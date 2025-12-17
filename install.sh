@@ -27,7 +27,7 @@ mysql -e "FLUSH PRIVILEGES;"
 # Clone and setup app
 cd /var/www
 rm -rf taurus-crm
-git clone https://github.com/Hashimmalik688/taurustechnologies.git taurus-crm
+git clone https://github.com/Hashimmalik688/taurustechnologies_MIS.git taurus-crm
 cd taurus-crm
 
 # Environment setup
