@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Ensure logical age ranges
-            $table->index(['insurance_carrier_id', 'age_min', 'age_max']);
+            $table->index(['insurance_carrier_id', 'age_min', 'age_max'], 'carrier_commission_idx');
         });
     }
 
