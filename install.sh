@@ -7,9 +7,9 @@ echo "🚀 Installing Taurus CRM on Contabo VPS..."
 apt update && apt upgrade -y
 
 # Install all dependencies
-apt install -y nginx mysql-server php8.2-fpm php8.2-cli php8.2-mysql \
-  php8.2-mbstring php8.2-xml php8.2-curl php8.2-zip php8.2-gd \
-  php8.2-bcmath supervisor certbot python3-certbot-nginx git unzip
+apt install -y nginx mysql-server php8.3-fpm php8.3-cli php8.3-mysql \
+  php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-gd \
+  php8.3-bcmath supervisor certbot python3-certbot-nginx git unzip
 
 # Install Composer
 curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -39,6 +39,7 @@ sed -i 's|DB_USERNAME=.*|DB_USERNAME=taurus|g' .env
 sed -i 's|DB_PASSWORD=.*|DB_PASSWORD=TaurusSecure2025!|g' .env
 
 # Install dependencies
+rm -f composer.lock
 composer install --no-dev --optimize-autoloader
 npm install && npm run build
 php artisan key:generate
@@ -76,7 +77,7 @@ server {
     error_page 404 /index.php;
     
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
