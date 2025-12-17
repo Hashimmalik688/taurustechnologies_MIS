@@ -1,0 +1,111 @@
+/* Global admin UI tweaks: fonts, spacing, colors, and table-scroll-top sync styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary: #2563eb; /* blue-600 */
+    --gold: #d4af37;
+    --muted: #6b7280;
+    --bg-panel: #ffffff;
+    --panel-border: #e6e9ee;
+}
+
+body {
+    font-family: Inter, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: #111827;
+    background: #f8fafc;
+}
+
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background: linear-gradient(90deg,#ffffff 0%, #fbfbfd 100%);
+    border-bottom: 1px solid var(--panel-border);
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+}
+
+.company-branding { font-family: 'Inter', sans-serif; color: var(--primary); }
+
+/* Buttons: slightly more modern defaults */
+.btn-outline-primary { color: var(--primary); border-color: rgba(37,99,235,0.12); background: transparent; }
+.btn-outline-info { color: #0ea5e9; border-color: rgba(14,165,233,0.12); }
+.btn-outline-danger { color: #dc2626; border-color: rgba(220,38,38,0.08); }
+.btn-outline-secondary { color: #374151; border-color: rgba(55,65,81,0.06); }
+
+/* Table wrapper: allow internal scrolling but provide an extra top scrollbar mirror */
+.table-wrapper { position: relative; overflow: auto; }
+.table-wrapper .locked-table { min-width: 1200px; }
+
+/* The top mirrored scrollbar container */
+.table-scroll-top { height: 12px; overflow-x: auto; overflow-y: hidden; }
+.table-scroll-top .scroll-inner { height: 1px; }
+
+/* Make sticky columns header visual layer consistent */
+.locked-table thead th { background: #fff; }
+
+/* Small screens: make table responsive */
+@media (max-width: 768px) {
+    .locked-table thead th, .locked-table tbody td { font-size: 0.85rem; }
+}
+
+/* Reduce modal header weight and make forms cleaner */
+.modal .modal-title { font-weight: 700; }
+
+/* Subtle card shadows and rounded corners */
+.card { border-radius: 10px; box-shadow: 0 1px 4px rgba(15,23,42,0.03); border: 1px solid var(--panel-border); }
+
+/* Utility small text-truncation */
+.text-truncate-200 { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Make badges a bit softer */
+.badge { font-weight: 600; }
+
+/* Small improvements to action groups */
+.btn-group .btn { border-radius: 6px; }
+
+/* Make data tables more legible */
+.table-sm th, .table-sm td { padding: 0.45rem 0.6rem; }
+
+/* Ensure top scrollbar sits above sticky headers when used */
+.table-scroll-top.sticky-top { position: sticky; top: 66px; z-index: 999; background: transparent; }
+
+/* Utility color classes */
+.text-muted-soft { color: #94a3b8 !important; }
+.text-gold { color: var(--gold) !important; font-weight: 700; }
+.text-positive { color: #10b981; font-weight: 600; }
+.text-negative { color: #ef4444; font-weight: 600; }
+
+/* Alert soft backgrounds */
+.alert-soft-success { background: rgba(16,185,129,0.12); border: 1px solid #10b981; color: #065f46; }
+.alert-soft-danger { background: rgba(239,68,68,0.08); border: 1px solid #ef4444; color: #991b1b; }
+
+/* Metric / stat styles used in reports */
+.metric-card { background: linear-gradient(135deg, rgba(15,23,42,0.06), rgba(255,255,255,0.02)); padding: 1rem; border-radius: 8px; }
+.metric-title { color: #94a3b8; font-size: 0.9rem; }
+.metric-value { font-size: 1.5rem; font-weight: 700; }
+.metric-value.green { color: #10b981; }
+.metric-value.gold { color: var(--gold); }
+.metric-value.red { color: #ef4444; }
+
+/* Badges used in reports */
+.badge-paid { background: linear-gradient(135deg,#3b82f6 0%,#1d4ed8 100%); color: #fff; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 700; }
+.badge-pending { background: rgba(234,179,8,0.12); color: #eab308; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 700; }
+.badge-present { background: rgba(16,185,129,0.12); color: #10b981; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 700; }
+.badge-late { background: rgba(239,68,68,0.08); color: #ef4444; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 700; }
+
+/* Button soft variants used in tables */
+.btn-soft-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: none; }
+.btn-soft-muted { background: rgba(100,116,139,0.12); color: #cbd5e1; border: none; }
+
+/* Glass/card helper */
+.glassmorphism-card { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 1rem; border: 1px solid rgba(255,255,255,0.04); }
+
+/* Utility layout classes */
+.flex-gap { display: flex; gap: 0.5rem; align-items: center; }
+.text-small-muted { color: #94a3b8; font-size: 0.9rem; }
+.w-200 { width: 200px; }
+.img-rounded-md { border-radius: 8px; }
+

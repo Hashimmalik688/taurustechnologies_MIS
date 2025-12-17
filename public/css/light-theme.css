@@ -1,0 +1,542 @@
+/* ============================================
+   TAURUS CRM - LIGHT THEME
+   Comprehensive Light Theme Overrides
+   ============================================ */
+
+:root {
+    --gold: #d4af37;
+    --gold-light: #f4e4b4;
+    --gold-dark: #b8941f;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #f3f4f6;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border-color: #e5e7eb;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Global Styles */
+body {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Sidebar - Light Theme */
+#sidebar {
+    background: var(--bg-primary) !important;
+    border-right: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.sidebar-logo {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.logo-text {
+    color: var(--text-primary) !important;
+}
+
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--gold) !important;
+    color: white !important;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s;
+    z-index: 1000;
+}
+
+.sidebar-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(212,175,55,0.4);
+}
+
+.sidebar-toggle i {
+    font-size: 16px;
+    transition: transform 0.3s;
+}
+
+#sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(180deg);
+}
+
+.menu-label {
+    color: var(--text-muted) !important;
+    font-size: 0.7rem !important;
+}
+
+.menu-item {
+    color: var(--text-secondary) !important;
+}
+
+.menu-item:hover {
+    background: rgba(212, 175, 55, 0.08) !important;
+    color: var(--gold) !important;
+}
+
+.menu-item.active {
+    background: rgba(212, 175, 55, 0.12) !important;
+    color: var(--gold) !important;
+    border-left-color: var(--gold) !important;
+}
+
+/* Header / Topbar */
+.top-header,
+#page-topbar,
+.navbar-header {
+    background: var(--bg-primary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.notification-btn,
+.btn.header-item {
+    color: var(--text-secondary) !important;
+}
+
+.notification-btn:hover,
+.btn.header-item:hover {
+    color: var(--gold) !important;
+}
+
+/* Main Content */
+#page-content {
+    background: var(--bg-secondary) !important;
+}
+
+/* Cards */
+.card,
+.agents-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.card-header {
+    background: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.card-title {
+    color: var(--text-primary) !important;
+}
+
+/* Dashboard Specific */
+.dashboard-wrapper {
+    background: var(--bg-secondary) !important;
+}
+
+.dashboard-wrapper::before,
+.dashboard-wrapper::after {
+    display: none !important; /* Remove animated backgrounds */
+}
+
+.glass-card,
+.metric-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+    backdrop-filter: none !important;
+}
+
+.metric-value {
+    color: var(--text-primary) !important;
+}
+
+.metric-label {
+    color: var(--text-secondary) !important;
+}
+
+/* Stat Cards */
+.status-card {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.mini-stat {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 1rem !important; /* Smaller */
+}
+
+.mini-stat-value {
+    font-size: 1.5rem !important; /* Smaller */
+}
+
+.mini-stat-label {
+    font-size: 0.8rem !important;
+    color: var(--text-secondary) !important;
+}
+
+/* Tables */
+table,
+.table {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+thead th {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+tbody tr {
+    border-bottom: 1px solid var(--border-color) !important;
+    background: var(--bg-primary) !important;
+}
+
+tbody tr:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+tbody td {
+    color: var(--text-primary) !important;
+}
+
+/* Badges */
+.badge-gold {
+    background: rgba(212, 175, 55, 0.15) !important;
+    color: var(--gold-dark) !important;
+    border-color: var(--gold) !important;
+}
+
+.badge-carrier {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #059669 !important;
+    border-color: #10b981 !important;
+}
+
+.badge-state {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #d97706 !important;
+    border-color: #f59e0b !important;
+}
+
+/* Buttons */
+.btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light)) !important;
+    color: #111 !important;
+    border: none !important;
+}
+
+.btn-outline-gold {
+    background: transparent !important;
+    border: 2px solid var(--gold) !important;
+    color: var(--gold-dark) !important;
+}
+
+.btn-outline-gold:hover {
+    background: var(--gold) !important;
+    color: #111 !important;
+}
+
+/* Modals */
+.modal-content {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    background: var(--bg-tertiary) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    background: var(--bg-tertiary) !important;
+}
+
+.modal-title {
+    color: var(--text-primary) !important;
+}
+
+/* Dropdown Menus */
+.dropdown-menu {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.dropdown-item {
+    color: var(--text-primary) !important;
+}
+
+.dropdown-item:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--gold) !important;
+}
+
+.dropdown-divider {
+    border-color: var(--border-color) !important;
+}
+
+/* Notifications */
+.notification-dropdown {
+    background: var(--bg-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.notification-item {
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.notification-item:hover {
+    background: var(--bg-tertiary) !important;
+}
+
+.notification-item.unread {
+    background: rgba(212, 175, 55, 0.08) !important;
+}
+
+.notification-header {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.notification-header h6 {
+    color: var(--text-primary) !important;
+}
+
+/* Alerts */
+.alert-success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-left-color: #10b981 !important;
+    color: #059669 !important;
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-left-color: #ef4444 !important;
+    color: #dc2626 !important;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-left-color: #f59e0b !important;
+    color: #d97706 !important;
+}
+
+/* Agents Page Header */
+.agents-header {
+    background: linear-gradient(135deg, var(--bg-primary), var(--bg-tertiary)) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.agents-header h3 {
+    color: var(--text-primary) !important;
+}
+
+.agents-header .subtitle {
+    color: var(--text-secondary) !important;
+}
+
+/* Avatar */
+.agent-avatar {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light)) !important;
+    color: #111 !important;
+}
+
+.agent-info-name {
+    color: var(--text-primary) !important;
+}
+
+.agent-info-email {
+    color: var(--text-secondary) !important;
+}
+
+/* Forms */
+.form-control,
+.form-select {
+    background: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25) !important;
+}
+
+/* DataTables */
+.dataTables_wrapper {
+    color: var(--text-primary) !important;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background: var(--bg-primary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    color: var(--text-secondary) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--text-primary) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--gold) !important;
+    color: #111 !important;
+    border-color: var(--gold) !important;
+}
+
+/* Performance Tweaks - Reduced Animations */
+* {
+    transition-duration: 0.15s !important;
+}
+
+@keyframes float,
+@keyframes slideDown,
+@keyframes pulse {
+    animation-duration: 0s !important;
+}
+
+/* Compact Layout for Dashboard */
+.row.g-4 {
+    gap: 0.75rem !important;
+}
+
+.metric-card,
+.glass-card {
+    padding: 1rem !important; /* Reduced from 1.5rem */
+}
+
+.metric-value {
+    font-size: 1.75rem !important; /* Reduced from 2.5rem */
+    margin-bottom: 0.25rem !important;
+}
+
+.metric-label {
+    font-size: 0.8rem !important; /* Reduced */
+}
+
+.status-card {
+    padding: 1rem !important; /* Reduced */
+}
+
+.status-value {
+    font-size: 1.5rem !important; /* Reduced */
+}
+
+/* Chart containers */
+#salesChart,
+#performanceChart {
+    max-height: 250px !important; /* Reduced from 300px */
+}
+
+/* Team tabs */
+.team-tab {
+    padding: 0.6rem 1.25rem !important; /* Reduced */
+    font-size: 0.9rem !important;
+}
+
+/* Clock widget */
+.clock-widget {
+    padding: 0.75rem !important; /* Reduced */
+}
+
+.clock-widget .label {
+    font-size: 0.75rem !important;
+}
+
+.clock-widget .time {
+    font-size: 1rem !important; /* Reduced */
+}
+
+/* ============================================
+   LEADS TABLE - HORIZONTAL SCROLL + STICKY ACTIONS
+   ============================================ */
+
+/* Horizontal Scroll Container with Golden Scrollbar */
+.leads-table-wrapper {
+    overflow-x: auto;
+    position: relative;
+    max-width: 100%;
+}
+
+/* Golden Scrollbar */
+.leads-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.leads-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.leads-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+.leads-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--gold-dark);
+}
+
+/* Leads Table Styling */
+.leads-table {
+    min-width: 3000px; /* Wide enough for all columns */
+    margin-bottom: 0;
+}
+
+/* Sticky Action Column on Left */
+.leads-table th:first-child,
+.leads-table td:first-child {
+    position: sticky !important;
+    left: 0 !important;
+    background: white !important;
+    z-index: 10 !important;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1) !important;
+}
+
+.leads-table thead th:first-child {
+    background: #f8f9fa !important;
+    z-index: 11 !important;
+}
+
+.leads-table tbody tr:hover td:first-child {
+    background: white !important;
+}
+
+/* Compact Table Cells */
+.leads-table th,
+.leads-table td {
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.leads-table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+/* Hover effect for rows */
+.leads-table tbody tr:hover {
+    background-color: rgba(212, 175, 55, 0.05);
+}

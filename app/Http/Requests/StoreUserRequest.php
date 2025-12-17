@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreUserRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'zoom_number' => ['nullable', 'string', 'max:50'],
+            'role' => ['nullable', 'in:Super Admin,Manager,Employee,Agent,HR,Vendor,Paraguins Validator,Verifier,Paraguins Closer,Ravens Closer'],
+            'dob' => ['nullable', 'date', 'before:today'],
+            'gender' => ['nullable', 'in:Male,Female,Other'],
+            'join_date' => ['nullable', 'date'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'email.required' => 'The email address is required.',
+            'email.unique' => 'This email address is already registered.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 8 characters.',
+            'password.confirmed' => 'Password confirmation does not match.',
+            'dob.before' => 'Date of birth must be in the past.',
+        ];
+    }
+}
