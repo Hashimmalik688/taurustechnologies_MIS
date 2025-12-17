@@ -111,21 +111,24 @@
                                     <label for="role" class="form-label">Role</label>
                                     <select id="role" name="role" class="form-select">
                                         <option value="">Select role...</option>
-                                        <option value="Super Admin" {{ old('role', $user->userDetail->role ?? '') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
-                                        <option value="Manager" {{ old('role', $user->userDetail->role ?? '') == 'Manager' ? 'selected' : '' }}>Manager</option>
-                                        <option value="HR" {{ old('role', $user->userDetail->role ?? '') == 'HR' ? 'selected' : '' }}>HR</option>
-                                        <option value="Employee" {{ old('role', $user->userDetail->role ?? '') == 'Employee' ? 'selected' : '' }}>Employee</option>
-                                        <option value="Agent" {{ old('role', $user->userDetail->role ?? '') == 'Agent' ? 'selected' : '' }}>Agent</option>
-                                        <option value="Vendor" {{ old('role', $user->userDetail->role ?? '') == 'Vendor' ? 'selected' : '' }}>Vendor</option>
+                                        @php
+                                            $currentRole = $user->roles->first()?->name ?? '';
+                                        @endphp
+                                        <option value="Super Admin" {{ old('role', $currentRole) == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
+                                        <option value="Manager" {{ old('role', $currentRole) == 'Manager' ? 'selected' : '' }}>Manager</option>
+                                        <option value="HR" {{ old('role', $currentRole) == 'HR' ? 'selected' : '' }}>HR</option>
+                                        <option value="Employee" {{ old('role', $currentRole) == 'Employee' ? 'selected' : '' }}>Employee</option>
+                                        <option value="Agent" {{ old('role', $currentRole) == 'Agent' ? 'selected' : '' }}>Agent</option>
+                                        <option value="Vendor" {{ old('role', $currentRole) == 'Vendor' ? 'selected' : '' }}>Vendor</option>
                                         <optgroup label="Paraguins Team">
-                                            <option value="Paraguins Closer" {{ old('role', $user->userDetail->role ?? '') == 'Paraguins Closer' ? 'selected' : '' }}>Paraguins Closer</option>
-                                            <option value="Paraguins Validator" {{ old('role', $user->userDetail->role ?? '') == 'Paraguins Validator' ? 'selected' : '' }}>Paraguins Validator</option>
-                                            <option value="Verifier" {{ old('role', $user->userDetail->role ?? '') == 'Verifier' ? 'selected' : '' }}>Verifier</option>
+                                            <option value="Paraguins Closer" {{ old('role', $currentRole) == 'Paraguins Closer' ? 'selected' : '' }}>Paraguins Closer</option>
+                                            <option value="Paraguins Validator" {{ old('role', $currentRole) == 'Paraguins Validator' ? 'selected' : '' }}>Paraguins Validator</option>
+                                            <option value="Verifier" {{ old('role', $currentRole) == 'Verifier' ? 'selected' : '' }}>Verifier</option>
                                         </optgroup>
-                                        <option value="Ravens Closer" {{ old('role', $user->userDetail->role ?? '') == 'Ravens Closer' ? 'selected' : '' }}>Ravens Closer</option>
-                                        <option value="Retention Officer" {{ old('role', $user->userDetail->role ?? '') == 'Retention Officer' ? 'selected' : '' }}>Retention Officer</option>
-                                        <option value="Trainer" {{ old('role', $user->userDetail->role ?? '') == 'Trainer' ? 'selected' : '' }}>Trainer</option>
-                                        <option value="QA" {{ old('role', $user->userDetail->role ?? '') == 'QA' ? 'selected' : '' }}>QA</option>
+                                        <option value="Ravens Closer" {{ old('role', $currentRole) == 'Ravens Closer' ? 'selected' : '' }}>Ravens Closer</option>
+                                        <option value="Retention Officer" {{ old('role', $currentRole) == 'Retention Officer' ? 'selected' : '' }}>Retention Officer</option>
+                                        <option value="Trainer" {{ old('role', $currentRole) == 'Trainer' ? 'selected' : '' }}>Trainer</option>
+                                        <option value="QA" {{ old('role', $currentRole) == 'QA' ? 'selected' : '' }}>QA</option>
                                     </select>
                                 </div>
                             </div>
