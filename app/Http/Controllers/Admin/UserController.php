@@ -37,7 +37,15 @@ class UserController extends Controller
         $user->zoom_number = $request->zoom_number;
         $user->save();
 
-        $user->assignRole($request->role);
+        // Assign role using syncRoles to ensure clean assignment
+        $user->syncRoles([$request->role]);
+        
+        // Verify role was assigned
+        \Log::info("User created with role", [
+            'email' => $user->email,
+            'requested_role' => $request->role,
+            'assigned_role' => $user->roles->first()?->name
+        ]);
 
         $userDetail = new UserDetail;
         $userDetail->user_id = $user->id;
