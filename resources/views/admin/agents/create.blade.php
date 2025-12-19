@@ -474,7 +474,52 @@
                                     @else
                                         <div class="alert alert-warning">
                                             <i class="mdi mdi-alert me-2"></i>
-                                            No insurance carriers available. Please add carriers first from Insurance Carriers menu.
+                                            No insurance carriers available. Add a new carrier below or contact administrator.
+                                        </div>
+                                        
+                                        {{-- Quick Add Carrier Section --}}
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="mdi mdi-plus-circle me-2"></i>Quick Add Insurance Carrier</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="quickAddCarrierForm" onsubmit="addCarrier(event)">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Carrier Name *</label>
+                                                                <input type="text" class="form-control" id="carrier_name" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Base Commission %</label>
+                                                                <input type="number" class="form-control" id="base_commission" step="0.01" min="0" max="100" placeholder="85.00">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Age Min</label>
+                                                                <input type="number" class="form-control" id="age_min" placeholder="18">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Age Max</label>
+                                                                <input type="number" class="form-control" id="age_max" placeholder="80">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <div class="mb-3">
+                                                                <label class="form-label">&nbsp;</label>
+                                                                <button type="submit" class="btn btn-success d-block w-100">
+                                                                    <i class="mdi mdi-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         </div>
                                     @endif
                                 </div>
@@ -646,6 +691,51 @@
                 toggleCommissionInput(checkbox, carrierId);
             });
         });
+
+        // Quick Add Carrier Function
+        async function addCarrier(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('carrier_name').value;
+            const baseCommission = document.getElementById('base_commission').value || 85;
+            const ageMin = document.getElementById('age_min').value || 18;
+            const ageMax = document.getElementById('age_max').value || 80;
+            
+            if (!name.trim()) {
+                alert('Please enter carrier name');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/carriers/quick-add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        base_commission_percentage: baseCommission,
+                        age_min: ageMin,
+                        age_max: ageMax,
+                        is_active: true,
+                        plan_types: ['Term', 'Whole Life']
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Carrier added successfully! Please refresh the page.');
+                    document.getElementById('quickAddCarrierForm').reset();
+                    // Optionally reload the page or update the carriers list
+                    location.reload();
+                } else {
+                    alert('Error adding carrier. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding carrier. Please check your connection.');
+            }
+        }
 
         .select2-container {
             width: 100% !important;

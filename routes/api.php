@@ -18,6 +18,33 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Quick add insurance carrier
+Route::middleware(['auth'])->post('/carriers/quick-add', function (Request $request) {
+    $validated = $request->validate([
+        'name' => 'required|string|max:255|unique:insurance_carriers,name',
+        'base_commission_percentage' => 'nullable|numeric|min:0|max:100',
+        'age_min' => 'nullable|integer|min:0',
+        'age_max' => 'nullable|integer|min:0',
+        'plan_types' => 'nullable|array',
+        'is_active' => 'boolean'
+    ]);
+    
+    $carrier = \App\Models\InsuranceCarrier::create([
+        'name' => $validated['name'],
+        'base_commission_percentage' => $validated['base_commission_percentage'] ?? 85.00,
+        'age_min' => $validated['age_min'] ?? 18,
+        'age_max' => $validated['age_max'] ?? 80,
+        'plan_types' => $validated['plan_types'] ?? ['Term', 'Whole Life'],
+        'is_active' => $validated['is_active'] ?? true,
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'carrier' => $carrier,
+        'message' => 'Carrier added successfully'
+    ]);
+});
+
 // Poll for active call events (local polling system)
 Route::get('/call-events/poll', function (Request $request) {
     if (!auth()->check()) {

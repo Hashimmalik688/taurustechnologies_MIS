@@ -44,6 +44,14 @@
             </div>
 
             <div class="user-menu">
+                <!-- Chat Button -->
+                <div style="position: relative;">
+                    <a href="{{ route('chat.index') }}" class="notification-btn" title="Team Chat" style="text-decoration: none;">
+                        <i class="bx bx-message-square-dots" style="font-size: 1.25rem;"></i>
+                        <span class="notification-badge" style="background: #10b981;">0</span>
+                    </a>
+                </div>
+
                 <!-- Notifications -->
                 <div style="position: relative;">
                     <button class="notification-btn" onclick="toggleNotifications()">
