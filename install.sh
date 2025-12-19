@@ -38,6 +38,12 @@ sed -i 's|DB_DATABASE=.*|DB_DATABASE=taurus|g' .env
 sed -i 's|DB_USERNAME=.*|DB_USERNAME=taurus|g' .env
 sed -i 's|DB_PASSWORD=.*|DB_PASSWORD=TaurusSecure2025!|g' .env
 
+# Add proxy trust settings for real IP detection
+echo "" >> .env
+echo "# Trust proxies to get real client IP" >> .env
+echo "TRUSTED_PROXIES=*" >> .env
+echo "TRUSTED_HEADERS=HEADER_X_FORWARDED_FOR,HEADER_X_FORWARDED_HOST,HEADER_X_FORWARDED_PORT,HEADER_X_FORWARDED_PROTO" >> .env
+
 # Install dependencies
 rm -f composer.lock
 composer install --no-dev --optimize-autoloader
@@ -80,6 +86,11 @@ server {
         fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
+        
+        # Pass real client IP through proxy
+        fastcgi_param REMOTE_ADDR $remote_addr;
+        fastcgi_param HTTP_X_FORWARDED_FOR $remote_addr;
+        fastcgi_param HTTP_X_REAL_IP $remote_addr;
     }
     
     location ~ /\.(?!well-known).* {
