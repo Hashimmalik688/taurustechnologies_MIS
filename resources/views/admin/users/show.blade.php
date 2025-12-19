@@ -133,12 +133,20 @@
                     <div class="text-center mb-4">
                         <h4 class="mb-1">{{ $user->name }}</h4>
                         <p class="text-muted mb-2">{{ $user->email }}</p>
-                        @if($user->userDetail)
-                            <span class="badge badge-role {{ $user->userDetail->role == 'Manager' ? 'badge-manager' : 'badge-employee' }}">
-                                <i class="mdi mdi-account-circle me-1"></i>
-                                {{ $user->userDetail->role ?? 'N/A' }}
-                            </span>
-                        @endif
+                        <div class="mb-2">
+                            @foreach ($user->roles as $role)
+                                <span class="badge badge-role {{ in_array($role->name, ['Manager', 'Super Admin']) ? 'badge-manager' : 'badge-employee' }} me-1">
+                                    <i class="mdi mdi-account-circle me-1"></i>
+                                    {{ $role->name }}
+                                </span>
+                            @endforeach
+                            @if($user->roles->isEmpty())
+                                <span class="badge badge-role badge-employee">
+                                    <i class="mdi mdi-account-circle me-1"></i>
+                                    No Role Assigned
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="mb-3">

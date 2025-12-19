@@ -37,14 +37,15 @@ class UserController extends Controller
         $user->zoom_number = $request->zoom_number;
         $user->save();
 
-        // Assign role using syncRoles to ensure clean assignment
-        $user->syncRoles([$request->role]);
+        // Assign roles using syncRoles to ensure clean assignment
+        $roles = $request->roles ?? [];
+        $user->syncRoles($roles);
         
-        // Verify role was assigned
-        \Log::info("User created with role", [
+        // Verify roles were assigned
+        \Log::info("User created with roles", [
             'email' => $user->email,
-            'requested_role' => $request->role,
-            'assigned_role' => $user->roles->first()?->name
+            'requested_roles' => $roles,
+            'assigned_roles' => $user->roles->pluck('name')->toArray()
         ]);
 
         $userDetail = new UserDetail;
@@ -55,7 +56,7 @@ class UserController extends Controller
         $userDetail->join_date = $request->join_date;
         $userDetail->address = $request->address;
         $userDetail->city = $request->city;
-        $userDetail->role = $request->role;
+        $userDetail->role = implode(', ', $roles); // Store multiple roles as comma-separated string
         $userDetail->save();
 
         // Log the action
@@ -64,7 +65,7 @@ class UserController extends Controller
             user: auth()->user(),
             model: 'User',
             model_id: $user->id,
-            description: "New user created: {$user->email} with role {$request->role}"
+            description: "New user created: {$user->email} with roles " . implode(', ', $roles)
         );
 
         return redirect()->route('users.index')->with('success', 'Employee created successfully.');
@@ -89,7 +90,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Store old values for audit log
-        $oldRole = $user->roles()->first()?->name;
+        $oldRoles = $user->roles()->pluck('name')->toArray();
         $oldEmail = $user->email;
         $oldStatus = $user->status;
 
@@ -114,11 +115,13 @@ class UserController extends Controller
         $userDetail->join_date = $request->join_date;
         $userDetail->address = $request->address;
         $userDetail->city = $request->city;
-        $userDetail->role = $request->role;
+        
+        $newRoles = $request->roles ?? [];
+        $userDetail->role = implode(', ', $newRoles); // Store multiple roles as comma-separated string
         $userDetail->save();
 
-        // Update user role in Spatie
-        $user->syncRoles([$request->role]);
+        // Update user roles in Spatie
+        $user->syncRoles($newRoles);
 
         // Log the action
         AuditLog::logAction(
@@ -129,7 +132,7 @@ class UserController extends Controller
             description: "User updated: {$user->email}",
             changes: [
                 'email' => ['old' => $oldEmail, 'new' => $user->email],
-                'role' => ['old' => $oldRole, 'new' => $request->role],
+                'roles' => ['old' => implode(', ', $oldRoles), 'new' => implode(', ', $newRoles)],
                 'status' => ['old' => $oldStatus, 'new' => $user->status],
             ]
         );

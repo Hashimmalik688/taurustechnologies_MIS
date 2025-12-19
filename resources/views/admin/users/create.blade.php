@@ -115,31 +115,82 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="role" class="form-label">Role</label>
-                                    <select id="role" name="role" class="form-select">
-                                        <option value="">Select role...</option>
-                                        <option value="Super Admin">Super Admin</option>
-                                        <option value="Manager">Manager</option>
-                                        <option value="HR">HR</option>
-                                        <option value="Employee">Employee</option>
-                                        <option value="Agent">Agent</option>
-                                        <option value="Vendor">Vendor</option>
-                                        <optgroup label="Paraguins Team">
-                                            <option value="Paraguins Closer">Paraguins Closer</option>
-                                            <option value="Paraguins Validator">Paraguins Validator</option>
-                                            <option value="Verifier">Verifier</option>
-                                        </optgroup>
-                                        <option value="Ravens Closer">Ravens Closer</option>
-                                        <option value="Retention Officer">Retention Officer</option>
-                                        <option value="Trainer">Trainer</option>
-                                        <option value="QA">QA</option>
-                                    </select>
+                                    <label class="form-label">Roles</label>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="role-super-admin">
+                                                <label class="form-check-label" for="role-super-admin">Super Admin</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="role-manager">
+                                                <label class="form-check-label" for="role-manager">Manager</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="role-hr">
+                                                <label class="form-check-label" for="role-hr">HR</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="role-employee">
+                                                <label class="form-check-label" for="role-employee">Employee</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="role-agent">
+                                                <label class="form-check-label" for="role-agent">Agent</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="role-vendor">
+                                                <label class="form-check-label" for="role-vendor">Vendor</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="role-qa">
+                                                <label class="form-check-label" for="role-qa">QA</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="role-trainer">
+                                                <label class="form-check-label" for="role-trainer">Trainer</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-primary">Paraguins Team</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Closer" id="role-paraguins-closer">
+                                                <label class="form-check-label" for="role-paraguins-closer">Paraguins Closer</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Validator" id="role-paraguins-validator">
+                                                <label class="form-check-label" for="role-paraguins-validator">Paraguins Validator</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="role-verifier">
+                                                <label class="form-check-label" for="role-verifier">Verifier</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="role-ravens-closer">
+                                                <label class="form-check-label" for="role-ravens-closer">Ravens Closer</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="role-retention-officer">
+                                                <label class="form-check-label" for="role-retention-officer">Retention Officer</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @error('roles')
+                                        <div class="text-danger mt-2">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-3">
+                        <div class="row">
                                 <div class="mb-3">
                                     <label for="dob" class="form-label">DOB</label>
                                     <input type="date" class="form-control" id="dob" name="dob"
@@ -196,6 +247,28 @@
             <!-- end card -->
         </div>
     </div>
+@endsection
+@section('css')
+<style>
+    .required::after {
+        content: " *";
+        color: red;
+    }
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+    .form-check-label {
+        font-weight: 500;
+    }
+    .text-primary {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 0.25rem;
+    }
+</style>
 @endsection
 @section('script')
 @endsection

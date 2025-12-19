@@ -106,34 +106,98 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="role" class="form-label">Role</label>
-                                    <select id="role" name="role" class="form-select">
-                                        <option value="">Select role...</option>
-                                        @php
-                                            $currentRole = $user->roles->first()?->name ?? '';
-                                        @endphp
-                                        <option value="Super Admin" {{ old('role', $currentRole) == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
-                                        <option value="Manager" {{ old('role', $currentRole) == 'Manager' ? 'selected' : '' }}>Manager</option>
-                                        <option value="HR" {{ old('role', $currentRole) == 'HR' ? 'selected' : '' }}>HR</option>
-                                        <option value="Employee" {{ old('role', $currentRole) == 'Employee' ? 'selected' : '' }}>Employee</option>
-                                        <option value="Agent" {{ old('role', $currentRole) == 'Agent' ? 'selected' : '' }}>Agent</option>
-                                        <option value="Vendor" {{ old('role', $currentRole) == 'Vendor' ? 'selected' : '' }}>Vendor</option>
-                                        <optgroup label="Paraguins Team">
-                                            <option value="Paraguins Closer" {{ old('role', $currentRole) == 'Paraguins Closer' ? 'selected' : '' }}>Paraguins Closer</option>
-                                            <option value="Paraguins Validator" {{ old('role', $currentRole) == 'Paraguins Validator' ? 'selected' : '' }}>Paraguins Validator</option>
-                                            <option value="Verifier" {{ old('role', $currentRole) == 'Verifier' ? 'selected' : '' }}>Verifier</option>
-                                        </optgroup>
-                                        <option value="Ravens Closer" {{ old('role', $currentRole) == 'Ravens Closer' ? 'selected' : '' }}>Ravens Closer</option>
-                                        <option value="Retention Officer" {{ old('role', $currentRole) == 'Retention Officer' ? 'selected' : '' }}>Retention Officer</option>
-                                        <option value="Trainer" {{ old('role', $currentRole) == 'Trainer' ? 'selected' : '' }}>Trainer</option>
-                                        <option value="QA" {{ old('role', $currentRole) == 'QA' ? 'selected' : '' }}>QA</option>
-                                    </select>
+                                    <label class="form-label">Roles</label>
+                                    @php
+                                        $currentRoles = $user->roles->pluck('name')->toArray();
+                                    @endphp
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="role-super-admin" 
+                                                    {{ in_array('Super Admin', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-super-admin">Super Admin</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="role-manager"
+                                                    {{ in_array('Manager', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-manager">Manager</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="role-hr"
+                                                    {{ in_array('HR', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hr">HR</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="role-employee"
+                                                    {{ in_array('Employee', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-employee">Employee</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="role-agent"
+                                                    {{ in_array('Agent', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-agent">Agent</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="role-vendor"
+                                                    {{ in_array('Vendor', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-vendor">Vendor</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="role-qa"
+                                                    {{ in_array('QA', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-qa">QA</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="role-trainer"
+                                                    {{ in_array('Trainer', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-trainer">Trainer</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-primary">Paraguins Team</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Closer" id="role-paraguins-closer"
+                                                    {{ in_array('Paraguins Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-paraguins-closer">Paraguins Closer</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Validator" id="role-paraguins-validator"
+                                                    {{ in_array('Paraguins Validator', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-paraguins-validator">Paraguins Validator</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="role-verifier"
+                                                    {{ in_array('Verifier', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-verifier">Verifier</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="role-ravens-closer"
+                                                    {{ in_array('Ravens Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-ravens-closer">Ravens Closer</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="role-retention-officer"
+                                                    {{ in_array('Retention Officer', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-retention-officer">Retention Officer</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @error('roles')
+                                        <div class="text-danger mt-2">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-3">
+                        <div class="row">
                                 <div class="mb-3">
                                     <label for="dob" class="form-label">DOB</label>
                                     <input type="date" class="form-control" id="dob" name="dob"
@@ -206,6 +270,20 @@
     .required::after {
         content: " *";
         color: red;
+    }
+    .form-check {
+        margin-bottom: 0.5rem;
+    }
+    .form-check-label {
+        font-weight: 500;
+    }
+    .text-primary {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 0.25rem;
     }
 </style>
 @endsection
