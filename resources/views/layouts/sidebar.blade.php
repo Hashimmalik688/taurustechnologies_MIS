@@ -150,6 +150,11 @@
                     <span class="menu-text">Partners</span>
                 </a>
 
+                <a href="{{ route('admin.insurance-carriers.index') }}" class="menu-item {{ Request::is('admin/insurance-carriers*') ? 'active' : '' }}">
+                    <i class="bx bx-shield-alt-2"></i>
+                    <span class="menu-text">Insurance Carriers</span>
+                </a>
+
                 <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
                     <i class="bx bx-group"></i>
                     <span class="menu-text">Users</span>

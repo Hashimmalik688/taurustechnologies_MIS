@@ -412,9 +412,21 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <div class="alert alert-info">
-                                        <i class="mdi mdi-information me-2"></i>
-                                        Select carriers this agent will work with and set individual commission percentages for each.
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="alert alert-info flex-grow-1 me-3 mb-0">
+                                            <i class="mdi mdi-information me-2"></i>
+                                            Select carriers this agent will work with and set individual commission percentages for each.
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="window.open('{{ route('admin.insurance-carriers.index') }}', '_blank')">
+                                                <i class="mdi mdi-view-list me-1"></i>
+                                                View All Carriers
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addCarrierModal">
+                                                <i class="mdi mdi-plus me-1"></i>
+                                                Add New Carrier
+                                            </button>
+                                        </div>
                                     </div>
                                     
                                     @if(isset($insuranceCarriers) && $insuranceCarriers->count() > 0)
@@ -425,10 +437,11 @@
                                                         <th width="5%">
                                                             <input type="checkbox" id="selectAllCarriers" class="form-check-input">
                                                         </th>
-                                                        <th width="35%">Carrier Name</th>
-                                                        <th width="20%">Payment Module</th>
-                                                        <th width="20%">Base Commission %</th>
-                                                        <th width="20%">Agent Commission %</th>
+                                                        <th width="30%">Carrier Name</th>
+                                                        <th width="15%">Payment Module</th>
+                                                        <th width="15%">Base Commission %</th>
+                                                        <th width="15%">Agent Commission %</th>
+                                                        <th width="20%">Actions</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -465,6 +478,20 @@
                                                                    max="100"
                                                                    disabled>
                                                             <small class="text-muted">Leave blank to use base rate</small>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex gap-1">
+                                                                <button type="button" class="btn btn-outline-info btn-sm" 
+                                                                        onclick="editCarrier({{ $carrier->id }})" 
+                                                                        title="Edit Carrier">
+                                                                    <i class="mdi mdi-pencil"></i>
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                                                        onclick="viewCarrierDetails({{ $carrier->id }})" 
+                                                                        title="View Details">
+                                                                    <i class="mdi mdi-eye"></i>
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                     @endforeach
@@ -542,6 +569,176 @@
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Add Carrier Modal --}}
+    <div class="modal fade" id="addCarrierModal" tabindex="-1" aria-labelledby="addCarrierModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCarrierModalLabel">Add New Insurance Carrier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addCarrierForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_carrier_name" class="form-label">Carrier Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="modal_carrier_name" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_payment_module" class="form-label">Payment Module <span class="text-danger">*</span></label>
+                                <select class="form-select" id="modal_payment_module" name="payment_module" required>
+                                    <option value="">Select Payment Module</option>
+                                    <option value="on_draft">On Draft</option>
+                                    <option value="on_issue">On Issue</option>
+                                    <option value="as_earned">As Earned</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="modal_base_commission" class="form-label">Base Commission %</label>
+                                <input type="number" class="form-control" id="modal_base_commission" name="base_commission_percentage" step="0.01" min="0" max="100">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="modal_phone" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="modal_phone" name="phone">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="modal_ssn_last4" class="form-label">SSN Last 4</label>
+                                <input type="text" class="form-control" id="modal_ssn_last4" name="ssn_last4" maxlength="4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_age_min" class="form-label">Minimum Age</label>
+                                <input type="number" class="form-control" id="modal_age_min" name="age_min" min="0" max="120">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="modal_age_max" class="form-label">Maximum Age</label>
+                                <input type="number" class="form-control" id="modal_age_max" name="age_max" min="0" max="120">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_plan_types" class="form-label">Plan Types</label>
+                            <input type="text" class="form-control" id="modal_plan_types" name="plan_types" placeholder="e.g., Term, Whole Life, Universal">
+                            <small class="text-muted">Separate multiple types with commas</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modal_calculation_notes" class="form-label">Calculation Notes</label>
+                            <textarea class="form-control" id="modal_calculation_notes" name="calculation_notes" rows="3" placeholder="Any specific commission calculation notes..."></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="modal_is_active" name="is_active" checked>
+                            <label class="form-check-label" for="modal_is_active">
+                                Active (Visible in dropdowns)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add Carrier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Edit Carrier Modal --}}
+    <div class="modal fade" id="editCarrierModal" tabindex="-1" aria-labelledby="editCarrierModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCarrierModalLabel">Edit Insurance Carrier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editCarrierForm">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" id="edit_carrier_id">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_carrier_name" class="form-label">Carrier Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_carrier_name" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_payment_module" class="form-label">Payment Module <span class="text-danger">*</span></label>
+                                <select class="form-select" id="edit_payment_module" name="payment_module" required>
+                                    <option value="">Select Payment Module</option>
+                                    <option value="on_draft">On Draft</option>
+                                    <option value="on_issue">On Issue</option>
+                                    <option value="as_earned">As Earned</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="edit_base_commission" class="form-label">Base Commission %</label>
+                                <input type="number" class="form-control" id="edit_base_commission" name="base_commission_percentage" step="0.01" min="0" max="100">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit_phone" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="edit_phone" name="phone">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit_ssn_last4" class="form-label">SSN Last 4</label>
+                                <input type="text" class="form-control" id="edit_ssn_last4" name="ssn_last4" maxlength="4">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_age_min" class="form-label">Minimum Age</label>
+                                <input type="number" class="form-control" id="edit_age_min" name="age_min" min="0" max="120">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_age_max" class="form-label">Maximum Age</label>
+                                <input type="number" class="form-control" id="edit_age_max" name="age_max" min="0" max="120">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_plan_types" class="form-label">Plan Types</label>
+                            <input type="text" class="form-control" id="edit_plan_types" name="plan_types" placeholder="e.g., Term, Whole Life, Universal">
+                            <small class="text-muted">Separate multiple types with commas</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_calculation_notes" class="form-label">Calculation Notes</label>
+                            <textarea class="form-control" id="edit_calculation_notes" name="calculation_notes" rows="3" placeholder="Any specific commission calculation notes..."></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active">
+                            <label class="form-check-label" for="edit_is_active">
+                                Active (Visible in dropdowns)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Carrier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Carrier Details Modal --}}
+    <div class="modal fade" id="carrierDetailsModal" tabindex="-1" aria-labelledby="carrierDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="carrierDetailsModalLabel">Carrier Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="carrierDetailsContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -736,6 +933,131 @@
                 alert('Error adding carrier. Please check your connection.');
             }
         }
+
+        // Function to edit carrier
+        async function editCarrier(carrierId) {
+            try {
+                const response = await fetch(`/admin/insurance-carriers/${carrierId}/edit`);
+                if (response.ok) {
+                    window.open(`/admin/insurance-carriers/${carrierId}/edit`, '_blank');
+                } else {
+                    // If the edit route fails, open modal instead
+                    await loadCarrierInModal(carrierId, 'edit');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await loadCarrierInModal(carrierId, 'edit');
+            }
+        }
+
+        // Function to view carrier details
+        async function viewCarrierDetails(carrierId) {
+            try {
+                const response = await fetch(`/admin/insurance-carriers/${carrierId}`);
+                if (response.ok) {
+                    const html = await response.text();
+                    document.getElementById('carrierDetailsContent').innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('carrierDetailsModal')).show();
+                } else {
+                    alert('Unable to load carrier details.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading carrier details. Please try again.');
+            }
+        }
+
+        // Function to load carrier data in modal
+        async function loadCarrierInModal(carrierId, mode) {
+            try {
+                const response = await fetch(`/admin/insurance-carriers/${carrierId}`);
+                if (response.ok) {
+                    const carrier = await response.json();
+                    if (mode === 'edit') {
+                        // Populate edit modal
+                        document.getElementById('edit_carrier_id').value = carrier.id;
+                        document.getElementById('edit_carrier_name').value = carrier.name;
+                        document.getElementById('edit_payment_module').value = carrier.payment_module || '';
+                        document.getElementById('edit_base_commission').value = carrier.base_commission_percentage || '';
+                        document.getElementById('edit_phone').value = carrier.phone || '';
+                        document.getElementById('edit_ssn_last4').value = carrier.ssn_last4 || '';
+                        document.getElementById('edit_age_min').value = carrier.age_min || '';
+                        document.getElementById('edit_age_max').value = carrier.age_max || '';
+                        document.getElementById('edit_plan_types').value = Array.isArray(carrier.plan_types) ? carrier.plan_types.join(', ') : carrier.plan_types || '';
+                        document.getElementById('edit_calculation_notes').value = carrier.calculation_notes || '';
+                        document.getElementById('edit_is_active').checked = carrier.is_active || false;
+                        
+                        new bootstrap.Modal(document.getElementById('editCarrierModal')).show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading carrier data.');
+            }
+        }
+
+        // Handle add carrier form submission
+        document.getElementById('addCarrierForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/admin/insurance-carriers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Carrier added successfully! Page will refresh.');
+                    bootstrap.Modal.getInstance(document.getElementById('addCarrierModal')).hide();
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'Please check your input.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding carrier. Please try again.');
+            }
+        });
+
+        // Handle edit carrier form submission
+        document.getElementById('editCarrierForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const carrierId = document.getElementById('edit_carrier_id').value;
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch(`/admin/insurance-carriers/${carrierId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Carrier updated successfully! Page will refresh.');
+                    bootstrap.Modal.getInstance(document.getElementById('editCarrierModal')).hide();
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'Please check your input.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating carrier. Please try again.');
+            }
+        });
 
         .select2-container {
             width: 100% !important;

@@ -67,6 +67,14 @@ class InsuranceCarrierController extends Controller
             }
         }
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Insurance carrier created successfully.',
+                'carrier' => $carrier->load('commissionBrackets')
+            ]);
+        }
+
         return redirect()->route('admin.insurance-carriers.index')
             ->with('success', 'Insurance carrier created successfully.');
     }
@@ -76,6 +84,10 @@ class InsuranceCarrierController extends Controller
      */
     public function show(InsuranceCarrier $insuranceCarrier)
     {
+        if (request()->expectsJson()) {
+            return response()->json($insuranceCarrier->load('commissionBrackets'));
+        }
+        
         return view('admin.insurance-carriers.show', compact('insuranceCarrier'));
     }
 
@@ -156,6 +168,14 @@ class InsuranceCarrierController extends Controller
         } else {
             // No brackets submitted, delete all existing
             $insuranceCarrier->commissionBrackets()->delete();
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Insurance carrier updated successfully.',
+                'carrier' => $insuranceCarrier->fresh()->load('commissionBrackets')
+            ]);
         }
 
         return redirect()->route('admin.insurance-carriers.index')
