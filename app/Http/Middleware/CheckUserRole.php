@@ -23,8 +23,18 @@ class CheckUserRole
             return redirect()->route('login');
         }
 
-        // Check if user has the required role
-        if (!Auth::user()->hasRole($role)) {
+        // Split roles by pipe and check if user has any of them
+        $roles = explode('|', $role);
+        $hasRole = false;
+        
+        foreach ($roles as $singleRole) {
+            if (Auth::user()->hasRole(trim($singleRole))) {
+                $hasRole = true;
+                break;
+            }
+        }
+
+        if (!$hasRole) {
             abort(403, 'Unauthorized action. You do not have permission to access this resource.');
         }
 

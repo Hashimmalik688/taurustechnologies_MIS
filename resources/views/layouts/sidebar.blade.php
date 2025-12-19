@@ -100,7 +100,7 @@
             </a>
         @endhasrole
 
-        @hasrole('Paraguins Validator|Super Admin')
+        @hasrole('Paraguins Validator|Manager|Super Admin')
             <div class="menu-label">VALIDATOR</div>
 
             <a href="{{ route('validator.index') }}" class="menu-item {{ Request::is('validator*') ? 'active' : '' }}">

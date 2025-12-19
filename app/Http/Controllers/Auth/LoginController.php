@@ -62,6 +62,11 @@ class LoginController extends Controller
             return route('validator.index');
         }
         
+        // Managers can access validator dashboard too (they're also validators)
+        if ($user->hasRole('Manager')) {
+            return route('validator.index');
+        }
+        
         // Employees go to their dashboard
         if ($user->hasRole('Employee')) {
             return route('employee.dashboard');
