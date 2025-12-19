@@ -42,7 +42,7 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-1 text-primary">Your IP Address Information</h6>
                             <p class="mb-1">
-                                <strong>Current IP:</strong> <code id="current-ip">{{ request()->ip() }}</code>
+                                <strong>Current IP:</strong> <code id="current-ip">{{ app(\App\Services\IpDetectionService::class)->getBestIpForAttendance() }}</code>
                                 <span id="ip-type-badge" class="badge badge-soft-warning ms-2">Checking...</span>
                             </p>
                             <p class="mb-0 text-muted">

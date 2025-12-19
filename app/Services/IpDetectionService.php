@@ -84,13 +84,8 @@ class IpDetectionService
     {
         $allIps = $this->getAllIpAddresses();
 
-        // If we're in development (localhost), use the request IP
-        if ($allIps['is_localhost']) {
-            return $allIps['request_ip'];
-        }
-
-        // Otherwise, prefer public IP, fall back to request IP
-        return $allIps['public_ip'] ?: $allIps['request_ip'];
+        // Always use request IP (the actual client IP through proxy)
+        return $allIps['request_ip'];
     }
 
     private function ipInRange($ip, $range)
