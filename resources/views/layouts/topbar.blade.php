@@ -35,6 +35,15 @@
                 </span>
             </div>
 
+            <!-- Chat Button -->
+            <div class="dropdown d-inline-block me-2">
+                <a href="{{ route('chat.index') }}" class="btn header-item noti-icon waves-effect" 
+                   title="Team Chat" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                    <i class="bx bx-message-square-dots"></i>
+                    <span class="badge bg-success rounded-pill chat-badge" style="display: none;">0</span>
+                </a>
+            </div>
+
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon waves-effect"
                     id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"

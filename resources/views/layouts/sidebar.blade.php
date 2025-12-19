@@ -190,11 +190,6 @@
             <i class="bx bx-calendar-check"></i>
             <span class="menu-text">My Attendance</span>
         </a>
-
-        <a href="{{ route('chat.index') }}" class="menu-item {{ Request::is('chat*') ? 'active' : '' }}">
-            <i class="bx bx-message-square-dots"></i>
-            <span class="menu-text">Team Chat</span>
-        </a>
     </nav>
 </div>
 <!-- Left Sidebar End -->
