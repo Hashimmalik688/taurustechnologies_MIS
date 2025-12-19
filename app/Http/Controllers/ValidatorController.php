@@ -125,7 +125,7 @@ class ValidatorController extends Controller
             ->where('status', 'closed')
             ->findOrFail($id);
 
-        $validators = User::role('Verification Officer')->get(['id', 'name']);
+        $validators = User::role(['Verification Officer', 'Verifier', 'Paraguins Validator', 'Manager'])->get(['id', 'name']);
 
         return view('validator.edit', compact('lead', 'validators'));
     }

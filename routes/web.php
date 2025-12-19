@@ -181,7 +181,7 @@ Route::group([
 Route::group([
     'prefix' => 'validator',
     'as' => 'validator.',
-    'middleware' => ['auth', 'role:Paraguins Validator|Super Admin']
+    'middleware' => ['auth', 'role:Paraguins Validator|Manager|Super Admin']
 ], function () {
     Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index');
     Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit');

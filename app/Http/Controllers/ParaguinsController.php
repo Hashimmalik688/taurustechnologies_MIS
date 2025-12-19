@@ -16,8 +16,8 @@ class ParaguinsController extends Controller
     {
         $userId = Auth::id();
         
-        // Get validators for dropdown
-        $validators = User::role('Verifier')->get(['id', 'name']);
+        // Get validators for dropdown (include Managers)
+        $validators = User::role(['Verifier', 'Paraguins Validator', 'Manager'])->get(['id', 'name']);
         
         // Get pending/transferred leads assigned to this closer (including returned from validator)
         $pendingLeads = Lead::where('team', 'paraguins')
@@ -57,7 +57,7 @@ class ParaguinsController extends Controller
             ->where('managed_by', Auth::id())
             ->findOrFail($id);
 
-        $validators = User::role('Verification Officer')->get(['id', 'name']);
+        $validators = User::role(['Verifier', 'Paraguins Validator', 'Manager'])->get(['id', 'name']);
 
         return view('paraguins.closers.edit', compact('lead', 'validators'));
     }
