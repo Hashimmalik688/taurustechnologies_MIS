@@ -143,24 +143,83 @@
                                     value="{{ $user->userDetail->phone ?? '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                <select class="form-control" id="role" name="role" required>
-                                    <option value="Super Admin" {{ $user->hasRole('Super Admin') ? 'selected' : '' }}>Super Admin</option>
-                                    <option value="Manager" {{ $user->hasRole('Manager') ? 'selected' : '' }}>Manager</option>
-                                    <option value="HR" {{ $user->hasRole('HR') ? 'selected' : '' }}>HR</option>
-                                    <option value="Employee" {{ $user->hasRole('Employee') ? 'selected' : '' }}>Employee</option>
-                                    <option value="Agent" {{ $user->hasRole('Agent') ? 'selected' : '' }}>Agent</option>
-                                    <option value="Vendor" {{ $user->hasRole('Vendor') ? 'selected' : '' }}>Vendor</option>
-                                    <optgroup label="Paraguins Team">
-                                        <option value="Paraguins Closer" {{ $user->hasRole('Paraguins Closer') ? 'selected' : '' }}>Paraguins Closer</option>
-                                        <option value="Paraguins Validator" {{ $user->hasRole('Paraguins Validator') ? 'selected' : '' }}>Paraguins Validator</option>
-                                        <option value="Verifier" {{ $user->hasRole('Verifier') ? 'selected' : '' }}>Verifier</option>
-                                    </optgroup>
-                                    <option value="Ravens Closer" {{ $user->hasRole('Ravens Closer') ? 'selected' : '' }}>Ravens Closer</option>
-                                    <option value="Retention Officer" {{ $user->hasRole('Retention Officer') ? 'selected' : '' }}>Retention Officer</option>
-                                    <option value="Trainer" {{ $user->hasRole('Trainer') ? 'selected' : '' }}>Trainer</option>
-                                    <option value="QA" {{ $user->hasRole('QA') ? 'selected' : '' }}>QA</option>
-                                </select>
+                                <label class="form-label">Roles</label>
+                                @php
+                                    $currentRoles = $user->roles->pluck('name')->toArray();
+                                @endphp
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="modal-role-super-admin-{{ $user->id }}" 
+                                                {{ in_array('Super Admin', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-super-admin-{{ $user->id }}">Super Admin</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="modal-role-manager-{{ $user->id }}"
+                                                {{ in_array('Manager', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-manager-{{ $user->id }}">Manager</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="modal-role-hr-{{ $user->id }}"
+                                                {{ in_array('HR', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-hr-{{ $user->id }}">HR</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="modal-role-employee-{{ $user->id }}"
+                                                {{ in_array('Employee', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-employee-{{ $user->id }}">Employee</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="modal-role-agent-{{ $user->id }}"
+                                                {{ in_array('Agent', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-agent-{{ $user->id }}">Agent</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="modal-role-vendor-{{ $user->id }}"
+                                                {{ in_array('Vendor', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-vendor-{{ $user->id }}">Vendor</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-primary fw-bold">Paraguins Team</small>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Closer" id="modal-role-paraguins-closer-{{ $user->id }}"
+                                                {{ in_array('Paraguins Closer', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-paraguins-closer-{{ $user->id }}">Paraguins Closer</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Validator" id="modal-role-paraguins-validator-{{ $user->id }}"
+                                                {{ in_array('Paraguins Validator', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-paraguins-validator-{{ $user->id }}">Paraguins Validator</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="modal-role-verifier-{{ $user->id }}"
+                                                {{ in_array('Verifier', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-verifier-{{ $user->id }}">Verifier</label>
+                                        </div>
+                                        <hr class="my-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="modal-role-ravens-closer-{{ $user->id }}"
+                                                {{ in_array('Ravens Closer', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-ravens-closer-{{ $user->id }}">Ravens Closer</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="modal-role-retention-officer-{{ $user->id }}"
+                                                {{ in_array('Retention Officer', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-retention-officer-{{ $user->id }}">Retention Officer</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="modal-role-trainer-{{ $user->id }}"
+                                                {{ in_array('Trainer', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-trainer-{{ $user->id }}">Trainer</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="modal-role-qa-{{ $user->id }}"
+                                                {{ in_array('QA', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-qa-{{ $user->id }}">QA</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password (Leave blank to keep current)</label>
@@ -252,3 +311,27 @@
         }
     </script>
 @endsection
+
+@section('css')
+<style>
+    .modal .form-check {
+        margin-bottom: 0.25rem;
+    }
+    .modal .form-check-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .modal .text-primary {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .modal-dialog {
+        max-width: 600px;
+    }
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+</style>
