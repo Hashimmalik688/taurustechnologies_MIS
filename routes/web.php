@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\RavensDashboardController;
 use App\Http\Controllers\Admin\RetentionDashboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamDashboardController;
+use App\Http\Controllers\AgentDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\HomeController;
@@ -48,7 +49,7 @@ Route::get('/logout', function() {
 })->name('logout.get');
 
 // Authenticated routes - Dashboard restricted to Super Admin and Manager
-Route::group(['middleware' => ['auth', 'role:Super Admin|Manager']], function () {
+Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Agent']], function () {
     // Dashboard - redirects happen in controller based on role
     Route::get('/', [DashboardController::class, 'root'])->name('root');
 });
@@ -58,6 +59,11 @@ Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|
     Route::get('/team/paraguins', [TeamDashboardController::class, 'paraguinsTeam'])->name('team.paraguins');
     Route::get('/team/ravens', [TeamDashboardController::class, 'ravensTeam'])->name('team.ravens');
     Route::get('/closer/{userId}/details', [TeamDashboardController::class, 'closerDetails'])->name('closer.details');
+});
+
+// Agent Dashboard - Agent role only
+Route::group(['prefix' => 'agent', 'as' => 'agent.', 'middleware' => ['auth', 'role:Agent']], function () {
+    Route::get('/dashboard', [AgentDashboardController::class, 'index'])->name('dashboard');
 });
 
 // Employee & Ravens Closer Routes - Only Attendance and Chat access

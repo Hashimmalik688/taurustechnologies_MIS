@@ -53,6 +53,11 @@ class DashboardController extends Controller
      */
     public function root()
     {
+        // Redirect Agents to their own dashboard
+        if (Auth::check() && Auth::user()->hasRole('Agent')) {
+            return redirect()->route('agent.dashboard');
+        }
+
         // Redirect Verifiers to their dashboard
         if (Auth::check() && Auth::user()->hasRole('Verifier')) {
             return redirect()->route('verifier.dashboard');
