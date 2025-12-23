@@ -24,14 +24,23 @@ class AgentDashboardController extends Controller
     {
         $agent = Auth::user();
         
-        // Simple stats
+        // Get leads assigned to this agent (where closer_name matches agent's name)
+        $allLeads = Lead::where('closer_name', $agent->name)->get();
+        
+        // Calculate statistics
         $stats = [
-            'total_leads' => 0,
-            'today_leads' => 0,
-            'pending' => 0,
-            'closed' => 0,
+            'total_sales' => $allLeads->count(),
+            'approved' => $allLeads->where('status', 'accepted')->count(),
+            'declined' => $allLeads->where('status', 'rejected')->count(),
+            'revenue' => $allLeads->where('status', 'accepted')->sum('monthly_premium'),
+            'company_share' => $allLeads->where('status', 'accepted')->sum('monthly_premium') * 0.3, // 30% company share
         ];
+        
+        // Get paginated leads for table
+        $leads = Lead::where('closer_name', $agent->name)
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
 
-        return view('agent.dashboard', compact('agent', 'stats'));
+        return view('agent.dashboard', compact('agent', 'stats', 'leads'));
     }
 }
