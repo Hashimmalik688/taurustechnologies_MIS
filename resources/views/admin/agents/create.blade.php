@@ -415,7 +415,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div class="alert alert-info flex-grow-1 me-3 mb-0">
                                             <i class="mdi mdi-information me-2"></i>
-                                            Select carriers this agent will work with and set individual commission percentages for each.
+                                            Select carriers this agent will work with and set individual commission percentages for each. (Optional - can be added later)
                                         </div>
                                         <div class="d-flex gap-2">
                                             <button type="button" class="btn btn-primary btn-sm" onclick="window.open('{{ route('admin.insurance-carriers.index') }}', '_blank')">
@@ -838,8 +838,6 @@
         // Form validation
         document.getElementById('agentForm').addEventListener('submit', function(e) {
             const activeStates = document.getElementById('active_states').selectedOptions;
-            const carriers = document.querySelectorAll('input[name="carriers[]"]');
-            const filledCarriers = Array.from(carriers).filter(input => input.value.trim() !== '');
 
             // Validate at least one active state is selected
             if (activeStates.length === 0) {
@@ -848,12 +846,7 @@
                 return false;
             }
 
-            // Validate at least one carrier is filled
-            if (filledCarriers.length === 0) {
-                e.preventDefault();
-                alert('Please add at least one carrier.');
-                return false;
-            }
+            // Note: Carrier selection is now optional - agents can be created without carriers
         });
     </script>
 @endsection
