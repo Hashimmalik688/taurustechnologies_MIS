@@ -27,13 +27,12 @@ class AgentDashboardController extends Controller
     {
         $agent = Auth::user();
         
-        // Get agent's assigned leads/sales
+        // Get agent's assigned leads/sales - simplified query
         $assignedLeads = Lead::where(function($query) use ($agent) {
             $query->where('assigned_to', $agent->id)
                   ->orWhere('agent_id', $agent->id)
                   ->orWhere('created_by', $agent->id);
         })
-        ->with(['status', 'assignedTo'])
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -41,13 +40,13 @@ class AgentDashboardController extends Controller
         $stats = [
             'total_leads' => $assignedLeads->count(),
             'today_leads' => $assignedLeads->filter(function($lead) {
-                return $lead->created_at->isToday();
+                return $lead->created_at && $lead->created_at->isToday();
             })->count(),
             'this_month_leads' => $assignedLeads->filter(function($lead) {
-                return $lead->created_at->isCurrentMonth();
+                return $lead->created_at && $lead->created_at->isCurrentMonth();
             })->count(),
             'pending' => $assignedLeads->where('status', 'pending')->count(),
-            'contacted' => $assignedLeads->whereIn('status', ['contacted', 'in_progress'])->count(),
+            'contacted' => $assignedLeads->whereIn('status', ['contacted', 'in_progress', 'qualified'])->count(),
             'sold' => $assignedLeads->where('status', 'sold')->count(),
             'closed' => $assignedLeads->where('status', 'closed')->count(),
         ];
@@ -60,7 +59,7 @@ class AgentDashboardController extends Controller
         ->where('status', 'sold')
         ->whereMonth('created_at', Carbon::now()->month)
         ->whereYear('created_at', Carbon::now()->year)
-        ->sum('monthly_premium');
+        ->sum(DB::raw('COALESCE(monthly_premium, 0)'));
 
         // Recent activity - last 10 leads
         $recentLeads = $assignedLeads->take(10);

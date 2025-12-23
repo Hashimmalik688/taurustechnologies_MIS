@@ -47,6 +47,11 @@ class LoginController extends Controller
     {
         $user = auth()->user();
         
+        // Agents go to their dashboard
+        if ($user->hasRole('Agent')) {
+            return route('agent.dashboard');
+        }
+        
         // Verifiers should only access verifier form and chat
         if ($user->hasRole('Verifier')) {
             return route('verifier.dashboard');
@@ -54,7 +59,7 @@ class LoginController extends Controller
         
         // Paraguins Closers go to their dashboard
         if ($user->hasRole('Paraguins Closer')) {
-            return redirect()->route('paraguins.closers.index');
+            return route('paraguins.closers.index');
         }
 
         // Paraguins Validators go to validator dashboard

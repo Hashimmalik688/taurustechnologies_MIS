@@ -156,7 +156,7 @@
                                         <td>
                                             <h5 class="font-size-14 mb-1">
                                                 <a href="{{ route('admin.leads.show', $lead->id) }}" class="text-dark">
-                                                    {{ $lead->full_name ?? 'N/A' }}
+                                                    {{ $lead->full_name ?? $lead->name ?? 'N/A' }}
                                                 </a>
                                             </h5>
                                             <p class="text-muted mb-0">{{ $lead->email ?? 'No email' }}</p>
@@ -171,12 +171,12 @@
                                                     'lost' => 'danger',
                                                     'pending' => 'warning'
                                                 ];
-                                                $color = $statusColors[$lead->status] ?? 'secondary';
+                                                $color = $statusColors[$lead->status ?? 'new'] ?? 'secondary';
                                             @endphp
-                                            <span class="badge bg-{{ $color }}">{{ ucfirst($lead->status) }}</span>
+                                            <span class="badge bg-{{ $color }}">{{ ucfirst($lead->status ?? 'New') }}</span>
                                         </td>
                                         <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                                        <td>{{ $lead->created_at->format('M d, Y') }}</td>
+                                        <td>{{ $lead->created_at ? $lead->created_at->format('M d, Y') : 'N/A' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
