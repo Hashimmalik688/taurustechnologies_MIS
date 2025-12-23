@@ -27,11 +27,11 @@ class AgentDashboardController extends Controller
     {
         $agent = Auth::user();
         
-        // Get agent's assigned leads/sales - simplified query
+        // Get agent's assigned leads/sales using closer_name or forwarded_by
         $assignedLeads = Lead::where(function($query) use ($agent) {
-            $query->where('assigned_to', $agent->id)
-                  ->orWhere('agent_id', $agent->id)
-                  ->orWhere('created_by', $agent->id);
+            $query->where('closer_name', $agent->name)
+                  ->orWhere('forwarded_by', $agent->id)
+                  ->orWhere('managed_by', $agent->id);
         })
         ->orderBy('created_at', 'desc')
         ->get();
@@ -53,8 +53,9 @@ class AgentDashboardController extends Controller
 
         // Monthly revenue calculation
         $monthlyRevenue = Lead::where(function($query) use ($agent) {
-            $query->where('assigned_to', $agent->id)
-                  ->orWhere('agent_id', $agent->id);
+            $query->where('closer_name', $agent->name)
+                  ->orWhere('forwarded_by', $agent->id)
+                  ->orWhere('managed_by', $agent->id);
         })
         ->where('status', 'sold')
         ->whereMonth('created_at', Carbon::now()->month)
