@@ -13,5 +13,6 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         'api/zoom-webhook',
+        'zoom/webhook',  // Zoom calls this webhook URL
     ];
 }

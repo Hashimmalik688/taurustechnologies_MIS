@@ -310,6 +310,18 @@
                                                                 <strong>Failed:Declined Banking</strong>
                                                             </label>
                                                         </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="radio" name="failure_reason" id="noPitch{{ $lead->id }}" value="Failed:No Pitch (Not Interested)" required>
+                                                            <label class="form-check-label" for="noPitch{{ $lead->id }}">
+                                                                <strong>Failed:No Pitch (Not Interested)</strong>
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check mb-2">
+                                                            <input class="form-check-input" type="radio" name="failure_reason" id="noAnswer{{ $lead->id }}" value="Failed:No Answer" required>
+                                                            <label class="form-check-label" for="noAnswer{{ $lead->id }}">
+                                                                <strong>Failed:No Answer</strong>
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -417,7 +429,7 @@
                                             @endphp
                                             <span class="status-badge {{ $status['class'] }}">{{ $status['label'] }}</span>
                                         </td>
-                                        <td>{{ $lead->updated_at->format('M d, Y H:i') }}</td>
+                                        <td>{{ $lead->updated_at->format('M d, Y g:i A') }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -473,7 +485,7 @@
                                                 @endif
                                             </span>
                                         </td>
-                                        <td>{{ $lead->updated_at->format('M d, Y H:i') }}</td>
+                                        <td>{{ $lead->updated_at->format('M d, Y g:i A') }}</td>
                                     </tr>
                                 @empty
                                     <tr>

@@ -16,11 +16,20 @@ class ImportSanitizer
             return null;
         }
 
-        // If numeric, assume Excel serial date
+        // If numeric, assume Excel serial date (only if it's a reasonable Excel date value)
         if (is_numeric($value)) {
             try {
-                $dt = ExcelDate::excelToDateTimeObject((int)floor($value));
-                return $dt->format('Y-m-d');
+                $numValue = (int)floor($value);
+                // Excel dates range from 1 (1900-01-01) to 2958465 (9999-12-31)
+                // Reasonable date range for leads: 1000 (1902) to 50000 (2037)
+                if ($numValue > 100 && $numValue < 50000) {
+                    $dt = ExcelDate::excelToDateTimeObject($numValue);
+                    return $dt->format('Y-m-d');
+                }
+                // If it looks like a year (1900-2100), return Jan 1 of that year
+                if ($numValue >= 1900 && $numValue <= 2100) {
+                    return "$numValue-01-01";
+                }
             } catch (\Throwable $e) {
                 return null;
             }

@@ -27,7 +27,7 @@
             </a>
         @endhasrole
 
-        @unlessrole('Verifier|Paraguins Closer|Paraguins Validator|Employee|Ravens Closer|Retention Officer|QA')
+        @unlessrole('Verifier|Paraguins Closer|Paraguins Validator|Employee|Ravens Closer|Retention Officer|QA|HR')
             <div class="menu-label">MAIN</div>
 
             @hasrole('Employee')
@@ -36,6 +36,8 @@
                 <!-- Ravens Closer sees same as Employee - attendance and chat only -->
             @elsehasrole('QA')
                 <!-- QA only sees QA Review and COMMUNICATION section below -->
+            @elsehasrole('HR')
+                <!-- HR only sees Dock, Attendance, and Public Holidays -->
             @else
                 <a href="{{ route('root') }}" class="menu-item {{ Request::is('/') ? 'active' : '' }}">
                     <i class="bx bx-home-circle"></i>
@@ -139,6 +141,13 @@
                 <span class="menu-text">Dock Section</span>
             </a>
             @endhasrole
+
+            @hasrole('HR|Super Admin')
+            <a href="{{ route('admin.public-holidays.index') }}" class="menu-item {{ Request::is('admin/public-holidays*') ? 'active' : '' }}">
+                <i class="bx bx-calendar-star"></i>
+                <span class="menu-text">Public Holidays</span>
+            </a>
+            @endhasrole
         @endhasrole
 
         @unlessrole('Verifier|Paraguins Closer|Paraguins Validator|Employee|Ravens Closer')
@@ -162,19 +171,22 @@
             @endhasrole
 
             @hasrole('Super Admin|Manager')
-
                 <a href="{{ route('ledger.index') }}" class="menu-item {{ Request::is('ledger*') ? 'active' : '' }}">
                     <i class="mdi mdi-book-open-page-variant"></i>
                     <span class="menu-text">Ledger</span>
                 </a>
+            @endhasrole
 
+            @hasrole('Super Admin|Manager|HR')
                 <div class="menu-label">OPERATIONS</div>
 
                 <a href="{{ route('attendance.index') }}" class="menu-item {{ Request::is('attendance*') ? 'active' : '' }}">
                     <i class="bx bx-time-five"></i>
                     <span class="menu-text">Attendance</span>
                 </a>
+            @endhasrole
 
+            @hasrole('Super Admin|Manager')
                 <a href="{{ route('salary.index') }}" class="menu-item {{ Request::is('salary*') ? 'active' : '' }}">
                     <i class="bx bx-dollar-circle"></i>
                     <span class="menu-text">Salary</span>
@@ -182,7 +194,7 @@
 
                 <div class="menu-label">SETTINGS</div>
 
-                <a href="{{ route('settings.index') }}" class="menu-item {{ Request::is('settings*') ? 'active' : '' }}">
+                <a href="{{ route('settings.index') }}" class="menu-item {{ Request::is('settings') ? 'active' : '' }}">
                     <i class="bx bx-cog"></i>
                     <span class="menu-text">Settings</span>
                 </a>
@@ -194,6 +206,11 @@
         <a href="{{ route('attendance.dashboard') }}" class="menu-item {{ Request::is('attendance/dashboard') ? 'active' : '' }}">
             <i class="bx bx-calendar-check"></i>
             <span class="menu-text">My Attendance</span>
+        </a>
+
+        <a href="{{ route('my-dock-records') }}" class="menu-item {{ Request::is('my-dock-records*') ? 'active' : '' }}">
+            <i class="mdi mdi-cash-minus"></i>
+            <span class="menu-text">My Dock Records</span>
         </a>
     </nav>
 </div>

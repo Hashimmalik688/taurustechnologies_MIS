@@ -243,7 +243,11 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <strong>{{ $record->working_hours }}h</strong>
+                                                @if ($record->isStillWorking())
+                                                    <strong class="text-primary">{{ $record->getFormattedCurrentWorkingHours() }}</strong>
+                                                @else
+                                                    <strong>{{ $record->working_hours }}h</strong>
+                                                @endif
                                             </td>
                                             <td>
                                                 @php

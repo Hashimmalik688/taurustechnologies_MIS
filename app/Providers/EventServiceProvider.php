@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\LeadCreated;
+use App\Events\SaleCreated;
 use App\Listeners\MarkAttendanceOnLogin;
 use App\Listeners\LogUserLogout;
+use App\Listeners\SendLeadCreatedNotification;
+use App\Listeners\SendSaleCreatedNotification;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
@@ -28,6 +32,12 @@ class EventServiceProvider extends ServiceProvider
         Logout::class => [
             LogUserLogout::class,
         ],
+        LeadCreated::class => [
+            SendLeadCreatedNotification::class,
+        ],
+        SaleCreated::class => [
+            SendSaleCreatedNotification::class,
+        ],
     ];
 
     /**
@@ -40,3 +50,4 @@ class EventServiceProvider extends ServiceProvider
         //
     }
 }
+

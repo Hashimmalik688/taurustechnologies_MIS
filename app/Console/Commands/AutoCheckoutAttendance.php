@@ -19,7 +19,7 @@ class AutoCheckoutAttendance extends Command
      *
      * @var string
      */
-    protected $description = 'Automatically checkout employees who have not checked out after 6 AM';
+    protected $description = 'Automatically checkout employees who have not checked out after 5 AM';
 
     /**
      * Execute the console command.
@@ -34,7 +34,7 @@ class AutoCheckoutAttendance extends Command
         
         if ($result['success']) {
             $this->info($result['message']);
-            $this->info("Checked out {$result['checked_out_count']} employee(s) at 6:00 AM.");
+            $this->info("Checked out {$result['checked_out_count']} employee(s) at 5:00 AM.");
         } else {
             $this->warn($result['message']);
         }

@@ -45,54 +45,63 @@ Route::middleware(['auth'])->post('/carriers/quick-add', function (Request $requ
     ]);
 });
 
-// Poll for active call events (local polling system)
-Route::get('/call-events/poll', function (Request $request) {
-    if (!auth()->check()) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+// Get lead data for Ravens form (using web session auth)
+Route::middleware(['web', 'auth'])->get('/leads/{id}', function (Request $request, $id) {
+    $lead = \App\Models\Lead::with(['carriers'])->find($id);
+    
+    if (!$lead) {
+        return response()->json(['error' => 'Lead not found'], 404);
     }
-
-    $userId = auth()->id();
-
-    // Get unread connected call events for this user
-    $callEvent = \App\Models\CallEvent::where('user_id', $userId)
-        ->where('status', 'connected')
-        ->where('is_read', false)
-        ->orderBy('event_time', 'desc')
-        ->first();
-
-    if ($callEvent) {
-        return response()->json([
-            'has_call' => true,
-            'lead_id' => $callEvent->lead_id,
-            'status' => $callEvent->status,
-            'lead_data' => $callEvent->lead_data,
-            'caller_number' => $callEvent->caller_number,
-            'callee_number' => $callEvent->callee_number,
-            'event_id' => $callEvent->id,
-        ]);
-    }
-
-    return response()->json(['has_call' => false]);
+    
+    return response()->json($lead);
 });
 
-// Mark call event as read
-Route::post('/call-events/{id}/mark-read', function (Request $request, $id) {
-    if (!auth()->check()) {
-        return response()->json(['error' => 'Unauthorized'], 401);
+// Check call connection status based on multiple factors
+Route::middleware(['web', 'auth'])->post('/call-status/check', function (Request $request) {
+    $leadId = $request->input('lead_id');
+    $callDuration = $request->input('call_duration'); // in milliseconds
+    $userInteracted = $request->input('user_interacted', false); // did user return focus?
+    
+    // More sophisticated detection logic
+    $isConnected = false;
+    $confidence = 0;
+    
+    // Factor 1: Duration (weak signal)
+    if ($callDuration > 10000) { // 10+ seconds
+        $confidence += 30;
     }
-
-    $callEvent = \App\Models\CallEvent::where('id', $id)
+    if ($callDuration > 30000) { // 30+ seconds = very likely connected
+        $confidence += 50;
+    }
+    
+    // Factor 2: User interaction (strong signal)
+    if ($userInteracted) {
+        $confidence += 40;
+    }
+    
+    // Factor 3: Check if there are any system call events
+    $existingCallEvent = \App\Models\CallEvent::where('lead_id', $leadId)
         ->where('user_id', auth()->id())
-        ->first();
-
-    if ($callEvent) {
-        $callEvent->is_read = true;
-        $callEvent->save();
-
-        return response()->json(['success' => true]);
+        ->where('status', 'connected')
+        ->where('created_at', '>', now()->subMinutes(5))
+        ->exists();
+    
+    if ($existingCallEvent) {
+        $confidence += 60; // Strong indicator
     }
-
-    return response()->json(['error' => 'Call event not found'], 404);
+    
+    // Determine if connected based on confidence score
+    $isConnected = $confidence >= 70;
+    
+    return response()->json([
+        'is_connected' => $isConnected,
+        'confidence' => $confidence,
+        'factors' => [
+            'duration_ms' => $callDuration,
+            'user_interacted' => $userInteracted,
+            'existing_event' => $existingCallEvent
+        ]
+    ]);
 });
 
 Route::get('/zoom-webhook', [App\Http\Controllers\Admin\ZoomWebhookController::class, 'handleWebhook']);

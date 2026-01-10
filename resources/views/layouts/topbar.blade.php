@@ -173,10 +173,57 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         loadTopbarNotifications();
+        loadChatUnreadCount();
 
         // Refresh notifications every 30 seconds
         setInterval(loadTopbarNotifications, 30000);
+        
+        // Refresh chat unread count every 30 seconds
+        setInterval(loadChatUnreadCount, 30000);
     });
+
+    function loadChatUnreadCount() {
+        fetch('/api/chat/unread-count', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                console.log('Chat unread count response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Chat unread count data:', data);
+                if (data.success) {
+                    console.log('Updating badge with count:', data.unread_count);
+                    updateChatBadge(data.unread_count);
+                } else {
+                    console.log('API returned success: false');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading chat unread count:', error);
+            });
+    }
+
+    function updateChatBadge(unreadCount) {
+        const badge = document.querySelector('.chat-badge');
+        console.log('Badge element found:', badge);
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'inline';
+                console.log('Badge updated to:', unreadCount);
+            } else {
+                badge.style.display = 'none';
+                console.log('Badge hidden (count is 0)');
+            }
+        } else {
+            console.log('Badge element not found');
+        }
+    }
 
     function loadTopbarNotifications() {
         fetch('/api/notifications/topbar', {

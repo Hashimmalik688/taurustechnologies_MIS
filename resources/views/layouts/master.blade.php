@@ -22,6 +22,9 @@
     <!-- Admin UI overrides -->
     <link rel="stylesheet" href="{{ URL::asset('css/admin-ui.css') }}">
     
+    <!-- Device Fingerprinting for Attendance Tracking -->
+    <script src="{{ URL::asset('js/device-fingerprint.js') }}"></script>
+    
     @yield('css')
 </head>
 
@@ -48,7 +51,7 @@
                 <div style="position: relative;">
                     <a href="{{ route('chat.index') }}" class="notification-btn" title="Team Chat" style="text-decoration: none;">
                         <i class="bx bx-message-square-dots" style="font-size: 1.25rem;"></i>
-                        <span class="notification-badge" style="background: #10b981;">0</span>
+                        <span class="chat-badge notification-badge" style="background: #10b981; display: none;">0</span>
                     </a>
                 </div>
 
@@ -426,6 +429,59 @@
         // Example of how to manually trigger for testing:
         // window.showCallPopup({ employee: { id: 1, name: 'John Doe', email: 'john.doe@example.com' } });
 
+    </script>
+
+    <!-- Chat Unread Count Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadChatUnreadCount();
+
+        // Refresh chat unread count every 30 seconds
+        setInterval(loadChatUnreadCount, 30000);
+    });
+
+    function loadChatUnreadCount() {
+        fetch('/api/chat/unread-count', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                console.log('Chat unread count response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Chat unread count data:', data);
+                if (data.success) {
+                    console.log('Updating badge with count:', data.unread_count);
+                    updateChatBadge(data.unread_count);
+                } else {
+                    console.log('API returned success: false');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading chat unread count:', error);
+            });
+    }
+
+    function updateChatBadge(unreadCount) {
+        const badge = document.querySelector('.chat-badge');
+        console.log('Badge element found:', badge);
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'inline';
+                console.log('Badge updated to:', unreadCount);
+            } else {
+                badge.style.display = 'none';
+                console.log('Badge hidden (count is 0)');
+            }
+        } else {
+            console.log('Badge element not found');
+        }
+    }
     </script>
 
 </body>

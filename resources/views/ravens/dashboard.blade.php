@@ -157,8 +157,8 @@
                     @php $today = $stats['today_status'] ?? null; @endphp
                     @if($today)
                         <p class="mb-1"><strong>Status:</strong> <span class="badge bg-{{ $today->status === 'present' ? 'success' : ($today->status === 'late' ? 'warning' : 'danger') }}">{{ ucfirst($today->status) }}</span></p>
-                        <p class="mb-1"><strong>Login:</strong> {{ $today->formatted_login_time ?? $today->login_time?->format('H:i') ?? 'N/A' }}</p>
-                        <p class="mb-1"><strong>Logout:</strong> {{ $today->formatted_logout_time ?? $today->logout_time?->format('H:i') ?? 'N/A' }}</p>
+                        <p class="mb-1"><strong>Login:</strong> {{ $today->formatted_login_time ?? ($today->login_time ? \Carbon\Carbon::parse($today->login_time)->format('g:i A') : 'N/A') }}</p>
+                        <p class="mb-1"><strong>Logout:</strong> {{ $today->formatted_logout_time ?? ($today->logout_time ? \Carbon\Carbon::parse($today->logout_time)->format('g:i A') : 'N/A') }}</p>
                     @else
                         <p class="text-muted">No attendance record for today.</p>
                         <a href="#" id="RavensMarkBtn" class="btn btn-gold btn-sm">Mark Attendance</a>

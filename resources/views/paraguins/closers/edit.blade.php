@@ -256,21 +256,57 @@
                             </div>
                         </div>
 
+                        <!-- Multiple Beneficiaries Section -->
                         <h6 class="form-section-title mt-4">Beneficiary Information</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="beneficiary" class="form-label required">Beneficiary Name</label>
-                                <input type="text" class="form-control @error('beneficiary') is-invalid @enderror"
-                                    id="beneficiary" name="beneficiary" value="{{ old('beneficiary', $lead->beneficiary) }}"
-                                    placeholder="Full legal name" required>
-                                @error('beneficiary')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <div id="beneficiaries-container" class="mb-3">
+                            @php
+                                // Check for old input first (from failed submission), then existing beneficiaries
+                                $existingBeneficiaries = old('beneficiaries', $lead->beneficiaries ?? []);
+                                // If no beneficiaries in JSON but old fields exist, migrate them
+                                if (empty($existingBeneficiaries) && ($lead->beneficiary || $lead->beneficiary_dob)) {
+                                    $existingBeneficiaries = [[
+                                        'name' => $lead->beneficiary ?? '',
+                                        'dob' => $lead->beneficiary_dob ?? ''
+                                    ]];
+                                }
+                                // Ensure at least one beneficiary row
+                                if (empty($existingBeneficiaries)) {
+                                    $existingBeneficiaries = [['name' => '', 'dob' => '']];
+                                }
+                            @endphp
+                            
+                            @foreach($existingBeneficiaries as $index => $beneficiary)
+                            <div class="row g-3 mb-2 beneficiary-row" data-index="{{ $index }}">
+                                <div class="col-md-5">
+                                    <label for="beneficiaries[{{ $index }}][name]" class="form-label {{ $index === 0 ? 'required' : '' }}">
+                                        Beneficiary Name {{ $index > 0 ? ($index + 1) : '' }}
+                                    </label>
+                                    <input type="text" class="form-control @error('beneficiaries.'.$index.'.name') is-invalid @enderror" 
+                                           name="beneficiaries[{{ $index }}][name]" 
+                                           value="{{ old('beneficiaries.'.$index.'.name', $beneficiary['name'] ?? '') }}" 
+                                           placeholder="Full name" {{ $index === 0 ? 'required' : '' }}>
+                                    @error('beneficiaries.'.$index.'.name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="beneficiaries[{{ $index }}][dob]" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control @error('beneficiaries.'.$index.'.dob') is-invalid @enderror" 
+                                           name="beneficiaries[{{ $index }}][dob]" 
+                                           value="{{ old('beneficiaries.'.$index.'.dob', $beneficiary['dob'] ?? '') }}">
+                                    @error('beneficiaries.'.$index.'.dob')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    @if($index === 0)
+                                        <button type="button" class="btn btn-success w-100" id="add-beneficiary-edit" title="Add Another Beneficiary">
+                                            <i class="bx bx-plus"></i> Add
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-danger w-100 remove-beneficiary" title="Remove Beneficiary">
+                                            <i class="bx bx-minus"></i> Remove
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label for="beneficiary_dob" class="form-label">Beneficiary Date of Birth</label>
-                                <input type="date" class="form-control @error('beneficiary_dob') is-invalid @enderror"
-                                    id="beneficiary_dob" name="beneficiary_dob" value="{{ old('beneficiary_dob', $lead->beneficiary_dob) }}">
-                                @error('beneficiary_dob')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -360,8 +396,7 @@
                             <div class="col-md-3">
                                 <label for="expiry_date" class="form-label">Expiry Date</label>
                                 <input type="text" class="form-control @error('expiry_date') is-invalid @enderror"
-                                    id="expiry_date" name="expiry_date" value="{{ old('expiry_date', $lead->expiry_date) }}"
-                                    placeholder="MM/YYYY" maxlength="7">
+                                    id="expiry_date" name="expiry_date" value="{{ old('expiry_date', $lead->expiry_date) }}">
                                 @error('expiry_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                         </div>
@@ -498,6 +533,18 @@
                                 <strong>Failed:Declined Banking</strong>
                             </label>
                         </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="failure_reason" id="noPitch" value="Failed:No Pitch (Not Interested)" required>
+                            <label class="form-check-label" for="noPitch">
+                                <strong>Failed:No Pitch (Not Interested)</strong>
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="failure_reason" id="noAnswer" value="Failed:No Answer" required>
+                            <label class="form-check-label" for="noAnswer">
+                                <strong>Failed:No Answer</strong>
+                            </label>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -509,6 +556,50 @@
     </div>
 
     <script>
+        // Multiple Beneficiaries Management
+        document.addEventListener('DOMContentLoaded', function() {
+            let beneficiaryIndex = {{ count($existingBeneficiaries) }};
+            
+            const addBeneficiaryBtn = document.getElementById('add-beneficiary-edit');
+            if (addBeneficiaryBtn) {
+                addBeneficiaryBtn.addEventListener('click', function() {
+                    const container = document.getElementById('beneficiaries-container');
+                    const newRow = document.createElement('div');
+                    newRow.className = 'row g-3 mb-2 beneficiary-row';
+                    newRow.setAttribute('data-index', beneficiaryIndex);
+                    newRow.innerHTML = `
+                        <div class="col-md-5">
+                            <label for="beneficiaries[${beneficiaryIndex}][name]" class="form-label">Beneficiary Name ${beneficiaryIndex + 1}</label>
+                            <input type="text" class="form-control" name="beneficiaries[${beneficiaryIndex}][name]" placeholder="Full name">
+                        </div>
+                        <div class="col-md-5">
+                            <label for="beneficiaries[${beneficiaryIndex}][dob]" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="beneficiaries[${beneficiaryIndex}][dob]">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger w-100 remove-beneficiary" title="Remove Beneficiary">
+                                <i class="bx bx-minus"></i> Remove
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(newRow);
+                    beneficiaryIndex++;
+                    
+                    // Attach remove handler
+                    newRow.querySelector('.remove-beneficiary').addEventListener('click', function() {
+                        newRow.remove();
+                    });
+                });
+            }
+            
+            // Remove beneficiary (for existing rows)
+            document.querySelectorAll('.remove-beneficiary').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    this.closest('.beneficiary-row').remove();
+                });
+            });
+        });
+
         // Copy form data to pending form before submit
         document.getElementById('pendingForm').addEventListener('submit', function(e) {
             const mainForm = document.querySelector('form[action*="update"]');

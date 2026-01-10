@@ -227,6 +227,11 @@
                                     placeholder="Leave blank to keep current password">
                             </div>
                             <div class="mb-3">
+                                <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
+                                    placeholder="Confirm new password">
+                            </div>
+                            <div class="mb-3">
                                 <label for="dob" class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control" id="dob" name="dob"
                                     value="{{ $user->userDetail->dob ?? '' }}">

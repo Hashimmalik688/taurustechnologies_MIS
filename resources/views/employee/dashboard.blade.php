@@ -157,12 +157,39 @@
                     @php $today = $stats['today_status'] ?? null; @endphp
                     @if($today)
                         <p class="mb-1"><strong>Status:</strong> <span class="badge bg-{{ $today->status === 'present' ? 'success' : ($today->status === 'late' ? 'warning' : 'danger') }}">{{ ucfirst($today->status) }}</span></p>
-                        <p class="mb-1"><strong>Login:</strong> {{ $today->formatted_login_time ?? $today->login_time?->format('H:i') ?? 'N/A' }}</p>
-                        <p class="mb-1"><strong>Logout:</strong> {{ $today->formatted_logout_time ?? $today->logout_time?->format('H:i') ?? 'N/A' }}</p>
+                        <p class="mb-1"><strong>Login:</strong> {{ $today->formatted_login_time ?? ($today->login_time ? \Carbon\Carbon::parse($today->login_time)->format('g:i A') : 'N/A') }}</p>
+                        <p class="mb-1"><strong>Logout:</strong> {{ $today->formatted_logout_time ?? ($today->logout_time ? \Carbon\Carbon::parse($today->logout_time)->format('g:i A') : 'N/A') }}</p>
                     @else
                         <p class="text-muted">No attendance record for today.</p>
                         <a href="#" id="employeeMarkBtn" class="btn btn-gold btn-sm">Mark Attendance</a>
                     @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Panel -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bordered">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Quick Access</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{{ route('attendance.dashboard') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bx bx-calendar-check fs-4 mb-2"></i>
+                                <div>My Attendance</div>
+                                <small class="text-muted">View my attendance records</small>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ route('my-dock-records') }}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="mdi mdi-cash-minus fs-4 mb-2"></i>
+                                <div>My Dock Records</div>
+                                <small class="text-muted">View my salary deductions</small>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

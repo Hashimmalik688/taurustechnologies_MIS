@@ -12,6 +12,7 @@ class ZoomToken extends Model
     protected $table = 'zoom_tokens';
     
     protected $fillable = [
+        'user_id',
         'account_id',
         'access_token',
         'refresh_token',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\CallLog;
 use App\Models\Attendance;
+use App\Models\PublicHoliday;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,15 +32,67 @@ class RavensDashboardController extends Controller
 
         $attendanceRecords = Attendance::where('user_id', $user->id)
             ->whereBetween('date', [$periodStart->format('Y-m-d'), $periodEnd->format('Y-m-d')])
-            ->get();
+            ->get()
+            ->keyBy(function($a) { return $a->date->format('Y-m-d'); });
+
+        // Calculate actual workdays (excluding weekends and holidays)
+        $workdays = 0;
+        $present = 0;
+        $late = 0;
+        $absent = 0;
+        $totalHours = 0;
+        
+        $cursor = $periodStart->copy();
+        $now = \Carbon\Carbon::now('Asia/Karachi');
+        
+        // For night shift: if before 5am, we're still in previous day's shift
+        $effectiveToday = $now->copy();
+        if ($now->hour < 5) {
+            $effectiveToday->subDay();
+        }
+        
+        while ($cursor->lte($periodEnd)) {
+            // Skip if future date (only check if viewing current period)
+            // If cursor is beyond today, skip it (don't count future days)
+            if ($cursor->gt($now)) {
+                $cursor->addDay();
+                continue;
+            }
+            
+            // Skip weekends
+            if (in_array($cursor->dayOfWeek, [\Carbon\Carbon::SATURDAY, \Carbon\Carbon::SUNDAY])) {
+                $cursor->addDay();
+                continue;
+            }
+            
+            // Skip public holidays
+            if (PublicHoliday::isHoliday($cursor)) {
+                $cursor->addDay();
+                continue;
+            }
+            
+            $workdays++;
+            $att = $attendanceRecords->get($cursor->format('Y-m-d'));
+            
+            if ($att) {
+                if ($att->status === 'present') $present++;
+                if ($att->status === 'late') $late++;
+                $totalHours += $att->working_hours ?? 0;
+            } else {
+                $absent++;
+            }
+            
+            $cursor->addDay();
+        }
 
         $attendanceSummary = [
-            'total_records' => $attendanceRecords->count(),
-            'present_days' => $attendanceRecords->where('status', 'present')->count(),
-            'absent_days' => $attendanceRecords->whereIn('status', ['absent', 'leave'])->count(),
-            'late_days' => $attendanceRecords->filter(function ($rec) { return $rec->isLate(); })->count(),
-            'total_working_hours' => $attendanceRecords->sum('working_hours'),
-            'average_working_hours' => $attendanceRecords->count() > 0 ? round($attendanceRecords->sum('working_hours') / $attendanceRecords->count(), 1) : 0,
+            'total_days' => $workdays,
+            'total_records' => $attendanceRecords->count(), // Actual attendance records
+            'present_days' => $present,
+            'late_days' => $late,
+            'absent_days' => $absent,
+            'total_working_hours' => round($totalHours, 1),
+            'average_working_hours' => $workdays > 0 ? round($totalHours / $workdays, 1) : 0,
         ];
 
         // Get stats for the Ravens employee
@@ -58,8 +111,8 @@ class RavensDashboardController extends Controller
 
     public function calling()
     {
-        // Get leads for Ravens employees to call - paginated for performance
-        $leads = Lead::orderBy('created_at', 'desc')->paginate(100);
+        // Get all leads for Ravens employees to call
+        $leads = Lead::orderBy('created_at', 'desc')->get();
 
         return view('ravens.calling', compact('leads'));
     }
@@ -107,5 +160,50 @@ class RavensDashboardController extends Controller
             ->whereYear('sale_at', now()->year)
             ->whereIn('status', ['accepted', 'underwritten'])
             ->count();
+    }
+
+    /**
+     * Get lead data for the Ravens form popup
+     */
+    public function getLeadData($leadId)
+    {
+        $lead = Lead::find($leadId);
+
+        if (!$lead) {
+            return response()->json(['error' => 'Lead not found'], 404);
+        }
+
+        // Return full lead data for the form with properly formatted dates
+        return response()->json([
+            'id' => $lead->id,
+            'cn_name' => $lead->cn_name,
+            'phone_number' => $lead->phone_number,
+            'date_of_birth' => $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('Y-m-d') : null,
+            'ssn' => $lead->ssn,
+            'gender' => $lead->gender,
+            'beneficiary' => $lead->beneficiary,
+            'beneficiary_dob' => $lead->beneficiary_dob ? \Carbon\Carbon::parse($lead->beneficiary_dob)->format('Y-m-d') : null,
+            'carrier_name' => $lead->carrier_name,
+            'coverage_amount' => $lead->coverage_amount,
+            'monthly_premium' => $lead->monthly_premium,
+            'birth_place' => $lead->birth_place,
+            'smoker' => $lead->smoker,
+            'height_weight' => $lead->height_weight,
+            'address' => $lead->address,
+            'medical_issue' => $lead->medical_issue,
+            'medications' => $lead->medications,
+            'doctor_name' => $lead->doctor_name,
+            'doctor_address' => $lead->doctor_address,
+            'policy_type' => $lead->policy_type,
+            'initial_draft_date' => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
+            'bank_name' => $lead->bank_name,
+            'account_type' => $lead->account_type,
+            'routing_number' => $lead->routing_number,
+            'account_number' => $lead->acc_number,
+            'verified_by' => $lead->account_verified_by,
+            'bank_balance' => $lead->bank_balance,
+            'source' => $lead->source,
+            'closer_name' => $lead->closer_name,
+        ]);
     }
 }

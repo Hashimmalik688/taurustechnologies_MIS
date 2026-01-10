@@ -19,21 +19,25 @@
     .locked-table thead th:nth-child(1),
     .locked-table thead th:nth-child(2),
     .locked-table thead th:nth-child(3),
+    .locked-table thead th:nth-child(4),
     .locked-table tbody td:nth-child(1),
     .locked-table tbody td:nth-child(2),
-    .locked-table tbody td:nth-child(3) {
+    .locked-table tbody td:nth-child(3),
+    .locked-table tbody td:nth-child(4) {
         position: sticky;
         background: white;
         z-index: 10;
     }
 
     .locked-table thead th:nth-child(1) { left: 0; z-index: 11; width: 50px; }
-    .locked-table thead th:nth-child(2) { left: 50px; z-index: 11; min-width: 150px; }
-    .locked-table thead th:nth-child(3) { left: 200px; z-index: 11; min-width: 180px; }
+    .locked-table thead th:nth-child(2) { left: 50px; z-index: 11; width: 70px; }
+    .locked-table thead th:nth-child(3) { left: 120px; z-index: 11; min-width: 150px; }
+    .locked-table thead th:nth-child(4) { left: 270px; z-index: 11; min-width: 180px; }
 
     .locked-table tbody td:nth-child(1) { left: 0; }
     .locked-table tbody td:nth-child(2) { left: 50px; }
-    .locked-table tbody td:nth-child(3) { left: 200px; }
+    .locked-table tbody td:nth-child(3) { left: 120px; }
+    .locked-table tbody td:nth-child(4) { left: 270px; }
 
     .locked-table thead th {
         background: #f8f9fa !important;
@@ -63,6 +67,38 @@
     /* Slightly nicer font and spacing for leads table */
     .locked-table, .locked-table th, .locked-table td {
         font-family: Inter, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    /* Hide any stuck loading overlays */
+    .page-content { opacity: 1 !important; }
+    body::after, .page-content::after { display: none !important; }
+    
+    /* Fix oversized pagination arrows */
+    svg {
+        max-width: 20px !important;
+        max-height: 20px !important;
+    }
+    
+    .pagination svg, .pagination-wrapper svg, nav svg, .page-link svg {
+        width: 16px !important;
+        height: 16px !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+    }
+    
+    /* Ensure pagination links display properly */
+    .pagination {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.25rem !important;
+    }
+    
+    .pagination .page-link {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 38px !important;
+        height: 38px !important;
     }
 </style>
 @endsection
@@ -144,6 +180,7 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle locked-table">
                             <thead>
                                 <tr>
+                                    <th>#</th>
                                     <th>ID</th>
                                     <th>Customer Name</th>
                                     <th>Actions</th>
@@ -184,8 +221,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($leads as $lead)
+                                @forelse($leads as $index => $lead)
                                     <tr>
+                                        <td><strong>{{ $leads->firstItem() + $index }}</strong></td>
                                         <td><strong>{{ $lead->id }}</strong></td>
                                         <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
                                         <td>
@@ -203,32 +241,13 @@
                                                 <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                                     <i class="fas fa-edit" aria-hidden="true"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete">
-                                                    <i class="fas fa-trash" aria-hidden="true"></i>
-                                                </button>
-                                            </div>
-
-                                            <!-- Delete Modal -->
-                                            <div class="modal fade" id="delete-{{ $lead->id }}" tabindex="-1">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Confirm Delete</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Are you sure you want to delete <strong>{{ $lead->cn_name }}</strong>?
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <form action="{{ route('leads.delete', $lead->id) }}" method="POST" style="display: inline;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <form action="{{ route('leads.delete', $lead->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                        <i class="fas fa-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                         <td>{{ $lead->phone_number ?? 'N/A' }}</td>

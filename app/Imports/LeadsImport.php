@@ -14,7 +14,9 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
 {
     public function collection(Collection $rows)
     {
-    Log::info('Starting lead import', ['total_rows' => $rows->count()]);
+        Log::info('Starting lead import', ['total_rows' => $rows->count()]);
+        $createdCount = 0;
+        $updatedCount = 0;
 
         foreach ($rows as $index => $row) {
             if ($row->filter()->isEmpty()) {
@@ -35,32 +37,84 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                     $lowercaseRow[$normalizedKey] = $value;
                 }
 
-                // Get and normalize phone number
-                $rawPhoneNumber = $this->getValueFromRow($lowercaseRow, ['phone number']);
-                $normalizedPhoneNumber = $this->normalizePhoneNumber($rawPhoneNumber);
-
-                // Skip if no valid phone number
-                if (! $normalizedPhoneNumber) {
-                    Log::warning("Skipping row {$index}: No valid phone number found", ['row' => $row]);
-
-                    continue;
+                // Get and normalize phone number - extract from any format (includes all variations)
+                $rawPhoneNumber = $this->getValueFromRow($lowercaseRow, [
+                    'phone number', 
+                    'phone', 
+                    'contact number',
+                    'cell phone',
+                    'cell',
+                    'mobile',
+                    'mobile number',
+                    'tel',
+                    'telephone',
+                    'phone_number',
+                    'primary phone',
+                    'main phone'
+                ]);
+                
+                // Check for secondary phone field
+                $rawSecondaryPhone = $this->getValueFromRow($lowercaseRow, [
+                    'secondary phone',
+                    'second phone',
+                    'alternate phone',
+                    'other phone',
+                    'secondary_phone_number'
+                ]);
+                
+                // Extract and clean phone numbers - AUTO SPLIT if multiple in one field
+                $normalizedPhoneNumber = null;
+                $normalizedSecondaryPhone = null;
+                
+                if ($rawPhoneNumber) {
+                    // Check if multiple phone numbers in one field (separated by space, comma, slash, or pipe)
+                    $phoneNumbers = preg_split('/[\s,\/\|;]+/', trim($rawPhoneNumber));
+                    
+                    // Extract digits from first number
+                    $firstPhone = preg_replace('/[^0-9]/', '', $phoneNumbers[0]);
+                    if (strlen($firstPhone) >= 10) {
+                        $normalizedPhoneNumber = $this->normalizePhoneNumber($firstPhone);
+                    }
+                    
+                    // If there's a second number in the same field, use it as secondary
+                    if (count($phoneNumbers) > 1 && !$rawSecondaryPhone) {
+                        $secondPhone = preg_replace('/[^0-9]/', '', $phoneNumbers[1]);
+                        if (strlen($secondPhone) >= 10) {
+                            $normalizedSecondaryPhone = $this->normalizePhoneNumber($secondPhone);
+                        }
+                    }
+                }
+                
+                // Process secondary phone if provided in separate field
+                if ($rawSecondaryPhone && !$normalizedSecondaryPhone) {
+                    $secondPhone = preg_replace('/[^0-9]/', '', $rawSecondaryPhone);
+                    if (strlen($secondPhone) >= 10) {
+                        $normalizedSecondaryPhone = $this->normalizePhoneNumber($secondPhone);
+                    }
                 }
 
-                // Check if lead already exists by normalized phone number
-                // Also check for non-normalized versions (with leading 1)
-                $existingLead = Lead::where('phone_number', $normalizedPhoneNumber)
-                    ->orWhere('phone_number', '1'.$normalizedPhoneNumber)
-                    ->first();
+                // Import ALL leads, even without valid phone numbers
+                // Cast phone number as string to avoid integer conversion
+                $normalizedPhoneNumber = $normalizedPhoneNumber ? (string)$normalizedPhoneNumber : null;
+
+                // Check if lead already exists by normalized phone number (only if phone exists)
+                $existingLead = null;
+                if ($normalizedPhoneNumber) {
+                    $existingLead = Lead::where('phone_number', $normalizedPhoneNumber)
+                        ->orWhere('phone_number', '1'.$normalizedPhoneNumber)
+                        ->first();
+                }
 
                 if ($existingLead) {
                     // Lead exists, just add carrier details
                     $existingLead->carriers()->create([
                         'name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
-                        'coverage_amount' => $this->getValueFromRow($lowercaseRow, ['coverage amount']),
-                        'premium_amount' => $this->getValueFromRow($lowercaseRow, ['monthly premium']),
+                        'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
+                        'premium_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
                         'status' => 'pending',
                     ]);
 
+                    $updatedCount++;
                     Log::info('Added carrier to existing lead', [
                         'lead_id' => $existingLead->id,
                         'phone_number' => $normalizedPhoneNumber,
@@ -70,16 +124,24 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         $rawDate = $this->getValueFromRow($lowercaseRow, ['timestamp', 'time stamp', 'date']);
                         $leadDate = ImportSanitizer::parseExcelDate($rawDate) ?? now()->format('Y-m-d');
 
+                        // Handle smoker field - default to 0 if not present or empty
+                        $smokerValue = $this->getValueFromRow($lowercaseRow, ['smoker']);
+                        $smoker = null; // Allow NULL if no data
+                        if ($smokerValue !== null && $smokerValue !== '') {
+                            $smoker = (strtolower(trim($smokerValue)) == 'yes' || trim($smokerValue) == '1') ? 1 : 0;
+                        }
+
                         $lead = Lead::create([
                             'date' => $leadDate,
                         'phone_number' => $normalizedPhoneNumber,
+                        'secondary_phone_number' => $normalizedSecondaryPhone,
                         'cn_name' => $this->getValueFromRow($lowercaseRow, ['customer name', 'name']),
                         'date_of_birth' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['dob', 'date of birth'])),
                         'gender' => $this->getValueFromRow($lowercaseRow, ['gender']),
-                        'smoker' => $this->getValueFromRow($lowercaseRow, ['smoker']) == 'Yes' ? 1 : 0,
+                        'smoker' => $smoker,
                         'driving_license' => $this->getValueFromRow($lowercaseRow, ['driving license #', 'driving license', 'license']),
                         'height_weight' => $this->getValueFromRow($lowercaseRow, ['height & weight', 'height and weight', 'height_weight']),
-                        'birth_place' => $this->getValueFromRow($lowercaseRow, ['birth place']),
+                        'birth_place' => $this->getValueFromRow($lowercaseRow, ['birth place', 'birthplace']),
                         'medical_issue' => $this->getValueFromRow($lowercaseRow, ['medical issue']),
                         'medications' => $this->getValueFromRow($lowercaseRow, ['medications']),
                         'doctor_name' => $this->getValueFromRow($lowercaseRow, ['doc name', 'doctor name']),
@@ -92,9 +154,11 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'beneficiary_dob' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['beneficiary dob', 'beneficiary date of birth'])),
                         'emergency_contact' => $this->getValueFromRow($lowercaseRow, ['emergency contact']),
                         'policy_type' => $this->getValueFromRow($lowercaseRow, ['policy type']),
+                        'policy_number' => $this->getValueFromRow($lowercaseRow, ['policy no.', 'policy no', 'policy number', 'policy_number']),
                         'initial_draft_date' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['initial draft date'])) ?? now()->format('Y-m-d'),
                         'future_draft_date' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['future draft date'])),
                         'bank_name' => $this->getValueFromRow($lowercaseRow, ['bank name']),
+                        'account_title' => $this->getValueFromRow($lowercaseRow, ['account title', 'acc title', 'account_title']),
                         'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
                         'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
                         'acc_number' => $this->getValueFromRow($lowercaseRow, ['acc number', 'account number']),
@@ -107,17 +171,18 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
                         'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line #', 'preset line']),
                         'comments' => $this->getValueFromRow($lowercaseRow, ['comments']),
-                        'status' => 'pending',
+                        'status' => 'closed', // Mark imported leads as closed so they appear in All Leads
                     ]);
 
                     // Create carrier for new lead
                     $lead->carriers()->create([
                         'name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
-                        'coverage_amount' => $this->getValueFromRow($lowercaseRow, ['coverage amount']),
-                        'premium_amount' => $this->getValueFromRow($lowercaseRow, ['monthly premium']),
+                        'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
+                        'premium_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
                         'status' => 'pending',
                     ]);
 
+                    $createdCount++;
                     Log::info('Created new lead with carrier', [
                         'lead_id' => $lead->id,
                         'phone_number' => $normalizedPhoneNumber,
@@ -137,7 +202,11 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
         }
 
         $totalLeads = Lead::count();
-        Log::info('Lead import completed', ['total_leads_in_db' => $totalLeads]);
+        Log::info('Lead import completed', [
+            'created' => $createdCount,
+            'updated' => $updatedCount,
+            'total_leads_in_db' => $totalLeads
+        ]);
     }
 
     /**

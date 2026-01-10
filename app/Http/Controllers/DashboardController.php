@@ -93,6 +93,16 @@ class DashboardController extends Controller
             return redirect()->route('retention.dashboard');
         }
 
+        // Redirect HR to dock section (HR only has access to Dock, Attendance, and Public Holidays)
+        if (Auth::check() && Auth::user()->hasRole('HR')) {
+            return redirect()->route('dock.index');
+        }
+
+        // Redirect Trainer to attendance dashboard
+        if (Auth::check() && Auth::user()->hasRole('Trainer')) {
+            return redirect()->route('attendance.dashboard');
+        }
+
         // Fetch data from boss's dashboard with caching
         $bossData = $this->fetchBossDashboardData();
 

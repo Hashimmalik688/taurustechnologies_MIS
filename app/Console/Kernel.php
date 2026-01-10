@@ -30,11 +30,11 @@ class Kernel extends ConsoleKernel
             ->dailyAt('19:30')
             ->timezone('Asia/Karachi');
         
-        // Auto-checkout employees at 6:10 AM who haven't checked out
-        // Office hours end at 5 AM, with 1-hour buffer until 6 AM
-        $schedule->command('attendance:auto-checkout')
-            ->dailyAt('06:10')
-            ->timezone('Asia/Karachi');
+        // Auto-checkout disabled - checkout is now fully manual
+        // Days without checkout will be marked as unpaid manually by Super Admin
+        // $schedule->command('attendance:auto-checkout')
+        //     ->dailyAt('05:10')
+        //     ->timezone('Asia/Karachi');
     }
 
     /**

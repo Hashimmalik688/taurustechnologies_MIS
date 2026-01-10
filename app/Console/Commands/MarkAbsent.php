@@ -48,6 +48,12 @@ class MarkAbsent extends Command
 
         $today = Carbon::today();
 
+        // Skip marking absent if today is a public holiday
+        if (\App\Models\Holiday::isHoliday($today)) {
+            $this->info('Today is a public holiday. Skipping absence marking.');
+            return 0;
+        }
+
         // Get users with the provided roles
         $usersQuery = User::query()->whereHas('roles', function ($q) use ($roles) {
             $q->whereIn('name', $roles);

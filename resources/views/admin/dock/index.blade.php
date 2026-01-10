@@ -16,6 +16,18 @@
     </div>
 </div>
 
+<!-- Information Alert -->
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-information-outline me-2"></i>
+            <strong>Employee Access:</strong> Employees can now view their own dock records by navigating to <strong>"My Dock Records"</strong> in the sidebar. 
+            They will see the amount, reason, who docked them, and when each dock was applied.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
 <!-- Statistics Cards -->
 <div class="row">
     <div class="col-md-4">

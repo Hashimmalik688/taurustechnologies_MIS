@@ -228,44 +228,15 @@
                                             <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            {{-- <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#delete-form-{{ $lead->id }}">
+                                            <form action="{{ route('leads.delete', $lead->id) }}" method="POST" 
+                                                style="display: inline-block; margin: 0;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="event.preventDefault(); event.stopPropagation(); $('.modal-backdrop').remove(); if(confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?\n\nThis action cannot be undone.')) { this.closest('form').submit(); }">
                                                     <i class="fas fa-trash"></i>
-                                                </button> --}}
-
-                                            <!-- Delete Modal -->
-                                            <div class="modal fade" id="delete-form-{{ $lead->id }}" tabindex="-1"
-                                                role="dialog" aria-labelledby="delete-form-modal-{{ $lead->id }}"
-                                                aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="delete-form-modal-{{ $lead->id }}">
-                                                                Confirm Delete
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            Are you sure you want to delete leads form for
-                                                            <strong>{{ $lead->cn_name }}</strong>?
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Cancel</button>
-                                                            <form action="{{ route('leads.delete', $lead->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                </button>
+                                            </form>
                                         @endhasrole
                                     </td>
                                 </tr>
@@ -1090,4 +1061,20 @@
             }
         });
     </script>
+
+    <style>
+        /* Fix modal backdrop and z-index issues */
+        .modal-backdrop.show {
+            opacity: 0.5;
+            z-index: 1040;
+        }
+        
+        .modal.show {
+            z-index: 1055;
+        }
+        
+        .modal-dialog {
+            z-index: 1060;
+        }
+    </style>
 @endsection

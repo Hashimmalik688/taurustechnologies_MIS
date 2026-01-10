@@ -20,6 +20,7 @@ class CallLog extends Model
         'call_start_time',
         'call_end_time',
         'duration_seconds',
+        'zoom_call_id', // Professional Zoom API integration
         'outcome',
         'recording_url',
         'notes',

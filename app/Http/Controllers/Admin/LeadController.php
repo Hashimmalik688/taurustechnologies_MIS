@@ -7,6 +7,8 @@ use App\Http\Requests\StoreLeadRequest;
 use App\Http\Requests\UpdateLeadRequest;
 use App\Imports\LeadsImport;
 use App\Models\Lead;
+use App\Events\LeadCreated;
+use App\Events\SaleCreated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -15,8 +17,12 @@ class LeadController extends Controller
 {
     public function index(Request $request)
     {
-        // All Leads section with search functionality
+        // All Leads section - Only show leads closed by Paraguin closers or accepted by managers
+        // Verifier forms (pending) and declined/transferred leads are excluded
         $query = Lead::query();
+        
+        // Only show closed and accepted leads
+        $query->whereIn('status', ['closed', 'accepted']);
         
         // Search functionality
         if ($request->filled('search')) {
@@ -119,6 +125,9 @@ class LeadController extends Controller
         if (! empty($carrierData['name'])) {
             $lead->carriers()->create($carrierData);
         }
+
+        // Dispatch event to notify managers and assigned person
+        event(new LeadCreated($lead, Auth::user()->name));
 
         // Redirect with success message
         return redirect()->route('leads.create')
@@ -371,26 +380,39 @@ class LeadController extends Controller
 
     public function import(Request $request)
     {
-        // Validate the request
+        // Validate the request - Allow up to 50MB files for large bulk imports
         $request->validate([
-            'import_file' => 'required|mimes:xlsx,xls,csv|max:2048',
+            'import_file' => 'required|mimes:xlsx,xls,csv|max:51200',
         ]);
 
         try {
+            $beforeCount = Lead::count();
+            
             // Import the file using the LeadsImport class
             Excel::import(new LeadsImport, $request->file('import_file'));
 
-            // Count leads to verify import worked
-            $leadsCount = Lead::count();
+            $afterCount = Lead::count();
+            $imported = $afterCount - $beforeCount;
 
-            return redirect()->route('leads.index')->with('success', "Leads imported successfully! Total leads in system: {$leadsCount}");
+            return redirect()->route('leads.index')->with('success', "Successfully imported {$imported} leads! Total leads: {$afterCount}");
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessage = "Import validation failed. Errors: ";
+            foreach ($failures as $failure) {
+                $errorMessage .= "Row {$failure->row()}: " . implode(', ', $failure->errors()) . "; ";
+            }
+            \Log::error('Lead import validation failed', ['errors' => $errorMessage]);
+            return redirect()->back()->with('error', $errorMessage);
         } catch (\Exception $e) {
             \Log::error('Lead import failed: ' . $e->getMessage(), [
-                'exception' => $e,
+                'file' => $request->file('import_file')->getClientOriginalName(),
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage() . ' (Line: ' . $e->getLine() . ')');
         }
     }
 
@@ -558,6 +580,9 @@ class LeadController extends Controller
         $lead->retention_officer_id = auth()->id();
         $lead->status = $isRetained ? 'accepted' : 'chargeback';
         $lead->save();
+
+        // Dispatch event to notify managers and assigned person about the new sale
+        event(new SaleCreated($newSale, $retentionOfficer));
 
         return response()->json([
             'success' => true,

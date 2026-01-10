@@ -39,14 +39,29 @@
                                         }}</td>
                                         <td>
                                             @if($a)
-                                                <span class="badge bg-{{ $a->status === 'present' ? 'success' : ($a->status === 'late' ? 'warning' : 'danger') }}">{{ ucfirst($a->status) }}</span>
+                                                <span class="badge bg-{{ 
+                                                    $a->status === 'present' ? 'success' : 
+                                                    ($a->status === 'late' ? 'warning' : 
+                                                    ($a->status === 'half_day' ? 'info' : 
+                                                    ($a->status === 'paid_leave' ? 'primary' : 'danger'))) 
+                                                }}">{{ ucfirst(str_replace('_', ' ', $a->status)) }}</span>
                                             @else
                                                 <span class="text-muted">No record</span>
                                             @endif
                                         </td>
                                         <td>{{ $a ? ($a->formatted_login_time ?? ($a->login_time?->format('H:i') ?? 'N/A')) : '-' }}</td>
                                         <td>{{ $a ? ($a->formatted_logout_time ?? ($a->logout_time?->format('H:i') ?? 'N/A')) : '-' }}</td>
-                                        <td>{{ $a ? ($a->working_hours ?? 0) : '-' }}</td>
+                                        <td>
+                                            @if ($a)
+                                                @if ($a->isStillWorking())
+                                                    <span class="text-primary fw-semibold">{{ $a->getFormattedCurrentWorkingHours() }}</span>
+                                                @else
+                                                    {{ $a->working_hours ?? 0 }}h
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

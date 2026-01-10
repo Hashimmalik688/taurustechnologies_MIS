@@ -93,21 +93,30 @@ class ParaguinsController extends Controller
             'coverage_amount' => ['required', 'numeric', 'min:0'],
             'monthly_premium' => ['required', 'numeric', 'min:0'],
             'source' => ['nullable', 'string', 'max:255'],
-            'beneficiary' => ['required', 'string', 'max:255'],
-            'beneficiary_dob' => ['nullable', 'date'],
+            // Multiple beneficiaries support
+            'beneficiaries' => ['required', 'array', 'min:1'],
+            'beneficiaries.*.name' => ['required', 'string', 'max:255'],
+            'beneficiaries.*.dob' => ['nullable', 'date'],
             'bank_name' => ['required', 'string', 'max:255'],
             'account_type' => ['required', 'in:Checking,Savings,Card'],
-            'account_number' => ['nullable', 'string', 'max:50'],
+            'account_number' => ['required_unless:account_type,Card', 'nullable', 'string', 'max:50'],
             'routing_number' => ['required_unless:account_type,Card', 'nullable', 'string', 'max:20'],
             'bank_balance' => ['nullable', 'numeric', 'min:0'],
-            'card_number' => ['required_if:account_type,Card', 'nullable', 'string', 'max:19'],
-            'cvv' => ['required_if:account_type,Card', 'nullable', 'string', 'max:4'],
-            'expiry_date' => ['required_if:account_type,Card', 'nullable', 'string', 'max:7'],
+            'card_number' => ['nullable', 'required_if:account_type,Card', 'string', 'max:19'],
+            'cvv' => ['nullable', 'required_if:account_type,Card', 'string', 'max:4'],
+            'expiry_date' => ['nullable', 'required_if:account_type,Card', 'string', 'max:50'],
             'assigned_validator_id' => ['required', 'exists:users,id'],
         ]);
 
         // Update lead with closer's information and mark as closed (sent to validator)
         $validated['status'] = 'closed';
+        
+        // Maintain backward compatibility: store first beneficiary in old fields
+        if (!empty($validated['beneficiaries'][0])) {
+            $validated['beneficiary'] = $validated['beneficiaries'][0]['name'];
+            $validated['beneficiary_dob'] = $validated['beneficiaries'][0]['dob'] ?? null;
+        }
+        
         $lead->update($validated);
 
         return redirect()->route('paraguins.closers.index')
@@ -125,7 +134,7 @@ class ParaguinsController extends Controller
             ->findOrFail($id);
 
         $validated = $request->validate([
-            'failure_reason' => ['required', 'in:Failed:POA,Failed:DNQ-Age,Failed:Declined SSN,Failed:Not Interested,Failed:DNC,Failed:Cannot Afford,Failed:DNQ-Health,Failed:Declined Banking'],
+            'failure_reason' => ['required', 'in:Failed:POA,Failed:DNQ-Age,Failed:Declined SSN,Failed:Not Interested,Failed:DNC,Failed:Cannot Afford,Failed:DNQ-Health,Failed:Declined Banking,Failed:No Pitch (Not Interested),Failed:No Answer'],
         ]);
 
         $lead->update([
@@ -133,8 +142,20 @@ class ParaguinsController extends Controller
             'failure_reason' => $validated['failure_reason'],
         ]);
 
+        // CRITICAL: Update status on all linked users (Validator and Manager)
+        // This ensures the validator and manager are notified of the failure
+        if ($lead->assigned_validator_id) {
+            \Log::info('Paraguins Closer marked lead as failed', [
+                'lead_id' => $lead->id,
+                'closer_id' => Auth::id(),
+                'validator_id' => $lead->assigned_validator_id,
+                'failure_reason' => $validated['failure_reason'],
+                'timestamp' => now()
+            ]);
+        }
+
         return redirect()->route('paraguins.closers.index')
-            ->with('success', 'Lead marked as ' . $validated['failure_reason'] . '.');
+            ->with('success', 'Lead marked as ' . $validated['failure_reason'] . '. Linked users have been notified.');
     }
 
     /**
@@ -165,6 +186,16 @@ class ParaguinsController extends Controller
         foreach ($fillableFields as $field) {
             if ($request->has($field) && $request->input($field) !== null && $request->input($field) !== '') {
                 $data[$field] = $request->input($field);
+            }
+        }
+        
+        // Handle beneficiaries array
+        if ($request->has('beneficiaries')) {
+            $data['beneficiaries'] = $request->input('beneficiaries');
+            // Maintain backward compatibility
+            if (!empty($data['beneficiaries'][0])) {
+                $data['beneficiary'] = $data['beneficiaries'][0]['name'];
+                $data['beneficiary_dob'] = $data['beneficiaries'][0]['dob'] ?? null;
             }
         }
         

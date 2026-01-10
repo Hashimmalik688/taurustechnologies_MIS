@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\RetentionController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\HolidayController;
+use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VendorController;
 use App\Http\Controllers\Admin\EmployeeDashboardController;
@@ -48,14 +50,14 @@ Route::get('/logout', function() {
     return redirect('/login');
 })->name('logout.get');
 
-// Authenticated routes - Dashboard restricted to Super Admin and Manager
-Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Agent']], function () {
+// Authenticated routes - Dashboard with role-based redirects
+Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Agent|Trainer|Employee|Ravens Closer|Paraguins Closer|Paraguins Validator|Verifier|QA|Retention Officer']], function () {
     // Dashboard - redirects happen in controller based on role
     Route::get('/', [DashboardController::class, 'root'])->name('root');
 });
 
 // Team Dashboards - restricted access
-Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor']], function () {
+Route::group(['middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor']], function () {
     Route::get('/team/paraguins', [TeamDashboardController::class, 'paraguinsTeam'])->name('team.paraguins');
     Route::get('/team/ravens', [TeamDashboardController::class, 'ravensTeam'])->name('team.ravens');
     Route::get('/closer/{userId}/details', [TeamDashboardController::class, 'closerDetails'])->name('closer.details');
@@ -71,6 +73,14 @@ Route::group(['prefix' => 'employee', 'as' => 'employee.', 'middleware' => ['aut
     // Redirect to attendance dashboard
     Route::get('/dashboard', function() {
         return redirect()->route('attendance.dashboard');
+    })->name('dashboard');
+});
+
+// HR Routes - Limited access to Dock, Attendance, and Public Holidays only
+Route::group(['prefix' => 'hr', 'as' => 'hr.', 'middleware' => ['auth', 'role:HR']], function () {
+    // HR Dashboard - redirect to dock
+    Route::get('/dashboard', function() {
+        return redirect()->route('dock.index');
     })->name('dashboard');
 });
 
@@ -130,7 +140,7 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', 'r
 });
 
 // Sales Management (with actions and status management)
-Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor']], function () {
+Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor']], function () {
     Route::get('/', [LeadController::class, 'sales'])->name('index');
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show');
     Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit');
@@ -240,22 +250,31 @@ Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', 'rol
     Route::get('/history/{userId}', [\App\Http\Controllers\Admin\DockController::class, 'history'])->name('history');
 });
 
+// Employee Dock View - Read-only access for employees to view their own dock records
+Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::class, 'myDockRecords'])->name('my-dock-records')->middleware(['auth', 'role:Super Admin|Manager|Employee|Agent|Ravens Closer|Paraguins Closer|Paraguins Validator|Verifier|QA|Retention Officer|HR|Vendor']);
+
 // Attendance
-Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor|Retention Officer']], function () {
+Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor|Retention Officer|Ravens Closer|Paraguins Closer|Paraguins Validator|Verifier|QA']], function () {
     Route::get('/', [AttendanceController::class, 'index'])->name('index');
     Route::get('/history', [AttendanceController::class, 'history'])->name('history');
-    Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual');
-    // POST endpoint for users to mark attendance manually (supports force_office flag)
-    Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post');
-    Route::get('/employee-report', [AttendanceController::class, 'index'])->name('employee-report');
+    Route::get('/employee-report/{userId}', [AttendanceController::class, 'employeeReport'])->name('employee-report');
     Route::get('/export', [AttendanceController::class, 'index'])->name('export');
+    Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json');
+    
+    // Manual entry, editing, and deleting - Super Admin only
+    Route::middleware(['role:Super Admin'])->group(function () {
+        Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual');
+        Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post');
+        Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update');
+        Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete');
+    });
 });
 
 // Notifications
-Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware(['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor']);
+Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware(['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor']);
 
 // API routes for AJAX requests
-Route::prefix('api/notifications')->name('api.notifications.')->middleware(['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor'])->group(function () {
+Route::prefix('api/notifications')->name('api.notifications.')->middleware(['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor'])->group(function () {
     Route::get('/topbar', [NotificationController::class, 'topbar'])->name('topbar');
     Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
     Route::patch('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
@@ -330,6 +349,30 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network');
 });
 
+// Holidays (Super Admin and Manager)
+Route::group(['prefix' => 'holidays', 'as' => 'admin.holidays.', 'middleware' => ['auth', 'role:Super Admin|Manager']], function () {
+    Route::get('/', [HolidayController::class, 'index'])->name('index');
+    Route::get('/create', [HolidayController::class, 'create'])->name('create');
+    Route::post('/', [HolidayController::class, 'store'])->name('store');
+    Route::get('/{holiday}/edit', [HolidayController::class, 'edit'])->name('edit');
+    Route::put('/{holiday}', [HolidayController::class, 'update'])->name('update');
+    Route::delete('/{holiday}', [HolidayController::class, 'destroy'])->name('destroy');
+    Route::post('/check-date', [HolidayController::class, 'checkDate'])->name('check-date');
+});
+
+// Public Holidays Management (Super Admin only - HR can view)
+Route::group(['prefix' => 'admin/public-holidays', 'as' => 'admin.public-holidays.', 'middleware' => ['auth', 'role:Super Admin|HR']], function () {
+    Route::get('/', [PublicHolidayController::class, 'index'])->name('index');
+    Route::get('/create', [PublicHolidayController::class, 'create'])->name('create');
+    Route::post('/', [PublicHolidayController::class, 'store'])->name('store');
+    Route::get('/{holiday}/edit', [PublicHolidayController::class, 'edit'])->name('edit');
+    Route::put('/{holiday}', [PublicHolidayController::class, 'update'])->name('update');
+    Route::delete('/{holiday}', [PublicHolidayController::class, 'destroy'])->name('destroy');
+    Route::post('/{holiday}/toggle', [PublicHolidayController::class, 'toggle'])->name('toggle');
+    Route::post('/check-date', [PublicHolidayController::class, 'checkDate'])->name('check-date');
+    Route::get('/month', [PublicHolidayController::class, 'getMonthHolidays'])->name('month');
+});
+
 // Audit Logs (Super Admin only)
 Route::group(['prefix' => 'audit-logs', 'as' => 'audit-logs.', 'middleware' => ['auth', 'role:Super Admin']], function () {
     Route::get('/', [AuditLogController::class, 'index'])->name('index');
@@ -357,6 +400,7 @@ Route::group(['prefix' => 'chat', 'as' => 'chat.', 'middleware' => 'auth'], func
 // Chat API Routes (in web.php to use web session auth)
 Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     Route::get('/conversations', [ChatController::class, 'getConversations']);
+    Route::get('/unread-count', [ChatController::class, 'getUnreadCount']);
     Route::post('/conversations/direct', [ChatController::class, 'getOrCreateConversation']);
     Route::post('/conversations/group', [ChatController::class, 'createGroupConversation']);
     Route::post('/groups', [ChatController::class, 'createGroup']); // Alternative endpoint
@@ -377,13 +421,13 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
 });
 
 // Chargebacks
-Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor']], function () {
+Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor']], function () {
     Route::get('/', [ChargebackController::class, 'index'])->name('index');
     Route::get('/show/{id}', [ChargebackController::class, 'show'])->name('show');
 });
 
 // Retention
-Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|HR|Vendor|Retention Officer']], function () {
+Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor|Retention Officer']], function () {
     Route::get('/', [RetentionController::class, 'index'])->name('index');
     Route::post('/{id}/status', [RetentionController::class, 'updateStatus'])->name('updateStatus');
 });
@@ -397,6 +441,7 @@ Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'
 Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 'role:Super Admin|Manager|Ravens Closer']], function () {
     Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard');
     Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling');
+    Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data');
 });
 
 // Public (authenticated) attendance endpoints for all users - MUST BE BEFORE CATCH-ALL
@@ -407,6 +452,78 @@ Route::group(['middleware' => ['auth']], function () {
 
     // Personal attendance dashboard (calendar + stats)
     Route::get('/attendance/dashboard', [\App\Http\Controllers\Admin\AttendanceController::class, 'dashboard'])->name('attendance.dashboard');
+});
+
+// Zoom Phone Integration Routes
+Route::group(['prefix' => 'zoom', 'as' => 'zoom.', 'middleware' => ['auth']], function () {
+    Route::get('/authorize', [App\Http\Controllers\ZoomController::class, 'startAuthorization'])->name('authorize');
+    Route::get('/callback', [App\Http\Controllers\ZoomController::class, 'callback'])->name('callback');
+    Route::post('/dial/{leadId}', [App\Http\Controllers\ZoomController::class, 'makeCall'])->name('dial');
+    Route::get('/call-status/{leadId}', [App\Http\Controllers\ZoomController::class, 'getCallStatusByLead'])->name('call.status');    
+    // Test endpoint to simulate webhook call connected
+    Route::get('/test-webhook-connected/{leadId}', function($leadId) {
+        $callLog = \App\Models\CallLog::where('lead_id', $leadId)->orderBy('created_at', 'desc')->first();
+        if ($callLog) {
+            $callLog->update(['call_status' => 'connected']);
+            return response()->json([
+                'success' => true, 
+                'message' => 'CallLog updated to connected for testing',
+                'call_log_id' => $callLog->id,
+                'lead_id' => $leadId,
+                'status' => 'connected'
+            ]);
+        }
+        return response()->json(['error' => 'CallLog not found for lead'], 404);
+    });});
+
+// Zoom Webhook (public, no auth required)
+Route::post('/zoom/webhook', [App\Http\Controllers\Admin\ZoomWebhookController::class, 'handleWebhook'])->name('zoom.webhook');
+
+// Zoom API Testing Routes (for proper development)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/zoom/test-api', [App\Http\Controllers\ZoomController::class, 'testApiCapabilities'])->name('zoom.test-api');
+    Route::get('/zoom/test-phone-auth', [App\Http\Controllers\ZoomController::class, 'testPhoneAuth'])->name('zoom.test-phone-auth');
+});
+
+// Call Events API (moved from api.php for proper web authentication)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/call-events/poll', function (Request $request) {
+        $userId = auth()->id();
+
+        // Get unread connected call events for this user
+        $callEvent = \App\Models\CallEvent::where('user_id', $userId)
+            ->where('status', 'connected')
+            ->where('is_read', false)
+            ->orderBy('event_time', 'desc')
+            ->first();
+
+        if ($callEvent) {
+            return response()->json([
+                'has_call' => true,
+                'lead_id' => $callEvent->lead_id,
+                'status' => $callEvent->status,
+                'lead_data' => $callEvent->lead_data,
+                'caller_number' => $callEvent->caller_number,
+                'callee_number' => $callEvent->callee_number,
+                'event_id' => $callEvent->id,
+            ]);
+        }
+
+        return response()->json(['has_call' => false]);
+    });
+
+    Route::post('/api/call-events/{id}/mark-read', function (Request $request, $id) {
+        $callEvent = \App\Models\CallEvent::where('id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($callEvent) {
+            $callEvent->update(['is_read' => true]);
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => 'Call event not found'], 404);
+    });
 });
 
 // Catch-all route - MUST BE LAST

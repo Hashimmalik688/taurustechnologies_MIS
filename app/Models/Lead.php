@@ -13,6 +13,7 @@ class Lead extends Model
     protected $fillable = [
         'date',
         'phone_number',
+        'secondary_phone_number',
         'cn_name',
         'date_of_birth',
         'gender',
@@ -34,11 +35,14 @@ class Lead extends Model
         'monthly_premium',
         'beneficiary',
         'beneficiary_dob',
+        'beneficiaries',  // JSON field for multiple beneficiaries
         'emergency_contact',
         'policy_type',
+        'policy_number',
         'initial_draft_date',
         'future_draft_date',
         'bank_name',
+        'account_title',
         'account_type',
         'routing_number',
         'account_number',
@@ -115,6 +119,7 @@ class Lead extends Model
         'sale_date' => 'date',
         'date_of_birth' => 'date',
         'beneficiary_dob' => 'date',
+        'beneficiaries' => 'array',  // Cast JSON to array
         'initial_draft_date' => 'date',
         'future_draft_date' => 'date',
         'ss_date' => 'date',

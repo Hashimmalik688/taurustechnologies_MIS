@@ -79,6 +79,21 @@
     border-color: #ef4444;
 }
 
+.calendar-day.half_day {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+.calendar-day.paid_leave {
+    background: #e9d5ff;
+    border-color: #a855f7;
+}
+
+.calendar-day.holiday {
+    background: #e0e7ff;
+    border-color: #6366f1;
+}
+
 .day-number {
     font-weight: 600;
     font-size: 1rem;
@@ -125,6 +140,16 @@
 .stat-box.late {
     border-color: #f59e0b;
     background: #fed7aa;
+}
+
+.stat-box.half_day {
+    border-color: #3b82f6;
+    background: #dbeafe;
+}
+
+.stat-box.paid_leave {
+    border-color: #a855f7;
+    background: #e9d5ff;
 }
 
 .stat-value {
@@ -216,27 +241,34 @@
         <div class="col-12">
             <!-- Check-in/Check-out Widget -->
             <div class="checkin-widget">
-                @if($todayAttendance)
-                    <div class="today-status {{ $todayAttendance->status }}">
+                <div class="today-status {{ $todayAttendance ? $todayAttendance->status : '' }}">
+                    @if($todayAttendance)
                         <i class="bx bx-check-circle"></i> 
                         {{ ucfirst($todayAttendance->status) }} 
-                        - Checked in at {{ $todayAttendance->login_time ? $todayAttendance->login_time->format('h:i A') : 'N/A' }}
-                    </div>
-                    <br>
-                    @if(!$todayAttendance->logout_time)
-                        <button id="btnCheckout" class="btn-checkin btn-checkout">
-                            <i class="bx bx-log-out"></i> Check Out
-                        </button>
+                        - Checked in at {{ $todayAttendance->login_time ? \Carbon\Carbon::parse($todayAttendance->login_time)->format('h:i A') : 'N/A' }}
+                        @if($todayAttendance->logout_time)
+                            <span class="text-muted">| Checked out at {{ \Carbon\Carbon::parse($todayAttendance->logout_time)->format('h:i A') }}</span>
+                        @endif
                     @else
-                        <p class="text-muted">Checked out at {{ $todayAttendance->logout_time->format('h:i A') }}</p>
-                        <p class="text-muted">Total hours: {{ $todayAttendance->working_hours ?? 0 }} hrs</p>
+                        <span class="text-muted">No attendance record for today</span>
                     @endif
-                @else
-                    <h5>You haven't checked in today</h5>
-                    <p class="text-muted">Click below to mark your attendance</p>
-                    <button id="btnCheckin" class="btn-checkin">
+                </div>
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                    <button id="btnCheckin" class="btn-checkin" @if($todayAttendance && $todayAttendance->login_time) disabled @endif>
                         <i class="bx bx-log-in"></i> Check In
                     </button>
+                    <button id="btnCheckout" class="btn-checkin btn-checkout" 
+                        @if((!$todayAttendance || $todayAttendance->logout_time || !$todayAttendance->login_time) && !$pendingCheckout) disabled @endif>
+                        <i class="bx bx-log-out"></i> Check Out
+                        @if($pendingCheckout)
+                            <small class="d-block" style="font-size: 0.7rem;">({{ $pendingCheckout->date->format('M d') }})</small>
+                        @endif
+                    </button>
+                </div>
+                @if($todayAttendance && $todayAttendance->logout_time)
+                    <p class="text-muted mt-2">Total hours: {{ $todayAttendance->working_hours ?? 0 }} hrs</p>
+                @elseif($pendingCheckout)
+                    <p class="text-warning mt-2"><i class="bx bx-info-circle"></i> Pending checkout for {{ $pendingCheckout->date->format('M d, Y') }}</p>
                 @endif
             </div>
 
@@ -257,6 +289,14 @@
                 <div class="stat-box absent">
                     <div class="stat-value">{{ $stats['absent'] }}</div>
                     <div class="stat-label">Absent</div>
+                </div>
+                <div class="stat-box half_day">
+                    <div class="stat-value">{{ $stats['half_day'] ?? 0 }}</div>
+                    <div class="stat-label">Half Day</div>
+                </div>
+                <div class="stat-box paid_leave">
+                    <div class="stat-value">{{ $stats['paid_leave'] ?? 0 }}</div>
+                    <div class="stat-label">Paid Leave</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-value">{{ $stats['total_hours'] }}</div>
@@ -297,22 +337,39 @@
                                 $classes = ['calendar-day'];
                                 if (!$day['isCurrentMonth']) $classes[] = 'other-month';
                                 if ($day['isToday']) $classes[] = 'today';
-                                if ($day['attendance']) {
-                                    if ($day['attendance']->isLate()) {
-                                        $classes[] = 'late';
-                                    } else {
-                                        $classes[] = $day['attendance']->status;
-                                    }
+                                
+                                // Show holiday if present
+                                if ($day['holiday']) {
+                                    $classes[] = 'holiday';
+                                } elseif ($day['attendance']) {
+                                    $classes[] = $day['attendance']->status;
                                 }
+                                
+                                $title = $day['holiday'] ? 'Holiday: ' . $day['holiday']->name : 
+                                         ($day['attendance'] ? ucfirst(str_replace('_', ' ', $day['attendance']->status)) : 'No record');
                             @endphp
-                            <div class="{{ implode(' ', $classes) }}" title="{{ $day['attendance'] ? ucfirst($day['attendance']->status) : 'No record' }}">
+                            <div class="{{ implode(' ', $classes) }}" title="{{ $title }}">
                                 <div class="day-number">{{ $day['date']->format('j') }}</div>
-                                @if($day['attendance'])
-                                    <div class="day-status">
-                                        {{ $day['attendance']->isLate() ? 'Late' : ucfirst($day['attendance']->status) }}
+                                @if($day['holiday'])
+                                    <div class="day-status" style="color: #6366f1;">
+                                        <i class="bx bx-calendar-star"></i> HOLIDAY
                                     </div>
-                                    @if($day['attendance']->login_time)
-                                        <div class="day-time">{{ $day['attendance']->login_time->format('H:i') }}</div>
+                                    <div class="day-time" style="font-size: 0.55rem;">
+                                        {{ Str::limit($day['holiday']->name, 20) }}
+                                    </div>
+                                @elseif($day['attendance'])
+                                    <div class="day-status">
+                                        {{ ucfirst(str_replace('_', ' ', $day['attendance']->status)) }}
+                                    </div>
+                                    @if($day['attendance']->login_time || $day['attendance']->logout_time)
+                                        <div class="day-time">
+                                            @if($day['attendance']->login_time)
+                                                In: {{ \Carbon\Carbon::parse($day['attendance']->login_time)->format('g:i A') }}
+                                            @endif
+                                            @if($day['attendance']->logout_time)
+                                                <br>Out: {{ \Carbon\Carbon::parse($day['attendance']->logout_time)->format('g:i A') }}
+                                            @endif
+                                        </div>
                                     @endif
                                 @endif
                             </div>
@@ -348,9 +405,9 @@
         if (checkin) {
             checkin.addEventListener('click', function(e){
                 e.preventDefault();
+                if (checkin.disabled) return;
                 checkin.disabled = true;
                 checkin.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Checking in...';
-                
                 post('{{ url('/attendance/check-in') }}', { force_office: 0 })
                     .then(data => {
                         if (data.success) {
@@ -372,9 +429,9 @@
         if (checkout) {
             checkout.addEventListener('click', function(e){
                 e.preventDefault();
+                if (checkout.disabled) return;
                 checkout.disabled = true;
                 checkout.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Checking out...';
-                
                 post('{{ url('/attendance/check-out') }}')
                     .then(data => {
                         if (data.success) {

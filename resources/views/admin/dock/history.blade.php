@@ -82,7 +82,7 @@
                                         <span class="badge bg-secondary">Cancelled</span>
                                     @endif
                                 </td>
-                                <td>{{ $record->created_at->format('d M Y H:i') }}</td>
+                                <td>{{ $record->created_at->format('d M Y g:i A') }}</td>
                             </tr>
                             @if ($record->notes)
                             <tr>

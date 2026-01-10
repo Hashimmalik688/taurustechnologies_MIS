@@ -338,9 +338,23 @@
                             </div>
                         </div>
                         <div class="col-md-6 info-row">
-                            <div class="info-label">Phone Number</div>
+                            <div class="info-label">Primary Phone</div>
                             <div class="info-value {{ $insurance->phone_number ? '' : 'empty' }}">
                                 {{ $insurance->phone_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Secondary Phone</div>
+                            <div class="info-value {{ $insurance->secondary_phone_number ? '' : 'empty' }}">
+                                {{ $insurance->secondary_phone_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">State / Zip</div>
+                            <div class="info-value {{ ($insurance->state || $insurance->zip_code) ? '' : 'empty' }}">
+                                {{ $insurance->state ?? '—' }} {{ $insurance->zip_code ?? '—' }}
                             </div>
                         </div>
                     </div>
@@ -525,21 +539,51 @@
                     <h5><i class="mdi mdi-account-heart"></i>Beneficiary Information</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 info-row">
-                            <div class="info-label">Beneficiary Name</div>
-                            <div class="info-value {{ $insurance->beneficiary ? '' : 'empty' }}">
-                                {{ $insurance->beneficiary ?? 'Not provided' }}
+                    @php
+                        $beneficiaries = $insurance->beneficiaries ?? [];
+                        // Fallback to old fields if no beneficiaries array
+                        if (empty($beneficiaries) && ($insurance->beneficiary || $insurance->beneficiary_dob)) {
+                            $beneficiaries = [[
+                                'name' => $insurance->beneficiary ?? '',
+                                'dob' => $insurance->beneficiary_dob ?? '',
+                                'relation' => ''
+                            ]];
+                        }
+                    @endphp
+                    @if(!empty($beneficiaries))
+                        @foreach($beneficiaries as $index => $beneficiary)
+                            <div class="row mb-3 pb-3 {{ $loop->last ? '' : 'border-bottom' }}">
+                                <div class="col-12 mb-2">
+                                    <h6 class="text-primary mb-2"><i class="bx bx-user"></i> Beneficiary {{ count($beneficiaries) > 1 ? ($index + 1) : '' }}</h6>
+                                </div>
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Name</div>
+                                    <div class="info-value {{ !empty($beneficiary['name']) ? '' : 'empty' }}">
+                                        {{ $beneficiary['name'] ?? 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Relation</div>
+                                    <div class="info-value {{ !empty($beneficiary['relation']) ? '' : 'empty' }}">
+                                        {{ $beneficiary['relation'] ?? 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Date of Birth</div>
+                                    <div class="info-value {{ !empty($beneficiary['dob']) ? '' : 'empty' }}">
+                                        {{ !empty($beneficiary['dob']) ? \Carbon\Carbon::parse($beneficiary['dob'])->format('M d, Y') : 'Not provided' }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="row">
+                            <div class="col-12 info-row">
+                                <div class="info-value empty">No beneficiaries added</div>
                             </div>
                         </div>
-                        <div class="col-md-6 info-row">
-                            <div class="info-label">Beneficiary DOB</div>
-                            <div class="info-value {{ $insurance->beneficiary_dob ? '' : 'empty' }}">
-                                {{ $insurance->beneficiary_dob ? \Carbon\Carbon::parse($insurance->beneficiary_dob)->format('M d, Y') : 'Not provided' }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
+                    @endif
+                    <div class="row mt-3">
                         <div class="col-md-12 info-row">
                             <div class="info-label">Emergency Contact</div>
                             <div class="info-value {{ $insurance->emergency_contact ? '' : 'empty' }}">

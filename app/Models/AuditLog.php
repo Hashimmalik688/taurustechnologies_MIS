@@ -17,6 +17,8 @@ class AuditLog extends Model
         'model_id',
         'ip_address',
         'user_agent',
+        'device_fingerprint',
+        'device_name',
         'changes',
         'description',
     ];
@@ -54,6 +56,8 @@ class AuditLog extends Model
             'model_id' => $model_id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
+            'device_fingerprint' => request()->header('X-Device-Fingerprint') ?: request()->header('X-Device-ID'),
+            'device_name' => request()->header('X-Device-Name'),
             'changes' => $changes,
             'description' => $description,
         ]);

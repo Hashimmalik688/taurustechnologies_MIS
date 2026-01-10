@@ -196,7 +196,7 @@ class ValidatorController extends Controller
             ->findOrFail($id);
 
         $validated = $request->validate([
-            'decline_reason' => ['required', 'in:Declined:POA,Declined:DNQ-Age,Declined:Declined SSN,Declined:Not Interested,Declined:DNC,Declined:Cannot Afford,Declined:DNQ-Health,Declined:Declined Banking'],
+            'decline_reason' => ['required', 'in:Declined:POA,Declined:DNQ-Age,Declined:Declined SSN,Declined:Not Interested,Declined:DNC,Declined:Cannot Afford,Declined:DNQ-Health,Declined:Declined Banking,Declined:No Pitch (Not Interested),Declined:No Answer'],
         ]);
 
         $lead->update([

@@ -254,19 +254,19 @@
                                             </td>
                                             <td>
                                                 <span class="badge badge-soft-info fs-12">
-                                                    {{ $attendance->login_time ? $attendance->login_time->format('h:i A') : '' }}
+                                                    {{ $attendance->login_time ? \Carbon\Carbon::parse($attendance->login_time)->format('g:i A') : '' }}
                                                 </span>
                                                 <div class="text-muted fs-13">
-                                                    {{ $attendance->login_time ? $attendance->login_time->format('D, M j') : '' }}
+                                                    {{ $attendance->login_time ? \Carbon\Carbon::parse($attendance->login_time)->format('D, M j') : '' }}
                                                 </div>
                                             </td>
                                             <td>
                                                 @if ($attendance->logout_time)
                                                     <span class="badge badge-soft-secondary fs-12">
-                                                        {{ $attendance->logout_time->format('h:i A') }}
+                                                        {{ \Carbon\Carbon::parse($attendance->logout_time)->format('g:i A') }}
                                                     </span>
                                                     <div class="text-muted fs-13">
-                                                        {{ $attendance->logout_time->format('D, M j') }}
+                                                        {{ \Carbon\Carbon::parse($attendance->logout_time)->format('D, M j') }}
                                                     </div>
                                                 @else
                                                     <span class="text-muted fs-13">
@@ -302,7 +302,9 @@
                                                     </div>
                                                 @elseif($attendance->date->isToday())
                                                     @php
-                                                        $currentMinutes = $attendance->login_time->diffInMinutes(now());
+                                                        $now = \Carbon\Carbon::now('Asia/Karachi');
+                                                        $loginTime = $attendance->login_time->copy()->setTimezone('Asia/Karachi');
+                                                        $currentMinutes = abs($loginTime->diffInMinutes($now));
                                                         $currentHours = floor($currentMinutes / 60);
                                                         $currentMins = $currentMinutes % 60;
                                                     @endphp

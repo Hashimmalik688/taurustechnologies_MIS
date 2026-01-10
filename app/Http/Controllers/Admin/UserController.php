@@ -17,8 +17,8 @@ class UserController extends Controller
 {
     public function index()
     {
-        // Only get non-deleted users with their relationships - paginated for performance
-        $users = User::with(['roles', 'userDetail'])->paginate(30);
+        // Get all users with their relationships (no pagination)
+        $users = User::with(['roles', 'userDetail'])->get();
 
         return view('admin.users.index', compact('users'));
     }
@@ -37,16 +37,31 @@ class UserController extends Controller
         $user->zoom_number = $request->zoom_number;
         $user->save();
 
-        // Assign roles using syncRoles to ensure clean assignment
+        // Assign roles - detach all first then attach new ones
         $roles = $request->roles ?? [];
-        $user->syncRoles($roles);
-        
-        // Verify roles were assigned
-        \Log::info("User created with roles", [
-            'email' => $user->email,
-            'requested_roles' => $roles,
-            'assigned_roles' => $user->roles->pluck('name')->toArray()
-        ]);
+        try {
+            // Detach all existing roles first
+            $user->roles()->detach();
+            
+            // Attach new roles by name
+            if (!empty($roles)) {
+                $user->syncRoles($roles);
+            }
+            
+            // Verify roles were assigned
+            \Log::info("User created with roles", [
+                'email' => $user->email,
+                'requested_roles' => $roles,
+                'assigned_roles' => $user->roles->pluck('name')->toArray()
+            ]);
+        } catch (\Exception $e) {
+            \Log::error("Error assigning roles to user", [
+                'email' => $user->email,
+                'roles' => $roles,
+                'error' => $e->getMessage()
+            ]);
+            // Continue without roles rather than failing the entire operation
+        }
 
         $userDetail = new UserDetail;
         $userDetail->user_id = $user->id;
@@ -100,8 +115,8 @@ class UserController extends Controller
         $user->zoom_number = $request->zoom_number;
         $user->status = $request->status ?? 'active';
 
-        // Update password only if provided
-        if ($request->password) {
+        // Update password only if provided and not blank
+        if ($request->filled('password') && trim($request->password) !== '') {
             $user->password = Hash::make($request->password);
         }
 
@@ -120,8 +135,23 @@ class UserController extends Controller
         $userDetail->role = implode(', ', $newRoles); // Store multiple roles as comma-separated string
         $userDetail->save();
 
-        // Update user roles in Spatie
-        $user->syncRoles($newRoles);
+        // Update user roles in Spatie - detach all first then attach new ones
+        try {
+            // Detach all existing roles first
+            $user->roles()->detach();
+            
+            // Attach new roles by name
+            if (!empty($newRoles)) {
+                $user->syncRoles($newRoles);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error updating roles for user", [
+                'user_id' => $user->id,
+                'roles' => $newRoles,
+                'error' => $e->getMessage()
+            ]);
+            // Continue without roles rather than failing the entire operation
+        }
 
         // Log the action
         AuditLog::logAction(

@@ -153,4 +153,23 @@ class DockController extends Controller
 
         return view('admin.dock.history', compact('user', 'dockRecords', 'totalDocked'));
     }
+
+    /**
+     * View dock records for current authenticated employee
+     */
+    public function myDockRecords()
+    {
+        $user = Auth::user();
+        
+        $dockRecords = DockRecord::with('dockedBy')
+            ->where('user_id', $user->id)
+            ->orderBy('dock_date', 'desc')
+            ->paginate(20);
+
+        $totalDocked = DockRecord::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->sum('amount');
+
+        return view('employee.dock-records', compact('user', 'dockRecords', 'totalDocked'));
+    }
 }

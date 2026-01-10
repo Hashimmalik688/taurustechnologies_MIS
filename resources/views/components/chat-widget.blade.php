@@ -424,6 +424,11 @@ function updateUnreadCount() {
     } else {
         badge.style.display = 'none';
     }
+    
+    // Also update the topbar chat badge if it exists
+    if (typeof updateChatBadge === 'function') {
+        updateChatBadge(totalUnread);
+    }
 }
 
 // Utility functions

@@ -102,10 +102,10 @@ class ChatController extends Controller
                     'created_by' => $userId,
                 ]);
 
-                // Add both participants
+                // Add both participants with last_read_at set to now
                 $conversation->participants()->createMany([
-                    ['user_id' => $userId],
-                    ['user_id' => $otherUserId],
+                    ['user_id' => $userId, 'last_read_at' => now()],
+                    ['user_id' => $otherUserId, 'last_read_at' => now()],
                 ]);
                 return $conversation;
             });
@@ -141,6 +141,7 @@ class ChatController extends Controller
             foreach ($participantIds as $userId) {
                 $conversation->participants()->create([
                     'user_id' => $userId,
+                    'last_read_at' => now(),
                 ]);
             }
             return $conversation;
@@ -185,6 +186,7 @@ class ChatController extends Controller
                     'conversation_id' => $conversation->id,
                     'user_id' => $participantId,
                     'joined_at' => now(),
+                    'last_read_at' => now(),
                 ]);
             }
 
@@ -645,6 +647,27 @@ class ChatController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Member removed successfully'
+        ]);
+    }
+
+    /**
+     * Get total unread message count for authenticated user
+     */
+    public function getUnreadCount()
+    {
+        $userId = Auth::id();
+
+        $totalUnread = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+            ->get()
+            ->sum(function ($conversation) use ($userId) {
+                return $conversation->unreadCount($userId);
+            });
+
+        return response()->json([
+            'success' => true,
+            'unread_count' => $totalUnread,
         ]);
     }
 }

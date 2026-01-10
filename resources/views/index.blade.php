@@ -770,14 +770,14 @@ function updateClocks() {
     // Florida (EST/EDT)
     const floridaTime = now.toLocaleTimeString('en-US', {
         timeZone: 'America/New_York',
-        hour12: false
+        hour12: true
     });
     $('#floridaTime').text(floridaTime);
 
     // Pakistan (PKT)
     const pakistanTime = now.toLocaleTimeString('en-US', {
         timeZone: 'Asia/Karachi',
-        hour12: false
+        hour12: true
     });
     $('#pakistanTime').text(pakistanTime);
 }

@@ -4,6 +4,8 @@ namespace App\Listeners;
 
 use Illuminate\Auth\Events\Logout;
 use App\Models\AuditLog;
+use App\Models\Attendance;
+use Carbon\Carbon;
 
 class LogUserLogout
 {
@@ -23,11 +25,15 @@ class LogUserLogout
         if ($event->user) {
             $user = $event->user;
 
-            // Update logout time
+            // Update logout time on User model for historical reference
             $user->update([
                 'time_out' => now(),
             ]);
 
+            // DISABLED: Do not auto-checkout on logout
+            // This prevents issues when WiFi drops, PC turns off, or user logs out
+            // Checkout must be done manually via the checkout button
+            
             // Log the logout action
             AuditLog::logAction(
                 action: 'logout',

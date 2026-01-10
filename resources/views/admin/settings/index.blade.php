@@ -100,6 +100,7 @@
                         <div class="card-body">
                             <div class="row">
                                 @foreach ($groupSettings as $setting)
+                                    @if($setting->key !== 'late_threshold_minutes')
                                     <div class="col-md-6 mb-3">
                                         <label for="{{ $setting->key }}" class="form-label">
                                             {{ ucwords(str_replace('_', ' ', str_replace($group . '_', '', $setting->key))) }}
@@ -146,11 +147,8 @@
                                             <div class="form-text">
                                                 Enter IP addresses or CIDR ranges (e.g., 192.168.1.0/24, 10.0.0.100)
                                             </div>
-                                        @elseif($setting->type === 'integer')
-                                            <input type="number" class="form-control" id="{{ $setting->key }}"
-                                                name="settings[{{ $setting->key }}]" value="{{ $setting->value }}">
                                         @else
-                                            <input type="{{ $setting->key === 'office_start_time' ? 'time' : 'text' }}"
+                                            <input type="{{ $setting->key === 'office_start_time' || $setting->key === 'late_time' ? 'time' : 'text' }}"
                                                 class="form-control" id="{{ $setting->key }}"
                                                 name="settings[{{ $setting->key }}]" value="{{ $setting->value }}">
                                         @endif
@@ -159,6 +157,7 @@
                                             <div class="form-text">{{ $setting->description }}</div>
                                         @endif
                                     </div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>

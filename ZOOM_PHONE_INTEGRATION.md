@@ -8,18 +8,8 @@ Complete guide to integrate Zoom Phone with your CRM for automatic call logging 
 
 - ✅ Click-to-call from CRM (dial leads directly)
 - ✅ Automatic call logging (duration, status, recording)
-- ✅ Real-time call notifications in dashboard
-- ✅ Call recordings accessible from CRM
-- ✅ Missed call alerts
-- ✅ Call history synced to lead records
-
----
 
 ## 📋 Prerequisites
-
-### Required Zoom Subscriptions
-1. **Zoom Phone License** (Pro or higher)
-   - Each user needs a Zoom Phone license
    - Cost: ~$15-25/user/month
    
 2. **Zoom Phone Numbers**
@@ -34,21 +24,23 @@ Complete guide to integrate Zoom Phone with your CRM for automatic call logging 
 - CRM deployed and accessible online (https://crm.taurustechnologies.co)
 - Admin access to Zoom Account
 - Admin access to CRM server
-
----
-
-## 🚀 Step-by-Step Setup
-
 ### Step 1: Create Zoom OAuth App (15 minutes)
 
 #### 1.1 Go to Zoom App Marketplace
 Visit: https://marketplace.zoom.us → Click **Develop** → **Build App**
 
-#### 1.2 Choose App Type
-- Click **OAuth**
-- Select **Account-level app**
 - App Name: `Taurus CRM Integration`
 - Company Name: `Taurus Technologies`
+
+#### 1.5 Save Credentials
+On the left sidebar of your Zoom App page, under **App Credentials**, you will see:
+- **Client ID** (visible)
+- **Client Secret** (hidden, click to reveal)
+
+**Account ID:**
+- For user-managed apps, Account ID is not always shown directly. If required, you can find it in your Zoom account profile (https://zoom.us/account/profile) or in the JWT/OAuth credentials section for account-level apps. For most CRM integrations, Client ID and Client Secret are sufficient.
+
+Click **Continue**. Your app is now in **Local Test** mode (see top right). You do not need to activate or publish for internal CRM use.
 - Developer Email: Your email
 - Click **Create**
 
@@ -84,6 +76,40 @@ Copy these values (you'll need them):
 - **Client ID:** `abcdef123456...`
 - **Client Secret:** `xyz789secret...`
 - **Account ID:** `abc123account...`
+
+### Step 2: Configure CRM Environment (5 minutes)
+
+1. **SSH to your CRM server:**
+   ```bash
+   ssh root@your-server-ip
+   cd /var/www/taurus-crm
+   ```
+
+2. **Update .env file:**
+   ```bash
+   nano .env
+   ```
+   Add these lines (replace with your actual values):
+   ```ini
+   # Zoom Phone Integration
+   ZOOM_CLIENT_ID=your_client_id_here
+   ZOOM_CLIENT_SECRET=your_client_secret_here
+   ZOOM_REDIRECT_URI=https://crm.taurustechnologies.co/zoom/callback
+
+   # Zoom Phone Settings
+   ZOOM_PHONE_ENABLED=true
+   ZOOM_AUTO_DIAL_ENABLED=true
+   ZOOM_CALL_RECORDING_ENABLED=true
+   ```
+   *(Account ID is not required for user-managed OAuth apps)*
+
+   Save and exit (Ctrl+X, Y, Enter)
+
+3. **Clear Laravel config/cache:**
+   ```bash
+   php artisan config:cache
+   php artisan cache:clear
+   ```
 
 Click **Continue** → **Activate** app
 
@@ -354,18 +380,8 @@ class ZoomController extends Controller
     }
     
     /**
-     * Get valid access token (refresh if needed)
-     */
-    private function getValidToken()
-    {
-        $tokenRecord = ZoomToken::where('user_id', Auth::id())->first();
-        
         if (!$tokenRecord) {
             return null;
-        }
-        
-        // Check if token expired
-        if ($tokenRecord->expires_at->isPast()) {
             // Refresh token
             $response = Http::asForm()->post('https://zoom.us/oauth/token', [
                 'grant_type' => 'refresh_token',
@@ -380,19 +396,11 @@ class ZoomController extends Controller
                     'access_token' => $data['access_token'],
                     'refresh_token' => $data['refresh_token'],
                     'expires_at' => now()->addSeconds($data['expires_in']),
-                ]);
-            } else {
-                return null;
-            }
-        }
         
         return $tokenRecord->access_token;
     }
 }
 ```
-
----
-
 ### Step 5: Create Database Tables (5 minutes)
 
 #### 5.1 Create Migrations

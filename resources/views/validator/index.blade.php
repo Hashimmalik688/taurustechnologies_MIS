@@ -218,6 +218,18 @@
                                                                         <strong>Declined:Declined Banking</strong>
                                                                     </label>
                                                                 </div>
+                                                                <div class="form-check mb-2">
+                                                                    <input class="form-check-input" type="radio" name="decline_reason" id="noPitch{{ $lead->id }}" value="Declined:No Pitch (Not Interested)" required>
+                                                                    <label class="form-check-label" for="noPitch{{ $lead->id }}">
+                                                                        <strong>Declined:No Pitch (Not Interested)</strong>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check mb-2">
+                                                                    <input class="form-check-input" type="radio" name="decline_reason" id="noAnswer{{ $lead->id }}" value="Declined:No Answer" required>
+                                                                    <label class="form-check-label" for="noAnswer{{ $lead->id }}">
+                                                                        <strong>Declined:No Answer</strong>
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

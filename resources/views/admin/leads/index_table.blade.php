@@ -3,11 +3,14 @@
     <table class="leads-table table table-striped table-bordered table-hover table-sm align-middle text-nowrap">
             <thead class="table-light">
                 <tr>
+                    <th class="text-center">#</th>
                     <th class="text-center">Actions</th>
                     <th>ID</th>
                     <th>Date</th>
                     <th>Client Name</th>
-                    <th>Phone</th>
+                    <th>Primary Phone</th>
+                    <th>Secondary Phone</th>
+                    <th>State/Zip</th>
                     <th>DOB</th>
                     <th>Gender</th>
                     <th>Smoker</th>
@@ -24,10 +27,10 @@
                     <th>Carrier</th>
                     <th>Coverage</th>
                     <th>Premium</th>
-                    <th>Beneficiary</th>
-                    <th>Beneficiary DOB</th>
+                    <th>Beneficiaries (Name / Relation / DOB)</th>
                     @hasrole('Super Admin')
                         <th>Emergency Contact</th>
+                        <th>Acc Verified By</th>
                         <th>Policy Type</th>
                         <th>Initial Draft</th>
                         <th>Future Draft</th>
@@ -47,8 +50,9 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($leads as $lead)
+                @forelse($leads as $index => $lead)
                     <tr>
+                        <td class="text-center"><strong>{{ $leads->firstItem() + $index }}</strong></td>
                         <td class="text-center" style="min-width: 140px;">
                             <div class="btn-group" role="group">
                                 <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
@@ -58,17 +62,40 @@
                                     <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#delete-form-{{ $lead->id }}" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <form action="{{ route('leads.delete', $lead->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 @endhasrole
                             </div>
                         </td>
                         <td>{{ $lead->id }}</td>
                         <td>{{ $lead->date ?? 'N/A' }}</td>
                         <td><strong>{{ $lead->cn_name }}</strong></td>
-                        <td>{{ $lead->phone_number }}</td>
+                        <td>
+                            @if($lead->phone_number)
+                                <span title="{{ $lead->phone_number }}">{{ $lead->phone_number }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($lead->secondary_phone_number)
+                                <span title="{{ $lead->secondary_phone_number }}">{{ $lead->secondary_phone_number }}</span>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($lead->state || $lead->zip_code)
+                                <small>{{ $lead->state ?? '—' }} {{ $lead->zip_code ?? '—' }}</small>
+                            @else
+                                <span class="text-muted">—</span>
+                            @endif
+                        </td>
                         <td>{{ $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('m/d/Y') : 'N/A' }}</td>
                         <td>
                             @if($lead->gender)
@@ -99,10 +126,39 @@
                         <td>{{ $lead->carrier_name ?? '—' }}</td>
                         <td>${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
                         <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                        <td>{{ $lead->beneficiary ?? '—' }}</td>
-                        <td>{{ $lead->beneficiary_dob ? \Carbon\Carbon::parse($lead->beneficiary_dob)->format('m/d/Y') : '—' }}</td>
+                        <td>
+                            @php
+                                $beneficiaries = $lead->beneficiaries ?? [];
+                                // Fallback to old fields if no beneficiaries array
+                                if (empty($beneficiaries) && ($lead->beneficiary || $lead->beneficiary_dob)) {
+                                    $beneficiaries = [[
+                                        'name' => $lead->beneficiary ?? '',
+                                        'dob' => $lead->beneficiary_dob ?? '',
+                                        'relation' => ''
+                                    ]];
+                                }
+                            @endphp
+                            @if(!empty($beneficiaries))
+                                <div style="max-width: 300px; font-size: 0.85rem;">
+                                    @foreach($beneficiaries as $index => $beneficiary)
+                                        <div class="mb-2 p-1 border-start border-2" style="border-color: #d4af37;">
+                                            <div><strong>{{ $index + 1 }}. {{ $beneficiary['name'] ?? '—' }}</strong></div>
+                                            @if(!empty($beneficiary['relation']))
+                                                <div><small class="text-muted">Rel: {{ $beneficiary['relation'] }}</small></div>
+                                            @endif
+                                            @if(!empty($beneficiary['dob']))
+                                                <div><small class="text-muted">DOB: {{ \Carbon\Carbon::parse($beneficiary['dob'])->format('m/d/Y') }}</small></div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                —
+                            @endif
+                        </td>
                         @hasrole('Super Admin')
                             <td>{{ $lead->emergency_contact ?? '—' }}</td>
+                            <td>{{ $lead->account_verified_by ?? '—' }}</td>
                             <td>{{ $lead->policy_type ?? '—' }}</td>
                             <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('m/d/Y') : '—' }}</td>
                             <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('m/d/Y') : '—' }}</td>
@@ -159,30 +215,6 @@
                         </td>
                     </tr>
 
-                    <!-- Delete Modal -->
-                            <div class="modal fade" id="delete-form-{{ $lead->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Confirm Delete</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete lead for <strong>{{ $lead->cn_name }}</strong>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <form action="{{ route('leads.delete', $lead->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
                 @empty
                     <tr>
                         <td colspan="40" class="text-center text-muted py-4">
