@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Models\InsuranceCarrier;
+use App\Services\CommissionCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -51,32 +53,130 @@ class HomeController extends Controller
     }
 
     /**
-     * Executive Dashboard with live data from boss's dashboard
+     * Executive Dashboard with live data from local database
      */
     public function root()
     {
-        // Fetch data from boss's dashboard with caching
+        // Fetch data from boss's dashboard with caching (for attendance)
         $bossData = $this->fetchBossDashboardData();
         
-        // Extract data from boss's dashboard
-        $users_count = User::count(); // Local database count
-        $total_sales_today = $bossData['totalSalesToday'] ?? 0;
-        $total_monthly_sales = $bossData['done'] ?? $bossData['TOTAL'] ?? 0;
-        $total_revenue = $bossData['totalRevenue'] ?? $bossData['total_revenue'] ?? 0;
+        // Get current month start and today
+        $monthStart = now()->startOfMonth();
+        $today = today();
         
-        // Sales status
-        $done_count = $bossData['done'] ?? $bossData['TOTAL'] ?? 0;
-        $approved_count = $bossData['approved'] ?? $bossData['APPROVED'] ?? 0;
-        $underwriting_count = $bossData['underwriting'] ?? $bossData['UW'] ?? 0;
-        $declined_count = $bossData['declined'] ?? $bossData['DECLINED'] ?? 0;
+        // Extract data from local database
+        $users_count = User::count();
         
-        // Attendance
+        // Sales counts using manager_status field (submitted sales with closer_name)
+        $total_sales_today = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->whereDate('sale_at', $today)
+            ->count();
+            
+        // Month-to-date sales (all submitted)
+        $total_monthly_sales = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+        
+        // Calculate revenue from issued and verified sales (Revenue Analytics logic)
+        // Revenue = Total partner commissions (Premium × 9 × Settlement %)
+        $issued_sales = Lead::where('status', 'accepted')
+            ->where('manager_status', 'approved')
+            ->where('issuance_status', 'Issued')
+            ->get();
+            
+        // Revenue is the sum of all partner commissions
+        $total_revenue = $issued_sales->sum('agent_revenue');
+        
+        // Sales status counts by manager_status (MTD)
+        $done_count = $total_monthly_sales; // Total submitted MTD
+        $approved_count = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->where('manager_status', 'approved')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+            
+        $underwriting_count = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->where('manager_status', 'underwriting')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+            
+        $declined_count = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->where('manager_status', 'declined')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+        
+        // Attendance from boss's dashboard (fallback to local if unavailable)
         $attendance = $bossData['attendance'] ?? [];
+        if (empty($attendance)) {
+            // Fallback: get from local database
+            $attendanceRecords = Attendance::whereDate('date', $today)
+                ->with('user:id,name')
+                ->get();
+            $attendance = $attendanceRecords->map(function($att) {
+                return [
+                    'name' => $att->user->name ?? 'Unknown',
+                    'status' => $att->status ?? 'absent'
+                ];
+            })->toArray();
+        }
         $present_count = $this->countPresent($attendance);
         $absent_count = $this->countAbsent($attendance);
         
-        // Sales per closer
-        $sales_per_closer = $bossData['salesPerCloser'] ?? [];
+        // Sales per closer - Calculate from local database
+        $closers = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->get()
+            ->groupBy('closer_name');
+            
+        $sales_per_closer = [];
+        foreach ($closers as $closerName => $sales) {
+            $todaySales = $sales->filter(function($sale) use ($today) {
+                return $sale->sale_at && $sale->sale_at->isSameDay($today);
+            })->count();
+            
+            $sales_per_closer[] = [
+                'closer' => $closerName,
+                'today' => $todaySales,
+                'mtd' => $sales->count(),
+                'approvedMTD' => $sales->where('manager_status', 'approved')->count(),
+                'declinedMTD' => $sales->where('manager_status', 'declined')->count(),
+                'uwMTD' => $sales->where('manager_status', 'underwriting')->count(),
+                'team' => $sales->first()->team ?? 'ravens'
+            ];
+        }
+        
+        // Sort by MTD sales descending
+        usort($sales_per_closer, function($a, $b) {
+            return $b['mtd'] - $a['mtd'];
+        });
         
         // Chargebacks - Calculate from local database
         $thisMonthStart = now()->startOfMonth();
@@ -235,24 +335,53 @@ class HomeController extends Controller
     public function updateProfile(Request $request, $id)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $user = User::find($id);
-        $user->name = $request->get('name');
-        $user->email = $request->get('email');
+        
+        if (!$user) {
+            Session::flash('message', 'User not found!');
+            Session::flash('alert-class', 'alert-danger');
+            return response()->json([
+                'isSuccess' => false,
+                'Message' => 'User not found!',
+            ], 404);
+        }
 
-        if ($request->file('avatar')) {
+        // Update name if provided
+        if ($request->filled('name')) {
+            $user->name = trim($request->name);
+        }
+
+        // Update email if provided
+        if ($request->filled('email')) {
+            $user->email = strtolower(trim($request->email));
+        }
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && file_exists(public_path($user->avatar))) {
+                @unlink(public_path($user->avatar));
+            }
+
             $avatar = $request->file('avatar');
             $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
             $avatarPath = public_path('/images/');
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($avatarPath)) {
+                mkdir($avatarPath, 0755, true);
+            }
+            
             $avatar->move($avatarPath, $avatarName);
             $user->avatar = '/images/' . $avatarName;
         }
 
-        $user->update();
+        $user->save();
 
         if ($user) {
             Session::flash('message', 'User Details Updated successfully!');

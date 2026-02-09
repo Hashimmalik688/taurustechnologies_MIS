@@ -32,4 +32,13 @@ class AgentCarrierCommission extends Model
     {
         return $this->belongsTo(InsuranceCarrier::class);
     }
+
+    /**
+     * Get the state-specific settlement records for this agent-carrier combination
+     */
+    public function carrierStates()
+    {
+        return $this->hasMany(AgentCarrierState::class, 'user_id', 'user_id')
+            ->where('insurance_carrier_id', $this->insurance_carrier_id);
+    }
 }

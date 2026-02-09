@@ -329,7 +329,7 @@ class ZoomWebhookController extends Controller
                 
             if ($callLog) {
                 $callLog->update([
-                    'call_status' => 'ended',
+                    'call_status' => 'completed',
                     'call_end_time' => now(),
                     'duration_seconds' => now()->diffInSeconds($callLog->call_start_time),
                 ]);

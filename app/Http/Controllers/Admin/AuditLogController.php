@@ -103,4 +103,25 @@ class AuditLogController extends Controller
             ['Content-Type' => 'text/csv']
         );
     }
+    /**
+     * Show device fingerprints used by multiple users (Account Switching Log)
+     * Super Admin only
+     */
+    public function accountSwitchingLog()
+    {
+        // Group by device_fingerprint, get all with >1 user
+        $suspicious = \App\Models\AuditLog::select('device_fingerprint')
+            ->whereNotNull('device_fingerprint')
+            ->groupBy('device_fingerprint')
+            ->havingRaw('COUNT(DISTINCT user_id) > 1')
+            ->pluck('device_fingerprint');
+
+        // Get all login events for these fingerprints
+        $logs = \App\Models\AuditLog::with('user')
+            ->whereIn('device_fingerprint', $suspicious)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('admin.account-switching-log', compact('logs'));
+    }
 }

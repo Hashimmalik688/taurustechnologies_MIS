@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Print - {{ DateTime::createFromFormat('!m', $month)->format('F') }} {{ $year }}</title>
+    <link href="{{ URL::asset('build/libs/boxicons/css/boxicons.min.css') }}" rel="stylesheet" type="text/css" />
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #333;
+        padding: 20px;
+        background: white;
+    }
+    
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #d4af37;
+        padding-bottom: 20px;
+    }
+    
+    .company-name {
+        font-size: 24px;
+        font-weight: bold;
+        color: #d4af37;
+        margin-bottom: 5px;
+    }
+    
+    .report-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .report-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .info-value {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        font-size: 11px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #d4af37;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+    
+    .text-right {
+        text-align: right;
+    }
+    
+    .employee-name {
+        font-weight: bold;
+        width: 150px;
+    }
+    
+    .salary-amount {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        width: 100px;
+    }
+    
+    .deduction-amount {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+        width: 100px;
+        color: #dc3545;
+    }
+    
+    .net-amount {
+        text-align: right;
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        width: 100px;
+        color: #28a745;
+    }
+    
+    .totals-row {
+        background: #e8e8e8 !important;
+        font-weight: bold;
+    }
+    
+    .totals-row td {
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        padding: 12px;
+    }
+    
+    .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 11px;
+        color: #666;
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+    }
+    
+    .signature-section {
+        margin-top: 40px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 50px;
+    }
+    
+    .signature-box {
+        text-align: center;
+        border-top: 1px solid #333;
+        padding-top: 10px;
+        margin-top: 40px;
+    }
+    
+    @media print {
+        body {
+            padding: 0;
+            background: white;
+        }
+        
+        .no-print {
+            display: none;
+        }
+        
+        page {
+            margin: 0;
+            padding: 0;
+        }
+    }
+    
+    .print-buttons {
+        margin-bottom: 20px;
+        text-align: right;
+    }
+    
+    .print-buttons button,
+    .print-buttons a {
+        padding: 8px 15px;
+        margin-left: 10px;
+        border: 1px solid #ddd;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+    
+    .print-buttons button:hover,
+    .print-buttons a:hover {
+        background: #f0f0f0;
+    }
+</style>
+</head>
+<body>
+    <div class="print-buttons no-print">
+        <button onclick="window.print()">
+            <i class="bx bx-printer"></i> Print
+        </button>
+        <a href="{{ route('admin.salary.export', request()->query()) }}">
+            <i class="bx bx-download"></i> Export CSV
+        </a>
+        <button onclick="window.close()">Close</button>
+    </div>
+    
+    <!-- HEADER SECTION -->
+    <div class="header">
+        <div class="company-name">TAURUS TECHNOLOGIES</div>
+        <div class="report-title">PAYROLL SUMMARY REPORT</div>
+    </div>
+    
+    <!-- REPORT INFO SECTION -->
+    <div class="report-info">
+        <div class="info-item">
+            <span class="info-label">Report Type:</span>
+            <span class="info-value">Payroll Summary</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Generated By:</span>
+            <span class="info-value">{{ Auth::user()->name }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Period:</span>
+            <span class="info-value">{{ DateTime::createFromFormat('!m', $month)->format('F') }} {{ $year }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Report Date:</span>
+            <span class="info-value">{{ date('M d, Y') }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Total Employees:</span>
+            <span class="info-value">{{ $totalEmployees }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Total Payroll:</span>
+            <span class="info-value">${{ number_format($totalNetSalary, 2) }}</span>
+        </div>
+    </div>
+    
+    <!-- DATA TABLE SECTION -->
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40px;">#</th>
+                <th>Employee Name</th>
+                <th>Position</th>
+                <th style="width: 80px;">Base Salary</th>
+                <th style="width: 80px;">Bonus</th>
+                <th style="width: 80px;">Punctuality</th>
+                <th style="width: 80px;">Revenue Bonus</th>
+                <th style="width: 80px;">Gross Salary</th>
+                <th style="width: 80px;">Dock Amount</th>
+                <th style="width: 80px;">Other Deductions</th>
+                <th style="width: 80px;">Net Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($salaryRecords as $index => $record)
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td class="employee-name">{{ $record->user->name ?? 'Unknown' }}</td>
+                    <td>{{ $record->user->getRoleNames()->first() ?? 'N/A' }}</td>
+                    <td class="salary-amount">${{ number_format($record->base_salary, 2) }}</td>
+                    <td class="salary-amount">${{ number_format($record->bonus_amount, 2) }}</td>
+                    <td class="salary-amount">${{ number_format($record->punctuality_bonus, 2) }}</td>
+                    <td class="salary-amount">${{ number_format($record->revenue_bonus, 2) }}</td>
+                    <td class="salary-amount">${{ number_format($record->gross_salary, 2) }}</td>
+                    <td class="deduction-amount">${{ number_format($record->dock_amount, 2) }}</td>
+                    <td class="deduction-amount">${{ number_format($record->total_deductions - $record->dock_amount, 2) }}</td>
+                    <td class="net-amount">${{ number_format($record->net_salary, 2) }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="11" class="text-center">No payroll records found for the selected period.</td>
+                </tr>
+            @endforelse
+            
+            @if($salaryRecords->count() > 0)
+                <tr class="totals-row">
+                    <td colspan="8" class="text-center"><strong>TOTALS</strong></td>
+                    <td class="salary-amount"><strong>${{ number_format($totalGrossSalary, 2) }}</strong></td>
+                    <td class="deduction-amount"><strong>${{ number_format($salaryRecords->sum('dock_amount'), 2) }}</strong></td>
+                    <td class="deduction-amount"><strong>${{ number_format($totalDeductions - $salaryRecords->sum('dock_amount'), 2) }}</strong></td>
+                    <td class="net-amount"><strong>${{ number_format($totalNetSalary, 2) }}</strong></td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
+    
+    <!-- SIGNATURE SECTION -->
+    <div class="signature-section">
+        <div class="signature-box">
+            <strong>Prepared By:</strong><br>
+            {{ Auth::user()->name }}<br>
+            {{ Auth::user()->getRoleNames()->first() }}
+        </div>
+        <div class="signature-box">
+            <strong>Reviewed By:</strong><br>
+            _____________________<br>
+            HR Manager
+        </div>
+        <div class="signature-box">
+            <strong>Approved By:</strong><br>
+            _____________________<br>
+            CEO
+        </div>
+    </div>
+    
+    <!-- FOOTER SECTION -->
+    <div class="footer">
+        <p><strong>TAURUS TECHNOLOGIES</strong> | Payroll Summary Report</p>
+        <p>Generated on {{ date('F d, Y \a\t g:i A') }} | Page 1 of 1</p>
+        <p style="font-size: 10px; color: #999;">This is a computer-generated report. No signature required.</p>
+    </div>
+</body>
+</html>

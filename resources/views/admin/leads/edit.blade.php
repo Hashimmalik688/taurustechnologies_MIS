@@ -57,12 +57,12 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="date" class="form-label required">
+                                    <label for="date" class="form-label">
                                         <i class="mdi mdi-calendar me-1"></i>
                                         Date
                                     </label>
                                     <input type="date" class="form-control @error('date') is-invalid @enderror"
-                                        id="date" name="date" value="{{ old('date', $lead->date) }}" required>
+                                        id="date" name="date" value="{{ old('date', $lead->date ? (is_string($lead->date) ? \Carbon\Carbon::parse($lead->date)->format('Y-m-d') : $lead->date->format('Y-m-d')) : '') }}">
                                     @error('date')
                                         <div class="invalid-feedback d-block">
                                             {{ $message }}
@@ -116,7 +116,7 @@
                                     </label>
                                     <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
                                         id="date_of_birth" name="date_of_birth"
-                                        value="{{ old('date_of_birth', $lead->date_of_birth) }}" required>
+                                        value="{{ old('date_of_birth', $lead->date_of_birth ? (is_string($lead->date_of_birth) ? \Carbon\Carbon::parse($lead->date_of_birth)->format('Y-m-d') : $lead->date_of_birth->format('Y-m-d')) : '') }}">
                                     @error('date_of_birth')
                                         <div class="invalid-feedback d-block">
                                             {{ $message }}
@@ -547,6 +547,24 @@
                                     @enderror
                                 </div>
                             </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="assigned_partner" class="form-label">
+                                        <i class="mdi mdi-briefcase me-1"></i>
+                                        Assigned Partner
+                                    </label>
+                                    <input type="text" class="form-control @error('assigned_partner') is-invalid @enderror"
+                                        id="assigned_partner" name="assigned_partner"
+                                        value="{{ old('assigned_partner', $lead->assigned_partner) }}"
+                                        placeholder="Enter partner name">
+                                    @error('assigned_partner')
+                                        <div class="invalid-feedback d-block">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Status Information Section --}}
@@ -567,7 +585,7 @@
                                         Status
                                     </label>
                                     <select id="status" name="status"
-                                        class="form-select @error('status') is-invalid @enderror" required>
+                                        class="form-select @error('status') is-invalid @enderror">
                                         <option value="">Select status...</option>
                                         <option value="pending"
                                             {{ old('status', $lead->status) == 'pending' ? 'selected' : '' }}>Pending
@@ -650,15 +668,15 @@
 
         // Form validation
         document.getElementById('leadForm').addEventListener('submit', function(e) {
-            const requiredFields = ['date', 'phone_number', 'cn_name', 'date_of_birth', 'status'];
+            const requiredFields = ['phone_number', 'cn_name'];
             let isValid = true;
 
             requiredFields.forEach(fieldName => {
                 const field = document.getElementById(fieldName);
-                if (!field.value.trim()) {
+                if (field && !field.value.trim()) {
                     isValid = false;
                     field.classList.add('is-invalid');
-                } else {
+                } else if (field) {
                     field.classList.remove('is-invalid');
                 }
             });

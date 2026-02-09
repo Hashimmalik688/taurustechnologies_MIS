@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DockRecord;
 use App\Models\User;
+use App\Traits\PayrollMonthCalculation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DockController extends Controller
 {
+    use PayrollMonthCalculation;
     /**
      * Display dock records dashboard
      */
@@ -30,10 +32,14 @@ class DockController extends Controller
 
         $dockRecords = $query->orderBy('dock_date', 'desc')->paginate(20);
 
-        // Get all employees for dropdown
+        // Get all employees for dropdown - exclude CEO users
         $employees = User::where('status', '!=', 'inactive')
-            ->orderBy('name')
-            ->get();
+            ->get()
+            ->filter(function ($user) {
+                return $user && method_exists($user, 'hasRole') && !$user->hasRole('CEO');
+            })
+            ->sortBy('name')
+            ->values();
 
         // Calculate statistics for the month
         $stats = [
@@ -66,7 +72,17 @@ class DockController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        // Prevent docking CEO users - they are above the system
+        $user = User::find($validated['user_id']);
+        if ($user && $user->hasRole('CEO')) {
+            return redirect()->back()
+                ->with('error', 'CEO users cannot be docked - they are above the system.');
+        }
+
         $dockDate = Carbon::parse($validated['dock_date']);
+        
+        // Calculate correct payroll month/year based on 26th-25th cycle
+        $payrollMonthYear = $this->getPayrollMonthYear($dockDate);
 
         $dockRecord = DockRecord::create([
             'user_id' => $validated['user_id'],
@@ -74,8 +90,8 @@ class DockController extends Controller
             'amount' => $validated['amount'],
             'reason' => $validated['reason'],
             'dock_date' => $dockDate,
-            'dock_month' => $dockDate->month,
-            'dock_year' => $dockDate->year,
+            'dock_month' => $payrollMonthYear['month'],
+            'dock_year' => $payrollMonthYear['year'],
             'status' => 'active',
             'notes' => $validated['notes'] ?? null,
         ]);
@@ -98,13 +114,16 @@ class DockController extends Controller
         ]);
 
         $dockDate = Carbon::parse($validated['dock_date']);
+        
+        // Calculate correct payroll month/year based on 26th-25th cycle
+        $payrollMonthYear = $this->getPayrollMonthYear($dockDate);
 
         $dockRecord->update([
             'amount' => $validated['amount'],
             'reason' => $validated['reason'],
             'dock_date' => $dockDate,
-            'dock_month' => $dockDate->month,
-            'dock_year' => $dockDate->year,
+            'dock_month' => $payrollMonthYear['month'],
+            'dock_year' => $payrollMonthYear['year'],
             'status' => $validated['status'],
             'notes' => $validated['notes'] ?? null,
         ]);

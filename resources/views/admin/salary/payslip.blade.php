@@ -303,10 +303,21 @@
                 <div class="summary-number text-{{ $salaryRecord->leave_days > 0 ? 'danger' : 'success' }}">
                     {{ $salaryRecord->leave_days }}
                 </div>
-                <div class="summary-label">Leave Days</div>
+                <div class="summary-label">Leave Days (Full)</div>
             </div>
             <div class="summary-item">
-                <div class="summary-number text-info">
+                <div class="summary-number text-{{ ($salaryRecord->half_days ?? 0) > 0 ? 'warning' : 'success' }}">
+                    {{ $salaryRecord->half_days ?? 0 }}
+                </div>
+                <div class="summary-label">Half Days</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-number text-{{ ($salaryRecord->late_days ?? 0) > 0 ? 'warning' : 'success' }}">
+                    {{ $salaryRecord->late_days ?? 0 }}
+                </div>
+                <div class="summary-label">Late Days</div>
+            </div>
+            <div class="summary-item">                <div class="summary-number text-info">
                     {{ $salaryRecord->attendance_percentage }}%
                 </div>
                 <div class="summary-label">Attendance</div>

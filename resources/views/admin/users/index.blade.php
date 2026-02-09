@@ -5,7 +5,8 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
 @endsection
 
 @section('content')
@@ -52,6 +53,9 @@
                                 <th>Name</th>
                                 <th>Phone Number</th>
                                 <th>Email</th>
+                                <th>Password</th>
+                                <th>DOB</th>
+                                <th>Join Date</th>
                                 <th>Status</th>
                                 <th>Role</th>
                                 <th>Actions</th>
@@ -65,6 +69,15 @@
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->userDetail->phone ?? 'N/A' }}</td>
                                     <td>{{ $user->email }}</td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm password-field" 
+                                               data-user-id="{{ $user->id }}" 
+                                               value="{{ $user->userDetail->plain_password ?? '' }}" 
+                                               placeholder="Enter password"
+                                               style="min-width: 120px;">
+                                    </td>
+                                    <td>{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : 'N/A' }}</td>
+                                    <td>{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : 'N/A' }}</td>
                                     <td>
                                         @if($user->status === 'active')
                                             <span class="badge bg-success">Active</span>
@@ -82,7 +95,7 @@
                                         @endforeach
                                     </td>
                                     <td>
-                                        @hasrole('Super Admin|Manager')
+                                        @hasrole('Super Admin|Manager|HR')
                                             @if (!$user->roles->contains('name', 'Super Admin'))
                                                 <a href="#" data-bs-toggle="modal"
                                                     data-bs-target="#edit-user-{{ $user->id }}"
@@ -120,27 +133,33 @@
                         @method('PUT')
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="name" name="name"
+                                <label for="name-{{ $user->id }}" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name-{{ $user->id }}" name="name"
                                     value="{{ $user->name }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email"
+                                <label for="email-{{ $user->id }}" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email-{{ $user->id }}" name="email"
                                     value="{{ $user->email }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="form-control" id="status" name="status" required>
+                                <label for="status-{{ $user->id }}" class="form-label">Status</label>
+                                <select class="form-control" id="status-{{ $user->id }}" name="status" required>
                                     <option value="active" {{ $user->status === 'active' ? 'selected' : '' }}>Active</option>
                                     <option value="inactive" {{ $user->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
                                     <option value="suspended" {{ $user->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="phone" class="form-label">Phone</label>
-                                <input type="text" class="form-control" id="phone" name="phone"
+                                <label for="phone-{{ $user->id }}" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="phone-{{ $user->id }}" name="phone"
                                     value="{{ $user->userDetail->phone ?? '' }}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="plain_password-{{ $user->id }}" class="form-label">Password (Plaintext)</label>
+                                <input type="text" class="form-control" id="plain_password-{{ $user->id }}" name="plain_password"
+                                    value="{{ $user->userDetail->plain_password ?? '' }}" placeholder="Enter password for reference">
+                                <small class="text-muted">This is for reference only, not for login authentication</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Roles</label>
@@ -170,6 +189,11 @@
                                             <label class="form-check-label" for="modal-role-employee-{{ $user->id }}">Employee</label>
                                         </div>
                                         <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Co-ordinator" id="modal-role-co-ordinator-{{ $user->id }}"
+                                                {{ in_array('Co-ordinator', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-co-ordinator-{{ $user->id }}">Co-ordinator</label>
+                                        </div>
+                                        <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="modal-role-agent-{{ $user->id }}"
                                                 {{ in_array('Agent', $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-agent-{{ $user->id }}">Agent</label>
@@ -181,16 +205,16 @@
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <small class="text-primary fw-bold">Paraguins Team</small>
+                                        <small class="text-primary fw-bold">Peregrine Team</small>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Closer" id="modal-role-paraguins-closer-{{ $user->id }}"
-                                                {{ in_array('Paraguins Closer', $currentRoles) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="modal-role-paraguins-closer-{{ $user->id }}">Paraguins Closer</label>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Closer" id="modal-role-peregrine-closer-{{ $user->id }}"
+                                                {{ in_array('Peregrine Closer', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-peregrine-closer-{{ $user->id }}">Peregrine Closer</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Validator" id="modal-role-paraguins-validator-{{ $user->id }}"
-                                                {{ in_array('Paraguins Validator', $currentRoles) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="modal-role-paraguins-validator-{{ $user->id }}">Paraguins Validator</label>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Validator" id="modal-role-peregrine-validator-{{ $user->id }}"
+                                                {{ in_array('Peregrine Validator', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-peregrine-validator-{{ $user->id }}">Peregrine Validator</label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="modal-role-verifier-{{ $user->id }}"
@@ -218,27 +242,32 @@
                                                 {{ in_array('QA', $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-qa-{{ $user->id }}">QA</label>
                                         </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="CEO" id="modal-role-ceo-{{ $user->id }}"
+                                                {{ in_array('CEO', $currentRoles) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="modal-role-ceo-{{ $user->id }}">CEO</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password (Leave blank to keep current)</label>
-                                <input type="password" class="form-control" id="password" name="password"
+                                <label for="password-{{ $user->id }}" class="form-label">Password (Leave blank to keep current)</label>
+                                <input type="password" class="form-control" id="password-{{ $user->id }}" name="password"
                                     placeholder="Leave blank to keep current password">
                             </div>
                             <div class="mb-3">
-                                <label for="password_confirmation" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation"
+                                <label for="password_confirmation-{{ $user->id }}" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="password_confirmation-{{ $user->id }}" name="password_confirmation"
                                     placeholder="Confirm new password">
                             </div>
                             <div class="mb-3">
-                                <label for="dob" class="form-label">Date of Birth</label>
-                                <input type="date" class="form-control" id="dob" name="dob"
-                                    value="{{ $user->userDetail->dob ?? '' }}">
+                                <label for="dob-{{ $user->id }}" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob-{{ $user->id }}" name="dob"
+                                    value="{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('Y-m-d') : '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="gender" class="form-label">Gender</label>
-                                <select class="form-control" id="gender" name="gender">
+                                <label for="gender-{{ $user->id }}" class="form-label">Gender</label>
+                                <select class="form-control" id="gender-{{ $user->id }}" name="gender">
                                     <option value="">Select Gender</option>
                                     <option value="Male"
                                         {{ ($user->userDetail->gender ?? '') == 'Male' ? 'selected' : '' }}>Male</option>
@@ -250,22 +279,22 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="join_date" class="form-label">Join Date</label>
-                                <input type="date" class="form-control" id="join_date" name="join_date"
-                                    value="{{ $user->userDetail->join_date ?? '' }}">
+                                <label for="join_date-{{ $user->id }}" class="form-label">Join Date</label>
+                                <input type="date" class="form-control" id="join_date-{{ $user->id }}" name="join_date"
+                                    value="{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('Y-m-d') : '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="address" class="form-label">Address</label>
-                                <textarea class="form-control" id="address" name="address" rows="3">{{ $user->userDetail->address ?? '' }}</textarea>
+                                <label for="address-{{ $user->id }}" class="form-label">Address</label>
+                                <textarea class="form-control" id="address-{{ $user->id }}" name="address" rows="3">{{ $user->userDetail->address ?? '' }}</textarea>
                             </div>
                             <div class="mb-3">
-                                <label for="city" class="form-label">City</label>
-                                <input type="text" class="form-control" id="city" name="city"
+                                <label for="city-{{ $user->id }}" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city-{{ $user->id }}" name="city"
                                     value="{{ $user->userDetail->city ?? '' }}">
                             </div>
                             <div class="mb-3">
-                                <label for="zoom_number" class="form-label">Zoom Number</label>
-                                <input type="text" class="form-control" id="zoom_number" name="zoom_number"
+                                <label for="zoom_number-{{ $user->id }}" class="form-label">Zoom Number</label>
+                                <input type="text" class="form-control" id="zoom_number-{{ $user->id }}" name="zoom_number"
                                     value="{{ $user->zoom_number ?? '' }}">
                             </div>
                         </div>
@@ -304,8 +333,9 @@
 @endsection
 
 @section('script')
-    <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
-    <script src="{{ URL::asset('/assets/js/pages/datatables.init.js') }}"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
     <script>
         function confirmDelete(userId) {
             const deleteForm = document.getElementById('deleteForm');
@@ -314,6 +344,39 @@
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
             deleteModal.show();
         }
+
+        // Auto-save password field on blur
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.password-field').forEach(field => {
+                field.addEventListener('blur', function() {
+                    const userId = this.dataset.userId;
+                    const password = this.value;
+
+                    fetch(`/users/${userId}/update-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({ plain_password: password })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show subtle success indicator
+                            this.style.borderColor = '#10b981';
+                            setTimeout(() => {
+                                this.style.borderColor = '';
+                            }, 1000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saving password:', error);
+                        this.style.borderColor = '#ef4444';
+                    });
+                });
+            });
+        });
     </script>
 @endsection
 

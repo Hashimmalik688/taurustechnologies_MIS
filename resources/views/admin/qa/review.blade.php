@@ -22,11 +22,66 @@
         </div>
     @endif
 
-    <div class="row mb-3">
+    <div class="row mb-4">
         <div class="col-12">
             <h2 class="text-gold fw-bold">
                 <i class="bx bx-check-double me-2"></i>QA Review
             </h2>
+        </div>
+    </div>
+
+    <!-- QA Analytics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: #6b7280; margin-bottom: 0.5rem;">
+                        <i class="bx bx-bar-chart-alt-2"></i>
+                    </div>
+                    <h6 class="text-muted mb-2">Total Sales</h6>
+                    <h3 class="text-gold fw-bold">{{ $qaAnalytics['total'] }}</h3>
+                    <small class="text-muted">All sales reviewed</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #f59e0b !important;">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;">
+                        <i class="bx bx-time-five"></i>
+                    </div>
+                    <h6 class="text-muted mb-2">Pending</h6>
+                    <h3 class="fw-bold" style="color: #f59e0b;">{{ $qaAnalytics['pending'] }}</h3>
+                    <small class="text-muted">{{ $qaAnalytics['pending_percent'] }}% awaiting review</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #10b981 !important;">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;">
+                        <i class="bx bx-check-circle"></i>
+                    </div>
+                    <h6 class="text-muted mb-2">Good</h6>
+                    <h3 class="fw-bold" style="color: #10b981;">{{ $qaAnalytics['good'] }}</h3>
+                    <small class="text-muted">{{ $qaAnalytics['good_percent'] }}% passed</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #ef4444 !important;">
+                <div class="card-body text-center">
+                    <div style="font-size: 2rem; color: #ef4444; margin-bottom: 0.5rem;">
+                        <i class="bx bx-x-circle"></i>
+                    </div>
+                    <h6 class="text-muted mb-2">Issues</h6>
+                    <h3 class="fw-bold" style="color: #ef4444;">{{ $qaAnalytics['avg'] + $qaAnalytics['bad'] }}</h3>
+                    <small class="text-muted">{{ $qaAnalytics['issues_percent'] }}% need attention</small>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -56,9 +111,10 @@
                             <div class="col-md-2">
                                 <select name="qa_status" class="form-select">
                                     <option value="">All QA Status</option>
-                                    <option value="In Review" {{ request('qa_status') == 'In Review' ? 'selected' : '' }}>🔍 In Review</option>
-                                    <option value="Approved" {{ request('qa_status') == 'Approved' ? 'selected' : '' }}>✅ Approved</option>
-                                    <option value="Rejected" {{ request('qa_status') == 'Rejected' ? 'selected' : '' }}>❌ Rejected</option>
+                                    <option value="Pending" {{ request('qa_status') == 'Pending' ? 'selected' : '' }}>⏳ Pending</option>
+                                    <option value="Good" {{ request('qa_status') == 'Good' ? 'selected' : '' }}>✅ Good</option>
+                                    <option value="Avg" {{ request('qa_status') == 'Avg' ? 'selected' : '' }}>⚠️ Avg</option>
+                                    <option value="Bad" {{ request('qa_status') == 'Bad' ? 'selected' : '' }}>❌ Bad</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
@@ -120,15 +176,19 @@
                                         <td>
                                             <select class="form-select form-select-sm qa-status-dropdown" 
                                                     data-lead-id="{{ $lead->id }}" 
+                                                    data-current-status="{{ $lead->qa_status ?? 'Pending' }}"
                                                     style="min-width: 130px;">
-                                                <option value="In Review" {{ ($lead->qa_status ?? 'In Review') == 'In Review' ? 'selected' : '' }}>
-                                                    🔍 In Review
+                                                <option value="Pending" {{ ($lead->qa_status ?? 'Pending') == 'Pending' ? 'selected' : '' }}>
+                                                    ⏳ Pending
                                                 </option>
-                                                <option value="Approved" {{ ($lead->qa_status ?? '') == 'Approved' ? 'selected' : '' }}>
-                                                    ✅ Approved
+                                                <option value="Good" {{ ($lead->qa_status ?? '') == 'Good' ? 'selected' : '' }}>
+                                                    ✅ Good
                                                 </option>
-                                                <option value="Rejected" {{ ($lead->qa_status ?? '') == 'Rejected' ? 'selected' : '' }}>
-                                                    ❌ Rejected
+                                                <option value="Avg" {{ ($lead->qa_status ?? '') == 'Avg' ? 'selected' : '' }}>
+                                                    ⚠️ Avg
+                                                </option>
+                                                <option value="Bad" {{ ($lead->qa_status ?? '') == 'Bad' ? 'selected' : '' }}>
+                                                    ❌ Bad
                                                 </option>
                                             </select>
                                         </td>
@@ -141,6 +201,11 @@
                                             <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                 <i class="bx bx-save"></i> Save QA Review
                                             </button>
+                                            @if(auth()->user()->hasRole('Super Admin') && $lead->qa_status !== 'Pending')
+                                                <button class="btn btn-sm btn-warning mt-1 reset-qa-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
+                                                    <i class="bx bx-undo"></i> Reset
+                                                </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -174,23 +239,73 @@ $(document).ready(function() {
     $('.qa-status-dropdown').change(function() {
         const leadId = $(this).data('lead-id');
         const newQaStatus = $(this).val();
+        const currentStatus = $(this).data('current-status');
         const qaReason = $(`.qa-reason-input[data-lead-id="${leadId}"]`).val();
         const dropdown = $(this);
         
-        updateQaStatus(leadId, newQaStatus, qaReason, dropdown);
+        updateQaStatus(leadId, newQaStatus, currentStatus, qaReason, dropdown);
     });
 
     // Handle QA reason save button
     $('.save-qa-reason').click(function() {
         const leadId = $(this).data('lead-id');
         const qaStatus = $(`.qa-status-dropdown[data-lead-id="${leadId}"]`).val();
+        const currentStatus = $(`.qa-status-dropdown[data-lead-id="${leadId}"]`).data('current-status');
         const qaReason = $(`.qa-reason-input[data-lead-id="${leadId}"]`).val();
         const button = $(this);
         
-        updateQaStatus(leadId, qaStatus, qaReason, button);
+        updateQaStatus(leadId, qaStatus, currentStatus, qaReason, button);
     });
 
-    function updateQaStatus(leadId, qaStatus, qaReason, element) {
+    // Handle reset QA status button (Super Admin only)
+    $('.reset-qa-status').click(function() {
+        const leadId = $(this).data('lead-id');
+        const button = $(this);
+        
+        if (confirm('Are you sure you want to reset this QA status to Pending? This action is only available to Super Admin.')) {
+            button.prop('disabled', true);
+            
+            $.ajax({
+                url: `/sales/${leadId}/qa-status/reset`,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Reset dropdown and data attribute
+                        const dropdown = $(`.qa-status-dropdown[data-lead-id="${leadId}"]`);
+                        dropdown.val('Pending').data('current-status', 'Pending');
+                        $(`.qa-reason-input[data-lead-id="${leadId}"]`).val('');
+                        
+                        button.addClass('btn-success');
+                        setTimeout(() => {
+                            button.removeClass('btn-success');
+                        }, 2000);
+                        
+                        // Show success message
+                        const alertHtml = `
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                <i class="mdi mdi-undo me-2"></i>
+                                <strong>Reset by Super Admin!</strong> ${response.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `;
+                        $('.breadcrumb-header').after(alertHtml);
+                    }
+                },
+                error: function(xhr) {
+                    const response = xhr.responseJSON;
+                    alert(response.message || 'Failed to reset QA status');
+                },
+                complete: function() {
+                    button.prop('disabled', false);
+                }
+            });
+        }
+    });
+
+    function updateQaStatus(leadId, qaStatus, currentStatus, qaReason, element) {
         element.prop('disabled', true);
         
         $.ajax({
@@ -203,6 +318,9 @@ $(document).ready(function() {
             },
             success: function(response) {
                 if (response.success) {
+                    // Update the data attribute with new status
+                    $(`.qa-status-dropdown[data-lead-id="${leadId}"]`).data('current-status', qaStatus);
+                    
                     element.addClass('border-success');
                     setTimeout(() => {
                         element.removeClass('border-success');
@@ -219,8 +337,15 @@ $(document).ready(function() {
                     $('.breadcrumb-header').after(alertHtml);
                 }
             },
-            error: function() {
-                alert('Failed to update QA status');
+            error: function(xhr) {
+                const response = xhr.responseJSON;
+                if (response.message) {
+                    alert(response.message);
+                } else {
+                    alert('Failed to update QA status');
+                }
+                // Reset dropdown to previous value on error
+                $(`.qa-status-dropdown[data-lead-id="${leadId}"]`).val(currentStatus);
             },
             complete: function() {
                 element.prop('disabled', false);

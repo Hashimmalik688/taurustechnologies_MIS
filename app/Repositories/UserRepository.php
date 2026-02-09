@@ -32,7 +32,7 @@ class UserRepository implements UserRepositoryInterface
     {
         $user = new User;
         $user->name = $data['name'];
-        $user->email = $data['email'];
+        $user->email = strtolower($data['email']); // Convert to lowercase for consistency
         $user->password = Hash::make($data['password']);
         $user->zoom_number = $data['zoom_number'] ?? null;
         $user->save();
@@ -68,7 +68,7 @@ class UserRepository implements UserRepositoryInterface
 
         // Update user basic info
         $user->name = $data['name'] ?? $user->name;
-        $user->email = $data['email'] ?? $user->email;
+        $user->email = isset($data['email']) ? strtolower($data['email']) : $user->email; // Convert to lowercase for consistency
         $user->zoom_number = $data['zoom_number'] ?? $user->zoom_number;
 
         // Update password only if provided

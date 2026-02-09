@@ -403,7 +403,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label">Punctuality Bonus (Rs)</label>
                                     <input type="number" id="settings_punctuality_bonus" name="punctuality_bonus" class="form-control" step="0.01" min="0" value="0">
-                                    <small class="text-muted">If 0 offs, <2 half days, <4 late</small>
+                                    <small class="text-muted">If 0 offs, <2 half days, <4 late days</small>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Fine per Absence (Rs)</label>
@@ -446,6 +446,7 @@
                                     <li>Working Days: 22 per month</li>
                                     <li>Daily Salary = Basic Salary ÷ 22</li>
                                     <li>Deductions: Leave = 1 day, Half day = 0.5 day</li>
+                                    <li>Punctuality Bonus: Disqualified if ≥1 off OR ≥2 half days OR ≥4 late arrivals</li>
                                     <li>Extra fines are applied on top of deductions</li>
                                 </ul>
                             </div>

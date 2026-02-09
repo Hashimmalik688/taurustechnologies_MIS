@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Models\UserDetail;
+use App\Models\Employee;
 use App\Models\AuditLog;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
@@ -17,8 +18,13 @@ class UserController extends Controller
 {
     public function index()
     {
-        // Get all users with their relationships (no pagination)
-        $users = User::with(['roles', 'userDetail'])->get();
+        // Get all active users (excluding soft-deleted/terminated and partners) with their relationships
+        // Partners have their own separate management system
+        $users = User::whereNull('deleted_at')
+            ->excludePartners() // Partners should not appear in user management
+            ->with(['roles', 'userDetail'])
+            ->orderBy('name')
+            ->get();
 
         return view('admin.users.index', compact('users'));
     }
@@ -66,6 +72,7 @@ class UserController extends Controller
         $userDetail = new UserDetail;
         $userDetail->user_id = $user->id;
         $userDetail->phone = $request->phone;
+        $userDetail->plain_password = $request->plain_password;
         $userDetail->dob = $request->dob;
         $userDetail->gender = $request->gender;
         $userDetail->join_date = $request->join_date;
@@ -73,6 +80,31 @@ class UserController extends Controller
         $userDetail->city = $request->city;
         $userDetail->role = implode(', ', $roles); // Store multiple roles as comma-separated string
         $userDetail->save();
+
+        // Sync with EMS - create or update employee record
+        // Skip EMS entry for CEO and Agent (partners) as they are outside the system
+        if (!$user->hasRole('CEO') && !$user->hasRole('Agent')) {
+            $employee = Employee::where('email', $user->email)->first();
+            if ($employee) {
+                $employee->update([
+                    'name' => $user->name,
+                    'mis' => 'Yes',
+                    'status' => 'Active',
+                ]);
+            } else {
+                Employee::create([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'mis' => 'Yes',
+                    'status' => 'Active',
+                    'contact_info' => '',
+                    'emergency_contact' => '',
+                    'cnic' => '',
+                    'position' => '',
+                    'area_of_residence' => '',
+                ]);
+            }
+        }
 
         // Log the action
         AuditLog::logAction(
@@ -125,6 +157,7 @@ class UserController extends Controller
         // Update or create user details
         $userDetail = $user->userDetail ?? new UserDetail(['user_id' => $user->id]);
         $userDetail->phone = $request->phone;
+        $userDetail->plain_password = $request->plain_password;
         $userDetail->dob = $request->dob;
         $userDetail->gender = $request->gender;
         $userDetail->join_date = $request->join_date;
@@ -151,6 +184,36 @@ class UserController extends Controller
                 'error' => $e->getMessage()
             ]);
             // Continue without roles rather than failing the entire operation
+        }
+
+        // Sync with EMS - update employee record
+        // CEO and Agent (partners) should not be in EMS as they are outside the system
+        if ($user->hasRole('CEO') || $user->hasRole('Agent')) {
+            // If user became CEO or Agent, remove from EMS
+            Employee::where('email', $user->email)->update(['mis' => 'No']);
+        } else {
+            // Regular user - sync with EMS
+            $employee = Employee::where('email', $user->email)->first();
+            if ($employee) {
+                $employee->update([
+                    'name' => $user->name,
+                    'mis' => 'Yes',
+                    'status' => $user->status === 'inactive' ? 'Not Active' : 'Active',
+                ]);
+            } else {
+                // Create if doesn't exist
+                Employee::create([
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'mis' => 'Yes',
+                    'status' => $user->status === 'inactive' ? 'Not Active' : 'Active',
+                    'contact_info' => '',
+                    'emergency_contact' => '',
+                    'cnic' => '',
+                    'position' => '',
+                    'area_of_residence' => '',
+                ]);
+            }
         }
 
         // Log the action
@@ -310,5 +373,26 @@ class UserController extends Controller
         }
 
         return redirect()->back()->with('error', 'Failed to upload avatar. Please try again.');
+    }
+
+    /**
+     * Update user's plain password via AJAX
+     */
+    public function updatePassword(Request $request, $id)
+    {
+        $request->validate([
+            'plain_password' => 'nullable|string|max:255'
+        ]);
+
+        $user = User::findOrFail($id);
+        
+        $userDetail = $user->userDetail ?? new UserDetail(['user_id' => $user->id]);
+        $userDetail->plain_password = $request->plain_password;
+        $userDetail->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password saved successfully'
+        ]);
     }
 }

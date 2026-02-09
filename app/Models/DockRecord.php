@@ -22,9 +22,19 @@ class DockRecord extends Model
     ];
 
     protected $casts = [
-        'dock_date' => 'date',
+        'dock_date' => 'date:Y-m-d',
         'amount' => 'decimal:2',
     ];
+
+    protected $appends = ['dock_date_formatted'];
+
+    /**
+     * Get formatted dock date for JSON
+     */
+    public function getDockDateFormattedAttribute()
+    {
+        return $this->dock_date ? $this->dock_date->format('Y-m-d') : null;
+    }
 
     /**
      * Get the employee being docked

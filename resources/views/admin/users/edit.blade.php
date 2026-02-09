@@ -91,6 +91,17 @@
 
                             <div class="col-md-4">
                                 <div class="mb-3">
+                                    <label for="plain_password" class="form-label">Password (Plaintext Reference)</label>
+                                    <input type="text" class="form-control" id="plain_password" name="plain_password"
+                                        value="{{ old('plain_password', $user->userDetail->plain_password ?? '') }}"
+                                        placeholder="Enter password for reference">
+                                    <small class="text-muted">This is for reference only, not for login</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                                <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" class="form-control @error('password') is-invalid @enderror"
                                         id="password" name="password" placeholder="Leave blank to keep current password">
@@ -134,6 +145,11 @@
                                                     {{ in_array('Employee', old('roles', $currentRoles)) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="role-employee">Employee</label>
                                             </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Co-ordinator" id="role-co-ordinator"
+                                                    {{ in_array('Co-ordinator', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-co-ordinator">Co-ordinator</label>
+                                            </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
@@ -158,16 +174,16 @@
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label text-primary">Paraguins Team</label>
+                                            <label class="form-label text-primary">Peregrine Team</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Closer" id="role-paraguins-closer"
-                                                    {{ in_array('Paraguins Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-paraguins-closer">Paraguins Closer</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Closer" id="role-peregrine-closer"
+                                                    {{ in_array('Peregrine Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-peregrine-closer">Peregrine Closer</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Paraguins Validator" id="role-paraguins-validator"
-                                                    {{ in_array('Paraguins Validator', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-paraguins-validator">Paraguins Validator</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Validator" id="role-peregrine-validator"
+                                                    {{ in_array('Peregrine Validator', old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-peregrine-validator">Peregrine Validator</label>
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="role-verifier"

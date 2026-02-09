@@ -140,7 +140,7 @@ class EmployeeDashboardController extends Controller
     {
         return Lead::where('closer_name', Auth::user()->name)
             ->whereDate('sale_at', today())
-            ->whereIn('status', ['accepted', 'underwritten'])
+            ->where('manager_status', 'approved')
             ->count();
     }
 
@@ -163,7 +163,7 @@ class EmployeeDashboardController extends Controller
         return Lead::where('closer_name', Auth::user()->name)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
-            ->whereIn('status', ['accepted', 'underwritten'])
+            ->where('manager_status', 'approved')
             ->count();
     }
 }

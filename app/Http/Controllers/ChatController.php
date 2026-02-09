@@ -38,6 +38,7 @@ class ChatController extends Controller
         $conversations = ChatConversation::whereHas('participants', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
+            ->where('type', 'direct') // Only show direct conversations in Messages list
             ->with(['latestMessage.user', 'users', 'participants' => function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             }])
@@ -46,20 +47,75 @@ class ChatController extends Controller
             ->map(function ($conversation) use ($userId) {
                 // Get other participants (for direct chats, show the other person's name)
                 $otherUsers = $conversation->users->filter(fn($user) => $user->id !== $userId);
+                $otherUser = $otherUsers->first();
+
+                // Format avatar URL properly
+                $avatarUrl = null;
+                if ($conversation->type === 'direct' && $otherUser && $otherUser->avatar) {
+                    // Use asset() to generate proper URL
+                    $avatarUrl = asset($otherUser->avatar);
+                } elseif ($conversation->type === 'group' && $conversation->avatar) {
+                    $avatarUrl = asset($conversation->avatar); // Group avatar path
+                }
 
                 return [
                     'id' => $conversation->id,
                     'name' => $conversation->type === 'group'
                         ? $conversation->name 
-                        : ($otherUsers->first()->name ?? 'Unknown User'),
+                        : ($otherUser->name ?? 'Unknown User'),
                     'type' => $conversation->type,
-                    'avatar' => $conversation->type === 'direct'
-                        ? $otherUsers->first()->avatar ?? null
-                        : null,
+                    'community_id' => $conversation->community_id,
+                    'avatar' => $avatarUrl,
                     'latest_message' => $conversation->latestMessage ? [
                         'message' => $conversation->latestMessage->message,
                         'created_at' => $conversation->latestMessage->created_at->diffForHumans(),
-                        'user_name' => $conversation->latestMessage->user->name,
+                        'user_name' => $conversation->latestMessage->user?->name ?? 'Unknown',
+                    ] : null,
+                    'unread_count' => $conversation->unreadCount($userId),
+                    'updated_at' => $conversation->updated_at->diffForHumans(),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'conversations' => $conversations,
+        ]);
+    }
+
+    /**
+     * Get group conversations for the authenticated user (for Communities tab)
+     */
+    public function getGroupConversations()
+    {
+        $userId = Auth::id();
+
+        $conversations = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })
+            ->where('type', 'group') // Only group conversations
+            ->whereNull('community_id') // Exclude community groups
+            ->with(['latestMessage.user', 'users', 'participants' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
+            ->latest('updated_at')
+            ->get()
+            ->map(function ($conversation) use ($userId) {
+                // Format avatar URL properly for groups
+                $avatarUrl = null;
+                if ($conversation->avatar) {
+                    $avatarUrl = asset('storage/' . $conversation->avatar);
+                }
+
+                return [
+                    'id' => $conversation->id,
+                    'name' => $conversation->name ?? 'Group Chat',
+                    'type' => $conversation->type,
+                    'community_id' => $conversation->community_id,
+                    'avatar' => $avatarUrl,
+                    'latest_message' => $conversation->latestMessage ? [
+                        'message' => $conversation->latestMessage->message,
+                        'created_at' => $conversation->latestMessage->created_at->diffForHumans(),
+                        'user_name' => $conversation->latestMessage->user?->name ?? 'Unknown',
                     ] : null,
                     'unread_count' => $conversation->unreadCount($userId),
                     'updated_at' => $conversation->updated_at->diffForHumans(),
@@ -126,6 +182,7 @@ class ChatController extends Controller
             'name' => 'required|string|max:255',
             'user_ids' => 'required|array|min:1',
             'user_ids.*' => 'exists:users,id',
+            'community_id' => 'nullable|exists:communities,id',
         ]);
 
         $conversation = DB::transaction(function () use ($request) {
@@ -134,6 +191,7 @@ class ChatController extends Controller
                 'name' => $request->name,
                 'type' => 'group',
                 'created_by' => $creatorId,
+                'community_id' => $request->community_id ?? null,
             ]);
 
             $participantIds = collect($request->user_ids)->push($creatorId)->unique();
@@ -162,6 +220,8 @@ class ChatController extends Controller
             'name' => 'required|string|max:255',
             'user_ids' => 'required|array|min:1',
             'user_ids.*' => 'exists:users,id',
+            'community_id' => 'nullable|exists:communities,id',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $userId = Auth::id();
@@ -171,13 +231,21 @@ class ChatController extends Controller
         if (!in_array($userId, $userIds)) {
             $userIds[] = $userId;
         }
+        
+        // Handle avatar upload
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('chat/avatars', 'public');
+        }
 
-        $conversation = DB::transaction(function () use ($request, $userIds, $userId) {
+        $conversation = DB::transaction(function () use ($request, $userIds, $userId, $avatarPath) {
             // Create group conversation
             $conversation = ChatConversation::create([
                 'name' => $request->name,
                 'type' => 'group',
                 'created_by' => $userId,
+                'community_id' => $request->community_id ?? null,
+                'avatar' => $avatarPath,
             ]);
 
             // Add all participants
@@ -193,10 +261,16 @@ class ChatController extends Controller
             return $conversation;
         });
 
+        // Format avatar URL for response
+        $conversationData = $conversation->toArray();
+        if ($conversation->avatar) {
+            $conversationData['avatar'] = asset('storage/' . $conversation->avatar);
+        }
+
         return response()->json([
             'success' => true,
             'conversation_id' => $conversation->id,
-            'conversation' => $conversation,
+            'conversation' => $conversationData,
         ]);
     }
 
@@ -228,11 +302,12 @@ class ChatController extends Controller
 
         return response()->json([
             'success' => true,
-            'messages' => $messages,
+            'messages' => $messages->items(),  // Get just the items array from paginated collection
             'conversation' => [
                 'id' => $conversation->id,
                 'name' => $conversation->name,
                 'type' => $conversation->type,
+                'community_id' => $conversation->community_id,
             ],
         ]);
     }
@@ -281,6 +356,23 @@ class ChatController extends Controller
         $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })->findOrFail($request->conversation_id);
+
+        // Check if this is a community conversation - verify user is a member
+        if ($conversation->community_id) {
+            // Check if user is a member
+            $member = DB::table('community_members')
+                ->where('community_id', $conversation->community_id)
+                ->where('user_id', $userId)
+                ->first();
+            
+            // User must be a member
+            if (!$member) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not a member of this community.'
+                ], 403);
+            }
+        }
 
         // Determine message type (support audio/images/files)
         $type = 'text';
@@ -331,9 +423,37 @@ class ChatController extends Controller
         // Load relationships for response
         $message->load(['user', 'attachments']);
 
-        // Broadcast event for real-time updates. This will broadcast the newly created
-        // message to other participants on the private conversation channel.
+        // Handle @mentions - notify mentioned users
+        $mentionedUsers = $message->getMentionedUsers();
+        if (!empty($mentionedUsers)) {
+            // Get mentioned user IDs
+            if (in_array('everyone', $mentionedUsers)) {
+                // Get all users in conversation
+                $notifyUsers = $conversation->users()->where('user_id', '!=', $userId)->get();
+            } else {
+                // Get specific mentioned users
+                $notifyUsers = User::whereIn('name', $mentionedUsers)
+                    ->whereHas('chatParticipants', function ($query) use ($request) {
+                        $query->where('conversation_id', $request->conversation_id);
+                    })
+                    ->where('id', '!=', $userId)
+                    ->get();
+            }
+            
+            // Create notifications for mentioned users
+            foreach ($notifyUsers as $mentionedUser) {
+                $mentionedUser->notify(new \App\Notifications\MentionedInChatNotification($message));
+            }
+        }
+
+        // Broadcast event for real-time updates
         try {
+            // If this is a community announcement, broadcast globally to all community members
+            if ($conversation->community_id) {
+                broadcast(new \App\Events\CommunityAnnouncementPosted($message, $conversation));
+            }
+            
+            // Also broadcast to the conversation channel
             broadcast(new MessageSent($message))->toOthers();
         } catch (\Throwable $e) {
             // If broadcasting isn't configured yet (no pusher/websockets), don't fail the
@@ -376,10 +496,30 @@ class ChatController extends Controller
      */
     public function getUsers()
     {
+        // Only get actual employees/users, exclude partners
+        // Partners exist in separate partners table and should not appear in chat
         $users = User::where('id', '!=', Auth::id())
-            ->select('id', 'name', 'email')
+            ->excludePartners() // Exclude partner records
+            ->select('id', 'name', 'email', 'avatar')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function ($user) {
+                $avatarUrl = null;
+                if ($user->avatar) {
+                    if (Storage::disk('local')->exists($user->avatar)) {
+                        $avatarUrl = Storage::disk('local')->url($user->avatar);
+                    } else {
+                        $avatarUrl = $user->avatar; // In case it's already a full URL
+                    }
+                }
+                
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'avatar' => $avatarUrl,
+                ];
+            });
 
         return response()->json([
             'success' => true,
@@ -434,28 +574,51 @@ class ChatController extends Controller
      */
     public function getConversation($id)
     {
-        $userId = Auth::id();
+        try {
+            $userId = Auth::id();
 
-        $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->with(['users'])
-            ->findOrFail($id);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+                ->with(['users'])
+                ->findOrFail($id);
 
-        // Get creator information
-        $creator = User::find($conversation->created_by);
+            // Get creator information
+            $creator = User::find($conversation->created_by);
 
-        return response()->json([
-            'success' => true,
-            'conversation' => [
-                'id' => $conversation->id,
-                'name' => $conversation->name,
-                'type' => $conversation->type,
-                'created_by' => $conversation->created_by,
-                'creator' => $creator ? ['id' => $creator->id, 'name' => $creator->name] : null,
-                'created_at' => $conversation->created_at,
-            ]
-        ]);
+            // Get all users in the conversation
+            $users = $conversation->users()->get()->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'avatar' => $user->avatar ? asset($user->avatar) : null,
+                    'email' => $user->email,
+                    'role' => $user->getRoleNames()->first() ?? 'Member',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'conversation' => [
+                    'id' => $conversation->id,
+                    'name' => $conversation->name,
+                    'type' => $conversation->type,
+                    'community_id' => $conversation->community_id,
+                    'avatar' => $conversation->avatar ? asset('storage/' . $conversation->avatar) : null,
+                    'created_by' => $conversation->created_by,
+                    'creator' => $creator ? ['id' => $creator->id, 'name' => $creator->name] : null,
+                    'created_at' => $conversation->created_at,
+                ],
+                'users' => $users,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Get conversation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch conversation',
+                'error' => $e->getMessage()
+            ], 404);
+        }
     }
 
     /**
@@ -463,32 +626,93 @@ class ChatController extends Controller
      */
     public function updateConversation($id, Request $request)
     {
-        $userId = Auth::id();
+        try {
+            $userId = Auth::id();
 
-        $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->findOrFail($id);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($id);
 
-        // Only creator can update group conversations
-        if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+            // Only creator can update group conversations
+            if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the group creator can update the group.'
+                ], 403);
+            }
+
+            $request->validate([
+                'name' => 'required|string|max:255',
+            ]);
+
+            $conversation->update([
+                'name' => $request->name
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'conversation' => $conversation
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Update conversation error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Only the group creator can update the group.'
-            ], 403);
+                'message' => 'Failed to update conversation',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
+    
+    /**
+     * Update conversation avatar
+     */
+    public function updateConversationAvatar($id, Request $request)
+    {
+        try {
+            $userId = Auth::id();
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($id);
 
-        $conversation->update([
-            'name' => $request->name
-        ]);
+            // Only creator can update group conversations
+            if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the group creator can update the group avatar.'
+                ], 403);
+            }
 
-        return response()->json([
-            'success' => true,
-            'conversation' => $conversation
-        ]);
+            $request->validate([
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            // Delete old avatar if exists
+            if ($conversation->avatar && \Storage::disk('public')->exists($conversation->avatar)) {
+                \Storage::disk('public')->delete($conversation->avatar);
+            }
+
+            // Store new avatar
+            $avatarPath = $request->file('avatar')->store('chat/avatars', 'public');
+            
+            $conversation->update([
+                'avatar' => $avatarPath
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Avatar updated successfully',
+                'avatar' => asset('storage/' . $avatarPath),
+                'conversation' => $conversation
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Update conversation avatar error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update avatar',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -496,38 +720,47 @@ class ChatController extends Controller
      */
     public function deleteConversation($id)
     {
-        $userId = Auth::id();
+        try {
+            $userId = Auth::id();
 
-        $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->findOrFail($id);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($id);
 
-        // Only creator can delete group conversations
-        if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only the group creator can delete the group.'
-            ], 403);
-        }
-
-        DB::transaction(function () use ($conversation) {
-            // Delete all messages and their attachments
-            $messages = ChatMessage::where('conversation_id', $conversation->id)->get();
-            foreach ($messages as $message) {
-                // Delete attachments from storage
-                foreach ($message->attachments as $attachment) {
-                    Storage::disk('public')->delete($attachment->file_path);
-                }
+            // Only creator can delete group conversations
+            if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the group creator can delete the group.'
+                ], 403);
             }
 
-            // Delete conversation (cascades to messages, participants, attachments)
-            $conversation->delete();
-        });
+            DB::transaction(function () use ($conversation) {
+                // Delete all messages and their attachments
+                $messages = ChatMessage::where('conversation_id', $conversation->id)->get();
+                foreach ($messages as $message) {
+                    // Delete attachments from storage
+                    foreach ($message->attachments as $attachment) {
+                        Storage::disk('public')->delete($attachment->file_path);
+                    }
+                }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Conversation deleted successfully'
-        ]);
+                // Delete conversation (cascades to messages, participants, attachments)
+                $conversation->delete();
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Conversation deleted successfully'
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Delete conversation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete conversation',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -535,24 +768,33 @@ class ChatController extends Controller
      */
     public function getConversationMembers($id)
     {
-        $userId = Auth::id();
+        try {
+            $userId = Auth::id();
 
-        $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->findOrFail($id);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($id);
 
-        $members = User::whereIn('id', function ($query) use ($id) {
-            $query->select('user_id')
-                ->from('chat_participants')
-                ->where('conversation_id', $id);
-        })
-            ->select('id', 'name', 'email')
-            ->get();
+            $members = User::whereIn('id', function ($query) use ($id) {
+                $query->select('user_id')
+                    ->from('chat_participants')
+                    ->where('conversation_id', $id);
+            })
+                ->select('id', 'name', 'email', 'avatar')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'members' => $members
-        ]);
+            return response()->json([
+                'success' => true,
+                'members' => $members
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Get conversation members error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch conversation members',
+                'error' => $e->getMessage()
+            ], 404);
+        }
     }
 
     /**
@@ -560,49 +802,58 @@ class ChatController extends Controller
      */
     public function addMember($id, Request $request)
     {
-        $userId = Auth::id();
+        try {
+            $userId = Auth::id();
 
-        $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->findOrFail($id);
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($id);
 
-        // Only creator can add members to group conversations
-        if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+            // Only creator can add members to group conversations
+            if ($conversation->type === 'group' && $conversation->created_by !== $userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the group creator can add members.'
+                ], 403);
+            }
+
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+            ]);
+
+            $newUserId = $request->user_id;
+
+            // Check if user is already a member
+            $existingParticipant = ChatParticipant::where('conversation_id', $id)
+                ->where('user_id', $newUserId)
+                ->first();
+
+            if ($existingParticipant) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is already a member of this group.'
+                ], 400);
+            }
+
+            // Add the user as a participant
+            ChatParticipant::create([
+                'conversation_id' => $id,
+                'user_id' => $newUserId,
+                'joined_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Member added successfully'
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Add member error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Only the group creator can add members.'
-            ], 403);
+                'message' => 'Failed to add member',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $newUserId = $request->user_id;
-
-        // Check if user is already a member
-        $existingParticipant = ChatParticipant::where('conversation_id', $id)
-            ->where('user_id', $newUserId)
-            ->first();
-
-        if ($existingParticipant) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User is already a member of this group.'
-            ], 400);
-        }
-
-        // Add the user as a participant
-        ChatParticipant::create([
-            'conversation_id' => $id,
-            'user_id' => $newUserId,
-            'joined_at' => now(),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Member added successfully'
-        ]);
     }
 
     /**
@@ -652,11 +903,13 @@ class ChatController extends Controller
 
     /**
      * Get total unread message count for authenticated user
+     * Also includes unread community announcements
      */
     public function getUnreadCount()
     {
         $userId = Auth::id();
 
+        // Get unread chat messages
         $totalUnread = ChatConversation::whereHas('participants', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })
@@ -665,9 +918,104 @@ class ChatController extends Controller
                 return $conversation->unreadCount($userId);
             });
 
+        // Get unread community announcements count
+        $user = auth()->user();
+        
+        // Get communities that the user is part of
+        $userCommunities = ChatConversation::where('type', 'group')
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereNotNull('community_id')
+            ->pluck('community_id')
+            ->unique()
+            ->toArray();
+
+        // Also include communities the user created
+        $createdCommunities = \App\Models\Community::where('created_by', $user->id)->pluck('id')->toArray();
+        
+        $communityIds = array_unique(array_merge($userCommunities, $createdCommunities));
+
+        // Count active announcements
+        $announcementCount = 0;
+        if (!empty($communityIds)) {
+            $announcementCount = \App\Models\CommunityAnnouncement::active()
+                ->forBanner()
+                ->whereIn('community_id', $communityIds)
+                ->count();
+        }
+
         return response()->json([
             'success' => true,
             'unread_count' => $totalUnread,
+            'announcement_count' => $announcementCount,
+            'total_count' => $totalUnread + $announcementCount,
         ]);
+    }
+
+    /**
+     * Get users in a conversation (for mentions autocomplete)
+     */
+    public function getConversationUsers($conversationId)
+    {
+        try {
+            $userId = Auth::id();
+
+            $conversation = ChatConversation::whereHas('participants', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->findOrFail($conversationId);
+
+            $users = $conversation->users()->get()->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'avatar' => $user->avatar,
+                    'role' => $user->getRoleNames()->first() ?? 'Member',
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'users' => $users,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Get conversation users error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch conversation users',
+                'error' => $e->getMessage()
+            ], 404);
+        }
+    }
+
+    /**
+     * Get all communities for chat group creation
+     */
+    public function getCommunities()
+    {
+        try {
+            $userId = Auth::id();
+            
+            // Only get communities where the user is a member
+            $communities = \App\Models\Community::select('id', 'name', 'icon', 'color', 'avatar', 'created_by', 'posting_restricted')
+                ->whereHas('members', function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                })
+                ->orderBy('name')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'communities' => $communities,
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Get communities error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch communities',
+                'communities' => [],
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

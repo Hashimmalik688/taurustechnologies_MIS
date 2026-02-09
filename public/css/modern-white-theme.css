@@ -146,7 +146,7 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     border-radius: 8px;
-    overflow: hidden;
+    /* overflow: hidden removed - breaks position:sticky on thead */
 }
 
 .table thead th {

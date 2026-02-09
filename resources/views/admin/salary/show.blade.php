@@ -272,6 +272,84 @@
                             </div>
                         </div>
 
+                        {{-- Attendance Breakdown --}}
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Attendance Summary
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-2">
+                                        <div class="card border-secondary">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Working Days</h6>
+                                                <h4 class="mb-0">{{ $salaryRecord->working_days }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card border-success">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Present Days</h6>
+                                                <h4 class="mb-0 text-success">{{ $salaryRecord->present_days }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card border-danger">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Full Leave</h6>
+                                                <h4 class="mb-0 text-danger">{{ $salaryRecord->leave_days }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card border-warning">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Half Days</h6>
+                                                <h4 class="mb-0 text-warning">{{ $salaryRecord->half_days ?? 0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card border-warning">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Late Days</h6>
+                                                <h4 class="mb-0 text-warning">{{ $salaryRecord->late_days ?? 0 }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="card border-primary">
+                                            <div class="card-body p-3">
+                                                <h6 class="text-muted small mb-1">Daily Salary</h6>
+                                                <h6 class="mb-0 text-primary">${{ number_format($salaryRecord->daily_salary, 2) }}</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                @if($salaryRecord->attendance_bonus > 0 || $salaryRecord->attendance_deduction < 0)
+                                    <div class="row mt-3">
+                                        <div class="col-12">
+                                            <div class="alert alert-info mb-0">
+                                                <strong><i class="fas fa-info-circle me-2"></i>Attendance Impact:</strong>
+                                                @if($salaryRecord->attendance_bonus > 0)
+                                                    <span class="text-success">+${{ number_format($salaryRecord->attendance_bonus, 2) }} Punctuality Bonus</span>
+                                                @endif
+                                                @if($salaryRecord->attendance_deduction < 0)
+                                                    <span class="text-danger">-${{ number_format(abs($salaryRecord->attendance_deduction), 2) }} Deductions</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
                         {{-- Deductions Management --}}
                         <div class="card mb-4">
                             <div

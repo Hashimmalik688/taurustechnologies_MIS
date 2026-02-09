@@ -21,6 +21,13 @@
     <div class="col-12">
         <div class="alert alert-info alert-dismissible fade show" role="alert">
             <i class="mdi mdi-information-outline me-2"></i>
+            <strong>Payroll Cycle:</strong> Our payroll month runs from the 26th of the previous month to the 25th of the current month. 
+            For example, January 26 to February 25 is calculated as <strong>February payroll</strong>, which is paid on <strong>March 10</strong>.
+            Dock records are automatically assigned to the correct payroll month based on the dock date.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-secondary alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-account-eye me-2"></i>
             <strong>Employee Access:</strong> Employees can now view their own dock records by navigating to <strong>"My Dock Records"</strong> in the sidebar. 
             They will see the amount, reason, who docked them, and when each dock was applied.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -154,13 +161,13 @@
                                 <td>{{ $record->id }}</td>
                                 <td>
                                     <a href="{{ route('dock.history', $record->user_id) }}" class="text-body fw-bold">
-                                        {{ $record->user->name }}
+                                        {{ $record->user?->name ?? 'Deleted User' }}
                                     </a>
                                 </td>
                                 <td><strong>Rs {{ number_format($record->amount, 2) }}</strong></td>
                                 <td>{{ Str::limit($record->reason, 40) }}</td>
                                 <td>{{ $record->dock_date->format('d M Y') }}</td>
-                                <td>{{ $record->dockedBy->name }}</td>
+                                <td>{{ $record->dockedBy?->name ?? 'Deleted User' }}</td>
                                 <td>
                                     @if ($record->status === 'active')
                                         <span class="badge bg-warning">Active</span>
@@ -171,8 +178,16 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if (!Auth::user()->hasRole('HR'))
                                     <button type="button" class="btn btn-sm btn-info" 
-                                            onclick="editDock({{ json_encode($record) }})"
+                                            data-record-id="{{ $record->id }}"
+                                            data-employee-name="{{ $record->user?->name ?? 'Unknown' }}"
+                                            data-amount="{{ $record->amount }}"
+                                            data-dock-date="{{ $record->dock_date->format('Y-m-d') }}"
+                                            data-status="{{ $record->status }}"
+                                            data-reason="{{ $record->reason }}"
+                                            data-notes="{{ $record->notes ?? '' }}"
+                                            onclick="editDock(this)"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#editDockModal">
                                         <i class="mdi mdi-pencil"></i>
@@ -197,6 +212,7 @@
                                             <i class="mdi mdi-delete"></i>
                                         </button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                             @if ($record->notes)
@@ -211,8 +227,8 @@
                     </table>
                 </div>
 
-                <div class="mt-3">
-                    {{ $dockRecords->links() }}
+                <div class="mt-3 d-flex justify-content-center">
+                    {{ $dockRecords->appends(request()->query())->links('pagination::bootstrap-5') }}
                 </div>
                 @else
                 <div class="text-center py-4">
@@ -255,6 +271,9 @@
                         <div class="col-md-3">
                             <label class="form-label">Dock Date *</label>
                             <input type="date" name="dock_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                            <small class="form-text text-muted">
+                                <i class="mdi mdi-information"></i> Will be assigned to payroll month automatically (26th-25th cycle)
+                            </small>
                         </div>
 
                         <div class="col-12">
@@ -307,6 +326,9 @@
                         <div class="col-md-3">
                             <label class="form-label">Dock Date *</label>
                             <input type="date" id="edit_dock_date" name="dock_date" class="form-control" required>
+                            <small class="form-text text-muted">
+                                <i class="mdi mdi-information"></i> Will be assigned to payroll month automatically (26th-25th cycle)
+                            </small>
                         </div>
 
                         <div class="col-md-12">
@@ -342,16 +364,30 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-function editDock(record) {
-    document.getElementById('editDockForm').action = '/dock/' + record.id;
-    document.getElementById('edit_employee_name').value = record.user.name;
-    document.getElementById('edit_amount').value = record.amount;
-    document.getElementById('edit_dock_date').value = record.dock_date;
-    document.getElementById('edit_status').value = record.status;
-    document.getElementById('edit_reason').value = record.reason;
-    document.getElementById('edit_notes').value = record.notes || '';
+function editDock(button) {
+    // Get data from button attributes
+    const id = button.getAttribute('data-record-id');
+    const employeeName = button.getAttribute('data-employee-name');
+    const amount = button.getAttribute('data-amount');
+    const dockDate = button.getAttribute('data-dock-date');
+    const status = button.getAttribute('data-status');
+    const reason = button.getAttribute('data-reason');
+    const notes = button.getAttribute('data-notes');
+    
+    console.log('Edit Dock Record:', { id, employeeName, amount, dockDate, status, reason, notes });
+    
+    // Set form action
+    document.getElementById('editDockForm').action = '/dock/' + id;
+    
+    // Populate form fields
+    document.getElementById('edit_employee_name').value = employeeName || '';
+    document.getElementById('edit_amount').value = amount || 0;
+    document.getElementById('edit_dock_date').value = dockDate || '';
+    document.getElementById('edit_status').value = status || 'active';
+    document.getElementById('edit_reason').value = reason || '';
+    document.getElementById('edit_notes').value = notes || '';
 }
 </script>
-@endsection
+@endpush

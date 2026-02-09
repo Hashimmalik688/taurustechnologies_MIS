@@ -72,7 +72,7 @@
                                         <td><?php echo e($index + 1); ?></td>
                                         <td>
                                             <strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong>
-                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(strtolower($lead->team ?? '') === 'paraguins'): ?>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(strtolower($lead->team ?? '') === 'peregrine'): ?>
                                                 <span class="badge bg-success ms-2">Paraguin</span>
                                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
@@ -125,155 +125,86 @@
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
                     <div id="phase2" style="display: none;">
-                        <div class="alert alert-info border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-                            <i class="fas fa-info-circle me-2"></i> <strong>Review current information and note any changes</strong>
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i> <strong>Review and update information as needed</strong>
                         </div>
 
-                        <div class="row g-4">
+                        <div class="row g-3">
                             <!-- Name -->
                             <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT NAME</label>
-                                        <div class="p-2 bg-light border rounded mb-3 fw-bold" id="displayName" style="min-height: 38px; line-height: 22px;">-</div>
-                                        <label class="form-label text-primary small mb-1"><i class="fas fa-edit me-1"></i>Changes (if any)</label>
-                                        <input type="text" class="form-control" id="phase2_name" placeholder="Enter new name if changed">
-                                    </div>
-                                </div>
+                                <label class="form-label small text-muted">CURRENT NAME</label>
+                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayName">-</div>
+                                <label class="form-label small">Changes (if any)</label>
+                                <input type="text" class="form-control" id="phase2_name" placeholder="Enter new name if changed">
                             </div>
 
                             <!-- Phone Number -->
                             <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT PHONE</label>
-                                        <div class="p-2 bg-light border rounded mb-3 fw-bold" id="displayPhone" style="min-height: 38px; line-height: 22px;">-</div>
-                                        <label class="form-label text-primary small mb-1"><i class="fas fa-edit me-1"></i>Changes (if any)</label>
-                                        <input type="text" class="form-control" id="phase2_phone" placeholder="Enter new phone if changed">
-                                    </div>
-                                </div>
+                                <label class="form-label small text-muted">CURRENT PHONE</label>
+                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayPhone">-</div>
+                                <label class="form-label small">Changes (if any)</label>
+                                <input type="text" class="form-control" id="phase2_phone" placeholder="Enter new phone if changed">
                             </div>
 
-                            <!-- DOB -->
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT DATE OF BIRTH</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayDOB" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="date" class="form-control required-field" id="phase2_dob" required>
-                                    </div>
-                                </div>
+                            <!-- DOB & SSN -->
+                            <div class="col-md-6">
+                                <label class="form-label small">Date of Birth</label>
+                                <input type="date" class="form-control" id="phase2_dob">
                             </div>
-
-                            <!-- SSN -->
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT SSN</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displaySSN" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="text" class="form-control required-field" id="phase2_ssn" placeholder="XXX-XX-XXXX" required>
-                                    </div>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label small">SSN</label>
+                                <input type="text" class="form-control" id="phase2_ssn" placeholder="XXX-XX-XXXX">
                             </div>
 
                             <!-- Address -->
-                            <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT ADDRESS</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayAddress" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-primary small mb-1"><i class="fas fa-edit me-1"></i>Changes (if any)</label>
-                                        <input type="text" class="form-control" id="phase2_address" placeholder="Enter new address if changed">
-                                    </div>
-                                </div>
+                            <div class="col-12">
+                                <label class="form-label small">Address</label>
+                                <input type="text" class="form-control" id="phase2_address" placeholder="Enter address">
                             </div>
 
                             <!-- Beneficiary -->
+                            <div class="col-12">
+                                <label class="form-label small text-muted">CURRENT BENEFICIARY</label>
+                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayBeneficiary">-</div>
+                                <label class="form-label small">Add/Update Beneficiaries</label>
+                                <div id="beneficiaries-ravens-container">
+                                    <div class="row g-2 mb-2 beneficiary-ravens-row" data-index="0">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control form-control-sm" name="beneficiaries[0][name]" placeholder="Beneficiary Name">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="date" class="form-control form-control-sm" name="beneficiaries[0][dob]" placeholder="DOB">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-success btn-sm w-100" id="add-beneficiary-ravens">
+                                                <i class="bx bx-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Carrier, Coverage, Premium -->
                             <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT BENEFICIARY</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayBeneficiary" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="text" class="form-control required-field" id="phase2_beneficiary" required>
-                                    </div>
-                                </div>
+                                <label class="form-label small">Carrier</label>
+                                <input type="text" class="form-control" id="phase2_carrier">
                             </div>
-
-                            <!-- Carrier -->
                             <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT CARRIER</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayCarrier" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="text" class="form-control required-field" id="phase2_carrier" required>
-                                    </div>
-                                </div>
+                                <label class="form-label small">Coverage Amount</label>
+                                <input type="number" class="form-control" id="phase2_coverage" step="0.01" placeholder="Amount">
                             </div>
-
-                            <!-- Coverage Amount -->
                             <div class="col-md-4">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT COVERAGE AMOUNT</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayCoverage" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="number" class="form-control required-field" id="phase2_coverage" step="0.01" placeholder="Enter amount" required>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Premium -->
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT MONTHLY PREMIUM</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayPremium" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-danger small mb-1"><i class="fas fa-asterisk me-1" style="font-size: 8px;"></i>Update/Confirm <span class="badge bg-danger">Required</span></label>
-                                        <input type="number" class="form-control required-field" id="phase2_premium" step="0.01" placeholder="Enter amount" required>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Account Number -->
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-body">
-                                        <label class="form-label text-muted small mb-1">CURRENT ACCOUNT NUMBER</label>
-                                        <div class="p-2 bg-light border rounded mb-3" id="displayAccountNumber" style="min-height: 38px; line-height: 22px;">Not available</div>
-                                        <label class="form-label text-primary small mb-1"><i class="fas fa-edit me-1"></i>Changes (if any)</label>
-                                        <input type="text" class="form-control" id="phase2_account_number" placeholder="Enter new account number if changed">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Partner/Agent -->
-                            <div class="col-md-6">
-                                <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #fff3cd 0%, #fff9e6 100%);">
-                                    <div class="card-body">
-                                        <label class="form-label fw-bold small mb-2"><i class="fas fa-user-tie me-1"></i>PARTNER/AGENT ASSIGNMENT <span class="badge bg-danger">Required</span></label>
-                                        <select class="form-select form-select-lg required-field" id="phase2_partner_agent" required>
-                                            <option value="">Select Partner/Agent</option>
-                                            <option value="partner_1">John Partner</option>
-                                            <option value="agent_1">-- Agent Mike</option>
-                                            <option value="agent_2">-- Agent Sarah</option>
-                                            <option value="partner_2">Jane Partner</option>
-                                            <option value="agent_3">-- Agent Tom</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <label class="form-label small">Monthly Premium</label>
+                                <input type="number" class="form-control" id="phase2_premium" step="0.01" placeholder="Amount">
                             </div>
                         </div>
 
-                        <div class="text-center mt-4 pb-3">
+                        <div class="text-center mt-4">
                             <button type="button" class="btn btn-light btn-lg px-4 me-2" onclick="goToPhase1()">
                                 <i class="fas fa-arrow-left me-2"></i> Back
                             </button>
-                            <button type="button" class="btn btn-lg px-4" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);" id="showMoreBtn" disabled onclick="goToPhase3()">
-                                <i class="fas fa-arrow-right me-2"></i> Continue to Full Details
+                            <button type="button" class="btn btn-lg px-4" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white;" id="showMoreBtn" onclick="goToPhase3()">
+                                <i class="fas fa-arrow-right me-2"></i> Continue
                             </button>
                         </div>
                     </div>
@@ -496,8 +427,8 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Policy Carrier: <span class="text-danger">*</span></label>
-                                <select class="form-select required-field" id="phase3_policy_carrier" required>
+                                <label class="form-label fw-bold">Policy Carrier:</label>
+                                <select class="form-select" id="phase3_policy_carrier">
                                     <option value="">Select Carrier</option>
                                     <option value="AMAM">AMAM</option>
                                     <option value="Combined">Combined</option>
@@ -507,8 +438,8 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">State: <span class="text-danger">*</span></label>
-                                <select class="form-select required-field" id="phase3_approved_state" required>
+                                <label class="form-label fw-bold">State:</label>
+                                <select class="form-select" id="phase3_approved_state">
                                     <option value="">Select State</option>
                                     <option value="FL">Florida</option>
                                     <option value="TX">Texas</option>
@@ -528,8 +459,22 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-phone-slash me-1"></i> End Call</button>
-                    <button type="button" class="btn btn-success"><i class="fas fa-save me-1"></i> Save & Exit</button>
+                    <!-- Disposition Dropdown (on the left) -->
+                    <div class="btn-group dropup me-auto">
+                        <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ban me-1"></i> Dispose Lead
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('no_answer'); return false;"><i class="fas fa-phone-slash me-2"></i> No Answer</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_number'); return false;"><i class="fas fa-phone-times me-2"></i> Wrong Number</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_details'); return false;"><i class="fas fa-exclamation-triangle me-2"></i> Wrong Details</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action buttons (on the right) -->
+                    <button type="button" class="btn btn-secondary" onclick="closeCallModal()"><i class="fas fa-phone-slash me-1"></i> End Call</button>
+                    <button type="button" class="btn btn-warning" onclick="saveAndExit()"><i class="fas fa-save me-1"></i> Save & Exit</button>
+                    <button type="button" class="btn btn-success" onclick="submitSale()"><i class="fas fa-check-circle me-1"></i> Submit Sale</button>
                 </div>
             </div>
         </div>
@@ -554,8 +499,66 @@
 
     // TEST: Ensure JavaScript is loading
     console.log('✅ Ravens calling script loaded');
+    
+    // Test function to verify modal functionality
+    window.testRavensModal = function() {
+        console.log('🧪 Testing Ravens modal functionality...');
+        const modalElement = document.getElementById('callDetailsModal');
+        console.log('🎭 Modal element:', modalElement);
+        
+        if (modalElement) {
+            try {
+                const modal = new bootstrap.Modal(modalElement);
+                console.log('✅ Bootstrap modal object created successfully');
+                modal.show();
+                console.log('✅ Modal.show() called - modal should be visible');
+                
+                // Auto-close after 3 seconds for testing
+                setTimeout(() => {
+                    modal.hide();
+                    console.log('🚪 Test modal closed automatically');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('❌ Error in modal test:', error);
+            }
+        } else {
+            console.error('❌ Modal element not found!');
+        }
+    };
+    
+    // Direct modal test with data - bypasses API call
+    window.testRavensModalWithData = function() {
+        console.log('🧪 Testing Ravens modal with sample data (bypassing API)...');
+        
+        const testCallData = {
+            event_id: 'test-' + Date.now(),
+            lead_data: {
+                id: 999,
+                cn_name: 'Test Customer',
+                phone_number: '1234567890',
+                date_of_birth: '1990-01-01',
+                ssn: '123-45-6789'
+            },
+            lead_id: 999,
+            status: 'connected'
+        };
+        
+        console.log('🧪 Calling showCallModal directly with test data...');
+        if (typeof showCallModal === 'function') {
+            showCallModal(testCallData);
+        } else {
+            console.error('❌ showCallModal function not found!');
+        }
+    };
+    
+    // Make test available in console
+    console.log('💡 Test commands available:');
+    console.log('  - testRavensModal() - Basic modal test');
+    console.log('  - testRavensModalWithData() - Full modal test with data');
 
     // Unified call function - uses proper Zoom API integration
+    // Shows Ravens form after 10-second delay when call is initiated
     window.makeCall = function(leadId, phoneNumber, button) {
         console.log('makeCall called with:', leadId, phoneNumber);
         
@@ -766,9 +769,9 @@
         }
     }
 
-    // New flow: Show form 12 seconds after dial, close immediately if call ends
+    // New flow: Show form after 10 seconds, monitor for call end
     window.startRealCallDetection = function(leadId, phoneNumber, leadName) {
-        console.log("📞 Starting call detection (auto-show after 12 seconds)...", { leadId, phoneNumber, leadName });
+        console.log("📞 Starting call detection (show form after 10 seconds)...", { leadId, phoneNumber, leadName });
         
         let isMonitoringActive = true;
         let formShown = false;
@@ -777,14 +780,14 @@
         // Store current call info
         window.currentCallInfo = { leadId, phoneNumber, leadName };
         
-        // Show form after 12 seconds (regardless of call status)
-        const autoShowTimer = setTimeout(() => {
+        // Show form after 10 seconds
+        const formTimer = setTimeout(() => {
             if (isMonitoringActive) {
-                console.log('⏰ 12 seconds passed - showing Ravens form');
+                console.log('⏰ 10 seconds passed - showing Ravens form');
                 formShown = true;
                 showRavensFormForCall(leadId, phoneNumber, leadName, 'connected', 0);
             }
-        }, 12000); // 12 seconds
+        }, 10000); // 10 seconds
         
         // Start polling to detect call end (but only close form if it's already shown)
         function checkCallStatus() {
@@ -805,12 +808,13 @@
                         const status = data.status || data.call_status;
                         console.log(`Current status: ${status}`);
                         
-                        // Check for ended states
+                        // Check for ended states - comprehensive webhook detection
                         if (status === 'ended' || status === 'completed' || status === 'failed' || 
                             status === 'cancelled' || status === 'missed' || status === 'voicemail' || 
-                            status === 'rejected' || status === 'busy') {
+                            status === 'rejected' || status === 'busy' || status === 'hangup' || 
+                            status === 'disconnected' || status === 'timeout') {
                             
-                            console.log(`❌ Call ended detected! Status: ${status}, Form shown: ${formShown}`);
+                            console.log(`❌ Call ended detected via webhook! Status: ${status}, Form shown: ${formShown}`);
                             
                             // Only close form if it's already shown
                             if (formShown) {
@@ -851,7 +855,7 @@
             if (isMonitoringActive) {
                 console.log('⏰ Call monitoring timeout - stopping detection');
                 isMonitoringActive = false;
-                clearTimeout(autoShowTimer);
+                clearTimeout(formTimer);
                 if (checkInterval) clearInterval(checkInterval);
             }
         }, 600000); // 10 minutes
@@ -874,14 +878,24 @@
     // Show Ravens form when call is connected
     window.showRavensFormForCall = function(leadId, phoneNumber, leadName, callStatus, duration) {
         console.log(`🎯 Showing Ravens form: ${leadName}`);
+        console.log('🔍 Debug: leadId=' + leadId + ', phoneNumber=' + phoneNumber + ', callStatus=' + callStatus);
         
         toastr.success(`Opening form for: ${leadName}`, 'Call Form');
         
         // Fetch full lead data from the server to populate the form
+        console.log('🌐 Fetching lead data from:', `/ravens/leads/${leadId}/data`);
         fetch(`/ravens/leads/${leadId}/data`)
-            .then(response => response.json())
+            .then(response => {
+                console.log('🌐 API Response Status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
             .then(leadData => {
                 console.log('📋 Got full lead data:', leadData);
+                console.log('🔍 Checking if showCallModal function exists...');
+                console.log('showCallModal type:', typeof showCallModal);
                 
                 // Create proper call event data for the modal
                 const callEventData = {
@@ -893,8 +907,7 @@
                         date_of_birth: leadData.date_of_birth || '',
                         ssn: leadData.ssn || '',
                         gender: leadData.gender || '',
-                        beneficiary: leadData.beneficiary || '',
-                        beneficiary_dob: leadData.beneficiary_dob || '',
+                        beneficiaries: leadData.beneficiaries || [],
                         carrier_name: leadData.carrier_name || leadData.carrier || '',
                         coverage_amount: leadData.coverage_amount || leadData.coverage || '',
                         monthly_premium: leadData.monthly_premium || leadData.premium || '',
@@ -926,17 +939,21 @@
                 
                 // Show the Ravens form modal with full data
                 if (typeof showCallModal === 'function') {
-                    console.log('Opening Ravens form with full lead data');
+                    console.log('✅ Opening Ravens form with full lead data');
+                    console.log('🔍 Call event data:', callEventData);
                     showCallModal(callEventData);
                 } else {
+                    console.error('❌ showCallModal function not found! Redirecting to lead details');
                     // Fallback - redirect to lead details
-                    console.warn('showCallModal not available, redirecting to lead details');
                     window.location.href = `/ravens/leads/${leadId}`;
                 }
             })
             .catch(error => {
-                console.error('Failed to fetch lead data:', error);
-                // Still show the form with minimal data
+                console.error('❌ Failed to fetch lead data:', error);
+                console.error('API endpoint might be broken or lead ID invalid');
+                
+                // Try to show modal anyway with minimal data
+                console.log('🎭 Attempting to show modal with minimal data...');
                 const callEventData = {
                     event_id: 'call_' + Date.now(),
                     lead_data: {
@@ -947,10 +964,11 @@
                     lead_id: leadId,
                     status: callStatus
                 };
-                
+
                 if (typeof showCallModal === 'function') {
                     showCallModal(callEventData);
                 } else {
+                    console.error('❌ showCallModal function not available, redirecting to lead details');
                     window.location.href = `/ravens/leads/${leadId}`;
                 }
             });
@@ -1225,10 +1243,48 @@
     // ===== PHASE NAVIGATION SYSTEM =====
     // Note: currentLeadData is already declared globally at line 477 as window.currentLeadData
 
+    function closeCallModal() {
+        const modalElement = document.getElementById('callDetailsModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            } else {
+                // Fallback if modal instance not found
+                modalElement.classList.remove('show');
+                modalElement.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }
+        }
+        console.log('Call modal closed');
+    }
+
     function goToPhase1() {
-        document.getElementById('phase1').style.display = 'block';
-        document.getElementById('phase2').style.display = 'none';
-        document.getElementById('phase3').style.display = 'none';
+        console.log('📋 Switching to Phase 1');
+        
+        const phase1 = document.getElementById('phase1');
+        const phase2 = document.getElementById('phase2');
+        const phase3 = document.getElementById('phase3');
+        
+        console.log('🔍 Phase elements found:', {
+            phase1: !!phase1,
+            phase2: !!phase2,
+            phase3: !!phase3
+        });
+        
+        if (phase1) {
+            phase1.style.display = 'block';
+            console.log('✅ Phase 1 set to display: block');
+        } else {
+            console.error('❌ Phase 1 element not found!');
+        }
+        
+        if (phase2) phase2.style.display = 'none';
+        if (phase3) phase3.style.display = 'none';
+        
+        console.log('📋 Phase 1 should now be visible');
     }
 
     function goToPhase2() {
@@ -1279,7 +1335,12 @@
         document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || ld.ssn || 'N/A';
         document.getElementById('orig_smoker').textContent = ld.smoker == 1 ? 'Yes' : 'No';
         document.getElementById('orig_height_weight').textContent = ld.height_weight || 'N/A';
-        document.getElementById('orig_address').textContent = ld.address || 'N/A';
+        // Address fallback: use address, else state, else birth place
+        let addressDisplay3 = ld.address;
+        if (!addressDisplay3 || addressDisplay3.trim() === '') {
+            addressDisplay3 = ld.state || ld.birth_place || 'N/A';
+        }
+        document.getElementById('orig_address').textContent = addressDisplay3;
 
         // Medical Information
         document.getElementById('orig_medical_issue').textContent = ld.medical_issue || 'N/A';
@@ -1288,8 +1349,27 @@
         document.getElementById('orig_doctor_address').textContent = ld.doctor_address || 'N/A';
 
         // Policy Information
-        document.getElementById('orig_beneficiary').textContent = document.getElementById('phase2_beneficiary').value || 'N/A';
-        document.getElementById('orig_beneficiary_dob').textContent = formatDate(ld.beneficiary_dob);
+        // Show all current beneficiaries (names and DOBs if available)
+        let beneficiariesDisplay = 'N/A';
+        if (ld.beneficiaries && ld.beneficiaries.length > 0) {
+            beneficiariesDisplay = ld.beneficiaries.map(b => {
+                if (b.dob) {
+                    return b.name + ' (' + formatDate(b.dob) + ')';
+                }
+                return b.name;
+            }).join(', ');
+        }
+        document.getElementById('orig_beneficiary').textContent = beneficiariesDisplay;
+        // Show first beneficiary DOB if available
+        let beneficiaryDob = '';
+        if (ld.beneficiaries && ld.beneficiaries.length > 0 && ld.beneficiaries[0].dob) {
+            beneficiaryDob = formatDate(ld.beneficiaries[0].dob);
+        } else if (ld.beneficiary_dob) {
+            beneficiaryDob = formatDate(ld.beneficiary_dob);
+        } else {
+            beneficiaryDob = 'N/A';
+        }
+        document.getElementById('orig_beneficiary_dob').textContent = beneficiaryDob;
         document.getElementById('orig_policy_type').textContent = ld.policy_type || 'N/A';
         document.getElementById('orig_carrier').textContent = document.getElementById('phase2_carrier').value || 'N/A';
         document.getElementById('orig_coverage').textContent = document.getElementById('phase2_coverage').value ? '$' + parseFloat(document.getElementById('phase2_coverage').value).toLocaleString() : 'N/A';
@@ -1313,49 +1393,45 @@
         document.getElementById('change_phone').value = ld.phone_number || '';
         document.getElementById('change_dob').value = formatDateInput(document.getElementById('phase2_dob').value);
         document.getElementById('change_ssn').value = document.getElementById('phase2_ssn').value || '';
-        document.getElementById('change_beneficiary').value = document.getElementById('phase2_beneficiary').value || '';
+        // Beneficiary is now handled separately in beneficiaries array
         document.getElementById('change_carrier').value = document.getElementById('phase2_carrier').value || '';
         document.getElementById('change_coverage').value = document.getElementById('phase2_coverage').value || '';
         document.getElementById('change_premium').value = document.getElementById('phase2_premium').value || '';
     }
 
     function validatePhase2Fields() {
-        const requiredFields = document.querySelectorAll('#phase2 .required-field');
-        let allFilled = true;
-
-        requiredFields.forEach(field => {
-            if (!field.value || field.value.trim() === '') {
-                allFilled = false;
-            }
-        });
-
+        // All fields are now optional, always enable the Continue button
         const showMoreBtn = document.getElementById('showMoreBtn');
-        if (allFilled) {
+        if (showMoreBtn) {
             showMoreBtn.disabled = false;
             showMoreBtn.classList.remove('btn-secondary');
-        } else {
-            showMoreBtn.disabled = true;
-            showMoreBtn.classList.add('btn-secondary');
         }
     }
 
-    // Add event listeners to Phase 2 required fields
-    document.addEventListener('DOMContentLoaded', function() {
-        const requiredFields = document.querySelectorAll('#phase2 .required-field');
-        requiredFields.forEach(field => {
-            field.addEventListener('input', validatePhase2Fields);
-            field.addEventListener('change', validatePhase2Fields);
-        });
-    });
-
     function showCallModal(callData) {
         console.log('=== CALL CONNECTED ===', callData);
+        console.log('🔍 Attempting to show Ravens modal...');
+        
         const leadData = callData.lead_data;
         window.currentLeadData = leadData;
 
-        // PHASE 1: Show caller identification
-        document.getElementById('callerName').textContent = leadData.cn_name || 'Unknown Caller';
-        document.getElementById('callerPhone').textContent = leadData.phone_number || 'No Number';
+        // PHASE 1: Show caller identification - Check if elements exist first
+        const callerNameEl = document.getElementById('callerName');
+        const callerPhoneEl = document.getElementById('callerPhone');
+        
+        if (callerNameEl) {
+            callerNameEl.textContent = leadData.cn_name || 'Unknown Caller';
+            console.log('✅ Caller name set:', leadData.cn_name);
+        } else {
+            console.error('❌ callerName element not found!');
+        }
+        
+        if (callerPhoneEl) {
+            callerPhoneEl.textContent = leadData.phone_number || 'No Number';
+            console.log('✅ Caller phone set:', leadData.phone_number);
+        } else {
+            console.error('❌ callerPhone element not found!');
+        }
 
         // Helper to format date for display
         const formatDateDisplay = (dateStr) => {
@@ -1383,37 +1459,236 @@
         };
 
         // PHASE 2: Populate CURRENT VALUE displays (read-only)
-        document.getElementById('displayName').textContent = leadData.cn_name || 'Not available';
-        document.getElementById('displayPhone').textContent = leadData.phone_number || 'Not available';
-        document.getElementById('displayDOB').textContent = formatDateDisplay(leadData.date_of_birth);
-        document.getElementById('displaySSN').textContent = leadData.ssn || 'Not available';
-        document.getElementById('displayAddress').textContent = leadData.address || 'Not available';
-        document.getElementById('displayBeneficiary').textContent = leadData.beneficiary || 'Not available';
-        document.getElementById('displayCarrier').textContent = leadData.carrier_name || 'Not available';
-        document.getElementById('displayCoverage').textContent = leadData.coverage_amount ? '$' + parseFloat(leadData.coverage_amount).toLocaleString() : 'Not available';
-        document.getElementById('displayPremium').textContent = leadData.monthly_premium ? '$' + parseFloat(leadData.monthly_premium).toFixed(2) : 'Not available';
-        document.getElementById('displayAccountNumber').textContent = leadData.account_number || 'Not available';
+        // Use safe element access to prevent crashes if elements don't exist
+        const safeSetText = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            } else {
+                console.warn(`⚠️ Element not found: ${id}`);
+            }
+        };
+        
+        const safeSetValue = (id, value) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = value;
+            } else {
+                console.warn(`⚠️ Element not found: ${id}`);
+            }
+        };
+        
+        safeSetText('displayName', leadData.cn_name || 'Not available');
+        safeSetText('displayPhone', leadData.phone_number || 'Not available');
+        safeSetText('displayDOB', formatDateDisplay(leadData.date_of_birth));
+        safeSetText('displaySSN', leadData.ssn || 'Not available');
+        // Address fallback: use address, else state, else birth place
+        let addressDisplay = leadData.address;
+        if (!addressDisplay || addressDisplay.trim() === '') {
+            addressDisplay = leadData.state || leadData.birth_place || 'Not available';
+        }
+        safeSetText('displayAddress', addressDisplay);
+        
+        // Handle beneficiaries display - show as comma-separated list
+        // Show all current beneficiaries (names and DOBs if available)
+        let beneficiariesDisplay = 'Not available';
+        if (leadData.beneficiaries && leadData.beneficiaries.length > 0) {
+            beneficiariesDisplay = leadData.beneficiaries.map(b => {
+                if (b.dob) {
+                    return b.name + ' (' + formatDateDisplay(b.dob) + ')';
+                }
+                return b.name;
+            }).join(', ');
+        }
+        safeSetText('displayBeneficiary', beneficiariesDisplay);
+        
+        safeSetText('displayCarrier', leadData.carrier_name || 'Not available');
+        safeSetText('displayCoverage', leadData.coverage_amount ? '$' + parseFloat(leadData.coverage_amount).toLocaleString() : 'Not available');
+        safeSetText('displayPremium', leadData.monthly_premium ? '$' + parseFloat(leadData.monthly_premium).toFixed(2) : 'Not available');
+        safeSetText('displayAccountNumber', leadData.account_number || 'Not available');
 
         // PHASE 2: Pre-fill CHANGES fields with existing values (user can modify)
-        document.getElementById('phase2_name').value = '';
-        document.getElementById('phase2_phone').value = '';
-        document.getElementById('phase2_dob').value = formatDateInput(leadData.date_of_birth);
-        document.getElementById('phase2_ssn').value = leadData.ssn || '';
-        document.getElementById('phase2_address').value = '';
-        document.getElementById('phase2_beneficiary').value = leadData.beneficiary || '';
-        document.getElementById('phase2_carrier').value = leadData.carrier_name || '';
-        document.getElementById('phase2_coverage').value = leadData.coverage_amount || '';
-        document.getElementById('phase2_premium').value = leadData.monthly_premium || '';
-        document.getElementById('phase2_account_number').value = '';
+        safeSetValue('phase2_name', '');
+        safeSetValue('phase2_phone', '');
+        safeSetValue('phase2_dob', formatDateInput(leadData.date_of_birth));
+        safeSetValue('phase2_ssn', leadData.ssn || '');
+        // Pre-fill address field with fallback
+        let addressValue = leadData.address;
+        if (!addressValue || addressValue.trim() === '') {
+            addressValue = leadData.state || leadData.birth_place || '';
+        }
+        safeSetValue('phase2_address', addressValue);
+        
+        // Clear existing beneficiary rows
+        const beneficiaryContainer = document.getElementById('beneficiaries-container-ravens');
+        if (beneficiaryContainer) {
+            beneficiaryContainer.innerHTML = '';
+            window.beneficiaryIndexRavens = 0;
+            
+            // Populate beneficiaries from lead data
+            if (leadData.beneficiaries && leadData.beneficiaries.length > 0) {
+                leadData.beneficiaries.forEach((beneficiary, index) => {
+                const row = document.createElement('div');
+                row.className = 'beneficiary-ravens-row row mb-2';
+                row.innerHTML = `
+                    <div class="col-md-5">
+                        <input type="text" class="form-control beneficiary-name-ravens" 
+                               placeholder="Beneficiary Name" value="${beneficiary.name || ''}" required>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="date" class="form-control beneficiary-dob-ravens" 
+                               value="${formatDateInput(beneficiary.dob || '')}" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-beneficiary-ravens">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                `;
+                beneficiaryContainer.appendChild(row);
+                window.beneficiaryIndexRavens++;
+            });
+            } else {
+                // Add one empty beneficiary row
+                const row = document.createElement('div');
+                row.className = 'beneficiary-ravens-row row mb-2';
+                row.innerHTML = `
+                    <div class="col-md-5">
+                        <input type="text" class="form-control beneficiary-name-ravens" 
+                               placeholder="Beneficiary Name" required>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="date" class="form-control beneficiary-dob-ravens" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-beneficiary-ravens">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                `;
+                beneficiaryContainer.appendChild(row);
+                window.beneficiaryIndexRavens++;
+            }
+        } else {
+            console.warn('⚠️ beneficiaries-container-ravens element not found');
+        }
+        
+        safeSetValue('phase2_carrier', leadData.carrier_name || '');
+        safeSetValue('phase2_coverage', leadData.coverage_amount || '');
+        safeSetValue('phase2_premium', leadData.monthly_premium || '');
+        safeSetValue('phase2_account_number', '');
 
         // Validate Phase 2 fields after populating
-        validatePhase2Fields();
+        if (typeof validatePhase2Fields === 'function') {
+            validatePhase2Fields();
+        }
 
         // Show modal and start at Phase 1
         const modalElement = document.getElementById('callDetailsModal');
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-        goToPhase1();
+        console.log('🎭 Modal element found:', modalElement);
+        
+        if (!modalElement) {
+            console.error('❌ Modal element not found! Cannot show Ravens form.');
+            return;
+        }
+        
+        try {
+            console.log('🔍 Checking Bootstrap availability:', typeof bootstrap);
+            if (typeof bootstrap === 'undefined') {
+                console.error('❌ Bootstrap is not available! This is the problem.');
+                throw new Error('Bootstrap not available');
+            }
+            
+            const modal = new bootstrap.Modal(modalElement);
+            console.log('🎭 Bootstrap modal created:', modal);
+            
+            // CRITICAL: Show the modal first, then make sure phase1 is visible
+            modal.show();
+            console.log('✅ Modal.show() called');
+            
+            // Ensure phase1 is visible after modal shows
+            setTimeout(() => {
+                console.log('🎭 Making sure phase1 is visible...');
+                goToPhase1();
+                
+                // Double-check phase1 visibility
+                const phase1 = document.getElementById('phase1');
+                if (phase1) {
+                    console.log('🔍 Phase1 display style:', phase1.style.display);
+                    if (phase1.style.display === 'none' || phase1.style.display === '') {
+                        phase1.style.display = 'block';
+                        console.log('🔧 Phase1 forced to display: block');
+                    }
+                }
+            }, 100);
+            
+            console.log('✅ Ravens modal should now be visible with phase1');
+            
+            // Check if modal is actually visible after a longer delay to allow animation
+            setTimeout(() => {
+                const isVisible = modalElement.classList.contains('show');
+                const computedStyle = window.getComputedStyle(modalElement);
+                console.log('🔍 Modal visibility check:');
+                console.log('  - Has "show" class:', isVisible);
+                console.log('  - Display style:', computedStyle.display);
+                console.log('  - Visibility style:', computedStyle.visibility);
+                console.log('  - Opacity style:', computedStyle.opacity);
+                console.log('  - Z-index:', computedStyle.zIndex);
+                
+                // Check if modal backdrop exists
+                const backdrop = document.querySelector('.modal-backdrop');
+                console.log('  - Backdrop exists:', !!backdrop);
+                
+                // Check phase1 visibility specifically
+                const phase1 = document.getElementById('phase1');
+                if (phase1) {
+                    const phase1Style = window.getComputedStyle(phase1);
+                    console.log('  - Phase1 display:', phase1Style.display);
+                    console.log('  - Phase1 visibility:', phase1Style.visibility);
+                }
+                
+                if (!isVisible || computedStyle.display === 'none') {
+                    console.error('❌ Modal is not visible! There may be a CSS or Bootstrap issue.');
+                    
+                    // Force show the modal using direct DOM manipulation
+                    console.log('🔧 Attempting manual modal visibility fix...');
+                    modalElement.style.display = 'block';
+                    modalElement.classList.add('show');
+                    modalElement.setAttribute('aria-hidden', 'false');
+                    modalElement.setAttribute('aria-modal', 'true');
+                    modalElement.setAttribute('role', 'dialog');
+                    
+                    // Ensure modal is above everything else
+                    modalElement.style.zIndex = '9999';
+                    
+                    // Also make sure phase1 is visible
+                    if (phase1) {
+                        phase1.style.display = 'block';
+                        console.log('🔧 Phase1 also forced visible');
+                    }
+                    
+                    console.log('🔧 Manual fix applied, checking again...');
+                    setTimeout(() => {
+                        const newStyle = window.getComputedStyle(modalElement);
+                        console.log('🔍 After manual fix - Display:', newStyle.display, 'Visibility:', newStyle.visibility);
+                    }, 100);
+                } else {
+                    console.log('✅ Modal appears to be visible correctly');
+                }
+            }, 800);
+            
+        } catch (error) {
+            console.error('❌ Error showing modal:', error);
+            console.log('💡 Trying fallback method...');
+            // Fallback: try using jQuery if Bootstrap modal fails
+            if (typeof $ !== 'undefined') {
+                $('#callDetailsModal').modal('show');
+                console.log('✅ Fallback: jQuery modal shown');
+                goToPhase1();
+            } else {
+                console.error('❌ Both Bootstrap and jQuery modal methods failed');
+            }
+        }
 
         // Mark as read
         if (callData.event_id && !callData.event_id.toString().startsWith('test-')) {
@@ -1531,11 +1806,271 @@
         });
     }
     
+    /**
+     * Save and Exit - Save lead data without marking as sale
+     */
+    function saveAndExit() {
+        // Collect all form data from Phase 3
+        const leadId = window.currentLeadData?.id;
+        
+        if (!leadId) {
+            toastr.error('Lead ID not found');
+            return;
+        }
+        
+        const formData = {
+            lead_id: leadId,
+            cn_name: document.getElementById('change_name')?.value || null,
+            phone_number: document.getElementById('change_phone')?.value || null,
+            date_of_birth: document.getElementById('change_dob')?.value || null,
+            ssn: document.getElementById('change_ssn')?.value || null,
+            gender: document.getElementById('change_gender')?.value || null,
+            address: document.getElementById('change_address')?.value || null,
+            beneficiary: document.getElementById('change_beneficiary')?.value || null,
+            beneficiary_dob: document.getElementById('change_beneficiary_dob')?.value || null,
+            policy_type: document.getElementById('change_policy_type')?.value || null,
+            carrier_name: document.getElementById('change_carrier')?.value || null,
+            coverage_amount: document.getElementById('change_coverage')?.value || null,
+            monthly_premium: document.getElementById('change_premium')?.value || null,
+            initial_draft_date: document.getElementById('change_draft_date')?.value || null,
+            bank_name: document.getElementById('change_bank_name')?.value || null,
+            account_type: document.getElementById('change_account_type')?.value || null,
+            routing_number: document.getElementById('change_routing')?.value || null,
+            account_number: document.getElementById('change_account')?.value || null,
+            account_verified_by: document.getElementById('change_verified_by')?.value || null,
+            bank_balance: document.getElementById('change_balance')?.value || null,
+            source: document.getElementById('change_source')?.value || null,
+            closer_name: document.getElementById('change_closer')?.value || null,
+        };
+        
+        // Send to server
+        fetch('/ravens/leads/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success('Lead information saved successfully');
+                // Close modal
+                closeCallModal();
+            } else {
+                toastr.error(data.message || 'Failed to save lead information');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving lead:', error);
+            toastr.error('An error occurred while saving');
+        });
+    }
+    
+    /**
+     * Submit Sale - Mark lead as sold and send to sales section
+     */
+    function submitSale() {
+        const leadId = window.currentLeadData?.id;
+        
+        if (!leadId) {
+            toastr.error('Lead ID not found');
+            return;
+        }
+        
+        // All fields are now optional, skip required field validation
+        
+        // Collect beneficiary data
+        const beneficiaries = [];
+        document.querySelectorAll('.beneficiary-ravens-row').forEach((row, index) => {
+            const name = row.querySelector(`[name="beneficiaries[${index}][name]"]`)?.value;
+            const dob = row.querySelector(`[name="beneficiaries[${index}][dob]"]`)?.value;
+            if (name) {
+                beneficiaries.push({ name: name, dob: dob || null });
+            }
+        });
+        
+        // Collect all form data
+        const formData = {
+            lead_id: leadId,
+            cn_name: document.getElementById('phase2_name')?.value || document.getElementById('change_name')?.value || null,
+            phone_number: document.getElementById('phase2_phone')?.value || document.getElementById('change_phone')?.value || null,
+            date_of_birth: document.getElementById('phase2_dob')?.value || document.getElementById('change_dob')?.value || null,
+            ssn: document.getElementById('phase2_ssn')?.value || document.getElementById('change_ssn')?.value || null,
+            gender: document.getElementById('phase2_gender')?.value || document.getElementById('change_gender')?.value || null,
+            address: document.getElementById('phase2_address')?.value || document.getElementById('change_address')?.value || null,
+            beneficiaries: beneficiaries,
+            policy_type: document.getElementById('change_policy_type')?.value || null,
+            carrier_name: document.getElementById('phase2_carrier')?.value || document.getElementById('change_carrier')?.value || null,
+            coverage_amount: document.getElementById('phase2_coverage')?.value || document.getElementById('change_coverage')?.value || null,
+            monthly_premium: document.getElementById('phase2_premium')?.value || document.getElementById('change_premium')?.value || null,
+            initial_draft_date: document.getElementById('change_draft_date')?.value || null,
+            bank_name: document.getElementById('change_bank_name')?.value || null,
+            account_type: document.getElementById('change_account_type')?.value || null,
+            routing_number: document.getElementById('change_routing')?.value || null,
+            account_number: document.getElementById('phase2_account_number')?.value || document.getElementById('change_account')?.value || null,
+            account_verified_by: document.getElementById('change_verified_by')?.value || null,
+            bank_balance: document.getElementById('change_balance')?.value || null,
+            source: document.getElementById('change_source')?.value || null,
+            closer_name: <?php echo json_encode(Auth::user()->name ?? 'Unknown', 15, 512) ?>,
+            policy_carrier: document.getElementById('phase3_policy_carrier')?.value || null,
+            state: document.getElementById('phase3_approved_state')?.value || null,
+        };
+        
+        // Confirm submission
+        if (!confirm('Are you sure you want to submit this sale? This will move the lead to the sales section and notify QA and managers.')) {
+            return;
+        }
+        
+        // Send to server
+        fetch('/ravens/leads/submit-sale', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success(data.message || 'Sale submitted successfully!');
+                
+                // Show warning if this is a repeat sale
+                if (data.is_repeat_sale) {
+                    toastr.warning(data.repeat_sale_message, 'Repeat Sale Detected', {
+                        timeOut: 10000
+                    });
+                }
+                
+                // Close modal
+                closeCallModal();
+                
+                // Reload page to refresh leads list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                toastr.error(data.message || 'Failed to submit sale');
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting sale:', error);
+            toastr.error('An error occurred while submitting sale');
+        });
+    }
+    
     // Professional Zoom API Integration ✅
     // - Uses real OAuth authentication with Zoom
     // - Professional call status monitoring via Zoom API
     // - Ravens form appears only when call is verified as completed
     // - No popups or confirmations - direct professional calling
+    
+    // Beneficiary management for Ravens form
+    document.addEventListener('DOMContentLoaded', function() {
+        let beneficiaryIndexRavens = 1;
+        
+        const addBeneficiaryBtn = document.getElementById('add-beneficiary-ravens');
+        if (addBeneficiaryBtn) {
+            addBeneficiaryBtn.addEventListener('click', function() {
+                const container = document.getElementById('beneficiaries-ravens-container');
+                const newRow = document.createElement('div');
+                newRow.className = 'row g-2 mb-2 beneficiary-ravens-row';
+                newRow.setAttribute('data-index', beneficiaryIndexRavens);
+                newRow.innerHTML = `
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-sm" name="beneficiaries[${beneficiaryIndexRavens}][name]" placeholder="Beneficiary Name ${beneficiaryIndexRavens + 1}">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="date" class="form-control form-control-sm" name="beneficiaries[${beneficiaryIndexRavens}][dob]" placeholder="DOB">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm w-100 remove-beneficiary-ravens">
+                            <i class="bx bx-minus"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(newRow);
+                beneficiaryIndexRavens++;
+                
+                // Attach remove handler
+                newRow.querySelector('.remove-beneficiary-ravens').addEventListener('click', function() {
+                    newRow.remove();
+                });
+            });
+        }
+        
+        // Remove beneficiary (for existing rows)
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-beneficiary-ravens')) {
+                e.target.closest('.beneficiary-ravens-row').remove();
+            }
+        });
+    });
+
+    /**
+     * Dispose current lead with a disposition reason
+     */
+    function disposeCurrentLead(disposition) {
+        if (!window.currentLeadData || !window.currentLeadData.id) {
+            toastr.error('No active lead to dispose');
+            return;
+        }
+
+        const dispositionLabels = {
+            'no_answer': 'No Answer',
+            'wrong_number': 'Wrong Number',
+            'wrong_details': 'Wrong Details'
+        };
+
+        const confirmMessage = `Are you sure you want to dispose this lead as "${dispositionLabels[disposition]}"?`;
+        
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+
+        // Optional: Ask for notes
+        const notes = prompt('Add notes (optional):');
+
+        // Send disposition request
+        fetch('<?php echo e(route('ravens.leads.dispose')); ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                lead_id: window.currentLeadData.id,
+                disposition: disposition,
+                notes: notes || ''
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success('Lead disposed successfully as ' + data.disposition);
+                
+                // Close modal and remove from list
+                $('#callingModal').modal('hide');
+                window.currentLeadData = null;
+                window.isCallActive = false;
+                
+                // Reload page to refresh lead list
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                toastr.error(data.message || 'Failed to dispose lead');
+            }
+        })
+        .catch(error => {
+            console.error('Error disposing lead:', error);
+            toastr.error('An error occurred while disposing the lead');
+        });
+    }
     
 </script>
 <?php $__env->stopSection(); ?>

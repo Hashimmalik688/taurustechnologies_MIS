@@ -56,8 +56,8 @@
                                 <label for="payment_module" class="form-label">Payment Module <span class="text-danger">*</span></label>
                                 <select class="form-select @error('payment_module') is-invalid @enderror" 
                                         id="payment_module" name="payment_module" required>
-                                    <option value="on_draft" {{ old('payment_module') == 'on_draft' ? 'selected' : '' }}>On Draft</option>
-                                    <option value="on_issue" {{ old('payment_module', 'on_issue') == 'on_issue' ? 'selected' : '' }}>On Issue</option>
+                                    <option value="on_draft" {{ old('payment_module', 'on_draft') == 'on_draft' ? 'selected' : '' }}>On Draft</option>
+                                    <option value="on_issue" {{ old('payment_module') == 'on_issue' ? 'selected' : '' }}>On Issue</option>
                                     <option value="as_earned" {{ old('payment_module') == 'as_earned' ? 'selected' : '' }}>As Earned</option>
                                 </select>
                                 @error('payment_module')
@@ -68,34 +68,12 @@
                         </div>
 
                         <div class="row">
-                            <!-- Phone -->
-                            <div class="col-md-4 mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                                       id="phone" name="phone" value="{{ old('phone') }}" 
-                                       placeholder="(555) 123-4567">
-                                @error('phone')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- SSN Last 4 -->
-                            <div class="col-md-4 mb-3">
-                                <label for="ssn_last4" class="form-label">Last 4 of SSN</label>
-                                <input type="text" class="form-control @error('ssn_last4') is-invalid @enderror" 
-                                       id="ssn_last4" name="ssn_last4" value="{{ old('ssn_last4') }}" 
-                                       maxlength="4" pattern="[0-9]{4}" placeholder="1234">
-                                @error('ssn_last4')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
                             <!-- Plan Types -->
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-12 mb-3">
                                 <label for="plan_types" class="form-label">Plan Types</label>
                                 <input type="text" class="form-control @error('plan_types') is-invalid @enderror" 
-                                       id="plan_types" name="plan_types" value="{{ old('plan_types') }}" 
-                                       placeholder="Term, Whole Life, Universal">
+                                       id="plan_types" name="plan_types" value="{{ old('plan_types', 'G.I, Graded, Level, Modified') }}" 
+                                       placeholder="G.I, Graded, Level, Modified">
                                 @error('plan_types')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -152,7 +130,8 @@
                         <!-- Status -->
                         <div class="mb-4">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                <input type="hidden" name="is_active" value="0">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1"
                                        {{ old('is_active', true) ? 'checked' : '' }}>
                                 <label class="form-check-label" for="is_active">
                                     Active (Visible in dropdowns)
@@ -178,6 +157,16 @@
 @section('script')
 <script>
 let bracketIndex = 0;
+
+// Check if opened in modal mode
+const urlParams = new URLSearchParams(window.location.search);
+const isModal = urlParams.get('modal') === '1';
+
+if (isModal) {
+    // Hide breadcrumb in modal mode
+    const breadcrumb = document.querySelector('.page-content > .container-fluid > .row:first-child');
+    if (breadcrumb) breadcrumb.style.display = 'none';
+}
 
 document.getElementById('addBracket').addEventListener('click', function() {
     const container = document.getElementById('brackets-container');
@@ -228,5 +217,48 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+// Handle form submission in modal mode
+if (isModal) {
+    const form = document.getElementById('carrierForm');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Notify parent window
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'carrierCreated',
+                        carrier: data.carrier
+                    }, '*');
+                }
+                
+                // Show success message
+                alert('Carrier created successfully! The page will refresh.');
+                
+                // Close modal
+                window.close();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to create carrier'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while creating the carrier.');
+        });
+    });
+}
 </script>
 @endsection

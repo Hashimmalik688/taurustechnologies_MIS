@@ -3,7 +3,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('css'); ?>
-    <link href="<?php echo e(URL::asset('public/css/light-theme.css')); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo e(URL::asset('css/light-theme.css')); ?>" rel="stylesheet" type="text/css" />
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -179,18 +179,150 @@
         </div>
     </div>
 
-    <!-- Performance Chart (Optional) -->
-    <div class="row">
-        <div class="col-xl-12">
+    <!-- My Sales Section -->
+    <div class="row mt-4">
+        <div class="col-12">
             <div class="card bordered">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">My Performance This Week</h4>
-                </div>
-                <div class="card-body">
-                    <div class="text-center text-muted py-5">
-                        <i class="bx bx-bar-chart fs-1 mb-3"></i>
-                        <p>Performance charts coming soon...</p>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="bx bx-dollar-circle me-2"></i>My Sales Records
+                    </h4>
+                    <div>
+                        <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            Total: <?php echo e($mySales->total() ?? 0); ?>
+
+                        </span>
                     </div>
+                </div>
+
+                <div class="card-body">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($mySales) && $mySales->count() > 0): ?>
+                        <!-- Sales Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-success"><?php echo e($mySales->where('status', 'accepted')->count()); ?></h4>
+                                        <p class="mb-0 text-muted">Accepted</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-info"><?php echo e($mySales->where('status', 'underwritten')->count()); ?></h4>
+                                        <p class="mb-0 text-muted">Underwritten</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-warning"><?php echo e($mySales->where('status', 'pending')->count()); ?></h4>
+                                        <p class="mb-0 text-muted">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-danger">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-danger"><?php echo e($mySales->where('status', 'declined')->count()); ?></h4>
+                                        <p class="mb-0 text-muted">Declined</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="60">#</th>
+                                        <th>Customer Name</th>
+                                        <th>Sale Date</th>
+                                        <th>Status</th>
+                                        <th>Coverage</th>
+                                        <th>Premium</th>
+                                        <th>Carrier</th>
+                                        <th width="100">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $mySales; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $sale): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr>
+                                            <td><?php echo e($mySales->firstItem() + $index); ?></td>
+                                            <td>
+                                                <strong><?php echo e($sale->cn_name ?? 'N/A'); ?></strong>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->phone_number): ?>
+                                                    <br><small class="text-muted"><?php echo e($sale->phone_number); ?></small>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <i class="bx bx-calendar me-1"></i>
+                                                <?php echo e($sale->sale_at ? $sale->sale_at->format('M d, Y') : 'N/A'); ?>
+
+                                            </td>
+                                            <td>
+                                                <?php
+                                                    $statusColors = [
+                                                        'accepted' => 'success',
+                                                        'underwritten' => 'info',
+                                                        'pending' => 'warning',
+                                                        'declined' => 'danger',
+                                                        'chargeback' => 'dark',
+                                                    ];
+                                                    $color = $statusColors[$sale->status] ?? 'secondary';
+                                                ?>
+                                                <span class="badge bg-<?php echo e($color); ?>"><?php echo e(ucfirst($sale->status)); ?></span>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->qa_status): ?>
+                                                    <br><small class="text-muted">QA: <?php echo e($sale->qa_status); ?></small>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->coverage_amount): ?>
+                                                    <strong>$<?php echo e(number_format($sale->coverage_amount, 0)); ?></strong>
+                                                <?php else: ?>
+                                                    <span class="text-muted">N/A</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->monthly_premium): ?>
+                                                    $<?php echo e(number_format($sale->monthly_premium, 2)); ?>
+
+                                                <?php else: ?>
+                                                    <span class="text-muted">N/A</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td><?php echo e($sale->carrier_name ?? 'N/A'); ?></td>
+                                            <td class="text-center">
+                                                <a href="<?php echo e(route('sales.index')); ?>?search=<?php echo e($sale->phone_number); ?>" 
+                                                   class="btn btn-sm btn-primary" 
+                                                   title="View in Sales">
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted">
+                                Showing <?php echo e($mySales->firstItem()); ?> to <?php echo e($mySales->lastItem()); ?> of <?php echo e($mySales->total()); ?>
+
+                            </div>
+                            <div><?php echo e($mySales->links()); ?></div>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="bx bx-package fs-1 text-muted"></i>
+                            <p class="text-muted mt-3">No sales yet. Start calling to make your first sale!</p>
+                            <a href="<?php echo e(route('ravens.calling')); ?>" class="btn btn-primary mt-2">
+                                <i class="bx bx-phone-call me-1"></i> Go to Calling System
+                            </a>
+                        </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>

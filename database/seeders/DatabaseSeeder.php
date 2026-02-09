@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             SettingsSeeder::class,
             RolePermissionSeeder::class,
+            EmployeeEMSDataSeeder::class, // <-- Add EMS data seeder
         ]);
     }
 }

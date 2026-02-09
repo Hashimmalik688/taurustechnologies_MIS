@@ -12,11 +12,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = new User;
-        $user->name = 'Super Admin';
-        $user->email = 'admin@taurus.com';
-        $user->password = bcrypt('password');
-        $user->save();
-        $user->assignRole('Super Admin');
+        $user = User::where('email', 'admin@taurus.com')->first();
+        if ($user) {
+            $user->password = bcrypt('Hashim@431');
+            $user->save();
+        } else {
+            $user = new User;
+            $user->name = 'Super Admin';
+            $user->email = 'admin@taurus.com';
+            $user->password = bcrypt('Hashim@431');
+            $user->save();
+            $user->assignRole('Super Admin');
+        }
     }
 }

@@ -256,4 +256,343 @@ class LedgerController extends Controller
 
         return view('admin.ledger.summary', compact('summary', 'categoryBreakdown', 'vendorBreakdown', 'startDate', 'endDate'));
     }
+
+    /**
+     * Display petty cash ledger
+     */
+    public function pettyCashIndex(Request $request)
+    {
+        // Get all entries in chronological order for balance calculations and serial numbers
+        $allEntries = \App\Models\PettyCashLedger::orderBy('date', 'asc')->orderBy('id', 'asc')->get();
+        
+        // Calculate running balances and serial numbers
+        $runningBalance = 0;
+        $balanceMap = [];
+        $serialNumberMap = [];
+        
+        foreach ($allEntries as $index => $entry) {
+            $runningBalance += $entry->debit - $entry->credit;
+            $balanceMap[$entry->id] = $runningBalance;
+            $serialNumberMap[$entry->id] = $index + 1;  // Serial number starts from 1
+        }
+
+        // Get unique heads/categories
+        $heads = \App\Models\PettyCashLedger::distinct()->pluck('head')->sort()->values();
+
+        // Get filter parameters
+        $selectedHead = $request->input('head', '');
+        $fromDate = $request->input('from_date', '');
+        $toDate = $request->input('to_date', '');
+        
+        $categoryTotal = 0;
+        $categoryMonthTotal = 0;
+
+        // Build base query
+        $query = \App\Models\PettyCashLedger::query();
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->where('date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $query->where('date', '<=', $toDate);
+        }
+
+        // Filter by head/category if provided
+        if ($selectedHead) {
+            $query->where('head', $selectedHead);
+        }
+
+        // Get filtered entries sorted by date descending (newest first for display)
+        $entries = $query->orderBy('date', 'desc')->orderBy('id', 'desc')->get();
+
+        // Calculate category totals
+        if ($selectedHead) {
+            $categoryQuery = \App\Models\PettyCashLedger::where('head', $selectedHead);
+            
+            // All-time total
+            $categoryTotal = $categoryQuery->sum('credit');
+            
+            // For the selected date range or current month
+            $categoryMonthQuery = \App\Models\PettyCashLedger::where('head', $selectedHead);
+            if ($fromDate && $toDate) {
+                $categoryMonthQuery->whereBetween('date', [$fromDate, $toDate]);
+            } else {
+                $categoryMonthQuery->whereBetween('date', [now()->startOfMonth(), now()->endOfMonth()]);
+            }
+            $categoryMonthTotal = $categoryMonthQuery->sum('credit');
+        }
+
+        return view('admin.finance.petty-cash', compact('entries', 'balanceMap', 'serialNumberMap', 'heads', 'selectedHead', 'categoryTotal', 'categoryMonthTotal', 'fromDate', 'toDate'));
+    }
+
+    /**
+     * Print petty cash ledger in general ledger format
+     */
+    public function pettyCashPrint(Request $request)
+    {
+        // Get all entries in chronological order for balance calculations
+        $allEntries = \App\Models\PettyCashLedger::orderBy('date', 'asc')->orderBy('id', 'asc')->get();
+        
+        // Calculate running balances
+        $runningBalance = 0;
+        $balanceMap = [];
+        
+        foreach ($allEntries as $entry) {
+            $runningBalance += $entry->debit - $entry->credit;
+            $balanceMap[$entry->id] = $runningBalance;
+        }
+
+        // Get unique heads/categories
+        $heads = \App\Models\PettyCashLedger::distinct()->pluck('head')->sort()->values();
+
+        // Get filter parameters
+        $selectedHead = $request->input('head', '');
+        $fromDate = $request->input('from_date', '');
+        $toDate = $request->input('to_date', '');
+        
+        $categoryTotal = 0;
+        $categoryMonthTotal = 0;
+
+        // Build base query
+        $query = \App\Models\PettyCashLedger::query();
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->where('date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $query->where('date', '<=', $toDate);
+        }
+
+        // Filter by head/category if provided
+        if ($selectedHead) {
+            $query->where('head', $selectedHead);
+        }
+
+        // Get filtered entries
+        $entries = $query->orderBy('date', 'asc')->orderBy('id', 'asc')->get();
+
+        // Calculate category totals
+        if ($selectedHead) {
+            $categoryQuery = \App\Models\PettyCashLedger::where('head', $selectedHead);
+            
+            // All-time total
+            $categoryTotal = $categoryQuery->sum('credit');
+            
+            // For the selected date range or current month
+            $categoryMonthQuery = \App\Models\PettyCashLedger::where('head', $selectedHead);
+            if ($fromDate && $toDate) {
+                $categoryMonthQuery->whereBetween('date', [$fromDate, $toDate]);
+            } else {
+                $categoryMonthQuery->whereBetween('date', [now()->startOfMonth(), now()->endOfMonth()]);
+            }
+            $categoryMonthTotal = $categoryMonthQuery->sum('credit');
+        }
+
+        return view('admin.finance.petty-cash-print', compact('entries', 'balanceMap', 'heads', 'selectedHead', 'categoryTotal', 'categoryMonthTotal', 'fromDate', 'toDate'));
+    }
+
+    /**
+     * Export petty cash ledger to CSV
+     */
+    public function pettyCashExport(Request $request)
+    {
+        // Get filter parameters
+        $selectedHead = $request->input('head', '');
+        $fromDate = $request->input('from_date', '');
+        $toDate = $request->input('to_date', '');
+
+        // Build base query
+        $query = \App\Models\PettyCashLedger::query();
+
+        // Apply date filters
+        if ($fromDate) {
+            $query->where('date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $query->where('date', '<=', $toDate);
+        }
+
+        // Filter by head/category if provided
+        if ($selectedHead) {
+            $query->where('head', $selectedHead);
+        }
+
+        // Get filtered entries
+        $entries = $query->orderBy('date', 'asc')->orderBy('id', 'asc')->get();
+
+        // Calculate running balances
+        $runningBalance = 0;
+        $csvData = [];
+        
+        // Add headers
+        $csvData[] = ['TAURUS TECHNOLOGIES - PETTY CASH LEDGER'];
+        $csvData[] = [];
+        $csvData[] = ['Report Date', date('m-d-Y')];
+        $csvData[] = ['User', auth()->user()->name];
+        
+        if ($selectedHead) {
+            $csvData[] = ['Category', $selectedHead];
+        }
+        
+        if ($fromDate && $toDate) {
+            $csvData[] = ['Date Range', date('M d, Y', strtotime($fromDate)) . ' - ' . date('M d, Y', strtotime($toDate))];
+        }
+        
+        $csvData[] = [];
+        $csvData[] = ['G/L No.', 'Date', 'Head', 'Description', 'Debit', 'Credit', 'Balance'];
+        
+        // Add data rows
+        foreach ($entries as $entry) {
+            $runningBalance += $entry->debit - $entry->credit;
+            $csvData[] = [
+                $entry->serial_number,
+                $entry->date->format('m/d/Y'),
+                $entry->head,
+                $entry->description,
+                $entry->debit > 0 ? number_format($entry->debit, 2) : '',
+                $entry->credit > 0 ? number_format($entry->credit, 2) : '',
+                number_format($runningBalance, 2),
+            ];
+        }
+        
+        // Add totals row
+        $csvData[] = [];
+        $csvData[] = ['TOTALS', '', '', '', number_format($entries->sum('debit'), 2), number_format($entries->sum('credit'), 2), number_format($runningBalance, 2)];
+        
+        // Create CSV response
+        $filename = 'petty-cash-ledger-' . date('Y-m-d-His') . '.csv';
+        $handle = fopen('php://output', 'w');
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        
+        fclose($handle);
+        exit;
+    }
+
+    /**
+     * Get petty cash entry for editing
+     */
+    public function pettyCashEdit($id)
+    {
+        $entry = \App\Models\PettyCashLedger::findOrFail($id);
+        return response()->json([
+            'id' => $entry->id,
+            'date' => $entry->date->format('Y-m-d'),
+            'description' => $entry->description,
+            'head' => $entry->head,
+            'debit' => $entry->debit,
+            'credit' => $entry->credit,
+        ]);
+    }
+
+    /**
+     * Store new petty cash entry
+     */
+    public function pettyCashStore(Request $request)
+    {
+        try {
+            $request->validate([
+                'date' => 'required|date',
+                'description' => 'required|string|max:255',
+                'head' => 'required|string|max:100',
+                'debit' => 'nullable|numeric|min:0',
+                'credit' => 'nullable|numeric|min:0',
+            ]);
+
+            $debit = $request->debit ?? 0;
+            $credit = $request->credit ?? 0;
+
+            // Calculate the next serial number (excluding soft-deleted records)
+            $maxSerial = \App\Models\PettyCashLedger::withoutTrashed()->max('serial_number');
+            $nextSerialNumber = ($maxSerial ?? 0) + 1;
+
+            // Create new entry
+            \App\Models\PettyCashLedger::create([
+                'serial_number' => $nextSerialNumber,
+                'date' => $request->date,
+                'description' => $request->description,
+                'head' => $request->head,
+                'debit' => $debit,
+                'credit' => $credit,
+            ]);
+
+            return redirect()->route('petty-cash.index')->with('success', 'Entry created successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error creating entry: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update existing petty cash entry
+     */
+    public function pettyCashUpdate(Request $request, $id)
+    {
+        try {
+            $entry = \App\Models\PettyCashLedger::findOrFail($id);
+
+            $request->validate([
+                'date' => 'required|date',
+                'description' => 'required|string|max:255',
+                'head' => 'required|string|max:100',
+                'debit' => 'nullable|numeric|min:0',
+                'credit' => 'nullable|numeric|min:0',
+            ]);
+
+            $debit = $request->debit ?? 0;
+            $credit = $request->credit ?? 0;
+
+            // Recalculate balance for this entry and all subsequent entries
+            $oldDebit = $entry->debit;
+            $oldCredit = $entry->credit;
+            $difference = ($debit - $credit) - ($oldDebit - $oldCredit);
+
+            $entry->update([
+                'date' => $request->date,
+                'description' => $request->description,
+                'head' => $request->head,
+                'debit' => $debit,
+                'credit' => $credit,
+            ]);
+
+            // Update balance for all entries after this one
+            $laterEntries = \App\Models\PettyCashLedger::where('id', '>', $id)->orderBy('id', 'asc')->get();
+            foreach ($laterEntries as $laterEntry) {
+                $laterEntry->update(['balance' => $laterEntry->balance + $difference]);
+            }
+
+            return redirect()->route('petty-cash.index')->with('success', 'Entry updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error updating entry: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Delete petty cash entry
+     */
+    public function pettyCashDestroy($id)
+    {
+        try {
+            $entry = \App\Models\PettyCashLedger::findOrFail($id);
+            $difference = $entry->debit - $entry->credit;
+
+            // Update balance for all entries after this one
+            $laterEntries = \App\Models\PettyCashLedger::where('id', '>', $id)->orderBy('id', 'asc')->get();
+            foreach ($laterEntries as $laterEntry) {
+                $laterEntry->update(['balance' => $laterEntry->balance - $difference]);
+            }
+
+            $entry->delete();
+
+            return redirect()->route('petty-cash.index')->with('success', 'Entry deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error deleting entry: ' . $e->getMessage());
+        }
+    }
 }

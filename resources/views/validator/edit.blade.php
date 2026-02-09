@@ -23,7 +23,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        @include('paraguins.closers.form', ['lead' => $lead, 'isValidator' => true])
+                        @include('peregrine.closers.form', ['lead' => $lead, 'isValidator' => true])
                         
                         <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-success btn-lg">

@@ -334,7 +334,7 @@ File: Main Js File
         initSettings();
         initLanguage();
         initPreloader();
-        Waves.init();
+        // Waves.init(); // Disabled - waves.min.js not available
         initCheckAll();
     }
 

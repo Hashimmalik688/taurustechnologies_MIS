@@ -310,7 +310,7 @@
                                     <label for="punctuality_bonus" class="form-label">Punctuality Bonus (Rs)</label>
                                     <input type="number" id="punctuality_bonus" name="punctuality_bonus" class="form-control"
                                         step="0.01" min="0" value="0">
-                                    <div class="form-text">Bonus if 0 offs, <2 half days, <4 late arrivals</div>
+                                    <div class="form-text">Bonus if 0 offs, <2 half days, <4 late days</div>
                                 </div>
                             </div>
                         </div>
@@ -347,7 +347,7 @@
                                         <li><strong>Working Days:</strong> 22 days per month</li>
                                         <li><strong>Daily Salary:</strong> Basic Salary ÷ 22</li>
                                         <li><strong>Leave Deduction:</strong> Full day = 1 day salary, Half day = 0.5 day salary</li>
-                                        <li><strong>Punctuality Rules:</strong> No bonus if ≥1 off OR ≥2 half days OR ≥4 late arrivals (after 7:15 AM)</li>
+                                        <li><strong>Punctuality Rules:</strong> No bonus if ≥1 off OR ≥2 half days OR ≥4 late days (after 7:15 AM)</li>
                                         <li><strong>Sales Bonus:</strong> Only paid for sales above target (if sales employee)</li>
                                     </ul>
                                 </div>

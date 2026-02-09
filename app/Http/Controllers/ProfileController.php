@@ -24,9 +24,9 @@ class ProfileController extends Controller
     public function updateProfile(Request $request, $id)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:1024'],
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $user = User::find($id);
@@ -40,25 +40,44 @@ class ProfileController extends Controller
             ], 404);
         }
 
-        $user->name = $request->get('name');
-        $user->email = $request->get('email');
+        // Update name if provided
+        if ($request->filled('name')) {
+            $user->name = trim($request->name);
+        }
 
-        if ($request->file('avatar')) {
+        // Update email if provided
+        if ($request->filled('email')) {
+            $user->email = strtolower(trim($request->email));
+        }
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && file_exists(public_path($user->avatar))) {
+                @unlink(public_path($user->avatar));
+            }
+
             $avatar = $request->file('avatar');
             $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
             $avatarPath = public_path('/images/');
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($avatarPath)) {
+                mkdir($avatarPath, 0755, true);
+            }
+            
             $avatar->move($avatarPath, $avatarName);
             $user->avatar = '/images/' . $avatarName;
         }
 
-        $user->update();
+        $user->save();
 
         if ($user) {
-            Session::flash('message', 'User Details Updated successfully!');
+            Session::flash('message', 'Profile updated successfully!');
             Session::flash('alert-class', 'alert-success');
             return response()->json([
                 'isSuccess' => true,
-                'Message' => 'User Details Updated successfully!',
+                'Message' => 'Profile updated successfully!',
             ], 200);
         }
 

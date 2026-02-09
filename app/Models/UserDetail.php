@@ -17,6 +17,7 @@ class UserDetail extends Model
         'carriers',
         'role',
         'phone',
+        'plain_password',
         'ssn_last4',
         'dob',
         'gender',

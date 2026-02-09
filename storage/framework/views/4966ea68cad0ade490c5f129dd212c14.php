@@ -3,181 +3,1403 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('css'); ?>
+    <style>
+        .chat-container * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        .message-text, .chat-search-input, #messageInput, input, textarea, .form-control { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
+        .chat-container img, .chat-container button { -webkit-user-drag: none; -moz-user-drag: none; user-drag: none; }
+        body { overflow-x: hidden; }
+    </style>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/chat.css']); ?>
 <?php $__env->stopSection(); ?>
-
 <?php $__env->startSection('content'); ?>
+
     <div class="chat-wrapper">
         <div class="chat-container">
-            <!-- Conversations Sidebar -->
-            <div class="chat-sidebar">
-                <div class="chat-sidebar-header">
-                    <h5 class="mb-0"><i class="bx bx-message-dots"></i> Chats</h5>
-                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#newChatModal">
-                        <i class="bx bx-edit-alt"></i>
+            <!-- LEFT SIDEBAR - ICONS -->
+            <div class="chat-icon-sidebar">
+                <button class="chat-logo-btn" title="Taurus CRM">T</button>
+
+                <div class="chat-icon-nav">
+                    <button class="chat-icon-btn active" data-tab="chats" title="Messages">
+                        <i class="bx bx-message-dots"></i>
+                    </button>
+                    <button class="chat-icon-btn" data-tab="groups" title="Groups">
+                        <i class="bx bx-group"></i>
+                    </button>
+                    <button class="chat-icon-btn" data-tab="communities" title="Communities">
+                        <i class="bx bx-buildings"></i>
+                    </button>
+                    <button class="chat-icon-btn" data-tab="people" title="People">
+                        <i class="bx bx-user"></i>
                     </button>
                 </div>
 
-                <div class="chat-search-box">
-                    <i class="bx bx-search"></i>
-                    <input type="text" id="searchConversations" placeholder="Search messages or people" class="chat-search-input">
+                <div class="chat-icon-bottom">
+                </div>
+            </div>
+
+            <!-- MAIN SIDEBAR - CONVERSATIONS & COMMUNITIES -->
+            <div class="chat-sidebar">
+                <!-- Chats Tab -->
+                <div id="chats-tab" class="chat-sidebar-content active">
+                    <div class="chat-sidebar-header">
+                        <h5>Messages</h5>
+                    </div>
+
+                    <div class="chat-search-box">
+                        <input type="text" id="searchConversations" placeholder="Search conversations..." class="chat-search-input">
+                    </div>
+
+                    <div class="conversations-list" id="conversationsList" style="max-height: calc(100vh - 220px); overflow-y: auto; overflow-x: hidden;">
+                        <div class="loading-conversations">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p style="font-size: 0.85rem; margin-top: 8px;">Loading chats...</p>
+                        </div>
+                    </div>
                 </div>
 
-                            <div class="conversations-list" id="conversationsList">
-                                <div class="loading-conversations">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="text-muted mt-2">Loading chats...</p>
-                                </div>
-                            </div>
+                <!-- Groups Tab -->
+                <div id="groups-tab" class="chat-sidebar-content" style="display: none;">
+                    <div class="chat-sidebar-header">
+                        <h5>Groups</h5>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal" title="Create new group" style="background: linear-gradient(135deg, #d4a574, #b8860b); border: none; padding: 6px 12px; font-size: 13px; font-weight: 600; color: white;">
+                                <i class="bx bx-plus" style="font-size: 16px;"></i> Create
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Chat Area -->
-                        <div class="chat-main" id="chatMain">
-                            <div class="chat-welcome">
-                                <i class="bx bx-message-square-dots"></i>
-                                <h4>Select a conversation</h4>
-                                <p>Choose from your existing conversations or start a new one</p>
-                            </div>
+                    <div class="chat-search-box">
+                        <input type="text" id="searchGroups" placeholder="Search groups..." class="chat-search-input">
+                    </div>
+
+                    <div class="group-conversations-list" id="groupConversationsList" style="max-height: calc(100vh - 220px); overflow-y: auto; overflow-x: hidden;">
+                        <!-- Group conversations will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Communities Tab -->
+                <div id="communities-tab" class="chat-sidebar-content" style="display: none;">
+                    <div class="chat-sidebar-header">
+                        <h5>Communities</h5>
+                        <div class="btn-group">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->hasRole(['Manager', 'Super Admin', 'Co-ordinator'])): ?>
+                                <button class="btn" data-bs-toggle="modal" data-bs-target="#newCommunityModal" title="Create community">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="chat-search-box">
+                        <input type="text" id="searchCommunities" placeholder="Search communities..." class="chat-search-input">
+                    </div>
+
+                    <div class="communities-list" id="communitiesList" style="max-height: calc(100vh - 220px); overflow-y: auto; overflow-x: hidden;">
+                        <!-- Communities will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- People Tab -->
+                <div id="people-tab" class="chat-sidebar-content" style="display: none;">
+                    <!-- People tab now uses full container width when active -->
+                </div>
+            </div>
+
+            <!-- CHAT MAIN AREA -->
+            <div class="chat-main" id="chatMain">
+                <div class="chat-welcome">
+                    <i class="bx bx-message-square-dots"></i>
+                    <h4>Welcome to Taurus Chat</h4>
+                    <p>Select a conversation to start messaging or create a new chat</p>
+                </div>
+            </div>
+
+            <!-- PEOPLE FULL PAGE -->
+            <div class="people-main" id="peopleMain" style="display: none; width: 100%; padding: 20px; background: var(--chat-bg-secondary);">
+                <div class="people-header" style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid var(--chat-border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+                        <div>
+                            <h2 style="color: var(--chat-text-primary); font-weight: 700; margin: 0; font-size: 28px;">Team Directory</h2>
+                            <p style="color: var(--chat-text-secondary); margin: 5px 0 0 0; font-size: 16px;">Connect with your colleagues</p>
+                        </div>
+                        <div style="position: relative;">
+                            <input type="text" id="searchPeopleCards" placeholder="Search people..." style="
+                                padding: 12px 20px 12px 45px; 
+                                border: 2px solid var(--chat-border-color); 
+                                border-radius: 25px; 
+                                width: 300px; 
+                                font-size: 14px; 
+                                transition: all 0.3s ease;
+                                outline: none;
+                                background: var(--chat-bg-body);
+                                color: var(--chat-text-primary);
+                            " onFocus="this.style.borderColor='#DAA520';" onBlur="this.style.borderColor='var(--chat-border-color)';">
+                            <i class="bx bx-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--chat-text-secondary); font-size: 18px;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="people-content" style="max-width: 1200px; margin: 0 auto; max-height: calc(100vh - 280px); overflow-y: auto; padding-right: 10px;">
+                    <div id="peopleCards" class="people-cards-grid" style="
+                        display: grid; 
+                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+                        gap: 20px; 
+                        padding: 0;
+                    ">
+                        <!-- People cards will be loaded here -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- New Chat Modal -->
+    <!-- New Chat Modal - Redesigned -->
     <div class="modal fade" id="newChatModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Start New Chat</h5>
+                    <div>
+                        <h5 class="modal-title">Create Group</h5>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Create a group chat</p>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Chat Type Selection -->
-                    <div class="mb-4">
-                        <label class="form-label">Chat Type</label>
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="chatType" id="directChat" value="direct" checked>
-                            <label class="btn btn-outline-primary" for="directChat">
-                                <i class="bx bx-user"></i> Direct Message
-                            </label>
-                            <input type="radio" class="btn-check" name="chatType" id="groupChat" value="group">
-                            <label class="btn btn-outline-primary" for="groupChat">
-                                <i class="bx bx-group"></i> Group Chat
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Direct Chat Section -->
-                    <div id="directChatSection">
-                        <label class="form-label">Select User</label>
-                        <div class="mb-3">
-                            <input type="text" id="searchUsers" class="form-control" placeholder="Search users...">
-                        </div>
-                        <div id="usersList" class="users-list" style="max-height: 300px; overflow-y: auto;">
-                            <!-- Users will be populated here -->
-                        </div>
-                    </div>
-
                     <!-- Group Chat Section -->
-                    <div id="groupChatSection" style="display: none;">
-                        <div class="mb-3">
-                            <label class="form-label">Group Name</label>
-                            <input type="text" id="groupName" class="form-control" placeholder="Enter group name...">
+                    <div id="groupChatSection">
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px;">Group Name</label>
+                            <input type="text" id="groupName" class="form-control" placeholder="Enter group name..." style="border-radius: 8px;">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Select Members</label>
-                            <input type="text" id="searchGroupUsers" class="form-control" placeholder="Search users...">
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Picture</label>
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div id="groupAvatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 32px; overflow: hidden;">
+                                    <i class="bx bx-group" style="font-size: 36px;"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="file" class="form-control" id="groupAvatar" accept="image/*" style="border-radius: 8px;">
+                                    <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Optional: Upload a profile picture for your group</small>
+                                </div>
+                            </div>
                         </div>
-                        <div id="groupUsersList" class="users-list" style="max-height: 250px; overflow-y: auto;">
-                            <!-- Users will be populated here -->
+
+                        <div style="margin-bottom: 16px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px;">Add Members</label>
+                            <input type="text" id="searchGroupUsers" class="form-control" placeholder="Search and select members..." style="border-radius: 8px;">
                         </div>
-                        <div id="selectedMembers" class="mt-3">
-                            <label class="form-label">Selected Members</label>
-                            <div id="membersList" class="d-flex flex-wrap gap-2">
+
+                        <div style="margin-bottom: 16px;">
+                            <div id="groupUsersList" class="users-list" style="max-height: 250px; overflow-y: auto;">
+                                <!-- Users will be populated here -->
+                            </div>
+                        </div>
+
+                        <div id="selectedMembers">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 12px;">Selected Members <span id="memberCount" style="color: #9ca3af;">(0)</span></label>
+                            <div id="membersList" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
                                 <!-- Selected members will appear here -->
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="createChatBtn">Create Chat</button>
+                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151;">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="createChatBtn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">Create Group</button>
                 </div>
             </div>
         </div>
     </div>
 <?php $__env->stopSection(); ?>
 
-<!-- Group Management Modal -->
-<div class="modal fade" id="groupManagementModal" tabindex="-1" aria-labelledby="groupManagementModalLabel" aria-hidden="true">
+<!-- Group Management Modal - Redesigned -->
+<div class="modal fade" id="groupManagementModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="groupManagementModalLabel">Manage Group</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div>
+                    <h5 class="modal-title" style="font-weight: 700; color: #111827;">Manage Group</h5>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Edit group settings and members</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <!-- Group Info Section -->
-                    <div class="col-md-6">
-                        <div class="group-info-section">
-                            <h6>Group Information</h6>
-                            <div class="form-group mb-3">
-                                <label for="groupNameEdit">Group Name:</label>
-                                <input type="text" id="groupNameEdit" class="form-control" placeholder="Enter group name">
+                <!-- Group Information Section -->
+                <div style="margin-bottom: 32px;">
+                    <h6 style="font-weight: 700; color: #111827; margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;">Group Information</h6>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Picture</label>
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div id="groupAvatarPreview" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #d4a574, #b8860b); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 20px; overflow: hidden;">
+                                <i class="bx bx-group" style="font-size: 24px;"></i>
                             </div>
-                            <div class="form-group mb-3">
-                                <label>Created by:</label>
-                                <p id="groupCreator" class="form-control-plaintext">-</p>
+                            <div style="flex: 1;">
+                                <input type="file" class="form-control" id="groupAvatar" accept="image/*" style="border-radius: 8px; font-size: 13px;">
+                                <small style="display: block; margin-top: 4px; color: #6b7280; font-size: 11px;">Upload a profile picture</small>
                             </div>
-                            <div class="group-actions">
-                                <button type="button" class="btn btn-primary" onclick="updateGroupName()">Update Name</button>
-                                <button type="button" class="btn btn-danger" onclick="deleteGroup()" id="deleteGroupBtn">Delete Group</button>
-                            </div>
+                            <button type="button" class="btn" onclick="updateGroupAvatar()" style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">Save Picture</button>
                         </div>
                     </div>
                     
-                    <!-- Members Management Section -->
-                    <div class="col-md-6">
-                        <div class="members-section">
-                            <h6>Members Management</h6>
-                            <div class="current-members mb-3">
-                                <label>Current Members:</label>
-                                <div id="currentMembersList" class="members-list">
-                                    <!-- Members will be loaded here -->
-                                </div>
-                            </div>
-                            
-                            <div class="add-members">
-                                <label>Add New Members:</label>
-                                <div class="form-group">
-                                    <input type="text" id="memberSearch" class="form-control" placeholder="Search users to add...">
-                                </div>
-                                <div id="availableUsersList" class="users-list mt-2" style="max-height: 200px; overflow-y: auto;">
-                                    <!-- Available users will be loaded here -->
-                                </div>
-                            </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Name</label>
+                        <input type="text" id="groupNameEdit" class="form-control" placeholder="Enter group name" style="border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Created By</label>
+                        <p id="groupCreator" style="background: #f9fafb; padding: 10px 12px; border-radius: 8px; margin: 0; color: #6b7280; font-size: 14px;">-</p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn" onclick="updateGroupName()" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Update Name</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="deleteGroup()" id="deleteGroupBtn" style="flex: 1; padding: 10px 16px; border: 1px solid #f87171; color: #dc2626; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer;">Delete Group</button>
+                    </div>
+                </div>
+
+                <!-- Members Management Section -->
+                <div>
+                    <h6 style="font-weight: 700; color: #111827; margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;">Members</h6>
+                    
+                    <!-- Current Members -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-weight: 600; color: #111827; margin-bottom: 12px; display: block;">Current Members</label>
+                        <div id="currentMembersList" class="members-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Add New Members -->
+                    <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
+                        <label style="font-weight: 600; color: #111827; margin-bottom: 12px; display: block;">Add Members</label>
+                        <div id="availableUsersList" class="users-list" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Available users will be loaded here -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Close</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- GIF Picker Modal -->
+<div class="modal fade" id="gifPickerModal" tabindex="-1" aria-labelledby="gifPickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%); border-bottom: none; padding: 20px 24px;">
+                <h5 class="modal-title" id="gifPickerModalLabel" style="color: white; font-weight: 700; font-size: 20px; margin: 0;">
+                    <i class="bx bx-image" style="margin-right: 8px;"></i>Choose a GIF
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px; background: var(--bs-body-bg);">
+                <!-- Search Input -->
+                <div style="margin-bottom: 20px;">
+                    <input type="text" id="gifSearchInput" class="form-control" placeholder="Search GIFs (e.g., happy, dance, celebrate)..." style="border-radius: 8px; border: 2px solid #e5e7eb; padding: 12px 16px;">
+                </div>
+                
+                <!-- GIF Grid -->
+                <div id="gifGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 4px;">
+                    <!-- GIFs will be loaded here -->
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--bs-secondary-color);">
+                        <i class="bx bx-search" style="font-size: 48px; margin-bottom: 12px; opacity: 0.5;"></i>
+                        <p>Search for GIFs above</p>
+                    </div>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="gifLoading" style="display: none; text-align: center; padding: 40px; color: var(--bs-secondary-color);">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p style="margin-top: 12px;">Loading GIFs...</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: var(--bs-secondary-bg); border-top: 1px solid var(--bs-border-color); padding: 16px 24px;">
+                <small style="color: var(--bs-secondary-color); margin-right: auto;">
+                    <i class="bx bx-info-circle" style="margin-right: 4px;"></i>Powered by Tenor
+                </small>
+                <button type="button" class="btn" data-bs-dismiss="modal" style="background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); color: var(--bs-body-color); padding: 10px 16px; border-radius: 8px; font-weight: 600;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Community Members Modal -->
+    <div class="modal fade" id="communityMembersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold">Manage Members</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="manageCommunityId">
+                    
+                    <!-- Add Member Section -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-2">Add New Member</label>
+                        <div class="input-group">
+                            <select class="form-select" id="newCommunityMemberSelect">
+                                <option value="">Select user...</option>
+                                <!-- Populated by JS -->
+                            </select>
+                            <button class="btn btn-primary" id="addCommunityMemberBtn">Add</button>
+                        </div>
+                    </div>
+
+                    <!-- Current Members List -->
+                    <div>
+                        <label class="form-label fw-bold mb-2">Current Members</label>
+                        <div id="communityMembersList" class="list-group list-group-flush border rounded" style="max-height: 300px; overflow-y: auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu (Hidden by default) -->
+    <div id="communityContextMenu" class="dropdown-menu" style="display: none; position: fixed; z-index: 9999;">
+        <a class="dropdown-item" href="#" id="ctxManageMembers">
+            <i class="bx bx-user-plus me-2"></i> Manage Members
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item text-danger" href="#" id="ctxDeleteCommunity">
+            <i class="bx bx-trash me-2"></i> Delete Community
+        </a>
+    </div>
+
+    <!-- New Community Modal - Redesigned -->
+    <div class="modal fade" id="newCommunityModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" style="font-weight: 700; color: #111827;">Create Community</h5>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Organize groups and channels</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createCommunityForm">
+                        <?php echo csrf_field(); ?>
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Community Name</label>
+                            <input type="text" class="form-control" id="communityName" name="name" placeholder="e.g., Product Team" required style="border-radius: 8px;">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Description</label>
+                            <textarea class="form-control" id="communityDescription" name="description" placeholder="What's this community about?" rows="2" style="border-radius: 8px;"></textarea>
+                            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Optional: Help members understand the purpose</small>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Community Color</label>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div id="communityColorPreview" style="width: 60px; height: 60px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                    <i class="bx bx-bullhorn" style="font-size: 28px;"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <input type="color" class="form-control form-control-color" id="communityColor" name="color" value="#667eea" style="width: 100%; height: 50px; border-radius: 8px; cursor: pointer;">
+                                    <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Pick a color to represent this community</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Add Members (Optional)</label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <select class="form-select" id="communityMemberSelect" style="border-radius: 8px;">
+                                    <option value="">Select a member to add...</option>
+                                </select>
+                                <button type="button" id="addMemberToCommunityBtn" style="padding: 10px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;">
+                                    Add
+                                </button>
+                            </div>
+                            <div id="communityMembersDisplay" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                <!-- Members will be added here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden input to store member IDs -->
+                        <input type="hidden" id="communityMemberIds" name="member_ids" value="[]">
+                    </form>
+                </div>
+                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="createCommunityBtn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">Create Community</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <?php $__env->startSection('script'); ?>
 <script>
-const currentUserId = <?php echo e(auth()->id()); ?>;
-let currentConversationId = null;
-let currentConversationName = '';
-let messagesRefreshInterval = null;
-let conversationsRefreshInterval = null;
+// Chat Application v3.0 - Taurus CRM
 
-// API helper
+// ===== GLOBAL VARIABLES (MUST BE DECLARED FIRST) =====
+window.currentUserId = <?php echo e(auth()->id()); ?>;
+if (typeof window.currentUserName === 'undefined') {
+    window.currentUserName = '<?php echo e(auth()->user()->name); ?>';
+}
+if (typeof window.userRoles === 'undefined') {
+    window.userRoles = <?php echo json_encode(auth()->user()->roles->pluck('name')->toArray()); ?>;
+}
+if (typeof window.isSuperAdmin === 'undefined') {
+    window.isSuperAdmin = window.userRoles.includes('Super Admin') || window.userRoles.includes('CEO');
+}
+if (typeof window.currentConversationId === 'undefined') {
+    window.currentConversationId = null;
+}
+if (typeof window.currentConversationName === 'undefined') {
+    window.currentConversationName = '';
+}
+
+// Translation variables
+const translations = {
+    noAnnouncementsYet: '<?php echo e(__('chat.no_announcements_yet')); ?>',
+    beTheFirstToPost: '<?php echo e(__('chat.be_the_first_to_post')); ?>',
+    onlyAuthorizedUsers: '<?php echo e(__('chat.only_authorized_users')); ?>'
+};
+if (typeof window.messagesRefreshInterval === 'undefined') {
+    window.messagesRefreshInterval = null;
+}
+if (typeof window.conversationsRefreshInterval === 'undefined') {
+    window.conversationsRefreshInterval = null;
+}
+if (typeof window.conversationUsers === 'undefined') {
+    window.conversationUsers = [];
+}
+if (typeof window.currentMentionMatch === 'undefined') {
+    window.currentMentionMatch = null;
+}
+if (typeof window.selectedSuggestionIndex === 'undefined') {
+    window.selectedSuggestionIndex = 0;
+}
+if (typeof window.communityMembersToAdd === 'undefined') {
+    window.communityMembersToAdd = [];
+}
+if (typeof window.contextMenuCommunityId === 'undefined') {
+    window.contextMenuCommunityId = null;
+}
+if (typeof window.contextMenuCommunityName === 'undefined') {
+    window.contextMenuCommunityName = null;
+}
+
+// ===== SIDEBAR TAB SWITCHING =====
+document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.chat-icon-btn');
+    const tabContents = document.querySelectorAll('.chat-sidebar-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            
+            // Remove active class from all buttons
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Hide all tab contents
+            tabContents.forEach(content => content.style.display = 'none');
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.style.display = 'flex';
+            }
+            
+            // Handle sidebar and main area visibility
+            const chatSidebar = document.querySelector('.chat-sidebar');
+            const chatMain = document.getElementById('chatMain');
+            const peopleMain = document.getElementById('peopleMain');
+            
+            if (tabName === 'people') {
+                // Hide chat sidebar and main area, show people page
+                chatSidebar.style.display = 'none';
+                chatMain.style.display = 'none';
+                peopleMain.style.display = 'block';
+                loadPeopleCardsForDisplay();
+            } else {
+                // Show chat sidebar and main area, hide people page
+                chatSidebar.style.display = 'flex';
+                chatMain.style.display = 'flex';
+                peopleMain.style.display = 'none';
+            }
+            
+            // Load data based on tab
+            if (tabName === 'communities') {
+                loadCommunitiesForDisplay();
+            } else if (tabName === 'groups') {
+                loadGroupsForDisplay();
+            }
+        });
+    });
+
+    // Load initial data
+    setTimeout(() => {
+        loadConversations();
+    }, 500);
+});
+
+// Load communities for display
+let globalCommunities = [];
+async function loadCommunitiesForDisplay() {
+    try {
+        const data = await apiCall('/api/chat/communities');
+        globalCommunities = data.communities || [];
+        renderCommunitiesList(globalCommunities);
+        
+        // Subscribe to all community announcement channels
+        subscribeToCommunityAnnouncements(globalCommunities);
+    } catch (error) {
+        console.error('Error loading communities:', error);
+    }
+}
+
+// Load groups for display
+async function loadGroupsForDisplay() {
+    try {
+        const groupData = await apiCall('/api/chat/group-conversations');
+        renderGroupConversationsList(groupData.conversations || []);
+    } catch (error) {
+        console.error('Error loading groups:', error);
+    }
+}
+
+// Load people for card display
+async function loadPeopleCardsForDisplay() {
+    try {
+        const data = await apiCall('/api/chat/users');
+        renderPeopleCards(data.users || []);
+    } catch (error) {
+        console.error('Error loading people:', error);
+        const container = document.getElementById('peopleCards');
+        if (container) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #e53e3e; padding: 40px;"><i class="bx bx-error" style="font-size: 48px; margin-bottom: 16px;"></i><br>Error loading people</div>';
+        }
+    }
+}
+
+// Render people as cards
+function renderPeopleCards(users) {
+    const container = document.getElementById('peopleCards');
+    if (!container) return;
+
+    if (users.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--chat-text-secondary); padding: 60px; font-size: 18px;"><i class="bx bx-user" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>No people available</div>';
+        return;
+    }
+
+    container.innerHTML = users.map(user => `
+        <div class="person-card" onclick="startPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}')" 
+             data-user-name="${user.name}" data-user-email="${user.email}"
+             style="
+                background: var(--chat-bg-body); 
+                border-radius: 16px; 
+                padding: 24px; 
+                text-align: center; 
+                cursor: pointer; 
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid var(--chat-border-color);
+                position: relative;
+                overflow: hidden;
+                color: var(--chat-text-primary);
+             "
+             onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(218, 165, 32, 0.2)';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)';">
+            
+            <!-- Gold gradient accent -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);"></div>
+            
+            <!-- Profile Picture -->
+            <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 4px solid var(--chat-bg-secondary); box-shadow: 0 4px 12px rgba(218, 165, 32, 0.15);">
+                    ${user.avatar ? 
+                        `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; object-fit: cover;">` : 
+                        `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px;">${user.name.charAt(0).toUpperCase()}</div>`
+                    }
+                </div>
+            </div>
+            
+            <!-- User Info -->
+            <div style="margin-bottom: 16px;">
+                <h3 style="color: var(--chat-text-primary); font-weight: 600; margin: 0 0 4px 0; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="user-name">${user.name}</h3>
+                <p style="color: var(--chat-text-secondary); margin: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="user-email">${user.email}</p>
+            </div>
+            
+            <!-- Action Button -->
+            <div style="margin-top: 20px;">
+                <button style="
+                    background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%); 
+                    color: white; 
+                    border: none; 
+                    padding: 10px 20px; 
+                    border-radius: 20px; 
+                    font-weight: 600; 
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    width: 100%;
+                    box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
+                " onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+                    <i class="bx bx-message" style="margin-right: 6px;"></i>Start Chat
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    // Initialize search for people cards
+    initializePeopleCardsSearch();
+}
+
+// Initialize people cards search functionality
+function initializePeopleCardsSearch() {
+    const searchInput = document.getElementById('searchPeopleCards');
+    if (!searchInput) return;
+    
+    // Remove previous listeners
+    searchInput.removeEventListener('input', handlePeopleCardsSearch);
+    searchInput.addEventListener('input', handlePeopleCardsSearch);
+}
+
+// Handler for people cards search
+function handlePeopleCardsSearch(e) {
+    filterPeopleCards(e.target.value);
+}
+
+// Filter people cards by search term
+function filterPeopleCards(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const cards = document.querySelectorAll('.person-card');
+    
+    if (cards.length === 0) return;
+    
+    let visibleCount = 0;
+    cards.forEach(card => {
+        const userName = card.getAttribute('data-user-name')?.toLowerCase() || '';
+        const userEmail = card.getAttribute('data-user-email')?.toLowerCase() || '';
+        
+        if (term === '' || userName.includes(term) || userEmail.includes(term)) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show "no results" message if needed
+    const container = document.getElementById('peopleCards');
+    let noResultsMsg = container.querySelector('.no-results-message');
+    
+    if (visibleCount === 0 && term !== '') {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'no-results-message';
+            noResultsMsg.style.cssText = 'grid-column: 1/-1; text-align: center; color: var(--chat-text-secondary); padding: 40px; font-size: 16px;';
+            noResultsMsg.innerHTML = '<i class="bx bx-search" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>No people found matching your search';
+            container.appendChild(noResultsMsg);
+        }
+        noResultsMsg.style.display = 'block';
+    } else {
+        if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+        }
+    }
+}
+
+// Start person chat from card
+function startPersonChat(userId, userName) {
+    // Switch to Messages tab
+    const messagesTab = document.querySelector('[data-tab="chats"]');
+    if (messagesTab) {
+        messagesTab.click();
+    }
+    
+    // Start direct chat
+    startDirectChat(userId, userName);
+}
+
+// Render people in sidebar
+function renderPeopleList(users) {
+    const listEl = document.getElementById('peopleList');
+    if (users.length === 0) {
+        listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #9ca3af; font-size: 14px;">No people available</div>';
+        return;
+    }
+
+    listEl.innerHTML = users.map(user => `
+        <button class="user-item" onclick="openPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}', event)" data-user-id="${user.id}" data-user-name="${user.name}" data-user-email="${user.email}" style="width: 100%; text-align: left; background: none; border: none; padding: 10px; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="user-avatar" style="width: 45px; height: 45px; flex-shrink: 0;">
+                    ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : `<div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">${user.name.charAt(0).toUpperCase()}</div>`}
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div class="user-name" style="font-weight: 600; color: #111827; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.name}</div>
+                    <div class="user-email" style="font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
+                </div>
+            </div>
+        </button>
+    `).join('');
+    
+    // Initialize search for people
+    initializePeopleSearch();
+}
+
+// Initialize people search functionality
+function initializePeopleSearch() {
+    const searchInput = document.getElementById('searchPeople');
+    if (!searchInput) return;
+    
+    // Simply attach listener without cloning - clear previous listeners first
+    searchInput.removeEventListener('input', handlePeopleSearch);
+    searchInput.addEventListener('input', handlePeopleSearch);
+}
+
+// Handler for people search
+function handlePeopleSearch(e) {
+    filterPeopleList(e.target.value);
+}
+
+// Filter people by search term
+function filterPeopleList(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const userItems = document.querySelectorAll('#peopleList .user-item');
+    
+    if (userItems.length === 0) return;
+    
+    userItems.forEach(item => {
+        const userName = item.getAttribute('data-user-name')?.toLowerCase() || '';
+        const userEmail = item.getAttribute('data-user-email')?.toLowerCase() || '';
+        
+        if (term === '' || userName.includes(term) || userEmail.includes(term)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+// Open person chat - navigate to Messages tab
+function openPersonChat(userId, userName, event) {
+    event.preventDefault();
+    
+    // Switch to Messages tab
+    const messagesTab = document.querySelector('[data-tab="chats"]');
+    if (messagesTab) {
+        messagesTab.click();
+    }
+    
+    // Start direct chat
+    startDirectChat(userId, userName);
+}
+
+// Render communities in sidebar
+function renderCommunitiesList(communities) {
+    const listEl = document.getElementById('communitiesList');
+    if (communities.length === 0) {
+        listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #9ca3af; font-size: 14px;">No communities yet</div>';
+        return;
+    }
+
+    listEl.innerHTML = communities.map(community => {
+        // Fix icon class - ensure we don't double-prefix with 'bx'
+        let iconClass = community.icon || 'bx-group';
+        if (!iconClass.startsWith('bx ')) {
+            iconClass = 'bx ' + iconClass;
+        }
+        
+        // Allow context menu for creator OR Super Admin
+        const canManage = (community.created_by == window.currentUserId) || window.isSuperAdmin;
+        
+        const isCreator = community.created_by == window.currentUserId;
+        const communityData = JSON.stringify(community);
+        
+        return `
+        <div class="community-item community-item-${community.id}" 
+             data-community='${communityData.replace(/'/g, "&apos;")}'
+             data-is-creator="${isCreator}"
+             onclick="selectCommunityFromData(this)"
+             oncontextmenu="showCommunityContextMenu(event, ${community.id}, '${community.name.replace(/'/g, "\\'")}', ${canManage}); return false;"
+             style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border-left: 3px solid ${community.color || '#667eea'};">
+            <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || '#667eea') + ';'} flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                ${community.avatar ? '<img src="/storage/' + community.avatar + '" alt="' + community.name + '" style="width: 100%; height: 100%; object-fit: cover;">' : '<i class="' + iconClass + '"></i>'}
+            </div>
+            <div class="community-info" style="flex: 1; min-width: 0;">
+                <div class="community-name" style="font-weight: 600;">${community.name}</div>
+                <div style="font-size: 11px; color: #9ca3af; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <i class="bx bx-bullhorn" style="font-size: 12px;"></i>
+                    <span>Announcement Board</span>
+                </div>
+            </div>
+            ${canManage ? `
+                <a href="/admin/communities/${community.id}/edit" class="btn-edit-community btn-edit-${community.id}" 
+                   data-community-id="${community.id}" 
+                   title="Edit Community" 
+                   onclick="event.stopPropagation();"
+                   style="flex-shrink: 0; background: #667eea; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; opacity: 0; margin-right: 4px; text-decoration: none; display: inline-flex; align-items: center;">
+                    <i class="bx bx-edit"></i>
+                </a>
+                <button class="btn-delete-community btn-delete-${community.id}" 
+                        data-community-id="${community.id}" 
+                        data-community-name="${community.name}" 
+                        title="Delete Community" 
+                        style="flex-shrink: 0; background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; opacity: 0;">
+                    <i class="bx bx-trash"></i>
+                </button>
+            ` : ''}
+        </div>
+        `;
+    }).join('');
+    
+    // Add event listeners for delete buttons and hover effects
+    setTimeout(() => {
+        const communitiesListEl = document.getElementById('communitiesList');
+        if (communitiesListEl) {
+            // Add hover effects to show edit and delete buttons
+            communitiesListEl.querySelectorAll('.community-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = '#f3f4f6';
+                    const deleteBtn = this.querySelector('.btn-delete-community');
+                    const editBtn = this.querySelector('.btn-edit-community');
+                    if (deleteBtn) deleteBtn.style.opacity = '1';
+                    if (editBtn) editBtn.style.opacity = '1';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'transparent';
+                    const deleteBtn = this.querySelector('.btn-delete-community');
+                    const editBtn = this.querySelector('.btn-edit-community');
+                    if (deleteBtn) deleteBtn.style.opacity = '0';
+                    if (editBtn) editBtn.style.opacity = '0';
+                });
+            });
+            
+            // Add hover effects for edit buttons
+            communitiesListEl.querySelectorAll('.btn-edit-community').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.background = '#5b6fd5';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.background = '#667eea';
+                });
+            });
+            
+            // Add click handlers for delete buttons
+            communitiesListEl.querySelectorAll('.btn-delete-community').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const communityId = this.getAttribute('data-community-id');
+                    const communityName = this.getAttribute('data-community-name');
+                    deleteCommunityHandler(e, communityId, communityName);
+                });
+                
+                // Add hover effects
+                btn.addEventListener('mouseenter', function() {
+                    this.style.background = '#dc2626';
+                });
+                btn.addEventListener('mouseleave', function() {
+                    this.style.background = '#ef4444';
+                });
+            });
+        }
+    }, 100);
+}
+
+// Render group conversations list
+function renderGroupConversationsList(conversations) {
+    const listEl = document.getElementById('groupConversationsList');
+    if (conversations.length === 0) {
+        listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: #9ca3af; font-size: 14px;">No group chats yet</div>';
+        return;
+    }
+
+    listEl.innerHTML = conversations.map(conv => {
+        const safeName = (conv.name || 'Group Chat').replace(/'/g, "\\'");
+        const avatarUrl = conv.avatar;
+        const displayName = conv.name || 'Group Chat';
+        
+        // Create avatar HTML with proper image rendering
+        let avatarHtml = '<i class="bx bx-group"></i>';
+        if (avatarUrl) {
+            avatarHtml = `<img src="${avatarUrl}" alt="${displayName}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'bx bx-group\\'></i>';">`;
+        }
+        
+        return `
+        <div class="conversation-item group-conversation-item ${conv.id === window.currentConversationId ? 'active' : ''}"
+             onclick="selectConversation(${conv.id}, '${safeName}', this)"
+             style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+            <div class="conversation-avatar" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #667eea; color: white; font-size: 18px;">
+                ${avatarHtml}
+            </div>
+            <div class="conversation-info" style="flex: 1; min-width: 0;">
+                <div class="conversation-name">${displayName}</div>
+                ${conv.latest_message ? `<div class="conversation-preview" style="font-size: 13px; color: #9ca3af; margin-top: 2px;">${(conv.latest_message.message || '').substring(0, 40)}...</div>` : ''}
+            </div>
+            ${conv.updated_at ? `<div class="conversation-time" style="font-size: 12px; color: #9ca3af;">${conv.updated_at}</div>` : ''}
+            ${conv.unread_count > 0 ? `<span class="unread-badge" style="background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; margin-left: 4px;">${conv.unread_count}</span>` : ''}
+        </div>
+        `;
+    }).join('');
+    
+    // Add hover effects for group conversations
+    setTimeout(() => {
+        const groupListEl = document.getElementById('groupConversationsList');
+        if (groupListEl) {
+            groupListEl.querySelectorAll('.group-conversation-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.background = '#f3f4f6';
+                    }
+                });
+                item.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.background = 'transparent';
+                    }
+                });
+            });
+        }
+    }, 100);
+}
+
+// Helper function to select community from data attribute
+function selectCommunityFromData(element) {
+    try {
+        const communityData = element.getAttribute('data-community');
+        const isCreator = element.getAttribute('data-is-creator') === 'true';
+        const community = JSON.parse(communityData.replace(/&apos;/g, "'"));
+        selectCommunity(community, isCreator);
+    } catch (error) {
+        console.error('Error parsing community data:', error);
+    }
+}
+
+// Select community
+async function selectCommunity(community, isCreator = false) {
+    try {
+        const communityId = community.id;
+        const communityName = community.name;
+        const communityColor = community.color || '#667eea';
+        
+        // Set current community context
+        window.currentCommunityId = communityId;
+        window.currentConversationId = null; // Communities don't use chat conversations
+        window.currentConversationName = communityName;
+        
+        // Fetch announcements and check permissions
+        let announcementsData = { announcements: [], can_post: false };
+        try {
+            announcementsData = await apiCall(`/api/chat/communities/${communityId}/announcements`);
+            console.log('Announcements API Response:', announcementsData);
+        } catch (e) {
+            console.error('Could not load announcements:', e);
+        }
+        
+        // Use the can_post value from API response
+        const canPostAnnouncement = !!announcementsData.can_post;
+        
+        const chatMain = document.getElementById('chatMain');
+        const avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: ${communityColor}; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;"><i class="bx bx-bullhorn"></i></div>`;
+        
+        // Build the community interface
+        chatMain.innerHTML = `
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    ${avatarHtml}
+                    <div class="chat-header-title">
+                        <h5>${communityName}</h5>
+                        <p style="font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 4px;">
+                            <i class="bx bx-bullhorn" style="font-size: 13px;"></i>
+                            Announcement Board
+                        </p>
+                    </div>
+                </div>
+                ${isCreator || window.isSuperAdmin || window.userRoles.includes('CEO') ? `<a href="/admin/communities/${communityId}/edit" class="btn btn-sm btn-primary" title="Edit Community" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;"><i class="bx bx-edit"></i> Edit Community</a>` : ''}
+            </div>
+            <div class="announcement-messages" id="announcementMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb;">
+                <div id="announcementsContainer">
+                    ${announcementsData.announcements.length > 0 ? 
+                        renderAnnouncements(announcementsData.announcements, communityColor) : 
+                        `<div style="max-width: 500px; margin: 60px auto; text-align: center;">
+                            <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
+                            <h5 class="mt-3" style="color: #111827; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                            <p style="color: #6b7280; margin-top: 12px; line-height: 1.6;">
+                                ${canPostAnnouncement ? translations.beTheFirstToPost : translations.onlyAuthorizedUsers}
+                            </p>
+                        </div>`
+                    }
+                </div>
+            </div>
+            ${canPostAnnouncement ? `
+                <div class="announcement-input-area" style="border-top: 2px solid #e5e7eb; background: #ffffff; padding: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <textarea id="announcementInput" placeholder="Type your announcement..." rows="2" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 60px;"></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" id="attachAnnouncementBtn" title="Attach file" style="padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; color: #6b7280;">
+                                    <i class="bx bx-paperclip" style="font-size: 18px;"></i>
+                                </button>
+                                <button type="button" id="emojiAnnouncementBtn" title="Add emoji" style="padding: 8px 12px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; color: #6b7280;">
+                                    <i class="bx bx-smile" style="font-size: 18px;"></i>
+                                </button>
+                            </div>
+                            <button type="button" id="sendAnnouncementBtn" onclick="sendAnnouncement()" style="padding: 10px 24px; background: linear-gradient(135deg, ${communityColor}, ${adjustColor(communityColor, -20)}); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <i class="bx bx-paper-plane" style="font-size: 16px;"></i>
+                                Post Announcement
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" id="announcementFileInput" multiple style="display: none" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar">
+                </div>
+            ` : `
+                <div style="border-top: 2px solid #e5e7eb; background: #f9fafb; padding: 16px; text-align: center; color: #9ca3af; font-size: 13px;">
+                    <i class="bx bx-lock-alt" style="font-size: 16px; vertical-align: middle; margin-right: 4px;"></i>
+                    You do not have permission to post announcements. Contact an admin for access.
+                </div>
+            `}
+        `;
+        
+        // Setup file attachment handler and Enter key if user can post
+        if (canPostAnnouncement) {
+            setTimeout(() => {
+                const attachBtn = document.getElementById('attachAnnouncementBtn');
+                const fileInput = document.getElementById('announcementFileInput');
+                const textarea = document.getElementById('announcementInput');
+                
+                if (attachBtn && fileInput) {
+                    attachBtn.addEventListener('click', () => fileInput.click());
+                }
+                
+                if (textarea) {
+                    textarea.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendAnnouncement();
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // Subscribe to real-time announcement updates
+        subscribeToCommunityAnnouncements(communityId);
+    } catch (error) {
+        console.error('Error loading community:', error);
+        alert('Failed to load community. Please try again.');
+    }
+}
+
+// Render announcements
+function renderAnnouncements(announcements, communityColor) {
+    if (!announcements || announcements.length === 0) {
+        return `<div style="max-width: 500px; margin: 60px auto; text-align: center;">
+            <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
+            <h5 class="mt-3" style="color: #111827; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+        </div>`;
+    }
+    
+    return announcements.map(announcement => {
+        const avatar = announcement.created_by.avatar 
+            ? `/storage/${announcement.created_by.avatar}` 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(announcement.created_by.name)}&background=${communityColor.replace('#', '')}&color=fff`;
+        
+        return `
+            <div class="announcement-item" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid ${communityColor};">
+                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                    <img src="${avatar}" alt="${announcement.created_by.name}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid ${communityColor};">
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <strong style="color: #111827; font-size: 14px;">${announcement.created_by.name}</strong>
+                            <span style="font-size: 12px; color: #9ca3af;">${announcement.created_at_human}</span>
+                        </div>
+                        ${announcement.title ? `<div style="font-weight: 600; color: ${communityColor}; margin-bottom: 8px; font-size: 15px;">${escapeHtml(announcement.title)}</div>` : ''}
+                        <div style="color: #374151; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(announcement.message)}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Send announcement
+async function sendAnnouncement() {
+    const textarea = document.getElementById('announcementInput');
+    const message = textarea?.value.trim();
+    
+    if (!message) {
+        alert('Please enter an announcement message');
+        return;
+    }
+    
+    if (!window.currentCommunityId) {
+        alert('No community selected');
+        return;
+    }
+    
+    try {
+        const sendBtn = document.getElementById('sendAnnouncementBtn');
+        if (sendBtn) {
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Posting...';
+        }
+        
+        const result = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`, {
+            method: 'POST',
+            body: JSON.stringify({
+                message: message,
+                title: null,
+                priority: 'normal'
+            })
+        });
+        
+        if (result.success) {
+            textarea.value = '';
+            
+            // Reload announcements
+            const announcementsData = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`);
+            const container = document.getElementById('announcementsContainer');
+            const community = window.communities.find(c => c.id === window.currentCommunityId);
+            if (container && community) {
+                container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
+            }
+            
+            // Scroll to bottom
+            const messagesDiv = document.getElementById('announcementMessages');
+            if (messagesDiv) {
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        }
+    } catch (error) {
+        console.error('Error sending announcement:', error);
+        alert('Failed to post announcement. Please try again.');
+    } finally {
+        const sendBtn = document.getElementById('sendAnnouncementBtn');
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            const community = window.communities.find(c => c.id === window.currentCommunityId);
+            const color = community?.color || '#667eea';
+            sendBtn.innerHTML = `<i class="bx bx-paper-plane" style="font-size: 16px;"></i> Post Announcement`;
+        }
+    }
+}
+
+// Helper function to adjust color brightness
+function adjustColor(color, amount) {
+    const num = parseInt(color.replace('#', ''), 16);
+    const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+    const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+// Load community announcements
+async function loadCommunityAnnouncements(conversationId, communityColor) {
+    try {
+        const messages = await apiCall(`/api/chat/conversations/${conversationId}/messages`);
+        const container = document.getElementById('announcementsContainer');
+        
+        if (!messages.messages || messages.messages.length === 0) {
+            container.innerHTML = `
+                <div style="max-width: 500px; margin: 60px auto; text-align: center;">
+                    <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
+                    <h5 class="mt-3" style="color: #111827; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                    <p style="color: #6b7280; margin-top: 12px;">${translations.beTheFirstToPost}</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = messages.messages.map(msg => `
+            <div class="announcement-item" style="background: white; border-left: 4px solid ${communityColor}; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: start; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: ${communityColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; flex-shrink: 0;">
+                        ${(msg.user?.name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div>
+                                <div style="font-weight: 600; color: #111827; font-size: 14px;">${msg.user?.name || 'Unknown'}</div>
+                                <div style="font-size: 12px; color: #9ca3af;">${msg.created_at}</div>
+                            </div>
+                            ${msg.user_id === window.currentUserId ? `
+                                <button onclick="deleteAnnouncement(${msg.id})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px 8px;" title="Delete">
+                                    <i class="bx bx-trash" style="font-size: 16px;"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                        <div style="color: #374151; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${msg.message}</div>
+                        ${msg.attachments && msg.attachments.length > 0 ? `
+                            <div style="margin-top: 12px; display: flex; flex-wrap: gap: 8px;">
+                                ${msg.attachments.map(att => `
+                                    <a href="${att.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #f3f4f6; border-radius: 6px; text-decoration: none; color: #6b7280; font-size: 13px;">
+                                        <i class="bx bx-file" style="font-size: 16px;"></i>
+                                        ${att.file_name}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Scroll to bottom
+        setTimeout(() => {
+            const messagesEl = document.getElementById('announcementMessages');
+            if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+        }, 100);
+    } catch (error) {
+        console.error('Error loading announcements:', error);
+    }
+}
+
+// Send announcement
+async function sendAnnouncement() {
+    const input = document.getElementById('announcementInput');
+    const fileInput = document.getElementById('announcementFileInput');
+    const message = input?.value?.trim();
+    
+    if (!message && (!fileInput?.files || fileInput.files.length === 0)) {
+        alert('Please enter a message or attach a file');
+        return;
+    }
+    
+    if (!window.currentConversationId) {
+        // Need to create conversation first
+        try {
+            const membersResponse = await apiCall(`/api/communities/${window.currentCommunityId}/members`);
+            const memberIds = membersResponse.members?.map(m => m.id) || [];
+            
+            if (!memberIds.includes(window.currentUserId)) {
+                memberIds.push(window.currentUserId);
+            }
+            
+            const createResponse = await apiCall('/api/chat/conversations/group', 'POST', {
+                name: window.currentConversationName,
+                user_ids: memberIds,
+                community_id: window.currentCommunityId
+            });
+            
+            if (createResponse.success && createResponse.conversation) {
+                window.currentConversationId = createResponse.conversation.id;
+            } else {
+                throw new Error('Failed to create conversation');
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+            alert('Failed to create announcement board. Please try again.');
+            return;
+        }
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('conversation_id', window.currentConversationId);
+        formData.append('message', message || '');
+        
+        if (fileInput && fileInput.files.length > 0) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('attachments[]', fileInput.files[i]);
+            }
+        }
+        
+        const response = await fetch('/api/chat/messages', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content,
+            },
+            body: formData
+        });
+        
+        if (!response.ok) throw new Error('Failed to send announcement');
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Clear inputs
+            if (input) input.value = '';
+            if (fileInput) fileInput.value = '';
+            
+            // Reload announcements
+            const community = globalCommunities.find(c => c.id === window.currentCommunityId);
+            if (community) {
+                loadCommunityAnnouncements(window.currentConversationId, community.color || '#667eea');
+            }
+        }
+    } catch (error) {
+        console.error('Error sending announcement:', error);
+        alert('Failed to send announcement. Please try again.');
+    }
+}
+
+// Delete announcement
+async function deleteAnnouncement(messageId) {
+    if (!confirm('Are you sure you want to delete this announcement?')) return;
+    
+    try {
+        await apiCall(`/api/chat/messages/${messageId}`, 'DELETE');
+        
+        // Reload announcements
+        const community = globalCommunities.find(c => c.id === window.currentCommunityId);
+        if (community && window.currentConversationId) {
+            loadCommunityAnnouncements(window.currentConversationId, community.color || '#667eea');
+        }
+    } catch (error) {
+        console.error('Error deleting announcement:', error);
+        alert('Failed to delete announcement.');
+    }
+}
+
+// Retry loading community with ID
+function retryLoadCommunity(communityId, isCreator) {
+    // Find the community in globalCommunities array
+    const community = globalCommunities.find(c => c.id === communityId);
+    if (community) {
+        selectCommunity(community, isCreator);
+    } else {
+        console.error('Community not found:', communityId);
+        alert('Failed to retry. Please refresh the page.');
+    }
+}
+
+// Delete community handler
+function deleteCommunityHandler(event, communityId, communityName) {
+    event.stopPropagation();
+    if (confirm(`Are you sure you want to delete the community "${communityName}"? This action cannot be undone.`)) {
+        apiCall(`/api/communities/${communityId}`, 'DELETE')
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Community deleted successfully');
+                    loadCommunitiesForDisplay();
+                    // Clear the chat main area
+                    document.getElementById('chatMain').innerHTML = `
+                        <div class="chat-welcome">
+                            <i class="bx bx-message-square-dots"></i>
+                            <h4>Welcome to Taurus Chat</h4>
+                            <p>Select a conversation to start messaging or create a new chat</p>
+                        </div>
+                    `;
+                } else {
+                    alert('Error deleting community: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting community:', error);
+                alert('Error deleting community. Please try again.');
+            });
+    }
+}
+
+// API helper function
 async function apiCall(url, method = 'GET', data = null) {
     const options = {
         method: method,
@@ -229,12 +1451,15 @@ async function apiCall(url, method = 'GET', data = null) {
     return await response.json();
 }
 
+// Chat Application Variables - Already declared at top of script
+
 // Load conversations
 async function loadConversations() {
     try {
         console.log('Loading conversations...');
         const conversationsData = await apiCall('/api/chat/conversations');
         console.log('Conversations loaded:', conversationsData);
+        console.log('Filtering out community conversations (those with community_id)...');
         const usersData = await apiCall('/api/chat/users');
         console.log('Users loaded:', usersData);
         renderConversationsAndUsers(conversationsData.conversations, usersData.users);
@@ -248,49 +1473,66 @@ async function loadConversations() {
 // Render conversations and users together
 function renderConversationsAndUsers(conversations, users) {
     const listEl = document.getElementById('conversationsList');
+    
+    if (!listEl) {
+        console.error('conversationsList element not found!');
+        return;
+    }
 
-    if (conversations.length === 0 && users.length === 0) {
+    console.log('Rendering conversations. Total received:', conversations.length);
+    
+    // Filter out community conversations (they have community_id or are group chats with same name as a community)
+    const nonCommunityConversations = conversations.filter(conv => {
+        const hasCommId = !!conv.community_id;
+        if (hasCommId) {
+            console.log('Filtering out community conversation:', conv.name, 'community_id:', conv.community_id);
+        }
+        return !hasCommId;
+    });
+    
+    console.log('After filtering, showing', nonCommunityConversations.length, 'non-community conversations');
+
+    if (nonCommunityConversations.length === 0) {
         listEl.innerHTML = '<div class="no-conversations"><p>No chats available</p></div>';
         return;
     }
 
     let html = '';
 
-    // Add existing conversations first
-    if (conversations.length > 0) {
+    // Add existing conversations only (removed user list from sidebar)
+    if (nonCommunityConversations.length > 0) {
         html += '<div class="sidebar-section-label">Recent</div>';
-        html += conversations.map(conv => {
-            const safeName = conv.name || 'Unknown';
-            return `
-            <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}"
-                 onclick="selectConversation(${conv.id}, '${safeName.replace(/'/g, "\\'")}', this)">
-                <div class="conversation-avatar">${safeName.charAt(0).toUpperCase()}</div>
+        
+        try {
+            html += nonCommunityConversations.map(conv => {
+                const safeName = (conv.name || 'Unknown').replace(/'/g, "\\'");
+                const avatarUrl = conv.avatar;
+                const displayName = conv.name || 'Unknown';
+                
+                return `
+            <div class="conversation-item ${conv.id === window.currentConversationId ? 'active' : ''}"
+                 onclick="selectConversation(${conv.id}, '${safeName}', this)">
+                <div class="conversation-avatar">
+                    ${avatarUrl ? `<img src="${avatarUrl}" alt="${displayName}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : displayName.charAt(0).toUpperCase()}
+                </div>
                 <div class="conversation-info">
-                    <div class="conversation-name">${safeName}</div>
+                    <div class="conversation-name">${displayName}</div>
                     ${conv.latest_message ? `<div class="conversation-preview">${(conv.latest_message.message || '').substring(0, 40)}...</div>` : ''}
                 </div>
                 ${conv.updated_at ? `<div class="conversation-time">${conv.updated_at}</div>` : ''}
                 ${conv.unread_count > 0 ? `<span class="unread-badge">${conv.unread_count}</span>` : ''}
             </div>
-        `}).join('');
+        `;
+            }).join('');
+        } catch (error) {
+            console.error('Error generating conversation HTML:', error);
+            html += '<div class="no-conversations"><p style="color: red;">Error rendering chats</p></div>';
+        }
     }
 
-    // Add available users
-    if (users.length > 0) {
-        html += '<div class="sidebar-section-label">Direct Messages</div>';
-        html += users.map(user => {
-            const safeName = user.name || 'Unknown User';
-            return `
-            <div class="user-item" onclick="startDirectChat(${user.id}, '${safeName.replace(/'/g, "\\'")}')">
-                <div class="user-avatar">${safeName.charAt(0).toUpperCase()}</div>
-                <div class="user-info">
-                    <div class="user-name">${safeName}</div>
-                </div>
-            </div>
-        `}).join('');
-    }
-
+    console.log('Setting innerHTML, HTML length:', html.length);
     listEl.innerHTML = html;
+    console.log('Conversations rendered successfully');
 }
 
 // Old render function kept for backwards compatibility
@@ -303,7 +1545,7 @@ function renderConversations(conversations) {
     }
 
     listEl.innerHTML = conversations.map(conv => `
-        <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}"
+        <div class="conversation-item ${conv.id === window.currentConversationId ? 'active' : ''}"
              onclick="selectConversation(${conv.id}, '${conv.name.replace(/'/g, "\\'")}')">
             <div class="conversation-avatar">
                 <div class="avatar-circle">${conv.name.charAt(0).toUpperCase()}</div>
@@ -324,7 +1566,8 @@ function renderConversations(conversations) {
 
 // Select conversation
 async function selectConversation(conversationId, conversationName, element) {
-    currentConversationId = conversationId;
+    window.currentConversationId = conversationId;
+    window.lastMessagesHash = null; // Reset hash to force render when switching conversations
 
     // Update active state
     document.querySelectorAll('.conversation-item').forEach(item => {
@@ -345,28 +1588,75 @@ async function selectConversation(conversationId, conversationName, element) {
 async function loadMessages(conversationId, conversationName) {
     try {
         const data = await apiCall(`/api/chat/conversations/${conversationId}/messages`);
-        renderChatArea(conversationName, data.messages.data, data.conversation?.type || 'direct', conversationId);
+        console.log('Messages data received:', data);
+        
+        // Load conversation details
+        let communityId = null;
+        try {
+            const convResponse = await apiCall(`/api/chat/conversations/${conversationId}`);
+            window.conversationUsers = convResponse.users || [];
+            communityId = convResponse.conversation?.community_id || null;
+        } catch (e) {
+            console.warn('Failed to load conversation details:', e);
+        }
+        
+        // Handle different possible data structures
+        let messages = data.messages || data.data || [];
+        let conversationType = data.conversation?.type || 'direct';
+        let conversationObj = data.conversation || {};
+        
+        console.log('Rendering messages:', messages.length, 'Type:', conversationType);
+        
+        renderChatArea(conversationName, messages, conversationType, conversationId, communityId);
     } catch (error) {
         console.error('Error loading messages:', error);
     }
 }
 
 // Render chat area
-function renderChatArea(conversationName, messages, conversationType = 'direct', conversationId = null) {
+async function renderChatArea(conversationName, messages, conversationType = 'direct', conversationId = null, communityId = null) {
     const chatMain = document.getElementById('chatMain');
+
+    // Set the current conversation ID and name for message sending
+    window.currentConversationId = conversationId;
+    window.currentConversationName = conversationName;
+    window.currentCommunityId = communityId;
+
+    // Check if this is a community conversation
+    const isCommunity = communityId !== null && communityId !== undefined;
+
+    // Get conversation avatar if available
+    let avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #d4a574, #b8860b); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">${conversationName.charAt(0).toUpperCase()}</div>`;
+    try {
+        const convData = await apiCall(`/api/chat/conversations/${conversationId}`);
+        // For group/community conversations, use conversation avatar
+        if (convData.conversation && convData.conversation.avatar) {
+            avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden;"><img src="${convData.conversation.avatar}" alt="${conversationName}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+        } 
+        // For direct conversations, use the other user's avatar
+        else if (convData.conversation && convData.conversation.type === 'direct' && convData.users && convData.users.length > 0) {
+            const otherUser = convData.users.find(u => u.id !== window.currentUserId);
+            if (otherUser && otherUser.avatar) {
+                avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden;"><img src="${otherUser.avatar}" alt="${conversationName}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+            }
+        }
+    } catch (e) {
+        // Use default avatar if fetch fails
+        console.warn('Failed to load conversation avatar:', e);
+    }
 
     chatMain.innerHTML = `
         <div class="chat-header">
             <div class="chat-header-info">
-                <div class="chat-header-avatar">${conversationName.charAt(0).toUpperCase()}</div>
+                ${avatarHtml}
                 <div class="chat-header-title">
                     <h5>${conversationName}</h5>
-                    <p>Active</p>
+                    <p>${isCommunity ? 'Community Chat' : ''}</p>
                 </div>
             </div>
             <div class="chat-header-actions">
-                ${conversationType === 'group' && conversationId ? `<button class="btn btn-sm btn-outline-primary me-2" onclick="openGroupManagement(${conversationId})" title="Manage Group"><i class="bx bx-cog"></i> Manage</button>` : ''}
-                <button class="btn btn-sm btn-light" title="More options"><i class="bx bx-dots-vertical-rounded"></i></button>
+                ${conversationType === 'group' && conversationId && !isCommunity ? `<button class="btn btn-sm btn-outline-primary me-2" onclick="openGroupManagement(${conversationId})" title="Manage Group"><i class="bx bx-cog"></i> Manage</button>` : ''}
+                ${isCommunity && communityId && (window.isSuperAdmin || window.userRoles.includes('CEO')) ? `<a href="/admin/communities/${communityId}/edit" class="btn btn-sm btn-primary me-2" title="Edit Community" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;"><i class="bx bx-edit"></i> Edit Community</a>` : ''}
             </div>
         </div>
 
@@ -376,10 +1666,17 @@ function renderChatArea(conversationName, messages, conversationType = 'direct',
 
         <div class="chat-input-area">
             <div class="message-input-wrapper">
-                <textarea id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                <textarea id="messageInput" placeholder="Type @ to mention someone, @everyone to mention all..." rows="1"></textarea>
+                <div id="mentionSuggestions" class="mention-suggestions" style="display: none;"></div>
                 <div class="message-input-actions">
                     <button type="button" id="attachBtn" title="Attach file">
                         <i class="bx bx-paperclip"></i>
+                    </button>
+                    <button type="button" id="emojiBtn" title="Add emoji">
+                        <i class="bx bx-smile"></i>
+                    </button>
+                    <button type="button" id="gifBtn" title="Add GIF">
+                        <i class="bx bx-image"></i>
                     </button>
                     <button type="button" id="sendButton" title="Send message">
                         <i class="bx bx-send"></i>
@@ -408,14 +1705,57 @@ function renderChatArea(conversationName, messages, conversationType = 'direct',
         document.getElementById('fileInput').click();
     });
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+    
+    // Add emoji button listener
+    const emojiBtn = document.getElementById('emojiBtn');
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', () => {
+            const input = document.getElementById('messageInput');
+            if (input && window.EmojiPicker) {
+                window.EmojiPicker.show(input);
+            }
+        });
+    }
+    
+    // Add GIF button listener
+    document.getElementById('gifBtn').addEventListener('click', showGifPicker);
 
-    // Start auto-refresh for messages
-    clearInterval(messagesRefreshInterval);
-    messagesRefreshInterval = setInterval(() => {
-        if (currentConversationId) {
+    // Initialize mention autocomplete
+    await initMentionAutocomplete();
+
+    // Start auto-refresh for messages (5 seconds for near real-time updates)
+    clearInterval(window.messagesRefreshInterval);
+    window.messagesRefreshInterval = setInterval(() => {
+        if (window.currentConversationId) {
             refreshMessages();
         }
-    }, 5000);
+    }, 5000); // 5 seconds - animation removed so refresh is invisible
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Helper function to format message text with mentions and GIFs
+function formatMessageText(text) {
+    if (!text) return '';
+    
+    // Check if this is a GIF message
+    if (text.startsWith('[GIF]')) {
+        const gifUrl = text.substring(5); // Remove [GIF] prefix
+        return `<img src="${gifUrl}" alt="GIF" style="max-width: 300px; border-radius: 8px; display: block; margin: 4px 0;">`;
+    }
+    
+    // First escape HTML
+    let escaped = escapeHtml(text);
+    
+    // Then find and highlight mentions
+    escaped = escaped.replace(/@(everyone|\w+)/g, '<span class="mention-highlight">@$1</span>');
+    
+    return escaped;
 }
 
 // Render messages
@@ -425,16 +1765,18 @@ function renderMessages(messages) {
     }
 
     return messages.map(msg => {
-        const isSender = msg.user_id === currentUserId;
+        const isSender = msg.user_id === window.currentUserId;
+        const userName = escapeHtml(msg.user?.name || 'Unknown User');
+        const userAvatar = msg.user?.avatar;
+        const avatarHtml = userAvatar 
+            ? `<img src="${userAvatar}" alt="${userName}" class="message-avatar">` 
+            : `<div class="message-avatar">${userName.charAt(0).toUpperCase()}</div>`;
         return `
-        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}">
-            <div class="message-avatar">${msg.user.name.charAt(0).toUpperCase()}</div>
+        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}" data-message-id="${msg.id}" style="position: relative;">
+            ${!isSender ? avatarHtml : ''}
             <div class="message-content">
-                <div class="message-header">
-                    <span class="message-sender">${msg.user.name}</span>
-                    <span class="message-time">${new Date(msg.created_at).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'})}</span>
-                </div>
-                ${msg.message ? `<div class="message-text">${msg.message}</div>` : ''}
+                ${!isSender ? `<div class="message-username">${userName}</div>` : ''}
+                ${msg.message ? `<div class="message-text">${formatMessageText(msg.message)}</div>` : ''}
                 ${msg.attachments && msg.attachments.length > 0 ? `
                     <div class="message-attachment">
                         ${msg.attachments.map(att => {
@@ -507,9 +1849,9 @@ function renderMessages(messages) {
                         }).join('')}
                     </div>
                 ` : ''}
-            </div>
-            <div class="message-actions">
-                <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
+                <div class="message-actions">
+                    <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
+                </div>
             </div>
         </div>
     `;
@@ -518,17 +1860,53 @@ function renderMessages(messages) {
 
 // Refresh messages
 async function refreshMessages() {
-    if (!currentConversationId) return;
+    if (!window.currentConversationId) return;
 
     try {
-        const data = await apiCall(`/api/chat/conversations/${currentConversationId}/messages`);
+        const data = await apiCall(`/api/chat/conversations/${window.currentConversationId}/messages`);
+        
+        // Handle different possible data structures
+        const messages = data.messages || data.data || [];
+        
         const messagesEl = document.getElementById('chatMessages');
-        const scrolledToBottom = messagesEl.scrollHeight - messagesEl.scrollTop === messagesEl.clientHeight;
+        
+        // Smart comparison: Only update if messages changed
+        // Track message count and last message ID to prevent unnecessary re-renders
+        if (typeof window.lastMessagesHash === 'undefined') {
+            window.lastMessagesHash = null;
+        }
+        
+        // Create a simple hash from message count and last message ID
+        const currentHash = messages.length > 0 
+            ? `${messages.length}-${messages[messages.length - 1].id}`
+            : '0-0';
+        
+        // Only update DOM if messages actually changed
+        if (window.lastMessagesHash !== currentHash) {
+            const scrolledToBottom = messagesEl.scrollHeight - messagesEl.scrollTop === messagesEl.clientHeight;
 
-        messagesEl.innerHTML = renderMessages(data.messages.data);
+            messagesEl.innerHTML = renderMessages(messages);
 
-        if (scrolledToBottom) {
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+            if (scrolledToBottom) {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            
+            window.lastMessagesHash = currentHash;
+        }
+        
+        // Track last message ID for notifications
+        if (typeof window.lastMessageId === 'undefined') {
+            window.lastMessageId = 0;
+        }
+        
+        // Check for new messages and mentions
+        if (messages.length > 0) {
+            const latest = messages[messages.length - 1];
+            if (latest.id > window.lastMessageId) {
+                window.lastMessageId = latest.id;
+                // Only notify if looking at a different conversation or window hidden
+                checkAndNotifyMentions(latest);
+            }
         }
     } catch (error) {
         console.error('Error refreshing messages:', error);
@@ -552,6 +1930,144 @@ async function deleteMessage(messageId) {
     }
 }
 
+// === GIF Picker Functions ===
+const GIPHY_API_KEY = 'GlVGYHkr3WSBnllca54iNt0yFbjz7L65'; // Free Giphy API key with better regional support
+let gifSearchTimeout = null;
+
+// Show GIF picker modal
+function showGifPicker() {
+    const modal = new bootstrap.Modal(document.getElementById('gifPickerModal'));
+    modal.show();
+    
+    // Load trending GIFs initially
+    loadTrendingGifs();
+    
+    // Setup search handler
+    const searchInput = document.getElementById('gifSearchInput');
+    searchInput.value = '';
+    searchInput.removeEventListener('input', handleGifSearch);
+    searchInput.addEventListener('input', handleGifSearch);
+}
+
+// Handle GIF search with debounce
+function handleGifSearch(e) {
+    const query = e.target.value.trim();
+    
+    // Clear previous timeout
+    clearTimeout(gifSearchTimeout);
+    
+    // Debounce search
+    gifSearchTimeout = setTimeout(() => {
+        if (query.length > 0) {
+            searchGifs(query);
+        } else {
+            loadTrendingGifs();
+        }
+    }, 500);
+}
+
+// Load trending GIFs
+async function loadTrendingGifs() {
+    const gridEl = document.getElementById('gifGrid');
+    const loadingEl = document.getElementById('gifLoading');
+    
+    try {
+        gridEl.style.display = 'none';
+        loadingEl.style.display = 'block';
+        
+        const response = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_API_KEY}&limit=20&rating=g`);
+        const data = await response.json();
+        
+        renderGifs(data.data);
+    } catch (error) {
+        console.error('Error loading trending GIFs:', error);
+        gridEl.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--bs-danger);"><i class="bx bx-error-circle" style="font-size: 48px; margin-bottom: 12px;"></i><p>Failed to load GIFs. Please try again.</p></div>';
+        gridEl.style.display = 'grid';
+    } finally {
+        loadingEl.style.display = 'none';
+    }
+}
+
+// Search GIFs
+async function searchGifs(query) {
+    const gridEl = document.getElementById('gifGrid');
+    const loadingEl = document.getElementById('gifLoading');
+    
+    try {
+        gridEl.style.display = 'none';
+        loadingEl.style.display = 'block';
+        
+        const response = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=20&rating=g`);
+        const data = await response.json();
+        
+        if (data.data && data.data.length > 0) {
+            renderGifs(data.data);
+        } else {
+            gridEl.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--bs-secondary-color);"><i class="bx bx-search" style="font-size: 48px; margin-bottom: 12px; opacity: 0.5;"></i><p>No GIFs found for "' + query + '"</p></div>';
+            gridEl.style.display = 'grid';
+        }
+    } catch (error) {
+        console.error('Error searching GIFs:', error);
+        gridEl.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--bs-danger);"><i class="bx bx-error-circle" style="font-size: 48px; margin-bottom: 12px;"></i><p>Failed to search GIFs. Please try again.</p></div>';
+        gridEl.style.display = 'grid';
+    } finally {
+        loadingEl.style.display = 'none';
+    }
+}
+
+// Render GIFs in grid
+function renderGifs(gifs) {
+    const gridEl = document.getElementById('gifGrid');
+    
+    gridEl.innerHTML = gifs.map(gif => {
+        // Giphy API structure: use fixed_height_small for preview, original for full
+        const previewUrl = gif.images.fixed_height_small.url;
+        const fullUrl = gif.images.original.url;
+        
+        return `
+            <div onclick="selectGif('${fullUrl}')" style="
+                cursor: pointer; 
+                border-radius: 8px; 
+                overflow: hidden; 
+                aspect-ratio: 1; 
+                background: var(--bs-secondary-bg);
+                transition: transform 0.2s, box-shadow 0.2s;
+                position: relative;
+            " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(218, 165, 32, 0.3)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                <img src="${previewUrl}" alt="GIF" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        `;
+    }).join('');
+    
+    gridEl.style.display = 'grid';
+}
+
+// Select and send GIF
+async function selectGif(gifUrl) {
+    if (!window.currentConversationId) {
+        alert('Please select a conversation first');
+        return;
+    }
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('gifPickerModal'));
+    modal.hide();
+    
+    try {
+        // Send GIF URL as message with special marker
+        const formData = new FormData();
+        formData.append('conversation_id', window.currentConversationId);
+        formData.append('message', `[GIF]${gifUrl}`);
+        
+        await apiCall('/api/chat/messages', 'POST', formData);
+        await refreshMessages();
+        loadConversations();
+    } catch (error) {
+        console.error('Error sending GIF:', error);
+        alert('Failed to send GIF: ' + error.message);
+    }
+}
+
 // Send message
 async function sendMessage() {
     const input = document.getElementById('messageInput');
@@ -563,15 +2079,16 @@ async function sendMessage() {
         return;
     }
     
-    if (!currentConversationId) {
+    if (!window.currentConversationId) {
         alert('Please select a conversation first');
         return;
     }
 
-    console.log('Sending message to conversation:', currentConversationId);
+    console.log('Sending message to conversation:', window.currentConversationId);
+    console.log('Current community ID:', window.currentCommunityId);
 
     const formData = new FormData();
-    formData.append('conversation_id', currentConversationId);
+    formData.append('conversation_id', window.currentConversationId);
     
     // Always append message as a string, even if empty
     formData.append('message', message || '');
@@ -598,6 +2115,13 @@ async function sendMessage() {
         let errorMessage = 'Failed to send message';
         if (error.message) {
             errorMessage += ': ' + error.message;
+        } else if (error.response) {
+            try {
+                const errorData = await error.response.json();
+                errorMessage += ': ' + (errorData.message || 'Unknown error');
+            } catch (e) {
+                errorMessage += ': Server error';
+            }
         }
         alert(errorMessage);
     }
@@ -667,7 +2191,7 @@ async function startDirectChat(userId, userName) {
         // Immediately load the conversation
         if (data.conversation_id) {
             await loadMessages(data.conversation_id, userName || 'Chat');
-            currentConversationId = data.conversation_id;
+            window.currentConversationId = data.conversation_id;
             
             // Reload conversations to update sidebar
             loadConversations();
@@ -736,16 +2260,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // New chat button
 
-// Initial load
-loadConversations();
+// Initial load is handled in DOMContentLoaded listener above (line ~426)
+// Removed duplicate call here to prevent refresh loop
 
-// Auto-refresh conversations every 30 seconds
-conversationsRefreshInterval = setInterval(loadConversations, 30000);
+// Auto-refresh conversations every 60 seconds (reduced frequency to prevent fading)
+window.conversationsRefreshInterval = setInterval(loadConversations, 60000);
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-    clearInterval(messagesRefreshInterval);
-    clearInterval(conversationsRefreshInterval);
+    clearInterval(window.messagesRefreshInterval);
+    clearInterval(window.conversationsRefreshInterval);
 });
 
 // -------------------------
@@ -756,16 +2280,24 @@ window.addEventListener('beforeunload', () => {
 // -------------------------
 
 // Configuration from environment (100% local Reverb, no Pusher)
-const echoConfig = <?php echo json_encode([
-    'key' => env('REVERB_APP_KEY', ''),
-    'host' => env('REVERB_HOST', '127.0.0.1'),
-    'port' => intval(env('REVERB_PORT', 8080)),
-    'scheme' => env('REVERB_SCHEME', 'http'),
-    'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
-]); ?>;
+// Use var to prevent "already declared" errors if script is loaded twice
+if (typeof echoConfig === 'undefined') {
+    var echoConfig = <?php echo json_encode([
+        'key' => env('REVERB_APP_KEY', ''),
+        'host' => env('REVERB_HOST', '127.0.0.1'),
+        'port' => intval(env('REVERB_PORT', 8080)),
+        'scheme' => env('REVERB_SCHEME', 'http'),
+        'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
+    ]); ?>;
+}
 
-let echoInstance = null;
-let subscribedChannel = null;
+// Prevent redeclaration if script loads multiple times
+if (typeof echoInstance === 'undefined') {
+    var echoInstance = null;
+}
+if (typeof subscribedChannel === 'undefined') {
+    var subscribedChannel = null;
+}
 
 function initEcho() {
     // Load Pusher and Echo from CDN if not already present
@@ -812,7 +2344,7 @@ function subscribeToConversation(conversationId) {
     // Unsubscribe previous
     try {
         if (subscribedChannel && echoInstance) {
-            echoInstance.leave(`private-chat.conversation.${subscribedChannel}`);
+            echoInstance.leave(`chat.conversation.${subscribedChannel}`);
         }
     } catch (e) { /* ignore */ }
 
@@ -825,13 +2357,16 @@ function subscribeToConversation(conversationId) {
         clearInterval(waitForEcho);
 
         try {
+            // Subscribe to the private channel using the correct channel name from MessageSent event
             echoInstance.private(`chat.conversation.${conversationId}`)
                 .listen('.message.sent', (e) => {
+                    console.log('Message received via Echo:', e);
                     // Received a new message — refresh messages if same conversation
-                    if (conversationId === currentConversationId) {
+                    if (conversationId === window.currentConversationId) {
                         // Append new message to chat area
                         refreshMessages();
-                        loadConversations(); // update latest message in list
+                        // Don't call loadConversations() here - it causes fade-in on every message
+                        // The 60-second interval will update the conversation list periodically
                     }
                 });
         } catch (e) {
@@ -840,42 +2375,116 @@ function subscribeToConversation(conversationId) {
     }, 200);
 }
 
+// Subscribe to community announcement channels
+let subscribedCommunityChannels = [];
+
+function subscribeToCommunityAnnouncements(communityIdOrArray) {
+    if (!echoInstance) initEcho();
+    
+    // Handle both single ID and array of communities
+    let communityIds = [];
+    if (typeof communityIdOrArray === 'number') {
+        communityIds = [communityIdOrArray];
+    } else if (Array.isArray(communityIdOrArray)) {
+        communityIds = communityIdOrArray.map(c => c.id).filter(id => id);
+    } else {
+        return;
+    }
+    
+    if (communityIds.length === 0) return;
+
+    // Wait until Echo is ready
+    const waitForEcho = setInterval(() => {
+        if (!echoInstance) return;
+        clearInterval(waitForEcho);
+
+        try {
+            // Subscribe to each community's announcement channel
+            communityIds.forEach(communityId => {
+                // Skip if already subscribed
+                if (subscribedCommunityChannels.includes(communityId)) return;
+                
+                try {
+                    echoInstance.private(`community.${communityId}`)
+                        .listen('.announcement.posted', async (data) => {
+                            console.log('Community announcement received:', data);
+                            
+                            // Show global toast notification if function exists (from master layout)
+                            if (typeof showAnnouncementToast === 'function') {
+                                showAnnouncementToast(data);
+                            }
+                            
+                            // Refresh announcements if viewing this community
+                            if (window.currentCommunityId === communityId) {
+                                try {
+                                    const announcementsData = await apiCall(`/api/chat/communities/${communityId}/announcements`);
+                                    const container = document.getElementById('announcementsContainer');
+                                    const community = window.communities.find(c => c.id === communityId);
+                                    if (container && community) {
+                                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
+                                        
+                                        // Scroll to bottom
+                                        const messagesDiv = document.getElementById('announcementMessages');
+                                        if (messagesDiv) {
+                                            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.error('Failed to refresh announcements:', e);
+                                }
+                            }
+                            
+                            // Update communities list
+                            loadCommunitiesForDisplay();
+                        });
+                    
+                    subscribedCommunityChannels.push(communityId);
+                    console.log(`Subscribed to community ${communityId} announcements`);
+                } catch (e) {
+                    console.warn(`Failed to subscribe to community ${communityId} announcements:`, e);
+                }
+            });
+        } catch (e) {
+            console.warn('Failed to subscribe to community announcement channels', e);
+        }
+    }, 200);
+}
+
 // Group chat functionality
 let selectedMembers = new Set();
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Chat type toggle
-    document.querySelectorAll('input[name="chatType"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const directSection = document.getElementById('directChatSection');
-            const groupSection = document.getElementById('groupChatSection');
-            
-            if (this.value === 'direct') {
-                directSection.style.display = 'block';
-                groupSection.style.display = 'none';
-            } else {
-                directSection.style.display = 'none';
-                groupSection.style.display = 'block';
-                loadUsersForGroup();
-            }
-        });
-    });
-
-    // Create chat button
+    // Create chat button - only for group creation now
     document.getElementById('createChatBtn').addEventListener('click', function() {
-        const chatType = document.querySelector('input[name="chatType"]:checked').value;
-        if (chatType === 'group') {
-            createGroupChat();
-        }
-        // Direct chats are handled by clicking on users directly
+        createGroupChat();
     });
 
     // Modal shown event
     document.getElementById('newChatModal').addEventListener('shown.bs.modal', function() {
-        loadUsersForDirectChat();
+        loadUsersForGroup();
         selectedMembers.clear();
         updateSelectedMembersList();
     });
+
+    // Add search functionality for group members
+    const searchGroupUsersInput = document.getElementById('searchGroupUsers');
+    if (searchGroupUsersInput) {
+        searchGroupUsersInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const userItems = document.querySelectorAll('#groupUsersList .user-item');
+            
+            userItems.forEach(item => {
+                const userName = item.dataset.userName?.toLowerCase() || '';
+                const userEmail = item.querySelector('.user-email')?.textContent.toLowerCase() || '';
+                
+                if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 
 // Load users for direct chat
@@ -898,6 +2507,31 @@ async function loadUsersForGroup() {
     }
 }
 
+// Load communities for group chat
+async function loadCommunitiesForGroupChat() {
+    try {
+        const data = await apiCall('/api/chat/communities');
+        const select = document.getElementById('groupCommunity');
+        
+        // Keep the default option
+        const defaultOption = select.querySelector('option');
+        select.innerHTML = '';
+        select.appendChild(defaultOption);
+        
+        // Add communities
+        if (data.communities && data.communities.length > 0) {
+            data.communities.forEach(community => {
+                const option = document.createElement('option');
+                option.value = community.id;
+                option.textContent = community.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading communities:', error);
+    }
+}
+
 // Render users list
 function renderUsersList(users, containerId, isGroupMode) {
     const container = document.getElementById(containerId);
@@ -907,7 +2541,9 @@ function renderUsersList(users, containerId, isGroupMode) {
              data-user-id="${user.id}" 
              data-user-name="${user.name}"
              onclick="${isGroupMode ? `toggleGroupMember(${user.id}, '${user.name.replace(/'/g, "\\'")}')` : `startDirectChat(${user.id}, '${user.name.replace(/'/g, "\\'")}'); bootstrap.Modal.getInstance(document.getElementById('newChatModal')).hide();`}">
-            <div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>
+            <div class="user-avatar">
+                ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : user.name.charAt(0).toUpperCase()}
+            </div>
             <div class="user-info">
                 <div class="user-name">${user.name}</div>
                 <div class="user-email">${user.email}</div>
@@ -971,23 +2607,60 @@ async function createGroupChat() {
     }
     
     try {
-        const data = await apiCall('/api/chat/groups', 'POST', {
-            name: groupName,
-            user_ids: Array.from(selectedMembers)
+        // Use FormData to handle file upload
+        const formData = new FormData();
+        formData.append('name', groupName);
+        
+        // Add color
+        const colorInput = document.getElementById('communityColor');
+        if (colorInput) {
+            formData.append('color', colorInput.value);
+        }
+        
+        // Add avatar file if selected
+        const avatarInput = document.getElementById('groupAvatar');
+        if (avatarInput && avatarInput.files.length > 0) {
+            formData.append('avatar', avatarInput.files[0]);
+        }
+        
+        // Add user IDs
+        selectedMembers.forEach(userId => {
+            formData.append('user_ids[]', userId);
         });
+        
+        const response = await fetch('/api/chat/groups', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content
+            },
+            body: formData
+        });
+        
+        console.log('Group creation response status:', response.status);
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Group creation failed:', errorText);
+            throw new Error('Failed to create group: ' + response.status);
+        }
+        
+        const data = await response.json();
         
         // Close modal
         bootstrap.Modal.getInstance(document.getElementById('newChatModal')).hide();
         
         // Load the new group conversation
         await loadMessages(data.conversation_id, groupName);
-        currentConversationId = data.conversation_id;
+        window.currentConversationId = data.conversation_id;
         
-        // Refresh conversations list
+        // Refresh conversations list and groups list
         loadConversations();
+        loadGroupsForDisplay(); // Reload groups to show new group with avatar
         
         // Clear form
         document.getElementById('groupName').value = '';
+        if (avatarInput) avatarInput.value = '';
+        document.getElementById('groupAvatarPreview').innerHTML = '<i class="bx bx-group" style="font-size: 36px;"></i>';
         selectedMembers.clear();
         updateSelectedMembersList();
         
@@ -1015,9 +2688,17 @@ async function openGroupManagement(conversationId) {
         document.getElementById('groupNameEdit').value = currentGroupData.name;
         document.getElementById('groupCreator').textContent = currentGroupData.creator?.name || 'Unknown';
         
+        // Set group avatar preview
+        const avatarPreview = document.getElementById('groupAvatarPreview');
+        if (currentGroupData.avatar) {
+            avatarPreview.innerHTML = `<img src="${currentGroupData.avatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+        } else {
+            avatarPreview.innerHTML = '<i class="bx bx-group" style="font-size: 24px;"></i>';
+        }
+        
         // Show/hide delete button based on permissions
         const deleteBtn = document.getElementById('deleteGroupBtn');
-        if (currentUserId && parseInt(currentGroupData.created_by) === parseInt(currentUserId)) {
+        if (window.currentUserId && parseInt(currentGroupData.created_by) === parseInt(window.currentUserId)) {
             deleteBtn.style.display = 'inline-block';
         } else {
             deleteBtn.style.display = 'none';
@@ -1045,7 +2726,9 @@ function renderCurrentMembers() {
     container.innerHTML = currentGroupMembers.map(member => `
         <div class="member-item d-flex justify-content-between align-items-center p-2 border rounded mb-2">
             <div class="d-flex align-items-center">
-                <div class="member-avatar me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">${member.name.charAt(0).toUpperCase()}</div>
+                <div class="member-avatar me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; overflow: hidden;">
+                    ${member.avatar ? `<img src="${member.avatar}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover;">` : member.name.charAt(0).toUpperCase()}
+                </div>
                 <div>
                     <div class="member-name fw-bold">${member.name}</div>
                     <small class="text-muted">${member.email}</small>
@@ -1053,7 +2736,7 @@ function renderCurrentMembers() {
             </div>
             <div class="member-actions">
                 ${parseInt(member.id) === parseInt(currentGroupData.created_by) ? '<span class="badge bg-primary">Creator</span>' : ''}
-                ${currentUserId && parseInt(member.id) !== parseInt(currentUserId) && parseInt(member.id) !== parseInt(currentGroupData.created_by) && parseInt(currentGroupData.created_by) === parseInt(currentUserId) ? 
+                ${window.currentUserId && parseInt(member.id) !== parseInt(window.currentUserId) && parseInt(member.id) !== parseInt(currentGroupData.created_by) && parseInt(currentGroupData.created_by) === parseInt(window.currentUserId) ? 
                     `<button class="btn btn-sm btn-outline-danger ms-2" onclick="removeMember(${member.id})" title="Remove member"><i class="bx bx-x"></i></button>` : ''}
             </div>
         </div>
@@ -1073,7 +2756,9 @@ function renderAvailableUsers(users) {
     container.innerHTML = availableUsers.map(user => `
         <div class="user-item d-flex justify-content-between align-items-center p-2 border rounded mb-2 available-user" style="cursor: pointer;" onclick="addMemberToGroup(${user.id})">
             <div class="d-flex align-items-center">
-                <div class="user-avatar me-2 bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">${user.name.charAt(0).toUpperCase()}</div>
+                <div class="user-avatar me-2 bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; overflow: hidden;">
+                    ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; object-fit: cover;">` : user.name.charAt(0).toUpperCase()}
+                </div>
                 <div>
                     <div class="user-name">${user.name}</div>
                     <small class="text-muted">${user.email}</small>
@@ -1092,13 +2777,13 @@ async function updateGroupName() {
         return;
     }
     
-    if (!currentGroupData || typeof currentUserId === 'undefined') {
+    if (!currentGroupData || typeof window.currentUserId === 'undefined') {
         alert('Unable to update group. Please refresh the page.');
-        console.error('Missing data:', { currentGroupData, currentUserId });
+        console.error('Missing data:', { currentGroupData, currentUserId: window.currentUserId });
         return;
     }
     
-    if (parseInt(currentGroupData.created_by) !== parseInt(currentUserId)) {
+    if (parseInt(currentGroupData.created_by) !== parseInt(window.currentUserId)) {
         alert('Only the group creator can change the group name');
         return;
     }
@@ -1113,8 +2798,8 @@ async function updateGroupName() {
         loadConversations(); // Refresh conversation list
         
         // Update chat header if this is the current conversation
-        if (currentConversationId === currentGroupData.id) {
-            loadConversation(currentConversationId, newName);
+        if (window.currentConversationId === currentGroupData.id) {
+            loadMessages(window.currentConversationId, newName);
         }
         
     } catch (error) {
@@ -1123,13 +2808,78 @@ async function updateGroupName() {
     }
 }
 
+async function updateGroupAvatar() {
+    const fileInput = document.getElementById('groupAvatar');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Please select a picture first');
+        return;
+    }
+    
+    if (!currentGroupData || typeof window.currentUserId === 'undefined') {
+        alert('Unable to update group. Please refresh the page.');
+        return;
+    }
+    
+    if (parseInt(currentGroupData.created_by) !== parseInt(window.currentUserId)) {
+        alert('Only the group creator can change the group picture');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        const response = await fetch(`/api/chat/conversations/${currentGroupData.id}/avatar`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to upload avatar');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Group picture updated successfully');
+            
+            // Update the preview in the modal
+            const avatarPreview = document.getElementById('groupAvatarPreview');
+            if (data.avatar) {
+                avatarPreview.innerHTML = `<img src="${data.avatar}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                currentGroupData.avatar = data.avatar; // Update current group data
+            }
+            
+            // Refresh conversation list and groups list
+            loadConversations();
+            loadGroupsForDisplay();
+            
+            // Update preview if this is the current conversation
+            if (window.currentConversationId === currentGroupData.id) {
+                loadMessages(window.currentConversationId, currentGroupData.name);
+            }
+        } else {
+            throw new Error(data.message || 'Failed to update picture');
+        }
+        
+    } catch (error) {
+        console.error('Error updating group avatar:', error);
+        alert('Failed to update group picture: ' + error.message);
+    }
+}
+
 async function addMemberToGroup(userId) {
-    if (!currentGroupData || !currentUserId) {
+    if (!currentGroupData || !window.currentUserId) {
         alert('Unable to add member. Please refresh the page.');
         return;
     }
     
-    if (parseInt(currentGroupData.created_by) !== parseInt(currentUserId)) {
+    if (parseInt(currentGroupData.created_by) !== parseInt(window.currentUserId)) {
         alert('Only the group creator can add members');
         return;
     }
@@ -1154,12 +2904,12 @@ async function addMemberToGroup(userId) {
 }
 
 async function removeMember(userId) {
-    if (!currentGroupData || !currentUserId) {
+    if (!currentGroupData || !window.currentUserId) {
         alert('Unable to remove member. Please refresh the page.');
         return;
     }
     
-    if (parseInt(currentGroupData.created_by) !== parseInt(currentUserId)) {
+    if (parseInt(currentGroupData.created_by) !== parseInt(window.currentUserId)) {
         alert('Only the group creator can remove members');
         return;
     }
@@ -1186,12 +2936,12 @@ async function removeMember(userId) {
 }
 
 async function deleteGroup() {
-    if (!currentGroupData || !currentUserId) {
+    if (!currentGroupData || !window.currentUserId) {
         alert('Unable to delete group. Please refresh the page.');
         return;
     }
     
-    if (parseInt(currentGroupData.created_by) !== parseInt(currentUserId)) {
+    if (parseInt(currentGroupData.created_by) !== parseInt(window.currentUserId)) {
         alert('Only the group creator can delete the group');
         return;
     }
@@ -1209,12 +2959,14 @@ async function deleteGroup() {
         bootstrap.Modal.getInstance(document.getElementById('groupManagementModal')).hide();
         
         // Refresh conversations and clear chat if this was the active conversation
-        if (currentConversationId === currentGroupData.id) {
-            currentConversationId = null;
+        if (window.currentConversationId === currentGroupData.id) {
+            window.currentConversationId = null;
             document.getElementById('chatMain').innerHTML = '<div class="no-conversation"><div class="text-center p-4"><i class="bx bx-chat" style="font-size: 3rem; color: #ccc;"></i><p class="text-muted mt-2">Select a conversation to start chatting</p></div></div>';
         }
         
+        // Refresh both conversations and groups lists
         loadConversations();
+        loadGroupsForDisplay();
         
     } catch (error) {
         console.error('Error deleting group:', error);
@@ -1231,7 +2983,936 @@ selectConversation = async function(conversationId, conversationName) {
 
 // Initialize Echo on page load (non-blocking)
 initEcho();
+
+// ===============================
+// CHAT ENHANCEMENTS
+// ===============================
+// Note: Chat search is handled in the DOMContentLoaded event listener above
+
+// Add emoji button when message input is rendered
+const originalLoadMessages = loadMessages;
+loadMessages = async function(conversationId, conversationName) {
+    await originalLoadMessages(conversationId, conversationName);
+    
+    // Add emoji button if not already exists
+    setTimeout(() => {
+        const actionsDiv = document.querySelector('.message-input-actions');
+        const attachBtn = document.getElementById('attachBtn');
+        
+        if (actionsDiv && attachBtn && !document.getElementById('emojiPickerBtn')) {
+            const emojiBtn = document.createElement('button');
+            emojiBtn.id = 'emojiPickerBtn';
+            emojiBtn.type = 'button';
+            emojiBtn.title = 'Add emoji';
+            emojiBtn.innerHTML = '<i class="bx bx-smile"></i>';
+            emojiBtn.onclick = () => {
+                const input = document.getElementById('messageInput');
+                if (input && window.EmojiPicker) {
+                    window.EmojiPicker.show(input);
+                }
+            };
+            
+            // Insert between attach and send buttons
+            actionsDiv.insertBefore(emojiBtn, attachBtn.nextSibling);
+        }
+    }, 100);
+};
+
+// Chat toast notifications
+window.ChatToast = {
+    show: function(message, conversationId, conversationName, senderId, senderName) {
+        if (senderId === window.currentUserId) return;
+        
+        // Show desktop notification if enabled and permitted
+        this.showDesktopNotification(senderName, message, conversationName);
+        
+        let container = document.getElementById('chatToastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'chatToastContainer';
+            container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:10000;max-width:350px;';
+            document.body.appendChild(container);
+        }
+        
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = 'chat-toast-notification';
+        toast.style.cssText = 'background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:15px;margin-top:10px;animation:slideIn 0.3s ease;cursor:pointer;border-left:4px solid #556ee6;';
+        
+        const initial = senderName.charAt(0).toUpperCase();
+        const truncatedMsg = message.length > 60 ? message.substring(0, 60) + '...' : message;
+        
+        toast.innerHTML = `
+            <div style="display:flex;align-items:start;gap:10px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px;flex-shrink:0;">
+                    ${initial}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;font-size:14px;color:#2c3e50;margin-bottom:2px;">${senderName}</div>
+                    <div style="font-size:13px;color:#7f8c8d;margin-bottom:2px;font-style:italic;">${conversationName}</div>
+                    <div style="font-size:13px;color:#34495e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${truncatedMsg}</div>
+                    <div style="margin-top:8px;display:flex;gap:8px;">
+                        <button onclick="ChatToast.reply('${toastId}', ${conversationId}, '${conversationName.replace(/'/g, "\\'")}')" style="background:#556ee6;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;">Reply</button>
+                        <button onclick="ChatToast.dismiss('${toastId}')" style="background:#f1f3f4;color:#5a6169;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;">Dismiss</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        toast.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                loadMessages(conversationId, conversationName);
+                window.currentConversationId = conversationId;
+                ChatToast.dismiss(toastId);
+            }
+        });
+        
+        container.appendChild(toast);
+        setTimeout(() => ChatToast.dismiss(toastId), 10000);
+        
+        // Play notification sound
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNw==');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        } catch(e) {}
+    },
+    
+    showDesktopNotification: function(senderName, message, conversationName) {
+        // Check if Notification API is supported and permission is granted
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                const truncatedMsg = message.length > 100 ? message.substring(0, 100) + '...' : message;
+                const notification = new Notification(`New message from ${senderName}`, {
+                    body: `${conversationName}: ${truncatedMsg}`,
+                    icon: '/images/favicon.ico',
+                    badge: '/images/favicon.ico',
+                    tag: `chat-${Date.now()}`,
+                    requireInteraction: false
+                });
+                
+                // Click handler to focus window
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+                
+                // Auto-close after 8 seconds
+                setTimeout(() => notification.close(), 8000);
+            } catch (e) {
+                console.warn('Failed to show desktop notification:', e);
+            }
+        }
+    },
+    
+    reply: function(toastId, conversationId, conversationName) {
+        loadMessages(conversationId, conversationName);
+        window.currentConversationId = conversationId;
+        document.getElementById('messageInput')?.focus();
+        this.dismiss(toastId);
+    },
+    
+    dismiss: function(toastId) {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }
+};
+
+// Add animation styles
+if (!document.getElementById('chatToastStyles')) {
+    const style = document.createElement('style');
+    style.id = 'chatToastStyles';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .message-input-actions button {
+            background: transparent;
+            border: none;
+            padding: 8px;
+            font-size: 20px;
+            color: #7f8c8d;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .message-input-actions button:hover {
+            background: #f0f0f0;
+            color: #556ee6;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Integrate toast with message refresh
+const originalRefreshMessages = refreshMessages;
+refreshMessages = async function() {
+    if (!window.currentConversationId) return;
+    
+    try {
+        const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}/messages`);
+        const messages = response.messages || [];
+        
+        // Check for new messages and show toast
+        const lastDisplayedId = parseInt(document.querySelector('.message-item:last-child')?.dataset.messageId || '0');
+        const newMessages = messages.filter(m => m.id > lastDisplayedId && m.user_id !== window.currentUserId);
+        
+        // Show notification for ALL new messages from others (always show, not just when window is out of focus)
+        if (newMessages.length > 0) {
+            const lastMsg = newMessages[newMessages.length - 1];
+            const convName = document.querySelector('.conversation-item.active .conversation-name')?.textContent || 'Chat';
+            ChatToast.show(
+                lastMsg.message || '[Attachment]',
+                window.currentConversationId,
+                convName,
+                lastMsg.user_id,
+                lastMsg.user?.name || 'User'
+            );
+        }
+        
+        // Continue with original refresh
+        await originalRefreshMessages();
+    } catch (e) {
+        console.warn('Toast notification check failed:', e);
+        await originalRefreshMessages();
+    }
+};
+
+// ==========================================
+// MENTION AUTOCOMPLETE
+// ==========================================
+
+    // Get users in current conversation
+    async function loadConversationUsers() {
+        if (!window.currentConversationId) return;
+        
+        try {
+            const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}`);
+            window.conversationUsers = response.users || [];
+            console.log('Loaded conversation users for mentions:', window.conversationUsers);
+        } catch (e) {
+            console.warn('Failed to load conversation users:', e);
+        }
+    }
+
+    // Initialize mention autocomplete on message input
+    async function initMentionAutocomplete() {
+        const messageInput = document.getElementById('messageInput');
+        if (!messageInput) return;
+
+        // Load conversation users first
+        await loadConversationUsers();
+
+        messageInput.addEventListener('input', function() {
+            const text = this.value;
+            const cursorPos = this.selectionStart;
+            
+            // Check if @ exists before cursor
+            const beforeCursor = text.substring(0, cursorPos);
+            const lastAtPos = beforeCursor.lastIndexOf('@');
+            
+            if (lastAtPos !== -1) {
+                const afterAt = beforeCursor.substring(lastAtPos + 1);
+                // Check if there's a space after @
+                if (!afterAt.includes(' ')) {
+                    const query = afterAt;
+                    const suggestions = getMentionSuggestions(query);
+                    showMentionSuggestions(suggestions);
+                    window.currentMentionMatch = { start: lastAtPos, end: cursorPos };
+                } else {
+                    document.getElementById('mentionSuggestions').style.display = 'none';
+                }
+            } else {
+                document.getElementById('mentionSuggestions').style.display = 'none';
+            }
+        });
+
+        messageInput.addEventListener('keydown', function(e) {
+            const container = document.getElementById('mentionSuggestions');
+            if (container.style.display === 'none') return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const items = container.querySelectorAll('.suggestion-item');
+                window.selectedSuggestionIndex = (window.selectedSuggestionIndex + 1) % items.length;
+                updateActiveSuggestion(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const items = container.querySelectorAll('.suggestion-item');
+                window.selectedSuggestionIndex = (window.selectedSuggestionIndex - 1 + items.length) % items.length;
+                updateActiveSuggestion(items);
+            } else if (e.key === 'Enter' && container.style.display !== 'none') {
+                e.preventDefault();
+                const activeItem = container.querySelector('.suggestion-item.active');
+                if (activeItem) {
+                    selectMention(activeItem.dataset.mention);
+                }
+            }
+        });
+    }
+
+    // Get mention suggestions
+    function getMentionSuggestions(query) {
+        if (!query || query.length < 1) return [];
+        
+        const suggestions = [];
+        
+        // Add @everyone option
+        if ('everyone'.startsWith(query.toLowerCase())) {
+            suggestions.push({
+                name: 'everyone',
+                type: 'special',
+                icon: '👥'
+            });
+        }
+        
+        // Add users
+        window.conversationUsers.forEach(user => {
+            if (user.name.toLowerCase().startsWith(query.toLowerCase())) {
+                suggestions.push({
+                    name: user.name,
+                    type: 'user',
+                    avatar: user.avatar,
+                    role: user.role
+                });
+            }
+        });
+        
+        return suggestions;
+    }
+
+    // Show mention suggestions
+    function showMentionSuggestions(suggestions) {
+        const container = document.getElementById('mentionSuggestions');
+        
+        if (suggestions.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.innerHTML = suggestions.map((s, i) => `
+            <div class="suggestion-item ${i === 0 ? 'active' : ''}" data-index="${i}" data-mention="${s.name}">
+                ${s.type === 'special' ? 
+                    `<span>${s.icon}</span><div class="user-name">@${s.name}</div>` :
+                    `<img src="${s.avatar || 'https://via.placeholder.com/24'}" alt="${s.name}" class="rounded-circle">
+                     <div>
+                        <div class="user-name">@${s.name}</div>
+                        <div class="user-role">${s.role || 'Member'}</div>
+                     </div>`
+                }
+            </div>
+        `).join('');
+        
+        container.style.display = 'block';
+        window.selectedSuggestionIndex = 0;
+        
+        // Add click handlers
+        container.querySelectorAll('.suggestion-item').forEach(item => {
+            item.addEventListener('click', () => selectMention(item.dataset.mention));
+        });
+    }
+
+    // Handle mention selection
+    function selectMention(name) {
+        const input = document.getElementById('messageInput');
+        const text = input.value;
+        const cursorPos = input.selectionStart;
+        
+        // Find the @ position
+        let atPos = text.lastIndexOf('@', cursorPos - 1);
+        if (atPos === -1) return;
+        
+        // Replace from @ to cursor
+        const before = text.substring(0, atPos);
+        const after = text.substring(cursorPos);
+        const newText = before + '@' + name + ' ' + after;
+        
+        input.value = newText;
+        input.focus();
+        input.setSelectionRange(newText.length - after.length, newText.length - after.length);
+        
+        // Hide suggestions
+        document.getElementById('mentionSuggestions').style.display = 'none';
+    }
+
+
+
+    function updateActiveSuggestion(items) {
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === window.selectedSuggestionIndex);
+        });
+    }
+
+    // Load communities
+    async function loadCommunities() {
+        try {
+            const response = await apiCall('/api/chat/communities');
+            if (response && response.length > 0) {
+                renderCommunities(response);
+            }
+        } catch (error) {
+            console.log('Error loading communities:', error);
+        }
+    }
+
+    // Render communities list
+    function renderCommunities(communities) {
+        const listEl = document.getElementById('communitiesList');
+        
+        if (communities.length === 0) {
+            listEl.innerHTML = '<div style="padding: 12px; text-align: center; color: #9ca3af; font-size: 0.85rem;">No communities</div>';
+            return;
+        }
+
+        listEl.innerHTML = communities.map(community => {
+            // Fix icon class - ensure we don't double-prefix with 'bx'
+            let iconClass = community.icon || 'bx-group';
+            // If icon doesn't start with 'bx ', add it
+            if (!iconClass.startsWith('bx ')) {
+                iconClass = 'bx ' + iconClass;
+            }
+            
+            // Allow context menu for creator OR Super Admin
+            const canManage = (community.created_by == window.currentUserId) || window.isSuperAdmin;
+            const isCreator = community.created_by == window.currentUserId;
+            const communityData = JSON.stringify(community);
+            
+            return `
+            <div class="community-item" 
+                 data-community='${communityData.replace(/'/g, "&apos;")}'
+                 data-is-creator="${isCreator}"
+                 onclick="selectCommunityFromData(this)"
+                 oncontextmenu="showCommunityContextMenu(event, ${community.id}, '${community.name.replace(/'/g, "\\'")}', ${canManage}); return false;">
+                <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || '#667eea') + ';'} width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    ${community.avatar ? '<img src="/storage/' + community.avatar + '" alt="' + community.name + '" style="width: 100%; height: 100%; object-fit: cover;">' : '<i class="' + iconClass + '"></i>'}
+                </div>
+                <div class="community-info">
+                    <div class="community-name">${community.name}</div>
+                </div>
+            </div>
+        `;
+        }).join('');
+    }
+    // Load communities - will be called after community creation or when modal opens
+    // Note: Initial loading uses loadCommunitiesForDisplay() which is called from DOMContentLoaded
+
+    // Store member IDs for community creation - Already declared at top of script
+
+    // Load users for community member selection
+    async function loadUsersForCommunityCreation() {
+        try {
+            const response = await fetch('/api/chat/users');
+            if (!response.ok) {
+                console.error('Failed to load users:', response.status);
+                return;
+            }
+            const data = await response.json();
+            console.log('Loaded users for community:', data);
+            
+            const select = document.getElementById('communityMemberSelect');
+            
+            if (!select) {
+                console.error('communityMemberSelect element not found');
+                return;
+            }
+            
+            // Clear existing options
+            select.innerHTML = '';
+            
+            // Add placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = 'Select a member to add...';
+            select.appendChild(placeholderOption);
+            
+            // Add user options
+            if (data.success && data.users && data.users.length > 0) {
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    select.appendChild(option);
+                });
+                console.log('Added', data.users.length, 'users to select');
+            } else {
+                console.warn('No users available or data.users is empty');
+            }
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+
+    // Add member to community being created
+    document.getElementById('addMemberToCommunityBtn')?.addEventListener('click', function() {
+        const select = document.getElementById('communityMemberSelect');
+        const userId = parseInt(select.value);
+        const userName = select.options[select.selectedIndex].text;
+        
+        if (!userId) {
+            alert('Please select a member');
+            return;
+        }
+        
+        // Check if already added
+        if (window.communityMembersToAdd.find(m => m.id === userId)) {
+            alert('This member is already added');
+            return;
+        }
+        
+        window.communityMembersToAdd.push({ id: userId, name: userName });
+        renderCommunityMembers();
+        select.value = '';
+    });
+
+    function renderCommunityMembers() {
+        const display = document.getElementById('communityMembersDisplay');
+        if (window.communityMembersToAdd.length === 0) {
+            display.innerHTML = '<p style="color: #9ca3af; font-size: 13px;">No members added yet</p>';
+            return;
+        }
+        
+        display.innerHTML = window.communityMembersToAdd.map(member => `
+            <div style="background: #f0f4f8; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                <span>${member.name}</span>
+                <button type="button" onclick="removeMemberFromCommunity(${member.id})" style="background: none; border: none; color: #6b7280; cursor: pointer; padding: 0; font-size: 16px;">&times;</button>
+            </div>
+        `).join('');
+        
+        document.getElementById('communityMemberIds').value = JSON.stringify(window.communityMembersToAdd.map(m => m.id));
+    }
+
+    window.removeMemberFromCommunity = function(userId) {
+        window.communityMembersToAdd = window.communityMembersToAdd.filter(m => m.id !== userId);
+        renderCommunityMembers();
+    };
+
+    // Load users when modal opens
+    document.getElementById('newCommunityModal')?.addEventListener('show.bs.modal', function() {
+        console.log('Create Community modal opened, loading users...');
+        loadUsersForCommunityCreation();
+        window.communityMembersToAdd = [];  // Reset members
+        renderCommunityMembers();
+    });
+
+    // Create community button handler
+    document.getElementById('createCommunityBtn')?.addEventListener('click', async function() {
+        const form = document.getElementById('createCommunityForm');
+        const formData = new FormData(form);
+        
+        // Add member IDs to form data
+        formData.append('member_ids', JSON.stringify(window.communityMembersToAdd.map(m => m.id)));
+        
+        try {
+            const response = await fetch('/api/communities', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            // Check if response is ok
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('Server Error:', text);
+                alert('Error creating community. Server returned: ' + response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                form.reset();
+                // Reset color preview to default
+                const colorPreview = document.getElementById('communityColorPreview');
+                if (colorPreview) {
+                    colorPreview.style.background = '#667eea';
+                }
+                const colorInput = document.getElementById('communityColor');
+                if (colorInput) {
+                    colorInput.value = '#667eea';
+                }
+                window.communityMembersToAdd = [];
+                renderCommunityMembers();
+                bootstrap.Modal.getInstance(document.getElementById('newCommunityModal')).hide();
+                loadCommunitiesForDisplay();
+                alert('Community created successfully!');
+            } else {
+                alert('Error: ' + (data.message || 'Failed to create community'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error creating community: ' + error.message);
+        }
+    });
+    
+    // Community color preview
+    document.getElementById('communityColor')?.addEventListener('input', function(e) {
+        const color = e.target.value;
+        const preview = document.getElementById('communityColorPreview');
+        if (preview) {
+            preview.style.background = color;
+        }
+    });
+    
+    // Group avatar preview - initialize immediately
+    const groupAvatarInput = document.getElementById('groupAvatar');
+    if (groupAvatarInput) {
+        groupAvatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('groupAvatarPreview');
+                    if (preview) {
+                        preview.innerHTML = 
+                            `<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover;" />`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+// ==========================================
+// COMMUNITY EVENT LISTENERS
+// ===========================================
+
+// Initialize community management when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Context Menu Event Listeners
+    document.addEventListener('click', function(e) {
+        // Hide context menu when clicking outside
+        const menu = document.getElementById('communityContextMenu');
+        if (menu && e.target !== menu && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    });
+
+    const ctxManageMembersBtn = document.getElementById('ctxManageMembers');
+    if (ctxManageMembersBtn) {
+        ctxManageMembersBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openCommunityMemberManagement(window.contextMenuCommunityId, window.contextMenuCommunityName);
+        });
+    }
+
+    const ctxDeleteCommunityBtn = document.getElementById('ctxDeleteCommunity');
+    if (ctxDeleteCommunityBtn) {
+        ctxDeleteCommunityBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            deleteCommunity(window.contextMenuCommunityId, window.contextMenuCommunityName);
+        });
+    }
+    
+    // Add Member Button
+    const addMemberBtn = document.getElementById('addCommunityMemberBtn');
+    if (addMemberBtn) {
+        addMemberBtn.addEventListener('click', function() {
+            const userId = document.getElementById('newCommunityMemberSelect').value;
+            const communityId = document.getElementById('manageCommunityId').value;
+            if (userId && communityId) {
+                addCommunityMember(communityId, userId);
+            }
+        });
+    }
+});
+
+// Request notification permission for desktop notifications - FOR ALL USERS
+if ('Notification' in window) {
+    if (Notification.permission === 'default') {
+        console.log('Requesting notification permission...');
+        Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission);
+            if (permission === 'granted') {
+                console.log('✅ Desktop notifications enabled for chat');
+            }
+        });
+    } else if (Notification.permission === 'granted') {
+        console.log('✅ Notification permission already granted');
+    } else {
+        console.log('❌ Notification permission denied - user will not see desktop notifications');
+    }
+}
+
+// Show Community Context Menu - For creators and Super Admins (GLOBAL)
+window.showCommunityContextMenu = function(event, communityId, communityName, isCreator) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Store community info
+    window.contextMenuCommunityId = communityId;
+    window.contextMenuCommunityName = communityName;
+    
+    const menu = document.getElementById('communityContextMenu');
+    if (!menu) return;
+    
+    // Allow if user is the creator OR is a Super Admin
+    if (!isCreator && !window.isSuperAdmin) {
+        console.warn('User is not the community creator or Super Admin - cannot manage this community');
+        return;
+    }
+    
+    menu.style.display = 'block';
+    menu.style.left = event.pageX + 'px';
+    menu.style.top = event.pageY + 'px';
+}
+
+// Delete Community - Only for creators (GLOBAL)
+window.deleteCommunity = async function(communityId, communityName) {
+    if (!confirm(`Are you sure you want to delete "${communityName}"? This cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/communities/${communityId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('success', 'Community deleted successfully');
+            // Hide the context menu
+            document.getElementById('communityContextMenu').style.display = 'none';
+            // Reload communities list
+            loadCommunitiesForDisplay();
+        } else {
+            showAlert('danger', data.message || 'Failed to delete community');
+        }
+    } catch (error) {
+        console.error('Error deleting community:', error);
+        showAlert('danger', 'Error deleting community: ' + error.message);
+    }
+}
+
+// Open Member Management Modal (GLOBAL)
+window.openCommunityMemberManagement = async function(communityId, communityName) {
+    const manageCommunityIdInput = document.getElementById('manageCommunityId');
+    if (!manageCommunityIdInput) {
+        console.error('manageCommunityId input not found');
+        return;
+    }
+    
+    manageCommunityIdInput.value = communityId;
+    const modal = new bootstrap.Modal(document.getElementById('communityMembersModal'));
+    modal.show();
+    
+    // Load members
+    await loadCommunityMembers(communityId);
+    
+    // Load users for select dropdown
+    await loadUsersForSelect();
+}
+
+// Load members for a community
+async function loadCommunityMembers(communityId) {
+    const list = document.getElementById('communityMembersList');
+    if (!list) return;
+    
+    list.innerHTML = '<div class="text-center p-3"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</div>';
+    
+    try {
+        const response = await fetch(`/api/communities/${communityId}/members`);
+        const data = await response.json();
+        
+        if (data.success) {
+            if (!data.members || data.members.length === 0) {
+                list.innerHTML = '<div class="text-center p-3 text-muted">No members yet</div>';
+                return;
+            }
+            
+            const communityCreatorId = data.created_by;
+            
+            list.innerHTML = data.members.map(member => `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; overflow: hidden; font-weight: bold;">
+                             ${member.avatar ? `<img src="${member.avatar}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover;">` : member.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="fw-bold">${member.name}</div>
+                            <small class="text-muted">${member.email}</small>
+                        </div>
+                    </div>
+                    ${member.id != communityCreatorId ? `
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeCommunityMember(${communityId}, ${member.id})">
+                        <i class="bx bx-trash"></i> Remove
+                    </button>` : '<span class="badge bg-secondary">Creator</span>'}
+                </div>
+            `).join('');
+        } else {
+            list.innerHTML = '<div class="text-center p-3 text-danger">Error loading members</div>';
+        }
+    } catch (error) {
+        console.error('Error loading community members:', error);
+        list.innerHTML = '<div class="text-center p-3 text-danger">Error loading members</div>';
+    }
+}
+
+// Load available users for member selection
+async function loadUsersForSelect() {
+    try {
+        const response = await fetch('/api/chat/users');
+        const data = await response.json();
+        const select = document.getElementById('newCommunityMemberSelect');
+        
+        if (!select) {
+            console.error('newCommunityMemberSelect element not found');
+            return;
+        }
+        
+        // Keep first option (placeholder)
+        const firstOption = select.options[0];
+        select.innerHTML = '';
+        if (firstOption) {
+            select.appendChild(firstOption);
+        } else {
+            // Add placeholder option if none exists
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Select user...';
+            select.appendChild(option);
+        }
+        
+        if (data.users && data.users.length > 0) {
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading users for select:', error);
+    }
+}
+
+// Add a new member to community
+async function addCommunityMember(communityId, userId) {
+    try {
+        const response = await fetch(`/api/communities/${communityId}/members`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ user_id: userId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload the members list
+            await loadCommunityMembers(communityId);
+            // Reset the select dropdown
+            document.getElementById('newCommunityMemberSelect').value = '';
+            showAlert('success', 'Member added successfully');
+        } else {
+            showAlert('danger', data.message || 'Failed to add member');
+        }
+    } catch (error) {
+        console.error('Error adding community member:', error);
+        showAlert('danger', 'Error adding member: ' + error.message);
+    }
+}
+
+// Remove a member from community
+async function removeCommunityMember(communityId, userId) {
+    if (!confirm('Are you sure you want to remove this member?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/communities/${communityId}/members/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload the members list
+            await loadCommunityMembers(communityId);
+            showAlert('success', 'Member removed successfully');
+        } else {
+            showAlert('danger', data.message || 'Failed to remove member');
+        }
+    } catch (error) {
+        console.error('Error removing community member:', error);
+        showAlert('danger', 'Error removing member: ' + error.message);
+    }
+}
+
+// ===== MENTION NOTIFICATIONS =====
+
+// Send desktop notification for mentions
+function sendMentionNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const notification = new Notification(title, {
+            body: body,
+            icon: '/images/logo-icon.png'
+        });
+        
+        notification.onclick = function() {
+            window.focus();
+            notification.close();
+        };
+    }
+}
+
+// Check message for mentions and notify
+function checkAndNotifyMentions(message) {
+    if (message && message.message) {
+        const msg = message.message.toLowerCase();
+        const currentUserNameLower = (currentUserName || '').toLowerCase();
+        
+        if (msg.includes('@' + currentUserNameLower) || msg.includes('@everyone')) {
+            sendMentionNotification(
+                `New mention from ${message.user?.name || 'Someone'}`,
+                message.message.substring(0, 100) + (message.message.length > 100 ? '...' : '')
+            );
+        }
+    }
+}
+
+// ===== ALERT HELPER =====
+
+// Show alert notifications
+function showAlert(type, message) {
+    // Try to use existing toast function if available
+    if (typeof toast === 'function') {
+        toast(type, message);
+    } else if (typeof toastr !== 'undefined') {
+        // Fallback to toastr if available
+        toastr[type](message);
+    } else {
+        // Last resort: browser alert
+        alert(message);
+    }
+}
+
 </script>
+
+<!-- External Scripts -->
+<script src="<?php echo e(asset('js/emoji-picker.min.js')); ?>"></script>
+
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/chat/index.blade.php ENDPATH**/ ?>

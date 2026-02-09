@@ -44,6 +44,7 @@ class UpdateLeadRequest extends FormRequest
             'bank_balance' => ['nullable', 'numeric'],
             'source' => ['nullable', 'string', 'max:255'],
             'closer_name' => ['nullable', 'string', 'max:255'],
+            'assigned_partner' => ['nullable', 'string', 'max:255'],
         ];
     }
 

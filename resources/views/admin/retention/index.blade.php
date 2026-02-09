@@ -5,6 +5,43 @@
 @endsection
 
 @section('css')
+<style>
+    .btn-group .btn-check:checked + .btn {
+        font-weight: 600;
+    }
+    
+    .btn-group {
+        display: flex;
+        border-radius: 0.375rem;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0;
+        border-right: 0;
+        padding: 0.6rem 1.2rem;
+    }
+    
+    .btn-group .btn:first-child {
+        border-radius: 0.375rem 0 0 0.375rem;
+    }
+    
+    .btn-group .btn:last-child {
+        border-right: 1px solid currentColor;
+        border-radius: 0 0.375rem 0.375rem 0;
+    }
+    
+    .disposition-radio:checked + .btn-outline-secondary {
+        background-color: #6c757d;
+        color: white;
+        border-color: #6c757d;
+    }
+    
+    .disposition-radio:checked + .btn-outline-success {
+        background-color: #198754;
+        color: white;
+        border-color: #198754;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -163,6 +200,13 @@
                                 <span class="badge bg-warning ms-1">{{ $rewrite_count }}</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#disposition" role="tab">
+                                <i class="bx bx-history me-1"></i>
+                                <span class="d-none d-sm-inline">Unissued</span>
+                                <span class="badge bg-danger ms-1">{{ $disposition_count }}</span>
+                            </a>
+                        </li>
                     </ul>
 
                     <!-- Tab Content -->
@@ -195,14 +239,25 @@
                                             @endphp
                                             <tr data-lead-id="{{ $lead->id }}" data-customer-name="{{ $lead->cn_name }}" data-phone="{{ $lead->phone_number }}" data-days-ago="{{ $daysAgo }}">
                                                 <td class="text-center">
-                                                    <button class="btn btn-success btn-sm dial-lead-btn" 
-                                                            data-lead-id="{{ $lead->id }}"
-                                                            data-phone="{{ $lead->phone_number }}"
-                                                            data-customer-name="{{ $lead->cn_name }}"
-                                                            data-days-ago="{{ $daysAgo }}"
-                                                            title="Call Customer">
-                                                        <i class="bx bx-phone-call"></i> Call
-                                                    </button>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button class="btn btn-success dial-lead-btn" 
+                                                                data-lead-id="{{ $lead->id }}"
+                                                                data-phone="{{ $lead->phone_number }}"
+                                                                data-customer-name="{{ $lead->cn_name }}"
+                                                                data-days-ago="{{ $daysAgo }}"
+                                                                title="Call Customer">
+                                                            <i class="bx bx-phone-call"></i>
+                                                        </button>
+                                                        <button class="btn btn-info show-lead-details-btn" 
+                                                                data-lead-id="{{ $lead->id }}"
+                                                                data-lead-json="{{ htmlspecialchars(json_encode($lead->toArray()), ENT_QUOTES, 'UTF-8') }}"
+                                                                title="View Details">
+                                                            <i class="fas fa-info-circle"></i>
+                                                        </button>
+                                                        <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-primary" title="View Full Profile" target="_blank">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </div>
                                                 </td>
                                                 <td><strong>{{ $lead->id }}</strong></td>
                                                 <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : 'N/A' }}</td>
@@ -244,7 +299,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="12" class="text-center py-5 text-muted">
+                                                <td colspan="13" class="text-center py-5 text-muted">
                                                     <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
                                                     <p class="mb-0">No leads requiring retention</p>
                                                 </td>
@@ -253,12 +308,10 @@
                                     </tbody>
                                 </table>
                             </div>
-                            @if($yet_to_retain_leads->hasPages())
-                                <div class="d-flex justify-content-center mt-4">
-                                    {{ $yet_to_retain_leads->appends(['search' => $search, 'month' => $month, 'year' => $year])->links() }}
-                                </div>
-                            @endif
                         </div>
+
+
+
 
                         <!-- RETAINED TAB -->
                         <div class="tab-pane" id="retained" role="tabpanel">
@@ -266,6 +319,7 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-success">
                                         <tr>
+                                            <th class="text-center" style="min-width:100px;">Actions</th>
                                             <th style="min-width:70px;">ID</th>
                                             <th style="min-width:100px;">Sale Date</th>
                                             <th style="min-width:120px;">Retained Date</th>
@@ -282,6 +336,11 @@
                                     <tbody>
                                         @forelse($retained_leads as $lead)
                                             <tr>
+                                                <td class="text-center">
+                                                    <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-primary btn-sm" title="View Details" target="_blank">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
                                                 <td><strong>{{ $lead->id }}</strong></td>
                                                 <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : 'N/A' }}</td>
                                                 <td>
@@ -307,7 +366,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="11" class="text-center py-5 text-muted">
+                                                <td colspan="12" class="text-center py-5 text-muted">
                                                     <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
                                                     <p class="mb-0">No retained sales yet</p>
                                                 </td>
@@ -329,6 +388,7 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-warning">
                                         <tr>
+                                            <th class="text-center" style="min-width:100px;">Actions</th>
                                             <th style="min-width:70px;">ID</th>
                                             <th style="min-width:100px;">Sale Date</th>
                                             <th style="min-width:120px;">CB Date</th>
@@ -346,6 +406,11 @@
                                     <tbody>
                                         @forelse($rewrite_leads as $lead)
                                             <tr>
+                                                <td class="text-center">
+                                                    <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-primary btn-sm" title="View Details" target="_blank">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
                                                 <td><strong>{{ $lead->id }}</strong></td>
                                                 <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : 'N/A' }}</td>
                                                 <td>{{ $lead->chargeback_marked_date ? $lead->chargeback_marked_date->format('M d, Y') : 'N/A' }}</td>
@@ -385,7 +450,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="12" class="text-center py-5 text-muted">
+                                                <td colspan="13" class="text-center py-5 text-muted">
                                                     <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
                                                     <p class="mb-0">No rewrite cases (chargebacks ≥30 days old)</p>
                                                 </td>
@@ -397,6 +462,132 @@
                             @if($rewrite_leads->hasPages())
                                 <div class="d-flex justify-content-center mt-4">
                                     {{ $rewrite_leads->appends(['search' => $search, 'month' => $month, 'year' => $year])->links() }}
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- UNISSUED TAB -->
+                        <div class="tab-pane" id="disposition" role="tabpanel">
+                            <div class="table-wrapper">
+                                <table class="table table-striped table-bordered table-hover table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="min-width:100px;">Actions</th>
+                                            <th style="min-width:150px;">Client Name</th>
+                                            <th style="min-width:130px;">Phone</th>
+                                            <th style="min-width:110px;">Sale Date</th>
+                                            <th style="min-width:120px;">Carrier</th>
+                                            <th style="min-width:140px;">Unissued Status</th>
+                                            <th style="min-width:200px;">Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($disposition_leads as $lead)
+                                            <tr>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-primary" title="View Details" target="_blank">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a href="#" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#dispositionModal-{{ $lead->id }}" title="Set Unissued Status">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                                <td><strong>{{ $lead->cn_name }}</strong></td>
+                                                <td>{{ $lead->phone_number }}</td>
+                                                <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A' }}</td>
+                                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                                <td>
+                                                    @if($lead->issuance_disposition)
+                                                        @php
+                                                            $badgeClass = match($lead->issuance_disposition) {
+                                                                'Via Portal' => 'bg-success',
+                                                                'Via Email' => 'bg-info',
+                                                                'By Carrier' => 'bg-warning',
+                                                                'By Bank' => 'bg-danger',
+                                                                default => 'bg-secondary'
+                                                            };
+                                                        @endphp
+                                                        <span class="badge {{ $badgeClass }}">{{ $lead->issuance_disposition }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">{{ $lead->issuance_reason ?? '—' }}</small>
+                                                </td>
+                                            </tr>
+
+                                            <!-- Unissued Modal -->
+                                            <div class="modal fade" id="dispositionModal-{{ $lead->id }}" tabindex="-1">
+                                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
+                                                            <h5 class="modal-title">
+                                                                <i class="mdi mdi-clipboard-list me-2"></i>Set Issuance Status - {{ $lead->cn_name }}
+                                                            </h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form id="dispositionForm-{{ $lead->id }}" class="disposition-form">
+                                                                @csrf
+                                                                
+                                                                <!-- Disposition Selection as Buttons -->
+                                                                <div class="mb-4">
+                                                                    <label class="form-label fw-bold mb-3">
+                                                                        Select Disposition <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <div class="btn-group w-100" role="group">
+                                                                        <input type="radio" class="btn-check disposition-radio" name="issuance_disposition" id="notApplicable-{{ $lead->id }}" value="Not Applicable" {{ $lead->issuance_disposition == 'Not Applicable' ? 'checked' : '' }}>
+                                                                        <label class="btn btn-outline-secondary" for="notApplicable-{{ $lead->id }}" style="flex: 1;">
+                                                                            <i class="mdi mdi-close-circle me-2"></i>Not Applicable
+                                                                        </label>
+
+                                                                        <input type="radio" class="btn-check disposition-radio" name="issuance_disposition" id="issued-{{ $lead->id }}" value="Issued" {{ $lead->issuance_disposition == 'Issued' ? 'checked' : '' }} data-lead-id="{{ $lead->id }}">
+                                                                        <label class="btn btn-outline-success" for="issued-{{ $lead->id }}" style="flex: 1;">
+                                                                            <i class="mdi mdi-check-circle me-2"></i>Issued (Send to Bank Verification)
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mb-3">
+                                                                    <label for="reason-{{ $lead->id }}" class="form-label fw-bold">Reason/Notes</label>
+                                                                    <textarea id="reason-{{ $lead->id }}" name="issuance_reason" class="form-control" rows="3" placeholder="Enter reason for this disposition..." style="max-width: 100%;">{{ $lead->issuance_reason ?? '' }}</textarea>
+                                                                    <div class="form-text">Maximum 1000 characters</div>
+                                                                </div>
+
+                                                                <!-- View Details Button -->
+                                                                <div class="mb-3">
+                                                                    <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info w-100" target="_blank">
+                                                                        <i class="mdi mdi-information-outline me-2"></i>View Complete Lead Details
+                                                                    </a>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="button" class="btn btn-success btn-sm save-disposition" data-lead-id="{{ $lead->id }}">
+                                                                <i class="bx bx-save"></i> Save Disposition
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center py-5 text-muted">
+                                                    <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
+                                                    <p class="mb-0">No incomplete issuance data available</p>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if($disposition_leads->hasPages())
+                                <div class="d-flex justify-content-center mt-4">
+                                    {{ $disposition_leads->appends(['search' => $search, 'month' => $month, 'year' => $year])->links() }}
                                 </div>
                             @endif
                         </div>
@@ -858,25 +1049,48 @@ document.addEventListener('DOMContentLoaded', function() {
             
             dialLead(leadId, phone, customerName, daysAgo, button);
         }
+
+        // Handle show lead details button
+        if (e.target.closest('.show-lead-details-btn')) {
+            const button = e.target.closest('.show-lead-details-btn');
+            const leadJsonStr = button.dataset.leadJson;
+            const lead = JSON.parse(leadJsonStr);
+            showLeadDetails(lead);
+        }
     });
 });
 
 // Retention management - Ravens 3-phase modal system
-let currentLeadId = null;
-let currentLeadData = null;
-let callModalInstance = null;
-let isCallActive = false;
-let currentEventId = null;
+var currentLeadId = (typeof window !== 'undefined' && typeof window.currentLeadId !== 'undefined')
+    ? window.currentLeadId
+    : null;
+var currentLeadData = (typeof window !== 'undefined' && typeof window.currentLeadData !== 'undefined')
+    ? window.currentLeadData
+    : null;
+var callModalInstance = (typeof window !== 'undefined' && typeof window.callModalInstance !== 'undefined')
+    ? window.callModalInstance
+    : null;
+var isCallActive = (typeof window !== 'undefined' && typeof window.isCallActive !== 'undefined')
+    ? window.isCallActive
+    : false;
+var currentEventId = (typeof window !== 'undefined' && typeof window.currentEventId !== 'undefined')
+    ? window.currentEventId
+    : null;
+
+if (typeof window !== 'undefined') {
+    window.currentLeadId = currentLeadId;
+    window.currentLeadData = currentLeadData;
+    window.callModalInstance = callModalInstance;
+    window.isCallActive = isCallActive;
+    window.currentEventId = currentEventId;
+}
 
 // Get user's zoom number
 window.zoomNumber = '{{ Auth::user()->zoom_number ?? '' }}';
 
-// Start polling for automatic call popup
-$(document).ready(function() {
-    if (window.zoomNumber) {
-        startCallPolling();
-    }
-});
+// Note: Polling is intentionally disabled on initial page load
+// Calls are initiated via explicit "Call" button clicks in the retention table
+// This prevents automatic modal popups when opening the retention management page
 
 // Call event polling
 function startCallPolling() {
@@ -1181,5 +1395,132 @@ window.testRavensCallModal = function() {
     showCallModal(testCallData);
     toastr.info('Test modal opened', 'Test Mode');
 }
+
+// Disposition Modal Handling
+$(document).ready(function() {
+    // Handle disposition dropdown change
+    $('.disposition-select').change(function() {
+        const leadId = $(this).data('lead-id');
+        const disposition = $(this).val();
+        const container = $(`#checkContainer-${leadId}`);
+
+        if (disposition === 'By Carrier' || disposition === 'By Bank') {
+            container.show();
+            checkOtherInsurances(leadId, disposition);
+        } else {
+            container.hide();
+        }
+    });
+
+    // Check for other insurances via AJAX
+    function checkOtherInsurances(leadId, disposition) {
+        $.ajax({
+            url: `/retention/check-other-insurances/${leadId}`,
+            method: 'GET',
+            data: { disposition: disposition },
+            dataType: 'json',
+            success: function(response) {
+                const container = $(`#checkContainer-${leadId}`);
+                const listDiv = $(`#otherList-${leadId}`);
+
+                container.find('.alert').html(`
+                    <i class="mdi mdi-check-circle me-2"></i>
+                    <strong>${response.count === 0 ? 'No' : response.count} other insurance(s) found with ${disposition === 'By Carrier' ? 'this carrier' : 'this bank account'}</strong>
+                `).removeClass('alert-info').addClass(response.count > 0 ? 'alert-warning' : 'alert-success');
+
+                if (response.count > 0) {
+                    let html = '<div class="table-responsive"><table class="table table-sm table-bordered mb-0"><thead class="table-light"><tr><th>Policy#</th><th>Carrier</th><th>Type</th><th>Sale Date</th></tr></thead><tbody>';
+                    response.insurances.forEach(insurance => {
+                        html += `<tr>
+                            <td>${insurance.policy_number || 'N/A'}</td>
+                            <td>${insurance.carrier_name || 'N/A'}</td>
+                            <td>${insurance.policy_type || 'N/A'}</td>
+                            <td>${insurance.sale_date ? new Date(insurance.sale_date).toLocaleDateString() : 'N/A'}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    listDiv.html(html);
+                } else {
+                    listDiv.html('');
+                }
+            },
+            error: function() {
+                $(`#otherList-${leadId}`).html('<div class="alert alert-danger">Error checking other insurances</div>');
+            }
+        });
+    }
+
+    // Save disposition
+    $('.save-disposition').click(function() {
+        const leadId = $(this).data('lead-id');
+        const form = $(`#dispositionForm-${leadId}`);
+        const disposition = form.find('[name="issuance_disposition"]').val();
+        const reason = form.find('[name="issuance_reason"]').val();
+
+        if (!disposition) {
+            alert('Please select a disposition');
+            return;
+        }
+
+        $.ajax({
+            url: `/retention/${leadId}/disposition`,
+            method: 'POST',
+            data: {
+                issuance_disposition: disposition,
+                issuance_reason: reason,
+                _token: '{{ csrf_token() }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Show success message
+                    const alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="mdi mdi-check-all me-2"></i>
+                            <strong>Success!</strong> ${response.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                    $('body').prepend(alertHtml);
+                    
+                    // Close modal
+                    $(`#dispositionModal-${leadId}`).modal('hide');
+                    
+                    // If disposition is "Issued", redirect to bank verification
+                    if (disposition === 'Issued') {
+                        setTimeout(() => {
+                            window.location.href = `/bank-verification?lead_id=${leadId}`;
+                        }, 1500);
+                    } else {
+                        // Otherwise reload the page
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                }
+            },
+            error: function(xhr) {
+                let errorMsg = 'Failed to save disposition';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                alert(errorMsg);
+            }
+        });
+    });
+
+    // Trigger check on modal show if disposition already selected
+    $('.modal').on('show.bs.modal', function() {
+        const leadId = $(this).attr('id').replace('dispositionModal-', '');
+        if (leadId && $(`#issued-${leadId}`).length) {
+            const disposition = $(`input[name="issuance_disposition"]:checked`).val();
+            // Handle any additional logic if needed
+        }
+    });
+
+    // Navigate to lead details page
+    window.showLeadDetails = function(lead) {
+        window.open('/leads/' + lead.id, '_blank');
+    };
 </script>
 @endsection

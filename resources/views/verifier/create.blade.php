@@ -20,7 +20,7 @@
 @section('content')
     @component('components.breadcrumb')
         @slot('li_1') Verification @endslot
-        @slot('title') {{ ucfirst($team ?? 'paraguins') }} - New Submission @endslot
+        @slot('title') {{ ucfirst($team ?? 'peregrine') }} - New Submission @endslot
     @endcomponent
 
     @if (session('success'))
@@ -43,7 +43,7 @@
                 <div class="card-body">
                     <form method="POST" action="{{ isset($team) ? route('verifier.store.team', ['team' => $team]) : route('verifier.store') }}">
                         @csrf
-                        <input type="hidden" name="team" value="{{ $team ?? 'paraguins' }}">
+                        <input type="hidden" name="team" value="{{ $team ?? 'peregrine' }}">
                         
                         <div class="row g-3">
                             <div class="col-md-3">
@@ -128,7 +128,60 @@
 
                             <div class="col-md-2">
                                 <label class="form-label required">State</label>
-                                <input type="text" name="state" class="form-control @error('state') is-invalid @enderror" value="{{ old('state') }}" placeholder="State" maxlength="2" required>
+                                <select name="state" class="form-select @error('state') is-invalid @enderror" required>
+                                    <option value="">State</option>
+                                    <option value="AL" {{ old('state') == 'AL' ? 'selected' : '' }}>Alabama (AL)</option>
+                                    <option value="AK" {{ old('state') == 'AK' ? 'selected' : '' }}>Alaska (AK)</option>
+                                    <option value="AZ" {{ old('state') == 'AZ' ? 'selected' : '' }}>Arizona (AZ)</option>
+                                    <option value="AR" {{ old('state') == 'AR' ? 'selected' : '' }}>Arkansas (AR)</option>
+                                    <option value="CA" {{ old('state') == 'CA' ? 'selected' : '' }}>California (CA)</option>
+                                    <option value="CO" {{ old('state') == 'CO' ? 'selected' : '' }}>Colorado (CO)</option>
+                                    <option value="CT" {{ old('state') == 'CT' ? 'selected' : '' }}>Connecticut (CT)</option>
+                                    <option value="DE" {{ old('state') == 'DE' ? 'selected' : '' }}>Delaware (DE)</option>
+                                    <option value="DC" {{ old('state') == 'DC' ? 'selected' : '' }}>District of Columbia (DC)</option>
+                                    <option value="FL" {{ old('state') == 'FL' ? 'selected' : '' }}>Florida (FL)</option>
+                                    <option value="GA" {{ old('state') == 'GA' ? 'selected' : '' }}>Georgia (GA)</option>
+                                    <option value="HI" {{ old('state') == 'HI' ? 'selected' : '' }}>Hawaii (HI)</option>
+                                    <option value="ID" {{ old('state') == 'ID' ? 'selected' : '' }}>Idaho (ID)</option>
+                                    <option value="IL" {{ old('state') == 'IL' ? 'selected' : '' }}>Illinois (IL)</option>
+                                    <option value="IN" {{ old('state') == 'IN' ? 'selected' : '' }}>Indiana (IN)</option>
+                                    <option value="IA" {{ old('state') == 'IA' ? 'selected' : '' }}>Iowa (IA)</option>
+                                    <option value="KS" {{ old('state') == 'KS' ? 'selected' : '' }}>Kansas (KS)</option>
+                                    <option value="KY" {{ old('state') == 'KY' ? 'selected' : '' }}>Kentucky (KY)</option>
+                                    <option value="LA" {{ old('state') == 'LA' ? 'selected' : '' }}>Louisiana (LA)</option>
+                                    <option value="ME" {{ old('state') == 'ME' ? 'selected' : '' }}>Maine (ME)</option>
+                                    <option value="MD" {{ old('state') == 'MD' ? 'selected' : '' }}>Maryland (MD)</option>
+                                    <option value="MA" {{ old('state') == 'MA' ? 'selected' : '' }}>Massachusetts (MA)</option>
+                                    <option value="MI" {{ old('state') == 'MI' ? 'selected' : '' }}>Michigan (MI)</option>
+                                    <option value="MN" {{ old('state') == 'MN' ? 'selected' : '' }}>Minnesota (MN)</option>
+                                    <option value="MS" {{ old('state') == 'MS' ? 'selected' : '' }}>Mississippi (MS)</option>
+                                    <option value="MO" {{ old('state') == 'MO' ? 'selected' : '' }}>Missouri (MO)</option>
+                                    <option value="MT" {{ old('state') == 'MT' ? 'selected' : '' }}>Montana (MT)</option>
+                                    <option value="NE" {{ old('state') == 'NE' ? 'selected' : '' }}>Nebraska (NE)</option>
+                                    <option value="NV" {{ old('state') == 'NV' ? 'selected' : '' }}>Nevada (NV)</option>
+                                    <option value="NH" {{ old('state') == 'NH' ? 'selected' : '' }}>New Hampshire (NH)</option>
+                                    <option value="NJ" {{ old('state') == 'NJ' ? 'selected' : '' }}>New Jersey (NJ)</option>
+                                    <option value="NM" {{ old('state') == 'NM' ? 'selected' : '' }}>New Mexico (NM)</option>
+                                    <option value="NY" {{ old('state') == 'NY' ? 'selected' : '' }}>New York (NY)</option>
+                                    <option value="NC" {{ old('state') == 'NC' ? 'selected' : '' }}>North Carolina (NC)</option>
+                                    <option value="ND" {{ old('state') == 'ND' ? 'selected' : '' }}>North Dakota (ND)</option>
+                                    <option value="OH" {{ old('state') == 'OH' ? 'selected' : '' }}>Ohio (OH)</option>
+                                    <option value="OK" {{ old('state') == 'OK' ? 'selected' : '' }}>Oklahoma (OK)</option>
+                                    <option value="OR" {{ old('state') == 'OR' ? 'selected' : '' }}>Oregon (OR)</option>
+                                    <option value="PA" {{ old('state') == 'PA' ? 'selected' : '' }}>Pennsylvania (PA)</option>
+                                    <option value="RI" {{ old('state') == 'RI' ? 'selected' : '' }}>Rhode Island (RI)</option>
+                                    <option value="SC" {{ old('state') == 'SC' ? 'selected' : '' }}>South Carolina (SC)</option>
+                                    <option value="SD" {{ old('state') == 'SD' ? 'selected' : '' }}>South Dakota (SD)</option>
+                                    <option value="TN" {{ old('state') == 'TN' ? 'selected' : '' }}>Tennessee (TN)</option>
+                                    <option value="TX" {{ old('state') == 'TX' ? 'selected' : '' }}>Texas (TX)</option>
+                                    <option value="UT" {{ old('state') == 'UT' ? 'selected' : '' }}>Utah (UT)</option>
+                                    <option value="VT" {{ old('state') == 'VT' ? 'selected' : '' }}>Vermont (VT)</option>
+                                    <option value="VA" {{ old('state') == 'VA' ? 'selected' : '' }}>Virginia (VA)</option>
+                                    <option value="WA" {{ old('state') == 'WA' ? 'selected' : '' }}>Washington (WA)</option>
+                                    <option value="WV" {{ old('state') == 'WV' ? 'selected' : '' }}>West Virginia (WV)</option>
+                                    <option value="WI" {{ old('state') == 'WI' ? 'selected' : '' }}>Wisconsin (WI)</option>
+                                    <option value="WY" {{ old('state') == 'WY' ? 'selected' : '' }}>Wyoming (WY)</option>
+                                </select>
                                 @error('state')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 

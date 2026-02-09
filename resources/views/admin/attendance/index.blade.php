@@ -5,8 +5,8 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('/assets/libs/flatpickr/flatpickr.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
         /* Modern DataTable Styling */
         .dataTables_wrapper .dataTables_filter {
@@ -199,13 +199,19 @@
                 </div>
                 <div class="row mt-2">
                     <div class="col-12">
-                        <a href="{{ route('attendance.index') }}" class="btn btn-sm btn-outline-secondary">
+                        <button type="button" class="btn btn-sm btn-outline-info" id="prevDayBtn">
+                            <i class="mdi mdi-chevron-left"></i> Previous Day
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info ms-2" id="nextDayBtn">
+                            <i class="mdi mdi-chevron-right"></i> Next Day
+                        </button>
+                        <a href="{{ route('attendance.index') }}" class="btn btn-sm btn-outline-secondary ms-2">
                             <i class="mdi mdi-refresh"></i> Reset Filters
                         </a>
                         <a href="{{ route('attendance.history') }}" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="mdi mdi-history"></i> View History
                         </a>
-                        @if(auth()->user()->hasRole('Super Admin'))
+                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
                         <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
                             <i class="mdi mdi-plus"></i> Manual Entry
                         </button>
@@ -330,6 +336,7 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
+                                                @if($attendance->user)
                                                 <div class="avatar-xs me-3">
                                                     <span
                                                         class="avatar-title rounded-circle bg-primary-subtle text-primary">
@@ -340,6 +347,9 @@
                                                     <h6 class="mb-0">{{ $attendance->user->name }}</h6>
                                                     <p class="text-muted mb-0">{{ $attendance->user->email }}</p>
                                                 </div>
+                                                @else
+                                                <span class="text-muted"><em>User Deleted</em></span>
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
@@ -400,7 +410,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if(auth()->user()->hasRole('Super Admin'))
+                                            @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-soft-primary" 
                                                     onclick="editAttendance({{ $attendance->id }})" 
@@ -408,7 +418,7 @@
                                                     <i class="mdi mdi-pencil"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-soft-danger" 
-                                                    onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user->name }}', '{{ $attendance->date->format('M d, Y') }}')" 
+                                                    onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user ? $attendance->user->name : 'Unknown User' }}', '{{ $attendance->date->format('M d, Y') }}')" 
                                                     title="Delete Attendance">
                                                     <i class="mdi mdi-delete"></i>
                                                 </button>
@@ -647,8 +657,6 @@
 @endsection
 
 @section('script')
-    <!-- jQuery (required for DataTables) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
@@ -657,9 +665,39 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTable only if not already initialized
-            if (!$.fn.DataTable.isDataTable('#attendance-table')) {
-                $('#attendance-table').DataTable({
+            // Safe DataTable initialization - only once per page load
+            if (window.attendanceTableInitialized) {
+                return; // Already initialized, skip
+            }
+            window.attendanceTableInitialized = true;
+            
+            var tableElement = $('#attendance-table');
+            
+            // Verify table exists and has proper structure
+            if (tableElement.length === 0) {
+                console.warn('Attendance table not found');
+                return;
+            }
+            
+            // Check if table has actual data rows (not just empty state)
+            var dataRows = tableElement.find('tbody tr:not(:has(td[colspan]))');
+            if (dataRows.length === 0) {
+                console.log('Table is empty, skipping DataTable initialization');
+                return;
+            }
+            
+            // If DataTable already exists, destroy it carefully
+            if ($.fn.DataTable.isDataTable('#attendance-table')) {
+                try {
+                    tableElement.DataTable().clear().destroy();
+                } catch (e) {
+                    console.warn('Error destroying existing DataTable:', e);
+                }
+            }
+            
+            // Initialize DataTable
+            try {
+                tableElement.DataTable({
                     "pageLength": 25,
                     "responsive": true,
                     "order": [[1, "asc"]], // Sort by login time
@@ -685,6 +723,9 @@
                            "<'row'<'col-sm-12'tr>>" +
                            "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
                 });
+                console.log('DataTable initialized successfully');
+            } catch (e) {
+                console.error('DataTable initialization error:', e);
             }
         });
 
@@ -932,5 +973,46 @@
                 alert('Error deleting attendance: ' + err.message);
             });
         }
+
+        // Previous/Next Day Navigation
+        document.getElementById('prevDayBtn')?.addEventListener('click', function() {
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+            
+            if (startDateInput && startDateInput.value) {
+                const currentDate = new Date(startDateInput.value);
+                currentDate.setDate(currentDate.getDate() - 1);
+                
+                const newDate = currentDate.toISOString().split('T')[0];
+                startDateInput.value = newDate;
+                endDateInput.value = newDate;
+                
+                document.getElementById('filterForm').submit();
+            }
+        });
+
+        document.getElementById('nextDayBtn')?.addEventListener('click', function() {
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+            
+            if (startDateInput && startDateInput.value) {
+                const currentDate = new Date(startDateInput.value);
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Don't allow navigation beyond today
+                if (currentDate <= today) {
+                    const newDate = currentDate.toISOString().split('T')[0];
+                    startDateInput.value = newDate;
+                    endDateInput.value = newDate;
+                    
+                    document.getElementById('filterForm').submit();
+                } else {
+                    alert('Cannot navigate to future dates');
+                }
+            }
+        });
     </script>
 @endsection

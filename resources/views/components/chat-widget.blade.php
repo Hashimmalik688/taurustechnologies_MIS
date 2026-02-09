@@ -216,7 +216,8 @@ async function loadMessages(conversationId) {
 // Render messages
 function renderMessages() {
     const container = document.getElementById('chat-messages-container');
-    const currentUserId = {{ Auth::id() }};
+    // Use the global currentUserId from chat system or window auth ID
+    const userId = typeof window.currentUserId !== 'undefined' ? window.currentUserId : {{ Auth::id() }};
 
     if (chatState.messages.length === 0) {
         container.innerHTML = `
@@ -229,12 +230,12 @@ function renderMessages() {
     }
 
     container.innerHTML = chatState.messages.map(msg => `
-        <div class="message-item ${msg.user_id === currentUserId ? 'own' : ''}">
+        <div class="message-item ${msg.user_id === userId ? 'own' : ''}">
             <div class="message-avatar">
                 ${msg.user.avatar ? `<img src="${msg.user.avatar}" alt="${msg.user.name}">` : `<span>${msg.user.name.charAt(0).toUpperCase()}</span>`}
             </div>
             <div class="message-content">
-                ${msg.user_id !== currentUserId ? `<div class="message-sender">${msg.user.name}</div>` : ''}
+                ${msg.user_id !== userId ? `<div class="message-sender">${msg.user.name}</div>` : ''}
                 ${msg.message ? `<div class="message-text">${escapeHtml(msg.message)}</div>` : ''}
                 ${msg.attachments && msg.attachments.length > 0 ? renderAttachments(msg.attachments) : ''}
                 <div class="message-time">${formatTime(msg.created_at)}</div>

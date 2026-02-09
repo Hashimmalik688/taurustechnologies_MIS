@@ -1,0 +1,123 @@
+/* Community Items Styles */
+.community-item {
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.community-item:hover {
+    background: #f3f4f6;
+    border-left-color: #667eea;
+    transform: translateX(2px);
+}
+
+.community-item.active {
+    background: #eff6ff;
+    border-left-color: #667eea;
+}
+
+.community-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+.community-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.community-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.communities-list {
+    padding: 8px 0;
+}
+
+.communities-list:empty::after {
+    content: 'No communities';
+    display: block;
+    padding: 12px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+/* Announcement Modal Styles */
+.announcement-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+.announcement-modal-header .modal-title {
+    font-weight: 600;
+}
+
+.announcement-modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.announcement-community-selector {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.announcement-community-selector .community-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #667eea;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.announcement-community-selector .community-tag i {
+    font-size: 1rem;
+}
+
+.priority-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-badge.urgent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.priority-badge.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.priority-badge.info {
+    background: #dbeafe;
+    color: #1e40af;
+}

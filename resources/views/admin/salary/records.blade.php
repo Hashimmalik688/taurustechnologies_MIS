@@ -51,7 +51,7 @@
                                                     <label class="form-label">Employee</label>
                                                     <select name="employee" class="form-select">
                                                         <option value="">All Employees</option>
-                                                        @foreach (\App\Models\User::role('Employee')->orderBy('name')->get() as $emp)
+                                                        @foreach (\App\Models\User::role('Employee')->excludePartners()->orderBy('name')->get() as $emp)
                                                             <option value="{{ $emp->id }}"
                                                                 {{ request('employee') == $emp->id ? 'selected' : '' }}>
                                                                 {{ $emp->name }}

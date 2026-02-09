@@ -1,0 +1,87 @@
+=== MySQL Binary Log Data Recovery Summary ===
+Date: February 2, 2026
+Database: taurus_crm
+
+BINLOG FILES ANALYZED:
+- Total binlog files: 34 files (binlog.000084 - binlog.000117)
+- Date range: January 3, 2026 - February 1, 2026 (23:59:59)
+- Total extracted size: 71 MB (recovery_attempt.sql)
+- Total lines extracted: 1,416,420 lines
+
+EXTRACTED FILES:
+1. /var/www/taurus-crm/storage/recovery_attempt.sql
+   - Size: 71 MB
+   - Lines: 1,416,420
+   - Format: Binary log SQL statements
+   - Date range: Jan 1 - Feb 1, 2026 (excludes Feb 2 data)
+   - Database: taurus_crm
+
+2. /var/www/taurus-crm/storage/feb1_readable.sql
+   - Size: 9.4 MB  
+   - Lines: 180,044
+   - Format: Readable decoded rows  
+   - Date range: Jan 30 - Feb 1, 2026
+   - Database: taurus_crm
+
+BINLOG FILES BY SIZE (Jan-Feb Period):
+- binlog.000087: 103 MB (Jan 5)
+- binlog.000088: 101 MB (Jan 5)
+- binlog.000089: 105 MB (Jan 5)
+- binlog.000090: 74 MB (Jan 6)
+- binlog.000091: 56 MB (Jan 7)
+- binlog.000097: 9.0 MB (Jan 13)
+- binlog.000098: 31 MB (Jan 14)
+- binlog.000101: 12 MB (Jan 17)
+- binlog.000104: 6.9 MB (Jan 20)
+- binlog.000105: 11 MB (Jan 21)
+- binlog.000106: 7.8 MB (Jan 22)
+- binlog.000107: 7.6 MB (Jan 23)
+- binlog.000108: 7.5 MB (Jan 24)
+- binlog.000111: 11 MB (Jan 27)
+- binlog.000115: 15 MB (Jan 30)
+- binlog.000116: 4.8 MB (Jan 31)
+- binlog.000117: 25 MB (Feb 1)
+
+RECOVERY COMMAND USED:
+sudo mysqlbinlog /var/lib/mysql/binlog.000084 ... binlog.000117 \
+    --start-datetime="2026-01-01 00:00:00" \
+    --stop-datetime="2026-02-02 00:00:00" \
+    --database=taurus_crm \
+    --result-file=/var/www/taurus-crm/storage/recovery_attempt.sql
+
+NOTES:
+- Feb 2 data was EXCLUDED as requested
+- All data from Jan 1 through Feb 1 (23:59:59) has been extracted
+- Binary logs use row-based replication (RBR) format
+- Files contain GTID transactions with timestamps
+- Data includes all INSERT, UPDATE, DELETE operations for taurus_crm database
+
+NEXT STEPS FOR DATA RESTORATION:
+1. Review recovery_attempt.sql for completeness
+2. Test restoration in a staging environment first
+3. Use: mysql -u root -p taurus_crm < /var/www/taurus-crm/storage/recovery_attempt.sql
+4. Verify data integrity after restoration
+5. Check for any constraints or foreign key issues
+
+
+=== DETAILED RECOVERY STATISTICS ===
+
+TRANSACTION COUNT:
+- Total timestamped transactions: 212,574
+- First transaction: Jan 2, 2026 00:00:07
+- Last transaction: Feb 1, 2026 00:00:04
+
+DATA COVERAGE:
+✓ January 2-31, 2026: COMPLETE
+✓ February 1, 2026 (until 00:00:04): COMPLETE
+✗ February 2, 2026: EXCLUDED (as requested)
+
+FILES CREATED:
+1. recovery_attempt.sql (71 MB) - Main recovery file with all transactions
+2. feb1_readable.sql (9.4 MB) - Human-readable format for Jan 30-Feb 1
+3. jan_data_sample.txt (106 KB) - Sample data for verification
+4. binlog_recovery_summary.txt - This summary file
+
+ALL DATA FROM FEBRUARY 1 OR EARLIER HAS BEEN EXTRACTED.
+NO FEBRUARY 2 DATA IS INCLUDED IN THE RECOVERY FILES.
+

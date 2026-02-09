@@ -26,6 +26,13 @@ class CheckUserRole
         // Split roles by pipe and check if user has any of them
         $roles = explode('|', $role);
         $hasRole = false;
+        $userRoles = Auth::user()->getRoleNames()->toArray();
+        
+        \Log::info('EMS Role Check', [
+            'user_id' => Auth::id(),
+            'user_roles' => $userRoles,
+            'required_roles' => $roles,
+        ]);
         
         foreach ($roles as $singleRole) {
             if (Auth::user()->hasRole(trim($singleRole))) {
@@ -35,6 +42,11 @@ class CheckUserRole
         }
 
         if (!$hasRole) {
+            \Log::warning('EMS Access Denied', [
+                'user_id' => Auth::id(),
+                'user_roles' => $userRoles,
+                'required_roles' => $roles,
+            ]);
             abort(403, 'Unauthorized action. You do not have permission to access this resource.');
         }
 

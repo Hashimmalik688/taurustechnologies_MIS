@@ -3,7 +3,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('css'); ?>
-    <link href="<?php echo e(URL::asset('public/css/light-theme.css')); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo e(URL::asset('css/light-theme.css')); ?>" rel="stylesheet" type="text/css" />
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>

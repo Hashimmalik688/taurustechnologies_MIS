@@ -16,15 +16,15 @@ class TeamDashboardController extends Controller
     }
 
     /**
-     * Paraguins Team Dashboard
+     * Peregrine Team Dashboard
      */
-    public function paraguinsTeam()
+    public function peregrineTeam()
     {
         $startOfMonth = Carbon::now()->startOfMonth();
         $today = Carbon::today();
 
-        // Get paraguins team members
-        $paraguinsTeam = User::where('department', 'paraguins')
+        // Get peregrine team members
+        $peregrineTeam = User::where('department', 'peregrine')
             ->orWhereHas('roles', function($q) {
                 $q->whereIn('name', ['Verifier', 'Live Closer', 'Verification Officer']);
             })
@@ -32,37 +32,37 @@ class TeamDashboardController extends Controller
 
         $stats = [
             'month_data' => Lead::whereMonth('created_at', Carbon::now()->month)
-                                ->where('team', 'paraguins')
+                                ->where('team', 'peregrine')
                                 ->count(),
             'total_calls' => DB::table('call_logs')
-                               ->whereIn('agent_id', $paraguinsTeam->pluck('id'))
+                               ->whereIn('agent_id', $peregrineTeam->pluck('id'))
                                ->whereDate('call_start_time', '>=', $startOfMonth)
                                ->count(),
-            'closed_sales' => Lead::where('team', 'paraguins')
+            'closed_sales' => Lead::where('team', 'peregrine')
                                   ->where('status', 'sale')
                                   ->whereMonth('created_at', Carbon::now()->month)
                                   ->count(),
-            'total_transfers' => Lead::where('team', 'paraguins')
+            'total_transfers' => Lead::where('team', 'peregrine')
                                      ->where('status', 'transferred')
                                      ->whereMonth('created_at', Carbon::now()->month)
                                      ->count(),
         ];
 
         // Sales per closer
-        $salesPerCloser = User::whereIn('id', $paraguinsTeam->pluck('id'))
+        $salesPerCloser = User::whereIn('id', $peregrineTeam->pluck('id'))
             ->withCount([
                 'leadsManaged as total_sales' => function ($query) use ($startOfMonth) {
                     $query->where('created_at', '>=', $startOfMonth)
-                          ->where('team', 'paraguins');
+                          ->where('team', 'peregrine');
                 },
                 'leadsManaged as sales_today' => function ($query) use ($today) {
                     $query->whereDate('created_at', $today)
-                          ->where('team', 'paraguins');
+                          ->where('team', 'peregrine');
                 }
             ])
             ->get();
 
-        return view('team-dashboards.paraguins', compact('stats', 'salesPerCloser'));
+        return view('team-dashboards.peregrine', compact('stats', 'salesPerCloser'));
     }
 
     /**

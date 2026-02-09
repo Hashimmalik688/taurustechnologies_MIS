@@ -17,7 +17,7 @@ class AttendanceController extends Controller
     private $attendanceService;
 
     // Roles that should track attendance (all non-admin roles)
-    private $trackableRoles = ['Employee', 'Paraguins Closer', 'Paraguins Validator', 'Verifier', 'Trainer', 'Ravens Closer', 'Manager', 'HR', 'QA', 'Retention Officer'];
+    private $trackableRoles = ['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer', 'Manager', 'HR', 'QA', 'Retention Officer', 'Co-Ordinator', 'Super Admin'];
 
     public function __construct(AttendanceService $attendanceService)
     {
@@ -52,6 +52,11 @@ class AttendanceController extends Controller
      */
     public function updateAjax(Request $request, $id)
     {
+        // Prevent HR from modifying attendance records
+        if (auth()->user()->hasRole('HR')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. HR has view-only access.'], 403);
+        }
+
         $attendance = Attendance::find($id);
         if (!$attendance) {
             return response()->json(['success' => false, 'message' => 'Not found'], 404);
@@ -105,13 +110,13 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Get all users with trackable roles
+     * Get all users with trackable roles (excluding deleted users)
      */
     private function getTrackableUsers()
     {
         return User::whereHas('roles', function($q) {
             $q->whereIn('name', $this->trackableRoles);
-        });
+        })->whereNull('deleted_at');
     }
 
     /**
@@ -141,6 +146,7 @@ class AttendanceController extends Controller
 
             // Build query with filters
             $query = Attendance::with('user')
+                ->whereHas('user')  // Ensure user exists (filter out orphaned records)
                 ->whereBetween('date', [$startDate, $endDate]);
 
             // Filter by employee name
@@ -163,6 +169,11 @@ class AttendanceController extends Controller
             $selectedDate = Carbon::parse($startDate);
             $selectedAttendances = Attendance::with('user')
                 ->whereDate('date', $selectedDate)
+                ->whereHas('user', function($q) {
+                    $q->whereHas('roles', function($r) {
+                        $r->whereIn('name', $this->trackableRoles);
+                    })->whereNull('deleted_at');
+                })
                 ->get();
 
             $presentCount = $selectedAttendances->where('status', 'present')->count();
@@ -171,7 +182,8 @@ class AttendanceController extends Controller
             // Only count absent if selected date is a workday (not weekend/holiday)
             $isWorkday = !in_array($selectedDate->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY]) 
                          && !PublicHoliday::isHoliday($selectedDate);
-            $absentCount = $isWorkday ? ($totalEmployees - $selectedAttendances->count()) : 0;
+            // Absent count: total trackable employees minus those with any attendance record
+            $absentCount = $isWorkday ? max(0, $totalEmployees - $selectedAttendances->count()) : 0;
 
             // Get absent employees for the selected date
             $presentUserIds = $selectedAttendances->pluck('user_id')->toArray();
@@ -535,6 +547,11 @@ class AttendanceController extends Controller
      */
     public function markManual(Request $request)
     {
+        // Prevent HR from marking manual attendance
+        if (auth()->user()->hasRole('HR')) {
+            return redirect()->back()->with('error', 'Unauthorized. HR has view-only access.');
+        }
+
         // Validate inputs
         $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -668,6 +685,11 @@ class AttendanceController extends Controller
      */
     public function delete($id)
     {
+        // Prevent HR from deleting attendance records
+        if (auth()->user()->hasRole('HR')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized. HR has view-only access.'], 403);
+        }
+
         try {
             $attendance = Attendance::findOrFail($id);
             $userId = $attendance->user_id;
@@ -710,13 +732,19 @@ class AttendanceController extends Controller
         }
 
         return $weekDates->map(function ($date) {
-            $dayAttendances = Attendance::whereDate('date', $date)->get();
+            $dayAttendances = Attendance::whereDate('date', $date)
+                ->whereHas('user', function($q) {
+                    $q->whereHas('roles', function($r) {
+                        $r->whereIn('name', $this->trackableRoles);
+                    })->whereNull('deleted_at');
+                })
+                ->get();
             $totalEmployees = $this->getTrackableUsers()->count();
             
             // Only count absent if it's a workday
             $isWorkday = !in_array($date->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY]) 
                          && !PublicHoliday::isHoliday($date);
-            $absentCount = $isWorkday ? ($totalEmployees - $dayAttendances->count()) : 0;
+            $absentCount = $isWorkday ? max(0, $totalEmployees - $dayAttendances->count()) : 0;
 
             return [
                 'date' => $date->format('M d'),

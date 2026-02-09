@@ -26,11 +26,12 @@ class RoleSeeder extends Seeder
             'QA',
             'Sales Closer',
             'Closer',
-            'Paraguins Closer',
-            'Paraguins Validator',
+            'Peregrine Closer',
+            'Peregrine Validator',
             'Retention Officer',
             'Ravens Closer',
             'Trainer',
+            'Co-ordinator',
         ];
 
         foreach ($roles as $role) {

@@ -13,7 +13,6 @@ class Attendance extends Model
         'login_time',
         'logout_time',
         'ip_address',
-        'user_agent',
         'device_fingerprint',
         'device_name',
         'status',

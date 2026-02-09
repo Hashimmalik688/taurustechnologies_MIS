@@ -5,8 +5,8 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('/assets/libs/flatpickr/flatpickr.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
 @endsection
 
 @section('content')
@@ -363,6 +363,7 @@
                                                             <i class="mdi mdi-eye font-size-16 text-info me-1"></i> View
                                                             Details
                                                         </a>
+                                                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
                                                         <a class="dropdown-item" href="#"
                                                             onclick="editRecord({{ $attendance->id }})">
                                                             <i class="mdi mdi-pencil font-size-16 text-primary me-1"></i>
@@ -373,6 +374,7 @@
                                                             onclick="deleteRecord({{ $attendance->id }})">
                                                             <i class="mdi mdi-delete font-size-16 me-1"></i> Delete
                                                         </a>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
@@ -427,12 +429,14 @@
                         <button class="btn btn-outline-primary" onclick="bulkExport()">
                             <i class="mdi mdi-download me-2"></i>Export Selected
                         </button>
+                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
                         <button class="btn btn-outline-info" onclick="bulkUpdateStatus()">
                             <i class="mdi mdi-pencil me-2"></i>Update Status
                         </button>
                         <button class="btn btn-outline-danger" onclick="bulkDelete()">
                             <i class="mdi mdi-delete me-2"></i>Delete Selected
                         </button>
+                        @endif
                     </div>
                     <div id="selected-count" class="text-muted mt-2">
                         No records selected
@@ -445,25 +449,49 @@
 @endsection
 
 @section('script')
-    <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
-    <script src="{{ URL::asset('/assets/libs/flatpickr/flatpickr.min.js') }}"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <!-- Flatpickr -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        // Initialize DataTable
-        $('#historyTable').DataTable({
-            "pageLength": 25,
-            "responsive": true,
-            "order": [
-                [1, "desc"]
-            ], // Sort by date desc
-            "columnDefs": [{
-                    "orderable": false,
-                    "targets": [0, 8]
-                } // Disable sorting for checkbox and action columns
-            ],
-            "paging": false, // Use Laravel pagination instead
-            "info": false,
-            "searching": true
+        // Initialize DataTable with guard
+        $(document).ready(function() {
+            if (window.historyTableInitialized) {
+                return;
+            }
+            window.historyTableInitialized = true;
+            
+            var tableElement = $('#historyTable');
+            
+            // Check if table has data rows
+            var dataRows = tableElement.find('tbody tr:not(:has(td[colspan]))');
+            if (dataRows.length === 0) {
+                console.log('History table is empty, skipping DataTable initialization');
+                return;
+            }
+            
+            try {
+                tableElement.DataTable({
+                    "pageLength": 25,
+                    "responsive": true,
+                    "order": [
+                        [1, "desc"]
+                    ], // Sort by date desc
+                    "columnDefs": [{
+                            "orderable": false,
+                            "targets": [0, 8]
+                        } // Disable sorting for checkbox and action columns
+                    ],
+                    "paging": false, // Use Laravel pagination instead
+                    "info": false,
+                    "searching": true
+                });
+                console.log('History DataTable initialized successfully');
+            } catch (e) {
+                console.error('History DataTable initialization error:', e);
+            }
         });
 
         // Date range shortcuts

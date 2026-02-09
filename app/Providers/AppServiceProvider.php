@@ -25,8 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
         Schema::defaultStringLength(191);
+
+        // Register UserObserver
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
 
         // Force HTTPS in production
         if (config('app.env') === 'production') {

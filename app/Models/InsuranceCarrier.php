@@ -10,8 +10,6 @@ class InsuranceCarrier extends Model
     protected $fillable = [
         'name',
         'payment_module',
-        'phone',
-        'ssn_last4',
         'base_commission_percentage',
         'age_min',
         'age_max',
@@ -63,6 +61,14 @@ class InsuranceCarrier extends Model
     public function agentCommissions(): HasMany
     {
         return $this->hasMany(AgentCarrierCommission::class);
+    }
+
+    /**
+     * Get all agent-state settlement rates for this carrier
+     */
+    public function agentStates(): HasMany
+    {
+        return $this->hasMany(AgentCarrierState::class);
     }
 
     /**

@@ -111,6 +111,37 @@ body.auth-body-bg {
 .shape-4 { width: 90px; height: 90px; bottom: 15%; left: 15%; }
 .shape-5 { width: 100px; height: 100px; top: 75%; right: 18%; }
 
+/* Partner Login Button - Top Right */
+.partner-login-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+  transition: all 0.3s ease;
+}
+
+.partner-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+  color: white;
+}
+
+.partner-login-btn i {
+  font-size: 1.1rem;
+}
+
 /* Centering wrapper */
 .auth-wrap {
   min-height: 100vh;
@@ -318,6 +349,13 @@ a.link-gold:hover {
   .auth-card .inner {
     padding: 1.75rem 1.25rem;
   }
+
+  .partner-login-btn {
+    top: 15px;
+    right: 15px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
 }
 </style>
 @endsection
@@ -339,6 +377,12 @@ a.link-gold:hover {
 <div class="bg-shape circle shape-3"></div>
 <div class="bg-shape square shape-4"></div>
 <div class="bg-shape circle shape-5"></div>
+
+<!-- Partner Login Button -->
+<a href="/partner/login" class="partner-login-btn">
+  <i class="mdi mdi-shield-star"></i>
+  Partner Login
+</a>
 
 <div class="auth-wrap">
   <div class="auth-card">
@@ -383,12 +427,20 @@ a.link-gold:hover {
 
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input id="password" 
-                 type="password" 
-                 name="password"
-                 class="form-control @error('password') is-invalid @enderror"
-                 placeholder="••••••••" 
-                 required>
+          <div class="position-relative">
+            <input id="password" 
+                   type="password" 
+                   name="password"
+                   class="form-control @error('password') is-invalid @enderror"
+                   placeholder="••••••••" 
+                   required>
+            <button type="button" class="btn btn-link position-absolute" 
+                    style="right: 10px; top: 50%; transform: translateY(-50%); padding: 0; z-index: 10;"
+                    onclick="togglePasswordVisibility()"
+                    title="Show/Hide Password">
+              <i id="password-toggle-icon" class="mdi mdi-eye-off"></i>
+            </button>
+          </div>
           @error('password')
             <div class="invalid-feedback">{{ $message }}</div>
           @enderror
@@ -430,5 +482,20 @@ a.link-gold:hover {
 @endsection
 
 @section('script')
-{{-- NO JavaScript needed for instant loading! --}}
+<script>
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('password-toggle-icon');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggleIcon.classList.remove('mdi-eye-off');
+      toggleIcon.classList.add('mdi-eye');
+    } else {
+      passwordInput.type = 'password';
+      toggleIcon.classList.remove('mdi-eye');
+      toggleIcon.classList.add('mdi-eye-off');
+    }
+  }
+</script>
 @endsection

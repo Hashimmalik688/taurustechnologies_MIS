@@ -183,7 +183,6 @@ class AttendanceService
             'date' => $shiftDate,
             'login_time' => $currentTime,
             'ip_address' => Request::ip(),
-            'user_agent' => Request::header('User-Agent'),
             'device_fingerprint' => Request::header('X-Device-Fingerprint') ?: Request::header('X-Device-ID'),
             'device_name' => Request::header('X-Device-Name'),
             'status' => $status,

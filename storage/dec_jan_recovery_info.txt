@@ -1,0 +1,33 @@
+=== December 2025 - January 2026 Recovery Attempt ===
+Date: February 2, 2026
+
+EXTRACTION COMMAND:
+sudo mysqlbinlog /var/lib/mysql/binlog.[0-9]* \
+    --start-datetime="2025-12-01 00:00:00" \
+    --stop-datetime="2026-01-31 23:59:59" \
+    --database=taurus_crm \
+    --result-file=/var/www/taurus-crm/storage/dec_jan_recovery.sql
+
+RESULT:
+✓ File created: dec_jan_recovery.sql
+✓ Size: 71 MB (same as recovery_attempt.sql)
+✓ Lines: 1,416,418
+
+DATE RANGE FOUND:
+⚠ IMPORTANT: No December 2025 data exists in binlogs
+- First transaction: January 2, 2026 00:05:35
+- Last transaction: January 31, 2026 02:49:07
+
+EXPLANATION:
+The oldest available binlog file (binlog.000084) starts from January 3, 2026.
+Binary logs from December 2025 have been rotated/purged and are no longer available.
+
+This file contains the SAME data as recovery_attempt.sql:
+- Both files: 71 MB
+- Both files: Start Jan 2, End Jan 31
+- Both files: 212,574+ transactions
+
+RECOMMENDATION:
+Use the original recovery_attempt.sql file for import.
+The dec_jan_recovery.sql file is identical and redundant.
+

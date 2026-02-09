@@ -20,8 +20,8 @@ Laravel 11 insurance CRM with role-based access, real-time chat (Laravel Reverb)
 Uses `spatie/laravel-permission`. Routes use `role:` middleware extensively. Key roles:
 - `Super Admin` - full access
 - `Manager` - leads, reports, settings
-- `Employee|Agent|Ravens Closer|Paraguins Closer` - scoped dashboards
-- `Verifier|Paraguins Validator|QA|Retention Officer` - specialized functions
+- `Employee|Agent|Ravens Closer|Peregrine Closer` - scoped dashboards
+- `Verifier|Peregrine Validator|QA|Retention Officer` - specialized functions
 
 **Pattern:** Check `routes/web.php` for role middleware groups. Controllers inherit access from route groups. Don't add role checks in controllers unless overriding route-level rules.
 

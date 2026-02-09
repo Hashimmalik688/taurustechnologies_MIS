@@ -486,10 +486,10 @@
                                                                         title="Edit Carrier">
                                                                     <i class="mdi mdi-pencil"></i>
                                                                 </button>
-                                                                <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                                        onclick="viewCarrierDetails({{ $carrier->id }})" 
-                                                                        title="View Details">
-                                                                    <i class="mdi mdi-eye"></i>
+                                                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                        onclick="deleteCarrier({{ $carrier->id }}, '{{ $carrier->name }}')" 
+                                                                        title="Delete Carrier">
+                                                                    <i class="mdi mdi-delete"></i>
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -552,6 +552,18 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- State-Specific Settlement Rates Section --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="mdi mdi-map-marker-multiple me-1"></i>
+                                    State-Specific Settlement Rates (Optional)
+                                </h5>
+                            </div>
+                        </div>
+
+                        @include('admin.agents.partials.carrier-states', ['insuranceCarriers' => $insuranceCarriers])
 
                         {{-- Submit Section --}}
                         <div class="row">
@@ -940,6 +952,33 @@
             } catch (error) {
                 console.error('Error:', error);
                 await loadCarrierInModal(carrierId, 'edit');
+            }
+        }
+
+        // Function to delete carrier
+        async function deleteCarrier(carrierId, carrierName) {
+            if (!confirm(`Are you sure you want to delete "${carrierName}"? This will affect all agents assigned to this carrier.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/insurance-carriers/${carrierId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Carrier deleted successfully! Page will refresh.');
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'Unable to delete carrier.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting carrier. Please try again.');
             }
         }
 

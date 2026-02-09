@@ -1,6 +1,12 @@
 <div class="card-body">
-    <div class="leads-table-wrapper">
-    <table class="leads-table table table-striped table-bordered table-hover table-sm align-middle text-nowrap">
+    <!-- Top Scrollbar -->
+    <div class="top-scrollbar-wrapper" id="topScrollbarLeads">
+        <div class="top-scrollbar-content" id="topScrollbarContentLeads"></div>
+    </div>
+    
+    <!-- Main Table Wrapper -->
+    <div class="leads-table-wrapper" id="leadsTableWrapper">
+    <table class="leads-table table table-striped table-bordered table-hover table-sm align-middle text-nowrap" id="leadsTable">
             <thead class="table-light">
                 <tr>
                     <th class="text-center">#</th>
@@ -43,7 +49,7 @@
                         <th>Expiry</th>
                         <th>Source</th>
                         <th>Closer</th>
-                        <th>Partner</th>
+                        <th>Assigned Partner</th>
                         <th>Comments</th>
                     @endhasrole
                     <th>Status</th>
@@ -171,6 +177,7 @@
                             <td>{{ $lead->expiry_date ?? '—' }}</td>
                             <td>{{ $lead->source ?? '—' }}</td>
                             <td>{{ $lead->closer_name ?? '—' }}</td>
+                            <td>{{ $lead->assigned_partner ?? '—' }}</td>
                             <td>
                                 @if($lead->preset_line)
                                     <span class="badge" style="background: var(--gold); color: white;">{{ $lead->preset_line }}</span>

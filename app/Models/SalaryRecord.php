@@ -17,8 +17,11 @@ class SalaryRecord extends Model
         'status', 'notes', 'calculated_at', 'approved_at', 'paid_at',
 
         // Attendance fields (compatible with your existing AttendanceService)
-        'working_days', 'present_days', 'leave_days', 'late_days', 'daily_salary',
+        'working_days', 'present_days', 'leave_days', 'late_days', 'half_days', 'daily_salary',
         'attendance_bonus', 'attendance_deduction',
+        
+        // Dock fields
+        'dock_amount', 'dock_details',
     ];
 
     protected $casts = [
@@ -33,6 +36,7 @@ class SalaryRecord extends Model
         'daily_salary' => 'decimal:2',
         'attendance_bonus' => 'decimal:2',
         'attendance_deduction' => 'decimal:2',
+        'dock_amount' => 'decimal:2',
     ];
 
     public function user()
@@ -43,6 +47,42 @@ class SalaryRecord extends Model
     public function deductions()
     {
         return $this->hasMany(SalaryDeduction::class);
+    }
+    
+    /**
+     * Get dock records for this employee for this month/year
+     */
+    public function dockRecords()
+    {
+        return $this->hasMany(DockRecord::class, 'user_id', 'user_id')
+            ->whereMonth('dock_date', $this->salary_month)
+            ->whereYear('dock_date', $this->salary_year);
+    }
+
+    /**
+     * Relationship to salary components (new split payment system)
+     */
+    public function components()
+    {
+        return $this->hasMany(SalaryComponent::class, 'user_id', 'user_id')
+            ->where('salary_month', $this->salary_month)
+            ->where('salary_year', $this->salary_year);
+    }
+
+    /**
+     * Get basic salary component
+     */
+    public function basicComponent()
+    {
+        return $this->components()->where('component_type', 'basic')->first();
+    }
+
+    /**
+     * Get bonus salary component
+     */
+    public function bonusComponent()
+    {
+        return $this->components()->where('component_type', 'bonus')->first();
     }
 
     public function getMonthNameAttribute()

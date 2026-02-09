@@ -5,7 +5,7 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('public/css/light-theme.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('css/light-theme.css') }}" rel="stylesheet" type="text/css" />
 @endsection
 
 @section('content')
@@ -181,18 +181,146 @@
         </div>
     </div>
 
-    <!-- Performance Chart (Optional) -->
-    <div class="row">
-        <div class="col-xl-12">
+    <!-- My Sales Section -->
+    <div class="row mt-4">
+        <div class="col-12">
             <div class="card bordered">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">My Performance This Week</h4>
-                </div>
-                <div class="card-body">
-                    <div class="text-center text-muted py-5">
-                        <i class="bx bx-bar-chart fs-1 mb-3"></i>
-                        <p>Performance charts coming soon...</p>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="bx bx-dollar-circle me-2"></i>My Sales Records
+                    </h4>
+                    <div>
+                        <span class="badge bg-success" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                            Total: {{ $mySales->total() ?? 0 }}
+                        </span>
                     </div>
+                </div>
+
+                <div class="card-body">
+                    @if(isset($mySales) && $mySales->count() > 0)
+                        <!-- Sales Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-success">{{ $mySales->where('status', 'accepted')->count() }}</h4>
+                                        <p class="mb-0 text-muted">Accepted</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-info">{{ $mySales->where('status', 'underwritten')->count() }}</h4>
+                                        <p class="mb-0 text-muted">Underwritten</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-warning">{{ $mySales->where('status', 'pending')->count() }}</h4>
+                                        <p class="mb-0 text-muted">Pending</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-danger">
+                                    <div class="card-body text-center">
+                                        <h4 class="text-danger">{{ $mySales->where('status', 'declined')->count() }}</h4>
+                                        <p class="mb-0 text-muted">Declined</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="60">#</th>
+                                        <th>Customer Name</th>
+                                        <th>Sale Date</th>
+                                        <th>Status</th>
+                                        <th>Coverage</th>
+                                        <th>Premium</th>
+                                        <th>Carrier</th>
+                                        <th width="100">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($mySales as $index => $sale)
+                                        <tr>
+                                            <td>{{ $mySales->firstItem() + $index }}</td>
+                                            <td>
+                                                <strong>{{ $sale->cn_name ?? 'N/A' }}</strong>
+                                                @if($sale->phone_number)
+                                                    <br><small class="text-muted">{{ $sale->phone_number }}</small>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <i class="bx bx-calendar me-1"></i>
+                                                {{ $sale->sale_at ? $sale->sale_at->format('M d, Y') : 'N/A' }}
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $statusColors = [
+                                                        'accepted' => 'success',
+                                                        'underwritten' => 'info',
+                                                        'pending' => 'warning',
+                                                        'declined' => 'danger',
+                                                        'chargeback' => 'dark',
+                                                    ];
+                                                    $color = $statusColors[$sale->status] ?? 'secondary';
+                                                @endphp
+                                                <span class="badge bg-{{ $color }}">{{ ucfirst($sale->status) }}</span>
+                                                @if($sale->qa_status)
+                                                    <br><small class="text-muted">QA: {{ $sale->qa_status }}</small>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($sale->coverage_amount)
+                                                    <strong>${{ number_format($sale->coverage_amount, 0) }}</strong>
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($sale->monthly_premium)
+                                                    ${{ number_format($sale->monthly_premium, 2) }}
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $sale->carrier_name ?? 'N/A' }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ route('sales.index') }}?search={{ $sale->phone_number }}" 
+                                                   class="btn btn-sm btn-primary" 
+                                                   title="View in Sales">
+                                                    <i class="bx bx-show"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted">
+                                Showing {{ $mySales->firstItem() }} to {{ $mySales->lastItem() }} of {{ $mySales->total() }}
+                            </div>
+                            <div>{{ $mySales->links() }}</div>
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="bx bx-package fs-1 text-muted"></i>
+                            <p class="text-muted mt-3">No sales yet. Start calling to make your first sale!</p>
+                            <a href="{{ route('ravens.calling') }}" class="btn btn-primary mt-2">
+                                <i class="bx bx-phone-call me-1"></i> Go to Calling System
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('leads', function (Blueprint $table) {
             // QA fields
-            $table->enum('qa_status', ['In Review', 'Approved', 'Rejected'])->default('In Review')->after('retention_officer_id');
+            $table->enum('qa_status', ['Pending', 'Good', 'Avg', 'Bad'])->default('Pending')->after('retention_officer_id');
             $table->text('qa_reason')->nullable()->after('qa_status');
             $table->foreignId('qa_user_id')->nullable()->after('qa_reason')->constrained('users')->nullOnDelete();
         });

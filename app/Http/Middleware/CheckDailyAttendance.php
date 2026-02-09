@@ -52,7 +52,7 @@ class CheckDailyAttendance
     {
         // Only run auto-check for worker roles. Adjust the roles list as needed.
         return method_exists($user, 'hasAnyRole')
-            ? $user->hasAnyRole(['Employee', 'Paraguins Closer', 'Paraguins Validator', 'Verifier', 'Trainer', 'Ravens Closer'])
+            ? $user->hasAnyRole(['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer'])
             : false;
     }
 }

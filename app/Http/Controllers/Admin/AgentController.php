@@ -14,7 +14,7 @@ class AgentController extends Controller
     public function index()
     {
         $agents = User::role('Agent')
-            ->with('userDetail')
+            ->with(['userDetail', 'carrierCommissions.insuranceCarrier', 'carrierStates'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -82,6 +82,21 @@ class AgentController extends Controller
                                 'commission_percentage' => $commissionPercentage,
                             ]);
                         }
+
+                        // Create agent-carrier-state records if states are provided
+                        if ($request->has("carrier_states.{$carrierId}") && !empty($request->carrier_states[$carrierId])) {
+                            foreach ($request->carrier_states[$carrierId] as $state) {
+                                \App\Models\AgentCarrierState::create([
+                                    'user_id' => $user->id,
+                                    'insurance_carrier_id' => $carrierId,
+                                    'state' => $state,
+                                    'settlement_level_pct' => $request->input("settlement_level.{$carrierId}.{$state}"),
+                                    'settlement_graded_pct' => $request->input("settlement_graded.{$carrierId}.{$state}"),
+                                    'settlement_gi_pct' => $request->input("settlement_gi.{$carrierId}.{$state}"),
+                                    'settlement_modified_pct' => $request->input("settlement_modified.{$carrierId}.{$state}"),
+                                ]);
+                            }
+                        }
                     }
                 }
             });
@@ -118,7 +133,12 @@ class AgentController extends Controller
             ->pluck('commission_percentage', 'insurance_carrier_id')
             ->toArray();
 
-        return view('admin.agents.edit', compact('user', 'insuranceCarriers', 'agentCommissions'));
+        // Get existing agent-carrier-state records
+        $agentCarrierStates = \App\Models\AgentCarrierState::where('user_id', $id)
+            ->get()
+            ->groupBy('insurance_carrier_id');
+
+        return view('admin.agents.edit', compact('user', 'insuranceCarriers', 'agentCommissions', 'agentCarrierStates'));
     }
 
     public function update(UpdateAgentRequest $request, $id)
@@ -163,6 +183,7 @@ class AgentController extends Controller
                 // Sync agent-carrier commission records
                 // Delete old records
                 \App\Models\AgentCarrierCommission::where('user_id', $user->id)->delete();
+                \App\Models\AgentCarrierState::where('user_id', $user->id)->delete();
                 
                 // Create new records
                 if ($request->has('selected_carriers') && !empty($request->selected_carriers)) {
@@ -176,6 +197,21 @@ class AgentController extends Controller
                                 'insurance_carrier_id' => $carrierId,
                                 'commission_percentage' => $commissionPercentage,
                             ]);
+                        }
+
+                        // Create agent-carrier-state records if states are provided
+                        if ($request->has("carrier_states.{$carrierId}") && !empty($request->carrier_states[$carrierId])) {
+                            foreach ($request->carrier_states[$carrierId] as $state) {
+                                \App\Models\AgentCarrierState::create([
+                                    'user_id' => $user->id,
+                                    'insurance_carrier_id' => $carrierId,
+                                    'state' => $state,
+                                    'settlement_level_pct' => $request->input("settlement_level.{$carrierId}.{$state}"),
+                                    'settlement_graded_pct' => $request->input("settlement_graded.{$carrierId}.{$state}"),
+                                    'settlement_gi_pct' => $request->input("settlement_gi.{$carrierId}.{$state}"),
+                                    'settlement_modified_pct' => $request->input("settlement_modified.{$carrierId}.{$state}"),
+                                ]);
+                            }
                         }
                     }
                 }
@@ -194,8 +230,27 @@ class AgentController extends Controller
 
     public function destroy($id)
     {
-        User::destroy($id);
+        try {
+            \DB::transaction(function () use ($id) {
+                $user = User::findOrFail($id);
+                
+                // Delete related records first to prevent foreign key constraint errors
+                \App\Models\AgentCarrierCommission::where('user_id', $user->id)->delete();
+                \App\Models\AgentCarrierState::where('user_id', $user->id)->delete();
+                
+                // Delete user details if exists
+                if ($user->userDetail) {
+                    $user->userDetail->delete();
+                }
+                
+                // Soft delete the user
+                $user->delete();
+            });
 
-        return redirect()->route('agents.index')->with('success', 'Agent deleted successfully.');
+            return redirect()->route('agents.index')->with('success', 'Agent deleted successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Agent deletion failed: ' . $e->getMessage());
+            return redirect()->route('agents.index')->with('error', 'Failed to delete agent. Please try again.');
+        }
     }
 }

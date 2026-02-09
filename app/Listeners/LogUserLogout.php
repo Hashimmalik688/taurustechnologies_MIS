@@ -5,6 +5,7 @@ namespace App\Listeners;
 use Illuminate\Auth\Events\Logout;
 use App\Models\AuditLog;
 use App\Models\Attendance;
+use App\Models\Partner;
 use Carbon\Carbon;
 
 class LogUserLogout
@@ -24,6 +25,11 @@ class LogUserLogout
     {
         if ($event->user) {
             $user = $event->user;
+
+            // Check if this is a Partner logout - if so, skip logging
+            if ($user instanceof Partner) {
+                return;
+            }
 
             // Update logout time on User model for historical reference
             $user->update([

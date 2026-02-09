@@ -81,6 +81,7 @@ class SalaryCalculationService
                 'present_days' => $attendanceData['present_days'],
                 'leave_days' => $attendanceData['leave_days'],
                 'late_days' => $attendanceData['late_days'],
+                'half_days' => $attendanceData['half_days'],
                 'daily_salary' => $dailySalary,
                 'attendance_bonus' => $punctualityBonus,
                 'attendance_deduction' => -$attendanceDeduction, // Store as negative

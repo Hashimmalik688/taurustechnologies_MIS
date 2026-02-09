@@ -5,7 +5,8 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
         :root {
             --gold: #d4af37;
@@ -440,11 +441,11 @@
 
                                         <td>
                                             <div class="carriers-list">
-                                                @if ($agent->userDetail && $agent->userDetail->carriers && count($agent->userDetail->carriers) > 0)
-                                                    @foreach ($agent->userDetail->carriers as $carrier)
+                                                @if ($agent->carrierCommissions && $agent->carrierCommissions->count() > 0)
+                                                    @foreach ($agent->carrierCommissions as $commission)
                                                         <span class="badge-carrier">
                                                             <i class="bx bx-car me-1"></i>
-                                                            {{ $carrier }}
+                                                            {{ $commission->insuranceCarrier->name }}
                                                         </span>
                                                     @endforeach
                                                 @else
@@ -458,15 +459,23 @@
 
                                         <td>
                                             <div class="states-list">
-                                                @if ($agent->userDetail && $agent->userDetail->active_states && count($agent->userDetail->active_states) > 0)
-                                                    @foreach ($agent->userDetail->active_states as $state)
+                                                @php
+                                                    $uniqueStates = $agent->carrierStates ? $agent->carrierStates->pluck('state')->unique()->sort()->values() : collect();
+                                                @endphp
+                                                @if ($uniqueStates->count() > 0)
+                                                    @foreach ($uniqueStates->take(5) as $state)
                                                         <span class="badge-state">
                                                             {{ $state }}
                                                         </span>
                                                     @endforeach
+                                                    @if ($uniqueStates->count() > 5)
+                                                        <span class="badge-state" style="background-color: #64748b;">
+                                                            +{{ $uniqueStates->count() - 5 }}
+                                                        </span>
+                                                    @endif
                                                     <div class="mt-2">
                                                         <small style="color: #94a3b8; font-weight: 600;">
-                                                            {{ count($agent->userDetail->active_states) }} state(s)
+                                                            {{ $uniqueStates->count() }} state(s)
                                                         </small>
                                                     </div>
                                                 @else
@@ -491,7 +500,7 @@
                                                             <i class="bx bx-show me-2"></i>View Details
                                                         </a>
                                                     </li>
-                                                    @hasrole('Admin')
+                                                    @hasanyrole('Super Admin|Manager')
                                                         <li>
                                                             <a class="dropdown-item"
                                                                 href="{{ route('agents.edit', $agent->id) }}">
@@ -522,7 +531,7 @@
                                                                 <i class="bx bx-trash me-2" style="color: #ef4444;"></i>Delete Agent
                                                             </button>
                                                         </li>
-                                                    @endhasrole
+                                                    @endhasanyrole
                                                 </ul>
                                             </div>
                                         </td>
@@ -609,12 +618,26 @@
 @endsection
 
 @section('script')
-    <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTable with custom configuration
-            $('#datatable').DataTable({
+            if (window.agentsTableInitialized) {
+                return;
+            }
+            window.agentsTableInitialized = true;
+            
+            var tableElement = $('#datatable');
+            if (tableElement.find('tbody tr:not(:has(td[colspan]))').length === 0) {
+                console.log('Agents table is empty, skipping DataTable initialization');
+                return;
+            }
+            
+            try {
+                // Initialize DataTable with custom configuration
+                tableElement.DataTable({
                 responsive: true,
                 pageLength: 25,
                 order: [
@@ -635,7 +658,11 @@
                     info: "Showing _START_ to _END_ of _TOTAL_ agents",
                     emptyTable: "No agents found"
                 }
-            });
+                });
+                console.log('Agents DataTable initialized successfully');
+            } catch (e) {
+                console.error('Agents DataTable initialization error:', e);
+            }
         });
 
         // Function to refresh the table

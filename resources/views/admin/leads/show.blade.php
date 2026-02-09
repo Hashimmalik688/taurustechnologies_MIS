@@ -263,6 +263,85 @@
             border: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
+
+        /* Live & Health Checklist */
+        .pipeline-checklist {
+            /* Normal layout flow - no sticky/fixed positioning */
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-left: 3px solid #e9ecef;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .checklist-item.completed {
+            border-left-color: var(--gold);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .checklist-item.current {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+        }
+
+        .checklist-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item.completed .checklist-checkbox {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .checklist-item.current .checklist-checkbox {
+            background: #28a745;
+            border-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .checklist-checkbox i {
+            color: white;
+            font-size: 14px;
+        }
+
+        .checklist-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .checklist-item.completed .checklist-label {
+            color: var(--gold-dark);
+        }
+
+        .checklist-item.current .checklist-label {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+            }
+        }
     </style>
 @endsection
 
@@ -315,6 +394,9 @@
                     <i class="mdi mdi-phone me-2"></i>Call Lead
                 </button>
             @endif
+            <a href="{{ route('sales.prettyPrint', $insurance->id) }}" class="btn btn-success" title="Pretty Print" target="_blank">
+                <i class="mdi mdi-printer me-2"></i>Pretty Print
+            </a>
             <a href="{{ route('leads.index') }}" class="btn btn-back">
                 <i class="mdi mdi-arrow-left me-2"></i>Back to Leads
             </a>
@@ -448,9 +530,23 @@
                         </div>
                     </div>
                     <div class="info-row">
-                        <div class="info-label">Doctor Name</div>
+                        <div class="info-label">Primary Care Physician</div>
                         <div class="info-value {{ $insurance->doctor_name ? '' : 'empty' }}">
                             {{ $insurance->doctor_name ?? 'Not provided' }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Doctor Phone</div>
+                            <div class="info-value {{ $insurance->doctor_number ? '' : 'empty' }}">
+                                {{ $insurance->doctor_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Doctor Address</div>
+                            <div class="info-value {{ $insurance->doctor_address ? '' : 'empty' }}">
+                                {{ $insurance->doctor_address ?? 'Not provided' }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -593,12 +689,190 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Follow Up Schedule -->
+            <div class="info-card">
+                <div class="card-header-gold">
+                    <h5><i class="mdi mdi-calendar-clock"></i>Follow Up Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Follow Up Required</div>
+                            <div class="info-value">
+                                @if($insurance->followup_required)
+                                    <span class="badge bg-success">
+                                        <i class="mdi mdi-check-circle me-1"></i>Yes
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary">
+                                        <i class="mdi mdi-close-circle me-1"></i>No
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Scheduled Date & Time</div>
+                            <div class="info-value {{ ($insurance->followup_required && $insurance->followup_scheduled_at) ? '' : 'empty' }}">
+                                @if($insurance->followup_required && $insurance->followup_scheduled_at)
+                                    <i class="mdi mdi-calendar me-1 text-primary"></i>
+                                    {{ \Carbon\Carbon::parse($insurance->followup_scheduled_at)->format('M d, Y h:i A') }}
+                                @else
+                                    Not scheduled
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Column -->
         <div class="col-lg-6">
-            <!-- Banking Information (Super Admin Only) -->
-            @hasrole('Super Admin')
+            <!-- Live & Health Pipeline Checklist -->
+            @php
+                // Define the 9 stages of Live & Health process
+                $pipelineStages = [
+                    ['key' => 'sales', 'label' => 'Sales', 'icon' => 'mdi-cart-outline'],
+                    ['key' => 'submission', 'label' => 'Submission', 'icon' => 'mdi-file-send-outline'],
+                    ['key' => 'issuance', 'label' => 'Issuance/Placed Officer', 'icon' => 'mdi-shield-check-outline'],
+                    ['key' => 'followup', 'label' => 'Follow up CX', 'icon' => 'mdi-phone-forward-outline'],
+                    ['key' => 'banking_validation', 'label' => 'Banking Validation', 'icon' => 'mdi-bank-check'],
+                    ['key' => 'draft_confirmation', 'label' => 'Confirmation of draft from bank/carrier', 'icon' => 'mdi-check-decagram'],
+                    ['key' => 'commission', 'label' => 'Commission Statement', 'icon' => 'mdi-cash-multiple'],
+                    ['key' => 'paid', 'label' => 'Paid', 'icon' => 'mdi-currency-usd'],
+                    ['key' => 'advance_recovery', 'label' => 'Advance Recovery', 'icon' => 'mdi-cash-refund']
+                ];
+
+                // Determine which stages are completed based on lead data
+                $completedStages = [];
+                $currentStage = null;
+
+                // Sales - if lead has sale_date or created
+                if ($insurance->sale_date || $insurance->date || $insurance->created_at) {
+                    $completedStages[] = 'sales';
+                }
+
+                // Submission - if status is accepted or further
+                if (in_array($insurance->status, ['accepted', 'underwriting', 'approved'])) {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                }
+
+                // Issuance - if issuance_status is set or policy_number exists
+                if ($insurance->issuance_status === 'issued' || $insurance->policy_number || $insurance->issued_policy_number) {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                    $completedStages[] = 'issuance';
+                }
+
+                // Follow up - if followup_status is set
+                if ($insurance->followup_status === 'completed' || $insurance->followup_status === 'in_progress') {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                    $completedStages[] = 'issuance';
+                    if ($insurance->followup_status === 'completed') {
+                        $completedStages[] = 'followup';
+                    } else {
+                        $currentStage = 'followup';
+                    }
+                }
+
+                // Banking Validation - if bank_verification_status is approved
+                if ($insurance->bank_verification_status === 'approved' || $insurance->account_verified_by) {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                    $completedStages[] = 'issuance';
+                    $completedStages[] = 'followup';
+                    $completedStages[] = 'banking_validation';
+                }
+
+                // Draft Confirmation - if initial_draft_date is set and passed
+                if ($insurance->initial_draft_date && \Carbon\Carbon::parse($insurance->initial_draft_date)->isPast()) {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                    $completedStages[] = 'issuance';
+                    $completedStages[] = 'followup';
+                    $completedStages[] = 'banking_validation';
+                    $completedStages[] = 'draft_confirmation';
+                }
+
+                // Commission Statement - if agent_commission is calculated
+                if ($insurance->agent_commission || $insurance->commission_calculated_at) {
+                    $completedStages[] = 'sales';
+                    $completedStages[] = 'submission';
+                    $completedStages[] = 'issuance';
+                    $completedStages[] = 'followup';
+                    $completedStages[] = 'banking_validation';
+                    $completedStages[] = 'draft_confirmation';
+                    $completedStages[] = 'commission';
+                }
+
+                // Paid - custom logic (you can add a 'payment_status' field later)
+                // For now, assume if commission exists and 30+ days passed
+                if ($insurance->agent_commission && $insurance->commission_calculated_at && 
+                    \Carbon\Carbon::parse($insurance->commission_calculated_at)->diffInDays(now()) > 30) {
+                    $completedStages[] = 'paid';
+                }
+
+                // Advance Recovery - if there's any recovery tracking (you can add field later)
+                // For now, leave it unchecked unless specifically marked
+
+                // Determine current stage if not set
+                if (!$currentStage) {
+                    if (!in_array('sales', $completedStages)) {
+                        $currentStage = 'sales';
+                    } elseif (!in_array('submission', $completedStages)) {
+                        $currentStage = 'submission';
+                    } elseif (!in_array('issuance', $completedStages)) {
+                        $currentStage = 'issuance';
+                    } elseif (!in_array('followup', $completedStages)) {
+                        $currentStage = 'followup';
+                    } elseif (!in_array('banking_validation', $completedStages)) {
+                        $currentStage = 'banking_validation';
+                    } elseif (!in_array('draft_confirmation', $completedStages)) {
+                        $currentStage = 'draft_confirmation';
+                    } elseif (!in_array('commission', $completedStages)) {
+                        $currentStage = 'commission';
+                    } elseif (!in_array('paid', $completedStages)) {
+                        $currentStage = 'paid';
+                    } else {
+                        $currentStage = 'advance_recovery';
+                    }
+                }
+
+                $completedStages = array_unique($completedStages);
+            @endphp
+
+            <div class="info-card pipeline-checklist">
+                <div class="card-header-gold">
+                    <h5><i class="mdi mdi-timeline-check"></i>Live & Health Pipeline</h5>
+                </div>
+                <div class="card-body">
+                    @foreach($pipelineStages as $stage)
+                        @php
+                            $isCompleted = in_array($stage['key'], $completedStages);
+                            $isCurrent = $stage['key'] === $currentStage;
+                        @endphp
+                        <div class="checklist-item {{ $isCompleted ? 'completed' : '' }} {{ $isCurrent ? 'current' : '' }}">
+                            <div class="checklist-checkbox">
+                                @if($isCompleted)
+                                    <i class="mdi mdi-check"></i>
+                                @elseif($isCurrent)
+                                    <i class="mdi mdi-dots-horizontal"></i>
+                                @endif
+                            </div>
+                            <div class="checklist-label">
+                                <i class="mdi {{ $stage['icon'] }} me-1"></i>
+                                {{ $stage['label'] }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Banking Information -->
+            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
                 <div class="info-card">
                     <div class="card-header-gold">
                         <h5><i class="mdi mdi-bank"></i>Banking Information</h5>
@@ -648,10 +922,10 @@
                         </div>
                     </div>
                 </div>
-            @endhasrole
+            @endhasanyrole
 
-            <!-- Card Information (Super Admin Only) -->
-            @hasrole('Super Admin')
+            <!-- Card Information -->
+            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
                 <div class="info-card">
                     <div class="card-header-gold">
                         <h5><i class="mdi mdi-credit-card"></i>Card Information</h5>
@@ -681,10 +955,10 @@
                         </div>
                     </div>
                 </div>
-            @endhasrole
+            @endhasanyrole
 
-            <!-- Sales Information (Super Admin & Manager) -->
-            @hasanyrole('Super Admin|Manager')
+            <!-- Sales Information -->
+            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
                 <div class="info-card">
                     <div class="card-header-gold">
                         <h5><i class="mdi mdi-chart-line"></i>Sales Information</h5>
@@ -706,7 +980,21 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 info-row">
-                                <div class="info-label">Preset Line / Partner</div>
+                                <div class="info-label">Assigned Partner</div>
+                                <div class="info-value {{ $insurance->assigned_partner ? '' : 'empty' }}">
+                                    {{ $insurance->assigned_partner ?? 'Not assigned' }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 info-row">
+                                <div class="info-label">Assigned Validator</div>
+                                <div class="info-value {{ $insurance->assignedValidator ? '' : 'empty' }}">
+                                    {{ $insurance->assignedValidator->name ?? 'Not assigned' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 info-row">
+                                <div class="info-label">Preset Line</div>
                                 <div class="info-value">
                                     @if($insurance->preset_line)
                                         <span class="badge badge-gold">
@@ -728,7 +1016,7 @@
                 </div>
 
                 <!-- Sale Assignment / Status Management -->
-                @hasrole('Super Admin|Manager')
+                @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
                 <div class="info-card">
                     <div class="card-header-gold">
                         <h5><i class="mdi mdi-check-circle"></i> Sale Assignment & Status</h5>
@@ -785,11 +1073,59 @@
                         </div>
                     </div>
                 </div>
-                @endhasrole
+                @endhasanyrole
             @endhasanyrole
 
-            <!-- Notes & Comments (Super Admin & Manager) -->
-            @hasanyrole('Super Admin|Manager')
+            <!-- QA Information -->
+            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator|QA')
+                <div class="info-card">
+                    <div class="card-header-gold">
+                        <h5><i class="mdi mdi-clipboard-check"></i>QA Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 info-row">
+                                <div class="info-label">QA Status</div>
+                                <div class="info-value">
+                                    @if($insurance->qa_status)
+                                        @php
+                                            $statusClass = match(strtolower($insurance->qa_status)) {
+                                                'approved' => 'bg-success',
+                                                'rejected' => 'bg-danger',
+                                                'in review' => 'bg-warning',
+                                                'pending' => 'bg-info',
+                                                default => 'bg-secondary'
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $statusClass }}" style="font-size: 14px; padding: 6px 12px;">
+                                            {{ $insurance->qa_status }}
+                                        </span>
+                                    @else
+                                        <span class="empty">Not reviewed</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-6 info-row">
+                                <div class="info-label">QA Officer</div>
+                                <div class="info-value {{ $insurance->qaUser ? '' : 'empty' }}">
+                                    {{ $insurance->qaUser->name ?? 'Not assigned' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 info-row">
+                                <div class="info-label">QA Reason / Notes</div>
+                                <div class="info-value {{ $insurance->qa_reason ? '' : 'empty' }}">
+                                    {{ $insurance->qa_reason ?? 'No QA notes' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endhasanyrole
+
+            <!-- Notes & Comments -->
+            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
                 <div class="info-card">
                     <div class="card-header-gold">
                         <h5><i class="mdi mdi-note-text"></i>Notes & Comments</h5>

@@ -13,8 +13,73 @@ class InsuranceCarrierController extends Controller
      */
     public function index()
     {
-        $carriers = InsuranceCarrier::with('commissionBrackets')->orderBy('name')->paginate(20);
-        return view('admin.insurance-carriers.index', compact('carriers'));
+        $partnerCarriers = [];
+        
+        // Get partners from the new Partner model with partner_id in agent_carrier_states
+        $newPartnerCarrierStates = \App\Models\AgentCarrierState::with(['partner', 'insuranceCarrier'])
+            ->whereNotNull('partner_id')
+            ->get()
+            ->groupBy(function($item) {
+                return $item->partner_id . '_' . $item->insurance_carrier_id;
+            });
+
+        foreach ($newPartnerCarrierStates as $group) {
+            $firstRecord = $group->first();
+            $partner = $firstRecord->partner;
+            $carrier = $firstRecord->insuranceCarrier;
+            
+            if(!$partner || !$carrier) continue;
+            
+            // Get partner's states for this carrier
+            $states = $group->pluck('state')->toArray();
+            
+            // Get leads count for this partner-carrier combo
+            $leadsCount = \App\Models\Lead::where('insurance_carrier_id', $carrier->id)
+                ->whereIn('state', $states)
+                ->count();
+            
+            // Get average settlement percentages
+            $avgLevel = $group->avg('settlement_level_pct');
+            $avgGraded = $group->avg('settlement_graded_pct');
+            $avgGi = $group->avg('settlement_gi_pct');
+            $avgModified = $group->avg('settlement_modified_pct');
+            
+            // Create a partner object that has both id and name for consistency
+            $partnerObj = (object) [
+                'id' => $partner->id,
+                'name' => $partner->name,
+                'code' => $partner->code,
+                'email' => $partner->email,
+                'is_partner_model' => true,
+            ];
+            
+            $partnerCarriers[] = [
+                'partner' => $partnerObj,
+                'carrier' => $carrier,
+                'states' => $states,
+                'state_count' => count($states),
+                'leads_count' => $leadsCount,
+                'avg_level' => $avgLevel,
+                'avg_graded' => $avgGraded,
+                'avg_gi' => $avgGi,
+                'avg_modified' => $avgModified,
+            ];
+        }
+
+        // Calculate summary stats
+        // Count partner-carrier assignments (each assignment counts separately)
+        $totalCarriers = count($partnerCarriers);
+        
+        // Count unique partners (not combinations)
+        $uniquePartnerIds = array_unique(array_map(function($item) {
+            return $item['partner']->id;
+        }, $partnerCarriers));
+        $totalPartners = count($uniquePartnerIds);
+        
+        $totalStates = !empty($partnerCarriers) ? count(array_unique(array_merge(...array_column($partnerCarriers, 'states')))) : 0;
+        $totalLeads = !empty($partnerCarriers) ? array_sum(array_column($partnerCarriers, 'leads_count')) : 0;
+
+        return view('admin.insurance-carriers.index', compact('partnerCarriers', 'totalCarriers', 'totalPartners', 'totalStates', 'totalLeads'));
     }
 
     /**
@@ -51,7 +116,8 @@ class InsuranceCarrierController extends Controller
             $validated['plan_types'] = array_map('trim', explode(',', $validated['plan_types']));
         }
 
-        $validated['is_active'] = $request->has('is_active');
+        // Ensure is_active is properly set as boolean
+        $validated['is_active'] = $request->boolean('is_active');
 
         $carrier = InsuranceCarrier::create($validated);
 
@@ -128,7 +194,8 @@ class InsuranceCarrierController extends Controller
             $validated['plan_types'] = [];
         }
 
-        $validated['is_active'] = $request->has('is_active');
+        // Ensure is_active is properly set as boolean
+        $validated['is_active'] = $request->boolean('is_active');
 
         $insuranceCarrier->update($validated);
 
@@ -188,13 +255,20 @@ class InsuranceCarrierController extends Controller
     public function destroy(InsuranceCarrier $insuranceCarrier)
     {
         // Check if carrier has leads
-        if ($insuranceCarrier->leads()->count() > 0) {
-            return back()->with('error', 'Cannot delete carrier that has associated leads.');
+        $leadCount = $insuranceCarrier->leads()->count();
+        if ($leadCount > 0) {
+            return back()->with('error', "Cannot delete carrier '{$insuranceCarrier->name}' because it has {$leadCount} associated lead(s). Please reassign or delete the leads first.");
         }
 
-        $insuranceCarrier->delete();
+        DB::transaction(function () use ($insuranceCarrier) {
+            // First, delete all partner/agent carrier state assignments
+            AgentCarrierState::where('insurance_carrier_id', $insuranceCarrier->id)->delete();
+            
+            // Then delete the carrier itself
+            $insuranceCarrier->delete();
+        });
 
         return redirect()->route('admin.insurance-carriers.index')
-            ->with('success', 'Insurance carrier deleted successfully.');
+            ->with('success', "Insurance carrier '{$insuranceCarrier->name}' and all its assignments have been permanently deleted.");
     }
 }

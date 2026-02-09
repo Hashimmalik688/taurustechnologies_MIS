@@ -121,14 +121,6 @@
     "file": "icons/materialdesignicons-webfont.woff2",
     "src": "resources/fonts/materialdesignicons-webfont.woff2"
   },
-  "resources/images/bg-auth-overlay.png": {
-    "file": "icons/bg-auth-overlay.png",
-    "src": "resources/images/bg-auth-overlay.png"
-  },
-  "resources/images/crypto/bg-ico-hero.jpg": {
-    "file": "icons/bg-ico-hero.jpg",
-    "src": "resources/images/crypto/bg-ico-hero.jpg"
-  },
   "resources/scss/app.scss": {
     "file": "css/app.min.css",
     "isEntry": true,

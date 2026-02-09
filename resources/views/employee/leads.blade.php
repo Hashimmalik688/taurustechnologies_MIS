@@ -5,7 +5,7 @@
 @endsection
 
 @section('css')
-    <link href="{{ URL::asset('public/css/light-theme.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ URL::asset('css/light-theme.css') }}" rel="stylesheet" type="text/css" />
     <style>
         .auto-dial-btn {
             position: relative;

@@ -27,7 +27,7 @@ class UpdateUserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'zoom_number' => ['nullable', 'string', 'max:50'],
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['in:Super Admin,Manager,Employee,Agent,HR,Vendor,Paraguins Validator,Verifier,Paraguins Closer,Ravens Closer,Retention Officer,Trainer,QA'],
+            'roles.*' => ['in:Super Admin,Manager,Employee,Agent,HR,Vendor,Peregrine Validator,Verifier,Peregrine Closer,Ravens Closer,Retention Officer,Trainer,QA,Co-ordinator'],
             'dob' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', 'in:Male,Female,Other'],
             'join_date' => ['nullable', 'date'],

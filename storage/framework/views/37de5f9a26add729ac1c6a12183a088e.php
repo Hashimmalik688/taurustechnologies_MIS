@@ -476,8 +476,8 @@
                 <div class="card compact-card bordered">
                     <div class="card-header compact-header d-flex justify-content-between align-items-center">
                         <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-gold btn-sm active" onclick="switchTeam('paraguins')" id="paraguinsTab">
-                                Paraguins (<span id="paraguinsCount"><?php echo e($paraguins_count ?? 0); ?></span>)
+                            <button type="button" class="btn btn-outline-gold btn-sm active" onclick="switchTeam('peregrine')" id="peregrineTab">
+                                Peregrine (<span id="peregrineCount"><?php echo e($peregrine_count ?? 0); ?></span>)
                             </button>
                             <button type="button" class="btn btn-outline-gold btn-sm" onclick="switchTeam('ravens')" id="ravensTab">
                                 Ravens (<span id="ravensCount"><?php echo e($ravens_count ?? 0); ?></span>)
@@ -730,39 +730,58 @@
 <?php $__env->startSection('script'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let currentTeam = 'live';
-let salesChart = null;
-let allData = null;
+// Global dashboard state (defensive against duplicate script loads)
+var currentTeam = (typeof window !== 'undefined' && typeof window.currentTeam !== 'undefined')
+    ? window.currentTeam
+    : 'peregrine';
+var salesChart = (typeof window !== 'undefined' && typeof window.salesChart !== 'undefined')
+    ? window.salesChart
+    : null;
+var allData = (typeof window !== 'undefined' && typeof window.allData !== 'undefined')
+    ? window.allData
+    : null;
+
+if (typeof window !== 'undefined') {
+    window.currentTeam = currentTeam;
+    window.salesChart = salesChart;
+    window.allData = allData;
+}
 
 // Server-side data
-const serverData = {
-    totalSalesToday: <?php echo e($total_sales_today); ?>,
-    done: <?php echo e($done_count); ?>,
-    totalRevenue: <?php echo e($total_revenue); ?>,
-    approved: <?php echo e($approved_count); ?>,
-    underwriting: <?php echo e($underwriting_count); ?>,
-    declined: <?php echo e($declined_count); ?>,
-    salesPerCloser: <?php echo json_encode($sales_per_closer, 15, 512) ?>,
-    attendance: <?php echo json_encode($attendance, 15, 512) ?>,
-    retention: {
-        cb: <?php echo e($retention_cb); ?>,
-        retained: <?php echo e($retention_retained); ?>,
-        pending: <?php echo e($retention_pending); ?>
-
-    },
-    chargebacks: {
-        thisMonth: {
-            count: <?php echo e($cb_this_count); ?>,
-            amount: <?php echo e($cb_this_amt); ?>
+var serverData = (typeof window !== 'undefined' && typeof window.serverData !== 'undefined')
+    ? window.serverData
+    : {
+        totalSalesToday: <?php echo e($total_sales_today); ?>,
+        done: <?php echo e($done_count); ?>,
+        totalRevenue: <?php echo e($total_revenue); ?>,
+        approved: <?php echo e($approved_count); ?>,
+        underwriting: <?php echo e($underwriting_count); ?>,
+        declined: <?php echo e($declined_count); ?>,
+        salesPerCloser: <?php echo json_encode($sales_per_closer, 15, 512) ?>,
+        attendance: <?php echo json_encode($attendance, 15, 512) ?>,
+        retention: {
+            cb: <?php echo e($retention_cb); ?>,
+            retained: <?php echo e($retention_retained); ?>,
+            pending: <?php echo e($retention_pending); ?>
 
         },
-        lastMonth: {
-            count: <?php echo e($cb_last_count); ?>,
-            amount: <?php echo e($cb_last_amt); ?>
+        chargebacks: {
+            thisMonth: {
+                count: <?php echo e($cb_this_count); ?>,
+                amount: <?php echo e($cb_this_amt); ?>
 
+            },
+            lastMonth: {
+                count: <?php echo e($cb_last_count); ?>,
+                amount: <?php echo e($cb_last_amt); ?>
+
+            }
         }
-    }
-};
+    };
+
+if (typeof window !== 'undefined') {
+    window.serverData = serverData;
+}
 
 // Update Clocks
 function updateClocks() {
@@ -814,13 +833,15 @@ function updateUI(d) {
     
     // Team Data
     if (d.salesPerCloser) {
-        const live = d.salesPerCloser.filter(c => (c.team || '').toLowerCase() === 'live');
-        const reselling = d.salesPerCloser.filter(c => (c.team || '').toLowerCase() === 'reselling');
+        const peregrine = d.salesPerCloser.filter(c => (c.team || '').toLowerCase() === 'peregrine');
+        const ravens = d.salesPerCloser.filter(c => (c.team || '').toLowerCase() === 'ravens');
 
-        $('#liveCount').text(live.length);
-        $('#resellingCount').text(reselling.length);
+        $('#peregrineCount').text(peregrine.length);
+        $('#ravensCount').text(ravens.length);
 
-        renderClosers(currentTeam === 'live' ? live : reselling);
+        // Filter based on current team
+        const currentTeamData = currentTeam === 'peregrine' ? peregrine : ravens;
+        renderClosers(currentTeamData);
         updateCharts(d.salesPerCloser);
         allData = d;
     }
@@ -845,34 +866,13 @@ function updateUI(d) {
 
 function switchTeam(team) {
     currentTeam = team;
-    $('#paraguinsTab, #ravensTab').removeClass('active');
+    $('#peregrineTab, #ravensTab').removeClass('active');
     $('#' + team + 'Tab').addClass('active');
 
-    // Filter table rows by team
-    const rows = document.querySelectorAll('.closer-row');
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        const rowTeam = row.getAttribute('data-team');
-        if (!rowTeam || rowTeam === team) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // If no rows visible, show message
-    const tbody = document.getElementById('closerTable');
-    const emptyRow = tbody.querySelector('.empty-row');
-    if (visibleCount === 0) {
-        if (!emptyRow) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="6" class="text-center py-3 text-muted">No closers in this team</td></tr>';
-        }
-    } else {
-        if (emptyRow) {
-            emptyRow.remove();
-        }
+    // Filter and re-render closers for the selected team
+    if (allData && allData.salesPerCloser) {
+        const teamClosers = allData.salesPerCloser.filter(c => (c.team || '').toLowerCase() === team);
+        renderClosers(teamClosers);
     }
 }
 
@@ -887,13 +887,13 @@ function renderClosers(closers) {
 
     closers.forEach(c => {
         tbody.append(`
-            <tr>
+            <tr class="closer-row" data-team="${c.team || 'peregrine'}">
                 <td><i class="bx bx-user-circle me-1 text-gold"></i>${c.closer || 'N/A'}</td>
                 <td class="text-center"><span class="badge badge-xs bg-info">${c.today || 0}</span></td>
                 <td class="text-center"><span class="badge badge-xs bg-primary">${c.mtd || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-success">${c.approvedMTD || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-danger">${c.declinedMTD || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-warning">${c.uwMTD || c.uw || c.underwriting || 0}</span></td>
+                <td class="text-center"><span class="badge badge-xs bg-success">${c.approved || c.approvedMTD || 0}</span></td>
+                <td class="text-center"><span class="badge badge-xs bg-danger">${c.declined || c.declinedMTD || 0}</span></td>
+                <td class="text-center"><span class="badge badge-xs bg-warning">${c.uw || c.uwMTD || c.underwriting || 0}</span></td>
             </tr>
         `);
     });
@@ -1006,6 +1006,18 @@ $(document).ready(function() {
     setInterval(updateClocks, 1000);
 
     loadData();
+    
+    // Poll for KPI data updates every 30 seconds
+    setInterval(function() {
+        fetch('<?php echo e(route('dashboard.kpi-data')); ?>')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateUI(data);
+                }
+            })
+            .catch(error => console.error('KPI update error:', error));
+    }, 30000); // 30 seconds
 });
 </script>
 <?php $__env->stopSection(); ?>

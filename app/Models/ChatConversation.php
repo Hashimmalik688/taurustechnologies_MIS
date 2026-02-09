@@ -14,6 +14,8 @@ class ChatConversation extends Model
         'name',
         'type',
         'created_by',
+        'community_id',
+        'avatar',
     ];
 
     protected $casts = [
@@ -27,6 +29,14 @@ class ChatConversation extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the community this conversation belongs to
+     */
+    public function community()
+    {
+        return $this->belongsTo(Community::class);
     }
 
     /**

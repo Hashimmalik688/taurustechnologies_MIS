@@ -97,16 +97,78 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                 // Cast phone number as string to avoid integer conversion
                 $normalizedPhoneNumber = $normalizedPhoneNumber ? (string)$normalizedPhoneNumber : null;
 
-                // Check if lead already exists by normalized phone number (only if phone exists)
+                // Check if lead already exists by phone, SSN, or account number
                 $existingLead = null;
+                $ssn = $this->getValueFromRow($lowercaseRow, ['s.s.n #', 'ssn', 's.s.n', 'ssn #']);
+                $accountNumber = $this->getValueFromRow($lowercaseRow, ['acc number', 'account number']);
+                $customerName = $this->getValueFromRow($lowercaseRow, ['customer name', 'name']);
+                
                 if ($normalizedPhoneNumber) {
                     $existingLead = Lead::where('phone_number', $normalizedPhoneNumber)
                         ->orWhere('phone_number', '1'.$normalizedPhoneNumber)
                         ->first();
                 }
+                
+                // Also check by SSN if phone not found
+                if (!$existingLead && $ssn) {
+                    $existingLead = Lead::where('ssn', $ssn)->first();
+                }
+                
+                // Also check by account number if still not found
+                if (!$existingLead && $accountNumber) {
+                    $existingLead = Lead::where('acc_number', $accountNumber)->first();
+                }
 
                 if ($existingLead) {
-                    // Lead exists, just add carrier details
+                    // Lead exists - merge missing fields
+                    $updateData = [];
+                    
+                    // Merge crucial fields if they're empty in existing lead
+                    if (empty($existingLead->ssn) && !empty($ssn)) {
+                        $updateData['ssn'] = $ssn;
+                    }
+                    if (empty($existingLead->acc_number) && !empty($accountNumber)) {
+                        $updateData['acc_number'] = $accountNumber;
+                    }
+                    if (empty($existingLead->cn_name) && !empty($customerName)) {
+                        $updateData['cn_name'] = $customerName;
+                    }
+                    if (empty($existingLead->phone_number) && !empty($normalizedPhoneNumber)) {
+                        $updateData['phone_number'] = $normalizedPhoneNumber;
+                    }
+                    if (empty($existingLead->secondary_phone_number) && !empty($normalizedSecondaryPhone)) {
+                        $updateData['secondary_phone_number'] = $normalizedSecondaryPhone;
+                    }
+                    
+                    // Merge other important fields
+                    $fieldsToMerge = [
+                        'date_of_birth' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['dob', 'date of birth'])),
+                        'gender' => $this->getValueFromRow($lowercaseRow, ['gender']),
+                        'address' => $this->getValueFromRow($lowercaseRow, ['street address', 'address', 'street adress', 'street address/address']),
+                        'bank_name' => $this->getValueFromRow($lowercaseRow, ['bank name']),
+                        'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
+                        'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
+                        'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified']),
+                        'beneficiary' => $this->getValueFromRow($lowercaseRow, ['beneficiary']),
+                        'beneficiary_dob' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['beneficiary dob', 'beneficiary date of birth'])),
+                    ];
+                    
+                    foreach ($fieldsToMerge as $field => $value) {
+                        if (empty($existingLead->$field) && !empty($value)) {
+                            $updateData[$field] = $value;
+                        }
+                    }
+                    
+                    // Update existing lead with merged data
+                    if (!empty($updateData)) {
+                        $existingLead->update($updateData);
+                        Log::info('Merged missing fields into existing lead', [
+                            'lead_id' => $existingLead->id,
+                            'merged_fields' => array_keys($updateData),
+                        ]);
+                    }
+                    
+                    // Add carrier details
                     $existingLead->carriers()->create([
                         'name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
                         'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,

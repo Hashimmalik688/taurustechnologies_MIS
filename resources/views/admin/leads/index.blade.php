@@ -6,6 +6,67 @@
 
 @section('css')
     {{-- <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" /> --}}
+    <style>
+        /* Fixed Table Container - Scrollable */
+        .top-scrollbar-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin-bottom: 0;
+            height: 20px;
+        }
+        
+        .top-scrollbar-content {
+            height: 1px;
+        }
+        
+        .leads-table-wrapper {
+            max-height: 450px; /* Show ~5-6 rows, rest scrollable */
+            overflow-x: auto;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        /* Fix: border-collapse:collapse breaks sticky in most browsers */
+        .leads-table-wrapper table {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+        
+        /* Sticky Table Headers - Always visible when scrolling */
+        .leads-table thead th {
+            position: sticky !important;
+            top: 0 !important;
+            background-color: #f8f9fa !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+            border-bottom: 2px solid #dee2e6 !important;
+        }
+        
+        /* Grey scrollbar styling */
+        .top-scrollbar-wrapper::-webkit-scrollbar,
+        .leads-table-wrapper::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+        
+        .top-scrollbar-wrapper::-webkit-scrollbar-track,
+        .leads-table-wrapper::-webkit-scrollbar-track {
+            background: #e5e5e5;
+            border-radius: 6px;
+        }
+        
+        .top-scrollbar-wrapper::-webkit-scrollbar-thumb,
+        .leads-table-wrapper::-webkit-scrollbar-thumb {
+            background: #999999;
+            border-radius: 6px;
+        }
+        
+        .top-scrollbar-wrapper::-webkit-scrollbar-thumb:hover,
+        .leads-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #666666;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -594,6 +655,12 @@
                                                 </div>
 
                                                 <div class="col-md-4">
+                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">🔐 Password:</label>
+                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_password">-</div>
+                                                    <input type="text" class="form-control" name="password" id="change_password" placeholder="Enter password">
+                                                </div>
+
+                                                <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">✓ Verified By:</label>
                                                     <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_verified_by">-</div>
                                                     <input type="text" class="form-control" name="verified_by" id="change_verified_by" placeholder="Confirm or update">
@@ -622,6 +689,33 @@
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">👔 Closer Name:</label>
                                                     <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_closer">-</div>
                                                     <input type="text" class="form-control" name="closer_name" id="change_closer" placeholder="Confirm or update">
+                                                </div>
+                                            </div>
+
+                                            <!-- QA Details Section -->
+                                            <div class="col-12 mt-4">
+                                                <h5 class="border-bottom pb-2 mb-3" style="color: #f59e0b;">
+                                                    <i class="fas fa-check-circle me-2"></i>QA Details
+                                                </h5>
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">✅ QA Status:</label>
+                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_qa_status">-</div>
+                                                    <select class="form-select" name="qa_status" id="change_qa_status">
+                                                        <option value="">Not Set</option>
+                                                        <option value="Pending">⏳ Pending</option>
+                                                        <option value="Good">✅ Good</option>
+                                                        <option value="Avg">⚠️ Avg</option>
+                                                        <option value="Bad">❌ Bad</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-8">
+                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">📝 QA Reason/Notes:</label>
+                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_qa_reason">-</div>
+                                                    <textarea class="form-control" name="qa_reason" id="change_qa_reason" rows="3" placeholder="Enter QA comments or reasons"></textarea>
                                                 </div>
                                             </div>
 
@@ -661,6 +755,49 @@
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
     <script>
+        // Dual Scrollbar Synchronization for Leads Table
+        document.addEventListener('DOMContentLoaded', function() {
+            const topScrollbar = document.getElementById('topScrollbarLeads');
+            const tableWrapper = document.getElementById('leadsTableWrapper');
+            const topScrollbarContent = document.getElementById('topScrollbarContentLeads');
+            const table = document.getElementById('leadsTable');
+            
+            if (topScrollbar && tableWrapper && topScrollbarContent && table) {
+                // Function to update top scrollbar width
+                function updateTopScrollbarWidth() {
+                    topScrollbarContent.style.width = table.offsetWidth + 'px';
+                }
+                
+                // Initial width setup
+                updateTopScrollbarWidth();
+                
+                // Update on window resize
+                window.addEventListener('resize', updateTopScrollbarWidth);
+                
+                // Synchronize scrolling: top scrollbar -> table
+                topScrollbar.addEventListener('scroll', function() {
+                    if (!tableWrapper.scrollSyncing) {
+                        topScrollbar.scrollSyncing = true;
+                        tableWrapper.scrollLeft = topScrollbar.scrollLeft;
+                        setTimeout(() => {
+                            topScrollbar.scrollSyncing = false;
+                        }, 50);
+                    }
+                });
+                
+                // Synchronize scrolling: table -> top scrollbar
+                tableWrapper.addEventListener('scroll', function() {
+                    if (!topScrollbar.scrollSyncing) {
+                        tableWrapper.scrollSyncing = true;
+                        topScrollbar.scrollLeft = tableWrapper.scrollLeft;
+                        setTimeout(() => {
+                            tableWrapper.scrollSyncing = false;
+                        }, 50);
+                    }
+                });
+            }
+        });
+
         let carrierIndex = 0;
         let deletedCarriers = [];
 
@@ -860,12 +997,17 @@
             document.getElementById('orig_account_type').textContent = ld.account_type || 'N/A';
             document.getElementById('orig_routing').textContent = ld.routing_number || 'N/A';
             document.getElementById('orig_account').textContent = ld.account_number || 'N/A';
+            document.getElementById('orig_password').textContent = ld.password || 'N/A';
             document.getElementById('orig_verified_by').textContent = ld.verified_by || 'N/A';
             document.getElementById('orig_balance').textContent = ld.bank_balance || 'N/A';
 
             // Additional Information
             document.getElementById('orig_source').textContent = ld.source || 'N/A';
             document.getElementById('orig_closer').textContent = ld.closer_name || 'N/A';
+
+            // QA Details
+            document.getElementById('orig_qa_status').textContent = ld.qa_status || 'Not Set';
+            document.getElementById('orig_qa_reason').textContent = ld.qa_reason || 'N/A';
 
             // Pre-fill change inputs with Phase 2 data
             document.getElementById('change_name').value = ld.cn_name || '';
@@ -876,6 +1018,11 @@
             document.getElementById('change_carrier').value = document.getElementById('phase2_carrier').value || '';
             document.getElementById('change_coverage').value = document.getElementById('phase2_coverage').value || '';
             document.getElementById('change_premium').value = document.getElementById('phase2_premium').value || '';
+            document.getElementById('change_password').value = ld.password || '';
+            if (ld.qa_status) {
+                document.getElementById('change_qa_status').value = ld.qa_status;
+            }
+            document.getElementById('change_qa_reason').value = ld.qa_reason || '';
         }
 
         // Validate Phase 2 required fields

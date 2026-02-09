@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Services\AccountSwitchingDetector;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -57,13 +59,13 @@ class LoginController extends Controller
             return route('verifier.dashboard');
         }
         
-        // Paraguins Closers go to their dashboard
-        if ($user->hasRole('Paraguins Closer')) {
-            return route('paraguins.closers.index');
+        // Peregrine Closers go to their dashboard
+        if ($user->hasRole('Peregrine Closer')) {
+            return route('peregrine.closers.index');
         }
 
-        // Paraguins Validators go to validator dashboard
-        if ($user->hasRole('Paraguins Validator')) {
+        // Peregrine Validators go to validator dashboard
+        if ($user->hasRole('Peregrine Validator')) {
             return route('validator.index');
         }
         
@@ -94,5 +96,48 @@ class LoginController extends Controller
             'email' => strtolower($request->input($this->username())),
             'password' => $request->input('password'),
         ];
+    }
+
+    /**
+     * The user has been authenticated.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function authenticated(Request $request, $user)
+    {
+        // Detect suspicious account switching
+        $detection = AccountSwitchingDetector::detectSuspiciousLogin(
+            $user->id,
+            $request->ip(),
+            $request->userAgent()
+        );
+
+        if ($detection['is_suspicious']) {
+            // Log the suspicious activity
+            AccountSwitchingDetector::logSuspiciousActivity(
+                $user->id,
+                $detection['suspect_user_id'],
+                $request->ip(),
+                $request->userAgent(),
+                $detection['seconds_between']
+            );
+
+            // Show warning message to user
+            session()->flash('warning', 
+                'Security Alert: ' . $detection['message']
+            );
+
+            // Optionally notify admins
+            \Log::warning('Account switching detected', [
+                'current_user' => $user->name,
+                'current_user_id' => $user->id,
+                'previous_user' => $detection['previous_user'],
+                'previous_user_id' => $detection['suspect_user_id'],
+                'seconds_between' => $detection['seconds_between'],
+                'ip' => $request->ip(),
+            ]);
+        }
     }
 }

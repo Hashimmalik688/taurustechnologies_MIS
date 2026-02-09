@@ -109,6 +109,37 @@ body.auth-body-bg {
 .shape-4 { width: 90px; height: 90px; bottom: 15%; left: 15%; }
 .shape-5 { width: 100px; height: 100px; top: 75%; right: 18%; }
 
+/* Partner Login Button - Top Right */
+.partner-login-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+  transition: all 0.3s ease;
+}
+
+.partner-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+  color: white;
+}
+
+.partner-login-btn i {
+  font-size: 1.1rem;
+}
+
 /* Centering wrapper */
 .auth-wrap {
   min-height: 100vh;
@@ -316,6 +347,13 @@ a.link-gold:hover {
   .auth-card .inner {
     padding: 1.75rem 1.25rem;
   }
+
+  .partner-login-btn {
+    top: 15px;
+    right: 15px;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+  }
 }
 </style>
 <?php $__env->stopSection(); ?>
@@ -337,6 +375,12 @@ a.link-gold:hover {
 <div class="bg-shape circle shape-3"></div>
 <div class="bg-shape square shape-4"></div>
 <div class="bg-shape circle shape-5"></div>
+
+<!-- Partner Login Button -->
+<a href="/partner/login" class="partner-login-btn">
+  <i class="mdi mdi-shield-star"></i>
+  Partner Login
+</a>
 
 <div class="auth-wrap">
   <div class="auth-card">
@@ -395,10 +439,11 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input id="password" 
-                 type="password" 
-                 name="password"
-                 class="form-control <?php $__errorArgs = ['password'];
+          <div class="position-relative">
+            <input id="password" 
+                   type="password" 
+                   name="password"
+                   class="form-control <?php $__errorArgs = ['password'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -406,8 +451,15 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                 placeholder="••••••••" 
-                 required>
+                   placeholder="••••••••" 
+                   required>
+            <button type="button" class="btn btn-link position-absolute" 
+                    style="right: 10px; top: 50%; transform: translateY(-50%); padding: 0; z-index: 10;"
+                    onclick="togglePasswordVisibility()"
+                    title="Show/Hide Password">
+              <i id="password-toggle-icon" class="mdi mdi-eye-off"></i>
+            </button>
+          </div>
           <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['password'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -456,6 +508,21 @@ unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendB
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('script'); ?>
-
+<script>
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('password-toggle-icon');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggleIcon.classList.remove('mdi-eye-off');
+      toggleIcon.classList.add('mdi-eye');
+    } else {
+      passwordInput.type = 'password';
+      toggleIcon.classList.remove('mdi-eye');
+      toggleIcon.classList.add('mdi-eye-off');
+    }
+  }
+</script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.master-without-nav', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/auth/login.blade.php ENDPATH**/ ?>

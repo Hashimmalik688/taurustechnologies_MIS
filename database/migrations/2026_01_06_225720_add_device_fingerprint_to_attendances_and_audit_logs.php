@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('attendances', function (Blueprint $table) {
-            $table->string('device_fingerprint', 100)->nullable()->after('user_agent');
-            $table->string('device_name', 255)->nullable()->after('device_fingerprint');
+            $table->string('device_fingerprint', 100)->nullable();
+            $table->string('device_name', 255)->nullable();
         });
         
         Schema::table('audit_logs', function (Blueprint $table) {
-            $table->string('device_fingerprint', 100)->nullable()->after('user_agent');
-            $table->string('device_name', 255)->nullable()->after('device_fingerprint');
+            $table->string('device_fingerprint', 100)->nullable();
+            $table->string('device_name', 255)->nullable();
         });
     }
 

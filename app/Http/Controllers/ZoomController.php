@@ -381,6 +381,30 @@ class ZoomController extends Controller
             'current_status' => $callRecord->call_status,
         ]);
         
+        // Check if call has ended (webhook updated the status or time has passed)
+        $endedStatuses = ['completed', 'ended', 'missed', 'voicemail', 'rejected', 'busy', 'failed'];
+        if (in_array($callRecord->call_status, $endedStatuses)) {
+            return response()->json([
+                'success' => true,
+                'status' => $callRecord->call_status,
+                'show_ravens_form' => false,
+                'call_id' => $callRecord->id,
+                'duration' => $callRecord->duration_seconds
+            ]);
+        }
+        
+        // If call has been "no_answer" for more than 2 minutes, mark it as ended
+        if ($callRecord->call_status === 'no_answer' && $callRecord->created_at->diffInMinutes(now()) > 2) {
+            $callRecord->update(['call_status' => 'ended']);
+            return response()->json([
+                'success' => true,
+                'status' => 'ended',
+                'show_ravens_form' => false,
+                'call_id' => $callRecord->id,
+                'duration' => 0
+            ]);
+        }
+        
         return response()->json([
             'success' => true,
             'status' => $callRecord->call_status,
@@ -431,10 +455,34 @@ class ZoomController extends Controller
         $callLog = \App\Models\CallLog::where('zoom_call_id', $callId)->first();
         
         if ($callLog) {
+            $duration = $payload['object']['duration'] ?? 0;
+            $result = $payload['object']['result'] ?? 'ended';
+            
+            // Map Zoom result to our status
+            $status = 'ended';
+            if (str_contains(strtolower($result), 'voicemail')) {
+                $status = 'voicemail';
+            } elseif (str_contains(strtolower($result), 'busy')) {
+                $status = 'busy';
+            } elseif (str_contains(strtolower($result), 'reject')) {
+                $status = 'rejected';
+            } elseif (str_contains(strtolower($result), 'missed')) {
+                $status = 'missed';
+            } elseif ($duration > 0) {
+                $status = 'completed';
+            }
+            
             $callLog->update([
-                'status' => 'completed',
-                'duration' => $payload['object']['duration'] ?? 0,
-                'ended_at' => now(),
+                'call_status' => $status,
+                'duration_seconds' => $duration,
+                'call_end_time' => now(),
+            ]);
+            
+            Log::info('📞 Webhook: Call ended', [
+                'call_id' => $callLog->id,
+                'lead_id' => $callLog->lead_id,
+                'status' => $status,
+                'duration' => $duration
             ]);
         }
     }

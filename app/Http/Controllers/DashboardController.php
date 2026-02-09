@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Services\RevenueCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -63,13 +64,13 @@ class DashboardController extends Controller
             return redirect()->route('verifier.dashboard');
         }
         
-        // Redirect Paraguins Closers to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Paraguins Closer')) {
-            return redirect()->route('paraguins.closers.index');
+        // Redirect Peregrine Closers to their dashboard
+        if (Auth::check() && Auth::user()->hasRole('Peregrine Closer')) {
+            return redirect()->route('peregrine.closers.index');
         }
 
-        // Redirect Paraguins Validators to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Paraguins Validator')) {
+        // Redirect Peregrine Validators to their dashboard
+        if (Auth::check() && Auth::user()->hasRole('Peregrine Validator')) {
             return redirect()->route('validator.index');
         }
         
@@ -93,9 +94,9 @@ class DashboardController extends Controller
             return redirect()->route('retention.dashboard');
         }
 
-        // Redirect HR to dock section (HR only has access to Dock, Attendance, and Public Holidays)
+        // Redirect HR to attendance (HR has view-only access to Attendance and E.M.S)
         if (Auth::check() && Auth::user()->hasRole('HR')) {
-            return redirect()->route('dock.index');
+            return redirect()->route('attendance.index');
         }
 
         // Redirect Trainer to attendance dashboard
@@ -103,27 +104,71 @@ class DashboardController extends Controller
             return redirect()->route('attendance.dashboard');
         }
 
-        // Fetch data from boss's dashboard with caching
+        // Fetch data from boss's dashboard with caching (for attendance only)
         $bossData = $this->fetchBossDashboardData();
 
-        // Extract data from boss's dashboard with local caching
+        // Extract data from local database using proper fields
         $users_count = Cache::remember('dashboard_users_count', 300, function () {
             return User::count();
         });
-        $total_sales_today = $bossData['totalSalesToday'] ?? 0;
-        $total_monthly_sales = $bossData['done'] ?? $bossData['TOTAL'] ?? 0;
-        $total_revenue = $bossData['totalRevenueMTD'] ?? $bossData['totalRevenue'] ?? $bossData['total_revenue'] ?? 0;
-
-        // Sales status
-        $done_count = $bossData['done'] ?? $bossData['TOTAL'] ?? 0;
-        $approved_count = $bossData['approved'] ?? $bossData['APPROVED'] ?? 0;
-        $underwriting_count = $bossData['underwriting'] ?? $bossData['UW'] ?? 0;
-        $declined_count = $bossData['declined'] ?? $bossData['DECLINED'] ?? 0;
+        
+        // Get current month start and today
+        $monthStart = now()->startOfMonth();
+        $today = today();
+        
+        // Sales counts using sale_date field (from sales management page)
+        $total_sales_today = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->whereDate('sale_date', $today)
+            ->count();
+            
+        // Month-to-date sales (all submitted)
+        $total_monthly_sales = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year)
+            ->count();
+        
+        // Calculate revenue from issued and verified sales (Revenue Analytics logic)
+        // Use agent_revenue (calculated commission) with fallback to monthly_premium
+        $issued_sales = Lead::where('status', 'accepted')
+            ->where('manager_status', 'approved')
+            ->where('issuance_status', 'Issued')
+            ->get();
+            
+        $total_revenue = $issued_sales->sum(function($lead) {
+            return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
+        });
+        
+        // Sales status counts by manager_status (MTD) using sale_date
+        $done_count = $total_monthly_sales; // Total submitted MTD
+        $approved_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->where('manager_status', 'approved')
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year)
+            ->count();
+            
+        $underwriting_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->where('manager_status', 'underwriting')
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year)
+            ->count();
+            
+        $declined_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->where('manager_status', 'declined')
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year)
+            ->count();
 
         // Attendance - Use local database instead of external API
-        $trackableRoles = ['Employee', 'Paraguins Closer', 'Paraguins Validator', 'Verifier', 'Trainer', 'Ravens Closer'];
+        // Use USA Eastern Time for consistency
+        $usaToday = now()->setTimezone('America/New_York')->toDateString();
+        $trackableRoles = ['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer'];
         $todayAttendances = \App\Models\Attendance::with('user')
-            ->whereDate('date', today())
+            ->whereDate('date', $usaToday)
             ->get();
         
         $attendance = $todayAttendances->map(function($att) {
@@ -136,29 +181,52 @@ class DashboardController extends Controller
         $present_count = $todayAttendances->whereIn('status', ['present', 'late'])->count();
         $absent_count = $todayAttendances->where('status', 'absent')->count();
 
-        // Sales per closer
-        $sales_per_closer = $bossData['salesPerCloser'] ?? [];
+        // Sales per closer - Calculate from local database using manager_status and sale_date
+        $closers = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->whereMonth('sale_date', now()->month)
+            ->whereYear('sale_date', now()->year)
+            ->get()
+            ->groupBy('closer_name');
+            
+        $sales_per_closer = [];
+        foreach ($closers as $closerName => $sales) {
+            $todaySales = $sales->filter(function($sale) use ($today) {
+                return $sale->sale_date && $sale->sale_date->isSameDay($today);
+            })->count();
+            
+            // Get user to determine team
+            $user = User::where('name', $closerName)->first();
+            $team = 'ravens'; // default
+            if ($user) {
+                if ($user->hasRole(['Peregrine Closer', 'Peregrine Validator'])) {
+                    $team = 'peregrine';
+                }
+            }
+            
+            $sales_per_closer[] = [
+                'closer' => $closerName,
+                'today' => $todaySales,
+                'mtd' => $sales->count(),
+                'approvedMTD' => $sales->where('manager_status', 'approved')->count(),
+                'declinedMTD' => $sales->where('manager_status', 'declined')->count(),
+                'uwMTD' => $sales->where('manager_status', 'underwriting')->count(),
+                'team' => $team
+            ];
+        }
+        
+        // Sort by MTD sales descending
+        usort($sales_per_closer, function($a, $b) {
+            return $b['mtd'] - $a['mtd'];
+        });
         
         // Get team counts from users with roles
-        $paraguins_count = User::role(['Paraguins Closer', 'Paraguins Validator'])
+        $peregrine_count = User::role(['Peregrine Closer', 'Peregrine Validator'])
             ->where('status', '!=', 'inactive')
             ->count();
         $ravens_count = User::role('Ravens Closer')
             ->where('status', '!=', 'inactive')
             ->count();
-        
-        // Enhance sales_per_closer with team info from database
-        $sales_per_closer = collect($sales_per_closer)->map(function($closer) {
-            $user = User::where('name', $closer['closer'] ?? '')->first();
-            if ($user) {
-                if ($user->hasRole(['Paraguins Closer', 'Paraguins Validator'])) {
-                    $closer['team'] = 'paraguins';
-                } elseif ($user->hasRole('Ravens Closer')) {
-                    $closer['team'] = 'ravens';
-                }
-            }
-            return $closer;
-        })->toArray();
 
         // Chargebacks - Calculate from local database
         $thisMonthStart = now()->startOfMonth();
@@ -179,17 +247,11 @@ class DashboardController extends Controller
             ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
             ->sum('monthly_premium') ?? 0;
 
-        // Retention - Calculate from local database
-        // CB = leads marked as chargeback status
-        // Retained = leads that were sales (accepted/underwritten) more than 30 days old and NOT chargedback
-        // Pending = leads that are accepted but less than 30 days old (pending retention period)
+        // Retention - Only count chargebacks (CB)
+        // Retention metric tracks leads that were chargedback
         $retention_cb = Lead::where('status', 'chargeback')->count();
-        $retention_retained = Lead::whereIn('status', ['accepted', 'underwritten'])
-            ->where('sale_at', '<', now()->subDays(30))
-            ->count();
-        $retention_pending = Lead::whereIn('status', ['accepted', 'underwritten'])
-            ->where('sale_at', '>=', now()->subDays(30))
-            ->count();
+        $retention_retained = 0; // Not tracking retained separately
+        $retention_pending = 0; // Not tracking pending separately
 
         // Financial overview
         $financial = $bossData['financialOverview'] ?? [];
@@ -225,7 +287,7 @@ class DashboardController extends Controller
             'present_count',
             'absent_count',
             'sales_per_closer',
-            'paraguins_count',
+            'peregrine_count',
             'ravens_count',
             'cb_this_count',
             'cb_this_amt',
@@ -243,6 +305,178 @@ class DashboardController extends Controller
             'pending_leads_count',
             'pending_leads'
         ));
+    }
+
+    /**
+     * Get KPI data for live dashboard updates (API endpoint)
+     * Returns fresh KPI data without page layout
+     */
+    public function getKpiData()
+    {
+        // Get current month and today
+        $today = today();
+        
+        // Sales counts using manager_status field and sale_at date (same as root method)
+        $total_sales_today = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereDate('sale_at', $today)
+            ->count();
+            
+        // Month-to-date sales (all submitted)
+        $total_monthly_sales = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+        
+        // Sales status counts by manager_status (MTD) - consistent with root method
+        $done_count = $total_monthly_sales; // Total submitted MTD
+        $approved_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->where('manager_status', 'approved')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+            
+        $underwriting_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->where('manager_status', 'underwriting')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+            
+        $declined_count = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->where('manager_status', 'declined')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->count();
+
+        // Attendance - Use local database
+        $usaToday = now()->setTimezone('America/New_York')->toDateString();
+        $todayAttendances = \App\Models\Attendance::with('user')
+            ->whereDate('date', $usaToday)
+            ->get();
+        
+        $attendance = $todayAttendances->map(function($att) {
+            return [
+                'name' => $att->user->name,
+                'status' => $att->status,
+            ];
+        })->toArray();
+
+        // Sales per closer - Calculate from local database (same as root method)
+        $closers = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereMonth('sale_at', now()->month)
+            ->whereYear('sale_at', now()->year)
+            ->get()
+            ->groupBy('closer_name');
+            
+        $sales_per_closer = [];
+        foreach ($closers as $closerName => $sales) {
+            $todaySales = $sales->filter(function($sale) use ($today) {
+                return $sale->sale_at && $sale->sale_at->isSameDay($today);
+            })->count();
+            
+            // Get user to determine team
+            $user = User::where('name', $closerName)->first();
+            $team = 'ravens'; // default
+            if ($user) {
+                if ($user->hasRole(['Peregrine Closer', 'Peregrine Validator'])) {
+                    $team = 'peregrine';
+                }
+            }
+            
+            // Count statuses
+            $approvedSales = $sales->where('manager_status', 'approved')->count();
+            $declinedSales = $sales->where('manager_status', 'declined')->count();
+            $uwSales = $sales->where('manager_status', 'underwriting')->count();
+            
+            $sales_per_closer[] = [
+                'closer' => $closerName,
+                'today' => $todaySales,
+                'mtd' => $sales->count(),
+                'approved' => $approvedSales,
+                'declined' => $declinedSales,
+                'uw' => $uwSales,
+                'team' => $team
+            ];
+        }
+        
+        // Sort by MTD sales descending
+        usort($sales_per_closer, function($a, $b) {
+            return $b['mtd'] - $a['mtd'];
+        });
+
+        // Chargebacks
+        $thisMonthStart = now()->startOfMonth();
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd = now()->subMonth()->endOfMonth();
+        
+        $cb_this_count = Lead::where('status', 'chargeback')
+            ->where('updated_at', '>=', $thisMonthStart)
+            ->count();
+        $cb_this_amt = Lead::where('status', 'chargeback')
+            ->where('updated_at', '>=', $thisMonthStart)
+            ->sum('monthly_premium') ?? 0;
+        
+        $cb_last_count = Lead::where('status', 'chargeback')
+            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
+            ->count();
+        $cb_last_amt = Lead::where('status', 'chargeback')
+            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
+            ->sum('monthly_premium') ?? 0;
+
+        // Retention
+        $retention_cb = Lead::where('status', 'chargeback')->count();
+        $retention_retained = Lead::whereIn('status', ['accepted', 'underwritten'])
+            ->where('sale_at', '<', now()->subDays(30))
+            ->count();
+        // Only count 'accepted' (not yet underwritten) in pending retention
+        $retention_pending = Lead::where('status', 'accepted')
+            ->where('sale_at', '>=', now()->subDays(30))
+            ->count();
+
+        // Calculate revenue from issued and approved sales (same logic as root method)
+        // Use agent_revenue (calculated commission) with fallback to monthly_premium
+        $issued_sales = Lead::where('status', 'accepted')
+            ->where('manager_status', 'approved')
+            ->where('issuance_status', 'Issued')
+            ->get();
+            
+        $total_revenue = $issued_sales->sum(function($lead) {
+            return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
+        });
+
+        // Return as JSON for AJAX updates
+        return response()->json([
+            'success' => true,
+            'timestamp' => now()->toIso8601String(),
+            'totalSalesToday' => $total_sales_today,
+            'done' => $done_count,
+            'approved' => $approved_count,
+            'underwriting' => $underwriting_count,
+            'declined' => $declined_count,
+            'totalRevenue' => $total_revenue,
+            'attendance' => $attendance,
+            'salesPerCloser' => $sales_per_closer,
+            'chargebacks' => [
+                'thisMonth' => [
+                    'count' => $cb_this_count,
+                    'amount' => $cb_this_amt
+                ],
+                'lastMonth' => [
+                    'count' => $cb_last_count,
+                    'amount' => $cb_last_amt
+                ]
+            ],
+            'retention' => [
+                'cb' => $retention_cb,
+                'retained' => $retention_retained,
+                'pending' => $retention_pending
+            ]
+        ]);
     }
 
     /**
@@ -301,5 +535,27 @@ class DashboardController extends Controller
             $status = strtolower($att['status'] ?? '');
             return in_array($status, ['absent', 'a']);
         })->count();
+    }
+
+    /**
+     * Revenue analytics page
+     */
+    public function revenue(Request $request)
+    {
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month', now()->month);
+
+        $revenueService = new RevenueCalculationService();
+        
+        // Get monthly revenue details
+        $monthlyRevenue = $revenueService->calculateMonthlyRevenue($year, $month);
+        
+        // Get year-to-date revenue
+        $ytdRevenue = $revenueService->calculateYearToDateRevenue($year);
+        
+        // Get top performers
+        $topPerformers = $revenueService->getTopPerformers($year, $month, 10);
+
+        return view('admin.revenue.index', compact('monthlyRevenue', 'ytdRevenue', 'topPerformers', 'year', 'month'));
     }
 }

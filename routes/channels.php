@@ -32,3 +32,11 @@ Broadcast::channel('chat.conversation.{conversationId}', function ($user, $conve
             $q->where('user_id', $user->id);
         })->exists();
 });
+
+// Authorize community announcement channels - only members can listen
+Broadcast::channel('community.{communityId}', function ($user, $communityId) {
+    return \DB::table('community_members')
+        ->where('community_id', $communityId)
+        ->where('user_id', $user->id)
+        ->exists();
+});

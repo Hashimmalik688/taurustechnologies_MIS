@@ -81,4 +81,49 @@ class LeadRepository implements LeadRepositoryInterface
             ->with(['carriers', 'forwardedBy', 'managedBy'])
             ->get();
     }
+
+    /**
+     * Get leads available for calling (exclude sold leads except those sold by the user)
+     */
+    public function getLeadsForCalling($userId, $userName)
+    {
+        return Lead::where(function($query) use ($userName) {
+            // Include leads that are not sold yet
+            $query->where(function($q) {
+                $q->whereNull('sale_at')
+                  ->orWhere('status', '!=', 'accepted');
+            })
+            // OR include leads sold by current user (so they can see their own sales)
+            ->orWhere('closer_name', $userName);
+        })
+        ->orderBy('created_at', 'desc')
+        ->get();
+    }
+
+    /**
+     * Check if a lead has been sold within the last N months
+     */
+    public function checkRepeatSale($phone, $ssn, $excludeLeadId = null, $months = 3)
+    {
+        $dateThreshold = now()->subMonths($months);
+
+        $query = Lead::whereNotNull('sale_at')
+            ->where('sale_at', '>=', $dateThreshold);
+
+        if ($excludeLeadId) {
+            $query->where('id', '!=', $excludeLeadId);
+        }
+
+        // Check by phone OR SSN
+        $query->where(function($q) use ($phone, $ssn) {
+            if ($phone) {
+                $q->where('phone_number', $phone);
+            }
+            if ($ssn) {
+                $q->orWhere('ssn', $ssn);
+            }
+        });
+
+        return $query->first();
+    }
 }

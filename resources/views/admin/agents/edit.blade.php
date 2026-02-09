@@ -257,6 +257,18 @@
                             </div>
                         </div>
 
+                        {{-- State-Specific Settlement Rates Section --}}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">
+                                    <i class="mdi mdi-map-marker-multiple me-1"></i>
+                                    State-Specific Settlement Rates (Optional)
+                                </h5>
+                            </div>
+                        </div>
+
+                        @include('admin.agents.partials.carrier-states', ['insuranceCarriers' => $insuranceCarriers, 'agentCarrierStates' => $agentCarrierStates ?? collect()])
+
                         {{-- Submit Section --}}
                         <div class="row">
                             <div class="col-12">
