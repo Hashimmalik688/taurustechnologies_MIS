@@ -155,6 +155,48 @@ class CommunityController extends Controller
     }
 
     /**
+     * Update a community
+     */
+    public function update(Request $request, Community $community)
+    {
+        try {
+            // Validate the request
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:communities,name,' . $community->id,
+                'description' => 'nullable|string|max:1000',
+                'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+                'posting_restricted' => 'nullable|boolean',
+            ]);
+
+            // Update the community
+            $community->update([
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? $community->description,
+                'color' => $validated['color'],
+                'posting_restricted' => $validated['posting_restricted'] ?? $community->posting_restricted,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Community updated successfully!',
+                'community' => $community,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Community update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating community: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete a community
      */
     public function destroy(Community $community)

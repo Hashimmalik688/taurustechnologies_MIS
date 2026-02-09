@@ -8,6 +8,124 @@
         .message-text, .chat-search-input, #messageInput, input, textarea, .form-control { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
         .chat-container img, .chat-container button { -webkit-user-drag: none; -moz-user-drag: none; user-drag: none; }
         body { overflow-x: hidden; }
+        
+        /* Community Announcement Pop-up Notification */
+        .announcement-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 420px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            z-index: 999999;
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+            display: none;
+        }
+        .announcement-popup.show {
+            display: block;
+        }
+        .announcement-popup.hiding {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(450px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(450px); opacity: 0; }
+        }
+        .announcement-popup-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .announcement-popup-body {
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .announcement-popup-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .announcement-popup-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .announcement-popup-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            animation: progressBar 20s linear forwards;
+        }
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+        
+        /* Floating Re-open Button */
+        .announcement-float-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            z-index: 999998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .announcement-float-btn.show {
+            display: flex;
+        }
+        .announcement-float-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+        }
+        .announcement-float-btn .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
     </style>
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/chat.css']); ?>
 <?php $__env->stopSection(); ?>
@@ -332,7 +450,7 @@
 
     <!-- Community Members Modal -->
     <div class="modal fade" id="communityMembersModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header border-bottom-0 pb-0">
                     <h5 class="modal-title fw-bold">Manage Members</h5>
@@ -356,7 +474,7 @@
                     <!-- Current Members List -->
                     <div>
                         <label class="form-label fw-bold mb-2">Current Members</label>
-                        <div id="communityMembersList" class="list-group list-group-flush border rounded" style="max-height: 300px; overflow-y: auto;">
+                        <div id="communityMembersList" class="list-group list-group-flush border rounded" style="max-height: 400px; overflow-y: auto;">
                             <!-- Populated by JS -->
                         </div>
                     </div>
@@ -365,8 +483,59 @@
         </div>
     </div>
 
+    <!-- Edit Community Modal -->
+    <div class="modal fade" id="editCommunityModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title fw-bold">Edit Community</h5>
+                        <p class="text-muted small mb-0">Update community settings</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editCommunityId">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Community Name</label>
+                        <input type="text" class="form-control" id="editCommunityName" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea class="form-control" id="editCommunityDescription" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Color</label>
+                        <input type="color" class="form-control form-control-color w-100" id="editCommunityColor" style="height: 50px;">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editCommunityPostingRestricted" style="cursor: pointer;">
+                            <label class="form-check-label" for="editCommunityPostingRestricted" style="cursor: pointer;">
+                                <strong>Restrict Posting</strong>
+                                <br>
+                                <small class="text-muted">Only creator and authorized members can post announcements</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveCommunitySettingsBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Context Menu (Hidden by default) -->
     <div id="communityContextMenu" class="dropdown-menu" style="display: none; position: fixed; z-index: 9999;">
+        <a class="dropdown-item" href="#" id="ctxEditCommunity">
+            <i class="bx bx-edit me-2"></i> Edit Community
+        </a>
         <a class="dropdown-item" href="#" id="ctxManageMembers">
             <i class="bx bx-user-plus me-2"></i> Manage Members
         </a>
@@ -436,6 +605,87 @@
                 <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
                     <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Cancel</button>
                     <button type="button" class="btn btn-primary" id="createCommunityBtn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">Create Community</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Community Announcement Pop-up Notification -->
+    <div id="announcementPopup" class="announcement-popup">
+        <button class="announcement-popup-close" onclick="closeAnnouncementPopup()">
+            <i class="bx bx-x" style="font-size: 20px;"></i>
+        </button>
+        <div class="announcement-popup-header">
+            <div id="popupCommunityIcon" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #667eea; color: white; font-size: 20px;">
+                <i class="bx bx-bullhorn"></i>
+            </div>
+            <div style="flex: 1;">
+                <div id="popupCommunityName" style="font-weight: 700; color: #111827; font-size: 16px;">Community</div>
+                <div style="font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px;">
+                    <i class="bx bx-bullhorn" style="font-size: 13px;"></i>
+                    <span>New Announcement</span>
+                </div>
+            </div>
+        </div>
+        <div class="announcement-popup-body">
+            <div id="popupPriorityBadge" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px;">
+                <i class="bx bx-info-circle"></i>
+                <span>Normal</span>
+            </div>
+            <div id="popupAnnouncementTitle" style="font-weight: 700; color: #111827; font-size: 18px; margin-bottom: 8px;"></div>
+            <div id="popupAnnouncementMessage" style="color: #374151; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
+            <div id="popupAnnouncementTime" style="font-size: 12px; color: #9ca3af; margin-top: 12px;"></div>
+        </div>
+        <div class="announcement-popup-progress"></div>
+    </div>
+
+    <!-- Floating Re-open Button -->
+    <button id="announcementFloatBtn" class="announcement-float-btn" onclick="showRecentAnnouncements()" title="View Recent Announcements">
+        <i class="bx bx-bell"></i>
+        <span id="announcementFloatBadge" class="notification-badge" style="display: none;">1</span>
+    </button>
+
+    <!-- Edit Announcement Modal -->
+    <div class="modal fade" id="editAnnouncementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" style="font-weight: 700; color: #111827;">Edit Announcement</h5>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Update your announcement details</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAnnouncementForm">
+                        <?php echo csrf_field(); ?>
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Title (Optional)</label>
+                            <input type="text" class="form-control" id="editAnnouncementTitle" placeholder="Announcement title" style="border-radius: 8px;">
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Message</label>
+                            <textarea class="form-control" id="editAnnouncementMessage" placeholder="Type your announcement message..." rows="4" required style="border-radius: 8px; resize: vertical;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Priority</label>
+                            <select class="form-select" id="editAnnouncementPriority" style="border-radius: 8px;">
+                                <option value="info">Info</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="warning">Warning</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Set the priority level for this announcement</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="updateAnnouncementBtn" onclick="updateAnnouncement()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">
+                        <i class="bx bx-save"></i> Update Announcement
+                    </button>
                 </div>
             </div>
         </div>
@@ -1002,6 +1252,18 @@ async function selectCommunity(community, isCreator = false) {
                         </p>
                     </div>
                 </div>
+                ${isCreator || window.isSuperAdmin ? `
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="openEditCommunityModal(${communityId})" class="btn btn-sm btn-outline-primary" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600;" title="Edit Community Settings">
+                            <i class="bx bx-cog" style="font-size: 16px;"></i>
+                            <span>Settings</span>
+                        </button>
+                        <button onclick="openCommunityMemberManagement(${communityId}, '${communityName.replace(/'/g, "\\'")}')" class="btn btn-sm btn-outline-secondary" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600;" title="Manage Members">
+                            <i class="bx bx-user-plus" style="font-size: 16px;"></i>
+                            <span>Members</span>
+                        </button>
+                    </div>
+                ` : ''}
             </div>
             <div class="announcement-messages" id="announcementMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb;">
                 <div id="announcementsContainer">
@@ -1086,18 +1348,63 @@ function renderAnnouncements(announcements, communityColor) {
     }
     
     return announcements.map(announcement => {
-        const avatar = announcement.created_by.avatar 
-            ? `/storage/${announcement.created_by.avatar}` 
-            : `https://ui-avatars.com/api/?name=${encodeURIComponent(announcement.created_by.name)}&background=${communityColor.replace('#', '')}&color=fff`;
+        const creatorName = announcement.created_by?.name || 'Unknown';
+        const creatorId = announcement.created_by?.id;
+        const avatar = announcement.created_by?.avatar 
+            ? `${announcement.created_by.avatar}` 
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(creatorName)}&background=${communityColor.replace('#', '')}&color=fff`;
+        
+        // Priority color mapping
+        const priorityColors = {
+            'urgent': '#ef4444',
+            'warning': '#f59e0b',
+            'info': '#3b82f6',
+            'normal': '#6b7280'
+        };
+        const priorityIcons = {
+            'urgent': 'bx-error-circle',
+            'warning': 'bx-error',
+            'info': 'bx-info-circle',
+            'normal': 'bx-info-circle'
+        };
+        const priorityLabels = {
+            'urgent': 'URGENT',
+            'warning': 'Warning',
+            'info': 'Info',
+            'normal': 'Normal'
+        };
+        
+        const priority = announcement.priority || 'normal';
+        const priorityColor = priorityColors[priority];
+        const priorityIcon = priorityIcons[priority];
+        const priorityLabel = priorityLabels[priority];
         
         return `
-            <div class="announcement-item" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid ${communityColor};">
+            <div class="announcement-item" style="margin-bottom: 24px; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid ${priorityColor};">
                 <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                    <img src="${avatar}" alt="${announcement.created_by.name}" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid ${communityColor};">
+                    <img src="${avatar}" alt="${creatorName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creatorName)}&background=${communityColor.replace('#', '')}&color=fff'" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid ${communityColor};">
                     <div style="flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <strong style="color: #111827; font-size: 14px;">${announcement.created_by.name}</strong>
-                            <span style="font-size: 12px; color: #9ca3af;">${announcement.created_at_human}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <strong style="color: #111827; font-size: 14px;">${creatorName}</strong>
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: ${priorityColor}; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                        <i class="bx ${priorityIcon}" style="font-size: 13px;"></i>
+                                        ${priorityLabel}
+                                    </span>
+                                </div>
+                                <div style="font-size: 12px; color: #9ca3af;">${announcement.created_at_human}</div>
+                            </div>
+                            ${creatorId === window.currentUserId ? `
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick='editAnnouncement(${announcement.id}, ${JSON.stringify(announcement.title || "")}, ${JSON.stringify(announcement.message)}, "${announcement.priority || "normal"}")' style="background: none; border: none; color: #3b82f6; cursor: pointer; padding: 4px 8px;" title="Edit">
+                                        <i class="bx bx-edit" style="font-size: 18px;"></i>
+                                    </button>
+                                    <button onclick="deleteAnnouncement(${announcement.id})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px 8px;" title="Delete">
+                                        <i class="bx bx-trash" style="font-size: 18px;"></i>
+                                    </button>
+                                </div>
+                            ` : ''}
                         </div>
                         ${announcement.title ? `<div style="font-weight: 600; color: ${communityColor}; margin-bottom: 8px; font-size: 15px;">${escapeHtml(announcement.title)}</div>` : ''}
                         <div style="color: #374151; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(announcement.message)}</div>
@@ -1130,22 +1437,19 @@ async function sendAnnouncement() {
             sendBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Posting...';
         }
         
-        const result = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`, {
-            method: 'POST',
-            body: JSON.stringify({
-                message: message,
-                title: null,
-                priority: 'normal'
-            })
+        const result = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`, 'POST', {
+            message: message,
+            title: null,
+            priority: 'normal'
         });
         
         if (result.success) {
             textarea.value = '';
             
-            // Reload announcements
+            // Reload announcements using globalCommunities
             const announcementsData = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`);
             const container = document.getElementById('announcementsContainer');
-            const community = window.communities.find(c => c.id === window.currentCommunityId);
+            const community = globalCommunities.find(c => c.id === window.currentCommunityId);
             if (container && community) {
                 container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
             }
@@ -1155,15 +1459,17 @@ async function sendAnnouncement() {
             if (messagesDiv) {
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }
+        } else {
+            throw new Error(result.message || 'Failed to post announcement');
         }
     } catch (error) {
         console.error('Error sending announcement:', error);
-        alert('Failed to post announcement. Please try again.');
+        alert('Failed to post announcement: ' + error.message);
     } finally {
         const sendBtn = document.getElementById('sendAnnouncementBtn');
         if (sendBtn) {
             sendBtn.disabled = false;
-            const community = window.communities.find(c => c.id === window.currentCommunityId);
+            const community = globalCommunities.find(c => c.id === window.currentCommunityId);
             const color = community?.color || '#667eea';
             sendBtn.innerHTML = `<i class="bx bx-paper-plane" style="font-size: 16px;"></i> Post Announcement`;
         }
@@ -1240,100 +1546,150 @@ async function loadCommunityAnnouncements(conversationId, communityColor) {
     }
 }
 
-// Send announcement
-async function sendAnnouncement() {
-    const input = document.getElementById('announcementInput');
-    const fileInput = document.getElementById('announcementFileInput');
-    const message = input?.value?.trim();
+// Edit announcement
+function editAnnouncement(announcementId, title, message, priority) {
+    // Store announcement ID for update
+    window.editingAnnouncementId = announcementId;
     
-    if (!message && (!fileInput?.files || fileInput.files.length === 0)) {
-        alert('Please enter a message or attach a file');
+    // Populate modal fields
+    document.getElementById('editAnnouncementTitle').value = title || '';
+    document.getElementById('editAnnouncementMessage').value = message;
+    document.getElementById('editAnnouncementPriority').value = priority || 'normal';
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editAnnouncementModal'));
+    modal.show();
+}
+
+// Update announcement
+async function updateAnnouncement() {
+    const announcementId = window.editingAnnouncementId;
+    
+    if (!announcementId || !window.currentCommunityId) {
+        alert('Invalid announcement or community');
         return;
     }
     
-    if (!window.currentConversationId) {
-        // Need to create conversation first
-        try {
-            const membersResponse = await apiCall(`/api/communities/${window.currentCommunityId}/members`);
-            const memberIds = membersResponse.members?.map(m => m.id) || [];
-            
-            if (!memberIds.includes(window.currentUserId)) {
-                memberIds.push(window.currentUserId);
-            }
-            
-            const createResponse = await apiCall('/api/chat/conversations/group', 'POST', {
-                name: window.currentConversationName,
-                user_ids: memberIds,
-                community_id: window.currentCommunityId
-            });
-            
-            if (createResponse.success && createResponse.conversation) {
-                window.currentConversationId = createResponse.conversation.id;
-            } else {
-                throw new Error('Failed to create conversation');
-            }
-        } catch (error) {
-            console.error('Error creating conversation:', error);
-            alert('Failed to create announcement board. Please try again.');
-            return;
-        }
+    const title = document.getElementById('editAnnouncementTitle').value.trim();
+    const message = document.getElementById('editAnnouncementMessage').value.trim();
+    const priority = document.getElementById('editAnnouncementPriority').value;
+    
+    if (!message) {
+        alert('Please enter an announcement message');
+        return;
     }
     
     try {
-        const formData = new FormData();
-        formData.append('conversation_id', window.currentConversationId);
-        formData.append('message', message || '');
-        
-        if (fileInput && fileInput.files.length > 0) {
-            for (let i = 0; i < fileInput.files.length; i++) {
-                formData.append('attachments[]', fileInput.files[i]);
-            }
+        const updateBtn = document.getElementById('updateAnnouncementBtn');
+        if (updateBtn) {
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Updating...';
         }
         
-        const response = await fetch('/api/chat/messages', {
-            method: 'POST',
+        const response = await fetch(`/api/chat/communities/${window.currentCommunityId}/announcements/${announcementId}`, {
+            method: 'PUT',
             headers: {
+                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content,
             },
-            body: formData
+            body: JSON.stringify({
+                title: title || null,
+                message: message,
+                priority: priority,
+                show_in_banner: true,
+                is_active: true
+            })
         });
         
-        if (!response.ok) throw new Error('Failed to send announcement');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update announcement');
+        }
         
         const data = await response.json();
         
         if (data.success) {
-            // Clear inputs
-            if (input) input.value = '';
-            if (fileInput) fileInput.value = '';
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editAnnouncementModal'));
+            modal.hide();
             
             // Reload announcements
-            const community = globalCommunities.find(c => c.id === window.currentCommunityId);
-            if (community) {
-                loadCommunityAnnouncements(window.currentConversationId, community.color || '#667eea');
+            try {
+                const announcementsData = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`);
+                const community = globalCommunities.find(c => c.id === window.currentCommunityId);
+                const container = document.getElementById('announcementsContainer');
+                
+                if (container && community && announcementsData.announcements) {
+                    container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
+                }
+            } catch (e) {
+                console.error('Failed to reload announcements:', e);
             }
         }
     } catch (error) {
-        console.error('Error sending announcement:', error);
-        alert('Failed to send announcement. Please try again.');
+        console.error('Error updating announcement:', error);
+        alert('Failed to update announcement: ' + error.message);
+    } finally {
+        const updateBtn = document.getElementById('updateAnnouncementBtn');
+        if (updateBtn) {
+            updateBtn.disabled = false;
+            updateBtn.innerHTML = '<i class="bx bx-save"></i> Update Announcement';
+        }
     }
 }
 
 // Delete announcement
-async function deleteAnnouncement(messageId) {
+async function deleteAnnouncement(announcementId) {
     if (!confirm('Are you sure you want to delete this announcement?')) return;
     
+    if (!window.currentCommunityId) {
+        alert('No community selected');
+        return;
+    }
+    
     try {
-        await apiCall(`/api/chat/messages/${messageId}`, 'DELETE');
+        const response = await fetch(`/api/chat/communities/${window.currentCommunityId}/announcements/${announcementId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('[name="csrf-token"]').content,
+            }
+        });
         
-        // Reload announcements
-        const community = globalCommunities.find(c => c.id === window.currentCommunityId);
-        if (community && window.currentConversationId) {
-            loadCommunityAnnouncements(window.currentConversationId, community.color || '#667eea');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to delete announcement');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload announcements
+            try {
+                const announcementsData = await apiCall(`/api/chat/communities/${window.currentCommunityId}/announcements`);
+                const community = globalCommunities.find(c => c.id === window.currentCommunityId);
+                const container = document.getElementById('announcementsContainer');
+                
+                if (container && community) {
+                    if (announcementsData.announcements && announcementsData.announcements.length > 0) {
+                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
+                    } else {
+                        container.innerHTML = `
+                            <div style="max-width: 500px; margin: 60px auto; text-align: center;">
+                                <i class="bx bx-bullhorn" style="font-size: 64px; color: ${community.color || '#667eea'}; opacity: 0.3;"></i>
+                                <h5 class="mt-3" style="color: #111827; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                                <p style="color: #6b7280; margin-top: 12px;">${translations.beTheFirstToPost}</p>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to reload announcements:', e);
+            }
         }
     } catch (error) {
         console.error('Error deleting announcement:', error);
-        alert('Failed to delete announcement.');
+        alert('Failed to delete announcement: ' + error.message);
     }
 }
 
@@ -2386,18 +2742,17 @@ function subscribeToCommunityAnnouncements(communityIdOrArray) {
                         .listen('.announcement.posted', async (data) => {
                             console.log('Community announcement received:', data);
                             
-                            // Show global toast notification if function exists (from master layout)
-                            if (typeof showAnnouncementToast === 'function') {
-                                showAnnouncementToast(data);
-                            }
+                            // Show pop-up notification
+                            showAnnouncementPopup(data);
                             
                             // Refresh announcements if viewing this community
                             if (window.currentCommunityId === communityId) {
                                 try {
                                     const announcementsData = await apiCall(`/api/chat/communities/${communityId}/announcements`);
                                     const container = document.getElementById('announcementsContainer');
-                                    const community = window.communities.find(c => c.id === communityId);
-                                    if (container && community) {
+                                    const community = globalCommunities.find(c => c.id === communityId);
+                                    
+                                    if (container && community && announcementsData.announcements) {
                                         container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#667eea');
                                         
                                         // Scroll to bottom
@@ -2426,6 +2781,221 @@ function subscribeToCommunityAnnouncements(communityIdOrArray) {
         }
     }, 200);
 }
+
+// ===== COMMUNITY ANNOUNCEMENT POP-UP NOTIFICATIONS =====
+
+// Store recent announcements in session storage
+function getRecentAnnouncements() {
+    try {
+        const stored = sessionStorage.getItem('recentAnnouncements');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveRecentAnnouncement(announcement) {
+    try {
+        let recent = getRecentAnnouncements();
+        // Add new announcement at the beginning
+        recent.unshift(announcement);
+        // Keep only last 5 announcements
+        recent = recent.slice(0, 5);
+        sessionStorage.setItem('recentAnnouncements', JSON.stringify(recent));
+        
+        // Update floating button badge
+        updateFloatingButtonBadge();
+    } catch (e) {
+        console.error('Error saving recent announcement:', e);
+    }
+}
+
+function updateFloatingButtonBadge() {
+    const recent = getRecentAnnouncements();
+    const floatBtn = document.getElementById('announcementFloatBtn');
+    const badge = document.getElementById('announcementFloatBadge');
+    
+    if (recent.length > 0) {
+        floatBtn.classList.add('show');
+        badge.style.display = 'flex';
+        badge.textContent = recent.length;
+    } else {
+        floatBtn.classList.remove('show');
+        badge.style.display = 'none';
+    }
+}
+
+// Show announcement pop-up notification
+let currentPopupTimeout = null;
+function showAnnouncementPopup(data) {
+    try {
+        const popup = document.getElementById('announcementPopup');
+        if (!popup) return;
+        
+        // Clear existing timeout
+        if (currentPopupTimeout) {
+            clearTimeout(currentPopupTimeout);
+        }
+        
+        // Extract announcement data
+        const announcement = data.announcement || data;
+        const communityName = data.community_name || 'Community';
+        const communityId = data.community_id;
+        
+        // Priority colors and icons
+        const priorityData = {
+            'urgent': { color: '#ef4444', icon: 'bx-error-circle', label: 'URGENT' },
+            'warning': { color: '#f59e0b', icon: 'bx-error', label: 'Warning' },
+            'info': { color: '#3b82f6', icon: 'bx-info-circle', label: 'Info' },
+            'normal': { color: '#6b7280', icon: 'bx-info-circle', label: 'Normal' }
+        };
+        
+        const priority = announcement.priority || 'normal';
+        const priorityInfo = priorityData[priority];
+        
+        // Find community color
+        const community = globalCommunities.find(c => c.id === communityId);
+        const communityColor = community?.color || '#667eea';
+        
+        // Update popup content
+        document.getElementById('popupCommunityName').textContent = communityName;
+        document.getElementById('popupCommunityIcon').style.background = communityColor;
+        
+        const priorityBadge = document.getElementById('popupPriorityBadge');
+        priorityBadge.style.background = priorityInfo.color;
+        priorityBadge.style.color = 'white';
+        priorityBadge.innerHTML = `<i class="bx ${priorityInfo.icon}"></i><span>${priorityInfo.label}</span>`;
+        
+        const titleEl = document.getElementById('popupAnnouncementTitle');
+        if (announcement.title) {
+            titleEl.textContent = announcement.title;
+            titleEl.style.display = 'block';
+        } else {
+            titleEl.style.display = 'none';
+        }
+        
+        document.getElementById('popupAnnouncementMessage').textContent = announcement.message;
+        document.getElementById('popupAnnouncementTime').textContent = 'Just now';
+        
+        // Save to recent announcements
+        saveRecentAnnouncement({
+            ...announcement,
+            community_name: communityName,
+            community_id: communityId,
+            community_color: communityColor,
+            timestamp: Date.now()
+        });
+        
+        // Show popup with animation
+        popup.classList.remove('hiding');
+        popup.classList.add('show');
+        
+        // Play sound notification if available
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjqP1fPPgjMGKHi+7+OZURE=');
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        } catch (e) {}
+        
+        // Auto-dismiss after 20 seconds
+        currentPopupTimeout = setTimeout(() => {
+            closeAnnouncementPopup();
+        }, 20000);
+        
+    } catch (error) {
+        console.error('Error showing announcement popup:', error);
+    }
+}
+
+// Close announcement pop-up
+function closeAnnouncementPopup() {
+    const popup = document.getElementById('announcementPopup');
+    if (!popup) return;
+    
+    popup.classList.add('hiding');
+    
+    setTimeout(() => {
+        popup.classList.remove('show', 'hiding');
+    }, 300);
+    
+    if (currentPopupTimeout) {
+        clearTimeout(currentPopupTimeout);
+        currentPopupTimeout = null;
+    }
+}
+
+// Show recent announcements when floating button is clicked
+function showRecentAnnouncements() {
+    const recent = getRecentAnnouncements();
+    
+    if (recent.length === 0) {
+        return;
+    }
+    
+    // Show the most recent announcement
+    const latest = recent[0];
+    
+    // Re-show the popup with the latest announcement
+    const popup = document.getElementById('announcementPopup');
+    if (!popup) return;
+    
+    const priorityData = {
+        'urgent': { color: '#ef4444', icon: 'bx-error-circle', label: 'URGENT' },
+        'warning': { color: '#f59e0b', icon: 'bx-error', label: 'Warning' },
+        'info': { color: '#3b82f6', icon: 'bx-info-circle', label: 'Info' },
+        'normal': { color: '#6b7280', icon: 'bx-info-circle', label: 'Normal' }
+    };
+    
+    const priority = latest.priority || 'normal';
+    const priorityInfo = priorityData[priority];
+    
+    document.getElementById('popupCommunityName').textContent = latest.community_name || 'Community';
+    document.getElementById('popupCommunityIcon').style.background = latest.community_color || '#667eea';
+    
+    const priorityBadge = document.getElementById('popupPriorityBadge');
+    priorityBadge.style.background = priorityInfo.color;
+    priorityBadge.style.color = 'white';
+    priorityBadge.innerHTML = `<i class="bx ${priorityInfo.icon}"></i><span>${priorityInfo.label}</span>`;
+    
+    const titleEl = document.getElementById('popupAnnouncementTitle');
+    if (latest.title) {
+        titleEl.textContent = latest.title;
+        titleEl.style.display = 'block';
+    } else {
+        titleEl.style.display = 'none';
+    }
+    
+    document.getElementById('popupAnnouncementMessage').textContent = latest.message;
+    
+    // Show relative time
+    const timestamp = latest.timestamp || Date.now();
+    const now = Date.now();
+    const diffMinutes = Math.floor((now - timestamp) / 60000);
+    let timeText = 'Just now';
+    if (diffMinutes >= 60) {
+        const hours = Math.floor(diffMinutes / 60);
+        timeText = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (diffMinutes > 0) {
+        timeText = `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+    }
+    document.getElementById('popupAnnouncementTime').textContent = timeText;
+    
+    // Show popup
+    popup.classList.remove('hiding');
+    popup.classList.add('show');
+    
+    // Clear badge after showing
+    setTimeout(() => {
+        sessionStorage.removeItem('recentAnnouncements');
+        updateFloatingButtonBadge();
+    }, 1000);
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Update floating button on page load
+    updateFloatingButtonBadge();
+});
 
 // Group chat functionality
 let selectedMembers = new Set();
@@ -3583,6 +4153,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const ctxEditCommunityBtn = document.getElementById('ctxEditCommunity');
+    if (ctxEditCommunityBtn) {
+        ctxEditCommunityBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openEditCommunityModal(window.contextMenuCommunityId);
+        });
+    }
+
     const ctxDeleteCommunityBtn = document.getElementById('ctxDeleteCommunity');
     if (ctxDeleteCommunityBtn) {
         ctxDeleteCommunityBtn.addEventListener('click', function(e) {
@@ -3600,6 +4178,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (userId && communityId) {
                 addCommunityMember(communityId, userId);
             }
+        });
+    }
+    
+    // Save Community Settings Button
+    const saveCommunitySettingsBtn = document.getElementById('saveCommunitySettingsBtn');
+    if (saveCommunitySettingsBtn) {
+        saveCommunitySettingsBtn.addEventListener('click', function() {
+            saveCommunitySettings();
         });
     }
 });
@@ -3716,11 +4302,11 @@ async function loadCommunityMembers(communityId) {
             
             list.innerHTML = data.members.map(member => `
                 <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center flex-grow-1">
                         <div class="user-avatar me-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; overflow: hidden; font-weight: bold;">
                              ${member.avatar ? `<img src="${member.avatar}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover;">` : member.name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div class="flex-grow-1">
                             <div class="fw-bold">
                                 ${member.name}
                                 ${member.id == communityCreatorId ? '<span class="badge bg-secondary ms-1" style="font-size: 10px;">Creator</span>' : ''}
@@ -3728,9 +4314,20 @@ async function loadCommunityMembers(communityId) {
                             <small class="text-muted">${member.email}</small>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeCommunityMember(${communityId}, ${member.id})">
-                        <i class="bx bx-trash"></i> Remove
-                    </button>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" ${member.can_post ? 'checked' : ''} 
+                                   onchange="toggleMemberPosting(${communityId}, ${member.id})" 
+                                   style="cursor: pointer;" 
+                                   title="${member.can_post ? 'Can post' : 'Cannot post'}">
+                            <label class="form-check-label small text-muted" style="cursor: pointer;">
+                                ${member.can_post ? 'Can post' : 'Restricted'}
+                            </label>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeCommunityMember(${communityId}, ${member.id})" title="Remove member">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
                 </div>
             `).join('');
         } else {
@@ -3836,6 +4433,119 @@ async function removeCommunityMember(communityId, userId) {
     } catch (error) {
         console.error('Error removing community member:', error);
         showAlert('danger', 'Error removing member: ' + error.message);
+    }
+}
+
+// Toggle member posting permission
+async function toggleMemberPosting(communityId, userId) {
+    try {
+        const response = await fetch(`/api/communities/${communityId}/members/${userId}/toggle-post`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showAlert('success', data.message || 'Permission updated');
+            // Reload to reflect changes
+            await loadCommunityMembers(communityId);
+        } else {
+            showAlert('danger', data.message || 'Failed to update permission');
+            // Reload to revert checkbox state
+            await loadCommunityMembers(communityId);
+        }
+    } catch (error) {
+        console.error('Error toggling member posting:', error);
+        showAlert('danger', 'Error updating permission');
+        // Reload to revert checkbox state
+        await loadCommunityMembers(communityId);
+    }
+}
+
+// Open Edit Community Modal
+async function openEditCommunityModal(communityId) {
+    const community = globalCommunities.find(c => c.id === communityId);
+    if (!community) {
+        showAlert('danger', 'Community not found');
+        return;
+    }
+    
+    // Populate form fields
+    document.getElementById('editCommunityId').value = community.id;
+    document.getElementById('editCommunityName').value = community.name;
+    document.getElementById('editCommunityDescription').value = community.description || '';
+    document.getElementById('editCommunityColor').value = community.color || '#667eea';
+    document.getElementById('editCommunityPostingRestricted').checked = community.posting_restricted || false;
+    
+    // Hide context menu
+    document.getElementById('communityContextMenu').style.display = 'none';
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editCommunityModal'));
+    modal.show();
+}
+
+// Save Community Settings
+async function saveCommunitySettings() {
+    const communityId = document.getElementById('editCommunityId').value;
+    const name = document.getElementById('editCommunityName').value.trim();
+    const description = document.getElementById('editCommunityDescription').value.trim();
+    const color = document.getElementById('editCommunityColor').value;
+    const postingRestricted = document.getElementById('editCommunityPostingRestricted').checked;
+    
+    if (!name) {
+        showAlert('danger', 'Community name is required');
+        return;
+    }
+    
+    try {
+        const saveBtn = document.getElementById('saveCommunitySettingsBtn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+        }
+        
+        const response = await fetch(`/api/communities/${communityId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                color: color,
+                posting_restricted: postingRestricted
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editCommunityModal'));
+            modal.hide();
+            
+            // Reload communities list
+            await loadCommunitiesForDisplay();
+            
+            showAlert('success', 'Community updated successfully');
+        } else {
+            showAlert('danger', data.message || 'Failed to update community');
+        }
+    } catch (error) {
+        console.error('Error saving community settings:', error);
+        showAlert('danger', 'Error updating community: ' + error.message);
+    } finally {
+        const saveBtn = document.getElementById('saveCommunitySettingsBtn');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Save Changes';
+        }
     }
 }
 

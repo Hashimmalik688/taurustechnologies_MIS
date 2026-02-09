@@ -918,38 +918,14 @@ class ChatController extends Controller
                 return $conversation->unreadCount($userId);
             });
 
-        // Get unread community announcements count
-        $user = auth()->user();
-        
-        // Get communities that the user is part of
-        $userCommunities = ChatConversation::where('type', 'group')
-            ->whereHas('users', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->whereNotNull('community_id')
-            ->pluck('community_id')
-            ->unique()
-            ->toArray();
-
-        // Also include communities the user created
-        $createdCommunities = \App\Models\Community::where('created_by', $user->id)->pluck('id')->toArray();
-        
-        $communityIds = array_unique(array_merge($userCommunities, $createdCommunities));
-
-        // Count active announcements
+        // Announcement count no longer included in badge - handled by popup polling system
         $announcementCount = 0;
-        if (!empty($communityIds)) {
-            $announcementCount = \App\Models\CommunityAnnouncement::active()
-                ->forBanner()
-                ->whereIn('community_id', $communityIds)
-                ->count();
-        }
 
         return response()->json([
             'success' => true,
             'unread_count' => $totalUnread,
             'announcement_count' => $announcementCount,
-            'total_count' => $totalUnread + $announcementCount,
+            'total_count' => $totalUnread,
         ]);
     }
 

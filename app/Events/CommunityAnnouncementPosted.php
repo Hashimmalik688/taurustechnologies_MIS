@@ -56,35 +56,3 @@ class CommunityAnnouncementPosted implements ShouldBroadcast
     }
 }
 
-        return [
-            'id' => $this->message->id,
-            'conversation_id' => $this->message->conversation_id,
-            'community_id' => $this->conversation->community_id,
-            'community_name' => $this->conversation->name,
-            'user' => [
-                'id' => $this->message->user->id ?? null,
-                'name' => $this->message->user->name ?? null,
-                'avatar' => $this->message->user->avatar ?? null,
-            ],
-            'message' => $this->message->message,
-            'type' => $this->message->type,
-            'attachments' => $this->message->attachments->map(function ($att) {
-                return [
-                    'id' => $att->id,
-                    'file_name' => $att->file_name,
-                    'url' => asset('storage/' . $att->file_path),
-                    'mime_type' => $att->mime_type,
-                ];
-            })->toArray(),
-            'created_at' => $this->message->created_at->toDateTimeString(),
-        ];
-    }
-
-    /**
-     * Custom event name for the client side.
-     */
-    public function broadcastAs()
-    {
-        return 'announcement.posted';
-    }
-}
