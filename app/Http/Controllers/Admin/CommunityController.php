@@ -13,37 +13,7 @@ class CommunityController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware(function ($request, $next) {
-            $user = auth()->user();
-            
-            // Allow all authenticated users for API requests (chat feature)
-            if ($request->is('api/*')) {
-                return $next($request);
-            }
-            
-            // Restrict admin panel routes to Super Admin and CEO only
-            if (!$user->hasRole(['Super Admin', 'CEO'])) {
-                abort(403, 'Only Super Admin and CEO can manage communities.');
-            }
-            return $next($request);
-        });
-    }
-
-    /**
-     * Display all communities
-     */
-    public function index()
-    {
-        $communities = Community::with('creator')->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.community.index', compact('communities'));
-    }
-
-    /**
-     * Show create form
-     */
-    public function create()
-    {
-        return view('admin.community.create');
+        // Note: Admin management UI removed - this controller now serves API endpoints only for chat system
     }
 
     /**
@@ -141,8 +111,12 @@ class CommunityController extends Controller
                 ], 201);
             }
 
-            return redirect()->route('admin.communities.index')
-                ->with('success', 'Community created successfully!');
+            // Web access removed - API only
+            return response()->json([
+                'success' => true,
+                'message' => 'Community created successfully!',
+                'community' => $community,
+            ], 201);
                 
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Community validation error', ['errors' => $e->errors()]);
@@ -155,7 +129,11 @@ class CommunityController extends Controller
                 ], 422);
             }
             
-            return back()->withErrors($e->errors())->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
             
         } catch (\Exception $e) {
             \Log::error('Community creation error: ' . $e->getMessage(), [
@@ -169,60 +147,11 @@ class CommunityController extends Controller
                 ], 500);
             }
             
-            return back()->with('error', 'Error creating community: ' . $e->getMessage())->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating community: ' . $e->getMessage()
+            ], 500);
         }
-    }
-
-    /**
-     * Show edit form
-     */
-    public function edit(Community $community)
-    {
-        // UNRESTRICTED ACCESS: All authenticated users can edit communities
-        // Load current members with their roles
-        $members = $community->members()->with('roles')->get();
-        
-        // Get all users for the add member dropdown (excluding current members)
-        $availableUsers = User::whereNotIn('id', $members->pluck('id'))
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-
-        return view('admin.community.edit', compact('community', 'members', 'availableUsers'));
-    }
-
-    /**
-     * Update a community
-     */
-    public function update(Request $request, Community $community)
-    {
-        // UNRESTRICTED ACCESS: All authenticated users can update communities
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:communities,name,' . $community->id,
-            'description' => 'nullable|string|max:1000',
-            'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'posting_restricted' => 'nullable|boolean',
-        ]);
-        
-        // Always use bullhorn icon
-        $validated['icon'] = 'bx-bullhorn';
-        
-        // Handle posting_restricted checkbox
-        $validated['posting_restricted'] = $request->has('posting_restricted') ? (bool)$request->posting_restricted : false;
-        
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($community->avatar && \Storage::disk('public')->exists($community->avatar)) {
-                \Storage::disk('public')->delete($community->avatar);
-            }
-            $avatarPath = $request->file('avatar')->store('communities/avatars', 'public');
-            $validated['avatar'] = $avatarPath;
-        }
-
-        $community->update($validated);
-
-        return redirect()->route('admin.communities.index')
-            ->with('success', 'Community updated successfully!');
     }
 
     /**
@@ -238,15 +167,10 @@ class CommunityController extends Controller
         
         $community->delete();
 
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Community deleted successfully!'
-            ]);
-        }
-
-        return redirect()->route('admin.communities.index')
-            ->with('success', 'Community deleted successfully!');
+        return response()->json([
+            'success' => true,
+            'message' => 'Community deleted successfully!'
+        ]);
     }
 
     /**

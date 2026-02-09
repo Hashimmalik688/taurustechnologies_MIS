@@ -845,13 +845,6 @@ function renderCommunitiesList(communities) {
                 </div>
             </div>
             ${canManage ? `
-                <a href="/admin/communities/${community.id}/edit" class="btn-edit-community btn-edit-${community.id}" 
-                   data-community-id="${community.id}" 
-                   title="Edit Community" 
-                   onclick="event.stopPropagation();"
-                   style="flex-shrink: 0; background: #667eea; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; opacity: 0; margin-right: 4px; text-decoration: none; display: inline-flex; align-items: center;">
-                    <i class="bx bx-edit"></i>
-                </a>
                 <button class="btn-delete-community btn-delete-${community.id}" 
                         data-community-id="${community.id}" 
                         data-community-name="${community.name}" 
@@ -873,26 +866,12 @@ function renderCommunitiesList(communities) {
                 item.addEventListener('mouseenter', function() {
                     this.style.background = '#f3f4f6';
                     const deleteBtn = this.querySelector('.btn-delete-community');
-                    const editBtn = this.querySelector('.btn-edit-community');
                     if (deleteBtn) deleteBtn.style.opacity = '1';
-                    if (editBtn) editBtn.style.opacity = '1';
                 });
                 item.addEventListener('mouseleave', function() {
                     this.style.background = 'transparent';
                     const deleteBtn = this.querySelector('.btn-delete-community');
-                    const editBtn = this.querySelector('.btn-edit-community');
                     if (deleteBtn) deleteBtn.style.opacity = '0';
-                    if (editBtn) editBtn.style.opacity = '0';
-                });
-            });
-            
-            // Add hover effects for edit buttons
-            communitiesListEl.querySelectorAll('.btn-edit-community').forEach(btn => {
-                btn.addEventListener('mouseenter', function() {
-                    this.style.background = '#5b6fd5';
-                });
-                btn.addEventListener('mouseleave', function() {
-                    this.style.background = '#667eea';
                 });
             });
             
@@ -1025,7 +1004,6 @@ async function selectCommunity(community, isCreator = false) {
                         </p>
                     </div>
                 </div>
-                ${isCreator || window.isSuperAdmin || window.userRoles.includes('CEO') ? `<a href="/admin/communities/${communityId}/edit" class="btn btn-sm btn-primary" title="Edit Community" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;"><i class="bx bx-edit"></i> Edit Community</a>` : ''}
             </div>
             <div class="announcement-messages" id="announcementMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: #f9fafb;">
                 <div id="announcementsContainer">
@@ -1658,7 +1636,6 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
             </div>
             <div class="chat-header-actions">
                 ${conversationType === 'group' && conversationId && !isCommunity ? `<button class="btn btn-sm btn-outline-primary me-2" onclick="openGroupManagement(${conversationId})" title="Manage Group"><i class="bx bx-cog"></i> Manage</button>` : ''}
-                ${isCommunity && communityId && (window.isSuperAdmin || window.userRoles.includes('CEO')) ? `<a href="/admin/communities/${communityId}/edit" class="btn btn-sm btn-primary me-2" title="Edit Community" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;"><i class="bx bx-edit"></i> Edit Community</a>` : ''}
             </div>
         </div>
 
@@ -3746,14 +3723,16 @@ async function loadCommunityMembers(communityId) {
                              ${member.avatar ? `<img src="${member.avatar}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover;">` : member.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <div class="fw-bold">${member.name}</div>
+                            <div class="fw-bold">
+                                ${member.name}
+                                ${member.id == communityCreatorId ? '<span class="badge bg-secondary ms-1" style="font-size: 10px;">Creator</span>' : ''}
+                            </div>
                             <small class="text-muted">${member.email}</small>
                         </div>
                     </div>
-                    ${member.id != communityCreatorId ? `
                     <button class="btn btn-sm btn-outline-danger" onclick="removeCommunityMember(${communityId}, ${member.id})">
                         <i class="bx bx-trash"></i> Remove
-                    </button>` : '<span class="badge bg-secondary">Creator</span>'}
+                    </button>
                 </div>
             `).join('');
         } else {

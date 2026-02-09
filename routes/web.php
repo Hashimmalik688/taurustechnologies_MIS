@@ -158,17 +158,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role:CEO|Super Admi
     Route::get('/account-switching-log', [AuditLogController::class, 'accountSwitchingLog'])->name('admin.account-switching-log');
 });
 
-// Communities Management (CEO, Managers, Super Admins, and Co-ordinators)
-Route::group(['prefix' => 'admin/communities', 'as' => 'admin.communities.', 'middleware' => ['auth', 'role:CEO|Manager|Super Admin|Co-ordinator']], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\CommunityController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Http\Controllers\Admin\CommunityController::class, 'create'])->name('create');
-    Route::post('/store', [\App\Http\Controllers\Admin\CommunityController::class, 'store'])->name('store');
-    Route::get('/{community}/edit', [\App\Http\Controllers\Admin\CommunityController::class, 'edit'])->name('edit');
-    Route::put('/{community}', [\App\Http\Controllers\Admin\CommunityController::class, 'update'])->name('update');
-    Route::delete('/{community}', [\App\Http\Controllers\Admin\CommunityController::class, 'destroy'])->name('destroy');
-});
-
-// Communities API routes
+// Communities API routes (used by chat system)
 Route::middleware('auth')->group(function () {
     Route::post('/api/communities', [\App\Http\Controllers\Admin\CommunityController::class, 'store']); // Create community via API
     Route::delete('/api/communities/{community}', [\App\Http\Controllers\Admin\CommunityController::class, 'destroy']); // Delete community
