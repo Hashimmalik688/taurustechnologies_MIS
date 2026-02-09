@@ -28,12 +28,79 @@
     <!-- Device Fingerprinting for Attendance Tracking -->
     <script src="{{ URL::asset('js/device-fingerprint.js') }}"></script>
     
-    <!-- Global Chat Notifications - Works on all pages -->
+    <!-- Global Chat Notifications will load after Echo in vendor-scripts -->
     <script>
         // Set current user ID globally for chat notifications
         window.currentUserId = {{ auth()->id() }};
     </script>
-    <script src="{{ URL::asset('js/chat-notifications.js') }}"></script>
+    
+    <!-- Community Announcement Pop-up Styles -->
+    <style>
+        .ann-popup {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10050;
+            width: 380px;
+            max-width: calc(100vw - 40px);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transform: translateX(420px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .ann-popup.visible {
+            transform: translateX(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .ann-popup-progress {
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s linear;
+            width: 100%;
+        }
+        .ann-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            z-index: 10049;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s ease;
+        }
+        .ann-btn.visible { display: flex; }
+        .ann-btn:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(102,126,234,0.6); }
+        .ann-btn-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+    </style>
     
     @yield('css')
 </head>
@@ -758,91 +825,186 @@
     });
     </script>
 
-    <!-- Global Community Announcement Toast Notification -->
-    <div id="announcementToast" style="position: fixed; top: 20px; left: 20px; z-index: 10000; min-width: 350px; max-width: 450px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 20px; color: white; transform: translateX(-500px); transition: transform 0.4s ease, opacity 0.4s ease; opacity: 0; display: none;">
-        <div style="display: flex; gap: 16px; align-items: start;">
-            <div style="flex-shrink: 0; width: 48px; height: 48px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
-                <i class="bx bx-bell-plus" style="font-size: 24px; color: #fff;"></i>
+    <script>
+    // ===== COMMUNITY ANNOUNCEMENT NOTIFICATIONS (Polling) =====
+    (function() {
+        let lastPollTime = null;
+        let dismissTimer = null;
+        let seenIds = JSON.parse(localStorage.getItem('seenAnnIds') || '[]');
+        let lastAnnouncement = null;
+
+        // Restore last announcement from localStorage on every page load
+        try {
+            const stored = localStorage.getItem('lastAnnouncement');
+            if (stored) {
+                lastAnnouncement = JSON.parse(stored);
+                // Only keep it if it's less than 1 hour old
+                if (lastAnnouncement && lastAnnouncement._storedAt) {
+                    const age = Date.now() - lastAnnouncement._storedAt;
+                    if (age > 3600000) { // 1 hour
+                        lastAnnouncement = null;
+                        localStorage.removeItem('lastAnnouncement');
+                    }
+                }
+            }
+        } catch(e) { lastAnnouncement = null; }
+
+        const PRIORITY = {
+            urgent:  { color: '#ef4444', icon: 'bx-error-circle', label: 'URGENT' },
+            warning: { color: '#f59e0b', icon: 'bx-error',        label: 'Warning' },
+            info:    { color: '#3b82f6', icon: 'bx-info-circle',  label: 'Info' },
+            normal:  { color: '#6b7280', icon: 'bx-info-circle',  label: 'Normal' },
+        };
+
+        function renderPopup(ann) {
+            const popup = document.getElementById('annPopup');
+            if (!popup) return;
+
+            const p = PRIORITY[ann.priority] || PRIORITY.normal;
+
+            document.getElementById('annCommunity').textContent = ann.community_name;
+            document.getElementById('annIcon').style.background = ann.community_color || '#667eea';
+
+            const badge = document.getElementById('annPriority');
+            badge.style.background = p.color;
+            badge.innerHTML = '<i class="bx ' + p.icon + '"></i> ' + p.label;
+
+            const titleEl = document.getElementById('annTitle');
+            if (ann.title) { titleEl.textContent = ann.title; titleEl.style.display = 'block'; }
+            else { titleEl.style.display = 'none'; }
+
+            document.getElementById('annMsg').textContent = ann.message;
+        }
+
+        function showPopup(ann, withCountdown) {
+            renderPopup(ann);
+            const popup = document.getElementById('annPopup');
+
+            // Save to localStorage so it persists across pages
+            lastAnnouncement = ann;
+            try {
+                localStorage.setItem('lastAnnouncement', JSON.stringify(Object.assign({}, ann, { _storedAt: Date.now() })));
+            } catch(e) {}
+
+            // Show the floating button
+            document.getElementById('annBtn').classList.add('visible');
+
+            if (withCountdown) {
+                document.getElementById('annProgress').style.width = '100%';
+                popup.classList.add('visible');
+
+                // Progress bar countdown - 20 seconds
+                let remaining = 100;
+                const bar = document.getElementById('annProgress');
+                clearInterval(dismissTimer);
+                dismissTimer = setInterval(() => {
+                    remaining -= 2.5;
+                    bar.style.width = Math.max(0, remaining) + '%';
+                    if (remaining <= 0) {
+                        clearInterval(dismissTimer);
+                        closePopup();
+                    }
+                }, 500);
+            }
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('annPopup');
+            if (popup) popup.classList.remove('visible');
+            clearInterval(dismissTimer);
+        }
+
+        function reopenPopup() {
+            // Re-read from localStorage in case it was updated on another tab/page
+            try {
+                const stored = localStorage.getItem('lastAnnouncement');
+                if (stored) lastAnnouncement = JSON.parse(stored);
+            } catch(e) {}
+
+            if (lastAnnouncement) {
+                showPopup(lastAnnouncement, true);
+            }
+        }
+
+        function pollAnnouncements() {
+            const url = lastPollTime
+                ? '/api/chat/announcements/poll?since=' + encodeURIComponent(lastPollTime)
+                : '/api/chat/announcements/poll';
+
+            fetch(url, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+                if (data.server_time) lastPollTime = data.server_time;
+
+                if (data.announcements && data.announcements.length > 0) {
+                    for (let i = data.announcements.length - 1; i >= 0; i--) {
+                        const ann = data.announcements[i];
+                        if (!seenIds.includes(ann.id)) {
+                            seenIds.push(ann.id);
+                            if (seenIds.length > 50) seenIds = seenIds.slice(-50);
+                            localStorage.setItem('seenAnnIds', JSON.stringify(seenIds));
+                            showPopup(ann, true); // new announcement → auto-show with countdown
+                        }
+                    }
+                }
+            })
+            .catch(() => {});
+        }
+
+        window.closeAnnPopup = closePopup;
+        window.reopenAnnPopup = reopenPopup;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // If there's a stored announcement, show the floating button immediately
+            if (lastAnnouncement) {
+                document.getElementById('annBtn').classList.add('visible');
+            }
+
+            // Start polling: first after 2s, then every 10s
+            setTimeout(pollAnnouncements, 2000);
+            setInterval(pollAnnouncements, 10000);
+        });
+    })();
+    </script>
+
+    <!-- Announcement Pop-up -->
+    <div id="annPopup" class="ann-popup">
+        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #e5e7eb;">
+            <div id="annIcon" style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0;">
+                <i class="bx bx-bullhorn" style="font-size:18px;"></i>
             </div>
-            <div style="flex: 1;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                    <h6 style="margin: 0; font-weight: 700; font-size: 16px; color: #fff;">New Announcement</h6>
-                    <button onclick="closeAnnouncementToast()" style="background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer; font-size: 20px; line-height: 1; padding: 0; margin-left: 8px;">&times;</button>
-                </div>
-                <p id="announcementCommunityName" style="margin: 0 0 8px 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); opacity: 0.9;"></p>
-                <p id="announcementMessage" style="margin: 0 0 12px 0; font-size: 14px; color: rgba(255,255,255,0.95); line-height: 1.5;"></p>
-                <button id="viewAnnouncementBtn" onclick="viewAnnouncement()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.3s ease; width: 100%;">
-                    <i class="bx bx-right-arrow-alt"></i> View Announcement
-                </button>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:12px; color:#9ca3af; font-weight:500;">New Announcement</div>
+                <div id="annCommunity" style="font-weight:700; font-size:15px; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+            </div>
+            <button onclick="closeAnnPopup()" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:22px; padding:0; line-height:1;">
+                <i class="bx bx-x"></i>
+            </button>
+        </div>
+        <div style="padding:14px 16px;">
+            <span id="annPriority" style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; color:white; margin-bottom:10px;"></span>
+            <h6 id="annTitle" style="font-weight:700; font-size:15px; color:#111; margin:8px 0 6px;"></h6>
+            <p id="annMsg" style="font-size:13px; color:#4b5563; line-height:1.6; margin:0; max-height:120px; overflow-y:auto;"></p>
+        </div>
+        <div style="padding:10px 16px; background:#f9fafb; border-top:1px solid #e5e7eb;">
+            <div id="annProgress" class="ann-popup-progress"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                <span style="font-size:12px; color:#9ca3af;">Just now</span>
+                <a href="/chat" style="color:#667eea; font-weight:600; font-size:13px; text-decoration:none;">View in Chat →</a>
             </div>
         </div>
     </div>
 
-    <script>
-    let announcementData = null;
-    let announcementTimeout = null;
-
-    function showAnnouncementToast(data) {
-        const toast = document.getElementById('announcementToast');
-        const communityName = document.getElementById('announcementCommunityName');
-        const message = document.getElementById('announcementMessage');
-        
-        // Store data for view button
-        announcementData = data;
-        
-        // Set content
-        communityName.textContent = data.community_name;
-        
-        // Truncate message if too long
-        let messageText = data.message || 'New announcement posted';
-        if (messageText.length > 120) {
-            messageText = messageText.substring(0, 120) + '...';
-        }
-        message.textContent = messageText;
-        
-        // Show toast with animation
-        toast.style.display = 'block';
-        setTimeout(() => {
-            toast.style.transform = 'translateX(0)';
-            toast.style.opacity = '1';
-        }, 10);
-        
-        // Auto-dismiss after 15 seconds
-        if (announcementTimeout) clearTimeout(announcementTimeout);
-        announcementTimeout = setTimeout(() => {
-            closeAnnouncementToast();
-        }, 15000);
-    }
-
-    function closeAnnouncementToast() {
-        const toast = document.getElementById('announcementToast');
-        toast.style.transform = 'translateX(-500px)';
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            toast.style.display = 'none';
-        }, 400);
-        
-        if (announcementTimeout) {
-            clearTimeout(announcementTimeout);
-            announcementTimeout = null;
-        }
-    }
-
-    function viewAnnouncement() {
-        if (announcementData) {
-            // Navigate to chat page with community selected
-            window.location.href = '/chat?conversation_id=' + announcementData.conversation_id;
-        }
-        closeAnnouncementToast();
-    }
-
-    // Initialize Echo listener for community announcements if Echo is available
-    if (typeof Echo !== 'undefined' && window.currentUserId) {
-        // We'll subscribe to community channels dynamically when user is a member
-        // This will be handled in the chat initialization
-        console.log('Community announcement listener ready');
-    }
-    </script>
+    <!-- Floating Re-open Button (above sticky notes button) -->
+    <button id="annBtn" class="ann-btn" onclick="reopenAnnPopup()" title="Recent Announcement">
+        <i class="bx bx-bell"></i>
+    </button>
 
     <!-- Include Sticky Notes Component -->
     @include('components.sticky-notes')

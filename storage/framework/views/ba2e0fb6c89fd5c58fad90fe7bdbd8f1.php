@@ -8,6 +8,9 @@
 <!-- App js -->
 <script src="<?php echo e(URL::asset('build/js/app.js')); ?>"></script>
 
+<!-- Global Chat Notifications (badge counter only, no Echo needed) -->
+<script src="<?php echo e(URL::asset('js/chat-notifications.js')); ?>"></script>
+
 <!-- Global Password Change Handler -->
 <script>
 $(document).ready(function() {

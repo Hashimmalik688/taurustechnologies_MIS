@@ -161,19 +161,13 @@ class CommunityAnnouncementController extends Controller
             'created_by' => $community->created_by,
         ]);
         
-        // If posting is not restricted, everyone can post
-        if (!$community->posting_restricted) {
-            \Log::info('Posting not restricted - allowing');
-            return true;
-        }
-
         // Creator can always post
         if ((int)$community->created_by === (int)$user->id) {
             \Log::info('User is creator - allowing');
             return true;
         }
 
-        // Check if user has explicit permission via community_members
+        // Check member record for explicit permission/restriction
         $memberRecord = \DB::table('community_members')
             ->where('community_id', $community->id)
             ->where('user_id', $user->id)
@@ -184,14 +178,28 @@ class CommunityAnnouncementController extends Controller
             'can_post' => $memberRecord ? $memberRecord->can_post : 'no record',
         ]);
         
-        // Member must exist and have can_post = true (or null for backwards compatibility)
-        if ($memberRecord && ($memberRecord->can_post === null || (bool)$memberRecord->can_post)) {
-            \Log::info('Member has permission - allowing');
+        // If member record exists, respect the can_post setting
+        if ($memberRecord) {
+            // Explicit false = restricted
+            if ($memberRecord->can_post === 0 || $memberRecord->can_post === false) {
+                \Log::info('Member explicitly restricted - denying');
+                return false;
+            }
+            // Explicit true or null (legacy) = allowed
+            if ($memberRecord->can_post === 1 || $memberRecord->can_post === true || $memberRecord->can_post === null) {
+                \Log::info('Member has permission - allowing');
+                return true;
+            }
+        }
+        
+        // No member record: check if community posting is restricted
+        if (!$community->posting_restricted) {
+            \Log::info('No member record, posting not restricted - allowing');
             return true;
         }
 
-        // If posting is restricted and user is not a member with permission
-        \Log::info('Permission denied');
+        // Community restricted and user not in members - deny
+        \Log::info('Permission denied - not a member of restricted community');
         return false;
     }
 
@@ -234,12 +242,17 @@ class CommunityAnnouncementController extends Controller
             // Load creator relationship
             $announcement->load('creator:id,name,avatar');
 
-            // Broadcast to community channel
-            broadcast(new \App\Events\CommunityAnnouncementPosted(
-                $announcement->toArray(),
-                $community->id,
-                $community->name
-            ))->toOthers();
+            // Broadcast to community channel - non-blocking
+            try {
+                broadcast(new \App\Events\CommunityAnnouncementPosted(
+                    $announcement->toArray(),
+                    $community->id,
+                    $community->name
+                ))->toOthers();
+            } catch (\Exception $broadcastError) {
+                // Log broadcast error but don't fail the request
+                \Log::warning('Announcement broadcast failed: ' . $broadcastError->getMessage());
+            }
 
             return response()->json([
                 'success' => true,
@@ -298,9 +311,9 @@ class CommunityAnnouncementController extends Controller
 
             // Validation
             $validated = $request->validate([
-                'title' => 'required|string|max:200',
+                'title' => 'nullable|string|max:200',
                 'message' => 'required|string|max:5000',
-                'priority' => 'required|in:info,warning,urgent',
+                'priority' => 'nullable|in:info,normal,warning,urgent',
                 'show_in_banner' => 'boolean',
                 'expires_at' => 'nullable|date_format:Y-m-d H:i|after:now',
                 'is_active' => 'boolean',
@@ -361,6 +374,67 @@ class CommunityAnnouncementController extends Controller
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Poll for new announcements since a given timestamp
+     * GET /api/chat/announcements/poll?since=2026-02-09T10:00:00
+     */
+    public function poll(Request $request): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+            $since = $request->query('since');
+
+            // Get user's community IDs
+            $communityIds = \DB::table('community_members')
+                ->where('user_id', $user->id)
+                ->pluck('community_id')
+                ->toArray();
+
+            // Also include communities the user created
+            $createdIds = Community::where('created_by', $user->id)->pluck('id')->toArray();
+            $communityIds = array_unique(array_merge($communityIds, $createdIds));
+
+            if (empty($communityIds)) {
+                return response()->json(['success' => true, 'announcements' => []]);
+            }
+
+            $query = CommunityAnnouncement::whereIn('community_id', $communityIds)
+                ->with('community:id,name,color')
+                ->orderBy('created_at', 'desc')
+                ->limit(5);
+
+            if ($since) {
+                $query->where('created_at', '>', $since);
+            } else {
+                // First load: only get announcements from last 2 minutes
+                $query->where('created_at', '>=', now()->subMinutes(2));
+            }
+
+            // Don't show user's own announcements as popups
+            $query->where('created_by', '!=', $user->id);
+
+            $announcements = $query->get()->map(fn($a) => [
+                'id' => $a->id,
+                'title' => $a->title,
+                'message' => $a->message,
+                'priority' => $a->priority ?? 'normal',
+                'community_id' => $a->community_id,
+                'community_name' => $a->community?->name ?? 'Community',
+                'community_color' => $a->community?->color ?? '#667eea',
+                'created_at' => $a->created_at->toIso8601String(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'announcements' => $announcements,
+                'server_time' => now()->toIso8601String(),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Announcement poll error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'announcements' => []], 500);
         }
     }
 }

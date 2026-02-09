@@ -161,6 +161,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role:CEO|Super Admi
 // Communities API routes (used by chat system)
 Route::middleware('auth')->group(function () {
     Route::post('/api/communities', [\App\Http\Controllers\Admin\CommunityController::class, 'store']); // Create community via API
+    Route::put('/api/communities/{community}', [\App\Http\Controllers\Admin\CommunityController::class, 'update']); // Update community
     Route::delete('/api/communities/{community}', [\App\Http\Controllers\Admin\CommunityController::class, 'destroy']); // Delete community
     Route::get('/api/communities/{community}/members', [\App\Http\Controllers\Admin\CommunityController::class, 'getMembers']); // Get members
     Route::post('/api/communities/{community}/members', [\App\Http\Controllers\Admin\CommunityController::class, 'addMember']); // Add member
@@ -608,6 +609,7 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     
     // Community announcements
     Route::get('/user/community-announcements', [CommunityAnnouncementController::class, 'getUserCommunityAnnouncements']);
+    Route::get('/announcements/poll', [CommunityAnnouncementController::class, 'poll']);
     Route::get('/communities/{community}/announcements', [CommunityAnnouncementController::class, 'index']);
     Route::post('/communities/{community}/announcements', [CommunityAnnouncementController::class, 'store']);
     Route::put('/communities/{community}/announcements/{announcement}', [CommunityAnnouncementController::class, 'update']);
