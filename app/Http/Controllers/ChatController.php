@@ -930,6 +930,65 @@ class ChatController extends Controller
     }
 
     /**
+     * Get new messages since a given timestamp for desktop notifications.
+     * Returns up to 5 most recent unread messages with sender/conversation info.
+     */
+    public function getNewMessages(Request $request)
+    {
+        try {
+            $userId = Auth::id();
+            $since = $request->query('since');
+
+            // Default to 5 seconds ago if no since param
+            $sinceTime = $since
+                ? \Carbon\Carbon::parse($since)
+                : now()->subSeconds(5);
+
+            // Get conversations the user is a participant of
+            $conversationIds = \App\Models\ChatParticipant::where('user_id', $userId)
+                ->pluck('conversation_id');
+
+            // Get new messages not sent by the current user, since the given time
+            $messages = ChatMessage::whereIn('conversation_id', $conversationIds)
+                ->where('user_id', '!=', $userId)
+                ->where('created_at', '>', $sinceTime)
+                ->with(['user:id,name,avatar', 'conversation:id,name,type'])
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($msg) {
+                    // For direct conversations (no name), use the sender's name
+                    $convName = $msg->conversation->name;
+                    if (empty($convName) && $msg->conversation->type === 'direct') {
+                        $convName = $msg->user->name ?? 'Direct Message';
+                    }
+                    return [
+                        'id' => $msg->id,
+                        'message' => $msg->message ?? '[Attachment]',
+                        'sender_id' => $msg->user_id,
+                        'sender_name' => $msg->user->name ?? 'Unknown',
+                        'conversation_id' => $msg->conversation_id,
+                        'conversation_name' => $convName ?: 'Chat',
+                        'created_at' => $msg->created_at->toIso8601String(),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'messages' => $messages,
+                'server_time' => now()->toIso8601String(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Get new messages error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'messages' => [],
+                'server_time' => now()->toIso8601String(),
+            ]);
+        }
+    }
+
+    /**
      * Get users in a conversation (for mentions autocomplete)
      */
     public function getConversationUsers($conversationId)

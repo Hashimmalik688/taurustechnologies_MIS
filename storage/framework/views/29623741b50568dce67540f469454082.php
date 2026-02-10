@@ -82,8 +82,17 @@
             font-size: 22px;
             transition: all 0.3s ease;
         }
-        .ann-btn.visible { display: flex; }
-        .ann-btn:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(102,126,234,0.6); }
+        .ann-btn.visible { display: flex; animation: annBtnPulse 2s ease-in-out infinite; }
+        .ann-btn.visible.checked { animation: none; opacity: 0.6; }
+        .ann-btn.visible.checked:hover { opacity: 1; }
+        .ann-btn:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(102,126,234,0.6); animation: none; }
+        @keyframes annBtnPulse {
+            0% { box-shadow: 0 4px 15px rgba(102,126,234,0.4); transform: scale(1); }
+            25% { box-shadow: 0 0 20px 8px rgba(102,126,234,0.6); transform: scale(1.15); }
+            50% { box-shadow: 0 4px 15px rgba(102,126,234,0.4); transform: scale(1); }
+            75% { box-shadow: 0 0 20px 8px rgba(118,75,162,0.5); transform: scale(1.1); }
+            100% { box-shadow: 0 4px 15px rgba(102,126,234,0.4); transform: scale(1); }
+        }
         .ann-btn-badge {
             position: absolute;
             top: -4px;
@@ -833,19 +842,23 @@
         let lastPollTime = null;
         let dismissTimer = null;
         let seenIds = JSON.parse(localStorage.getItem('seenAnnIds') || '[]');
+        // seenVersions tracks id:updated_at so edits are detected
+        let seenVersions = JSON.parse(localStorage.getItem('seenAnnVersions') || '{}');
         let lastAnnouncement = null;
+        let isChecked = localStorage.getItem('annChecked') === '1';
 
         // Restore last announcement from localStorage on every page load
         try {
             const stored = localStorage.getItem('lastAnnouncement');
             if (stored) {
                 lastAnnouncement = JSON.parse(stored);
-                // Only keep it if it's less than 1 hour old
                 if (lastAnnouncement && lastAnnouncement._storedAt) {
                     const age = Date.now() - lastAnnouncement._storedAt;
                     if (age > 3600000) { // 1 hour
                         lastAnnouncement = null;
                         localStorage.removeItem('lastAnnouncement');
+                        localStorage.removeItem('annChecked');
+                        isChecked = false;
                     }
                 }
             }
@@ -876,6 +889,12 @@
             else { titleEl.style.display = 'none'; }
 
             document.getElementById('annMsg').textContent = ann.message;
+
+            // Update link to go to community section in chat
+            const link = document.getElementById('annLink');
+            if (link && ann.community_id) {
+                link.href = '/chat?community=' + ann.community_id;
+            }
         }
 
         function showPopup(ann, withCountdown) {
@@ -888,14 +907,17 @@
                 localStorage.setItem('lastAnnouncement', JSON.stringify(Object.assign({}, ann, { _storedAt: Date.now() })));
             } catch(e) {}
 
-            // Show the floating button
-            document.getElementById('annBtn').classList.add('visible');
+            // Mark as unchecked (new/updated content) — button will pulse
+            isChecked = false;
+            localStorage.setItem('annChecked', '0');
+            const btn = document.getElementById('annBtn');
+            btn.classList.add('visible');
+            btn.classList.remove('checked');
 
             if (withCountdown) {
                 document.getElementById('annProgress').style.width = '100%';
                 popup.classList.add('visible');
 
-                // Progress bar countdown - 20 seconds
                 let remaining = 100;
                 const bar = document.getElementById('annProgress');
                 clearInterval(dismissTimer);
@@ -924,8 +946,34 @@
             } catch(e) {}
 
             if (lastAnnouncement) {
+                // User clicked the button → mark as checked, stop pulsing
+                isChecked = true;
+                localStorage.setItem('annChecked', '1');
+                const btn = document.getElementById('annBtn');
+                btn.classList.add('checked');
+
                 showPopup(lastAnnouncement, true);
+                // Keep checked state even though showPopup sets unchecked — override
+                setTimeout(function() {
+                    btn.classList.add('checked');
+                    localStorage.setItem('annChecked', '1');
+                }, 10);
             }
+        }
+
+        function isNewOrEdited(ann) {
+            // Check if this announcement is brand new or has been edited since we last saw it
+            const versionKey = String(ann.id);
+            const lastSeen = seenVersions[versionKey];
+            const currentVersion = ann.updated_at || ann.created_at;
+
+            if (!lastSeen || lastSeen !== currentVersion) {
+                // New or edited — update the version tracker
+                seenVersions[versionKey] = currentVersion;
+                localStorage.setItem('seenAnnVersions', JSON.stringify(seenVersions));
+                return true;
+            }
+            return false;
         }
 
         function pollAnnouncements() {
@@ -947,11 +995,8 @@
                 if (data.announcements && data.announcements.length > 0) {
                     for (let i = data.announcements.length - 1; i >= 0; i--) {
                         const ann = data.announcements[i];
-                        if (!seenIds.includes(ann.id)) {
-                            seenIds.push(ann.id);
-                            if (seenIds.length > 50) seenIds = seenIds.slice(-50);
-                            localStorage.setItem('seenAnnIds', JSON.stringify(seenIds));
-                            showPopup(ann, true); // new announcement → auto-show with countdown
+                        if (isNewOrEdited(ann)) {
+                            showPopup(ann, true);
                         }
                     }
                 }
@@ -965,7 +1010,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // If there's a stored announcement, show the floating button immediately
             if (lastAnnouncement) {
-                document.getElementById('annBtn').classList.add('visible');
+                const btn = document.getElementById('annBtn');
+                btn.classList.add('visible');
+                if (isChecked) btn.classList.add('checked');
             }
 
             // Start polling: first after 2s, then every 10s
@@ -998,7 +1045,7 @@
             <div id="annProgress" class="ann-popup-progress"></div>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
                 <span style="font-size:12px; color:#9ca3af;">Just now</span>
-                <a href="/chat" style="color:#667eea; font-weight:600; font-size:13px; text-decoration:none;">View in Chat →</a>
+                <a id="annLink" href="/chat" style="color:#667eea; font-weight:600; font-size:13px; text-decoration:none;">View in Community →</a>
             </div>
         </div>
     </div>

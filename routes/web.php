@@ -595,6 +595,7 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     Route::get('/conversations', [ChatController::class, 'getConversations']);
     Route::get('/group-conversations', [ChatController::class, 'getGroupConversations']); // Get group conversations for Communities tab
     Route::get('/unread-count', [ChatController::class, 'getUnreadCount']);
+    Route::get('/new-messages', [ChatController::class, 'getNewMessages']);
     Route::post('/conversations/direct', [ChatController::class, 'getOrCreateConversation']);
     Route::post('/conversations/group', [ChatController::class, 'createGroupConversation']);
     Route::post('/groups', [ChatController::class, 'createGroup']); // Alternative endpoint

@@ -3,6 +3,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('css'); ?>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/chat.css']); ?>
     <style>
         .chat-container * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         .message-text, .chat-search-input, #messageInput, input, textarea, .form-control { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
@@ -126,8 +127,107 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
+
+        /* ===== DARK MODE CHAT OVERRIDES ===== */
+        [data-theme="dark"] .chat-messages {
+            background: #0f0f0f !important;
+        }
+        [data-theme="dark"] .message-item.message-receiver .message-text {
+            background: #2d2d2d !important;
+            color: #e5e5e5 !important;
+            box-shadow: none !important;
+        }
+        [data-theme="dark"] .message-item.message-sender .message-text {
+            color: #fff !important;
+            box-shadow: none !important;
+        }
+        [data-theme="dark"] .message-username {
+            color: #b0b0b0 !important;
+        }
+        [data-theme="dark"] .message-text {
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] .chat-header,
+        [data-theme="dark"] .chat-main-header {
+            background: #1f1f1f !important;
+            border-bottom: 1px solid #333 !important;
+        }
+        [data-theme="dark"] .chat-input-area,
+        [data-theme="dark"] .chat-footer,
+        [data-theme="dark"] .message-input-container {
+            background: #1f1f1f !important;
+            border-top: 1px solid #333 !important;
+        }
+        [data-theme="dark"] #messageInput {
+            background: #2d2d2d !important;
+            border: 1px solid #333 !important;
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] #messageInput::placeholder {
+            color: #737373 !important;
+        }
+        [data-theme="dark"] .chat-sidebar {
+            background: #1f1f1f !important;
+            border-right: 1px solid #333 !important;
+        }
+        [data-theme="dark"] .conversation-item,
+        [data-theme="dark"] .conversation-list-item {
+            background: #1f1f1f !important;
+            border-bottom: 1px solid #333 !important;
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] .conversation-item:hover,
+        [data-theme="dark"] .conversation-list-item:hover {
+            background: #2d2d2d !important;
+        }
+        [data-theme="dark"] .conversation-item.active,
+        [data-theme="dark"] .conversation-list-item.active {
+            background: #2d2d2d !important;
+        }
+        [data-theme="dark"] .no-messages {
+            color: #b0b0b0 !important;
+        }
+        [data-theme="dark"] .chat-search-input,
+        [data-theme="dark"] #searchConversations,
+        [data-theme="dark"] #searchCommunities,
+        [data-theme="dark"] #searchPeople {
+            background: #2d2d2d !important;
+            border: 1px solid #333 !important;
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] .announcement-item {
+            background: #1f1f1f !important;
+            color: #e5e5e5 !important;
+            box-shadow: none !important;
+        }
+        [data-theme="dark"] .announcement-messages,
+        [data-theme="dark"] #announcementMessages {
+            background: #0f0f0f !important;
+        }
+        [data-theme="dark"] .announcement-input-area {
+            background: #1f1f1f !important;
+            border-top-color: #333 !important;
+        }
+        [data-theme="dark"] .announcement-input-area textarea,
+        [data-theme="dark"] #announcementInput {
+            background: #2d2d2d !important;
+            border-color: #333 !important;
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] .mention-highlight {
+            background: rgba(212, 175, 55, 0.2) !important;
+            color: #d4af37 !important;
+        }
+        [data-theme="dark"] .file-attachment {
+            background: #2d2d2d !important;
+            border-color: #333 !important;
+            color: #e5e5e5 !important;
+        }
+        [data-theme="dark"] .message-attachment a {
+            background: #2d2d2d !important;
+            color: #b0b0b0 !important;
+        }
     </style>
-    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/chat.css']); ?>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
 
@@ -3565,123 +3665,26 @@ loadMessages = async function(conversationId, conversationName) {
     }, 100);
 };
 
-// Chat toast notifications
+// Chat page: global chat-notifications.js handles desktop notifications via polling.
+// No need to duplicate notification logic here. Just keep ChatToast as a no-op
+// to prevent errors if anything calls it.
 window.ChatToast = {
-    show: function(message, conversationId, conversationName, senderId, senderName) {
-        if (senderId === window.currentUserId) return;
-        
-        // Show desktop notification if enabled and permitted
-        this.showDesktopNotification(senderName, message, conversationName);
-        
-        let container = document.getElementById('chatToastContainer');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'chatToastContainer';
-            container.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:10000;max-width:350px;';
-            document.body.appendChild(container);
-        }
-        
-        const toastId = 'toast-' + Date.now();
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.className = 'chat-toast-notification';
-        toast.style.cssText = 'background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);padding:15px;margin-top:10px;animation:slideIn 0.3s ease;cursor:pointer;border-left:4px solid #556ee6;';
-        
-        const initial = senderName.charAt(0).toUpperCase();
-        const truncatedMsg = message.length > 60 ? message.substring(0, 60) + '...' : message;
-        
-        toast.innerHTML = `
-            <div style="display:flex;align-items:start;gap:10px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:16px;flex-shrink:0;">
-                    ${initial}
-                </div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;font-size:14px;color:#2c3e50;margin-bottom:2px;">${senderName}</div>
-                    <div style="font-size:13px;color:#7f8c8d;margin-bottom:2px;font-style:italic;">${conversationName}</div>
-                    <div style="font-size:13px;color:#34495e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${truncatedMsg}</div>
-                    <div style="margin-top:8px;display:flex;gap:8px;">
-                        <button onclick="ChatToast.reply('${toastId}', ${conversationId}, '${conversationName.replace(/'/g, "\\'")}')" style="background:#556ee6;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;">Reply</button>
-                        <button onclick="ChatToast.dismiss('${toastId}')" style="background:#f1f3f4;color:#5a6169;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:500;">Dismiss</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        toast.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'BUTTON') {
-                loadMessages(conversationId, conversationName);
-                window.currentConversationId = conversationId;
-                ChatToast.dismiss(toastId);
-            }
-        });
-        
-        container.appendChild(toast);
-        setTimeout(() => ChatToast.dismiss(toastId), 10000);
-        
-        // Play notification sound
-        try {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNw==');
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
-        } catch(e) {}
-    },
-    
-    showDesktopNotification: function(senderName, message, conversationName) {
-        // Check if Notification API is supported and permission is granted
-        if ('Notification' in window && Notification.permission === 'granted') {
-            try {
-                const truncatedMsg = message.length > 100 ? message.substring(0, 100) + '...' : message;
-                const notification = new Notification(`New message from ${senderName}`, {
-                    body: `${conversationName}: ${truncatedMsg}`,
-                    icon: '/images/favicon.ico',
-                    badge: '/images/favicon.ico',
-                    tag: `chat-${Date.now()}`,
-                    requireInteraction: false
-                });
-                
-                // Click handler to focus window
-                notification.onclick = function() {
-                    window.focus();
-                    notification.close();
-                };
-                
-                // Auto-close after 8 seconds
-                setTimeout(() => notification.close(), 8000);
-            } catch (e) {
-                console.warn('Failed to show desktop notification:', e);
-            }
-        }
-    },
-    
+    show: function() {},
+    dismiss: function() {},
     reply: function(toastId, conversationId, conversationName) {
-        loadMessages(conversationId, conversationName);
-        window.currentConversationId = conversationId;
-        document.getElementById('messageInput')?.focus();
-        this.dismiss(toastId);
-    },
-    
-    dismiss: function(toastId) {
-        const toast = document.getElementById(toastId);
-        if (toast) {
-            toast.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
+        if (typeof loadMessages === 'function') {
+            loadMessages(conversationId, conversationName);
+            window.currentConversationId = conversationId;
         }
+        document.getElementById('messageInput')?.focus();
     }
 };
 
-// Add animation styles
-if (!document.getElementById('chatToastStyles')) {
+// Message input action button styles
+if (!document.getElementById('chatInputStyles')) {
     const style = document.createElement('style');
-    style.id = 'chatToastStyles';
+    style.id = 'chatInputStyles';
     style.textContent = `
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
         .message-input-actions button {
             background: transparent;
             border: none;
@@ -3699,40 +3702,6 @@ if (!document.getElementById('chatToastStyles')) {
     `;
     document.head.appendChild(style);
 }
-
-// Integrate toast with message refresh
-const originalRefreshMessages = refreshMessages;
-refreshMessages = async function() {
-    if (!window.currentConversationId) return;
-    
-    try {
-        const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}/messages`);
-        const messages = response.messages || [];
-        
-        // Check for new messages and show toast
-        const lastDisplayedId = parseInt(document.querySelector('.message-item:last-child')?.dataset.messageId || '0');
-        const newMessages = messages.filter(m => m.id > lastDisplayedId && m.user_id !== window.currentUserId);
-        
-        // Show notification for ALL new messages from others (always show, not just when window is out of focus)
-        if (newMessages.length > 0) {
-            const lastMsg = newMessages[newMessages.length - 1];
-            const convName = document.querySelector('.conversation-item.active .conversation-name')?.textContent || 'Chat';
-            ChatToast.show(
-                lastMsg.message || '[Attachment]',
-                window.currentConversationId,
-                convName,
-                lastMsg.user_id,
-                lastMsg.user?.name || 'User'
-            );
-        }
-        
-        // Continue with original refresh
-        await originalRefreshMessages();
-    } catch (e) {
-        console.warn('Toast notification check failed:', e);
-        await originalRefreshMessages();
-    }
-};
 
 // ==========================================
 // MENTION AUTOCOMPLETE
