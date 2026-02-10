@@ -1764,6 +1764,211 @@
     border-color: var(--gold) !important;
 }
 
+/* =================== CHAT PAGE – DARK MODE FIXES =================== */
+
+/* Chat messages area background */
+[data-theme="dark"] .chat-messages {
+    background: var(--bg-secondary) !important;
+}
+
+/* Received message bubbles (the white/light-gray ones) */
+[data-theme="dark"] .message-item.message-receiver .message-text {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Sent message bubbles – keep gradient but ensure text is white */
+[data-theme="dark"] .message-item.message-sender .message-text {
+    color: #fff !important;
+}
+
+/* Message username */
+[data-theme="dark"] .message-username {
+    color: var(--text-secondary) !important;
+}
+
+/* Message timestamps */
+[data-theme="dark"] .message-time {
+    color: var(--text-muted) !important;
+}
+
+/* No-messages empty state */
+[data-theme="dark"] .no-messages {
+    color: var(--text-secondary) !important;
+}
+
+/* Announcement items (JS-generated with inline background: white) */
+[data-theme="dark"] .announcement-item {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] .announcement-item strong {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .announcement-item div[style*="color: #374151"],
+[data-theme="dark"] .announcement-item div[style*="color: #111827"] {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .announcement-item div[style*="color: #9ca3af"] {
+    color: var(--text-muted) !important;
+}
+
+/* Announcement messages scrollable area */
+[data-theme="dark"] .announcement-messages,
+[data-theme="dark"] #announcementMessages {
+    background: var(--bg-secondary) !important;
+}
+
+/* Announcement input area */
+[data-theme="dark"] .announcement-input-area {
+    background: var(--bg-card) !important;
+    border-top-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .announcement-input-area textarea,
+[data-theme="dark"] #announcementInput {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .announcement-input-area button[style*="background: #f3f4f6"] {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* No-permission bar for announcements */
+[data-theme="dark"] div[style*="background: #f9fafb"][style*="text-align: center"] {
+    background: var(--bg-tertiary) !important;
+    border-top-color: var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
+/* Modal footers/headers with #f9fafb */
+[data-theme="dark"] .modal-footer[style*="background: #f9fafb"] {
+    background: var(--bg-tertiary) !important;
+    border-top-color: var(--border-color) !important;
+}
+
+/* Modal cancel/close buttons with white background */
+[data-theme="dark"] .modal-footer .btn[style*="background: #ffffff"],
+[data-theme="dark"] .modal-footer .btn[style*="background:#ffffff"] {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Members list in modals */
+[data-theme="dark"] #membersList {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Group info details */
+[data-theme="dark"] #groupCreator {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* File attachment links in messages */
+[data-theme="dark"] .message-attachment a[style*="background: #f3f4f6"],
+[data-theme="dark"] a[style*="background: #f3f4f6"] {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* File attachment (generic) */
+[data-theme="dark"] .file-attachment {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Audio message widget */
+[data-theme="dark"] .audio-message {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .audio-message audio {
+    filter: invert(1);
+}
+
+/* Chat toast notifications */
+[data-theme="dark"] .chat-toast-notification {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Community announcement popup (the old one on chat page) */
+[data-theme="dark"] .announcement-popup {
+    background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .announcement-popup-header {
+    border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .announcement-popup-body {
+    color: var(--text-primary) !important;
+}
+
+/* Community header area */
+[data-theme="dark"] .community-header {
+    background: var(--bg-card) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* No announcements empty state */
+[data-theme="dark"] #announcementsContainer h5 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] #announcementsContainer p {
+    color: var(--text-secondary) !important;
+}
+
+/* Conversation preview text truncated */
+[data-theme="dark"] .conversation-message-preview {
+    color: var(--text-muted) !important;
+}
+
+/* Global announcement popup (master layout) */
+[data-theme="dark"] .ann-popup {
+    background: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .ann-popup div[style*="border-bottom:1px solid #e5e7eb"] {
+    border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ann-popup div[style*="background:#f9fafb"] {
+    background: var(--bg-tertiary) !important;
+    border-top-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .ann-popup #annCommunity {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ann-popup #annTitle {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .ann-popup #annMsg {
+    color: var(--text-secondary) !important;
+}
+
+/* Mention highlight in messages */
+[data-theme="dark"] .mention-highlight {
+    background: rgba(212, 175, 55, 0.2) !important;
+    color: var(--gold) !important;
+}
+
 /* =================== EXECUTIVE DASHBOARD SPECIFIC =================== */
 [data-theme="dark"] .executive-dashboard,
 [data-theme="dark"] .dashboard-wrapper {

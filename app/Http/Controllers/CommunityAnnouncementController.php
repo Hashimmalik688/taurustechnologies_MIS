@@ -401,22 +401,31 @@ class CommunityAnnouncementController extends Controller
                 return response()->json(['success' => true, 'announcements' => []]);
             }
 
-            $query = CommunityAnnouncement::whereIn('community_id', $communityIds)
+            // Fetch NEW announcements (created after $since)
+            // AND EDITED announcements (updated after $since where updated != created)
+            $baseQuery = CommunityAnnouncement::whereIn('community_id', $communityIds)
                 ->with('community:id,name,color')
-                ->orderBy('created_at', 'desc')
+                ->where('created_by', '!=', $user->id)
                 ->limit(5);
 
             if ($since) {
-                $query->where('created_at', '>', $since);
+                // Get announcements that are either new OR recently edited
+                $baseQuery->where(function ($q) use ($since) {
+                    $q->where('created_at', '>', $since)
+                      ->orWhere(function ($q2) use ($since) {
+                          $q2->where('updated_at', '>', $since)
+                             ->whereColumn('updated_at', '!=', 'created_at');
+                      });
+                });
             } else {
                 // First load: only get announcements from last 2 minutes
-                $query->where('created_at', '>=', now()->subMinutes(2));
+                $baseQuery->where(function ($q) {
+                    $q->where('created_at', '>=', now()->subMinutes(2))
+                      ->orWhere('updated_at', '>=', now()->subMinutes(2));
+                });
             }
 
-            // Don't show user's own announcements as popups
-            $query->where('created_by', '!=', $user->id);
-
-            $announcements = $query->get()->map(fn($a) => [
+            $announcements = $baseQuery->orderBy('updated_at', 'desc')->get()->map(fn($a) => [
                 'id' => $a->id,
                 'title' => $a->title,
                 'message' => $a->message,
@@ -425,6 +434,7 @@ class CommunityAnnouncementController extends Controller
                 'community_name' => $a->community?->name ?? 'Community',
                 'community_color' => $a->community?->color ?? '#667eea',
                 'created_at' => $a->created_at->toIso8601String(),
+                'updated_at' => $a->updated_at->toIso8601String(),
             ]);
 
             return response()->json([
