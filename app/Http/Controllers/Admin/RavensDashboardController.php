@@ -159,7 +159,33 @@ class RavensDashboardController extends Controller
         // Get Peregrine closer names for tagging
         $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
 
-        // Get insurance carriers for dropdown
+        // Get carrier-partner combinations with their approved states
+        $carrierPartnerData = \App\Models\AgentCarrierState::with(['insuranceCarrier', 'partner'])
+            ->whereHas('insuranceCarrier', function($q) {
+                $q->where('is_active', true);
+            })
+            ->whereHas('partner', function($q) {
+                $q->where('is_active', true);
+            })
+            ->get()
+            ->groupBy(function($item) {
+                return $item->insurance_carrier_id . '_' . $item->partner_id;
+            })
+            ->map(function($group) {
+                $first = $group->first();
+                return [
+                    'carrier_id' => $first->insurance_carrier_id,
+                    'carrier_name' => $first->insuranceCarrier->name,
+                    'partner_id' => $first->partner_id,
+                    'partner_name' => $first->partner->name,
+                    'partner_code' => $first->partner->code,
+                    'display_name' => $first->insuranceCarrier->name . ' (' . $first->partner->code . ')',
+                    'states' => $group->pluck('state')->unique()->toArray()
+                ];
+            })
+            ->values();
+
+        // For backward compatibility, also get simple carrier list
         $insuranceCarriers = \App\Models\InsuranceCarrier::where('is_active', true)
             ->orderBy('name')
             ->pluck('name', 'name')
@@ -182,7 +208,7 @@ class RavensDashboardController extends Controller
             'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia'
         ];
 
-        return view('ravens.calling', compact('leads', 'peregrineClosers', 'insuranceCarriers', 'usStates'));
+        return view('ravens.calling', compact('leads', 'peregrineClosers', 'insuranceCarriers', 'carrierPartnerData', 'usStates'));
     }
 
     /**

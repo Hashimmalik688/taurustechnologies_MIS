@@ -331,29 +331,84 @@
 
                     <!-- Beneficiary Information -->
                     <h6 class="form-section-title mt-4">Beneficiary Information</h6>
-                    <div class="row-spacing">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="beneficiary" class="form-label required">Beneficiary Name</label>
-                                    <input type="text" class="form-control @error('beneficiary') is-invalid @enderror"
-                                        id="beneficiary" wire:model="beneficiary" placeholder="Full legal name">
-                                    @error('beneficiary')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                    <div class="alert alert-info mb-3" style="background-color: #e8f4fd; border-color: #d4af37; color: #1a1a1a;">
+                        <i class="bx bx-info-circle me-2"></i>
+                        You can add multiple beneficiaries. Click "Add Another Beneficiary" to add more.
+                    </div>
+                    
+                    @foreach($beneficiaries as $index => $beneficiary)
+                    <div class="card mb-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0" style="color: #d4af37; font-weight: 600;">
+                                    <i class="bx bx-user-circle"></i>
+                                    Beneficiary {{ $index + 1 }}
+                                </h6>
+                                @if(count($beneficiaries) > 1)
+                                <button type="button" wire:click="removeBeneficiary({{ $index }})" 
+                                        class="btn btn-sm btn-outline-danger">
+                                    <i class="bx bx-trash"></i> Remove
+                                </button>
+                                @endif
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="beneficiary_dob" class="form-label">Beneficiary Date of Birth</label>
-                                    <input type="date" class="form-control @error('beneficiary_dob') is-invalid @enderror"
-                                        id="beneficiary_dob" wire:model="beneficiary_dob">
-                                    @error('beneficiary_dob')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                            
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <div class="mb-3">
+                                        <label for="beneficiary_name_{{ $index }}" class="form-label required">Beneficiary Name</label>
+                                        <input type="text" 
+                                               class="form-control @error('beneficiaries.'.$index.'.name') is-invalid @enderror"
+                                               id="beneficiary_name_{{ $index }}" 
+                                               wire:model="beneficiaries.{{ $index }}.name" 
+                                               placeholder="Full legal name">
+                                        @error('beneficiaries.'.$index.'.name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="beneficiary_dob_{{ $index }}" class="form-label">Date of Birth</label>
+                                        <input type="date" 
+                                               class="form-control @error('beneficiaries.'.$index.'.dob') is-invalid @enderror"
+                                               id="beneficiary_dob_{{ $index }}" 
+                                               wire:model="beneficiaries.{{ $index }}.dob">
+                                        @error('beneficiaries.'.$index.'.dob')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label for="beneficiary_relation_{{ $index }}" class="form-label">Relation</label>
+                                        <select class="form-select @error('beneficiaries.'.$index.'.relation') is-invalid @enderror"
+                                                id="beneficiary_relation_{{ $index }}" 
+                                                wire:model="beneficiaries.{{ $index }}.relation">
+                                            <option value="">Select</option>
+                                            <option value="Spouse">Spouse</option>
+                                            <option value="Child">Child</option>
+                                            <option value="Parent">Parent</option>
+                                            <option value="Sibling">Sibling</option>
+                                            <option value="Other Family">Other Family</option>
+                                            <option value="Trust">Trust</option>
+                                            <option value="Estate">Estate</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        @error('beneficiaries.'.$index.'.relation')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    @endforeach
+                    
+                    <div class="row-spacing">
+                        <button type="button" wire:click="addBeneficiary" class="btn btn-outline-secondary">
+                            <i class="bx bx-plus-circle me-1"></i>
+                            Add Another Beneficiary
+                        </button>
                     </div>
                 </div>
             </div>

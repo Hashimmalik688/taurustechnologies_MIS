@@ -186,11 +186,11 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         $rawDate = $this->getValueFromRow($lowercaseRow, ['timestamp', 'time stamp', 'date']);
                         $leadDate = ImportSanitizer::parseExcelDate($rawDate) ?? now()->format('Y-m-d');
 
-                        // Handle smoker field - default to 0 if not present or empty
+                        // Handle smoker field - convert to 'yes'/'no' for ENUM
                         $smokerValue = $this->getValueFromRow($lowercaseRow, ['smoker']);
                         $smoker = null; // Allow NULL if no data
                         if ($smokerValue !== null && $smokerValue !== '') {
-                            $smoker = (strtolower(trim($smokerValue)) == 'yes' || trim($smokerValue) == '1') ? 1 : 0;
+                            $smoker = (strtolower(trim($smokerValue)) == 'yes' || trim($smokerValue) == '1') ? 'yes' : 'no';
                         }
 
                         $lead = Lead::create([
@@ -229,11 +229,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'card_number' => $this->getValueFromRow($lowercaseRow, ['card number', 'card info']),
                         'cvv' => $this->getValueFromRow($lowercaseRow, ['cvv']),
                         'expiry_date' => $this->getValueFromRow($lowercaseRow, ['expiry date', 'expiry']),
-                        'source' => $this->getValueFromRow($lowercaseRow, ['source:', 'source']),
-                        'source_type' => 'imported', // Mark all CSV imports as 'imported' type
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
-                        'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line #', 'preset line']),
-                        'comments' => $this->getValueFromRow($lowercaseRow, ['comments']),
                         'status' => 'closed', // Mark imported leads as closed so they appear in All Leads
                     ]);
 

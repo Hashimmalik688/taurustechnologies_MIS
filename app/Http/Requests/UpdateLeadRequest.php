@@ -45,7 +45,24 @@ class UpdateLeadRequest extends FormRequest
             'source' => ['nullable', 'string', 'max:255'],
             'closer_name' => ['nullable', 'string', 'max:255'],
             'assigned_partner' => ['nullable', 'string', 'max:255'],
+            'smoker' => ['nullable', 'string', 'in:yes,no'],
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        // Convert boolean/numeric smoker to 'yes'/'no' for ENUM
+        if ($this->has('smoker')) {
+            $smokerValue = $this->input('smoker');
+            if (is_bool($smokerValue) || is_numeric($smokerValue)) {
+                $this->merge([
+                    'smoker' => $smokerValue ? 'yes' : 'no'
+                ]);
+            }
+        }
     }
 
     /**

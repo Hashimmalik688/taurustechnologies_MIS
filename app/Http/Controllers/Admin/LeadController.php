@@ -159,22 +159,6 @@ class LeadController extends Controller
                   ->orWhereNotNull('sale_date');
             });
         
-        // Exclude leads where BOTH cn_name AND phone_number are N/A/empty
-        $query->where(function($q) {
-            $q->where(function($subQ) {
-                $subQ->whereNotNull('cn_name')
-                     ->where('cn_name', '!=', 'N/A')
-                     ->where('cn_name', '!=', '');
-            })->orWhere(function($subQ) {
-                $subQ->whereNotNull('phone_number')
-                     ->where('phone_number', '!=', 'N/A')
-                     ->where('phone_number', '!=', '');
-            });
-        });
-        
-        // Exclude leads submitted by verifiers
-        $query->whereNull('verified_by');
-        
         // Search functionality
         if ($request->filled('search')) {
             $search = $request->search;
@@ -290,6 +274,11 @@ class LeadController extends Controller
                 $sourceType = 'peregrine';
             }
 
+            // Convert smoker to 'yes'/'no' for ENUM
+            if (isset($validated['smoker'])) {
+                $validated['smoker'] = $validated['smoker'] ? 'yes' : 'no';
+            }
+
             $lead = Lead::create([
                 ...$validated,
                 'sale_at' => $validated['sale_date'],
@@ -331,6 +320,16 @@ class LeadController extends Controller
             $leadData['source_type'] = 'peregrine';
         }
 
+        // Set proper status and closer name for manually created leads
+        $leadData['status'] = 'closed';
+        $leadData['closer_name'] = $user->name;
+        $leadData['verified_by'] = null;
+
+        // Convert smoker to 'yes'/'no' for ENUM
+        if (isset($leadData['smoker'])) {
+            $leadData['smoker'] = $leadData['smoker'] ? 'yes' : 'no';
+        }
+
         // Create the lead
         $lead = Lead::create($leadData);
 
@@ -370,7 +369,8 @@ class LeadController extends Controller
             $lead->monthly_premium = $request->input('monthly_premium');
             $lead->carrier_name = $request->input('carrier_name');
             $lead->beneficiary = $request->input('beneficiary');
-            $lead->smoker = $request->input('smoker');
+            $smokerValue = $request->input('smoker');
+            $lead->smoker = $smokerValue ? 'yes' : 'no';
             $lead->status = 'pending';
             $lead->updated_at = now();
 
