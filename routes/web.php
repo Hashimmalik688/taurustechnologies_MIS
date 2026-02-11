@@ -208,6 +208,7 @@ Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-c
 // Leads Management (Add/Import only - no actions)
 Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager']], function () {
     Route::get('/', [LeadController::class, 'index'])->name('index');
+    Route::get('/peregrine', [LeadController::class, 'peregrineLeads'])->name('peregrine');
     Route::get('/create', [LeadController::class, 'create'])->name('create');
     Route::post('/store', [LeadController::class, 'store'])->name('store');
     Route::post('/import', [LeadController::class, 'import'])->name('import');

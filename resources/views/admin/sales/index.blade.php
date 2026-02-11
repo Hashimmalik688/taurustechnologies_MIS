@@ -97,6 +97,12 @@
     .table-responsive::-webkit-scrollbar-thumb:hover {
         background: #b8941f;
     }
+    
+    /* Peregrine badge style */
+    .bg-purple {
+        background-color: #6f42c1 !important;
+        color: #fff !important;
+    }
 </style>
 @endsection
 
@@ -341,6 +347,9 @@
                                             <td>
                                                 @if($lead->closer_name)
                                                     <span class="badge bg-info">{{ $lead->closer_name }}</span>
+                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                        <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif
@@ -409,6 +418,9 @@
                                             <td>
                                                 @if($lead->closer_name)
                                                     <span class="badge bg-info">{{ $lead->closer_name }}</span>
+                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                        <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif

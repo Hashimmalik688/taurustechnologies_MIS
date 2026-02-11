@@ -47,12 +47,30 @@ class LeadController extends Controller
 
     public function index(Request $request)
     {
-        // All Leads section - Only show leads closed by Paraguin closers or accepted by managers
+        // Raven Leads section - Shows all closed and accepted leads from Ravens team
         // Verifier forms (pending) and declined/transferred leads are excluded
         $query = Lead::query();
         
         // Only show closed and accepted leads
         $query->whereIn('status', ['closed', 'accepted']);
+        
+        // Exclude leads where BOTH cn_name AND phone_number are N/A/empty (verifier-submitted forms)
+        $query->where(function($q) {
+            $q->where(function($subQ) {
+                // Has valid cn_name
+                $subQ->whereNotNull('cn_name')
+                     ->where('cn_name', '!=', 'N/A')
+                     ->where('cn_name', '!=', '');
+            })->orWhere(function($subQ) {
+                // Has valid phone_number
+                $subQ->whereNotNull('phone_number')
+                     ->where('phone_number', '!=', 'N/A')
+                     ->where('phone_number', '!=', '');
+            });
+        });
+        
+        // Exclude leads submitted by verifiers (basic info only)
+        $query->whereNull('verified_by');
         
         // Search functionality
         if ($request->filled('search')) {
@@ -75,7 +93,59 @@ class LeadController extends Controller
         }
         
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
-        return view('admin.leads.index_simple', compact('leads'));
+        
+        // Get Peregrine closer names for tagging
+        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        
+        return view('admin.leads.index_simple', compact('leads', 'peregrineClosers'));
+    }
+
+    /**
+     * Show only Peregrine leads (verifier, peregrine closer, peregrine validator)
+     */
+    public function peregrineLeads(Request $request)
+    {
+        // Show leads from Peregrine team (verifier, peregrine closer, peregrine validator)
+        $query = Lead::query();
+        
+        // Filter for Peregrine leads - those WITH verified_by, validated_by, or source_type = 'peregrine'
+        $query->where(function($q) {
+            $q->whereNotNull('verified_by')
+              ->orWhereNotNull('validated_by')
+              ->orWhere('source_type', 'peregrine');
+        });
+        
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('cn_name', 'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%")
+                  ->orWhere('carrier_name', 'like', "%{$search}%")
+                  ->orWhere('closer_name', 'like', "%{$search}%")
+                  ->orWhere('ssn', 'like', "%{$search}%");
+            });
+        }
+        
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        // Month filter
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $request->month);
+        }
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
+        }
+        
+        $leads = $query->orderBy('created_at', 'desc')->paginate(50);
+        
+        // Get Peregrine closer names for tagging
+        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        
+        return view('admin.leads.peregrine', compact('leads', 'peregrineClosers'));
     }
 
     public function sales(Request $request)
@@ -88,6 +158,22 @@ class LeadController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             });
+        
+        // Exclude leads where BOTH cn_name AND phone_number are N/A/empty
+        $query->where(function($q) {
+            $q->where(function($subQ) {
+                $subQ->whereNotNull('cn_name')
+                     ->where('cn_name', '!=', 'N/A')
+                     ->where('cn_name', '!=', '');
+            })->orWhere(function($subQ) {
+                $subQ->whereNotNull('phone_number')
+                     ->where('phone_number', '!=', 'N/A')
+                     ->where('phone_number', '!=', '');
+            });
+        });
+        
+        // Exclude leads submitted by verifiers
+        $query->whereNull('verified_by');
         
         // Search functionality
         if ($request->filled('search')) {
@@ -166,7 +252,11 @@ class LeadController extends Controller
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
         $statusColors = $this->getStatusColors();
-        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors'));
+        
+        // Get Peregrine closer names for tagging
+        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        
+        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers'));
     }
 
     /**
@@ -193,10 +283,18 @@ class LeadController extends Controller
         ]);
 
         try {
+            // Determine source_type based on user role
+            $user = Auth::user();
+            $sourceType = null;
+            if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+                $sourceType = 'peregrine';
+            }
+
             $lead = Lead::create([
                 ...$validated,
                 'sale_at' => $validated['sale_date'],
                 'status' => $validated['status'] ?? 'accepted',
+                'source_type' => $sourceType,
             ]);
 
             return redirect()->route('sales.index')
@@ -226,6 +324,12 @@ class LeadController extends Controller
 
         // Remove carrier fields from lead data to avoid issues
         unset($leadData['carrier_name']);
+
+        // Mark lead as 'peregrine' if created by a peregrine team member
+        $user = Auth::user();
+        if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+            $leadData['source_type'] = 'peregrine';
+        }
 
         // Create the lead
         $lead = Lead::create($leadData);
@@ -572,9 +676,9 @@ class LeadController extends Controller
 
     public function import(Request $request)
     {
-        // Validate the request - Allow up to 50MB files for large bulk imports
+        // Validate the request - Allow up to 100MB files for large bulk imports
         $request->validate([
-            'import_file' => 'required|mimes:xlsx,xls,csv|max:51200',
+            'import_file' => 'required|mimes:xlsx,xls,csv|max:102400',
         ]);
 
         try {

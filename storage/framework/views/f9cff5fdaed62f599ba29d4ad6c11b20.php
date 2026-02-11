@@ -1,12 +1,10 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Ravens Calling System
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    <link href="{{ URL::asset('build/css/app.min.css') }}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="{{ URL::asset('build/libs/toastr/build/toastr.min.css') }}" />
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('build/css/app.min.css')); ?>" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo e(URL::asset('build/libs/toastr/build/toastr.min.css')); ?>" />
     <style>
         .auto-dial-btn {
             position: relative;
@@ -36,26 +34,26 @@
             color: #fff !important;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Ravens
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             Ravens Calling System
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
     <div class="row">
         <div class="col-12">
-            @php
+            <?php
                 $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
                     ->where('expires_at', '>', now())
                     ->exists();
-            @endphp
-            @if(!$hasZoomToken)
+            ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$hasZoomToken): ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="bx bx-phone-off me-2"></i>
                 <strong>Zoom Phone Not Connected!</strong> You need to connect your Zoom Phone account to make calls.
@@ -64,7 +62,7 @@
                 </a>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             
             <div class="card bordered">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -94,33 +92,33 @@
                                 </tr>
                             </thead>
                             <tbody id="leadsTableBody">
-                                @forelse($leads as $index => $lead)
-                                    <tr class="lead-row" data-lead-id="{{ $lead->id }}" data-phone="{{ $lead->phone_number }}" data-secondary-phone="{{ $lead->secondary_phone_number ?? '' }}">
-                                        <td>{{ $index + 1 }}</td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <tr class="lead-row" data-lead-id="<?php echo e($lead->id); ?>" data-phone="<?php echo e($lead->phone_number); ?>" data-secondary-phone="<?php echo e($lead->secondary_phone_number ?? ''); ?>">
+                                        <td><?php echo e($index + 1); ?></td>
                                         <td>
-                                            <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
-                                            @if(
+                                            <strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(
                                                 ($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)) ||
                                                 (strtolower($lead->team ?? '') === 'peregrine') ||
                                                 (stripos($lead->assigned_partner ?? '', 'peregrine') !== false)
-                                            )
+                                            ): ?>
                                                 <span class="badge bg-purple ms-1" title="Peregrine">Peregrine</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)">
+                                            <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('<?php echo e($lead->id); ?>', '<?php echo e($lead->phone_number); ?>', this)">
                                                 <i class="bx bx-phone-call"></i> Call
                                             </button>
                                         </td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="3" class="text-center text-muted py-4">
                                             <i class="bx bx-info-circle fs-3"></i>
                                             <p class="mb-0">No leads available</p>
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -605,10 +603,10 @@
         </div>
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-<script src="{{ URL::asset('build/libs/toastr/build/toastr.min.js') }}"></script>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/libs/toastr/build/toastr.min.js')); ?>"></script>
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
 <script>
@@ -799,8 +797,8 @@
     }
 
     // Get user's zoom number
-    window.zoomNumber = '{{ Auth::user()->zoom_number ?? '' }}';
-    window.sanitizedZoomNumber = '{{ Auth::user()->sanitized_zoom_number ?? '' }}';
+    window.zoomNumber = '<?php echo e(Auth::user()->zoom_number ?? ''); ?>';
+    window.sanitizedZoomNumber = '<?php echo e(Auth::user()->sanitized_zoom_number ?? ''); ?>';
 
     // Echo disabled - using API-based call monitoring instead
     // Safety check for echo references
@@ -1934,7 +1932,7 @@
                 carrier_name: 'Test Insurance Co',
                 coverage_amount: '100000',
                 monthly_premium: '75.50',
-                closer_name: @json(Auth::user()->name ?? 'Test Closer'),
+                closer_name: <?php echo json_encode(Auth::user()->name ?? 'Test Closer', 15, 512) ?>,
                 source: 'Test Source'
             },
             call_connected_at: new Date().toISOString()
@@ -2162,7 +2160,7 @@
             cvv: document.getElementById('change_cvv')?.value || null,
             expiry_date: document.getElementById('change_expiry_date')?.value || null,
             source: document.getElementById('change_source')?.value || null,
-            closer_name: @json(Auth::user()->name ?? 'Unknown'),
+            closer_name: <?php echo json_encode(Auth::user()->name ?? 'Unknown', 15, 512) ?>,
             policy_carrier: document.getElementById('phase3_policy_carrier')?.value || null,
             state: document.getElementById('phase3_approved_state')?.value || null,
         };
@@ -2284,7 +2282,7 @@
         const notes = prompt('Add notes (optional):');
 
         // Send disposition request
-        fetch('{{ route('ravens.leads.dispose') }}', {
+        fetch('<?php echo e(route('ravens.leads.dispose')); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2321,4 +2319,6 @@
     }
     
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/ravens/calling.blade.php ENDPATH**/ ?>

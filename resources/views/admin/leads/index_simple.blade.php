@@ -100,6 +100,12 @@
         min-width: 38px !important;
         height: 38px !important;
     }
+    
+    /* Peregrine badge style */
+    .bg-purple {
+        background-color: #6f42c1 !important;
+        color: #fff !important;
+    }
 </style>
 @endsection
 
@@ -133,7 +139,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">All Leads Database</h4>
+                    <div>
+                        <h4 class="card-title mb-0">Raven Leads Database</h4>
+                        <small class="text-muted">Complete leads database for Ravens team</small>
+                    </div>
                     <div>
                         <a href="{{ route('leads.create') }}" class="btn btn-primary waves-effect waves-light">
                             <i class="fas fa-plus me-1"></i> Add New Lead
@@ -278,7 +287,12 @@
                                         <td>{{ $lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A' }}</td>
                                         <td>{{ $lead->policy_type ?? 'N/A' }}</td>
                                         <td>{{ $lead->source ?? 'N/A' }}</td>
-                                        <td>{{ $lead->closer_name ?? 'N/A' }}</td>
+                                        <td>
+                                            {{ $lead->closer_name ?? 'N/A' }}
+                                            @if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
                                         <td>{{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A') }}</td>
                                         <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
@@ -322,10 +336,28 @@
                         <div class="mb-3">
                             <label class="form-label">Upload Excel File</label>
                             <input type="file" class="form-control" name="import_file" accept=".xlsx,.xls,.csv" required>
-                            <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: 2MB)</small>
+                            <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: <strong>100MB</strong>)</small>
                         </div>
-                        <div class="alert alert-info">
-                            <small><strong>Note:</strong> Excel file should have columns: Phone Number, Customer Name, DOB, Gender, Address, SSN, etc.</small>
+                        
+                        <div class="alert alert-info mb-2">
+                            <strong><i class="bx bx-info-circle"></i> Deduplication:</strong>
+                            <small>System automatically checks for duplicates using: <strong>Phone Number</strong>, <strong>SSN</strong>, or <strong>Account Number</strong>. Existing leads will be updated with missing data.</small>
+                        </div>
+                        
+                        <div class="alert alert-success mb-0">
+                            <strong><i class="bx bx-columns"></i> Flexible Column Names:</strong>
+                            <small>
+                                <ul class="mb-0" style="font-size: 0.85rem;">
+                                    <li><strong>Phone:</strong> "Phone Number", "Phone", "Cell Phone", "Mobile", "Contact Number"</li>
+                                    <li><strong>Name:</strong> "Customer Name", "Name", "CN Name"</li>
+                                    <li><strong>DOB:</strong> "Date of Birth", "DOB", "Birth Date"</li>
+                                    <li><strong>SSN:</strong> "SSN", "S.S.N #", "Social Security Number"</li>
+                                    <li><strong>Address:</strong> "Street Address", "Address"</li>
+                                    <li><strong>Bank:</strong> "Bank Name", "Account Type", "Routing Number", "Account Number"</li>
+                                    <li><strong>Carrier:</strong> "Carrier Name", "Coverage Amount", "Monthly Premium"</li>
+                                    <li>Plus 40+ more variations automatically recognized!</li>
+                                </ul>
+                            </small>
                         </div>
                     </div>
                     <div class="modal-footer">

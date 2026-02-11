@@ -117,7 +117,35 @@ class EmployeeDashboardController extends Controller
     public function leads()
     {
         // Get leads for employees to call - paginated for performance
-        $leads = Lead::orderBy('created_at', 'desc')->paginate(100);
+        // Exclude verifier-submitted leads (where both cn_name AND phone are N/A)
+        // Show only leads that are available for calling (not already sold)
+        $user = Auth::user();
+        
+        $leads = Lead::where(function($query) use ($user) {
+            // Include leads that are not sold yet
+            $query->where(function($q) {
+                $q->whereNull('sale_at')
+                  ->orWhere('status', '!=', 'accepted');
+            })
+            // OR include leads sold by current user (so they can see their own sales)
+            ->orWhere('closer_name', $user->name);
+        })
+        // Exclude leads where BOTH cn_name AND phone_number are N/A/empty
+        ->where(function($q) {
+            $q->where(function($subQ) {
+                $subQ->whereNotNull('cn_name')
+                     ->where('cn_name', '!=', 'N/A')
+                     ->where('cn_name', '!=', '');
+            })->orWhere(function($subQ) {
+                $subQ->whereNotNull('phone_number')
+                     ->where('phone_number', '!=', 'N/A')
+                     ->where('phone_number', '!=', '');
+            });
+        })
+        // Exclude verifier-submitted leads
+        ->whereNull('verified_by')
+        ->orderBy('created_at', 'desc')
+        ->paginate(100);
 
         return view('employee.leads', compact('leads'));
     }
