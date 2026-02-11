@@ -181,6 +181,11 @@ class CreateLead extends Component
             'carrier_notes',
         ])->toArray();
 
+        // Mark as peregrine if user has peregrine role
+        if (auth()->check() && auth()->user()->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+            $leadData['source_type'] = 'peregrine';
+        }
+
         // Create the lead
         $lead = Lead::create($leadData);
 

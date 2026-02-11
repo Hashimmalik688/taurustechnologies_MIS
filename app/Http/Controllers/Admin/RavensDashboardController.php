@@ -128,7 +128,12 @@ class RavensDashboardController extends Controller
         // Also exclude leads submitted by Peregrine closers (team = 'peregrine')
         $currentUser = Auth::user();
         
-        $leads = Lead::where(function($query) use ($currentUser) {
+        $leads = Lead::select([
+            'id', 'cn_name', 'phone_number', 'secondary_phone_number', 
+            'closer_name', 'team', 'assigned_partner', 'created_at', 
+            'status', 'sale_at', 'verified_by'
+        ])
+        ->where(function($query) use ($currentUser) {
             // Include leads that are not sold yet
             $query->where(function($q) {
                 $q->whereNull('sale_at')
@@ -142,10 +147,42 @@ class RavensDashboardController extends Controller
             $query->where('team', '!=', 'peregrine')
                   ->orWhereNull('team');
         })
+        // MUST have valid phone number for calling system
+        ->whereNotNull('phone_number')
+        ->where('phone_number', '!=', 'N/A')
+        ->where('phone_number', '!=', '')
+        // Exclude verifier-submitted leads
+        ->whereNull('verified_by')
         ->orderBy('created_at', 'desc')
         ->get();
 
-        return view('ravens.calling', compact('leads'));
+        // Get Peregrine closer names for tagging
+        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+
+        // Get insurance carriers for dropdown
+        $insuranceCarriers = \App\Models\InsuranceCarrier::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'name')
+            ->toArray();
+
+        // US States list
+        $usStates = [
+            'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
+            'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
+            'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho',
+            'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
+            'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
+            'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi',
+            'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+            'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
+            'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma',
+            'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
+            'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah',
+            'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia',
+            'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia'
+        ];
+
+        return view('ravens.calling', compact('leads', 'peregrineClosers', 'insuranceCarriers', 'usStates'));
     }
 
     /**

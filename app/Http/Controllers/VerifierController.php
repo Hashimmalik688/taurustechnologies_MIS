@@ -72,6 +72,7 @@ class VerifierController extends Controller
             'verified_by' => auth()->id(),
             'verified_at' => now(),
             'transferred_at' => now(),
+            'source_type' => 'peregrine', // Mark as peregrine lead
         ]);
 
         return redirect()->route('verifier.create', ['team' => $team])

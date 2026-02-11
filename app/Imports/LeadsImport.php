@@ -230,6 +230,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'cvv' => $this->getValueFromRow($lowercaseRow, ['cvv']),
                         'expiry_date' => $this->getValueFromRow($lowercaseRow, ['expiry date', 'expiry']),
                         'source' => $this->getValueFromRow($lowercaseRow, ['source:', 'source']),
+                        'source_type' => 'imported', // Mark all CSV imports as 'imported' type
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
                         'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line #', 'preset line']),
                         'comments' => $this->getValueFromRow($lowercaseRow, ['comments']),

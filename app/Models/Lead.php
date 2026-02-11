@@ -58,6 +58,7 @@ class Lead extends Model
         'cvv',
         'expiry_date',
         'source',
+        'source_type',
         'team',
         'closer_name',
         'assigned_partner',

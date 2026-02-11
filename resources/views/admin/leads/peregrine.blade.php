@@ -1,8 +1,10 @@
-<?php $__env->startSection('title'); ?>
-    Leads Management
-<?php $__env->stopSection(); ?>
+@extends('layouts.master')
 
-<?php $__env->startSection('css'); ?>
+@section('title')
+    Leads Management
+@endsection
+
+@section('css')
     <style>
     .table-wrapper {
         overflow-x: auto;
@@ -98,44 +100,51 @@
         min-width: 38px !important;
         height: 38px !important;
     }
+    
+    /* Peregrine badge style */
+    .bg-purple {
+        background-color: #6f42c1 !important;
+        color: #fff !important;
+    }
 </style>
-<?php $__env->stopSection(); ?>
+@endsection
 
-<?php $__env->startSection('content'); ?>
-    <?php $__env->startComponent('components.breadcrumb'); ?>
-        <?php $__env->slot('li_1'); ?>
+@section('content')
+    @component('components.breadcrumb')
+        @slot('li_1')
             Leads
-        <?php $__env->endSlot(); ?>
-        <?php $__env->slot('title'); ?>
+        @endslot
+        @slot('title')
             Management
-        <?php $__env->endSlot(); ?>
-    <?php echo $__env->renderComponent(); ?>
+        @endslot
+    @endcomponent
 
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
+    @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> <?php echo e(session('success')); ?>
-
+            <strong>Success!</strong> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    @endif
 
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
+    @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> <?php echo e(session('error')); ?>
-
+            <strong>Error!</strong> {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    @endif
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">All Leads Database</h4>
                     <div>
-                        <a href="<?php echo e(route('leads.create')); ?>" class="btn btn-primary waves-effect waves-light">
+                        <h4 class="card-title mb-0">Peregrine Leads Database</h4>
+                        <small class="text-muted">Leads from Verifiers, Peregrine Closers, and Peregrine Validators</small>
+                    </div>
+                    <div>
+                        <a href="{{ route('leads.create') }}" class="btn btn-primary waves-effect waves-light">
                             <i class="fas fa-plus me-1"></i> Add New Lead
                         </a>
                         <button class="btn btn-outline-secondary waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -146,32 +155,32 @@
 
                 <div class="card-body">
                     <!-- Search Bar -->
-                    <form method="GET" action="<?php echo e(route('leads.index')); ?>" class="mb-3">
+                    <form method="GET" action="{{ route('leads.peregrine') }}" class="mb-3">
                         <div class="row g-2">
                             <div class="col-md-4">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, SSN, carrier..." value="<?php echo e(request('search')); ?>">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, SSN, carrier..." value="{{ request('search') }}">
                             </div>
                             <div class="col-md-2">
                                 <select name="month" class="form-select">
                                     <option value="">All Months</option>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($m = 1; $m <= 12; $m++): ?>
-                                        <option value="<?php echo e($m); ?>" <?php echo e(request('month') == $m ? 'selected' : ''); ?>><?php echo e(date('F', mktime(0, 0, 0, $m, 1))); ?></option>
-                                    <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    @for($m = 1; $m <= 12; $m++)
+                                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
+                                    @endfor
                                 </select>
                             </div>
                             <div class="col-md-2">
                                 <select name="year" class="form-select">
                                     <option value="">All Years</option>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
-                                        <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?></option>
-                                    <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endfor
                                 </select>
                             </div>
                             <div class="col-md-2">
                                 <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Search</button>
                             </div>
                             <div class="col-md-2">
-                                <a href="<?php echo e(route('leads.index')); ?>" class="btn btn-outline-secondary w-100"><i class="bx bx-reset"></i> Clear</a>
+                                <a href="{{ route('leads.peregrine') }}" class="btn btn-outline-secondary w-100"><i class="bx bx-reset"></i> Clear</a>
                             </div>
                         </div>
                     </form>
@@ -221,88 +230,92 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                @forelse($leads as $index => $lead)
                                     <tr>
-                                        <td><strong><?php echo e($leads->firstItem() + $index); ?></strong></td>
-                                        <td><strong><?php echo e($lead->id); ?></strong></td>
-                                        <td><strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong></td>
+                                        <td><strong>{{ $leads->firstItem() + $index }}</strong></td>
+                                        <td><strong>{{ $lead->id }}</strong></td>
+                                        <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
                                         <td>
-                                            <?php
+                                            @php
                                                 $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
                                                 $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
-                                            ?>
+                                            @endphp
                                             <div class="btn-group-actions">
-                                                <button onclick="window.location.href='<?php echo e($callUrl); ?>'" class="btn btn-outline-secondary btn-sm" title="Call">
+                                                <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-outline-secondary btn-sm" title="Call">
                                                     <i class="fas fa-phone" aria-hidden="true"></i>
                                                 </button>
-                                                <a href="<?php echo e(route('leads.show', $lead->id)); ?>" class="btn btn-outline-info btn-sm" title="View">
+                                                <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
                                                     <i class="fas fa-eye" aria-hidden="true"></i>
                                                 </a>
-                                                <a href="<?php echo e(route('leads.edit', $lead->id)); ?>" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                                     <i class="fas fa-edit" aria-hidden="true"></i>
                                                 </a>
-                                                <form action="<?php echo e(route('leads.delete', $lead->id)); ?>" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete <?php echo e(addslashes($lead->cn_name)); ?>?');">
-                                                    <?php echo csrf_field(); ?>
-                                                    <?php echo method_field('DELETE'); ?>
+                                                <form action="{{ route('leads.delete', $lead->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
+                                                    @csrf
+                                                    @method('DELETE')
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
                                                         <i class="fas fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </form>
                                             </div>
                                         </td>
-                                        <td><?php echo e($lead->phone_number ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A'); ?></td>
-                                        <td><?php echo e($lead->smoker ? 'Yes' : 'No'); ?></td>
-                                        <td><?php echo e($lead->driving_license_number ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->height ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->weight ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->birth_place ?? 'N/A'); ?></td>
-                                        <td><?php echo e(Str::limit($lead->medical_issue ?? 'N/A', 30)); ?></td>
-                                        <td><?php echo e(Str::limit($lead->medications ?? 'N/A', 30)); ?></td>
-                                        <td><?php echo e($lead->doctor_name ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A'); ?></td>
-                                        <td><?php echo e(Str::limit($lead->address ?? 'N/A', 40)); ?></td>
-                                        <td><?php echo e($lead->state ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->zip_code ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->carrier_name ?? 'N/A'); ?></td>
-                                        <td>$<?php echo e(number_format($lead->coverage_amount ?? 0, 0)); ?></td>
-                                        <td>$<?php echo e(number_format($lead->monthly_premium ?? 0, 2)); ?></td>
-                                        <td><?php echo e($lead->beneficiary ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->emergency_contact ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A'); ?></td>
-                                        <td><?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A'); ?></td>
-                                        <td><?php echo e($lead->bank_name ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->account_type ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->routing_number ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->acc_number ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A'); ?></td>
-                                        <td><?php echo e($lead->policy_type ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->source ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->closer_name ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->account_verified_by ?? 'N/A'); ?></td>
-                                        <td><?php echo e($lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A')); ?></td>
-                                        <td><?php echo e($lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A'); ?></td>
-                                        <td><?php echo e($lead->preset_line ?? 'N/A'); ?></td>
+                                        <td>{{ $lead->phone_number ?? 'N/A' }}</td>
+                                        <td>{{ $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A' }}</td>
+                                        <td>{{ $lead->smoker ? 'Yes' : 'No' }}</td>
+                                        <td>{{ $lead->driving_license_number ?? 'N/A' }}</td>
+                                        <td>{{ $lead->height ?? 'N/A' }}</td>
+                                        <td>{{ $lead->weight ?? 'N/A' }}</td>
+                                        <td>{{ $lead->birth_place ?? 'N/A' }}</td>
+                                        <td>{{ Str::limit($lead->medical_issue ?? 'N/A', 30) }}</td>
+                                        <td>{{ Str::limit($lead->medications ?? 'N/A', 30) }}</td>
+                                        <td>{{ $lead->doctor_name ?? 'N/A' }}</td>
+                                        <td>{{ $lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A' }}</td>
+                                        <td>{{ Str::limit($lead->address ?? 'N/A', 40) }}</td>
+                                        <td>{{ $lead->state ?? 'N/A' }}</td>
+                                        <td>{{ $lead->zip_code ?? 'N/A' }}</td>
+                                        <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                        <td>${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
+                                        <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
+                                        <td>{{ $lead->beneficiary ?? 'N/A' }}</td>
+                                        <td>{{ $lead->emergency_contact ?? 'N/A' }}</td>
+                                        <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
+                                        <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
+                                        <td>{{ $lead->bank_name ?? 'N/A' }}</td>
+                                        <td>{{ $lead->account_type ?? 'N/A' }}</td>
+                                        <td>{{ $lead->routing_number ?? 'N/A' }}</td>
+                                        <td>{{ $lead->acc_number ?? 'N/A' }}</td>
+                                        <td>{{ $lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A' }}</td>
+                                        <td>{{ $lead->policy_type ?? 'N/A' }}</td>
+                                        <td>{{ $lead->source ?? 'N/A' }}</td>
                                         <td>
-                                            <div contenteditable="true" class="editable-comment" data-lead-id="<?php echo e($lead->id); ?>" style="min-width: 150px; max-width: 300px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;"><?php echo e($lead->comments ?? 'Click to add...'); ?></div>
+                                            {{ $lead->closer_name ?? 'N/A' }}
+                                            @if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
+                                        <td>{{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A') }}</td>
+                                        <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
+                                        <td>{{ $lead->preset_line ?? 'N/A' }}</td>
+                                        <td>
+                                            <div contenteditable="true" class="editable-comment" data-lead-id="{{ $lead->id }}" style="min-width: 150px; max-width: 300px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;">{{ $lead->comments ?? 'Click to add...' }}</div>
                                         </td>
                                     </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                @empty
                                     <tr>
                                         <td colspan="37" class="text-center py-4">
                                             <i class="bx bx-user-plus fs-1 text-muted"></i>
                                             <p class="mb-0 text-muted">No leads available. Add or import leads to get started.</p>
                                         </td>
                                     </tr>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     
                     <!-- Pagination -->
                     <div class="mt-3">
-                        <?php echo e($leads->appends(request()->query())->links()); ?>
-
+                        {{ $leads->appends(request()->query())->links() }}
                     </div>
                 </div>
             </div>
@@ -317,16 +330,34 @@
                     <h5 class="modal-title">Import Leads</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="<?php echo e(route('leads.import')); ?>" method="POST" enctype="multipart/form-data">
-                    <?php echo csrf_field(); ?>
+                <form action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Upload Excel File</label>
                             <input type="file" class="form-control" name="import_file" accept=".xlsx,.xls,.csv" required>
-                            <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: 2MB)</small>
+                            <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: <strong>100MB</strong>)</small>
                         </div>
-                        <div class="alert alert-info">
-                            <small><strong>Note:</strong> Excel file should have columns: Phone Number, Customer Name, DOB, Gender, Address, SSN, etc.</small>
+                        
+                        <div class="alert alert-info mb-2">
+                            <strong><i class="bx bx-info-circle"></i> Deduplication:</strong>
+                            <small>System automatically checks for duplicates using: <strong>Phone Number</strong>, <strong>SSN</strong>, or <strong>Account Number</strong>. Existing leads will be updated with missing data.</small>
+                        </div>
+                        
+                        <div class="alert alert-success mb-0">
+                            <strong><i class="bx bx-columns"></i> Flexible Column Names:</strong>
+                            <small>
+                                <ul class="mb-0" style="font-size: 0.85rem;">
+                                    <li><strong>Phone:</strong> "Phone Number", "Phone", "Cell Phone", "Mobile", "Contact Number"</li>
+                                    <li><strong>Name:</strong> "Customer Name", "Name", "CN Name"</li>
+                                    <li><strong>DOB:</strong> "Date of Birth", "DOB", "Birth Date"</li>
+                                    <li><strong>SSN:</strong> "SSN", "S.S.N #", "Social Security Number"</li>
+                                    <li><strong>Address:</strong> "Street Address", "Address"</li>
+                                    <li><strong>Bank:</strong> "Bank Name", "Account Type", "Routing Number", "Account Number"</li>
+                                    <li><strong>Carrier:</strong> "Carrier Name", "Coverage Amount", "Monthly Premium"</li>
+                                    <li>Plus 40+ more variations automatically recognized!</li>
+                                </ul>
+                            </small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -339,9 +370,9 @@
             </div>
         </div>
     </div>
-<?php $__env->stopSection(); ?>
+@endsection
 
-<?php $__env->startSection('script'); ?>
+@section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Editable comments functionality
@@ -384,6 +415,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/leads/index_simple.blade.php ENDPATH**/ ?>
+@endsection

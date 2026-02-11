@@ -40,6 +40,14 @@ class LeadRepository implements LeadRepositoryInterface
         $leadData = $data;
         unset($leadData['carrier_name']);
 
+        // Mark as peregrine if user has peregrine role
+        if (!isset($leadData['source_type']) && auth()->check()) {
+            $user = auth()->user();
+            if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+                $leadData['source_type'] = 'peregrine';
+            }
+        }
+
         // Create the lead
         $lead = Lead::create($leadData);
 

@@ -151,10 +151,17 @@
                 </a>
 
                 <div class="menu-dropdown" id="misDropdown">
-                    <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads*') && !Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-user-voice"></i>
-                        <span class="menu-text">All Leads</span>
-                    </a>
+                    @hasanyrole('Super Admin|CEO|Manager')
+                        <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
+                            <i class="bx bx-user-voice"></i>
+                            <span class="menu-text">Peregrine Leads</span>
+                        </a>
+
+                        <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
+                            <i class="bx bx-briefcase"></i>
+                            <span class="menu-text">Raven Leads</span>
+                        </a>
+                    @endhasanyrole
 
                     @hasanyrole('QA|Super Admin|Manager|Co-ordinator|CEO')
                         <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">

@@ -48,4 +48,12 @@ class ZoomToken extends Model
               ->orWhere('expires_at', '>', now());
         });
     }
+
+    /**
+     * Get the user that owns the token.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
