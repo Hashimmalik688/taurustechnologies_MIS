@@ -163,93 +163,106 @@
                         <div class="row g-3">
                             <!-- Name -->
                             <div class="col-md-6">
-                                <label class="form-label small text-muted">CURRENT NAME</label>
-                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayName">-</div>
-                                <label class="form-label small">Changes (if any)</label>
-                                <input type="text" class="form-control" id="phase2_name" placeholder="Enter new name if changed">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayName">-</span></p>
+                                <label class="form-label small">Enter new name if changed</label>
+                                <input type="text" class="form-control" id="phase2_name" placeholder="Leave empty if no change">
                             </div>
 
                             <!-- Phone Number -->
                             <div class="col-md-6">
-                                <label class="form-label small text-muted">CURRENT PHONE</label>
-                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayPhone">-</div>
-                                <label class="form-label small">Changes (if any)</label>
-                                <input type="text" class="form-control" id="phase2_phone" placeholder="Enter new phone if changed">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayPhone">-</span></p>
+                                <label class="form-label small">Enter new phone if changed</label>
+                                <input type="text" class="form-control" id="phase2_phone" placeholder="Leave empty if no change">
                             </div>
 
                             <!-- Secondary Phone Number -->
                             <div class="col-md-6">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displaySecondaryPhone">-</span></p>
                                 <label class="form-label small">Secondary Phone</label>
-                                <input type="text" class="form-control" id="phase2_secondary_phone" placeholder="Secondary phone number">
+                                <input type="text" class="form-control" id="phase2_secondary_phone" placeholder="Leave empty if no change">
                             </div>
 
-                            <!-- State & Zip Code -->
+                            <!-- State -->
                             <div class="col-md-6">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayState">-</span></p>
                                 <label class="form-label small">State</label>
-                                <input type="text" class="form-control" id="phase2_state" placeholder="State code (e.g., CA, NY)" maxlength="2">
+                                <select class="form-select" id="phase2_state">
+                                    <option value="">Select State</option>
+                                    @foreach($usStates as $code => $name)
+                                        <option value="{{ $code }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
+                            
+                            <!-- Zip Code -->
                             <div class="col-md-6">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayZipCode">-</span></p>
                                 <label class="form-label small">Zip Code</label>
-                                <input type="text" class="form-control" id="phase2_zip" placeholder="Zip code">
+                                <input type="text" class="form-control" id="phase2_zip" placeholder="Leave empty if no change">
                             </div>
 
-                            <!-- DOB & SSN -->
+                            <!-- DOB -->
                             <div class="col-md-6">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayDOB">-</span></p>
                                 <label class="form-label small">Date of Birth</label>
                                 <input type="date" class="form-control" id="phase2_dob">
                             </div>
+                            
+                            <!-- SSN -->
                             <div class="col-md-6">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displaySSN">-</span></p>
                                 <label class="form-label small">SSN</label>
                                 <input type="text" class="form-control" id="phase2_ssn" placeholder="XXX-XX-XXXX">
                             </div>
 
                             <!-- Address -->
                             <div class="col-12">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayAddress">-</span></p>
                                 <label class="form-label small">Address</label>
                                 <input type="text" class="form-control" id="phase2_address" placeholder="Enter address">
                             </div>
 
                             <!-- Emergency Contact -->
                             <div class="col-12">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayEmergencyContact">-</span></p>
                                 <label class="form-label small">Emergency Contact</label>
-                                <input type="text" class="form-control" id="phase2_emergency_contact" placeholder="Emergency contact name and phone">
+                                <input type="text" class="form-control" id="phase2_emergency_contact" placeholder="Leave empty if no change">
                             </div>
 
                             <!-- Beneficiary -->
                             <div class="col-12">
-                                <label class="form-label small text-muted">CURRENT BENEFICIARY</label>
-                                <div class="p-2 bg-light border rounded mb-2 fw-bold" id="displayBeneficiary">-</div>
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-success fw-bold" id="displayBeneficiary">-</span></p>
                                 <label class="form-label small">Add/Update Beneficiaries</label>
-                                <div id="beneficiaries-ravens-container">
-                                    <div class="row g-2 mb-2 beneficiary-ravens-row" data-index="0">
-                                        <div class="col-md-4">
-                                            <input type="text" class="form-control form-control-sm" name="beneficiaries[0][name]" placeholder="Beneficiary Name">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <input type="text" class="form-control form-control-sm" name="beneficiaries[0][relation]" placeholder="Relation">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <input type="date" class="form-control form-control-sm" name="beneficiaries[0][dob]" placeholder="DOB">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="button" class="btn btn-success btn-sm w-100" id="add-beneficiary-ravens">
-                                                <i class="bx bx-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div id="beneficiaries-container-ravens">
+                                    <!-- Beneficiaries will be populated dynamically -->
                                 </div>
+                                <button type="button" class="btn btn-sm btn-outline-success mt-2" onclick="window.addBeneficiaryRow()">
+                                    <i class="bx bx-plus"></i> Add Beneficiary
+                                </button>
                             </div>
 
-                            <!-- Carrier, Coverage, Premium -->
+                            <!-- Policy Carrier -->
                             <div class="col-md-4">
-                                <label class="form-label small">Carrier</label>
-                                <input type="text" class="form-control" id="phase2_carrier">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayCarrier">-</span></p>
+                                <label class="form-label small">Policy Carrier</label>
+                                <select class="form-select" id="phase2_carrier">
+                                    <option value="">Select Carrier</option>
+                                    @foreach($insuranceCarriers as $carrier)
+                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
+                                    @endforeach
+                                </select>
                             </div>
+                            
+                            <!-- Coverage Amount -->
                             <div class="col-md-4">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayCoverage">-</span></p>
                                 <label class="form-label small">Coverage Amount</label>
                                 <input type="number" class="form-control" id="phase2_coverage" step="0.01" placeholder="Amount">
                             </div>
+                            
+                            <!-- Monthly Premium -->
                             <div class="col-md-4">
+                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayPremium">-</span></p>
                                 <label class="form-label small">Monthly Premium</label>
                                 <input type="number" class="form-control" id="phase2_premium" step="0.01" placeholder="Amount">
                             </div>
@@ -279,43 +292,69 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Name:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_name"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_name" placeholder="Changes (if any, write same as above if no change)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_name"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_name" placeholder="Enter new name if changed">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Phone Number:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_phone"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_phone" placeholder="Changes (if any, write same as above if no change)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_phone"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_phone" placeholder="Enter new phone if changed">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Secondary Phone:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_secondary_phone"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_secondary_phone" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_secondary_phone"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_secondary_phone" placeholder="Enter secondary phone">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">State:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_state"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_state" placeholder="State code" maxlength="2">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_state"></span>
+                                </div>
+                                <select class="form-select form-select-sm" id="change_state">
+                                    <option value="">Select State</option>
+                                    @foreach($usStates as $state)
+                                        <option value="{{ $state }}">{{ $state }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Zip Code:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_zip"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_zip" placeholder="Zip code">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_zip"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_zip" placeholder="Enter zip code">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Date of Birth:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_dob"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_dob"></span>
+                                </div>
                                 <input type="date" class="form-control form-control-sm" id="change_dob">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Gender:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_gender"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_gender"></span>
+                                </div>
                                 <select class="form-select form-select-sm" id="change_gender">
                                     <option value="">Select</option>
                                     <option value="Male">Male</option>
@@ -326,19 +365,28 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Birth Place:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_birthplace"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_birthplace" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_birthplace"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_birthplace" placeholder="Enter birth place">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">SSN:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_ssn"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_ssn" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_ssn"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_ssn" placeholder="Enter SSN">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Smoker:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_smoker"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_smoker"></span>
+                                </div>
                                 <select class="form-select form-select-sm" id="change_smoker">
                                     <option value="0">No</option>
                                     <option value="1">Yes</option>
@@ -347,13 +395,19 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Height & Weight:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_height_weight"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_height_weight"></span>
+                                </div>
                                 <input type="text" class="form-control form-control-sm" id="change_height_weight" placeholder="e.g., 5'10\", 180 lbs">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Driving License:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_driving_license"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_driving_license"></span>
+                                </div>
                                 <select class="form-select form-select-sm" id="change_driving_license">
                                     <option value="">Select</option>
                                     <option value="Yes">Yes</option>
@@ -363,14 +417,20 @@
 
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Address:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_address"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_address" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_address"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_address" placeholder="Enter address">
                             </div>
 
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Emergency Contact:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_emergency_contact"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_emergency_contact" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_emergency_contact"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_emergency_contact" placeholder="Enter emergency contact">
                             </div>
 
                             <!-- Medical Information Section -->
@@ -380,32 +440,47 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Medical Issue:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_medical_issue"></div>
-                                <textarea class="form-control form-control-sm" id="change_medical_issue" rows="2" placeholder="Changes (if any)"></textarea>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_medical_issue"></span>
+                                </div>
+                                <textarea class="form-control form-control-sm" id="change_medical_issue" rows="2" placeholder="Enter medical issues"></textarea>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Medications:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_medications"></div>
-                                <textarea class="form-control form-control-sm" id="change_medications" rows="2" placeholder="Changes (if any)"></textarea>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_medications"></span>
+                                </div>
+                                <textarea class="form-control form-control-sm" id="change_medications" rows="2" placeholder="Enter medications"></textarea>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Doctor Name:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_doctor"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_doctor"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_doctor" placeholder="Enter doctor name">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Doctor Phone:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_doctor_phone"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor_phone" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_doctor_phone"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_doctor_phone" placeholder="Enter doctor phone">
                             </div>
 
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Doctor Address:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_doctor_address"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor_address" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_doctor_address"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_doctor_address" placeholder="Enter doctor address">
                             </div>
 
                             <!-- Policy Information Section -->
@@ -413,51 +488,77 @@
                                 <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Policy Information</h5>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Beneficiary:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_beneficiary"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_beneficiary" placeholder="Changes (if any)">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Beneficiary DOB:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_beneficiary_dob"></div>
-                                <input type="date" class="form-control form-control-sm" id="change_beneficiary_dob">
+                            <!-- Beneficiaries Section -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Beneficiaries:</label>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_beneficiary"></span>
+                                </div>
+                                <div id="beneficiaries-container-phase3" class="mb-3">
+                                    <!-- Beneficiaries will be populated from Phase 2 -->
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="window.addBeneficiaryRowPhase3()">
+                                    <i class="bx bx-plus"></i> Add Beneficiary
+                                </button>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Policy Type:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_policy_type"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_policy_type" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_policy_type"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_policy_type" placeholder="Enter policy type">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Carrier:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_carrier"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_carrier" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_carrier"></span>
+                                </div>
+                                <select class="form-select form-select-sm" id="change_carrier">
+                                    <option value="">Select Carrier</option>
+                                    @foreach($insuranceCarriers as $carrier)
+                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Coverage Amount:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_coverage"></div>
-                                <input type="number" class="form-control form-control-sm" id="change_coverage" step="0.01" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_coverage"></span>
+                                </div>
+                                <input type="number" class="form-control form-control-sm" id="change_coverage" step="0.01" placeholder="Enter coverage amount">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Monthly Premium:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_premium"></div>
-                                <input type="number" class="form-control form-control-sm" id="change_premium" step="0.01" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_premium"></span>
+                                </div>
+                                <input type="number" class="form-control form-control-sm" id="change_premium" step="0.01" placeholder="Enter premium amount">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Initial Draft Date:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_draft_date"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_draft_date"></span>
+                                </div>
                                 <input type="date" class="form-control form-control-sm" id="change_draft_date">
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Future Draft Date:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_future_draft_date"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_future_draft_date"></span>
+                                </div>
                                 <input type="date" class="form-control form-control-sm" id="change_future_draft_date">
                             </div>
 
@@ -468,13 +569,19 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Bank Name:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_bank_name"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_bank_name" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_bank_name"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_bank_name" placeholder="Enter bank name">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Account Type:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_account_type"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_account_type"></span>
+                                </div>
                                 <select class="form-select form-select-sm" id="change_account_type">
                                     <option value="">Select</option>
                                     <option value="Checking">Checking</option>
@@ -484,26 +591,38 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Routing Number:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_routing"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_routing" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_routing"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_routing" placeholder="Enter routing number">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Account Number:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_account"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_account" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_account"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_account" placeholder="Enter account number">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Verified By:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_verified_by"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_verified_by" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_verified_by"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_verified_by" placeholder="Enter verifier name">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Bank Balance:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_balance"></div>
-                                <input type="number" class="form-control form-control-sm" id="change_balance" step="0.01" placeholder="Changes (if any)">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_balance"></span>
+                                </div>
+                                <input type="number" class="form-control form-control-sm" id="change_balance" step="0.01" placeholder="Enter balance">
                             </div>
 
                             <!-- Card Information Section -->
@@ -513,31 +632,34 @@
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Card Number:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_card_number"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_card_number" placeholder="Card number">
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_card_number"></span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm" id="change_card_number" placeholder="Enter card number">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">CVV:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_cvv"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_cvv"></span>
+                                </div>
                                 <input type="text" class="form-control form-control-sm" id="change_cvv" placeholder="CVV" maxlength="4">
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Expiry Date:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_expiry_date"></div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info">Current</span>
+                                    <span class="text-primary fw-bold" id="orig_expiry_date"></span>
+                                </div>
                                 <input type="text" class="form-control form-control-sm" id="change_expiry_date" placeholder="MM/YY">
                             </div>
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
                                 <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Additional Information</h5>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Source:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_source"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_source" placeholder="Changes (if any)">
                             </div>
 
                             <div class="col-md-6">
@@ -553,27 +675,123 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Policy Carrier:</label>
-                                <select class="form-select" id="phase3_policy_carrier">
+                                <select class="form-select" id="phase3_policy_carrier" data-carrier-partner-info='@json($carrierPartnerData)'>
                                     <option value="">Select Carrier</option>
-                                    <option value="AMAM">AMAM</option>
-                                    <option value="Combined">Combined</option>
-                                    <option value="AIG">AIG</option>
-                                    <option value="LBL">LBL</option>
+                                    @foreach($carrierPartnerData as $cp)
+                                        <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}" 
+                                                data-carrier-name="{{ $cp['carrier_name'] }}" 
+                                                data-partner-id="{{ $cp['partner_id'] }}"
+                                                data-partner-name="{{ $cp['partner_name'] }}"
+                                                data-states='@json($cp['states'])'>
+                                            {{ $cp['display_name'] }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">State:</label>
                                 <select class="form-select" id="phase3_approved_state">
-                                    <option value="">Select State</option>
-                                    <option value="FL">Florida</option>
-                                    <option value="TX">Texas</option>
-                                    <option value="CA">California</option>
-                                    <option value="NY">New York</option>
-                                    <option value="PA">Pennsylvania</option>
+                                    <option value="">Select Carrier First</option>
                                 </select>
                             </div>
+
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Assigned Partner:</label>
+                                <input type="text" class="form-control" id="phase3_assigned_partner" placeholder="Auto-filled from carrier selection" readonly>
+                                <input type="hidden" id="phase3_partner_id">
+                            </div>
+
+                            <!-- Follow Up Schedule -->
+                            <div class="col-12 mt-4">
+                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">Follow Up Required:</label>
+                                <select class="form-select" id="phase3_followup_required">
+                                    <option value="">Select option...</option>
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12" id="followup_datetime_field" style="display: none;">
+                                <label class="form-label fw-bold">Follow Up Date & Time:</label>
+                                <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
+                                <small class="text-muted">When should the follow-up call be scheduled?</small>
+                            </div>
                         </div>
+
+                        <script>
+                        (function() {
+                            const followupRequired = document.getElementById('phase3_followup_required');
+                            const followupDatetimeField = document.getElementById('followup_datetime_field');
+                            const followupScheduledAt = document.getElementById('phase3_followup_scheduled_at');
+                            
+                            if (followupRequired) {
+                                followupRequired.addEventListener('change', function() {
+                                    if (this.value === '1') {
+                                        followupDatetimeField.style.display = 'block';
+                                        followupScheduledAt.setAttribute('required', 'required');
+                                    } else {
+                                        followupDatetimeField.style.display = 'none';
+                                        followupScheduledAt.removeAttribute('required');
+                                    }
+                                });
+                            }
+
+                            // Carrier-Partner State Filtering
+                            const carrierSelect = document.getElementById('phase3_policy_carrier');
+                            const stateSelect = document.getElementById('phase3_approved_state');
+                            const partnerInput = document.getElementById('phase3_assigned_partner');
+                            const partnerIdInput = document.getElementById('phase3_partner_id');
+                            const allStates = @json($usStates);
+
+                            if (carrierSelect) {
+                                carrierSelect.addEventListener('change', function() {
+                                    const selectedOption = this.options[this.selectedIndex];
+                                    
+                                    // Clear state dropdown
+                                    stateSelect.innerHTML = '<option value="">Select State</option>';
+                                    
+                                    if (this.value) {
+                                        // Get approved states for this carrier-partner combo
+                                        const approvedStates = JSON.parse(selectedOption.dataset.states || '[]');
+                                        const partnerName = selectedOption.dataset.partnerName;
+                                        const partnerId = selectedOption.dataset.partnerId;
+                                        
+                                        // Update assigned partner field
+                                        if (partnerInput) {
+                                            partnerInput.value = partnerName;
+                                        }
+                                        if (partnerIdInput) {
+                                            partnerIdInput.value = partnerId;
+                                        }
+                                        
+                                        // Populate states dropdown with approved states only
+                                        approvedStates.forEach(stateCode => {
+                                            if (allStates[stateCode]) {
+                                                const option = document.createElement('option');
+                                                option.value = stateCode;
+                                                option.textContent = allStates[stateCode];
+                                                stateSelect.appendChild(option);
+                                            }
+                                        });
+                                        
+                                        if (approvedStates.length === 0) {
+                                            stateSelect.innerHTML = '<option value="">No approved states</option>';
+                                        }
+                                    } else {
+                                        stateSelect.innerHTML = '<option value="">Select Carrier First</option>';
+                                        if (partnerInput) partnerInput.value = '';
+                                        if (partnerIdInput) partnerIdInput.value = '';
+                                    }
+                                });
+                            }
+                        })();
+                        </script>
 
                         <div class="text-center mt-4">
                             <button type="button" class="btn btn-secondary" onclick="goToPhase2()">
@@ -616,11 +834,13 @@
     window.autoDialActive = false;
     window.currentLeadIndex = 0;
     window.dialedLeads = new Set();
+    window.beneficiaryIndexRavens = 0;
     window.isCallActive = false;
     window.autoDialTimeout = null;
     window.currentEventId = null;
     window.pollInterval = null;
     window.currentLeadData = null;
+    window.autoSaveInterval = null; // Auto-save form data every 30 seconds
 
     // TEST: Ensure JavaScript is loading
     console.log('✅ Ravens calling script loaded');
@@ -997,12 +1217,12 @@
                                 closeRavensForm();
                                 toastr.info(`Call ended`, 'Call Completed');
                             } else {
-                                // Form not shown yet - just stop monitoring, form will never appear
-                                console.log('⛔ Call ended before form shown - canceling timer');
+                                // Form not shown yet - cancel timer so form will never appear
+                                console.log('⛔ Call ended before form shown - canceling 12-second timer');
                                 isMonitoringActive = false;
-                                clearTimeout(autoShowTimer);
+                                clearTimeout(formTimer); // Cancel the 12-second form display timer
                                 if (checkInterval) clearInterval(checkInterval);
-                                toastr.info(`Call ${status}`, 'Call Ended');
+                                toastr.info(`Call ${status} before form opened`, 'Call Ended');
                             }
                         } else {
                             console.log(`✅ Call still active (status: ${status})`);
@@ -1037,6 +1257,15 @@
     // Close the Ravens form when call ends
     window.closeRavensForm = function() {
         console.log('🚪 Closing Ravens form');
+        
+        // Stop auto-save and save one final time
+        if (window.autoSaveInterval) {
+            clearInterval(window.autoSaveInterval);
+            window.autoSaveInterval = null;
+            console.log('🛑 Auto-save interval cleared');
+        }
+        autoSaveFormData(true); // Final save before closing
+        
         const modalElement = document.getElementById('callDetailsModal');
         if (modalElement) {
             const modal = bootstrap.Modal.getInstance(modalElement);
@@ -1105,7 +1334,6 @@
                         account_number: leadData.account_number || '',
                         verified_by: leadData.verified_by || '',
                         bank_balance: leadData.bank_balance || '',
-                        source: leadData.source || '',
                         closer_name: leadData.closer_name || ''
                     },
                     lead_id: leadId,
@@ -1429,6 +1657,16 @@
     // Note: currentLeadData is already declared globally at line 477 as window.currentLeadData
 
     function closeCallModal() {
+        // Stop auto-save and save one final time before closing
+        if (window.autoSaveInterval) {
+            clearInterval(window.autoSaveInterval);
+            window.autoSaveInterval = null;
+            console.log('🛑 Auto-save interval cleared');
+        }
+        
+        // Final save before closing
+        autoSaveFormData(true); // true = silent save on close
+        
         const modalElement = document.getElementById('callDetailsModal');
         if (modalElement) {
             const modal = bootstrap.Modal.getInstance(modalElement);
@@ -1473,16 +1711,191 @@
     }
 
     function goToPhase2() {
+        console.log('Navigating to Phase 2...');
         document.getElementById('phase1').style.display = 'none';
         document.getElementById('phase2').style.display = 'block';
         document.getElementById('phase3').style.display = 'none';
     }
 
     function goToPhase3() {
-        populatePhase3WithData();
+        console.log('Navigating to Phase 3...');
+        
+        // Transfer Phase 2 data to Phase 3 displays
+        document.getElementById('orig_name').textContent = document.getElementById('phase2_name').value || document.getElementById('displayName').textContent;
+        document.getElementById('orig_phone').textContent = document.getElementById('phase2_phone').value || document.getElementById('displayPhone').textContent;
+        document.getElementById('orig_secondary_phone').textContent = document.getElementById('phase2_secondary_phone').value || '-';
+        document.getElementById('orig_state').textContent = document.getElementById('phase2_state').value || '-';
+        document.getElementById('orig_zip').textContent = document.getElementById('phase2_zip').value || '-';
+        document.getElementById('orig_dob').textContent = document.getElementById('phase2_dob').value || document.getElementById('displayDOB').textContent;
+        document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || document.getElementById('displaySSN').textContent;
+        document.getElementById('orig_address').textContent = document.getElementById('phase2_address').value || document.getElementById('displayAddress').textContent;
+        document.getElementById('orig_emergency_contact').textContent = document.getElementById('phase2_emergency_contact').value || '-';
+        document.getElementById('orig_carrier').textContent = document.getElementById('phase2_carrier').value || document.getElementById('displayCarrier').textContent;
+        document.getElementById('orig_coverage').textContent = document.getElementById('phase2_coverage').value || document.getElementById('displayCoverage').textContent;
+        document.getElementById('orig_premium').textContent = document.getElementById('phase2_premium').value || document.getElementById('displayPremium').textContent;
+        
         document.getElementById('phase1').style.display = 'none';
         document.getElementById('phase2').style.display = 'none';
         document.getElementById('phase3').style.display = 'block';
+    }
+
+    function goToPhase1() {
+        console.log('Returning to Phase 1...');
+        document.getElementById('phase1').style.display = 'block';
+        document.getElementById('phase2').style.display = 'none';
+        document.getElementById('phase3').style.display = 'none';
+    }
+
+    // Add beneficiary row dynamically
+    window.addBeneficiaryRow = function() {
+        const container = document.getElementById('beneficiaries-container-ravens');
+        if (!container) {
+            console.error('Beneficiary container not found');
+            return;
+        }
+        
+        const index = container.querySelectorAll('.beneficiary-ravens-row').length;
+        const row = document.createElement('div');
+        row.className = 'beneficiary-ravens-row row mb-2 g-2';
+        row.innerHTML = `
+            <div class="col-md-4">
+                <input type="text" class="form-control beneficiary-name-ravens" 
+                       placeholder="Beneficiary Name" required>
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control beneficiary-dob-ravens" required>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select beneficiary-relation-ravens">
+                    <option value="">Relation</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Child">Child</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Sibling">Sibling</option>
+                    <option value="Grandchild">Grandchild</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.beneficiary-ravens-row').remove()">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(row);
+        console.log('✅ Beneficiary row added');
+    }
+
+    // Add beneficiary row for Phase 3
+    window.addBeneficiaryRowPhase3 = function() {
+        const container = document.getElementById('beneficiaries-container-phase3');
+        if (!container) {
+            console.error('Phase 3 Beneficiary container not found');
+            return;
+        }
+        
+        const row = document.createElement('div');
+        row.className = 'beneficiary-phase3-row row mb-2 g-2';
+        row.innerHTML = `
+            <div class="col-md-4">
+                <input type="text" class="form-control form-control-sm beneficiary-name-phase3" 
+                       placeholder="Beneficiary Name">
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control form-control-sm beneficiary-dob-phase3">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select form-select-sm beneficiary-relation-phase3">
+                    <option value="">Relation</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Child">Child</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Sibling">Sibling</option>
+                    <option value="Grandchild">Grandchild</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.beneficiary-phase3-row').remove()">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        container.appendChild(row);
+        console.log('✅ Phase 3 Beneficiary row added');
+    }
+
+    // REMOVED DUPLICATE BROKEN showCallModal FUNCTION
+    
+    function goToPhase3() {
+        populatePhase3WithData();
+        copyBeneficiariesFromPhase2ToPhase3();
+        document.getElementById('phase1').style.display = 'none';
+        document.getElementById('phase2').style.display = 'none';
+        document.getElementById('phase3').style.display = 'block';
+    }
+
+    // Copy beneficiaries from Phase 2 to Phase 3
+    function copyBeneficiariesFromPhase2ToPhase3() {
+        const phase2Container = document.getElementById('beneficiaries-container-ravens');
+        const phase3Container = document.getElementById('beneficiaries-container-phase3');
+        
+        if (!phase2Container || !phase3Container) {
+            console.error('Beneficiary containers not found');
+            return;
+        }
+
+        // Clear Phase 3 container
+        phase3Container.innerHTML = '';
+
+        // Get all beneficiaries from Phase 2
+        const phase2Rows = phase2Container.querySelectorAll('.beneficiary-ravens-row');
+        
+        if (phase2Rows.length === 0) {
+            // Add one empty row if no beneficiaries
+            window.addBeneficiaryRowPhase3();
+            return;
+        }
+
+        // Copy each beneficiary to Phase 3
+        phase2Rows.forEach((phase2Row) => {
+            const name = phase2Row.querySelector('.beneficiary-name-ravens')?.value || '';
+            const dob = phase2Row.querySelector('.beneficiary-dob-ravens')?.value || '';
+            const relation = phase2Row.querySelector('.beneficiary-relation-ravens')?.value || '';
+
+            const row = document.createElement('div');
+            row.className = 'beneficiary-phase3-row row mb-2 g-2';
+            row.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" class="form-control form-control-sm beneficiary-name-phase3" 
+                           placeholder="Beneficiary Name" value="${name}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control form-control-sm beneficiary-dob-phase3" value="${dob}">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm beneficiary-relation-phase3">
+                        <option value="">Relation</option>
+                        <option value="Spouse" ${relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                        <option value="Child" ${relation === 'Child' ? 'selected' : ''}>Child</option>
+                        <option value="Parent" ${relation === 'Parent' ? 'selected' : ''}>Parent</option>
+                        <option value="Sibling" ${relation === 'Sibling' ? 'selected' : ''}>Sibling</option>
+                        <option value="Grandchild" ${relation === 'Grandchild' ? 'selected' : ''}>Grandchild</option>
+                        <option value="Other" ${relation === 'Other' ? 'selected' : ''}>Other</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.beneficiary-phase3-row').remove()">
+                        <i class="bx bx-trash"></i>
+                    </button>
+                </div>
+            `;
+            phase3Container.appendChild(row);
+        });
+
+        console.log(`✅ Copied ${phase2Rows.length} beneficiaries to Phase 3`);
     }
 
     function populatePhase3WithData() {
@@ -1551,16 +1964,7 @@
             }).join(', ');
         }
         document.getElementById('orig_beneficiary').textContent = beneficiariesDisplay;
-        // Show first beneficiary DOB if available
-        let beneficiaryDob = '';
-        if (ld.beneficiaries && ld.beneficiaries.length > 0 && ld.beneficiaries[0].dob) {
-            beneficiaryDob = formatDate(ld.beneficiaries[0].dob);
-        } else if (ld.beneficiary_dob) {
-            beneficiaryDob = formatDate(ld.beneficiary_dob);
-        } else {
-            beneficiaryDob = 'N/A';
-        }
-        document.getElementById('orig_beneficiary_dob').textContent = beneficiaryDob;
+        // Note: orig_beneficiary_dob display has been removed in favor of showing all beneficiaries with DOBs
         document.getElementById('orig_policy_type').textContent = ld.policy_type || 'N/A';
         document.getElementById('orig_carrier').textContent = document.getElementById('phase2_carrier').value || 'N/A';
         document.getElementById('orig_coverage').textContent = document.getElementById('phase2_coverage').value ? '$' + parseFloat(document.getElementById('phase2_coverage').value).toLocaleString() : 'N/A';
@@ -1582,7 +1986,6 @@
         document.getElementById('orig_expiry_date').textContent = ld.expiry_date || 'N/A';
 
         // Additional Information
-        document.getElementById('orig_source').textContent = ld.source || 'N/A';
         document.getElementById('orig_closer').textContent = ld.closer_name || 'N/A';
 
         // Pre-fill change inputs with Phase 2 data
@@ -1687,6 +2090,9 @@
         
         safeSetText('displayName', leadData.cn_name || 'Not available');
         safeSetText('displayPhone', leadData.phone_number || 'Not available');
+        safeSetText('displaySecondaryPhone', leadData.secondary_phone_number || 'N/A');
+        safeSetText('displayState', leadData.state || 'N/A');
+        safeSetText('displayZipCode', leadData.zip_code || 'N/A');
         safeSetText('displayDOB', formatDateDisplay(leadData.date_of_birth));
         safeSetText('displaySSN', leadData.ssn || 'Not available');
         // Address fallback: use address, else state, else birth place
@@ -1695,6 +2101,7 @@
             addressDisplay = leadData.state || leadData.birth_place || 'Not available';
         }
         safeSetText('displayAddress', addressDisplay);
+        safeSetText('displayEmergencyContact', leadData.emergency_contact || 'N/A');
         
         // Handle beneficiaries display - show as comma-separated list
         // Show all current beneficiaries (names and DOBs if available)
@@ -1740,18 +2147,29 @@
             if (leadData.beneficiaries && leadData.beneficiaries.length > 0) {
                 leadData.beneficiaries.forEach((beneficiary, index) => {
                 const row = document.createElement('div');
-                row.className = 'beneficiary-ravens-row row mb-2';
+                row.className = 'beneficiary-ravens-row row mb-2 g-2';
                 row.innerHTML = `
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <input type="text" class="form-control beneficiary-name-ravens" 
                                placeholder="Beneficiary Name" value="${beneficiary.name || ''}" required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <input type="date" class="form-control beneficiary-dob-ravens" 
                                value="${formatDateInput(beneficiary.dob || '')}" required>
                     </div>
+                    <div class="col-md-3">
+                        <select class="form-select beneficiary-relation-ravens">
+                            <option value="">Relation</option>
+                            <option value="Spouse" ${(beneficiary.relation || '') === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                            <option value="Child" ${(beneficiary.relation || '') === 'Child' ? 'selected' : ''}>Child</option>
+                            <option value="Parent" ${(beneficiary.relation || '') === 'Parent' ? 'selected' : ''}>Parent</option>
+                            <option value="Sibling" ${(beneficiary.relation || '') === 'Sibling' ? 'selected' : ''}>Sibling</option>
+                            <option value="Grandchild" ${(beneficiary.relation || '') === 'Grandchild' ? 'selected' : ''}>Grandchild</option>
+                            <option value="Other" ${(beneficiary.relation || '') === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
                     <div class="col-md-2">
-                        <button type="button" class="btn btn-danger btn-sm remove-beneficiary-ravens">
+                        <button type="button" class="btn btn-danger btn-sm w-100 remove-beneficiary-ravens">
                             <i class="bx bx-trash"></i>
                         </button>
                     </div>
@@ -1762,17 +2180,28 @@
             } else {
                 // Add one empty beneficiary row
                 const row = document.createElement('div');
-                row.className = 'beneficiary-ravens-row row mb-2';
+                row.className = 'beneficiary-ravens-row row mb-2 g-2';
                 row.innerHTML = `
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <input type="text" class="form-control beneficiary-name-ravens" 
                                placeholder="Beneficiary Name" required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <input type="date" class="form-control beneficiary-dob-ravens" required>
                     </div>
+                    <div class="col-md-3">
+                        <select class="form-select beneficiary-relation-ravens">
+                            <option value="">Relation</option>
+                            <option value="Spouse">Spouse</option>
+                            <option value="Child">Child</option>
+                            <option value="Parent">Parent</option>
+                            <option value="Sibling">Sibling</option>
+                            <option value="Grandchild">Grandchild</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                     <div class="col-md-2">
-                        <button type="button" class="btn btn-danger btn-sm remove-beneficiary-ravens">
+                        <button type="button" class="btn btn-danger btn-sm w-100 remove-beneficiary-ravens">
                             <i class="bx bx-trash"></i>
                         </button>
                     </div>
@@ -1815,6 +2244,15 @@
             // CRITICAL: Show the modal first, then make sure phase1 is visible
             modal.show();
             console.log('✅ Modal.show() called');
+            
+            // Start auto-save interval (save every 30 seconds)
+            if (window.autoSaveInterval) {
+                clearInterval(window.autoSaveInterval);
+            }
+            window.autoSaveInterval = setInterval(() => {
+                autoSaveFormData(false); // Show auto-save notification
+            }, 30000); // Every 30 seconds
+            console.log('💾 Auto-save started (every 30 seconds)');
             
             // Ensure phase1 is visible after modal shows
             setTimeout(() => {
@@ -1895,6 +2333,15 @@
                 $('#callDetailsModal').modal('show');
                 console.log('✅ Fallback: jQuery modal shown');
                 goToPhase1();
+                
+                // Start auto-save interval for fallback case too
+                if (window.autoSaveInterval) {
+                    clearInterval(window.autoSaveInterval);
+                }
+                window.autoSaveInterval = setInterval(() => {
+                    autoSaveFormData(false); // Show auto-save notification
+                }, 30000); // Every 30 seconds
+                console.log('💾 Auto-save started (fallback, every 30 seconds)');
             } else {
                 console.error('❌ Both Bootstrap and jQuery modal methods failed');
             }
@@ -1935,7 +2382,6 @@
                 coverage_amount: '100000',
                 monthly_premium: '75.50',
                 closer_name: @json(Auth::user()->name ?? 'Test Closer'),
-                source: 'Test Source'
             },
             call_connected_at: new Date().toISOString()
         };
@@ -2017,16 +2463,26 @@
     }
     
     /**
-     * Save and Exit - Save lead data without marking as sale
+     * Auto-save form data silently (called every 30 seconds and on form close)
      */
-    function saveAndExit() {
-        // Collect all form data from Phase 3
+    function autoSaveFormData(isSilent = false) {
         const leadId = window.currentLeadData?.id;
         
         if (!leadId) {
-            toastr.error('Lead ID not found');
+            console.log('⚠️ Auto-save skipped: No lead ID');
             return;
         }
+
+        // Collect beneficiary data
+        const beneficiaries = [];
+        document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
+            const name = row.querySelector('.beneficiary-name-phase3')?.value;
+            const dob = row.querySelector('.beneficiary-dob-phase3')?.value;
+            const relation = row.querySelector('.beneficiary-relation-phase3')?.value;
+            if (name) {
+                beneficiaries.push({ name: name, dob: dob || null, relation: relation || null });
+            }
+        });
         
         const formData = {
             lead_id: leadId,
@@ -2049,8 +2505,7 @@
             doctor_name: document.getElementById('change_doctor')?.value || null,
             doctor_number: document.getElementById('change_doctor_phone')?.value || null,
             doctor_address: document.getElementById('change_doctor_address')?.value || null,
-            beneficiary: document.getElementById('change_beneficiary')?.value || null,
-            beneficiary_dob: document.getElementById('change_beneficiary_dob')?.value || null,
+            beneficiaries: beneficiaries,
             policy_type: document.getElementById('change_policy_type')?.value || null,
             carrier_name: document.getElementById('change_carrier')?.value || null,
             coverage_amount: document.getElementById('change_coverage')?.value || null,
@@ -2066,7 +2521,109 @@
             card_number: document.getElementById('change_card_number')?.value || null,
             cvv: document.getElementById('change_cvv')?.value || null,
             expiry_date: document.getElementById('change_expiry_date')?.value || null,
-            source: document.getElementById('change_source')?.value || null,
+            closer_name: document.getElementById('change_closer')?.value || null,
+        };
+        
+        // Check if any data has actually been entered (besides default values)
+        const hasData = Object.values(formData).some(val => {
+            if (val === null || val === '' || val === leadId) return false;
+            if (Array.isArray(val) && val.length === 0) return false;
+            return true;
+        });
+        
+        if (!hasData) {
+            if (!isSilent) {
+                console.log('⚠️ Auto-save skipped: No data entered yet');
+            }
+            return;
+        }
+        
+        // Send to server
+        fetch('/ravens/leads/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (!isSilent) {
+                    console.log('💾 Auto-save successful');
+                    toastr.success('Form data saved', 'Auto-saved', { timeOut: 2000 });
+                }
+            } else {
+                console.error('⚠️ Auto-save failed:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Auto-save error:', error);
+        });
+    }
+
+    /**
+     * Save and Exit - Save lead data without marking as sale
+     */
+    function saveAndExit() {
+        // Collect all form data from Phase 3
+        const leadId = window.currentLeadData?.id;
+        
+        if (!leadId) {
+            toastr.error('Lead ID not found');
+            return;
+        }
+
+        // Collect beneficiary data from Phase 3
+        const beneficiaries = [];
+        document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
+            const name = row.querySelector('.beneficiary-name-phase3')?.value;
+            const dob = row.querySelector('.beneficiary-dob-phase3')?.value;
+            const relation = row.querySelector('.beneficiary-relation-phase3')?.value;
+            if (name) {
+                beneficiaries.push({ name: name, dob: dob || null, relation: relation || null });
+            }
+        });
+        
+        const formData = {
+            lead_id: leadId,
+            cn_name: document.getElementById('change_name')?.value || null,
+            phone_number: document.getElementById('change_phone')?.value || null,
+            secondary_phone_number: document.getElementById('change_secondary_phone')?.value || null,
+            state: document.getElementById('change_state')?.value || null,
+            zip_code: document.getElementById('change_zip')?.value || null,
+            date_of_birth: document.getElementById('change_dob')?.value || null,
+            ssn: document.getElementById('change_ssn')?.value || null,
+            gender: document.getElementById('change_gender')?.value || null,
+            address: document.getElementById('change_address')?.value || null,
+            emergency_contact: document.getElementById('change_emergency_contact')?.value || null,
+            driving_license: document.getElementById('change_driving_license')?.value || null,
+            birth_place: document.getElementById('change_birthplace')?.value || null,
+            height_weight: document.getElementById('change_height_weight')?.value || null,
+            smoker: document.getElementById('change_smoker')?.value || null,
+            medical_issue: document.getElementById('change_medical_issue')?.value || null,
+            medications: document.getElementById('change_medications')?.value || null,
+            doctor_name: document.getElementById('change_doctor')?.value || null,
+            doctor_number: document.getElementById('change_doctor_phone')?.value || null,
+            doctor_address: document.getElementById('change_doctor_address')?.value || null,
+            beneficiaries: beneficiaries,
+            policy_type: document.getElementById('change_policy_type')?.value || null,
+            carrier_name: document.getElementById('change_carrier')?.value || null,
+            coverage_amount: document.getElementById('change_coverage')?.value || null,
+            monthly_premium: document.getElementById('change_premium')?.value || null,
+            initial_draft_date: document.getElementById('change_draft_date')?.value || null,
+            future_draft_date: document.getElementById('change_future_draft_date')?.value || null,
+            bank_name: document.getElementById('change_bank_name')?.value || null,
+            account_type: document.getElementById('change_account_type')?.value || null,
+            routing_number: document.getElementById('change_routing')?.value || null,
+            account_number: document.getElementById('change_account')?.value || null,
+            account_verified_by: document.getElementById('change_verified_by')?.value || null,
+            bank_balance: document.getElementById('change_balance')?.value || null,
+            card_number: document.getElementById('change_card_number')?.value || null,
+            cvv: document.getElementById('change_cvv')?.value || null,
+            expiry_date: document.getElementById('change_expiry_date')?.value || null,
             closer_name: document.getElementById('change_closer')?.value || null,
         };
         
@@ -2109,17 +2666,14 @@
         
         // All fields are now optional, skip required field validation
         
-        // Collect beneficiary data
+        // Collect beneficiary data from Phase 3
         const beneficiaries = [];
-        document.querySelectorAll('.beneficiary-ravens-row').forEach((row, index) => {
-            const nameInput = row.querySelector(`[name="beneficiaries[${index}][name]"]`);
-            const relationInput = row.querySelector(`[name="beneficiaries[${index}][relation]"]`);
-            const dobInput = row.querySelector(`[name="beneficiaries[${index}][dob]"]`);
-            const name = nameInput?.value;
-            const relation = relationInput?.value;
-            const dob = dobInput?.value;
+        document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
+            const name = row.querySelector('.beneficiary-name-phase3')?.value;
+            const dob = row.querySelector('.beneficiary-dob-phase3')?.value;
+            const relation = row.querySelector('.beneficiary-relation-phase3')?.value;
             if (name) {
-                beneficiaries.push({ name: name, relation: relation || null, dob: dob || null });
+                beneficiaries.push({ name: name, dob: dob || null, relation: relation || null });
             }
         });
         
@@ -2161,10 +2715,20 @@
             card_number: document.getElementById('change_card_number')?.value || null,
             cvv: document.getElementById('change_cvv')?.value || null,
             expiry_date: document.getElementById('change_expiry_date')?.value || null,
-            source: document.getElementById('change_source')?.value || null,
             closer_name: @json(Auth::user()->name ?? 'Unknown'),
-            policy_carrier: document.getElementById('phase3_policy_carrier')?.value || null,
+            
+            // Extract carrier and partner info from the combined value
+            insurance_carrier_id: (() => {
+                const carrierSelect = document.getElementById('phase3_policy_carrier');
+                const selectedOption = carrierSelect?.options[carrierSelect.selectedIndex];
+                return selectedOption?.dataset?.carrierName || null;
+            })(),
+            partner_id: document.getElementById('phase3_partner_id')?.value || null,
+            assigned_partner: document.getElementById('phase3_assigned_partner')?.value || null,
             state: document.getElementById('phase3_approved_state')?.value || null,
+            
+            followup_required: document.getElementById('phase3_followup_required')?.value || null,
+            followup_scheduled_at: document.getElementById('phase3_followup_scheduled_at')?.value || null,
         };
         
         // Confirm submission

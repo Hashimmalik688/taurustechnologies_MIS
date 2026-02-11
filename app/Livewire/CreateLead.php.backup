@@ -153,10 +153,10 @@ class CreateLead extends Component
         'ssn.required' => 'SSN is required.',
         'address.required' => 'Address is required.',
 
-        // Lead Information Messages
+        // Lead Infies.*.name.required' => 'Beneficiary name
         'coverage_amount.required' => 'Coverage amount is required.',
         'monthly_premium.required' => 'Monthly premium is required.',
-        'beneficiaries.*.name.required' => 'Beneficiary name is required.',
+        'beneficiary.required' => 'Beneficiary is required.',
         'policy_type.required' => 'Policy type is required.',
         'initial_draft_date.required' => 'Initial draft date is required.',
         'bank_name.required' => 'Bank name is required.',
@@ -165,10 +165,7 @@ class CreateLead extends Component
 
         // Carrier Messages
         'carrier_email.email' => 'Please enter a valid email address.',
-        'carrier_website.url' => 'Please enter a valid website URL.',
-    ];
-
-    public function mount()
+        'carrier_webmount()
     {
         // Initialize with one empty beneficiary
         $this->beneficiaries = [
@@ -190,31 +187,7 @@ class CreateLead extends Component
     }
 
     public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-    }
-
-    public function save()
-    {
-        // Filter out empty beneficiaries before validation
-        $this->beneficiaries = array_filter($this->beneficiaries, function($b) {
-            return !empty($b['name']);
-        });
-        $this->beneficiaries = array_values($this->beneficiaries); // Re-index
-
-        $validatedData = $this->validate();
-
-        // Separate lead data from carrier data
-        $leadData = collect($validatedData)->except([
-            'carrier_name',
-            'carrier_policy_number',
-            'carrier_phone',
-            'carrier_email',
-            'carrier_website',
-            'carrier_notes',
-        ])->toArray();
-
-        // Store beneficiaries in JSON field if provided
+    {Store beneficiaries in JSON field if provided
         if (!empty($this->beneficiaries)) {
             $leadData['beneficiaries'] = $this->beneficiaries;
             // Also set the first beneficiary in the old field for backwards compatibility
@@ -229,15 +202,35 @@ class CreateLead extends Component
             $leadData['source_type'] = 'peregrine';
         }
 
-        // Set proper status and timestamps so manually created leads appear in Leads Management
-        // Status 'closed' means the lead has been processed and should show in the main leads list
-        $leadData['status'] = 'closed';
-        $leadData['closer_name'] = auth()->user()->name ?? 'Manual Entry';
-        $leadData['verified_by'] = null; // Keep null so it's not counted as a verifier submission
+        // Ensure verified_by is NOT set for manually created leads
+        // This ensures the lead shows up in Ravens calling list
+        $leadData['verified_by'] = null;
+    public function save()
+    {
+        // Filter out empty beneficiaries before validation
+        $this->beneficiaries = array_filter($this->beneficiaries, function($b) {
+            return !empty($b['name']);
+        });
+        $this->beneficiaries = array_values($this->beneficiaries); // Re-index
 
-        // Convert boolean smoker to enum 'yes'/'no' for database
-        if (isset($leadData['smoker'])) {
-            $leadData['smoker'] = $leadData['smoker'] ? 'yes' : 'no';
+
+    public function save()
+    {
+        $validatedData = $this->validate();
+
+        // Separate lead data from carrier data
+        $leadData = collect($validatedData)->except([
+            'carrier_name',
+            'carrier_policy_number',
+            'carrier_phone',
+            'carrier_email',
+            'carrier_website',
+            'carrier_notes',
+        ])->toArray();
+
+        // Mark as peregrine if user has peregrine role
+        if (auth()->check() && auth()->user()->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+            $leadData['source_type'] = 'peregrine';
         }
 
         // Create the lead
