@@ -363,6 +363,8 @@ class LeadController extends Controller
             $lead->medical_issue = $request->input('medical_issue');
             $lead->medications = $request->input('medications');
             $lead->height_weight = $request->input('height_weight');
+            $lead->height = $request->input('height');
+            $lead->weight = $request->input('weight');
             $lead->doctor_name = $request->input('doctor_name');
             $lead->policy_type = $request->input('policy_type');
             $lead->coverage_amount = $request->input('coverage_amount');
@@ -676,10 +678,35 @@ class LeadController extends Controller
 
     public function import(Request $request)
     {
-        // Validate the request - Allow up to 100MB files for large bulk imports
-        $request->validate([
-            'import_file' => 'required|mimes:xlsx,xls,csv|max:102400',
+        \Log::info('=== WEB IMPORT REQUEST RECEIVED ===', [
+            'user' => auth()->user()->name ?? 'unknown',
+            'has_file' => $request->hasFile('import_file'),
+            'file_name' => $request->hasFile('import_file') ? $request->file('import_file')->getClientOriginalName() : 'none',
+            'file_size' => $request->hasFile('import_file') ? $request->file('import_file')->getSize() : 0,
+            'file_mime' => $request->hasFile('import_file') ? $request->file('import_file')->getMimeType() : 'none',
+            'file_extension' => $request->hasFile('import_file') ? $request->file('import_file')->getClientOriginalExtension() : 'none',
         ]);
+
+        // Validate file exists
+        if (!$request->hasFile('import_file')) {
+            \Log::error('=== WEB IMPORT FAILED: No file uploaded ===');
+            return redirect()->back()->with('error', 'No file was uploaded. Please select a file and try again.');
+        }
+
+        $file = $request->file('import_file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $allowedExtensions = ['csv', 'xlsx', 'xls'];
+
+        if (!in_array($extension, $allowedExtensions)) {
+            \Log::error('=== WEB IMPORT FAILED: Invalid extension ===', ['extension' => $extension]);
+            return redirect()->back()->with('error', "Invalid file type '.{$extension}'. Only .csv, .xlsx, .xls files are accepted.");
+        }
+
+        // Check file size (100MB max)
+        if ($file->getSize() > 100 * 1024 * 1024) {
+            \Log::error('=== WEB IMPORT FAILED: File too large ===', ['size' => $file->getSize()]);
+            return redirect()->back()->with('error', 'File is too large. Maximum size is 100MB.');
+        }
 
         try {
             $beforeCount = Lead::count();
@@ -689,6 +716,12 @@ class LeadController extends Controller
 
             $afterCount = Lead::count();
             $imported = $afterCount - $beforeCount;
+
+            \Log::info('=== WEB IMPORT COMPLETED ===', [
+                'before' => $beforeCount,
+                'after' => $afterCount,
+                'imported' => $imported,
+            ]);
 
             return redirect()->route('leads.index')->with('success', "Successfully imported {$imported} leads! Total leads: {$afterCount}");
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
@@ -701,7 +734,7 @@ class LeadController extends Controller
             return redirect()->back()->with('error', $errorMessage);
         } catch (\Exception $e) {
             \Log::error('Lead import failed: ' . $e->getMessage(), [
-                'file' => $request->file('import_file')->getClientOriginalName(),
+                'file' => $request->hasFile('import_file') ? $request->file('import_file')->getClientOriginalName() : 'unknown',
                 'exception' => get_class($e),
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),

@@ -127,17 +127,35 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-3">
                                 <div class="mb-3">
-                                    <label for="height_weight" class="form-label">
+                                    <label for="height" class="form-label">
                                         <i class="mdi mdi-human-male-height me-1"></i>
-                                        Height/Weight
+                                        Height
                                     </label>
-                                    <input type="text" class="form-control @error('height_weight') is-invalid @enderror"
-                                        id="height_weight" name="height_weight"
-                                        value="{{ old('height_weight', $lead->height_weight) }}"
-                                        placeholder="e.g., 5'10\" / 180 lbs">
-                                    @error('height_weight')
+                                    <input type="text" class="form-control @error('height') is-invalid @enderror"
+                                        id="height" name="height"
+                                        value="{{ old('height', $lead->height) }}"
+                                        placeholder="e.g., 5'10&quot;">
+                                    @error('height')
+                                        <div class="invalid-feedback d-block">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="weight" class="form-label">
+                                        <i class="mdi mdi-weight me-1"></i>
+                                        Weight (lbs)
+                                    </label>
+                                    <input type="text" class="form-control @error('weight') is-invalid @enderror"
+                                        id="weight" name="weight"
+                                        value="{{ old('weight', $lead->weight) }}"
+                                        placeholder="e.g., 180">
+                                    @error('weight')
                                         <div class="invalid-feedback d-block">
                                             {{ $message }}
                                         </div>

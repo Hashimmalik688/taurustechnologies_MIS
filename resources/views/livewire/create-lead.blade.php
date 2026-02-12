@@ -196,11 +196,18 @@
                     <h6 class="form-section-title mt-4">Health Information</h6>
                     <div class="row-spacing">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="mb-3">
-                                    <label for="height_weight" class="form-label">Height & Weight</label>
-                                    <input type="text" class="form-control" id="height_weight"
-                                        wire:model="height_weight" placeholder="5'10&quot;, 180 lbs">
+                                    <label for="height" class="form-label">Height</label>
+                                    <input type="text" class="form-control" id="height"
+                                        wire:model="height" placeholder="5'10&quot;">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label for="weight" class="form-label">Weight (lbs)</label>
+                                    <input type="text" class="form-control" id="weight"
+                                        wire:model="weight" placeholder="180">
                                 </div>
                             </div>
                             <div class="col-md-2">

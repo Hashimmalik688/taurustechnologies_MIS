@@ -22,7 +22,8 @@
                     <th>Smoker</th>
                     @hasrole('Super Admin')
                         <th>DL#</th>
-                        <th>Height/Weight</th>
+                        <th>Height</th>
+                        <th>Weight</th>
                         <th>Birth Place</th>
                         <th>Medical Issue</th>
                         <th>Medications</th>
@@ -121,7 +122,8 @@
                         </td>
                         @hasrole('Super Admin')
                             <td>{{ $lead->driving_license ?? '—' }}</td>
-                            <td>{{ $lead->height_weight ?? '—' }}</td>
+                            <td>{{ $lead->height ?? '—' }}</td>
+                            <td>{{ $lead->weight ? $lead->weight . ' lbs' : '—' }}</td>
                             <td>{{ $lead->birth_place ?? '—' }}</td>
                             <td><span class="text-truncate d-inline-block" style="max-width: 120px;" title="{{ $lead->medical_issue }}">{{ $lead->medical_issue ?? '—' }}</span></td>
                             <td><span class="text-truncate d-inline-block" style="max-width: 120px;" title="{{ $lead->medications }}">{{ $lead->medications ?? '—' }}</span></td>

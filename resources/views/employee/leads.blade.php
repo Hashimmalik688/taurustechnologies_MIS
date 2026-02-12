@@ -288,10 +288,16 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Height & Weight:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_height_weight"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_height_weight" placeholder="e.g., 5'10\", 180 lbs">
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Height:</label>
+                                <div class="p-2 bg-light rounded mb-1" id="orig_height"></div>
+                                <input type="text" class="form-control form-control-sm" id="change_height" placeholder="e.g., 5'10&quot;">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Weight:</label>
+                                <div class="p-2 bg-light rounded mb-1" id="orig_weight"></div>
+                                <input type="text" class="form-control form-control-sm" id="change_weight" placeholder="e.g., 180">
                             </div>
 
                             <div class="col-md-12">
@@ -696,7 +702,8 @@
         document.getElementById('orig_birthplace').textContent = ld.birth_place || 'N/A';
         document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || 'N/A';
         document.getElementById('orig_smoker').textContent = ld.smoker == 1 ? 'Yes' : 'No';
-        document.getElementById('orig_height_weight').textContent = ld.height_weight || 'N/A';
+        document.getElementById('orig_height').textContent = ld.height || 'N/A';
+        document.getElementById('orig_weight').textContent = ld.weight ? ld.weight + ' lbs' : 'N/A';
         document.getElementById('orig_address').textContent = ld.address || 'N/A';
 
         // Medical Information

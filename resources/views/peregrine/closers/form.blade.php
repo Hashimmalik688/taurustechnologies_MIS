@@ -151,11 +151,15 @@
 
 <h6 class="form-section-title"><i class="bx bx-heart me-2"></i>Health Information</h6>
 <div class="row g-3 mb-3">
-    <div class="col-md-3">
-        <label for="height_weight" class="form-label">Height & Weight</label>
-        <input type="text" class="form-control" name="height_weight" value="{{ old('height_weight', $lead->height_weight ?? '') }}" placeholder="5'10&quot;, 180 lbs">
+    <div class="col-md-2">
+        <label for="height" class="form-label">Height</label>
+        <input type="text" class="form-control" name="height" value="{{ old('height', $lead->height ?? '') }}" placeholder="5'10&quot;">
     </div>
     <div class="col-md-2">
+        <label for="weight" class="form-label">Weight (lbs)</label>
+        <input type="text" class="form-control" name="weight" value="{{ old('weight', $lead->weight ?? '') }}" placeholder="180">
+    </div>
+    <div class="col-md-1">
         <label for="smoker" class="form-label">Smoker</label>
         <div class="form-check form-switch mt-2">
             <input class="form-check-input" type="checkbox" name="smoker" value="1" {{ old('smoker', $lead->smoker) ? 'checked' : '' }}>

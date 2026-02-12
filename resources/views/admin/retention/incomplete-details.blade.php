@@ -48,7 +48,8 @@
                             <p><strong>Address:</strong> {{ $lead->address ?? 'N/A' }}</p>
                             <p><strong>Gender:</strong> {{ $lead->gender ?? 'N/A' }}</p>
                             <p><strong>Smoker:</strong> {{ $lead->smoker ?? 'N/A' }}</p>
-                            <p><strong>Height/Weight:</strong> {{ $lead->height_weight ?? 'N/A' }}</p>
+                            <p><strong>Height:</strong> {{ $lead->height ?? 'N/A' }}</p>
+                            <p><strong>Weight:</strong> {{ $lead->weight ? $lead->weight . ' lbs' : 'N/A' }}</p>
                             <p><strong>Emergency Contact:</strong> {{ $lead->emergency_contact ?? 'N/A' }}</p>
                             <p><strong>Beneficiary:</strong> {{ $lead->beneficiary ?? 'N/A' }}</p>
                         </div>
