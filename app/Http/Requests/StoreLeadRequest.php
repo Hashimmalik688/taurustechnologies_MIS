@@ -35,6 +35,8 @@ class StoreLeadRequest extends FormRequest
             'account_type' => ['nullable', 'string', 'max:50'],
             'routing_number' => ['nullable', 'string', 'max:20'],
             'height_weight' => ['nullable', 'string', 'max:100'],
+            'height' => ['nullable', 'string', 'max:50'],
+            'weight' => ['nullable', 'string', 'max:50'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'medical_issue' => ['nullable', 'string'],
             'medications' => ['nullable', 'string'],

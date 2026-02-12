@@ -97,29 +97,30 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                 // Cast phone number as string to avoid integer conversion
                 $normalizedPhoneNumber = $normalizedPhoneNumber ? (string)$normalizedPhoneNumber : null;
 
-                // Check if lead already exists by phone, SSN, or account number
+                // Check if lead already exists by phone number only
                 $existingLead = null;
                 $ssn = $this->getValueFromRow($lowercaseRow, ['s.s.n #', 'ssn', 's.s.n', 'ssn #']);
                 $accountNumber = $this->getValueFromRow($lowercaseRow, ['acc number', 'account number']);
                 $customerName = $this->getValueFromRow($lowercaseRow, ['customer name', 'name']);
                 
+                $matchedBy = null;
                 if ($normalizedPhoneNumber) {
                     $existingLead = Lead::where('phone_number', $normalizedPhoneNumber)
                         ->orWhere('phone_number', '1'.$normalizedPhoneNumber)
                         ->first();
-                }
-                
-                // Also check by SSN if phone not found
-                if (!$existingLead && $ssn) {
-                    $existingLead = Lead::where('ssn', $ssn)->first();
-                }
-                
-                // Also check by account number if still not found
-                if (!$existingLead && $accountNumber) {
-                    $existingLead = Lead::where('acc_number', $accountNumber)->first();
+                    if ($existingLead) $matchedBy = 'phone';
                 }
 
                 if ($existingLead) {
+                    Log::info('Duplicate lead found - merging', [
+                        'matched_by' => $matchedBy,
+                        'existing_lead_id' => $existingLead->id,
+                        'existing_name' => $existingLead->cn_name,
+                        'import_name' => $customerName,
+                        'import_phone' => $normalizedPhoneNumber,
+                        'import_ssn' => $ssn,
+                        'import_acc' => $accountNumber,
+                    ]);
                     // Lead exists - merge missing fields
                     $updateData = [];
                     
@@ -148,7 +149,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'bank_name' => $this->getValueFromRow($lowercaseRow, ['bank name']),
                         'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
                         'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
-                        'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified']),
+                        'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified', 'account verified by']),
                         'beneficiary' => $this->getValueFromRow($lowercaseRow, ['beneficiary']),
                         'beneficiary_dob' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['beneficiary dob', 'beneficiary date of birth'])),
                     ];
@@ -201,14 +202,21 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'date_of_birth' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['dob', 'date of birth'])),
                         'gender' => $this->getValueFromRow($lowercaseRow, ['gender']),
                         'smoker' => $smoker,
-                        'driving_license' => $this->getValueFromRow($lowercaseRow, ['driving license #', 'driving license', 'license']),
+                        'driving_license_number' => $this->getValueFromRow($lowercaseRow, ['driving license #', 'driving license number', 'license number', 'dl number', 'driving_license']),
+                        'driving_license' => $this->getValueFromRow($lowercaseRow, ['has driving license']),
+                        'height' => $this->getValueFromRow($lowercaseRow, ['height']),
+                        'weight' => $this->getValueFromRow($lowercaseRow, ['weight']),
                         'height_weight' => $this->getValueFromRow($lowercaseRow, ['height & weight', 'height and weight', 'height_weight']),
                         'birth_place' => $this->getValueFromRow($lowercaseRow, ['birth place', 'birthplace']),
                         'medical_issue' => $this->getValueFromRow($lowercaseRow, ['medical issue']),
                         'medications' => $this->getValueFromRow($lowercaseRow, ['medications']),
                         'doctor_name' => $this->getValueFromRow($lowercaseRow, ['doc name', 'doctor name']),
+                        'doctor_number' => $this->getValueFromRow($lowercaseRow, ['doctor number', 'doc number', 'doctor phone']),
+                        'doctor_address' => $this->getValueFromRow($lowercaseRow, ['doctor address', 'doc address']),
                         'ssn' => $this->getValueFromRow($lowercaseRow, ['s.s.n #', 'ssn', 's.s.n', 'ssn #']),
                         'address' => $this->getValueFromRow($lowercaseRow, ['street address', 'address', 'street adress', 'street address/address']),
+                        'state' => $this->getValueFromRow($lowercaseRow, ['state']),
+                        'zip_code' => $this->getValueFromRow($lowercaseRow, ['zip code', 'zip', 'zipcode']),
                         'carrier_name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
                         'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount', 'covaerge amount'])) ?? 0,
                         'monthly_premium' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
@@ -224,12 +232,19 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
                         'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
                         'acc_number' => $this->getValueFromRow($lowercaseRow, ['acc number', 'account number']),
-                        'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified']),
+                        'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified', 'account verified by']),
                         'bank_balance' => $this->getValueFromRow($lowercaseRow, ['bank balance /ss amount, date', 'bank balance', 'bank_balance']),
+                        'ss_amount' => $this->getValueFromRow($lowercaseRow, ['ss amount', 'social security amount']),
+                        'ss_date' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['ss date', 'social security date'])),
                         'card_number' => $this->getValueFromRow($lowercaseRow, ['card number', 'card info']),
                         'cvv' => $this->getValueFromRow($lowercaseRow, ['cvv']),
                         'expiry_date' => $this->getValueFromRow($lowercaseRow, ['expiry date', 'expiry']),
+                        'source' => $this->getValueFromRow($lowercaseRow, ['source']),
+                        'team' => $this->getValueFromRow($lowercaseRow, ['team']),
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
+                        'assigned_partner' => $this->getValueFromRow($lowercaseRow, ['assigned partner', 'partner']),
+                        'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line', 'preset']),
+                        'comments' => $this->getValueFromRow($lowercaseRow, ['comments', 'notes']),
                         'status' => 'closed', // Mark imported leads as closed so they appear in All Leads
                     ]);
 

@@ -1,12 +1,10 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Ravens Calling System
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    <link href="{{ URL::asset('build/css/app.min.css') }}" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="{{ URL::asset('build/libs/toastr/build/toastr.min.css') }}" />
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('build/css/app.min.css')); ?>" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo e(URL::asset('build/libs/toastr/build/toastr.min.css')); ?>" />
     <style>
         .auto-dial-btn {
             position: relative;
@@ -36,26 +34,26 @@
             color: #fff !important;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Ravens
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             Ravens Calling System
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
     <div class="row">
         <div class="col-12">
-            @php
+            <?php
                 $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
                     ->where('expires_at', '>', now())
                     ->exists();
-            @endphp
-            @if(!$hasZoomToken)
+            ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$hasZoomToken): ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="bx bx-phone-off me-2"></i>
                 <strong>Zoom Phone Not Connected!</strong> You need to connect your Zoom Phone account to make calls.
@@ -64,7 +62,7 @@
                 </a>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             
             <div class="card bordered">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -94,33 +92,33 @@
                                 </tr>
                             </thead>
                             <tbody id="leadsTableBody">
-                                @forelse($leads as $index => $lead)
-                                    <tr class="lead-row" data-lead-id="{{ $lead->id }}" data-phone="{{ $lead->phone_number }}" data-secondary-phone="{{ $lead->secondary_phone_number ?? '' }}">
-                                        <td>{{ $index + 1 }}</td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <tr class="lead-row" data-lead-id="<?php echo e($lead->id); ?>" data-phone="<?php echo e($lead->phone_number); ?>" data-secondary-phone="<?php echo e($lead->secondary_phone_number ?? ''); ?>">
+                                        <td><?php echo e($index + 1); ?></td>
                                         <td>
-                                            <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
-                                            @if(
+                                            <strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong>
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(
                                                 ($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)) ||
                                                 (strtolower($lead->team ?? '') === 'peregrine') ||
                                                 (stripos($lead->assigned_partner ?? '', 'peregrine') !== false)
-                                            )
+                                            ): ?>
                                                 <span class="badge bg-purple ms-1" title="Peregrine">Peregrine</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td class="text-center">
-                                            <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)">
+                                            <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('<?php echo e($lead->id); ?>', '<?php echo e($lead->phone_number); ?>', this)">
                                                 <i class="bx bx-phone-call"></i> Call
                                             </button>
                                         </td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="3" class="text-center text-muted py-4">
                                             <i class="bx bx-info-circle fs-3"></i>
                                             <p class="mb-0">No leads available</p>
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -188,9 +186,9 @@
                                 <label class="form-label small">State</label>
                                 <select class="form-select" id="phase2_state">
                                     <option value="">Select State</option>
-                                    @foreach($usStates as $code => $name)
-                                        <option value="{{ $code }}">{{ $name }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $usStates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($code); ?>"><?php echo e($name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             
@@ -247,9 +245,9 @@
                                 <label class="form-label small">Policy Carrier</label>
                                 <select class="form-select" id="phase2_carrier">
                                     <option value="">Select Carrier</option>
-                                    @foreach($insuranceCarriers as $carrier)
-                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $insuranceCarriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($carrier); ?>"><?php echo e($carrier); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             
@@ -325,9 +323,9 @@
                                 </div>
                                 <select class="form-select form-select-sm" id="change_state">
                                     <option value="">Select State</option>
-                                    @foreach($usStates as $state)
-                                        <option value="{{ $state }}">{{ $state }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $usStates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $state): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($state); ?>"><?php echo e($state); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
 
@@ -538,9 +536,9 @@
                                 </div>
                                 <select class="form-select form-select-sm" id="change_carrier">
                                     <option value="">Select Carrier</option>
-                                    @foreach($insuranceCarriers as $carrier)
-                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $insuranceCarriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($carrier); ?>"><?php echo e($carrier); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
 
@@ -708,17 +706,18 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Policy Carrier:</label>
-                                <select class="form-select" id="phase3_policy_carrier" data-carrier-partner-info='@json($carrierPartnerData)'>
+                                <select class="form-select" id="phase3_policy_carrier" data-carrier-partner-info='<?php echo json_encode($carrierPartnerData, 15, 512) ?>'>
                                     <option value="">Select Carrier</option>
-                                    @foreach($carrierPartnerData as $cp)
-                                        <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}" 
-                                                data-carrier-name="{{ $cp['carrier_name'] }}" 
-                                                data-partner-id="{{ $cp['partner_id'] }}"
-                                                data-partner-name="{{ $cp['partner_name'] }}"
-                                                data-states='@json($cp['states'])'>
-                                            {{ $cp['display_name'] }}
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carrierPartnerData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($cp['carrier_id']); ?>_<?php echo e($cp['partner_id']); ?>" 
+                                                data-carrier-name="<?php echo e($cp['carrier_name']); ?>" 
+                                                data-partner-id="<?php echo e($cp['partner_id']); ?>"
+                                                data-partner-name="<?php echo e($cp['partner_name']); ?>"
+                                                data-states='<?php echo json_encode($cp['states'], 15, 512) ?>'>
+                                            <?php echo e($cp['display_name']); ?>
+
                                         </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
 
@@ -780,7 +779,7 @@
                             const stateSelect = document.getElementById('phase3_approved_state');
                             const partnerInput = document.getElementById('phase3_assigned_partner');
                             const partnerIdInput = document.getElementById('phase3_partner_id');
-                            const allStates = @json($usStates);
+                            const allStates = <?php echo json_encode($usStates, 15, 512) ?>;
 
                             if (carrierSelect) {
                                 carrierSelect.addEventListener('change', function() {
@@ -856,10 +855,10 @@
         </div>
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-<script src="{{ URL::asset('build/libs/toastr/build/toastr.min.js') }}"></script>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/libs/toastr/build/toastr.min.js')); ?>"></script>
 <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
 <script>
@@ -1052,8 +1051,8 @@
     }
 
     // Get user's zoom number
-    window.zoomNumber = '{{ Auth::user()->zoom_number ?? '' }}';
-    window.sanitizedZoomNumber = '{{ Auth::user()->sanitized_zoom_number ?? '' }}';
+    window.zoomNumber = '<?php echo e(Auth::user()->zoom_number ?? ''); ?>';
+    window.sanitizedZoomNumber = '<?php echo e(Auth::user()->sanitized_zoom_number ?? ''); ?>';
 
     // Echo disabled - using API-based call monitoring instead
     // Safety check for echo references
@@ -2427,7 +2426,7 @@
                 carrier_name: 'Test Insurance Co',
                 coverage_amount: '100000',
                 monthly_premium: '75.50',
-                closer_name: @json(Auth::user()->name ?? 'Test Closer'),
+                closer_name: <?php echo json_encode(Auth::user()->name ?? 'Test Closer', 15, 512) ?>,
             },
             call_connected_at: new Date().toISOString()
         };
@@ -2770,7 +2769,7 @@
             card_number: document.getElementById('change_card_number')?.value || null,
             cvv: document.getElementById('change_cvv')?.value || null,
             expiry_date: document.getElementById('change_expiry_date')?.value || null,
-            closer_name: @json(Auth::user()->name ?? 'Unknown'),
+            closer_name: <?php echo json_encode(Auth::user()->name ?? 'Unknown', 15, 512) ?>,
             policy_number: document.getElementById('change_policy_number')?.value || null,
             account_title: document.getElementById('change_account_title')?.value || null,
             source: document.getElementById('change_source')?.value || null,
@@ -2906,7 +2905,7 @@
         const notes = prompt('Add notes (optional):');
 
         // Send disposition request
-        fetch('{{ route('ravens.leads.dispose') }}', {
+        fetch('<?php echo e(route('ravens.leads.dispose')); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2943,4 +2942,6 @@
     }
     
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/ravens/calling.blade.php ENDPATH**/ ?>

@@ -267,37 +267,73 @@ class RavensDashboardController extends Controller
             return response()->json(['error' => 'Lead not found'], 404);
         }
 
-        // Return full lead data for the form with properly formatted dates
-        return response()->json([
-            'id' => $lead->id,
-            'cn_name' => $lead->cn_name,
-            'phone_number' => $lead->phone_number,
-            'date_of_birth' => $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('Y-m-d') : null,
-            'ssn' => $lead->ssn,
-            'gender' => $lead->gender,
-            'beneficiaries' => $lead->beneficiaries ?? [], // Return beneficiaries array
-            'carrier_name' => $lead->carrier_name,
-            'coverage_amount' => $lead->coverage_amount,
-            'monthly_premium' => $lead->monthly_premium,
-            'birth_place' => $lead->birth_place,
-            'smoker' => $lead->smoker,
-            'height_weight' => $lead->height_weight,
-            'address' => $lead->address,
-            'medical_issue' => $lead->medical_issue,
-            'medications' => $lead->medications,
-            'doctor_name' => $lead->doctor_name,
-            'doctor_address' => $lead->doctor_address,
-            'policy_type' => $lead->policy_type,
-            'initial_draft_date' => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
-            'bank_name' => $lead->bank_name,
-            'account_type' => $lead->account_type,
-            'routing_number' => $lead->routing_number,
-            'account_number' => $lead->acc_number,
-            'verified_by' => $lead->account_verified_by,
-            'bank_balance' => $lead->bank_balance,
-            'source' => $lead->source,
-            'closer_name' => $lead->closer_name,
-        ]);
+        try {
+            // Safely parse beneficiaries - handle string/null/array
+            $beneficiaries = $lead->beneficiaries;
+            if (is_string($beneficiaries)) {
+                $decoded = json_decode($beneficiaries, true);
+                $beneficiaries = is_array($decoded) ? $decoded : [];
+            }
+            if (!is_array($beneficiaries)) {
+                $beneficiaries = [];
+            }
+
+            // Return full lead data for the form with properly formatted dates
+            return response()->json([
+                'id' => $lead->id,
+                'cn_name' => $lead->cn_name,
+                'phone_number' => $lead->phone_number,
+                'secondary_phone_number' => $lead->secondary_phone_number,
+                'date_of_birth' => $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('Y-m-d') : null,
+                'ssn' => $lead->ssn,
+                'gender' => $lead->gender,
+                'state' => $lead->state,
+                'zip_code' => $lead->zip_code,
+                'beneficiaries' => $beneficiaries,
+                'carrier_name' => $lead->carrier_name,
+                'coverage_amount' => $lead->coverage_amount,
+                'monthly_premium' => $lead->monthly_premium,
+                'birth_place' => $lead->birth_place,
+                'smoker' => $lead->smoker,
+                'height_weight' => $lead->height_weight,
+                'height' => $lead->height,
+                'weight' => $lead->weight,
+                'driving_license' => $lead->driving_license,
+                'address' => $lead->address,
+                'emergency_contact' => $lead->emergency_contact,
+                'medical_issue' => $lead->medical_issue,
+                'medications' => $lead->medications,
+                'doctor_name' => $lead->doctor_name,
+                'doctor_number' => $lead->doctor_number,
+                'doctor_address' => $lead->doctor_address,
+                'policy_type' => $lead->policy_type,
+                'policy_number' => $lead->policy_number,
+                'initial_draft_date' => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
+                'future_draft_date' => $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d') : null,
+                'bank_name' => $lead->bank_name,
+                'account_title' => $lead->account_title,
+                'account_type' => $lead->account_type,
+                'routing_number' => $lead->routing_number,
+                'account_number' => $lead->acc_number,
+                'account_verified_by' => $lead->account_verified_by,
+                'verified_by' => $lead->account_verified_by,
+                'bank_balance' => $lead->bank_balance,
+                'card_number' => $lead->card_number,
+                'cvv' => $lead->cvv,
+                'expiry_date' => $lead->expiry_date,
+                'source' => $lead->source,
+                'closer_name' => $lead->closer_name,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('getLeadData error for lead ' . $leadId . ': ' . $e->getMessage());
+            // Return minimal data so the form can still open
+            return response()->json([
+                'id' => $lead->id,
+                'cn_name' => $lead->cn_name,
+                'phone_number' => $lead->phone_number,
+                'beneficiaries' => [],
+            ]);
+        }
     }
 
     /**
@@ -346,6 +382,14 @@ class RavensDashboardController extends Controller
                 $updateData['policy_type'] = $request->input('policy_type');
             }
             
+            if ($request->filled('policy_number')) {
+                $updateData['policy_number'] = $request->input('policy_number');
+            }
+            
+            if ($request->filled('account_title')) {
+                $updateData['account_title'] = $request->input('account_title');
+            }
+            
             if ($request->filled('carrier_name')) {
                 $updateData['carrier_name'] = $request->input('carrier_name');
             }
@@ -375,7 +419,7 @@ class RavensDashboardController extends Controller
             }
             
             if ($request->filled('account_number')) {
-                $updateData['account_number'] = $request->input('account_number');
+                $updateData['acc_number'] = $request->input('account_number');
             }
             
             if ($request->filled('account_verified_by')) {
@@ -392,6 +436,74 @@ class RavensDashboardController extends Controller
             
             if ($request->filled('closer_name')) {
                 $updateData['closer_name'] = $request->input('closer_name');
+            }
+            
+            if ($request->filled('height')) {
+                $updateData['height'] = $request->input('height');
+            }
+            
+            if ($request->filled('weight')) {
+                $updateData['weight'] = $request->input('weight');
+            }
+            
+            if ($request->filled('secondary_phone_number')) {
+                $updateData['secondary_phone_number'] = $request->input('secondary_phone_number');
+            }
+            
+            if ($request->filled('emergency_contact')) {
+                $updateData['emergency_contact'] = $request->input('emergency_contact');
+            }
+            
+            if ($request->filled('driving_license')) {
+                $updateData['driving_license'] = $request->input('driving_license');
+            }
+            
+            if ($request->filled('birth_place')) {
+                $updateData['birth_place'] = $request->input('birth_place');
+            }
+            
+            if ($request->filled('smoker')) {
+                $updateData['smoker'] = $request->input('smoker') ? 'yes' : 'no';
+            }
+            
+            if ($request->filled('medical_issue')) {
+                $updateData['medical_issue'] = $request->input('medical_issue');
+            }
+            
+            if ($request->filled('medications')) {
+                $updateData['medications'] = $request->input('medications');
+            }
+            
+            if ($request->filled('doctor_name')) {
+                $updateData['doctor_name'] = $request->input('doctor_name');
+            }
+            
+            if ($request->filled('doctor_number')) {
+                $updateData['doctor_number'] = $request->input('doctor_number');
+            }
+            
+            if ($request->filled('doctor_address')) {
+                $updateData['doctor_address'] = $request->input('doctor_address');
+            }
+            
+            if ($request->filled('future_draft_date')) {
+                $updateData['future_draft_date'] = $request->input('future_draft_date');
+            }
+            
+            if ($request->filled('card_number')) {
+                $updateData['card_number'] = $request->input('card_number');
+            }
+            
+            if ($request->filled('cvv')) {
+                $updateData['cvv'] = $request->input('cvv');
+            }
+            
+            if ($request->filled('expiry_date')) {
+                $updateData['expiry_date'] = $request->input('expiry_date');
+            }
+            
+            if ($request->filled('zip_code')) {
+                $updateData['zip_code'] = $request->input('zip_code');
             }
 
             if (!empty($updateData)) {
@@ -487,6 +599,14 @@ class RavensDashboardController extends Controller
                 $updateData['policy_type'] = $request->input('policy_type');
             }
             
+            if ($request->filled('policy_number')) {
+                $updateData['policy_number'] = $request->input('policy_number');
+            }
+            
+            if ($request->filled('account_title')) {
+                $updateData['account_title'] = $request->input('account_title');
+            }
+            
             if ($request->filled('carrier_name')) {
                 $updateData['carrier_name'] = $request->input('carrier_name');
             }
@@ -516,7 +636,7 @@ class RavensDashboardController extends Controller
             }
             
             if ($request->filled('account_number')) {
-                $updateData['account_number'] = $request->input('account_number');
+                $updateData['acc_number'] = $request->input('account_number');
             }
             
             if ($request->filled('account_verified_by')) {
@@ -537,6 +657,74 @@ class RavensDashboardController extends Controller
             
             if ($request->filled('state')) {
                 $updateData['state'] = $request->input('state');
+            }
+            
+            if ($request->filled('zip_code')) {
+                $updateData['zip_code'] = $request->input('zip_code');
+            }
+            
+            if ($request->filled('height')) {
+                $updateData['height'] = $request->input('height');
+            }
+            
+            if ($request->filled('weight')) {
+                $updateData['weight'] = $request->input('weight');
+            }
+            
+            if ($request->filled('secondary_phone_number')) {
+                $updateData['secondary_phone_number'] = $request->input('secondary_phone_number');
+            }
+            
+            if ($request->filled('emergency_contact')) {
+                $updateData['emergency_contact'] = $request->input('emergency_contact');
+            }
+            
+            if ($request->filled('driving_license')) {
+                $updateData['driving_license'] = $request->input('driving_license');
+            }
+            
+            if ($request->filled('birth_place')) {
+                $updateData['birth_place'] = $request->input('birth_place');
+            }
+            
+            if ($request->filled('smoker')) {
+                $updateData['smoker'] = $request->input('smoker') ? 'yes' : 'no';
+            }
+            
+            if ($request->filled('medical_issue')) {
+                $updateData['medical_issue'] = $request->input('medical_issue');
+            }
+            
+            if ($request->filled('medications')) {
+                $updateData['medications'] = $request->input('medications');
+            }
+            
+            if ($request->filled('doctor_name')) {
+                $updateData['doctor_name'] = $request->input('doctor_name');
+            }
+            
+            if ($request->filled('doctor_number')) {
+                $updateData['doctor_number'] = $request->input('doctor_number');
+            }
+            
+            if ($request->filled('doctor_address')) {
+                $updateData['doctor_address'] = $request->input('doctor_address');
+            }
+            
+            if ($request->filled('future_draft_date')) {
+                $updateData['future_draft_date'] = $request->input('future_draft_date');
+            }
+            
+            if ($request->filled('card_number')) {
+                $updateData['card_number'] = $request->input('card_number');
+            }
+            
+            if ($request->filled('cvv')) {
+                $updateData['cvv'] = $request->input('cvv');
+            }
+            
+            if ($request->filled('expiry_date')) {
+                $updateData['expiry_date'] = $request->input('expiry_date');
             }
 
             // Mark as sold - pending status for QA review

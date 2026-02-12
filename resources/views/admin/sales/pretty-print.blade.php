@@ -97,7 +97,8 @@ Address: {{ $lead->address ?? '_________________' }}
 State: {{ $lead->state ?? '_________________' }}
 Zip Code: {{ $lead->zip_code ?? '_________________' }}
 Gender: {{ $lead->gender ?? '_________________' }}
-Height & Weight: {{ $lead->height_weight ?? '_________________' }}
+Height: {{ $lead->height ?? '_________________' }}
+Weight: {{ $lead->weight ? $lead->weight . ' lbs' : '_________________' }}
 Nicotine User: {{ $lead->smoker ? 'Yes' : 'No' }}
 Birth Place: {{ $lead->birth_place ?? '_________________' }}
 

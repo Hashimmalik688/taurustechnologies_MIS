@@ -169,10 +169,15 @@
 
                         <h6 class="form-section-title mt-4">Health Information</h6>
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="height_weight" class="form-label">Height & Weight</label>
-                                <input type="text" class="form-control" id="height_weight" name="height_weight"
-                                    value="{{ old('height_weight', $lead->height_weight) }}" placeholder="5'10&quot;, 180 lbs">
+                            <div class="col-md-2">
+                                <label for="height" class="form-label">Height</label>
+                                <input type="text" class="form-control" id="height" name="height"
+                                    value="{{ old('height', $lead->height) }}" placeholder="5'10&quot;">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="weight" class="form-label">Weight (lbs)</label>
+                                <input type="text" class="form-control" id="weight" name="weight"
+                                    value="{{ old('weight', $lead->weight) }}" placeholder="180">
                             </div>
                             <div class="col-md-2">
                                 <label for="smoker" class="form-label">Smoker Status</label>

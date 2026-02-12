@@ -212,6 +212,8 @@ class ValidatorController extends Controller
             'zip_code' => ['required', 'string', 'max:10'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'height_weight' => ['nullable', 'string', 'max:100'],
+            'height' => ['nullable', 'string', 'max:50'],
+            'weight' => ['nullable', 'string', 'max:50'],
             'smoker' => ['nullable', 'boolean'],
             'doctor_name' => ['nullable', 'string', 'max:255'],
             'doctor_number' => ['nullable', 'string', 'max:50'],

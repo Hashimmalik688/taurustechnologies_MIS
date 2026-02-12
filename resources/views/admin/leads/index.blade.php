@@ -527,10 +527,16 @@
                                                     </select>
                                                 </div>
 
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">📏 Height & Weight:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_height_weight">-</div>
-                                                    <input type="text" class="form-control" name="height_weight" id="change_height_weight" placeholder="e.g., 5'10\", 180 lbs">
+                                                <div class="col-md-2">
+                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">📏 Height:</label>
+                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_height">-</div>
+                                                    <input type="text" class="form-control" name="height" id="change_height" placeholder="e.g., 5'10&quot;">
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <label class="form-label fw-bold" style="font-size: 0.95rem;">⚖️ Weight:</label>
+                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_weight">-</div>
+                                                    <input type="text" class="form-control" name="weight" id="change_weight" placeholder="e.g., 180">
                                                 </div>
 
                                                 <div class="col-md-12">
@@ -974,7 +980,8 @@
             document.getElementById('orig_birthplace').textContent = ld.birth_place || 'N/A';
             document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || 'N/A';
             document.getElementById('orig_smoker').textContent = ld.smoker == 1 ? 'Yes' : 'No';
-            document.getElementById('orig_height_weight').textContent = ld.height_weight || 'N/A';
+            document.getElementById('orig_height').textContent = ld.height || 'N/A';
+            document.getElementById('orig_weight').textContent = ld.weight ? ld.weight + ' lbs' : 'N/A';
             document.getElementById('orig_address').textContent = ld.address || 'N/A';
 
             // Medical Information

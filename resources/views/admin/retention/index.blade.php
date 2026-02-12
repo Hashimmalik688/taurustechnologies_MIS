@@ -792,10 +792,16 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Height & Weight:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_height_weight"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_height_weight" placeholder="e.g., 5'10\", 180 lbs">
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Height:</label>
+                                <div class="p-2 bg-light rounded mb-1" id="orig_height"></div>
+                                <input type="text" class="form-control form-control-sm" id="change_height" placeholder="e.g., 5'10&quot;">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold">Weight:</label>
+                                <div class="p-2 bg-light rounded mb-1" id="orig_weight"></div>
+                                <input type="text" class="form-control form-control-sm" id="change_weight" placeholder="e.g., 180">
                             </div>
 
                             <div class="col-md-12">
@@ -1223,7 +1229,8 @@ function populatePhase3WithData() {
     document.getElementById('orig_birthplace').textContent = currentLeadData.birth_place || 'N/A';
     document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || 'N/A';
     document.getElementById('orig_smoker').textContent = currentLeadData.smoker == 1 ? 'Yes' : 'No';
-    document.getElementById('orig_height_weight').textContent = currentLeadData.height_weight || 'N/A';
+    document.getElementById('orig_height').textContent = currentLeadData.height || 'N/A';
+    document.getElementById('orig_weight').textContent = currentLeadData.weight ? currentLeadData.weight + ' lbs' : 'N/A';
     document.getElementById('orig_address').textContent = currentLeadData.address || 'N/A';
     
     // Medical info
@@ -1315,7 +1322,8 @@ function submitRetentionSale() {
         birthplace: document.getElementById('change_birthplace').value,
         ssn: document.getElementById('change_ssn').value,
         smoker: document.getElementById('change_smoker').value,
-        height_weight: document.getElementById('change_height_weight').value,
+        height: document.getElementById('change_height').value,
+        weight: document.getElementById('change_weight').value,
         address: document.getElementById('change_address').value,
         medical_issue: document.getElementById('change_medical_issue').value,
         medications: document.getElementById('change_medications').value,
@@ -1381,6 +1389,8 @@ window.testRavensCallModal = function() {
             birth_place: 'Test City',
             smoker: 0,
             height_weight: '5ft 10in, 180 lbs',
+            height: '5ft 10in',
+            weight: '180',
             address: '123 Test St',
             beneficiary: 'Jane Beneficiary',
             carrier_name: 'Test Insurance',

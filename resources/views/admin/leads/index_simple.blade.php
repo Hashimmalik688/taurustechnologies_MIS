@@ -135,6 +135,19 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="mdi mdi-alert-circle-outline me-2"></i>
+            <strong>Validation Error!</strong>
+            <ul class="mb-0 mt-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -330,18 +343,23 @@
                     <h5 class="modal-title">Import Leads</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Upload Excel File</label>
-                            <input type="file" class="form-control" name="import_file" accept=".xlsx,.xls,.csv" required>
+                            <input type="file" class="form-control" name="import_file" accept=".xlsx,.xls,.csv" required id="importFileInput">
                             <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: <strong>100MB</strong>)</small>
+                        </div>
+                        
+                        <div id="importError" class="alert alert-danger mb-2 d-none">
+                            <strong><i class="bx bx-error-circle"></i> Error:</strong>
+                            <span id="importErrorMsg"></span>
                         </div>
                         
                         <div class="alert alert-info mb-2">
                             <strong><i class="bx bx-info-circle"></i> Deduplication:</strong>
-                            <small>System automatically checks for duplicates using: <strong>Phone Number</strong>, <strong>SSN</strong>, or <strong>Account Number</strong>. Existing leads will be updated with missing data.</small>
+                            <small>System automatically checks for duplicates using <strong>Phone Number</strong> only. Existing leads with the same phone will be updated with missing data.</small>
                         </div>
                         
                         <div class="alert alert-success mb-0">
@@ -362,7 +380,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-warning">
+                        <button type="submit" class="btn btn-warning" id="importSubmitBtn">
                             <i class="fas fa-upload me-1"></i> Import
                         </button>
                     </div>
@@ -375,6 +393,51 @@
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Import form handling
+    const importForm = document.getElementById('importForm');
+    const importBtn = document.getElementById('importSubmitBtn');
+    const importFileInput = document.getElementById('importFileInput');
+    const importError = document.getElementById('importError');
+    const importErrorMsg = document.getElementById('importErrorMsg');
+    
+    if (importForm) {
+        importForm.addEventListener('submit', function(e) {
+            // Validate file is selected
+            if (!importFileInput.files.length) {
+                e.preventDefault();
+                importError.classList.remove('d-none');
+                importErrorMsg.textContent = 'Please select a file to import.';
+                return;
+            }
+            
+            // Validate file type
+            const file = importFileInput.files[0];
+            const allowedTypes = ['.csv', '.xlsx', '.xls'];
+            const fileName = file.name.toLowerCase();
+            const isValid = allowedTypes.some(ext => fileName.endsWith(ext));
+            
+            if (!isValid) {
+                e.preventDefault();
+                importError.classList.remove('d-none');
+                importErrorMsg.textContent = 'Invalid file type. Only .csv, .xlsx, .xls files are accepted.';
+                return;
+            }
+            
+            // Validate file size (100MB max)
+            if (file.size > 100 * 1024 * 1024) {
+                e.preventDefault();
+                importError.classList.remove('d-none');
+                importErrorMsg.textContent = 'File is too large. Maximum size is 100MB.';
+                return;
+            }
+            
+            // Show loading state
+            importError.classList.add('d-none');
+            importBtn.disabled = true;
+            importBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Importing...';
+        });
+    }
+
     // Editable comments functionality
     document.querySelectorAll('.editable-comment').forEach(comment => {
         comment.addEventListener('blur', function() {

@@ -16,7 +16,9 @@ class CreateLead extends Component
 
     public $date_of_birth;
 
-    public $height_weight;
+    public $height;
+
+    public $weight;
 
     public $birth_place;
 

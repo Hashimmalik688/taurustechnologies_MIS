@@ -119,6 +119,8 @@ class PeregrineController extends Controller
             'zip_code' => ['required', 'string', 'max:10'],
             'birth_place' => ['nullable', 'string', 'max:255'],
             'height_weight' => ['nullable', 'string', 'max:100'],
+            'height' => ['nullable', 'string', 'max:50'],
+            'weight' => ['nullable', 'string', 'max:50'],
             'smoker' => ['nullable', 'boolean'],
             'doctor_name' => ['nullable', 'string', 'max:255'],
             'doctor_number' => ['nullable', 'string', 'max:50'],
@@ -228,7 +230,7 @@ class PeregrineController extends Controller
         // Save all form data without strict validation (partial data allowed)
         $fillableFields = [
             'cn_name', 'phone_number', 'date_of_birth', 'gender', 'ssn', 'address', 'state', 'zip_code',
-            'birth_place', 'height_weight', 'smoker', 'doctor_name', 'doctor_number', 'doctor_address',
+            'birth_place', 'height_weight', 'height', 'weight', 'smoker', 'doctor_name', 'doctor_number', 'doctor_address',
             'medical_issue', 'medications', 'carrier_name', 'policy_type', 'initial_draft_date',
             'coverage_amount', 'monthly_premium', 'source', 'beneficiary', 'beneficiary_dob',
             'bank_name', 'account_type', 'account_number', 'routing_number', 'bank_balance',
