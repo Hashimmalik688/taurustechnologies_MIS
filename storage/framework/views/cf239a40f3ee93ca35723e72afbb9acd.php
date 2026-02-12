@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Dock Section - Employee Fines'); ?>
 
-@section('title', 'Dock Section - Employee Fines')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="row">
     <div class="col-12">
         <div class="page-title-box">
@@ -44,9 +42,9 @@
                     <i class="mdi mdi-cash-remove widget-icon bg-danger-lighten text-danger"></i>
                 </div>
                 <h5 class="text-muted fw-normal mt-0" title="Total Docked">Total Docked</h5>
-                <h3 class="mt-3 mb-3">Rs {{ number_format($stats['total_docked'], 2) }}</h3>
+                <h3 class="mt-3 mb-3">Rs <?php echo e(number_format($stats['total_docked'], 2)); ?></h3>
                 <p class="mb-0 text-muted">
-                    <span class="text-nowrap">For {{ \Carbon\Carbon::create($year, $month)->format('F Y') }}</span>
+                    <span class="text-nowrap">For <?php echo e(\Carbon\Carbon::create($year, $month)->format('F Y')); ?></span>
                 </p>
             </div>
         </div>
@@ -59,9 +57,9 @@
                     <i class="mdi mdi-file-document widget-icon bg-warning-lighten text-warning"></i>
                 </div>
                 <h5 class="text-muted fw-normal mt-0" title="Total Records">Total Records</h5>
-                <h3 class="mt-3 mb-3">{{ $stats['total_records'] }}</h3>
+                <h3 class="mt-3 mb-3"><?php echo e($stats['total_records']); ?></h3>
                 <p class="mb-0 text-muted">
-                    <span class="text-success me-2">{{ $stats['active_records'] }}</span>
+                    <span class="text-success me-2"><?php echo e($stats['active_records']); ?></span>
                     <span class="text-nowrap">Active</span>
                 </p>
             </div>
@@ -75,7 +73,7 @@
                     <i class="mdi mdi-account-multiple widget-icon bg-info-lighten text-info"></i>
                 </div>
                 <h5 class="text-muted fw-normal mt-0">Employees</h5>
-                <h3 class="mt-3 mb-3">{{ $employees->count() }}</h3>
+                <h3 class="mt-3 mb-3"><?php echo e($employees->count()); ?></h3>
                 <p class="mb-0 text-muted">
                     <span class="text-nowrap">Total Active</span>
                 </p>
@@ -89,24 +87,25 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <form method="GET" action="{{ route('dock.index') }}" class="row g-3">
+                <form method="GET" action="<?php echo e(route('dock.index')); ?>" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Month</label>
                         <select name="month" class="form-select">
-                            @for ($m = 1; $m <= 12; $m++)
-                                <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($m = 1; $m <= 12; $m++): ?>
+                                <option value="<?php echo e($m); ?>" <?php echo e($month == $m ? 'selected' : ''); ?>>
+                                    <?php echo e(\Carbon\Carbon::create()->month($m)->format('F')); ?>
+
                                 </option>
-                            @endfor
+                            <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">Year</label>
                         <select name="year" class="form-select">
-                            @for ($y = date('Y') - 1; $y <= date('Y') + 1; $y++)
-                                <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                            @endfor
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($y = date('Y') - 1; $y <= date('Y') + 1; $y++): ?>
+                                <option value="<?php echo e($y); ?>" <?php echo e($year == $y ? 'selected' : ''); ?>><?php echo e($y); ?></option>
+                            <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
 
@@ -114,11 +113,12 @@
                         <label class="form-label">Employee</label>
                         <select name="user_id" class="form-select">
                             <option value="">All Employees</option>
-                            @foreach ($employees as $emp)
-                                <option value="{{ $emp->id }}" {{ request('user_id') == $emp->id ? 'selected' : '' }}>
-                                    {{ $emp->name }}
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($emp->id); ?>" <?php echo e(request('user_id') == $emp->id ? 'selected' : ''); ?>>
+                                    <?php echo e($emp->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
 
@@ -140,7 +140,7 @@
             <div class="card-body">
                 <h4 class="header-title mb-3">Dock Records</h4>
 
-                @if ($dockRecords->count() > 0)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dockRecords->count() > 0): ?>
                 <div class="table-responsive">
                     <table class="table table-hover table-centered mb-0">
                         <thead class="table-light">
@@ -156,89 +156,92 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($dockRecords as $record)
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dockRecords; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ $record->id }}</td>
+                                <td><?php echo e($record->id); ?></td>
                                 <td>
-                                    <a href="{{ route('dock.history', $record->user_id) }}" class="text-body fw-bold">
-                                        {{ $record->user?->name ?? 'Unknown User' }}
-                                        @if($record->user?->trashed())
+                                    <a href="<?php echo e(route('dock.history', $record->user_id)); ?>" class="text-body fw-bold">
+                                        <?php echo e($record->user?->name ?? 'Unknown User'); ?>
+
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->user?->trashed()): ?>
                                             <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
-                                        @endif
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </a>
                                 </td>
-                                <td><strong>Rs {{ number_format($record->amount, 2) }}</strong></td>
-                                <td>{{ Str::limit($record->reason, 40) }}</td>
-                                <td>{{ $record->dock_date->format('d M Y') }}</td>
-                                <td>{{ $record->dockedBy?->name ?? 'Unknown User' }}</td>
+                                <td><strong>Rs <?php echo e(number_format($record->amount, 2)); ?></strong></td>
+                                <td><?php echo e(Str::limit($record->reason, 40)); ?></td>
+                                <td><?php echo e($record->dock_date->format('d M Y')); ?></td>
+                                <td><?php echo e($record->dockedBy?->name ?? 'Unknown User'); ?></td>
                                 <td>
-                                    @if ($record->status === 'active')
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->status === 'active'): ?>
                                         <span class="badge bg-warning">Active</span>
-                                    @elseif ($record->status === 'applied')
+                                    <?php elseif($record->status === 'applied'): ?>
                                         <span class="badge bg-success">Applied</span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="badge bg-secondary">Cancelled</span>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                                 <td>
-                                    @if (!Auth::user()->hasRole('HR'))
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!Auth::user()->hasRole('HR')): ?>
                                     <button type="button" class="btn btn-sm btn-info" 
-                                            data-record-id="{{ $record->id }}"
-                                            data-employee-name="{{ $record->user?->name ?? 'Unknown' }}"
-                                            data-amount="{{ $record->amount }}"
-                                            data-dock-date="{{ $record->dock_date->format('Y-m-d') }}"
-                                            data-status="{{ $record->status }}"
-                                            data-reason="{{ $record->reason }}"
-                                            data-notes="{{ $record->notes ?? '' }}"
+                                            data-record-id="<?php echo e($record->id); ?>"
+                                            data-employee-name="<?php echo e($record->user?->name ?? 'Unknown'); ?>"
+                                            data-amount="<?php echo e($record->amount); ?>"
+                                            data-dock-date="<?php echo e($record->dock_date->format('Y-m-d')); ?>"
+                                            data-status="<?php echo e($record->status); ?>"
+                                            data-reason="<?php echo e($record->reason); ?>"
+                                            data-notes="<?php echo e($record->notes ?? ''); ?>"
                                             onclick="editDock(this)"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#editDockModal">
                                         <i class="mdi mdi-pencil"></i>
                                     </button>
                                     
-                                    @if ($record->status === 'active')
-                                    <form action="{{ route('dock.cancel', $record->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('PATCH')
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->status === 'active'): ?>
+                                    <form action="<?php echo e(route('dock.cancel', $record->id)); ?>" method="POST" class="d-inline">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('PATCH'); ?>
                                         <button type="submit" class="btn btn-sm btn-warning" 
                                                 onclick="return confirm('Cancel this dock record?')">
                                             <i class="mdi mdi-cancel"></i>
                                         </button>
                                     </form>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                                    <form action="{{ route('dock.destroy', $record->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
+                                    <form action="<?php echo e(route('dock.destroy', $record->id)); ?>" method="POST" class="d-inline">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
                                         <button type="submit" class="btn btn-sm btn-danger" 
                                                 onclick="return confirm('Delete this dock record permanently?')">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
                                     </form>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                             </tr>
-                            @if ($record->notes)
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($record->notes): ?>
                             <tr>
                                 <td colspan="8" class="text-muted small ps-5">
-                                    <i class="mdi mdi-note-text"></i> {{ $record->notes }}
+                                    <i class="mdi mdi-note-text"></i> <?php echo e($record->notes); ?>
+
                                 </td>
                             </tr>
-                            @endif
-                            @endforeach
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="mt-3 d-flex justify-content-center">
-                    {{ $dockRecords->appends(request()->query())->links('pagination::bootstrap-5') }}
+                    <?php echo e($dockRecords->appends(request()->query())->links('pagination::bootstrap-5')); ?>
+
                 </div>
-                @else
+                <?php else: ?>
                 <div class="text-center py-4">
                     <i class="mdi mdi-information-outline" style="font-size: 48px; color: #ccc;"></i>
                     <p class="text-muted mt-2">No dock records found for the selected period.</p>
                 </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
     </div>
@@ -248,8 +251,8 @@
 <div class="modal fade" id="addDockModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form action="{{ route('dock.store') }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('dock.store')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Add Dock Record</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -260,9 +263,9 @@
                             <label class="form-label">Employee *</label>
                             <select name="user_id" class="form-select" required>
                                 <option value="">Select Employee</option>
-                                @foreach ($employees as $emp)
-                                    <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($emp->id); ?>"><?php echo e($emp->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
 
@@ -273,7 +276,7 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Dock Date *</label>
-                            <input type="date" name="dock_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                            <input type="date" name="dock_date" class="form-control" value="<?php echo e(date('Y-m-d')); ?>" required>
                             <small class="form-text text-muted">
                                 <i class="mdi mdi-information"></i> Will be assigned to payroll month automatically (26th-25th cycle)
                             </small>
@@ -308,8 +311,8 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="editDockForm" method="POST">
-                @csrf
-                @method('PUT')
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <div class="modal-header bg-info text-white">
                     <h5 class="modal-title">Edit Dock Record</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -365,9 +368,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 function editDock(button) {
     // Get data from button attributes
@@ -393,4 +396,6 @@ function editDock(button) {
     document.getElementById('edit_notes').value = notes || '';
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/dock/index.blade.php ENDPATH**/ ?>

@@ -55,7 +55,7 @@
                                             @foreach ($employees as $employee)
                                                 <option value="{{ $employee->id }}"
                                                     {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
-                                                    {{ $employee->name }}
+                                                    {{ $employee->name }}{{ $employee->trashed() ? ' (Terminated)' : '' }}
                                                 </option>
                                             @endforeach
                                         @endif

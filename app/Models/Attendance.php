@@ -64,7 +64,7 @@ class Attendance extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     // Check if user is late (assuming office starts at 9 AM)

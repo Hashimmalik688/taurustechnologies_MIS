@@ -677,6 +677,7 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save');
     Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale');
     Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose');
+    Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore');
     Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads');
 });
 

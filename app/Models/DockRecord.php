@@ -41,7 +41,7 @@ class DockRecord extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->withTrashed();
     }
 
     /**
@@ -49,6 +49,6 @@ class DockRecord extends Model
      */
     public function dockedBy()
     {
-        return $this->belongsTo(User::class, 'docked_by');
+        return $this->belongsTo(User::class, 'docked_by')->withTrashed();
     }
 }

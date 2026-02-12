@@ -133,6 +133,8 @@ class RavensDashboardController extends Controller
             'closer_name', 'team', 'assigned_partner', 'created_at', 
             'status', 'sale_at', 'verified_by'
         ])
+        // Exclude disposed (bad) leads — they should never appear in calling system
+        ->where('status', '!=', 'disposed')
         ->where(function($query) use ($currentUser) {
             // Include leads that are not sold yet
             $query->where(function($q) {
@@ -153,6 +155,16 @@ class RavensDashboardController extends Controller
         ->where('phone_number', '!=', '')
         // Exclude verifier-submitted leads
         ->whereNull('verified_by')
+        // Deduplicate: only show the latest lead per phone number (prevents CSV import duplicates)
+        ->whereIn('id', function($subquery) {
+            $subquery->selectRaw('MAX(id)')
+                ->from('leads')
+                ->where('status', '!=', 'disposed')
+                ->whereNotNull('phone_number')
+                ->where('phone_number', '!=', '')
+                ->where('phone_number', '!=', 'N/A')
+                ->groupBy('phone_number');
+        })
         ->orderBy('created_at', 'desc')
         ->get();
 
@@ -871,13 +883,16 @@ class RavensDashboardController extends Controller
                 'lead_ssn' => $lead->ssn,
             ]);
 
-            // Mark original lead as disposed (you can also delete it if preferred)
-            $lead->update([
-                'status' => 'disposed',
-                'disposed_at' => now(),
-                'disposed_by' => Auth::id(),
-                'disposition_reason' => $request->input('disposition'),
-            ]);
+            // Mark original lead AND all duplicates with the same phone number as disposed
+            // This prevents other closers from seeing/disposing the same contact again
+            $duplicateCount = Lead::where('phone_number', $lead->phone_number)
+                ->where('status', '!=', 'disposed')
+                ->update([
+                    'status' => 'disposed',
+                    'disposed_at' => now(),
+                    'disposed_by' => Auth::id(),
+                    'disposition_reason' => $request->input('disposition'),
+                ]);
 
             // Log the disposition
             AuditLog::create([
@@ -889,6 +904,7 @@ class RavensDashboardController extends Controller
                     'disposition' => $request->input('disposition'),
                     'notes' => $request->input('notes'),
                     'customer_name' => $lead->cn_name,
+                    'duplicates_disposed' => $duplicateCount,
                 ]),
                 'ip_address' => $request->ip(),
             ]);
@@ -917,5 +933,68 @@ class RavensDashboardController extends Controller
             ->paginate(50);
 
         return view('ravens.bad-leads', compact('badLeads'));
+    }
+
+    /**
+     * Restore a disposed lead back to the calling system
+     */
+    public function restoreLead(Request $request)
+    {
+        try {
+            $request->validate([
+                'lead_id' => 'required|exists:leads,id',
+            ]);
+
+            $lead = Lead::findOrFail($request->input('lead_id'));
+
+            // Verify the lead is actually disposed
+            if ($lead->status !== 'disposed') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This lead is not disposed'
+                ], 400);
+            }
+
+            $phoneNumber = $lead->phone_number;
+
+            // Restore ALL leads with the same phone number (undo the mass disposal)
+            $restoredCount = Lead::where('phone_number', $phoneNumber)
+                ->where('status', 'disposed')
+                ->update([
+                    'status' => 'closed', // Restore to previous status
+                    'disposed_at' => null,
+                    'disposed_by' => null,
+                    'disposition_reason' => null,
+                ]);
+
+            // Delete the bad lead records for this phone number
+            BadLead::where('lead_phone', $phoneNumber)->delete();
+
+            // Log the restoration
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'lead_restored',
+                'model' => 'Lead',
+                'model_id' => $lead->id,
+                'changes' => json_encode([
+                    'customer_name' => $lead->cn_name,
+                    'phone_number' => $phoneNumber,
+                    'restored_count' => $restoredCount,
+                ]),
+                'ip_address' => $request->ip(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Lead restored successfully (" . $restoredCount . " record(s) restored)",
+                'restored_count' => $restoredCount
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error restoring lead: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to restore lead: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

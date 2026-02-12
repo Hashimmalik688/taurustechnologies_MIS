@@ -146,13 +146,15 @@ class AttendanceController extends Controller
 
             // Build query with filters
             $query = Attendance::with('user')
-                ->whereHas('user')  // Ensure user exists (filter out orphaned records)
+                ->whereHas('user', function($q) {
+                    $q->withTrashed(); // Include terminated employees
+                })
                 ->whereBetween('date', [$startDate, $endDate]);
 
             // Filter by employee name
             if ($searchName) {
                 $query->whereHas('user', function($q) use ($searchName) {
-                    $q->where('name', 'LIKE', '%' . $searchName . '%');
+                    $q->withTrashed()->where('name', 'LIKE', '%' . $searchName . '%');
                 });
             }
 
@@ -225,6 +227,9 @@ class AttendanceController extends Controller
         $status = $request->get('status');
 
         $query = Attendance::with('user')
+            ->whereHas('user', function($q) {
+                $q->withTrashed(); // Include terminated employees
+            })
             ->whereBetween('date', [$startDate, $endDate]);
 
         if ($userId) {
@@ -239,10 +244,10 @@ class AttendanceController extends Controller
             ->orderBy('login_time', 'desc')
             ->paginate(50);
 
-        // Get users for filter dropdown
-        $users = $this->getTrackableUsers()
-            ->orderBy('name')
-            ->get();
+        // Get users for filter dropdown (include terminated for historical access)
+        $users = User::withTrashed()->whereHas('roles', function($q) {
+            $q->whereIn('name', $this->trackableRoles);
+        })->orderBy('name')->get();
 
         // Summary statistics for the filtered period
         $summaryStats = $this->getSummaryStats($startDate, $endDate, $userId);
@@ -263,10 +268,10 @@ class AttendanceController extends Controller
      */
     public function employeeReport($userId, Request $request)
     {
-        $employee = User::findOrFail($userId);
+        $employee = User::withTrashed()->findOrFail($userId);
         
-        // Get all employees for the filter dropdown
-        $employees = User::whereHas('roles', function ($query) {
+        // Get all employees for the filter dropdown (include terminated for historical access)
+        $employees = User::withTrashed()->whereHas('roles', function ($query) {
             $query->whereIn('name', $this->trackableRoles);
         })->orderBy('name')->get();
         

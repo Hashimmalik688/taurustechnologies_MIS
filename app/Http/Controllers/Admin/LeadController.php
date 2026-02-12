@@ -72,7 +72,7 @@ class LeadController extends Controller
         // Exclude leads submitted by verifiers (basic info only)
         $query->whereNull('verified_by');
         
-        // Search functionality
+        // Instant search filter (no button needed)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -80,16 +80,9 @@ class LeadController extends Controller
                   ->orWhere('phone_number', 'like', "%{$search}%")
                   ->orWhere('carrier_name', 'like', "%{$search}%")
                   ->orWhere('closer_name', 'like', "%{$search}%")
+                  ->orWhere('state', 'like', "%{$search}%")
                   ->orWhere('ssn', 'like', "%{$search}%");
             });
-        }
-        
-        // Month filter
-        if ($request->filled('month')) {
-            $query->whereMonth('created_at', $request->month);
-        }
-        if ($request->filled('year')) {
-            $query->whereYear('created_at', $request->year);
         }
         
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
