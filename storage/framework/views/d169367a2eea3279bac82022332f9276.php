@@ -1,10 +1,8 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Project Management System
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
     <style>
         .epms-hero {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -70,20 +68,21 @@
         .ai-banner h5 { color: #a78bfa; font-weight: 700; }
         .ai-banner p { color: #94a3b8; }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1') EPMS @endslot
-        @slot('title') Project Management Dashboard @endslot
-    @endcomponent
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?> EPMS <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?> Project Management Dashboard <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-check-all me-2"></i>{{ session('success') }}
+            <i class="mdi mdi-check-all me-2"></i><?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Hero Section -->
     <div class="epms-hero">
@@ -93,7 +92,7 @@
                 <p class="mb-0 fs-5">Plan, track, and deliver projects with AI-powered insights</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="{{ route('epms.create') }}" class="btn btn-light btn-lg px-4">
+                <a href="<?php echo e(route('epms.create')); ?>" class="btn btn-light btn-lg px-4">
                     <i class="bx bx-plus me-1"></i> New Project
                 </a>
             </div>
@@ -105,42 +104,42 @@
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"><i class="bx bx-briefcase-alt-2"></i></div>
-                <div class="stat-value">{{ $stats['total'] }}</div>
+                <div class="stat-value"><?php echo e($stats['total']); ?></div>
                 <div class="stat-label">Total Projects</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="bx bx-play-circle"></i></div>
-                <div class="stat-value">{{ $stats['active'] }}</div>
+                <div class="stat-value"><?php echo e($stats['active']); ?></div>
                 <div class="stat-label">Active</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="bx bx-edit-alt"></i></div>
-                <div class="stat-value">{{ $stats['planning'] }}</div>
+                <div class="stat-value"><?php echo e($stats['planning']); ?></div>
                 <div class="stat-label">Planning</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="bx bx-check-circle"></i></div>
-                <div class="stat-value">{{ $stats['completed'] }}</div>
+                <div class="stat-value"><?php echo e($stats['completed']); ?></div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="bx bx-task"></i></div>
-                <div class="stat-value">{{ $stats['total_tasks'] }}</div>
+                <div class="stat-value"><?php echo e($stats['total_tasks']); ?></div>
                 <div class="stat-label">Total Tasks</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="bx bx-error-circle"></i></div>
-                <div class="stat-value">{{ $stats['critical_risks'] }}</div>
+                <div class="stat-value"><?php echo e($stats['critical_risks']); ?></div>
                 <div class="stat-label">Critical Risks</div>
             </div>
         </div>
@@ -154,7 +153,7 @@
                 <p class="mb-0">Describe your project and let AI generate a complete plan with milestones, tasks, WBS, risk analysis, and sprint planning.</p>
             </div>
             <div class="col-md-4 text-end">
-                <a href="{{ route('epms.create') }}" class="btn btn-outline-light">
+                <a href="<?php echo e(route('epms.create')); ?>" class="btn btn-outline-light">
                     <i class="bx bx-magic-wand me-1"></i> Launch AI Planner
                 </a>
             </div>
@@ -163,63 +162,65 @@
 
     <!-- Projects Grid -->
     <div class="row">
-        @forelse($projects as $project)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $projects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $project): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="project-card-v2">
                     <div class="card-header-strip" style="background: linear-gradient(90deg,
-                        {{ $project->priority === 'critical' ? '#ef4444, #dc2626' :
+                        <?php echo e($project->priority === 'critical' ? '#ef4444, #dc2626' :
                            ($project->priority === 'high' ? '#f59e0b, #d97706' :
-                           ($project->priority === 'medium' ? '#3b82f6, #2563eb' : '#10b981, #059669')) }});"></div>
+                           ($project->priority === 'medium' ? '#3b82f6, #2563eb' : '#10b981, #059669'))); ?>);"></div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <a href="{{ route('epms.show', $project) }}" class="project-name">{{ $project->name }}</a>
-                            <span class="health-dot {{ $project->health_score }}"></span>
+                            <a href="<?php echo e(route('epms.show', $project)); ?>" class="project-name"><?php echo e($project->name); ?></a>
+                            <span class="health-dot <?php echo e($project->health_score); ?>"></span>
                         </div>
                         <div class="d-flex gap-2 mb-3">
-                            <span class="methodology-badge method-{{ $project->methodology ?? 'agile' }}">{{ ucfirst($project->methodology ?? 'Agile') }}</span>
-                            <span class="priority-badge priority-{{ $project->priority ?? 'medium' }}">{{ ucfirst($project->priority ?? 'Medium') }}</span>
+                            <span class="methodology-badge method-<?php echo e($project->methodology ?? 'agile'); ?>"><?php echo e(ucfirst($project->methodology ?? 'Agile')); ?></span>
+                            <span class="priority-badge priority-<?php echo e($project->priority ?? 'medium'); ?>"><?php echo e(ucfirst($project->priority ?? 'Medium')); ?></span>
                         </div>
-                        @if($project->description)
-                            <p class="text-muted small mb-3">{{ Str::limit($project->description, 100) }}</p>
-                        @endif
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($project->description): ?>
+                            <p class="text-muted small mb-3"><?php echo e(Str::limit($project->description, 100)); ?></p>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         <div class="mb-3">
                             <div class="d-flex justify-content-between mb-1">
                                 <small class="text-muted">Progress</small>
-                                <small class="fw-semibold">{{ $project->progress_percentage }}%</small>
+                                <small class="fw-semibold"><?php echo e($project->progress_percentage); ?>%</small>
                             </div>
                             <div class="progress progress-bar-modern">
-                                <div class="progress-bar" style="width: {{ $project->progress_percentage }}%"></div>
+                                <div class="progress-bar" style="width: <?php echo e($project->progress_percentage); ?>%"></div>
                             </div>
                         </div>
                         <div class="row text-center mb-3">
-                            <div class="col-4"><div class="fw-bold text-primary">{{ $project->total_tasks }}</div><small class="text-muted">Tasks</small></div>
-                            <div class="col-4"><div class="fw-bold text-success">{{ $project->completed_tasks }}</div><small class="text-muted">Done</small></div>
-                            <div class="col-4"><div class="fw-bold {{ $project->days_remaining < 0 ? 'text-danger' : 'text-info' }}">{{ abs($project->days_remaining) }}</div><small class="text-muted">{{ $project->days_remaining < 0 ? 'Overdue' : 'Days Left' }}</small></div>
+                            <div class="col-4"><div class="fw-bold text-primary"><?php echo e($project->total_tasks); ?></div><small class="text-muted">Tasks</small></div>
+                            <div class="col-4"><div class="fw-bold text-success"><?php echo e($project->completed_tasks); ?></div><small class="text-muted">Done</small></div>
+                            <div class="col-4"><div class="fw-bold <?php echo e($project->days_remaining < 0 ? 'text-danger' : 'text-info'); ?>"><?php echo e(abs($project->days_remaining)); ?></div><small class="text-muted"><?php echo e($project->days_remaining < 0 ? 'Overdue' : 'Days Left'); ?></small></div>
                         </div>
-                        @if($project->budget > 0)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($project->budget > 0): ?>
                             <div class="d-flex justify-content-between small mb-2">
                                 <span class="text-muted">Budget</span>
-                                <span class="fw-semibold">{{ $project->currency }} {{ number_format($project->budget, 0) }}</span>
+                                <span class="fw-semibold"><?php echo e($project->currency); ?> <?php echo e(number_format($project->budget, 0)); ?></span>
                             </div>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                            <div><i class="bx bx-user text-muted me-1"></i><small class="text-muted">{{ $project->projectManager->name ?? 'Unassigned' }}</small></div>
-                            <small class="text-muted">{{ $project->deadline->format('M d, Y') }}</small>
+                            <div><i class="bx bx-user text-muted me-1"></i><small class="text-muted"><?php echo e($project->projectManager->name ?? 'Unassigned'); ?></small></div>
+                            <small class="text-muted"><?php echo e($project->deadline->format('M d, Y')); ?></small>
                         </div>
                         <div class="mt-3 d-flex gap-2">
-                            <a href="{{ route('epms.show', $project) }}" class="btn btn-sm btn-outline-primary flex-fill"><i class="bx bx-show"></i> View</a>
-                            <a href="{{ route('epms.edit', $project) }}" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bx bx-edit"></i> Edit</a>
+                            <a href="<?php echo e(route('epms.show', $project)); ?>" class="btn btn-sm btn-outline-primary flex-fill"><i class="bx bx-show"></i> View</a>
+                            <a href="<?php echo e(route('epms.edit', $project)); ?>" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bx bx-edit"></i> Edit</a>
                         </div>
                     </div>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="col-12 text-center py-5">
                 <i class="bx bx-folder-open display-1 text-muted"></i>
                 <h4 class="mt-3 text-muted">No projects yet</h4>
                 <p class="text-muted">Create your first project to get started.</p>
-                <a href="{{ route('epms.create') }}" class="btn btn-primary mt-2"><i class="bx bx-plus me-1"></i> Create First Project</a>
+                <a href="<?php echo e(route('epms.create')); ?>" class="btn btn-primary mt-2"><i class="bx bx-plus me-1"></i> Create First Project</a>
             </div>
-        @endforelse
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/epms/index.blade.php ENDPATH**/ ?>

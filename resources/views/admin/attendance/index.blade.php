@@ -211,6 +211,9 @@
                         <a href="{{ route('attendance.history') }}" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="mdi mdi-history"></i> View History
                         </a>
+                        <a href="{{ route('attendance.print-view') }}" class="btn btn-sm btn-outline-success ms-2">
+                            <i class="mdi mdi-printer"></i> Print View
+                        </a>
                         @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
                         <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
                             <i class="mdi mdi-plus"></i> Manual Entry

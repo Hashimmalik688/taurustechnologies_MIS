@@ -1,10 +1,8 @@
-@extends('layouts.master')
+<?php $__env->startSection('title'); ?>
+    <?php echo e($project->name); ?> - Project Dashboard
+<?php $__env->stopSection(); ?>
 
-@section('title')
-    {{ $project->name }} - Project Dashboard
-@endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
     <style>
@@ -450,44 +448,47 @@
             color: #94a3b8 !important;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            <a href="{{ route('epms.index') }}">EPMS</a>
-        @endslot
-        @slot('title')
-            {{ $project->name }}
-        @endslot
-    @endcomponent
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
+            <a href="<?php echo e(route('epms.index')); ?>">EPMS</a>
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
+            <?php echo e($project->name); ?>
 
-    @if (session('success'))
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
+
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bx bx-check-circle me-2"></i>
-            {{ session('success') }}
+            <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Project Header -->
     <div class="project-header">
         <div class="row align-items-center position-relative">
             <div class="col-md-8">
                 <h2 class="mb-2 text-white position-relative" style="z-index: 1;">
-                    <i class="bx bx-briefcase me-3"></i>{{ $project->name }}
+                    <i class="bx bx-briefcase me-3"></i><?php echo e($project->name); ?>
+
                 </h2>
-                <p class="mb-3 text-white-50 position-relative" style="z-index: 1;">{{ $project->description }}</p>
+                <p class="mb-3 text-white-50 position-relative" style="z-index: 1;"><?php echo e($project->description); ?></p>
                 <div class="d-flex gap-4 flex-wrap position-relative" style="z-index: 1;">
-                    <span class="text-white"><i class="bx bx-building me-2"></i>{{ $project->client_name }}</span>
-                    <span class="text-white"><i class="bx bx-calendar me-2"></i>{{ $project->start_date->format('M d, Y') }} - {{ $project->deadline->format('M d, Y') }}</span>
-                    <span class="method-badge method-{{ $project->methodology }}">{{ ucfirst($project->methodology) }}</span>
-                    <span class="priority-badge priority-{{ $project->priority }}">{{ ucfirst($project->priority) }}</span>
+                    <span class="text-white"><i class="bx bx-building me-2"></i><?php echo e($project->client_name); ?></span>
+                    <span class="text-white"><i class="bx bx-calendar me-2"></i><?php echo e($project->start_date->format('M d, Y')); ?> - <?php echo e($project->deadline->format('M d, Y')); ?></span>
+                    <span class="method-badge method-<?php echo e($project->methodology); ?>"><?php echo e(ucfirst($project->methodology)); ?></span>
+                    <span class="priority-badge priority-<?php echo e($project->priority); ?>"><?php echo e(ucfirst($project->priority)); ?></span>
                 </div>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0 position-relative" style="z-index: 1;">
                 <div class="btn-group" role="group">
-                    <a href="{{ route('epms.edit', $project) }}" class="btn btn-light">
+                    <a href="<?php echo e(route('epms.edit', $project)); ?>" class="btn btn-light">
                         <i class="bx bx-edit me-1"></i> Edit
                     </a>
                     <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addTaskModal">
@@ -509,29 +510,30 @@
                     <i class="bx bx-task text-white"></i>
                 </div>
                 <div class="stat-label">Project Progress</div>
-                <div class="stat-value">{{ number_format($project->progress_percentage, 1) }}%</div>
-                <div class="text-muted-dark small">{{ $project->completed_tasks }}/{{ $project->total_tasks }} tasks</div>
+                <div class="stat-value"><?php echo e(number_format($project->progress_percentage, 1)); ?>%</div>
+                <div class="text-muted-dark small"><?php echo e($project->completed_tasks); ?>/<?php echo e($project->total_tasks); ?> tasks</div>
                 <div class="progress-modern mt-3">
-                    <div class="progress-bar-modern" style="width: {{ $project->progress_percentage }}%"></div>
+                    <div class="progress-bar-modern" style="width: <?php echo e($project->progress_percentage); ?>%"></div>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="stat-card">
-                <div class="stat-icon {{ $project->health_score === 'green' ? 'green' : ($project->health_score === 'yellow' ? 'orange' : 'red') }}">
+                <div class="stat-icon <?php echo e($project->health_score === 'green' ? 'green' : ($project->health_score === 'yellow' ? 'orange' : 'red')); ?>">
                     <i class="bx bx-heart text-white"></i>
                 </div>
                 <div class="stat-label">Health Score</div>
                 <div class="stat-value" style="font-size: 1.5rem;">
-                    <span class="health-indicator health-{{ $project->health_score }}"></span>
-                    @if($project->health_score === 'green') On Track
-                    @elseif($project->health_score === 'yellow') At Risk
-                    @else Critical
-                    @endif
+                    <span class="health-indicator health-<?php echo e($project->health_score); ?>"></span>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($project->health_score === 'green'): ?> On Track
+                    <?php elseif($project->health_score === 'yellow'): ?> At Risk
+                    <?php else: ?> Critical
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
                 <div class="text-muted-dark small">
-                    {{ $project->days_remaining > 0 ? $project->days_remaining . ' days left' : abs($project->days_remaining) . ' days overdue' }}
+                    <?php echo e($project->days_remaining > 0 ? $project->days_remaining . ' days left' : abs($project->days_remaining) . ' days overdue'); ?>
+
                 </div>
             </div>
         </div>
@@ -542,19 +544,19 @@
                     <i class="bx bx-group text-white"></i>
                 </div>
                 <div class="stat-label">Team Size</div>
-                <div class="stat-value">{{ $project->team_size }}</div>
+                <div class="stat-value"><?php echo e($project->team_size); ?></div>
                 <div class="text-muted-dark small">Active members</div>
             </div>
         </div>
 
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="stat-card">
-                <div class="stat-icon {{ $project->active_risks_count > 0 ? 'red' : 'green' }}">
+                <div class="stat-icon <?php echo e($project->active_risks_count > 0 ? 'red' : 'green'); ?>">
                     <i class="bx bx-shield text-white"></i>
                 </div>
                 <div class="stat-label">Active Risks</div>
-                <div class="stat-value">{{ $project->active_risks_count }}</div>
-                <div class="text-muted-dark small">{{ $project->critical_risks_count }} critical</div>
+                <div class="stat-value"><?php echo e($project->active_risks_count); ?></div>
+                <div class="text-muted-dark small"><?php echo e($project->critical_risks_count); ?> critical</div>
             </div>
         </div>
     </div>
@@ -589,130 +591,134 @@
         <div class="row">
             <!-- Left Column: Charts & Sprint -->
             <div class="col-lg-8">
-                @if($activeSprint)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($activeSprint): ?>
                     <div class="glass-card p-4 mb-4">
                         <h5 class="mb-3 text-white">
-                            <i class="bx bx-run me-2"></i>Active Sprint: {{ $activeSprint->name }}
+                            <i class="bx bx-run me-2"></i>Active Sprint: <?php echo e($activeSprint->name); ?>
+
                         </h5>
                         <div class="sprint-card">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p class="text-white mb-2"><strong>Goal:</strong> {{ $activeSprint->goal ?? 'N/A' }}</p>
+                                    <p class="text-white mb-2"><strong>Goal:</strong> <?php echo e($activeSprint->goal ?? 'N/A'); ?></p>
                                     <p class="text-muted-dark mb-2">
                                         <i class="bx bx-calendar me-2"></i>
-                                        {{ $activeSprint->start_date->format('M d') }} - {{ $activeSprint->end_date->format('M d') }}
+                                        <?php echo e($activeSprint->start_date->format('M d')); ?> - <?php echo e($activeSprint->end_date->format('M d')); ?>
+
                                     </p>
                                 </div>
                                 <div class="col-md-6 text-md-end">
-                                    <h3 class="text-white">{{ $activeSprint->completed_points }}/{{ $activeSprint->capacity_points }}</h3>
+                                    <h3 class="text-white"><?php echo e($activeSprint->completed_points); ?>/<?php echo e($activeSprint->capacity_points); ?></h3>
                                     <p class="text-muted-dark mb-0">Story Points</p>
                                 </div>
                             </div>
-                            @if(!empty($burndownData))
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!empty($burndownData)): ?>
                                 <canvas id="burndownChart" class="mt-4" height="100"></canvas>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <!-- Milestones & Tasks Summary -->
                 <div class="glass-card p-4">
                     <h5 class="mb-4 text-white"><i class="bx bx-list-ul me-2"></i>Milestones & Tasks</h5>
-                    @forelse($project->milestones as $milestone)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->milestones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $milestone): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="text-white mb-1">
-                                        <i class="bx bx-flag me-2" style="color: #f59e0b;"></i>{{ $milestone->name }}
+                                        <i class="bx bx-flag me-2" style="color: #f59e0b;"></i><?php echo e($milestone->name); ?>
+
                                     </h6>
-                                    <small class="text-muted-dark">Due: {{ $milestone->due_date->format('M d, Y') }}</small>
+                                    <small class="text-muted-dark">Due: <?php echo e($milestone->due_date->format('M d, Y')); ?></small>
                                 </div>
-                                <span class="badge bg-{{ $milestone->status === 'completed' ? 'success' : ($milestone->status === 'missed' ? 'danger' : 'warning') }}">
-                                    {{ ucfirst($milestone->status) }}
+                                <span class="badge bg-<?php echo e($milestone->status === 'completed' ? 'success' : ($milestone->status === 'missed' ? 'danger' : 'warning')); ?>">
+                                    <?php echo e(ucfirst($milestone->status)); ?>
+
                                 </span>
                             </div>
-                            @php
+                            <?php
                                 $milestoneTasks = $project->tasks->where('milestone_id', $milestone->id);
-                            @endphp
-                            @if($milestoneTasks->count() > 0)
+                            ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($milestoneTasks->count() > 0): ?>
                                 <div class="ms-4">
-                                    @foreach($milestoneTasks->take(3) as $task)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $milestoneTasks->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: rgba(15,23,42,0.6); border-radius: 8px;">
-                                            <span class="text-white small">{{ $task->name }}</span>
-                                            <span class="badge bg-{{ $task->status === 'completed' ? 'success' : 'secondary' }}">
-                                                {{ $task->progress }}%
+                                            <span class="text-white small"><?php echo e($task->name); ?></span>
+                                            <span class="badge bg-<?php echo e($task->status === 'completed' ? 'success' : 'secondary'); ?>">
+                                                <?php echo e($task->progress); ?>%
                                             </span>
                                         </div>
-                                    @endforeach
-                                    @if($milestoneTasks->count() > 3)
-                                        <small class="text-muted-dark">+ {{ $milestoneTasks->count() - 3 }} more tasks</small>
-                                    @endif
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($milestoneTasks->count() > 3): ?>
+                                        <small class="text-muted-dark">+ <?php echo e($milestoneTasks->count() - 3); ?> more tasks</small>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center py-4">
                             <i class="bx bx-flag text-muted-dark" style="font-size: 3rem;"></i>
                             <p class="text-muted-dark mt-3">No milestones yet</p>
                         </div>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
             <!-- Right Column: AI Plan & Activity -->
             <div class="col-lg-4">
-                @if($aiConfigured)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($aiConfigured): ?>
                     <div class="glass-card p-4 mb-4">
                         <h5 class="mb-3 text-white"><i class="bx bx-brain me-2"></i>AI Planner</h5>
-                        @if($project->ai_plan)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($project->ai_plan): ?>
                             <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3);">
                                 <i class="bx bx-check-circle me-2"></i>
                                 <span class="text-white">AI plan applied</span>
                             </div>
-                            <small class="text-muted-dark">Prompt: {{ Str::limit($project->ai_prompt, 100) }}</small>
-                        @else
+                            <small class="text-muted-dark">Prompt: <?php echo e(Str::limit($project->ai_prompt, 100)); ?></small>
+                        <?php else: ?>
                             <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#aiPlanModal">
                                 <i class="bx bx-bulb me-2"></i>Generate AI Plan
                             </button>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <!-- Budget Overview -->
-                @if($project->budget)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($project->budget): ?>
                     <div class="glass-card p-4 mb-4">
                         <h5 class="mb-3 text-white"><i class="bx bx-dollar me-2"></i>Budget</h5>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted-dark">Total Budget:</span>
-                            <span class="text-white fw-bold">{{ $project->currency }} {{ number_format($project->budget, 2) }}</span>
+                            <span class="text-white fw-bold"><?php echo e($project->currency); ?> <?php echo e(number_format($project->budget, 2)); ?></span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted-dark">Spent:</span>
-                            <span class="text-danger fw-bold">{{ $project->currency }} {{ number_format($project->budget_spent, 2) }}</span>
+                            <span class="text-danger fw-bold"><?php echo e($project->currency); ?> <?php echo e(number_format($project->budget_spent, 2)); ?></span>
                         </div>
                         <div class="progress-modern">
-                            <div class="progress-bar-modern" style="width: {{ $project->budget_utilization }}%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);"></div>
+                            <div class="progress-bar-modern" style="width: <?php echo e($project->budget_utilization); ?>%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);"></div>
                         </div>
-                        <small class="text-muted-dark mt-2 d-block">{{ number_format($project->budget_utilization, 1) }}% utilized</small>
+                        <small class="text-muted-dark mt-2 d-block"><?php echo e(number_format($project->budget_utilization, 1)); ?>% utilized</small>
                     </div>
-                @endif
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 <!-- Recent Comments -->
                 <div class="glass-card p-4">
                     <h5 class="mb-3 text-white"><i class="bx bx-comment me-2"></i>Recent Comments</h5>
-                    @forelse($project->comments->take(3) as $comment)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->comments->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <div class="comment-item">
                             <div class="d-flex align-items-start">
                                 <div class="flex-grow-1">
-                                    <h6 class="text-white mb-1">{{ $comment->user->name }}</h6>
-                                    <p class="text-muted-dark mb-0 small">{{ $comment->body }}</p>
-                                    <small class="text-muted-dark">{{ $comment->created_at->diffForHumans() }}</small>
+                                    <h6 class="text-white mb-1"><?php echo e($comment->user->name); ?></h6>
+                                    <p class="text-muted-dark mb-0 small"><?php echo e($comment->body); ?></p>
+                                    <small class="text-muted-dark"><?php echo e($comment->created_at->diffForHumans()); ?></small>
                                 </div>
                             </div>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <p class="text-muted-dark text-center">No comments yet</p>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     <button class="btn btn-sm btn-outline-primary w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addCommentModal">
                         <i class="bx bx-plus me-2"></i>Add Comment
                     </button>
@@ -732,42 +738,44 @@
             </div>
 
             <div class="kanban-board">
-                @foreach($kanbanBoard as $columnKey => $column)
-                    <div class="kanban-column" data-column="{{ $columnKey }}">
-                        <div class="kanban-header" style="border-color: {{ $column['color'] }};">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $kanbanBoard; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $columnKey => $column): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="kanban-column" data-column="<?php echo e($columnKey); ?>">
+                        <div class="kanban-header" style="border-color: <?php echo e($column['color']); ?>;">
                             <div>
-                                <i class="bx {{ $column['icon'] }} me-2" style="color: {{ $column['color'] }};"></i>
-                                <span class="text-white fw-bold">{{ $column['label'] }}</span>
+                                <i class="bx <?php echo e($column['icon']); ?> me-2" style="color: <?php echo e($column['color']); ?>;"></i>
+                                <span class="text-white fw-bold"><?php echo e($column['label']); ?></span>
                             </div>
-                            <span class="badge" style="background: {{ $column['color'] }};">{{ $column['tasks']->count() }}</span>
+                            <span class="badge" style="background: <?php echo e($column['color']); ?>;"><?php echo e($column['tasks']->count()); ?></span>
                         </div>
-                        <div class="kanban-tasks" data-column="{{ $columnKey }}">
-                            @foreach($column['tasks'] as $task)
+                        <div class="kanban-tasks" data-column="<?php echo e($columnKey); ?>">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $column['tasks']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="kanban-task" 
-                                     data-task-id="{{ $task->id }}" 
-                                     style="border-left-color: {{ $task->color ?? $column['color'] }};">
-                                    <h6 class="text-white mb-2">{{ $task->name }}</h6>
+                                     data-task-id="<?php echo e($task->id); ?>" 
+                                     style="border-left-color: <?php echo e($task->color ?? $column['color']); ?>;">
+                                    <h6 class="text-white mb-2"><?php echo e($task->name); ?></h6>
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="priority-badge priority-{{ $task->priority }}">{{ $task->priority }}</span>
-                                        @if($task->story_points)
-                                            <span class="badge bg-info">{{ $task->story_points }} pts</span>
-                                        @endif
+                                        <span class="priority-badge priority-<?php echo e($task->priority); ?>"><?php echo e($task->priority); ?></span>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($task->story_points): ?>
+                                            <span class="badge bg-info"><?php echo e($task->story_points); ?> pts</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
-                                    @if($task->assignedUser)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($task->assignedUser): ?>
                                         <small class="text-muted-dark d-block">
-                                            <i class="bx bx-user me-1"></i>{{ $task->assignedUser->name }}
+                                            <i class="bx bx-user me-1"></i><?php echo e($task->assignedUser->name); ?>
+
                                         </small>
-                                    @endif
-                                    @if($task->label)
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($task->label): ?>
                                         <small class="text-muted-dark d-block mt-1">
-                                            <i class="bx bx-tag me-1"></i>{{ $task->label }}
+                                            <i class="bx bx-tag me-1"></i><?php echo e($task->label); ?>
+
                                         </small>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
     </div>
@@ -800,14 +808,14 @@
             </div>
 
             <div class="wbs-tree">
-                @forelse($project->wbsRootItems as $wbsItem)
-                    @include('admin.epms.partials.wbs-item', ['item' => $wbsItem, 'level' => 0])
-                @empty
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->wbsRootItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $wbsItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php echo $__env->make('admin.epms.partials.wbs-item', ['item' => $wbsItem, 'level' => 0], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="text-center py-5">
                         <i class="bx bx-sitemap text-muted-dark" style="font-size: 4rem;"></i>
                         <p class="text-muted-dark mt-3">No WBS items yet. Start building your work breakdown structure.</p>
                     </div>
-                @endforelse
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
     </div>
@@ -824,38 +832,39 @@
                         </button>
                     </div>
 
-                    @forelse($project->risks->sortByDesc('severity_score') as $risk)
-                        <div class="mb-3 p-3" style="background: rgba(15,23,42,0.6); border-radius: 12px; border-left: 4px solid {{ $risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6') }};">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->risks->sortByDesc('severity_score'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $risk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <div class="mb-3 p-3" style="background: rgba(15,23,42,0.6); border-radius: 12px; border-left: 4px solid <?php echo e($risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6')); ?>;">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="flex-grow-1">
-                                    <h6 class="text-white mb-1">{{ $risk->title }}</h6>
-                                    <p class="text-muted-dark mb-2 small">{{ $risk->description }}</p>
+                                    <h6 class="text-white mb-1"><?php echo e($risk->title); ?></h6>
+                                    <p class="text-muted-dark mb-2 small"><?php echo e($risk->description); ?></p>
                                     <div class="d-flex gap-2 flex-wrap">
-                                        <span class="badge" style="background: {{ $risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6') }};">
-                                            {{ ucfirst($risk->severity_level) }} (Score: {{ $risk->severity_score }})
+                                        <span class="badge" style="background: <?php echo e($risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6')); ?>;">
+                                            <?php echo e(ucfirst($risk->severity_level)); ?> (Score: <?php echo e($risk->severity_score); ?>)
                                         </span>
-                                        <span class="badge bg-secondary">{{ ucfirst($risk->category) }}</span>
-                                        <span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $risk->probability)) }}</span>
+                                        <span class="badge bg-secondary"><?php echo e(ucfirst($risk->category)); ?></span>
+                                        <span class="badge bg-info"><?php echo e(ucfirst(str_replace('_', ' ', $risk->probability))); ?></span>
                                     </div>
                                 </div>
                                 <div class="ms-3">
-                                    <span class="badge bg-{{ $risk->status === 'resolved' ? 'success' : ($risk->status === 'mitigating' ? 'warning' : 'secondary') }}">
-                                        {{ ucfirst($risk->status) }}
+                                    <span class="badge bg-<?php echo e($risk->status === 'resolved' ? 'success' : ($risk->status === 'mitigating' ? 'warning' : 'secondary')); ?>">
+                                        <?php echo e(ucfirst($risk->status)); ?>
+
                                     </span>
                                 </div>
                             </div>
-                            @if($risk->mitigation_plan)
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($risk->mitigation_plan): ?>
                                 <div class="mt-3 p-2" style="background: rgba(139,92,246,0.1); border-radius: 8px;">
-                                    <small class="text-muted-dark"><strong>Mitigation:</strong> {{ $risk->mitigation_plan }}</small>
+                                    <small class="text-muted-dark"><strong>Mitigation:</strong> <?php echo e($risk->mitigation_plan); ?></small>
                                 </div>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center py-5">
                             <i class="bx bx-shield text-muted-dark" style="font-size: 4rem;"></i>
                             <p class="text-muted-dark mt-3">No risks identified yet</p>
                         </div>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
@@ -872,24 +881,25 @@
                         <div class="risk-cell header">Very High</div>
 
                         <!-- Rows (Very High Probability to Very Low) -->
-                        @php
+                        <?php
                             $probLevels = ['very_high', 'high', 'medium', 'low', 'very_low'];
                             $impactLevels = ['very_low', 'low', 'medium', 'high', 'very_high'];
-                        @endphp
-                        @foreach(array_reverse($probLevels) as $prob)
-                            <div class="risk-cell header">{{ ucfirst(str_replace('_', ' ', $prob)) }}</div>
-                            @foreach($impactLevels as $impact)
-                                @php
+                        ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = array_reverse($probLevels); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $prob): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="risk-cell header"><?php echo e(ucfirst(str_replace('_', ' ', $prob))); ?></div>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $impactLevels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $impact): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $key = $prob . '_' . $impact;
                                     $count = $riskMatrix[$key] ?? 0;
                                     $score = \App\Models\EPMSRisk::SCORE_MAP[$prob] * \App\Models\EPMSRisk::SCORE_MAP[$impact];
                                     $cellClass = $score >= 20 ? 'risk-critical' : ($score >= 12 ? 'risk-high' : ($score >= 6 ? 'risk-medium' : 'risk-low'));
-                                @endphp
-                                <div class="risk-cell data {{ $cellClass }}" title="{{ $count }} risks">
-                                    {{ $count > 0 ? $count : '' }}
+                                ?>
+                                <div class="risk-cell data <?php echo e($cellClass); ?>" title="<?php echo e($count); ?> risks">
+                                    <?php echo e($count > 0 ? $count : ''); ?>
+
                                 </div>
-                            @endforeach
-                        @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -919,28 +929,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($project->members as $member)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->members; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <tr>
-                                        <td class="text-white">{{ $member->user->name }}</td>
-                                        <td>{{ $member->project_role ?? 'N/A' }}</td>
+                                        <td class="text-white"><?php echo e($member->user->name); ?></td>
+                                        <td><?php echo e($member->project_role ?? 'N/A'); ?></td>
                                         <td>
-                                            <span class="raci-badge raci-{{ strtolower(substr($member->raci_role, 0, 1)) }}">
-                                                {{ strtoupper(substr($member->raci_role, 0, 1)) }}
+                                            <span class="raci-badge raci-<?php echo e(strtolower(substr($member->raci_role, 0, 1))); ?>">
+                                                <?php echo e(strtoupper(substr($member->raci_role, 0, 1))); ?>
+
                                             </span>
-                                            {{ ucfirst($member->raci_role) }}
+                                            <?php echo e(ucfirst($member->raci_role)); ?>
+
                                         </td>
                                         <td>
-                                            @php
+                                            <?php
                                                 $memberTasks = $project->tasks->where('assigned_to', $member->user_id)->count();
-                                            @endphp
-                                            <span class="badge bg-primary">{{ $memberTasks }}</span>
+                                            ?>
+                                            <span class="badge bg-primary"><?php echo e($memberTasks); ?></span>
                                         </td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="4" class="text-center text-muted-dark py-4">No team members assigned</td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -950,25 +962,25 @@
             <div class="col-lg-4">
                 <div class="glass-card p-4">
                     <h5 class="mb-4 text-white">Resource Workload</h5>
-                    @forelse($resourceWorkload as $resource)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $resourceWorkload; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $resource): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div>
-                                    <h6 class="text-white mb-0">{{ $resource['user']->name }}</h6>
-                                    <small class="text-muted-dark">{{ $resource['role'] }}</small>
+                                    <h6 class="text-white mb-0"><?php echo e($resource['user']->name); ?></h6>
+                                    <small class="text-muted-dark"><?php echo e($resource['role']); ?></small>
                                 </div>
-                                <span class="badge bg-{{ $resource['utilization'] > 80 ? 'danger' : ($resource['utilization'] > 50 ? 'warning' : 'success') }}">
-                                    {{ number_format($resource['utilization'], 0) }}%
+                                <span class="badge bg-<?php echo e($resource['utilization'] > 80 ? 'danger' : ($resource['utilization'] > 50 ? 'warning' : 'success')); ?>">
+                                    <?php echo e(number_format($resource['utilization'], 0)); ?>%
                                 </span>
                             </div>
                             <div class="progress-modern">
-                                <div class="progress-bar-modern" style="width: {{ $resource['utilization'] }}%; background: {{ $resource['utilization'] > 80 ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%)' }};"></div>
+                                <div class="progress-bar-modern" style="width: <?php echo e($resource['utilization']); ?>%; background: <?php echo e($resource['utilization'] > 80 ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%)'); ?>;"></div>
                             </div>
-                            <small class="text-muted-dark mt-1 d-block">{{ $resource['tasks'] }} tasks, {{ $resource['hours'] }}h estimated</small>
+                            <small class="text-muted-dark mt-1 d-block"><?php echo e($resource['tasks']); ?> tasks, <?php echo e($resource['hours']); ?>h estimated</small>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <p class="text-muted-dark text-center">No resource data available</p>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
@@ -984,27 +996,28 @@
                 </button>
             </div>
 
-            @forelse($project->documents as $doc)
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $project->documents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="document-item">
                     <div class="d-flex align-items-center">
                         <i class="bx bx-file text-primary me-3" style="font-size: 2rem;"></i>
                         <div>
-                            <h6 class="text-white mb-0">{{ $doc->name }}</h6>
+                            <h6 class="text-white mb-0"><?php echo e($doc->name); ?></h6>
                             <small class="text-muted-dark">
-                                {{ $doc->file_type }} • {{ $doc->formatted_size }} • Uploaded by {{ $doc->uploader->name }} • {{ $doc->created_at->format('M d, Y') }}
+                                <?php echo e($doc->file_type); ?> • <?php echo e($doc->formatted_size); ?> • Uploaded by <?php echo e($doc->uploader->name); ?> • <?php echo e($doc->created_at->format('M d, Y')); ?>
+
                             </small>
                         </div>
                     </div>
-                    <a href="{{ route('epms.documents.download', [$project, $doc]) }}" class="btn btn-sm btn-outline-primary">
+                    <a href="<?php echo e(route('epms.documents.download', [$project, $doc])); ?>" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-download"></i>
                     </a>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="text-center py-5">
                     <i class="bx bx-file text-muted-dark" style="font-size: 4rem;"></i>
                     <p class="text-muted-dark mt-3">No documents uploaded yet</p>
                 </div>
-            @endforelse
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
     </div>
 
@@ -1016,8 +1029,8 @@
                     <h5 class="modal-title text-white">Add New Task</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.tasks.store', $project) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('epms.tasks.store', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -1028,9 +1041,9 @@
                                 <label class="form-label">Milestone</label>
                                 <select class="form-select" name="milestone_id">
                                     <option value="">No Milestone</option>
-                                    @foreach($project->milestones as $milestone)
-                                        <option value="{{ $milestone->id }}">{{ $milestone->name }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $project->milestones; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $milestone): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($milestone->id); ?>"><?php echo e($milestone->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                         </div>
@@ -1053,9 +1066,9 @@
                                 <label class="form-label">Assign To</label>
                                 <select class="form-select" name="assigned_to">
                                     <option value="">Unassigned</option>
-                                    @foreach($teamMembers as $member)
-                                        <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $teamMembers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($member->id); ?>"><?php echo e($member->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
@@ -1071,9 +1084,9 @@
                                 <label class="form-label">Sprint</label>
                                 <select class="form-select" name="sprint_id">
                                     <option value="">No Sprint</option>
-                                    @foreach($project->sprints as $sprint)
-                                        <option value="{{ $sprint->id }}">{{ $sprint->name }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $project->sprints; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sprint): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($sprint->id); ?>"><?php echo e($sprint->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                         </div>
@@ -1109,8 +1122,8 @@
                     <h5 class="modal-title text-white">Add New Milestone</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.milestones.store', $project) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('epms.milestones.store', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Milestone Name *</label>
@@ -1142,8 +1155,8 @@
                     <h5 class="modal-title text-white">Add Risk to Register</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.risks.store', $project) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('epms.risks.store', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Risk Title *</label>
@@ -1199,9 +1212,9 @@
                             <label class="form-label">Risk Owner</label>
                             <select class="form-select" name="owner_id">
                                 <option value="">Unassigned</option>
-                                @foreach($teamMembers as $member)
-                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $teamMembers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($member->id); ?>"><?php echo e($member->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                     </div>
@@ -1222,16 +1235,16 @@
                     <h5 class="modal-title text-white">Add Team Member</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.members.store', $project) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('epms.members.store', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Select User *</label>
                             <select class="form-select" name="user_id" required>
                                 <option value="">Choose...</option>
-                                @foreach($teamMembers as $member)
-                                    <option value="{{ $member->id }}">{{ $member->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $teamMembers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $member): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($member->id); ?>"><?php echo e($member->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -1265,8 +1278,8 @@
                     <h5 class="modal-title text-white">Upload Document</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.documents.store', $project) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
+                <form action="<?php echo e(route('epms.documents.store', $project)); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Document Name *</label>
@@ -1288,9 +1301,9 @@
                             <label class="form-label">Related Task (Optional)</label>
                             <select class="form-select" name="task_id">
                                 <option value="">No Task</option>
-                                @foreach($project->tasks as $task)
-                                    <option value="{{ $task->id }}">{{ $task->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $project->tasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($task->id); ?>"><?php echo e($task->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                     </div>
@@ -1311,8 +1324,8 @@
                     <h5 class="modal-title text-white">Add Comment</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.comments.store', $project) }}" method="POST" id="commentForm">
-                    @csrf
+                <form action="<?php echo e(route('epms.comments.store', $project)); ?>" method="POST" id="commentForm">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Comment *</label>
@@ -1322,9 +1335,9 @@
                             <label class="form-label">Related Task (Optional)</label>
                             <select class="form-select" name="task_id">
                                 <option value="">General Project Comment</option>
-                                @foreach($project->tasks as $task)
-                                    <option value="{{ $task->id }}">{{ $task->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $project->tasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($task->id); ?>"><?php echo e($task->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                     </div>
@@ -1345,8 +1358,8 @@
                     <h5 class="modal-title text-white">Add WBS Item</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('epms.wbs.store', $project) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('epms.wbs.store', $project)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Item Name *</label>
@@ -1360,9 +1373,9 @@
                             <label class="form-label">Parent Item</label>
                             <select class="form-select" name="parent_id">
                                 <option value="">Root Level</option>
-                                @foreach($project->wbsItems as $item)
-                                    <option value="{{ $item->id }}">{{ $item->code }} - {{ $item->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $project->wbsItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($item->id); ?>"><?php echo e($item->code); ?> - <?php echo e($item->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -1395,7 +1408,7 @@
     </div>
 
     <!-- AI Plan Modal -->
-    @if($aiConfigured && !$project->ai_plan)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($aiConfigured && !$project->ai_plan): ?>
     <div class="modal fade" id="aiPlanModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1441,11 +1454,11 @@
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -1477,11 +1490,11 @@
                         const newOrder = evt.newIndex;
 
                         // AJAX call to update task
-                        fetch(`{{ route('epms.show', $project) }}/tasks/${taskId}/move`, {
+                        fetch(`<?php echo e(route('epms.show', $project)); ?>/tasks/${taskId}/move`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                             },
                             body: JSON.stringify({
                                 kanban_column: newColumn,
@@ -1502,8 +1515,8 @@
 
         // Gantt Chart
         let ganttChart;
-        const ganttTasks = @json($ganttTasks);
-        const ganttMilestones = @json($ganttMilestones);
+        const ganttTasks = <?php echo json_encode($ganttTasks, 15, 512) ?>;
+        const ganttMilestones = <?php echo json_encode($ganttMilestones, 15, 512) ?>;
         const allGanttItems = [...ganttMilestones, ...ganttTasks];
 
         if (allGanttItems.length > 0) {
@@ -1547,11 +1560,11 @@
         }
 
         function updateTaskDates(taskId, start, end) {
-            fetch(`{{ route('epms.tasks.update-dates', [$project, ':taskId']) }}`.replace(':taskId', taskId), {
+            fetch(`<?php echo e(route('epms.tasks.update-dates', [$project, ':taskId'])); ?>`.replace(':taskId', taskId), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({
                     start_date: start.toISOString().split('T')[0],
@@ -1567,11 +1580,11 @@
         }
 
         function updateTaskProgress(taskId, progress) {
-            fetch(`{{ route('epms.tasks.update-status', [$project, ':taskId']) }}`.replace(':taskId', taskId), {
+            fetch(`<?php echo e(route('epms.tasks.update-status', [$project, ':taskId'])); ?>`.replace(':taskId', taskId), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({
                     progress: progress,
@@ -1587,22 +1600,22 @@
         }
 
         // Burndown Chart
-        @if($activeSprint && !empty($burndownData))
+        <?php if($activeSprint && !empty($burndownData)): ?>
         const burndownCtx = document.getElementById('burndownChart');
         if (burndownCtx) {
             new Chart(burndownCtx, {
                 type: 'line',
                 data: {
-                    labels: @json(array_keys($burndownData)),
+                    labels: <?php echo json_encode(array_keys($burndownData), 15, 512) ?>,
                     datasets: [{
                         label: 'Ideal Burndown',
-                        data: @json(array_column(array_values($burndownData), 'ideal')),
+                        data: <?php echo json_encode(array_column(array_values($burndownData), 'ideal'), 512) ?>,
                         borderColor: '#94a3b8',
                         borderDash: [5, 5],
                         tension: 0.1
                     }, {
                         label: 'Actual Progress',
-                        data: @json(array_column(array_values($burndownData), 'actual')),
+                        data: <?php echo json_encode(array_column(array_values($burndownData), 'actual'), 512) ?>,
                         borderColor: '#8b5cf6',
                         backgroundColor: 'rgba(139, 92, 246, 0.1)',
                         fill: true,
@@ -1630,10 +1643,10 @@
                 }
             });
         }
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         // AI Plan Generation
-        @if($aiConfigured && !$project->ai_plan)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($aiConfigured && !$project->ai_plan): ?>
         let currentPlanId = null;
 
         document.getElementById('generateAiPlanBtn')?.addEventListener('click', function() {
@@ -1650,11 +1663,11 @@
             document.getElementById('aiPlanResult').classList.add('d-none');
             document.getElementById('aiPlanError').classList.add('d-none');
 
-            fetch(`{{ route('epms.ai.generate-for-project', $project) }}`, {
+            fetch(`<?php echo e(route('epms.ai.generate-for-project', $project)); ?>`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({ prompt: prompt })
             })
@@ -1695,11 +1708,11 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Applying...';
 
-            fetch(`{{ route('epms.ai.apply', $project) }}`, {
+            fetch(`<?php echo e(route('epms.ai.apply', $project)); ?>`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify({ plan_id: currentPlanId })
             })
@@ -1720,7 +1733,7 @@
                 btn.innerHTML = '<i class="bx bx-check me-2"></i>Apply to Project';
             });
         });
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         // Comment Form AJAX Submission
         document.getElementById('commentForm')?.addEventListener('submit', function(e) {
@@ -1731,7 +1744,7 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 }
             })
             .then(response => response.json())
@@ -1784,4 +1797,6 @@
             fill: rgba(139, 92, 246, 0.1) !important;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/epms/show.blade.php ENDPATH**/ ?>

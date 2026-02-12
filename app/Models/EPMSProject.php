@@ -36,6 +36,18 @@ class EPMSProject extends Model
         'revision_tasks',
         'created_by',
         'project_manager_id',
+        // New internal project fields
+        'methodology',
+        'priority',
+        'category',
+        'budget',
+        'budget_spent',
+        'objectives',
+        'tags',
+        'ai_plan',
+        'ai_prompt',
+        'repository_url',
+        'tech_stack',
     ];
 
     protected $casts = [
@@ -44,9 +56,13 @@ class EPMSProject extends Model
         'gross_profit' => 'decimal:2',
         'margin_percentage' => 'decimal:2',
         'project_velocity' => 'decimal:2',
+        'budget' => 'decimal:2',
+        'budget_spent' => 'decimal:2',
         'start_date' => 'date',
         'deadline' => 'date',
         'estimated_completion_date' => 'date',
+        'tags' => 'array',
+        'ai_plan' => 'array',
     ];
 
     /**
@@ -77,6 +93,58 @@ class EPMSProject extends Model
         return $this->belongsTo(User::class, 'project_manager_id');
     }
 
+    public function members()
+    {
+        return $this->hasMany(EPMSProjectMember::class, 'project_id');
+    }
+
+    public function teamUsers()
+    {
+        return $this->belongsToMany(User::class, 'epms_project_members', 'project_id', 'user_id')
+            ->withPivot('raci_role', 'project_role', 'is_lead')
+            ->withTimestamps();
+    }
+
+    public function risks()
+    {
+        return $this->hasMany(EPMSRisk::class, 'project_id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(EPMSDocument::class, 'project_id');
+    }
+
+    public function sprints()
+    {
+        return $this->hasMany(EPMSSprint::class, 'project_id');
+    }
+
+    public function activeSprint()
+    {
+        return $this->hasOne(EPMSSprint::class, 'project_id')->where('status', 'active');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(EPMSComment::class, 'project_id');
+    }
+
+    public function aiPlans()
+    {
+        return $this->hasMany(EPMSAiPlan::class, 'project_id');
+    }
+
+    public function wbsItems()
+    {
+        return $this->hasMany(EPMSWbsItem::class, 'project_id');
+    }
+
+    public function wbsRootItems()
+    {
+        return $this->hasMany(EPMSWbsItem::class, 'project_id')->whereNull('parent_id')->orderBy('order');
+    }
+
     /**
      * Calculated Attributes
      */
@@ -96,6 +164,58 @@ class EPMSProject extends Model
     public function getTimeElapsedDaysAttribute()
     {
         return $this->start_date->diffInDays(now());
+    }
+
+    /**
+     * Get budget utilization percentage
+     */
+    public function getBudgetUtilizationAttribute(): float
+    {
+        if ($this->budget == 0) return 0;
+        return round(($this->budget_spent / $this->budget) * 100, 1);
+    }
+
+    /**
+     * Get team size
+     */
+    public function getTeamSizeAttribute(): int
+    {
+        return $this->members()->count();
+    }
+
+    /**
+     * Get active risks count
+     */
+    public function getActiveRisksCountAttribute(): int
+    {
+        return $this->risks()->whereNotIn('status', ['resolved', 'accepted'])->count();
+    }
+
+    /**
+     * Get critical risks count
+     */
+    public function getCriticalRisksCountAttribute(): int
+    {
+        return $this->risks()->where('severity_score', '>=', 20)->whereNotIn('status', ['resolved'])->count();
+    }
+
+    /**
+     * Get kanban columns with tasks
+     */
+    public function getKanbanBoardAttribute(): array
+    {
+        $columns = ['backlog', 'todo', 'in-progress', 'review', 'testing', 'done'];
+        $board = [];
+
+        foreach ($columns as $col) {
+            $board[$col] = $this->tasks()
+                ->where('kanban_column', $col)
+                ->orderBy('kanban_order')
+                ->with('assignedUser')
+                ->get();
+        }
+
+        return $board;
     }
 
     /**

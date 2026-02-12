@@ -369,6 +369,7 @@ Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::clas
 Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Employee|Agent|HR|Vendor|Retention Officer|Ravens Closer|Peregrine Closer|Peregrine Validator|Verifier|QA|Co-ordinator']], function () {
     Route::get('/', [AttendanceController::class, 'index'])->name('index');
     Route::get('/history', [AttendanceController::class, 'history'])->name('history');
+    Route::get('/print-view', [AttendanceController::class, 'printView'])->name('print-view');
     Route::get('/employee-report/{userId}', [AttendanceController::class, 'employeeReport'])->name('employee-report');
     Route::get('/export', [AttendanceController::class, 'index'])->name('export');
     Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json');
@@ -440,12 +441,41 @@ Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', 'rol
     Route::post('/{id}/tasks', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'addTask'])->name('tasks.store');
     Route::post('/{id}/tasks/{taskId}/status', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'updateTaskStatus'])->name('tasks.update-status');
     Route::post('/{id}/tasks/{taskId}/dates', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'updateTaskDates'])->name('tasks.update-dates');
+    Route::post('/{id}/tasks/{taskId}/move', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'moveTask'])->name('tasks.move');
     
     // Task Dependencies
     Route::post('/{id}/dependencies', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'addTaskDependency'])->name('dependencies.store');
     
     // External Costs
     Route::post('/{id}/costs', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'addExternalCost'])->name('costs.store');
+    
+    // Sprints
+    Route::post('/{id}/sprints', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeSprint'])->name('sprints.store');
+    Route::post('/{id}/sprints/{sprintId}/start', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'startSprint'])->name('sprints.start');
+    Route::post('/{id}/sprints/{sprintId}/complete', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'completeSprint'])->name('sprints.complete');
+    
+    // Risks
+    Route::post('/{id}/risks', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeRisk'])->name('risks.store');
+    Route::post('/{id}/risks/{riskId}/status', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'updateRiskStatus'])->name('risks.update-status');
+    
+    // Team Members (RACI)
+    Route::post('/{id}/members', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeMember'])->name('members.store');
+    Route::delete('/{id}/members/{memberId}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'removeMember'])->name('members.remove');
+    
+    // Documents
+    Route::post('/{id}/documents', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeDocument'])->name('documents.store');
+    Route::get('/{id}/documents/{docId}/download', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'downloadDocument'])->name('documents.download');
+    
+    // Comments
+    Route::post('/{id}/comments', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeComment'])->name('comments.store');
+    
+    // WBS
+    Route::post('/{id}/wbs', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'storeWbsItem'])->name('wbs.store');
+    
+    // AI Planning
+    Route::post('/ai/generate', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'generateAiPlan'])->name('ai.generate');
+    Route::post('/{id}/ai/generate', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'generateAiPlan'])->name('ai.generate-for-project');
+    Route::post('/{id}/ai/apply', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'applyAiPlan'])->name('ai.apply');
     
     // Gantt Data API
     Route::get('/{id}/gantt-data', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'getGanttData'])->name('gantt-data');
@@ -678,6 +708,9 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale');
     Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose');
     Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore');
+    Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
+    Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');
+    Route::get('/leads/dial-status', [RavensDashboardController::class, 'getDialStatus'])->name('leads.dial-status');
     Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads');
 });
 
