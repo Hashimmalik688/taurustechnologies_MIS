@@ -821,4 +821,137 @@ class AttendanceController extends Controller
 
         return $workingDays;
     }
+
+    /**
+     * Print View - Monthly attendance grid for all employees
+     */
+    public function printView(Request $request)
+    {
+        try {
+            // Get month/year from request or default to current month
+            $month = $request->get('month', Carbon::now()->format('Y-m'));
+            $department = $request->get('department', '');
+            
+            $monthStart = Carbon::parse($month . '-01');
+            $monthEnd = $monthStart->copy()->endOfMonth();
+            $daysInMonth = $monthEnd->day;
+
+            // Get all trackable users
+            $query = User::whereHas('roles', function($q) {
+                $q->whereIn('name', $this->trackableRoles);
+            })->orderBy('name');
+
+            // Filter by department if specified
+            if ($department) {
+                $query->where('department', $department);
+            }
+
+            $employees = $query->get();
+
+            // Get all attendances for the month
+            $attendances = Attendance::with('user')
+                ->whereHas('user', function($q) {
+                    $q->whereHas('roles', function($r) {
+                        $r->whereIn('name', $this->trackableRoles);
+                    });
+                })
+                ->whereBetween('date', [$monthStart, $monthEnd])
+                ->get()
+                ->groupBy('user_id');
+
+            // Build attendance grid for each employee
+            $employeeData = [];
+            foreach ($employees as $employee) {
+                $userAttendances = $attendances->get($employee->id, collect());
+                
+                // Create array of days with status
+                $dailyAttendance = [];
+                $totals = ['P' => 0, 'L' => 0, 'A' => 0, 'PL' => 0, 'H' => 0];
+                
+                for ($day = 1; $day <= $daysInMonth; $day++) {
+                    $currentDate = $monthStart->copy()->setDay($day);
+                    $dayOfWeek = $currentDate->dayOfWeek;
+                    
+                    // Check if weekend (Saturday=6, Sunday=0)
+                    if (in_array($dayOfWeek, [0, 6])) {
+                        $dailyAttendance[$day] = '-';
+                        continue;
+                    }
+                    
+                    // Check if holiday
+                    if (PublicHoliday::isHoliday($currentDate)) {
+                        $dailyAttendance[$day] = '-';
+                        continue;
+                    }
+                    
+                    // Find attendance record for this day
+                    $dayAttendance = $userAttendances->first(function($att) use ($currentDate) {
+                        return $att->date->format('Y-m-d') === $currentDate->format('Y-m-d');
+                    });
+                    
+                    if ($dayAttendance) {
+                        // Map status to display codes
+                        switch ($dayAttendance->status) {
+                            case 'present':
+                                $dailyAttendance[$day] = 'P';
+                                $totals['P']++;
+                                break;
+                            case 'late':
+                                $dailyAttendance[$day] = 'L';
+                                $totals['L']++;
+                                break;
+                            case 'absent':
+                                $dailyAttendance[$day] = 'A';
+                                $totals['A']++;
+                                break;
+                            case 'paid_leave':
+                                $dailyAttendance[$day] = 'PL';
+                                $totals['PL']++;
+                                break;
+                            case 'half_day':
+                                $dailyAttendance[$day] = 'H';
+                                $totals['H']++;
+                                break;
+                            default:
+                                $dailyAttendance[$day] = '-';
+                        }
+                    } else {
+                        // No record = Absent for workdays
+                        $dailyAttendance[$day] = 'A';
+                        $totals['A']++;
+                    }
+                }
+                
+                $employeeData[] = [
+                    'id' => $employee->id,
+                    'name' => $employee->name,
+                    'position' => $employee->position ?? $employee->getRoleNames()->first() ?? 'N/A',
+                    'department' => $employee->department ?? 'N/A',
+                    'daily_attendance' => $dailyAttendance,
+                    'totals' => $totals
+                ];
+            }
+
+            // Get unique departments for filter
+            $departments = User::whereHas('roles', function($q) {
+                $q->whereIn('name', $this->trackableRoles);
+            })->whereNotNull('department')
+                ->distinct()
+                ->pluck('department')
+                ->sort();
+
+            return view('admin.attendance.print-view', compact(
+                'employeeData',
+                'month',
+                'monthStart',
+                'monthEnd',
+                'daysInMonth',
+                'departments',
+                'department'
+            ));
+        } catch (\Exception $e) {
+            \Log::error('Attendance Print View Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error loading print view. Please try again.');
+        }
+    }
 }

@@ -14,9 +14,13 @@ class EPMSTask extends Model
     protected $fillable = [
         'project_id',
         'milestone_id',
+        'sprint_id',
         'name',
         'description',
         'status',
+        'kanban_column',
+        'label',
+        'color',
         'priority',
         'task_type',
         'start_date',
@@ -26,7 +30,9 @@ class EPMSTask extends Model
         'progress',
         'estimated_hours',
         'actual_hours',
+        'story_points',
         'order',
+        'kanban_order',
     ];
 
     protected $casts = [
@@ -46,6 +52,21 @@ class EPMSTask extends Model
     public function milestone()
     {
         return $this->belongsTo(EPMSMilestone::class, 'milestone_id');
+    }
+
+    public function sprint()
+    {
+        return $this->belongsTo(EPMSSprint::class, 'sprint_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(EPMSComment::class, 'task_id');
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(EPMSDocument::class, 'task_id');
     }
 
     public function assignedUser()

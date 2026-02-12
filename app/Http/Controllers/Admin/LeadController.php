@@ -72,6 +72,17 @@ class LeadController extends Controller
         // Exclude leads submitted by verifiers (basic info only)
         $query->whereNull('verified_by');
         
+        // Deduplicate: only show the latest lead per phone number (prevents CSV import duplicates)
+        $query->whereIn('id', function($subquery) {
+            $subquery->selectRaw('MAX(id)')
+                ->from('leads')
+                ->whereIn('status', ['closed', 'accepted'])
+                ->whereNotNull('phone_number')
+                ->where('phone_number', '!=', '')
+                ->where('phone_number', '!=', 'N/A')
+                ->groupBy('phone_number');
+        });
+        
         // Instant search filter (no button needed)
         if ($request->filled('search')) {
             $search = $request->search;

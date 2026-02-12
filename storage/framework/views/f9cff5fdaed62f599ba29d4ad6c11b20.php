@@ -28,6 +28,57 @@
             opacity: 0.6;
         }
         
+        /* Per-user dial tracking badges */
+        .dial-badges {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .dial-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: default;
+            position: relative;
+        }
+        .dial-badge.is-mine {
+            outline: 2px solid #000;
+            outline-offset: 1px;
+        }
+        .dial-badge .dial-time {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        .dial-badge:hover .dial-time {
+            display: block;
+        }
+        /* Row highlighting for dialed-by-me leads */
+        .lead-row.dialed-by-me {
+            background-color: rgba(78, 115, 223, 0.06) !important;
+            border-left: 3px solid #4e73df;
+        }
+        /* Row highlighting for dialed-by-others */
+        .lead-row.dialed-by-others {
+            background-color: rgba(231, 74, 59, 0.04) !important;
+        }
+        
         /* Peregrine badge style */
         .bg-purple {
             background-color: #6f42c1 !important;
@@ -82,12 +133,21 @@
                 </div>
 
                 <div class="card-body">
+                    <!-- Dial Tracking Legend -->
+                    <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded" style="background: #f8f9fa; font-size: 0.85rem;">
+                        <strong><i class="bx bx-info-circle me-1"></i> Dial Tracking:</strong>
+                        <span><span class="dial-badge is-mine" style="background-color: #4e73df; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">ME</span> = You dialed</span>
+                        <span><span class="dial-badge" style="background-color: #e74a3b; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">AB</span> = Another closer dialed</span>
+                        <span class="text-muted">| Hover badge to see name & time | Updates every 30s</span>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered align-middle">
                             <thead class="table-light">
                                 <tr>
                                     <th width="60">#</th>
                                     <th>Customer Name</th>
+                                    <th width="250">Callback Note <small class="text-muted">(auto-clears after 3 days)</small></th>
+                                    <th width="100" class="text-center">Dialed By</th>
                                     <th width="120" class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -105,6 +165,39 @@
                                                 <span class="badge bg-purple ms-1" title="Peregrine">Peregrine</span>
                                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
+                                        <td>
+                                            <?php
+                                                // Auto-clear callback note if older than 3 days
+                                                $showNote = false;
+                                                $noteValue = '';
+                                                if ($lead->callback_note && $lead->callback_note_updated_at) {
+                                                    $noteAge = $lead->callback_note_updated_at->diffInDays(now(), false);
+                                                    if ($noteAge < 3) {
+                                                        $showNote = true;
+                                                        $noteValue = $lead->callback_note;
+                                                    }
+                                                }
+                                            ?>
+                                            <input 
+                                                type="text" 
+                                                class="form-control form-control-sm callback-note-input" 
+                                                data-lead-id="<?php echo e($lead->id); ?>"
+                                                value="<?php echo e($noteValue); ?>"
+                                                placeholder="e.g., John's callback - 2pm"
+                                                onblur="saveCallbackNote(<?php echo e($lead->id); ?>, this.value)"
+                                                style="font-size: 0.85rem;">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($showNote && $lead->callback_note_updated_at): ?>
+                                                <small class="text-muted d-block mt-1">
+                                                    <i class="bx bx-time-five"></i> <?php echo e($lead->callback_note_updated_at->diffForHumans()); ?>
+
+                                                </small>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dial-badges" id="dial-badges-<?php echo e($lead->id); ?>">
+                                                <!-- Populated by JS from server -->
+                                            </div>
+                                        </td>
                                         <td class="text-center">
                                             <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('<?php echo e($lead->id); ?>', '<?php echo e($lead->phone_number); ?>', this)">
                                                 <i class="bx bx-phone-call"></i> Call
@@ -113,7 +206,7 @@
                                     </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted py-4">
+                                        <td colspan="5" class="text-center text-muted py-4">
                                             <i class="bx bx-info-circle fs-3"></i>
                                             <p class="mb-0">No leads available</p>
                                         </td>
@@ -865,7 +958,7 @@
     // Use window scope for global variables to avoid conflicts
     window.autoDialActive = false;
     window.currentLeadIndex = 0;
-    window.dialedLeads = new Set();
+    window.dialedLeads = new Set(); // Local cache, synced from server
     window.beneficiaryIndexRavens = 0;
     window.isCallActive = false;
     window.autoDialTimeout = null;
@@ -873,6 +966,108 @@
     window.pollInterval = null;
     window.currentLeadData = null;
     window.autoSaveInterval = null; // Auto-save form data every 30 seconds
+    window.dialStatusData = {}; // Server-synced dial status
+
+    // ===== PERSISTENT DIAL TRACKING =====
+    
+    /**
+     * Load dial status from server and render badges.
+     * Called on page load and periodically to show real-time updates from other closers.
+     */
+    function loadDialStatus() {
+        fetch('/ravens/leads/dial-status', {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.dialStatusData = data.dials || {};
+                renderDialBadges(data.dials, data.current_user_id);
+            }
+        })
+        .catch(error => console.error('Failed to load dial status:', error));
+    }
+
+    /**
+     * Render dial badges on each lead row showing who dialed it.
+     */
+    function renderDialBadges(dials, currentUserId) {
+        // Clear all existing badges and row highlights
+        document.querySelectorAll('.dial-badges').forEach(el => el.innerHTML = '');
+        document.querySelectorAll('.lead-row').forEach(row => {
+            row.classList.remove('dialed-by-me', 'dialed-by-others', 'dialed');
+        });
+
+        // Rebuild local dialedLeads set from server data
+        window.dialedLeads = new Set();
+
+        for (const [leadId, dialers] of Object.entries(dials)) {
+            const badgeContainer = document.getElementById('dial-badges-' + leadId);
+            const row = document.querySelector(`.lead-row[data-lead-id="${leadId}"]`);
+            if (!badgeContainer) continue;
+
+            let dialedByMe = false;
+            let dialedByOthers = false;
+
+            dialers.forEach(dialer => {
+                const badge = document.createElement('span');
+                badge.className = 'dial-badge' + (dialer.is_mine ? ' is-mine' : '');
+                badge.style.backgroundColor = dialer.color;
+                badge.title = dialer.user_name + ' at ' + dialer.dialed_at;
+                badge.innerHTML = dialer.initials + '<span class="dial-time">' + dialer.user_name + ' - ' + dialer.dialed_at + '</span>';
+                badgeContainer.appendChild(badge);
+
+                if (dialer.is_mine) {
+                    dialedByMe = true;
+                    window.dialedLeads.add(leadId);
+                } else {
+                    dialedByOthers = true;
+                }
+            });
+
+            // Apply row highlights
+            if (row) {
+                if (dialedByMe) {
+                    row.classList.add('dialed-by-me');
+                } else if (dialedByOthers) {
+                    row.classList.add('dialed-by-others');
+                }
+            }
+        }
+    }
+
+    /**
+     * Record a dial to the server (persists to DB).
+     */
+    function recordDial(leadId, outcome = 'dialed') {
+        fetch('/ravens/leads/record-dial', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ lead_id: leadId, outcome: outcome })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Dial recorded for lead', leadId);
+                // Refresh dial status to show updated badges
+                loadDialStatus();
+            }
+        })
+        .catch(error => console.error('Failed to record dial:', error));
+    }
+
+    // Load dial status on page load
+    loadDialStatus();
+    
+    // Refresh dial status every 30 seconds to see other closers' activity
+    setInterval(loadDialStatus, 30000);
 
     // TEST: Ensure JavaScript is loading
     console.log('✅ Ravens calling script loaded');
@@ -956,6 +1151,59 @@
         }, 2000);
     }
 
+    // Save callback note for a lead
+    window.saveCallbackNote = function(leadId, note) {
+        console.log('💾 Saving callback note for lead', leadId, ':', note);
+
+        fetch('<?php echo e(route('ravens.leads.save-callback-note')); ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                lead_id: leadId,
+                note: note
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Callback note saved:', data.message);
+                // Update the timestamp display if note was saved
+                if (data.note && data.updated_at) {
+                    const input = document.querySelector(`input[data-lead-id="${leadId}"]`);
+                    if (input) {
+                        const existingTimestamp = input.nextElementSibling;
+                        if (existingTimestamp && existingTimestamp.tagName === 'SMALL') {
+                            existingTimestamp.innerHTML = `<i class="bx bx-time-five"></i> ${data.updated_at}`;
+                        } else {
+                            // Create timestamp display
+                            const timestamp = document.createElement('small');
+                            timestamp.className = 'text-muted d-block mt-1';
+                            timestamp.innerHTML = `<i class="bx bx-time-five"></i> ${data.updated_at}`;
+                            input.parentNode.insertBefore(timestamp, input.nextSibling);
+                        }
+                    }
+                } else {
+                    // Clear timestamp if note was cleared
+                    const input = document.querySelector(`input[data-lead-id="${leadId}"]`);
+                    if (input) {
+                        const existingTimestamp = input.nextElementSibling;
+                        if (existingTimestamp && existingTimestamp.tagName === 'SMALL') {
+                            existingTimestamp.remove();
+                        }
+                    }
+                }
+            } else {
+                console.error('❌ Failed to save callback note:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error saving callback note:', error);
+        });
+    }
+
     // Unified call function - uses proper Zoom API integration
     // Shows Ravens form after 10-second delay when call is initiated
     window.makeCall = function(leadId, phoneNumber, button) {
@@ -1009,6 +1257,9 @@
                 
                 // Mark lead as dialed
                 window.dialedLeads.add(leadId);
+                
+                // Record dial persistently to server
+                recordDial(leadId, 'dialed');
                 
                 // Update UI
                 const row = button.closest('.lead-row');

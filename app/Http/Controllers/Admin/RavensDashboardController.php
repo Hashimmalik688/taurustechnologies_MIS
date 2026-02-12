@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
+use App\Models\LeadDial;
 use App\Models\BadLead;
 use App\Models\CallLog;
 use App\Models\Attendance;
@@ -131,7 +132,7 @@ class RavensDashboardController extends Controller
         $leads = Lead::select([
             'id', 'cn_name', 'phone_number', 'secondary_phone_number', 
             'closer_name', 'team', 'assigned_partner', 'created_at', 
-            'status', 'sale_at', 'verified_by'
+            'status', 'sale_at', 'verified_by', 'callback_note', 'callback_note_updated_at'
         ])
         // Exclude disposed (bad) leads — they should never appear in calling system
         ->where('status', '!=', 'disposed')
@@ -994,6 +995,153 @@ class RavensDashboardController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to restore lead: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save callback note for a lead (auto-clears after 3 days)
+     */
+    public function saveCallbackNote(Request $request)
+    {
+        try {
+            $request->validate([
+                'lead_id' => 'required|exists:leads,id',
+                'note' => 'nullable|string|max:500',
+            ]);
+
+            $lead = Lead::findOrFail($request->input('lead_id'));
+            $note = trim($request->input('note'));
+
+            // Update the callback note and timestamp
+            $lead->update([
+                'callback_note' => $note ?: null,
+                'callback_note_updated_at' => $note ? now() : null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $note ? 'Callback note saved' : 'Callback note cleared',
+                'note' => $note,
+                'updated_at' => $note ? now()->diffForHumans() : null,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error saving callback note: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save note: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Record that the current user dialed a lead.
+     * Uses upsert so re-dialing the same lead just updates the timestamp.
+     */
+    public function recordDial(Request $request)
+    {
+        try {
+            $request->validate([
+                'lead_id' => 'required|exists:leads,id',
+                'outcome' => 'nullable|string|in:dialed,no_answer,callback,connected,not_interested',
+            ]);
+
+            $dial = LeadDial::updateOrCreate(
+                [
+                    'lead_id' => $request->input('lead_id'),
+                    'user_id' => Auth::id(),
+                ],
+                [
+                    'dialed_at' => now(),
+                    'outcome' => $request->input('outcome', 'dialed'),
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'dial_id' => $dial->id,
+                'dialed_at' => $dial->dialed_at->diffForHumans(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error recording dial: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to record dial: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get dial status for all leads visible in the calling system.
+     * Returns a map of lead_id => [user_name, user_initials, dialed_at, color] for each dial.
+     */
+    public function getDialStatus()
+    {
+        try {
+            $currentUserId = Auth::id();
+
+            // Get all dials from today (we only show today's dials to keep it relevant)
+            $dials = LeadDial::with('user:id,name')
+                ->whereDate('dialed_at', today())
+                ->orderBy('dialed_at', 'desc')
+                ->get();
+
+            // Assign a consistent color to each user based on their ID
+            $userColors = [];
+            $colorPalette = [
+                '#4e73df', // blue
+                '#e74a3b', // red
+                '#1cc88a', // green
+                '#f6c23e', // yellow
+                '#36b9cc', // cyan
+                '#6f42c1', // purple
+                '#fd7e14', // orange
+                '#20c997', // teal
+                '#e83e8c', // pink
+                '#6610f2', // indigo
+            ];
+
+            $dialMap = [];
+            foreach ($dials as $dial) {
+                $userId = $dial->user_id;
+                $userName = $dial->user->name ?? 'Unknown';
+
+                // Assign color based on user ID (consistent across page loads)
+                if (!isset($userColors[$userId])) {
+                    $userColors[$userId] = $colorPalette[$userId % count($colorPalette)];
+                }
+
+                // Get initials from name
+                $parts = explode(' ', $userName);
+                $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+
+                $leadId = $dial->lead_id;
+                if (!isset($dialMap[$leadId])) {
+                    $dialMap[$leadId] = [];
+                }
+
+                $dialMap[$leadId][] = [
+                    'user_id' => $userId,
+                    'user_name' => $userName,
+                    'initials' => $initials,
+                    'color' => $userColors[$userId],
+                    'is_mine' => $userId === $currentUserId,
+                    'dialed_at' => $dial->dialed_at->format('g:i A'),
+                    'outcome' => $dial->outcome,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'dials' => $dialMap,
+                'current_user_id' => $currentUserId,
+                'user_colors' => $userColors,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting dial status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get dial status'
             ], 500);
         }
     }

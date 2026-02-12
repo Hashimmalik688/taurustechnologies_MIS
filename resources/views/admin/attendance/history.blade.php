@@ -51,6 +51,9 @@
                                 <button class="btn btn-outline-primary" onclick="exportData()">
                                     <i class="mdi mdi-download"></i> Export
                                 </button>
+                                <a href="{{ route('attendance.print-view') }}" class="btn btn-outline-success">
+                                    <i class="mdi mdi-printer"></i> Print View
+                                </a>
                                 <a href="{{ route('attendance.index') }}" class="btn btn-primary">
                                     <i class="mdi mdi-arrow-left"></i> Back to Today
                                 </a>

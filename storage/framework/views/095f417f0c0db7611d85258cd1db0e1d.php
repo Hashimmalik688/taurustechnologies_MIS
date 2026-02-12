@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title'); ?> Create New Project <?php $__env->stopSection(); ?>
 
-@section('title') Create New Project @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
     .create-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 35px; margin-bottom: 30px; color: #fff; }
     .form-section { background: #fff; border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #eef0f3; }
@@ -22,13 +20,13 @@
     .spinner-ai { display: none; }
     .spinner-ai.active { display: inline-block; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1') <a href="{{ route('epms.index') }}">EPMS</a> @endslot
-        @slot('title') Create Project @endslot
-    @endcomponent
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?> <a href="<?php echo e(route('epms.index')); ?>">EPMS</a> <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?> Create Project <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
     <div class="create-header">
         <h2><i class="bx bx-rocket me-2"></i>Create New Project</h2>
@@ -40,7 +38,7 @@
         <h5><i class="bx bx-brain"></i> AI Project Planner</h5>
         <p class="text-muted small">Describe your project idea and let AI generate a complete plan with tasks, milestones, risks, and more.</p>
 
-        @if($aiConfigured)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($aiConfigured): ?>
             <div class="row">
                 <div class="col-md-12 mb-3">
                     <label class="form-label">Describe Your Project *</label>
@@ -82,17 +80,17 @@
                 </div>
                 <pre id="aiResultContent"></pre>
             </div>
-        @else
+        <?php else: ?>
             <div class="alert alert-warning bg-transparent border border-warning">
                 <i class="bx bx-info-circle me-2"></i>
                 <strong>API Key Required:</strong> Add <code>OPENAI_API_KEY</code> to your <code>.env</code> file to enable AI project planning.
             </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
     <!-- Manual Project Form -->
-    <form action="{{ route('epms.store') }}" method="POST" id="projectForm">
-        @csrf
+    <form action="<?php echo e(route('epms.store')); ?>" method="POST" id="projectForm">
+        <?php echo csrf_field(); ?>
 
         <div class="row">
             <div class="col-lg-8">
@@ -102,38 +100,52 @@
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="name" class="form-label">Project Name *</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
-                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" id="name" name="name" value="<?php echo e(old('name')); ?>" required>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="invalid-feedback"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="category" class="form-label">Category</label>
                             <select class="form-select" name="category" id="category">
                                 <option value="">Select Category</option>
-                                <option value="Web Application" {{ old('category') == 'Web Application' ? 'selected' : '' }}>Web Application</option>
-                                <option value="Mobile App" {{ old('category') == 'Mobile App' ? 'selected' : '' }}>Mobile App</option>
-                                <option value="API/Backend" {{ old('category') == 'API/Backend' ? 'selected' : '' }}>API/Backend</option>
-                                <option value="Desktop App" {{ old('category') == 'Desktop App' ? 'selected' : '' }}>Desktop App</option>
-                                <option value="Data/Analytics" {{ old('category') == 'Data/Analytics' ? 'selected' : '' }}>Data/Analytics</option>
-                                <option value="AI/ML" {{ old('category') == 'AI/ML' ? 'selected' : '' }}>AI/ML</option>
-                                <option value="DevOps" {{ old('category') == 'DevOps' ? 'selected' : '' }}>DevOps</option>
-                                <option value="Other" {{ old('category') == 'Other' ? 'selected' : '' }}>Other</option>
+                                <option value="Web Application" <?php echo e(old('category') == 'Web Application' ? 'selected' : ''); ?>>Web Application</option>
+                                <option value="Mobile App" <?php echo e(old('category') == 'Mobile App' ? 'selected' : ''); ?>>Mobile App</option>
+                                <option value="API/Backend" <?php echo e(old('category') == 'API/Backend' ? 'selected' : ''); ?>>API/Backend</option>
+                                <option value="Desktop App" <?php echo e(old('category') == 'Desktop App' ? 'selected' : ''); ?>>Desktop App</option>
+                                <option value="Data/Analytics" <?php echo e(old('category') == 'Data/Analytics' ? 'selected' : ''); ?>>Data/Analytics</option>
+                                <option value="AI/ML" <?php echo e(old('category') == 'AI/ML' ? 'selected' : ''); ?>>AI/ML</option>
+                                <option value="DevOps" <?php echo e(old('category') == 'DevOps' ? 'selected' : ''); ?>>DevOps</option>
+                                <option value="Other" <?php echo e(old('category') == 'Other' ? 'selected' : ''); ?>>Other</option>
                             </select>
                         </div>
                         <div class="col-12 mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                            <textarea class="form-control" id="description" name="description" rows="3"><?php echo e(old('description')); ?></textarea>
                         </div>
                         <div class="col-12 mb-3">
                             <label for="objectives" class="form-label">Objectives</label>
-                            <textarea class="form-control" id="objectives" name="objectives" rows="2" placeholder="Key objectives and deliverables...">{{ old('objectives') }}</textarea>
+                            <textarea class="form-control" id="objectives" name="objectives" rows="2" placeholder="Key objectives and deliverables..."><?php echo e(old('objectives')); ?></textarea>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="tech_stack" class="form-label">Tech Stack</label>
-                            <input type="text" class="form-control" id="tech_stack" name="tech_stack" value="{{ old('tech_stack') }}" placeholder="e.g., Laravel, React, PostgreSQL">
+                            <input type="text" class="form-control" id="tech_stack" name="tech_stack" value="<?php echo e(old('tech_stack')); ?>" placeholder="e.g., Laravel, React, PostgreSQL">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="repository_url" class="form-label">Repository URL</label>
-                            <input type="url" class="form-control" id="repository_url" name="repository_url" value="{{ old('repository_url') }}" placeholder="https://github.com/...">
+                            <input type="url" class="form-control" id="repository_url" name="repository_url" value="<?php echo e(old('repository_url')); ?>" placeholder="https://github.com/...">
                         </div>
                     </div>
                 </div>
@@ -163,42 +175,42 @@
                     <div class="mb-3">
                         <label class="form-label">Methodology *</label>
                         <select class="form-select" name="methodology" required>
-                            <option value="agile" {{ old('methodology') == 'agile' ? 'selected' : '' }}>Agile (Scrum)</option>
-                            <option value="kanban" {{ old('methodology') == 'kanban' ? 'selected' : '' }}>Kanban</option>
-                            <option value="waterfall" {{ old('methodology') == 'waterfall' ? 'selected' : '' }}>Waterfall</option>
-                            <option value="hybrid" {{ old('methodology') == 'hybrid' ? 'selected' : '' }}>Hybrid</option>
+                            <option value="agile" <?php echo e(old('methodology') == 'agile' ? 'selected' : ''); ?>>Agile (Scrum)</option>
+                            <option value="kanban" <?php echo e(old('methodology') == 'kanban' ? 'selected' : ''); ?>>Kanban</option>
+                            <option value="waterfall" <?php echo e(old('methodology') == 'waterfall' ? 'selected' : ''); ?>>Waterfall</option>
+                            <option value="hybrid" <?php echo e(old('methodology') == 'hybrid' ? 'selected' : ''); ?>>Hybrid</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Priority *</label>
                         <select class="form-select" name="priority" required>
-                            <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low</option>
-                            <option value="medium" {{ old('priority', 'medium') == 'medium' ? 'selected' : '' }}>Medium</option>
-                            <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High</option>
-                            <option value="critical" {{ old('priority') == 'critical' ? 'selected' : '' }}>Critical</option>
+                            <option value="low" <?php echo e(old('priority') == 'low' ? 'selected' : ''); ?>>Low</option>
+                            <option value="medium" <?php echo e(old('priority', 'medium') == 'medium' ? 'selected' : ''); ?>>Medium</option>
+                            <option value="high" <?php echo e(old('priority') == 'high' ? 'selected' : ''); ?>>High</option>
+                            <option value="critical" <?php echo e(old('priority') == 'critical' ? 'selected' : ''); ?>>Critical</option>
                         </select>
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label">Start Date *</label>
-                            <input type="date" class="form-control" name="start_date" value="{{ old('start_date', date('Y-m-d')) }}" required>
+                            <input type="date" class="form-control" name="start_date" value="<?php echo e(old('start_date', date('Y-m-d'))); ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">Deadline *</label>
-                            <input type="date" class="form-control" name="deadline" value="{{ old('deadline') }}" required>
+                            <input type="date" class="form-control" name="deadline" value="<?php echo e(old('deadline')); ?>" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label">Currency *</label>
                             <select class="form-select" name="currency" required>
-                                <option value="PKR" {{ old('currency', 'PKR') == 'PKR' ? 'selected' : '' }}>PKR</option>
-                                <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD</option>
+                                <option value="PKR" <?php echo e(old('currency', 'PKR') == 'PKR' ? 'selected' : ''); ?>>PKR</option>
+                                <option value="USD" <?php echo e(old('currency') == 'USD' ? 'selected' : ''); ?>>USD</option>
                             </select>
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label">Budget</label>
-                            <input type="number" class="form-control" name="budget" value="{{ old('budget') }}" placeholder="0" step="0.01">
+                            <input type="number" class="form-control" name="budget" value="<?php echo e(old('budget')); ?>" placeholder="0" step="0.01">
                         </div>
                     </div>
                 </div>
@@ -210,17 +222,17 @@
                         <label class="form-label">Project Manager</label>
                         <select class="form-select" name="project_manager_id">
                             <option value="">Select PM</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}" {{ old('project_manager_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($user->id); ?>" <?php echo e(old('project_manager_id') == $user->id ? 'selected' : ''); ?>><?php echo e($user->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Team Members</label>
                         <select class="form-select" name="team_members[]" multiple size="5">
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                         <small class="text-muted">Hold Ctrl to select multiple</small>
                     </div>
@@ -232,9 +244,9 @@
             </div>
         </div>
     </form>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
     // Add Milestone rows
     let msIndex = 1;
@@ -268,7 +280,7 @@
         btn.disabled = true;
         spinner.classList.add('active');
 
-        fetch('{{ route("epms.ai.generate") }}', {
+        fetch('<?php echo e(route("epms.ai.generate")); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -369,4 +381,6 @@
         alert('AI plan applied to form! Review and adjust before submitting. Tasks, risks, WBS, and sprints will be created after project creation using "Apply AI Plan" on the project dashboard.');
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/epms/create.blade.php ENDPATH**/ ?>

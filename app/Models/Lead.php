@@ -140,6 +140,10 @@ class Lead extends Model
         'disposed_by',
         'disposition_reason',
 
+        // Callback notes (resets every 3 days)
+        'callback_note',
+        'callback_note_updated_at',
+
         // Bank Verification fields
         'bank_verification_status',
         'bank_verification_date',
@@ -204,6 +208,7 @@ class Lead extends Model
         'validated_at' => 'datetime',
         'returned_at' => 'datetime',
         'declined_at' => 'datetime',
+        'callback_note_updated_at' => 'datetime',
     ];
 
     /**
@@ -247,6 +252,14 @@ class Lead extends Model
     public function callLogs()
     {
         return $this->hasMany(CallLog::class)->latest();
+    }
+
+    /**
+     * Get dial records for this lead (tracks which closers dialed it)
+     */
+    public function dials()
+    {
+        return $this->hasMany(LeadDial::class);
     }
 
     /**
