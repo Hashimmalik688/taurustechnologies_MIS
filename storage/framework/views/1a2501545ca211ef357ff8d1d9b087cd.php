@@ -1,12 +1,10 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Attendance Overview
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css')); ?>" rel="stylesheet" type="text/css" />
+    <link href="<?php echo e(URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css')); ?>" rel="stylesheet" type="text/css" />
     <style>
         /* Modern DataTable Styling */
         .dataTables_wrapper .dataTables_filter {
@@ -132,63 +130,65 @@
             color: white;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Attendance
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             Overview
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
+            <strong>Success!</strong> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @if (session('error'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> {{ session('error') }}
+            <strong>Error!</strong> <?php echo e(session('error')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Enhanced Filters -->
     <div class="card mb-3">
         <div class="card-body">
-            <form method="GET" action="{{ route('attendance.index') }}" id="filterForm">
+            <form method="GET" action="<?php echo e(route('attendance.index')); ?>" id="filterForm">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Start Date</label>
                         <input type="date" class="form-control" name="start_date"
-                            value="{{ $startDate }}" max="{{ date('Y-m-d') }}">
+                            value="<?php echo e($startDate); ?>" max="<?php echo e(date('Y-m-d')); ?>">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">End Date</label>
                         <input type="date" class="form-control" name="end_date"
-                            value="{{ $endDate }}" max="{{ date('Y-m-d') }}">
+                            value="<?php echo e($endDate); ?>" max="<?php echo e(date('Y-m-d')); ?>">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Search Employee</label>
                         <input type="text" class="form-control" name="search_name"
-                            placeholder="Enter employee name..." value="{{ $searchName ?? '' }}">
+                            placeholder="Enter employee name..." value="<?php echo e($searchName ?? ''); ?>">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label">Status</label>
                         <select class="form-select" name="status">
                             <option value="">All</option>
-                            <option value="present" {{ ($searchStatus ?? '') == 'present' ? 'selected' : '' }}>Present</option>
-                            <option value="late" {{ ($searchStatus ?? '') == 'late' ? 'selected' : '' }}>Late</option>
-                            <option value="absent" {{ ($searchStatus ?? '') == 'absent' ? 'selected' : '' }}>Absent</option>
-                            <option value="half_day" {{ ($searchStatus ?? '') == 'half_day' ? 'selected' : '' }}>Half Day</option>
-                            <option value="paid_leave" {{ ($searchStatus ?? '') == 'paid_leave' ? 'selected' : '' }}>Paid Leave</option>
+                            <option value="present" <?php echo e(($searchStatus ?? '') == 'present' ? 'selected' : ''); ?>>Present</option>
+                            <option value="late" <?php echo e(($searchStatus ?? '') == 'late' ? 'selected' : ''); ?>>Late</option>
+                            <option value="absent" <?php echo e(($searchStatus ?? '') == 'absent' ? 'selected' : ''); ?>>Absent</option>
+                            <option value="half_day" <?php echo e(($searchStatus ?? '') == 'half_day' ? 'selected' : ''); ?>>Half Day</option>
+                            <option value="paid_leave" <?php echo e(($searchStatus ?? '') == 'paid_leave' ? 'selected' : ''); ?>>Paid Leave</option>
                         </select>
                     </div>
                     <div class="col-md-1 d-flex align-items-end">
@@ -205,17 +205,17 @@
                         <button type="button" class="btn btn-sm btn-outline-info ms-2" id="nextDayBtn">
                             <i class="mdi mdi-chevron-right"></i> Next Day
                         </button>
-                        <a href="{{ route('attendance.index') }}" class="btn btn-sm btn-outline-secondary ms-2">
+                        <a href="<?php echo e(route('attendance.index')); ?>" class="btn btn-sm btn-outline-secondary ms-2">
                             <i class="mdi mdi-refresh"></i> Reset Filters
                         </a>
-                        <a href="{{ route('attendance.history') }}" class="btn btn-sm btn-outline-primary ms-2">
+                        <a href="<?php echo e(route('attendance.history')); ?>" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="mdi mdi-history"></i> View History
                         </a>
-                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole('Super Admin|Co-ordinator')): ?>
                         <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
                             <i class="mdi mdi-plus"></i> Manual Entry
                         </button>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
             </form>
@@ -230,7 +230,7 @@
                     <div class="row align-items-center">
                         <div class="col-6">
                             <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Employees</span>
-                            <h4 class="mb-3">{{ $totalEmployees }}</h4>
+                            <h4 class="mb-3"><?php echo e($totalEmployees); ?></h4>
                         </div>
                         <div class="col-6">
                             <div class="text-end">
@@ -248,12 +248,12 @@
                     <div class="row align-items-center">
                         <div class="col-6">
                             <span class="text-muted mb-3 lh-1 d-block text-truncate">Present</span>
-                            <h4 class="mb-3 text-success">{{ $presentCount }}</h4>
+                            <h4 class="mb-3 text-success"><?php echo e($presentCount); ?></h4>
                         </div>
                         <div class="col-6">
                             <div class="text-end">
                                 <div class="badge badge-soft-success rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100, 1) : 0 }}%
+                                    <?php echo e($totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100, 1) : 0); ?>%
                                 </div>
                             </div>
                         </div>
@@ -268,12 +268,12 @@
                     <div class="row align-items-center">
                         <div class="col-6">
                             <span class="text-muted mb-3 lh-1 d-block text-truncate">Late Arrivals</span>
-                            <h4 class="mb-3 text-warning">{{ $lateCount }}</h4>
+                            <h4 class="mb-3 text-warning"><?php echo e($lateCount); ?></h4>
                         </div>
                         <div class="col-6">
                             <div class="text-end">
                                 <div class="badge badge-soft-warning rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($lateCount / $totalEmployees) * 100, 1) : 0 }}%
+                                    <?php echo e($totalEmployees > 0 ? round(($lateCount / $totalEmployees) * 100, 1) : 0); ?>%
                                 </div>
                             </div>
                         </div>
@@ -288,12 +288,12 @@
                     <div class="row align-items-center">
                         <div class="col-6">
                             <span class="text-muted mb-3 lh-1 d-block text-truncate">Absent</span>
-                            <h4 class="mb-3 text-danger">{{ $absentCount }}</h4>
+                            <h4 class="mb-3 text-danger"><?php echo e($absentCount); ?></h4>
                         </div>
                         <div class="col-6">
                             <div class="text-end">
                                 <div class="badge badge-soft-danger rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($absentCount / $totalEmployees) * 100, 1) : 0 }}%
+                                    <?php echo e($totalEmployees > 0 ? round(($absentCount / $totalEmployees) * 100, 1) : 0); ?>%
                                 </div>
                             </div>
                         </div>
@@ -310,12 +310,14 @@
                 <div class="card-header">
                     <h4 class="card-title mb-0">
                         Attendance Details
-                        @if($startDate == $endDate)
-                            - {{ \Carbon\Carbon::parse($startDate)->format('F j, Y') }}
-                        @else
-                            - {{ \Carbon\Carbon::parse($startDate)->format('M j') }} to {{ \Carbon\Carbon::parse($endDate)->format('M j, Y') }}
-                        @endif
-                        <span class="badge badge-soft-primary ms-2">{{ $attendanceDetails->count() }} Records</span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($startDate == $endDate): ?>
+                            - <?php echo e(\Carbon\Carbon::parse($startDate)->format('F j, Y')); ?>
+
+                        <?php else: ?>
+                            - <?php echo e(\Carbon\Carbon::parse($startDate)->format('M j')); ?> to <?php echo e(\Carbon\Carbon::parse($endDate)->format('M j, Y')); ?>
+
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <span class="badge badge-soft-primary ms-2"><?php echo e($attendanceDetails->count()); ?> Records</span>
                     </h4>
                 </div>
                 <div class="card-body">
@@ -332,66 +334,70 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($attendanceDetails as $attendance)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $attendanceDetails; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attendance): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                @if($attendance->user)
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->user): ?>
                                                 <div class="avatar-xs me-3">
                                                     <span
                                                         class="avatar-title rounded-circle bg-primary-subtle text-primary">
-                                                        {{ substr($attendance->user->name, 0, 1) }}
+                                                        <?php echo e(substr($attendance->user->name, 0, 1)); ?>
+
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0">{{ $attendance->user->name }}
-                                                        @if($attendance->user->trashed())
+                                                    <h6 class="mb-0"><?php echo e($attendance->user->name); ?>
+
+                                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->user->trashed()): ?>
                                                             <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
-                                                        @endif
+                                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     </h6>
-                                                    <p class="text-muted mb-0">{{ $attendance->user->email }}</p>
+                                                    <p class="text-muted mb-0"><?php echo e($attendance->user->email); ?></p>
                                                 </div>
-                                                @else
+                                                <?php else: ?>
                                                 <span class="text-muted"><em>User Deleted</em></span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </div>
                                         </td>
                                         <td>
-                                            @if ($attendance->login_time)
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->login_time): ?>
                                                 <span class="badge badge-soft-info">
-                                                    {{ $attendance->date ? $attendance->date->format('M d, Y') : '' }}<br>
-                                                    {{ \Carbon\Carbon::parse($attendance->login_time)->format('g:i A') }}
+                                                    <?php echo e($attendance->date ? $attendance->date->format('M d, Y') : ''); ?><br>
+                                                    <?php echo e(\Carbon\Carbon::parse($attendance->login_time)->format('g:i A')); ?>
+
                                                 </span>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="text-muted">-</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td>
-                                            @if ($attendance->logout_time)
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->logout_time): ?>
                                                 <span class="badge badge-soft-secondary">
-                                                    {{ \Carbon\Carbon::parse($attendance->logout_time)->format('M d, Y g:i A') }}
+                                                    <?php echo e(\Carbon\Carbon::parse($attendance->logout_time)->format('M d, Y g:i A')); ?>
+
                                                 </span>
-                                            @else
+                                            <?php else: ?>
                                                 <span class="text-muted">Still working</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td>
-                                            @if ($attendance->status === 'present')
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->status === 'present'): ?>
                                                 <span class="badge badge-soft-success">On Time</span>
-                                            @elseif($attendance->status === 'late')
+                                            <?php elseif($attendance->status === 'late'): ?>
                                                 <span class="badge badge-soft-warning">Late</span>
-                                            @elseif($attendance->status === 'absent')
+                                            <?php elseif($attendance->status === 'absent'): ?>
                                                 <span class="badge badge-soft-danger">Absent</span>
-                                            @elseif($attendance->status === 'half_day')
+                                            <?php elseif($attendance->status === 'half_day'): ?>
                                                 <span class="badge badge-soft-info">Half Day</span>
-                                            @elseif($attendance->status === 'paid_leave')
+                                            <?php elseif($attendance->status === 'paid_leave'): ?>
                                                 <span class="badge badge-soft-primary">Paid Leave</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td>
-                                            @if ($attendance->login_time)
-                                                @if ($attendance->logout_time)
-                                                    @php
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->login_time): ?>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($attendance->logout_time): ?>
+                                                    <?php
                                                         $loginTime = \Carbon\Carbon::parse($attendance->login_time);
                                                         $logoutTime = \Carbon\Carbon::parse($attendance->logout_time);
                                                         
@@ -403,36 +409,36 @@
                                                         $workingMinutes = $loginTime->diffInMinutes($logoutTime);
                                                         $hours = floor($workingMinutes / 60);
                                                         $minutes = $workingMinutes % 60;
-                                                    @endphp
-                                                    {{ $hours }}h {{ $minutes }}m
-                                                @else
-                                                    {{-- Still working - show live hours --}}
-                                                    <span class="text-primary fw-semibold">{{ $attendance->getFormattedCurrentWorkingHours() }}</span>
-                                                @endif
-                                            @else
+                                                    ?>
+                                                    <?php echo e($hours); ?>h <?php echo e($minutes); ?>m
+                                                <?php else: ?>
+                                                    
+                                                    <span class="text-primary fw-semibold"><?php echo e($attendance->getFormattedCurrentWorkingHours()); ?></span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            <?php else: ?>
                                                 <span class="text-muted">-</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                         <td>
-                                            @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole('Super Admin|Co-ordinator')): ?>
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-soft-primary" 
-                                                    onclick="editAttendance({{ $attendance->id }})" 
+                                                    onclick="editAttendance(<?php echo e($attendance->id); ?>)" 
                                                     title="Edit Attendance">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </button>
                                                 <button type="button" class="btn btn-sm btn-soft-danger" 
-                                                    onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user ? $attendance->user->name : 'Unknown User' }}', '{{ $attendance->date->format('M d, Y') }}')" 
+                                                    onclick="deleteAttendance(<?php echo e($attendance->id); ?>, '<?php echo e($attendance->user ? $attendance->user->name : 'Unknown User'); ?>', '<?php echo e($attendance->date->format('M d, Y')); ?>')" 
                                                     title="Delete Attendance">
                                                     <i class="mdi mdi-delete"></i>
                                                 </button>
                                             </div>
-                                            @else
+                                            <?php else: ?>
                                             <span class="text-muted">-</span>
-                                            @endif
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </td>
                                     </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
                                         <td colspan="6" class="text-center py-4">
                                             <div class="text-muted">
@@ -441,7 +447,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -456,20 +462,21 @@
                 <div class="card-header">
                     <h4 class="card-title mb-0">
                         Absent Today
-                        <span class="badge badge-soft-danger ms-2">{{ $absentEmployees->count() }}</span>
+                        <span class="badge badge-soft-danger ms-2"><?php echo e($absentEmployees->count()); ?></span>
                     </h4>
                 </div>
                 <div class="card-body">
-                    @forelse($absentEmployees as $employee)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $absentEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <div class="d-flex align-items-center mb-3">
                             <div class="avatar-xs me-3">
                                 <span class="avatar-title rounded-circle bg-danger-subtle text-danger">
-                                    {{ substr($employee->name, 0, 1) }}
+                                    <?php echo e(substr($employee->name, 0, 1)); ?>
+
                                 </span>
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="mb-0">{{ $employee->name }}</h6>
-                                <p class="text-muted mb-0 fs-13">{{ $employee->email }}</p>
+                                <h6 class="mb-0"><?php echo e($employee->name); ?></h6>
+                                <p class="text-muted mb-0 fs-13"><?php echo e($employee->email); ?></p>
                             </div>
                             <div class="dropdown">
                                 <a href="#" class="text-muted dropdown-toggle" data-bs-toggle="dropdown">
@@ -477,18 +484,18 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a class="dropdown-item" href="#"
-                                        onclick="markManualAttendance({{ $employee->id }})">
+                                        onclick="markManualAttendance(<?php echo e($employee->id); ?>)">
                                         <i class="mdi mdi-plus me-1"></i> Mark Present
                                     </a>
                                 </div>
                             </div>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center text-muted py-3">
                             <i class="mdi mdi-check-circle-outline font-size-24 mb-2 d-block text-success"></i>
                             All employees are present!
                         </div>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
 
@@ -508,23 +515,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($weeklyStats as $stat)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $weeklyStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
-                                        <td>{{ $stat['date'] }}</td>
+                                        <td><?php echo e($stat['date']); ?></td>
                                         <td>
                                             <span class="badge badge-soft-primary">
-                                                {{ $stat['present'] + $stat['late'] }}
+                                                <?php echo e($stat['present'] + $stat['late']); ?>
+
                                             </span>
                                         </td>
                                         <td>
                                             <div class="progress progress-sm">
-                                                <div class="progress-bar" style="width: {{ $stat['percentage'] }}%">
+                                                <div class="progress-bar" style="width: <?php echo e($stat['percentage']); ?>%">
                                                 </div>
                                             </div>
-                                            <span class="fs-12 text-muted">{{ $stat['percentage'] }}%</span>
+                                            <span class="fs-12 text-muted"><?php echo e($stat['percentage']); ?>%</span>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -547,9 +555,9 @@
                             <label for="employee_select" class="form-label">Employee</label>
                             <select class="form-select" id="employee_select" name="user_id" required>
                                 <option value="">Select Employee</option>
-                                @foreach ($allEmployees as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $allEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -607,7 +615,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="editAttendanceForm" method="POST" action="#">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" id="edit_attendance_id" name="id">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -651,19 +659,19 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
     <!-- DataTables Bootstrap 4 -->
-    <link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <link href="<?php echo e(URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css')); ?>" rel="stylesheet">
     <!-- Flatpickr -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js')); ?>"></script>
     <!-- Flatpickr -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -772,7 +780,7 @@
         // Filter by date
         function filterByDate() {
             const date = document.getElementById('attendance-date').value;
-            window.location.href = `{{ route('attendance.index') }}?date=${date}`;
+            window.location.href = `<?php echo e(route('attendance.index')); ?>?date=${date}`;
         }
 
         // Manual entry form submission
@@ -805,11 +813,11 @@
                 isOvernightShift = loginHour >= 12 && logoutHour < 12;
             }
 
-            fetch('{{ route('attendance.mark-manual.post') }}', {
+            fetch('<?php echo e(route('attendance.mark-manual.post')); ?>', {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                     }
                 })
                 .then(response => {
@@ -839,7 +847,7 @@
                         
                         // Reload page with the date filter set to the created attendance date
                         const createdDate = data.attendance.date || document.getElementById('attendance_date').value;
-                        window.location.href = `{{ route('attendance.index') }}?start_date=${createdDate}&end_date=${createdDate}`;
+                        window.location.href = `<?php echo e(route('attendance.index')); ?>?start_date=${createdDate}&end_date=${createdDate}`;
                     } else {
                         alert('Error: ' + (data.message || 'Failed to save attendance'));
                         submitBtn.disabled = false;
@@ -861,7 +869,7 @@
                 now.getMinutes().toString().padStart(2, '0');
 
             document.getElementById('employee_select').value = userId;
-            document.getElementById('attendance_date').value = '{{ date("Y-m-d") }}';
+            document.getElementById('attendance_date').value = '<?php echo e(date("Y-m-d")); ?>';
             document.getElementById('login_time').value = currentTime;
             document.getElementById('status_select').value = 'late';
 
@@ -930,7 +938,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 },
                 body: JSON.stringify(payload)
             })
@@ -959,7 +967,7 @@
             fetch(`/attendance/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                     'Content-Type': 'application/json'
                 }
             })
@@ -1019,4 +1027,6 @@
             }
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/attendance/index.blade.php ENDPATH**/ ?>

@@ -159,7 +159,7 @@ class DockController extends Controller
      */
     public function history($userId)
     {
-        $user = User::findOrFail($userId);
+        $user = User::withTrashed()->findOrFail($userId);
         
         $dockRecords = DockRecord::with('dockedBy')
             ->where('user_id', $userId)

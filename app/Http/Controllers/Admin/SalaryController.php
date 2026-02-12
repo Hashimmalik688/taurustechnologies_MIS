@@ -314,7 +314,7 @@ class SalaryController extends Controller
             'current_year' => 'nullable|integer|min:2020',
         ]);
 
-        $user = User::findOrFail($userId);
+        $user = User::withTrashed()->findOrFail($userId);
         
         // Auto-calculate punctuality qualification based on attendance
         $fullDays = $request->full_days ?? $user->full_days ?? 0;
@@ -485,7 +485,7 @@ class SalaryController extends Controller
 
     private function calculateUserSalary($userId, $month, $year)
     {
-        $user = User::find($userId);
+        $user = User::withTrashed()->find($userId);
 
         // Check if user has basic salary configured
         if (!$user->basic_salary || $user->basic_salary <= 0) {
@@ -1109,7 +1109,7 @@ class SalaryController extends Controller
         $month = $request->month;
         $year = $request->year;
 
-        $user = User::find($userId);
+        $user = User::withTrashed()->find($userId);
         $attendanceData = $this->calculateAttendanceAdjustments($userId, $month, $year, $user);
 
         return response()->json([

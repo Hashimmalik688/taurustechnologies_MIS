@@ -167,36 +167,19 @@
                 </div>
 
                 <div class="card-body">
-                    <!-- Search Bar -->
-                    <form method="GET" action="{{ route('leads.index') }}" class="mb-3">
-                        <div class="row g-2">
-                            <div class="col-md-4">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, SSN, carrier..." value="{{ request('search') }}">
-                            </div>
-                            <div class="col-md-2">
-                                <select name="month" class="form-select">
-                                    <option value="">All Months</option>
-                                    @for($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <select name="year" class="form-select">
-                                    <option value="">All Years</option>
-                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Search</button>
-                            </div>
-                            <div class="col-md-2">
-                                <a href="{{ route('leads.index') }}" class="btn btn-outline-secondary w-100"><i class="bx bx-reset"></i> Clear</a>
+                    <!-- Instant Search -->
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bx bx-search"></i></span>
+                                <input type="text" id="instantSearch" class="form-control" placeholder="Search by name, phone, SSN, carrier, state, closer..." value="{{ request('search') }}" autofocus>
+                                <button id="clearSearch" class="btn btn-outline-secondary {{ request('search') ? '' : 'd-none' }}" type="button"><i class="bx bx-x"></i></button>
                             </div>
                         </div>
-                    </form>
+                        <div class="col-md-3 d-flex align-items-center">
+                            <small class="text-muted" id="resultCount">Showing {{ $leads->total() }} leads</small>
+                        </div>
+                    </div>
 
                     <div class="table-wrapper">
                         <table class="table table-striped table-bordered table-hover table-sm align-middle locked-table">
@@ -393,6 +376,45 @@
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Instant search with debounce
+    const searchInput = document.getElementById('instantSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    let debounceTimer;
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const val = this.value.trim();
+            clearBtn.classList.toggle('d-none', !val);
+            
+            debounceTimer = setTimeout(() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('page'); // Reset to page 1 on search
+                if (val) {
+                    url.searchParams.set('search', val);
+                } else {
+                    url.searchParams.delete('search');
+                }
+                window.location.href = url.toString();
+            }, 500); // 500ms debounce
+        });
+        
+        // Focus cursor at end of input if there's a value
+        if (searchInput.value) {
+            searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+        }
+    }
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.delete('page');
+            window.location.href = url.toString();
+        });
+    }
+
     // Import form handling
     const importForm = document.getElementById('importForm');
     const importBtn = document.getElementById('importSubmitBtn');

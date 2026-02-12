@@ -78,7 +78,7 @@
                                     <option value="">All Employees</option>
                                     @foreach ($users as $user)
                                         <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
+                                            {{ $user->name }}{{ $user->trashed() ? ' (Terminated)' : '' }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -239,6 +239,7 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
+                                                    @if($attendance->user)
                                                     <div class="avatar-xs me-3">
                                                         <span
                                                             class="avatar-title rounded-circle bg-primary-subtle text-primary">
@@ -246,10 +247,17 @@
                                                         </span>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0">{{ $attendance->user->name }}</h6>
+                                                        <h6 class="mb-0">{{ $attendance->user->name }}
+                                                            @if($attendance->user->trashed())
+                                                                <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
+                                                            @endif
+                                                        </h6>
                                                         <p class="text-muted mb-0 fs-13">{{ $attendance->user->email }}
                                                         </p>
                                                     </div>
+                                                    @else
+                                                    <span class="text-muted"><em>Unknown User</em></span>
+                                                    @endif
                                                 </div>
                                             </td>
                                             <td>
