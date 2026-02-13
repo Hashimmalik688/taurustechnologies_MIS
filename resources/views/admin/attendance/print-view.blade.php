@@ -132,8 +132,14 @@
     }
     
     .status-weekend {
-        background-color: #f0f0f0 !important;
-        color: #6c757d;
+        background-color: #dc3545 !important;
+        color: #fff;
+        font-weight: 600;
+    }
+    
+    .weekend-header {
+        background-color: #dc3545 !important;
+        color: #fff !important;
     }
     
     .totals-cell {
@@ -221,16 +227,25 @@
             <div class="card no-print">
                 <div class="card-body">
                     <form method="GET" action="{{ route('attendance.print-view') }}" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="month" class="form-label">
-                                <i class="mdi mdi-calendar me-1"></i>
-                                Select Month
+                        <div class="col-md-3">
+                            <label for="start_date" class="form-label">
+                                <i class="mdi mdi-calendar-start me-1"></i>
+                                Start Date
                             </label>
-                            <input type="month" class="form-control" id="month" name="month" 
-                                   value="{{ $month }}" required>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ $startDate }}" required>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="end_date" class="form-label">
+                                <i class="mdi mdi-calendar-end me-1"></i>
+                                End Date
+                            </label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ $endDate }}" required>
+                        </div>
+                        
+                        <div class="col-md-3">
                             <label for="department" class="form-label">
                                 <i class="mdi mdi-office-building me-1"></i>
                                 Department
@@ -245,16 +260,16 @@
                             </select>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label d-block">&nbsp;</label>
                             <button type="submit" class="btn btn-primary me-2">
                                 <i class="mdi mdi-filter me-1"></i>
                                 Apply Filter
                             </button>
-                            <button type="button" class="btn btn-success" onclick="window.print()">
+                            <a href="{{ route('attendance.print', ['start_date' => $startDate, 'end_date' => $endDate, 'department' => $department]) }}" target="_blank" class="btn btn-success">
                                 <i class="mdi mdi-printer me-1"></i>
                                 Print
-                            </button>
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -266,8 +281,8 @@
                     <!-- Header -->
                     <div class="print-header">
                         <h3>Employee Attendance Record</h3>
-                        <p>{{ $monthStart->format('F Y') }}{{ $department ? ' - ' . $department : '' }}</p>
-                        <p style="font-size: 12px; color: #999;">Printed: {{ now()->format('d M Y, h:i A') }}</p>
+                        <p><strong>Period:</strong> {{ $periodStart->format('d M Y') }} - {{ $periodEnd->format('d M Y') }}{{ $department ? ' | Department: ' . $department : ' | All Departments' }}</p>
+                        <p style="font-size: 12px; color: #999;">Showing {{ count($dates) }} days | Generated: {{ now()->format('d M Y, h:i A') }}</p>
                     </div>
 
                     <!-- Legend -->
@@ -308,16 +323,18 @@
                                 <th rowspan="2" style="width: 50px;">ID</th>
                                 <th rowspan="2" style="width: 150px;">Name</th>
                                 <th rowspan="2" style="width: 120px;">Position</th>
-                                @if(!$department)
-                                    <th rowspan="2" style="width: 100px;">Department</th>
-                                @endif
-                                <th colspan="{{ $daysInMonth }}">Days of Month</th>
+                                <th colspan="{{ count($dates) }}">Dates</th>
                                 <th colspan="5">Totals</th>
                             </tr>
                             <tr>
-                                @for($day = 1; $day <= $daysInMonth; $day++)
-                                    <th style="width: 20px;">{{ $day }}</th>
-                                @endfor
+                                @foreach($dates as $date)
+                                    @php
+                                        $isWeekend = in_array($date->dayOfWeek, [0, 6]);
+                                    @endphp
+                                    <th style="width: 20px;" class="{{ $isWeekend ? 'weekend-header' : '' }}" title="{{ $date->format('D, M d') }}">
+                                        {{ $date->format('d') }}
+                                    </th>
+                                @endforeach
                                 <th style="width: 35px;">P</th>
                                 <th style="width: 35px;">L</th>
                                 <th style="width: 35px;">A</th>
@@ -331,13 +348,11 @@
                                     <td>{{ $employee['id'] }}</td>
                                     <td class="text-left">{{ $employee['name'] }}</td>
                                     <td class="text-left">{{ $employee['position'] }}</td>
-                                    @if(!$department)
-                                        <td class="text-left">{{ $employee['department'] }}</td>
-                                    @endif
                                     
-                                    @for($day = 1; $day <= $daysInMonth; $day++)
+                                    @foreach($dates as $date)
                                         @php
-                                            $status = $employee['daily_attendance'][$day] ?? '-';
+                                            $dateKey = $date->format('Y-m-d');
+                                            $status = $employee['daily_attendance'][$dateKey] ?? '-';
                                             $statusClass = match($status) {
                                                 'P' => 'status-p',
                                                 'L' => 'status-l',
@@ -348,7 +363,7 @@
                                             };
                                         @endphp
                                         <td class="{{ $statusClass }}">{{ $status }}</td>
-                                    @endfor
+                                    @endforeach
                                     
                                     <td class="totals-cell">{{ $employee['totals']['P'] }}</td>
                                     <td class="totals-cell">{{ $employee['totals']['L'] }}</td>
@@ -358,9 +373,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $daysInMonth + ($department ? 8 : 9) }}" 
+                                    <td colspan="{{ count($dates) + 8 }}" 
                                         style="text-align: center; padding: 20px;">
-                                        No employee data available for this month.
+                                        No employee data available for this period.
                                     </td>
                                 </tr>
                             @endforelse

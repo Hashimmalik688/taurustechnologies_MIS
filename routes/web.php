@@ -370,6 +370,7 @@ Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => [
     Route::get('/', [AttendanceController::class, 'index'])->name('index');
     Route::get('/history', [AttendanceController::class, 'history'])->name('history');
     Route::get('/print-view', [AttendanceController::class, 'printView'])->name('print-view');
+    Route::get('/print', [AttendanceController::class, 'print'])->name('print');
     Route::get('/employee-report/{userId}', [AttendanceController::class, 'employeeReport'])->name('employee-report');
     Route::get('/export', [AttendanceController::class, 'index'])->name('export');
     Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json');
