@@ -81,6 +81,7 @@
     
     <div class="container">Carrier Name: {{ $lead->carrier_name ?? '_________________' }}
 Plan Type: {{ $lead->policy_type ?? '_________________' }}
+Policy Number: {{ $lead->policy_number ?? '_________________' }}
 Coverage Amount: {{ $lead->coverage_amount ? '$' . number_format($lead->coverage_amount, 2) : '_________________' }}
 Monthly Premium: {{ $lead->monthly_premium ? '$' . number_format($lead->monthly_premium, 2) : '_________________' }}
 First Coverage: {{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : '_________________' }}
@@ -101,6 +102,11 @@ Height: {{ $lead->height ?? '_________________' }}
 Weight: {{ $lead->weight ? $lead->weight . ' lbs' : '_________________' }}
 Nicotine User: {{ $lead->smoker ? 'Yes' : 'No' }}
 Birth Place: {{ $lead->birth_place ?? '_________________' }}
+Emergency Contact: {{ $lead->emergency_contact ?? '_________________' }}
+Driving License: {{ $lead->driving_license !== null ? ($lead->driving_license ? 'Yes' : 'No') : '_________________' }}
+@if($lead->driving_license_number)
+DL Number: {{ $lead->driving_license_number }}
+@endif
 
 Primary Care Physician: {{ $lead->doctor_name ?? '_________________' }}
 Doctor Phone: {{ $lead->doctor_number ?? '_________________' }}
@@ -110,18 +116,40 @@ Medications: {{ $lead->medications ?? '_________________' }}
 
 SSN: {{ $lead->ssn ?? '_________________' }}
 
-@if(!empty($lead->beneficiaries))
-@foreach($lead->beneficiaries as $index => $beneficiary)
+@php
+    $beneficiaries = $lead->beneficiaries ?? [];
+    if (is_string($beneficiaries)) {
+        $decoded = json_decode($beneficiaries, true);
+        $beneficiaries = is_array($decoded) ? $decoded : [];
+    }
+    if (!is_array($beneficiaries)) {
+        $beneficiaries = [];
+    }
+    if (empty($beneficiaries) && ($lead->beneficiary || $lead->beneficiary_dob)) {
+        $beneficiaries = [[
+            'name' => $lead->beneficiary ?? '',
+            'dob' => $lead->beneficiary_dob ?? '',
+            'relation' => ''
+        ]];
+    }
+@endphp
+@if(!empty($beneficiaries))
+@foreach($beneficiaries as $index => $beneficiary)
 Benif. {{ $index + 1 }}: {{ $beneficiary['name'] ?? '_________________' }} | {{ !empty($beneficiary['dob']) ? \Carbon\Carbon::parse($beneficiary['dob'])->format('m/d/Y') : '___/___/____' }} | {{ $beneficiary['relation'] ?? '_________________' }}
 @endforeach
 @else
-Benif. 1: {{ $lead->beneficiary ?? '_________________' }} | {{ $lead->beneficiary_dob ? \Carbon\Carbon::parse($lead->beneficiary_dob)->format('m/d/Y') : '___/___/____' }} | _________________
+Benif. 1: _________________ | ___/___/____ | _________________
 @endif
 Name of the Bank: {{ $lead->bank_name ?? '_________________' }}
+Account Title: {{ $lead->account_title ?? '_________________' }}
 Account Type: {{ $lead->account_type ?? '_________________' }}
 Routing Number: {{ $lead->routing_number ?? '_________________' }}
-Account Number: {{ $lead->account_number ?? '_________________' }}
+Account Number: {{ $lead->acc_number ?? $lead->account_number ?? '_________________' }}
 Bank Balance: {{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : '_________________' }}
+@if($lead->ss_amount || $lead->ss_date)
+SS Amount: {{ $lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : '_________________' }}
+SS Date: {{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : '_________________' }}
+@endif
 
 @if($lead->card_number || $lead->cvv || $lead->expiry_date)
 Card Number: {{ $lead->card_number ?? '_________________' }}

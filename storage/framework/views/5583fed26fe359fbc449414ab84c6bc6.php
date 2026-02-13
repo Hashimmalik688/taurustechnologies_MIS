@@ -130,8 +130,14 @@
     }
     
     .status-weekend {
-        background-color: #f0f0f0 !important;
-        color: #6c757d;
+        background-color: #dc3545 !important;
+        color: #fff;
+        font-weight: 600;
+    }
+    
+    .weekend-header {
+        background-color: #dc3545 !important;
+        color: #fff !important;
     }
     
     .totals-cell {
@@ -219,16 +225,25 @@
             <div class="card no-print">
                 <div class="card-body">
                     <form method="GET" action="<?php echo e(route('attendance.print-view')); ?>" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="month" class="form-label">
-                                <i class="mdi mdi-calendar me-1"></i>
-                                Select Month
+                        <div class="col-md-3">
+                            <label for="start_date" class="form-label">
+                                <i class="mdi mdi-calendar-start me-1"></i>
+                                Start Date
                             </label>
-                            <input type="month" class="form-control" id="month" name="month" 
-                                   value="<?php echo e($month); ?>" required>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="<?php echo e($startDate); ?>" required>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="end_date" class="form-label">
+                                <i class="mdi mdi-calendar-end me-1"></i>
+                                End Date
+                            </label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="<?php echo e($endDate); ?>" required>
+                        </div>
+                        
+                        <div class="col-md-3">
                             <label for="department" class="form-label">
                                 <i class="mdi mdi-office-building me-1"></i>
                                 Department
@@ -244,16 +259,16 @@
                             </select>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label d-block">&nbsp;</label>
                             <button type="submit" class="btn btn-primary me-2">
                                 <i class="mdi mdi-filter me-1"></i>
                                 Apply Filter
                             </button>
-                            <button type="button" class="btn btn-success" onclick="window.print()">
+                            <a href="<?php echo e(route('attendance.print', ['start_date' => $startDate, 'end_date' => $endDate, 'department' => $department])); ?>" target="_blank" class="btn btn-success">
                                 <i class="mdi mdi-printer me-1"></i>
                                 Print
-                            </button>
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -265,8 +280,8 @@
                     <!-- Header -->
                     <div class="print-header">
                         <h3>Employee Attendance Record</h3>
-                        <p><?php echo e($monthStart->format('F Y')); ?><?php echo e($department ? ' - ' . $department : ''); ?></p>
-                        <p style="font-size: 12px; color: #999;">Printed: <?php echo e(now()->format('d M Y, h:i A')); ?></p>
+                        <p><strong>Period:</strong> <?php echo e($periodStart->format('d M Y')); ?> - <?php echo e($periodEnd->format('d M Y')); ?><?php echo e($department ? ' | Department: ' . $department : ' | All Departments'); ?></p>
+                        <p style="font-size: 12px; color: #999;">Showing <?php echo e(count($dates)); ?> days | Generated: <?php echo e(now()->format('d M Y, h:i A')); ?></p>
                     </div>
 
                     <!-- Legend -->
@@ -307,16 +322,19 @@
                                 <th rowspan="2" style="width: 50px;">ID</th>
                                 <th rowspan="2" style="width: 150px;">Name</th>
                                 <th rowspan="2" style="width: 120px;">Position</th>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$department): ?>
-                                    <th rowspan="2" style="width: 100px;">Department</th>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                <th colspan="<?php echo e($daysInMonth); ?>">Days of Month</th>
+                                <th colspan="<?php echo e(count($dates)); ?>">Dates</th>
                                 <th colspan="5">Totals</th>
                             </tr>
                             <tr>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($day = 1; $day <= $daysInMonth; $day++): ?>
-                                    <th style="width: 20px;"><?php echo e($day); ?></th>
-                                <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $isWeekend = in_array($date->dayOfWeek, [0, 6]);
+                                    ?>
+                                    <th style="width: 20px;" class="<?php echo e($isWeekend ? 'weekend-header' : ''); ?>" title="<?php echo e($date->format('D, M d')); ?>">
+                                        <?php echo e($date->format('d')); ?>
+
+                                    </th>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 <th style="width: 35px;">P</th>
                                 <th style="width: 35px;">L</th>
                                 <th style="width: 35px;">A</th>
@@ -330,13 +348,11 @@
                                     <td><?php echo e($employee['id']); ?></td>
                                     <td class="text-left"><?php echo e($employee['name']); ?></td>
                                     <td class="text-left"><?php echo e($employee['position']); ?></td>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$department): ?>
-                                        <td class="text-left"><?php echo e($employee['department']); ?></td>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($day = 1; $day <= $daysInMonth; $day++): ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <?php
-                                            $status = $employee['daily_attendance'][$day] ?? '-';
+                                            $dateKey = $date->format('Y-m-d');
+                                            $status = $employee['daily_attendance'][$dateKey] ?? '-';
                                             $statusClass = match($status) {
                                                 'P' => 'status-p',
                                                 'L' => 'status-l',
@@ -347,7 +363,7 @@
                                             };
                                         ?>
                                         <td class="<?php echo e($statusClass); ?>"><?php echo e($status); ?></td>
-                                    <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     
                                     <td class="totals-cell"><?php echo e($employee['totals']['P']); ?></td>
                                     <td class="totals-cell"><?php echo e($employee['totals']['L']); ?></td>
@@ -357,9 +373,9 @@
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="<?php echo e($daysInMonth + ($department ? 8 : 9)); ?>" 
+                                    <td colspan="<?php echo e(count($dates) + 8); ?>" 
                                         style="text-align: center; padding: 20px;">
-                                        No employee data available for this month.
+                                        No employee data available for this period.
                                     </td>
                                 </tr>
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>

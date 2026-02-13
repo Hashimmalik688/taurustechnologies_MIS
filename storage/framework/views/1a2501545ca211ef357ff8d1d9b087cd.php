@@ -211,7 +211,7 @@
                         <a href="<?php echo e(route('attendance.history')); ?>" class="btn btn-sm btn-outline-primary ms-2">
                             <i class="mdi mdi-history"></i> View History
                         </a>
-                        <a href="<?php echo e(route('attendance.print-view')); ?>" class="btn btn-sm btn-outline-success ms-2">
+                        <a href="<?php echo e(route('attendance.print-view')); ?>" class="btn btn-sm btn-outline-success ms-2" target="_blank">
                             <i class="mdi mdi-printer"></i> Print View
                         </a>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole('Super Admin|Co-ordinator')): ?>
