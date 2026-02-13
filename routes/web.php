@@ -142,6 +142,7 @@ Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', '
     Route::post('/import', [EmployeeController::class, 'import'])->name('import');
     Route::post('/update/{employee}', [EmployeeController::class, 'update'])->name('update');
     Route::delete('/terminate/{id}', [EmployeeController::class, 'terminate'])->name('terminate');
+    Route::post('/restore/{id}', [EmployeeController::class, 'restore'])->name('restore');
     Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('destroy');
 });
 

@@ -1,0 +1,1 @@
+<?php /**PATH /var/www/taurus-crm/resources/views/admin/agents/show.blade.php ENDPATH**/ ?>
