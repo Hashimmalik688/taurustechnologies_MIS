@@ -137,6 +137,18 @@
         font-weight: 600;
     }
     
+    .terminated-row {
+        background-color: #f5f5f5 !important;
+        opacity: 0.85;
+    }
+    
+    .terminated-badge {
+        color: #921c1c;
+        font-weight: 600;
+        font-size: 9px;
+        margin-left: 3px;
+    }
+    
     .weekend-header {
         background-color: #dc3545 !important;
         color: #fff !important;
@@ -320,6 +332,7 @@
                     <table class="attendance-print-table">
                         <thead>
                             <tr>
+                                <th rowspan="2" style="width: 35px;">S.No</th>
                                 <th rowspan="2" style="width: 50px;">ID</th>
                                 <th rowspan="2" style="width: 150px;">Name</th>
                                 <th rowspan="2" style="width: 120px;">Position</th>
@@ -344,9 +357,15 @@
                         </thead>
                         <tbody>
                             @forelse($employeeData as $employee)
-                                <tr>
+                                <tr class="{{ $employee['is_terminated'] ? 'terminated-row' : '' }}">
+                                    <td>{{ $loop->iteration }}</td>
                                     <td>{{ $employee['id'] }}</td>
-                                    <td class="text-left">{{ $employee['name'] }}</td>
+                                    <td class="text-left">
+                                        {{ $employee['name'] }}
+                                        @if($employee['is_terminated'])
+                                            <span class="terminated-badge">(Terminated)</span>
+                                        @endif
+                                    </td>
                                     <td class="text-left">{{ $employee['position'] }}</td>
                                     
                                     @foreach($dates as $date)
@@ -373,7 +392,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ count($dates) + 8 }}" 
+                                    <td colspan="{{ count($dates) + 9 }}" 
                                         style="text-align: center; padding: 20px;">
                                         No employee data available for this period.
                                     </td>

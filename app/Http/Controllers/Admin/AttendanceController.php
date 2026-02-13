@@ -837,9 +837,14 @@ class AttendanceController extends Controller
             $periodEnd = Carbon::parse($endDate);
             $totalDays = $periodStart->diffInDays($periodEnd) + 1;
 
-            // Get all trackable users
-            $query = User::whereHas('roles', function($q) {
+            // Get all trackable users (including terminated/soft-deleted employees)
+            // Only include soft-deleted users that have a matching Employee record (filters out dummy/test users)
+            $employeeEmails = \App\Models\Employee::pluck('email')->toArray();
+            $query = User::withTrashed()->whereHas('roles', function($q) {
                 $q->whereIn('name', $this->trackableRoles);
+            })->where(function($q) use ($employeeEmails) {
+                $q->whereNull('deleted_at') // Active users always included
+                  ->orWhereIn('email', $employeeEmails); // Terminated users only if they have an Employee record
             })->orderBy('name');
 
             // Filter by department if specified
@@ -872,6 +877,7 @@ class AttendanceController extends Controller
             $employeeData = [];
             foreach ($employees as $employee) {
                 $userAttendances = $attendances->get($employee->id, collect());
+                $isTerminated = $employee->deleted_at !== null;
                 
                 // Create array of days with status
                 $dailyAttendance = [];
@@ -925,9 +931,14 @@ class AttendanceController extends Controller
                                 $dailyAttendance[$dateKey] = '-';
                         }
                     } else {
-                        // No record = Absent for workdays
-                        $dailyAttendance[$dateKey] = 'A';
-                        $totals['A']++;
+                        // For terminated employees: show '-' (not working) if no record
+                        // For active employees: show 'A' (absent) if no record
+                        if ($isTerminated) {
+                            $dailyAttendance[$dateKey] = '-';
+                        } else {
+                            $dailyAttendance[$dateKey] = 'A';
+                            $totals['A']++;
+                        }
                     }
                 }
                 
@@ -937,12 +948,13 @@ class AttendanceController extends Controller
                     'position' => $employee->position ?? $employee->getRoleNames()->first() ?? 'N/A',
                     'department' => $employee->department ?? 'N/A',
                     'daily_attendance' => $dailyAttendance,
-                    'totals' => $totals
+                    'totals' => $totals,
+                    'is_terminated' => $isTerminated
                 ];
             }
 
             // Get unique departments for filter
-            $departments = User::whereHas('roles', function($q) {
+            $departments = User::withTrashed()->whereHas('roles', function($q) {
                 $q->whereIn('name', $this->trackableRoles);
             })->whereNotNull('department')
                 ->distinct()
@@ -981,9 +993,14 @@ class AttendanceController extends Controller
             $periodEnd = Carbon::parse($endDate);
             $totalDays = $periodStart->diffInDays($periodEnd) + 1;
 
-            // Get all trackable users
-            $query = User::whereHas('roles', function($q) {
+            // Get all trackable users (including terminated/soft-deleted employees)
+            // Only include soft-deleted users that have a matching Employee record (filters out dummy/test users)
+            $employeeEmails = \App\Models\Employee::pluck('email')->toArray();
+            $query = User::withTrashed()->whereHas('roles', function($q) {
                 $q->whereIn('name', $this->trackableRoles);
+            })->where(function($q) use ($employeeEmails) {
+                $q->whereNull('deleted_at') // Active users always included
+                  ->orWhereIn('email', $employeeEmails); // Terminated users only if they have an Employee record
             })->orderBy('name');
 
             // Filter by department if specified
@@ -1016,6 +1033,7 @@ class AttendanceController extends Controller
             $employeeData = [];
             foreach ($employees as $employee) {
                 $userAttendances = $attendances->get($employee->id, collect());
+                $isTerminated = $employee->deleted_at !== null;
                 
                 // Create array of days with status
                 $dailyAttendance = [];
@@ -1069,9 +1087,14 @@ class AttendanceController extends Controller
                                 $dailyAttendance[$dateKey] = '-';
                         }
                     } else {
-                        // No record = Absent for workdays
-                        $dailyAttendance[$dateKey] = 'A';
-                        $totals['A']++;
+                        // For terminated employees: show '-' (not working) if no record
+                        // For active employees: show 'A' (absent) if no record
+                        if ($isTerminated) {
+                            $dailyAttendance[$dateKey] = '-';
+                        } else {
+                            $dailyAttendance[$dateKey] = 'A';
+                            $totals['A']++;
+                        }
                     }
                 }
                 
@@ -1081,7 +1104,8 @@ class AttendanceController extends Controller
                     'position' => $employee->position ?? $employee->getRoleNames()->first() ?? 'N/A',
                     'department' => $employee->department ?? 'N/A',
                     'daily_attendance' => $dailyAttendance,
-                    'totals' => $totals
+                    'totals' => $totals,
+                    'is_terminated' => $isTerminated
                 ];
             }
 

@@ -346,4 +346,32 @@ class EmployeeController extends Controller
                 ->with('error', 'Error deleting employee: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Restore a terminated employee back to active status
+     */
+    public function restore($id)
+    {
+        try {
+            $employee = Employee::findOrFail($id);
+            
+            // Update employee status back to Active and MIS to Yes
+            $employee->update([
+                'status' => 'Active',
+                'mis' => 'Yes',
+            ]);
+            
+            // Restore the soft-deleted user if exists
+            $user = User::withTrashed()->where('email', $employee->email)->first();
+            if ($user && $user->trashed()) {
+                $user->restore();
+            }
+            
+            return redirect()->route('employee.ems')
+                ->with('success', $employee->name . ' has been restored to active status.');
+        } catch (\Exception $e) {
+            return redirect()->route('employee.ems')
+                ->with('error', 'Error restoring employee: ' . $e->getMessage());
+        }
+    }
 }

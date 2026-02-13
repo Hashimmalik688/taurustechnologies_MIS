@@ -135,6 +135,18 @@
         font-weight: 600;
     }
     
+    .terminated-row {
+        background-color: #f5f5f5 !important;
+        opacity: 0.85;
+    }
+    
+    .terminated-badge {
+        color: #921c1c;
+        font-weight: 600;
+        font-size: 9px;
+        margin-left: 3px;
+    }
+    
     .weekend-header {
         background-color: #dc3545 !important;
         color: #fff !important;
@@ -319,6 +331,7 @@
                     <table class="attendance-print-table">
                         <thead>
                             <tr>
+                                <th rowspan="2" style="width: 35px;">S.No</th>
                                 <th rowspan="2" style="width: 50px;">ID</th>
                                 <th rowspan="2" style="width: 150px;">Name</th>
                                 <th rowspan="2" style="width: 120px;">Position</th>
@@ -344,9 +357,16 @@
                         </thead>
                         <tbody>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $employeeData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $employee): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                <tr>
+                                <tr class="<?php echo e($employee['is_terminated'] ? 'terminated-row' : ''); ?>">
+                                    <td><?php echo e($loop->iteration); ?></td>
                                     <td><?php echo e($employee['id']); ?></td>
-                                    <td class="text-left"><?php echo e($employee['name']); ?></td>
+                                    <td class="text-left">
+                                        <?php echo e($employee['name']); ?>
+
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($employee['is_terminated']): ?>
+                                            <span class="terminated-badge">(Terminated)</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
                                     <td class="text-left"><?php echo e($employee['position']); ?></td>
                                     
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -373,7 +393,7 @@
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="<?php echo e(count($dates) + 8); ?>" 
+                                    <td colspan="<?php echo e(count($dates) + 9); ?>" 
                                         style="text-align: center; padding: 20px;">
                                         No employee data available for this period.
                                     </td>

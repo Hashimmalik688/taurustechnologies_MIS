@@ -62,6 +62,29 @@
     .badge-active { background: #10b981; color: white; }
     .badge-inactive { background: #ef4444; color: white; }
     .badge-pending { background: #f59e0b; color: white; }
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 600;
+        border: none;
+        padding: 0.75rem 1.25rem;
+    }
+    .nav-tabs .nav-link.active {
+        color: #d4af37;
+        border-bottom: 3px solid #d4af37;
+        background: transparent;
+    }
+    .nav-tabs .nav-link:hover:not(.active) {
+        color: #333;
+        border-bottom: 3px solid #ddd;
+    }
+    .terminated-count {
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        padding: 0.15rem 0.5rem;
+        font-size: 0.7rem;
+        margin-left: 0.4rem;
+    }
 </style>
 <?php $__env->stopSection(); ?>
 
@@ -136,9 +159,30 @@
     <!-- Employee Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0"><i class="bx bx-table me-2" style="color: #d4af37;"></i> Employee Records</h5>
+            <ul class="nav nav-tabs card-header-tabs" id="emsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#activeEmployees" type="button" role="tab">
+                        <i class="bx bx-user-check me-1"></i> Current Employees
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="terminated-tab" data-bs-toggle="tab" data-bs-target="#terminatedEmployees" type="button" role="tab">
+                        <i class="bx bx-user-x me-1"></i> Terminated
+                        <?php
+                            $terminatedEmployees = $employees->filter(fn($e) => $e->status === 'Terminated');
+                            $activeEmployees = $employees->filter(fn($e) => $e->status !== 'Terminated');
+                        ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($terminatedEmployees->count() > 0): ?>
+                            <span class="terminated-count"><?php echo e($terminatedEmployees->count()); ?></span>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </button>
+                </li>
+            </ul>
         </div>
         <div class="card-body">
+            <div class="tab-content" id="emsTabContent">
+                <!-- Active Employees Tab -->
+                <div class="tab-pane fade show active" id="activeEmployees" role="tabpanel">
             <div class="table-responsive">
                 <table id="employeeTable" class="table table-hover align-middle">
                     <thead class="table-light">
@@ -160,7 +204,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $employees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $activeEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <?php
                             $user = \App\Models\User::withTrashed()->where('email', $emp->email)->first();
                             $dob = $user && $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : 'N/A';
@@ -300,10 +344,10 @@
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="12" class="text-center py-5">
+                            <td colspan="14" class="text-center py-5">
                                 <div style="opacity: 0.5;">
                                     <i class="bx bx-inbox" style="font-size: 4rem; color: #d4af37;"></i>
-                                    <h5 class="mt-3 text-muted">No Employees Yet</h5>
+                                    <h5 class="mt-3 text-muted">No Active Employees</h5>
                                     <p class="text-muted">Click "Add Employee" button above to create your first employee record</p>
                                 </div>
                             </td>
@@ -311,6 +355,82 @@
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+                </div>
+
+                <!-- Terminated Employees Tab -->
+                <div class="tab-pane fade" id="terminatedEmployees" role="tabpanel">
+                    <div class="alert alert-warning mb-3">
+                        <i class="bx bx-info-circle me-1"></i>
+                        These are employees who have been terminated and their MIS accounts deactivated. You can <strong>restore</strong> them back to active status or <strong>permanently delete</strong> their records.
+                    </div>
+                    <div class="table-responsive">
+                        <table id="terminatedTable" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sr#</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Contact</th>
+                                    <th>CNIC</th>
+                                    <th>Position</th>
+                                    <th>MIS</th>
+                                    <th>Photo</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $terminatedEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <tr>
+                                    <td><strong><?php echo e($loop->iteration); ?></strong></td>
+                                    <td><strong><?php echo e($emp->name); ?></strong></td>
+                                    <td><a href="mailto:<?php echo e($emp->email); ?>" class="text-decoration-none"><?php echo e($emp->email); ?></a></td>
+                                    <td><?php echo e($emp->contact_info); ?></td>
+                                    <td><?php echo e($emp->cnic); ?></td>
+                                    <td><?php echo e($emp->position); ?></td>
+                                    <td>
+                                        <span class="badge badge-danger" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+                                            <i class="bx bx-x-circle me-1"></i>No
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->passport_image): ?>
+                                            <img src="<?php echo e(asset('storage/'.$emp->passport_image)); ?>" alt="<?php echo e($emp->name); ?>" class="employee-avatar" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                        <?php else: ?>
+                                            <div class="no-avatar" style="opacity:0.5;"><?php echo e(strtoupper(substr($emp->name, 0, 1))); ?></div>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (! \Illuminate\Support\Facades\Blade::check('role', 'Trainer')): ?>
+                                        <div class="d-flex gap-1">
+                                            <form method="POST" action="<?php echo e(route('employee.restore', $emp->id)); ?>" class="d-inline" onsubmit="return confirm('Restore <?php echo e($emp->name); ?> back to active status?');">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" class="btn btn-sm btn-success" title="Restore Employee">
+                                                    <i class="bx bx-undo"></i> Restore
+                                                </button>
+                                            </form>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="permanentDelete(<?php echo e($emp->id); ?>, '<?php echo e($emp->name); ?>');" title="Permanently Delete">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </div>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                                <tr>
+                                    <td colspan="9" class="text-center py-5">
+                                        <div style="opacity: 0.5;">
+                                            <i class="bx bx-check-circle" style="font-size: 4rem; color: #10b981;"></i>
+                                            <h5 class="mt-3 text-muted">No Terminated Employees</h5>
+                                            <p class="text-muted">All employees are currently active</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -458,6 +578,28 @@ $(document).ready(function() {
         table = $('#employeeTable').DataTable();
     }
 
+    // Initialize terminated table when tab shown
+    $('button[data-bs-target="#terminatedEmployees"]').on('shown.bs.tab', function () {
+        if (!$.fn.dataTable.isDataTable('#terminatedTable')) {
+            $('#terminatedTable').DataTable({
+                responsive: false,
+                pageLength: 25,
+                order: [[0, 'asc']],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search terminated...",
+                    lengthMenu: "Show _MENU_ per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ terminated employees",
+                    infoEmpty: "No terminated employees",
+                    infoFiltered: "(filtered from _MAX_ total)"
+                },
+                columnDefs: [
+                    { orderable: false, targets: [7, 8] }
+                ]
+            });
+        }
+    });
+
     // Format phone numbers - add 0 prefix if starts with 3
     function formatPhoneNumber(value) {
         if (!value) return value;
@@ -492,6 +634,21 @@ $(document).ready(function() {
 // Delete employee function
 function deleteEmployee(empId, empName) {
     if (confirm(`Are you sure you want to delete ${empName}? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/ems/${empId}`;
+        form.innerHTML = `
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('DELETE'); ?>
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Permanently delete terminated employee
+function permanentDelete(empId, empName) {
+    if (confirm(`⚠️ PERMANENTLY delete ${empName}?\n\nThis will remove ALL records including attendance history. This cannot be undone.`)) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = `/ems/${empId}`;
