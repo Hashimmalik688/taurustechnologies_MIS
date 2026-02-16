@@ -383,10 +383,17 @@
                     </a>
 
                     <div class="menu-dropdown" id="settingsDropdown">
-                        <a href="<?php echo e(route('settings.index')); ?>" class="dropdown-item <?php echo e(Request::is('settings') ? 'active' : ''); ?>">
+                        <a href="<?php echo e(route('settings.index')); ?>" class="dropdown-item <?php echo e(Request::is('settings') && !Request::is('settings/permissions*') ? 'active' : ''); ?>">
                             <i class="bx bx-slider-alt"></i>
                             <span class="menu-text">System Settings</span>
                         </a>
+
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Super Admin|Co-ordinator')): ?>
+                            <a href="<?php echo e(route('settings.permissions.index')); ?>" class="dropdown-item <?php echo e(Request::is('settings/permissions*') ? 'active' : ''); ?>">
+                                <i class="bx bx-shield-alt"></i>
+                                <span class="menu-text">Permissions Manager</span>
+                            </a>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                         <a href="<?php echo e(route('admin.dupe-checker.index')); ?>" class="dropdown-item <?php echo e(Request::is('admin/dupe-checker*') ? 'active' : ''); ?>">
                             <i class="bx bx-copy-alt"></i>

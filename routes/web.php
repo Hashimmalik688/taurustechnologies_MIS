@@ -111,52 +111,52 @@ Route::group(['prefix' => 'hr', 'as' => 'hr.', 'middleware' => ['auth', 'role:HR
 
 // Users Management (CEO & Super Admin & Co-ordinator)
 Route::group(['prefix' => 'users', 'as' => 'users.', 'middleware' => ['auth', 'role:CEO|Super Admin|Co-ordinator']], function () {
-    Route::get('/', [UserController::class, 'index'])->name('index');
-    Route::get('/create', [UserController::class, 'create'])->name('create');
-    Route::post('/store', [UserController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [UserController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [UserController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [UserController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [UserController::class, 'destroy'])->name('delete');
+    Route::get('/', [UserController::class, 'index'])->name('index')->middleware('role.permission:users,view');
+    Route::get('/create', [UserController::class, 'create'])->name('create')->middleware('role.permission:users,edit');
+    Route::post('/store', [UserController::class, 'store'])->name('store')->middleware('role.permission:users,edit');
+    Route::get('/show/{id}', [UserController::class, 'show'])->name('show')->middleware('role.permission:users,view');
+    Route::get('/edit/{id}', [UserController::class, 'edit'])->name('edit')->middleware('role.permission:users,edit');
+    Route::put('/update/{id}', [UserController::class, 'update'])->name('update')->middleware('role.permission:users,edit');
+    Route::delete('/delete/{id}', [UserController::class, 'destroy'])->name('delete')->middleware('role.permission:users,full');
     
     // Admin password reset (Super Admin & Manager only)
-    Route::get('/{id}/reset-password', [UserController::class, 'resetPasswordForm'])->name('reset-password-form');
-    Route::post('/{id}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password');
+    Route::get('/{id}/reset-password', [UserController::class, 'resetPasswordForm'])->name('reset-password-form')->middleware('role.permission:users,edit');
+    Route::post('/{id}/reset-password', [UserController::class, 'resetPassword'])->name('reset-password')->middleware('role.permission:users,edit');
     
     // Avatar upload
-    Route::get('/{id}/upload-avatar', [UserController::class, 'uploadAvatarForm'])->name('upload-avatar-form');
-    Route::post('/{id}/upload-avatar', [UserController::class, 'uploadAvatar'])->name('upload-avatar');
+    Route::get('/{id}/upload-avatar', [UserController::class, 'uploadAvatarForm'])->name('upload-avatar-form')->middleware('role.permission:users,edit');
+    Route::post('/{id}/upload-avatar', [UserController::class, 'uploadAvatar'])->name('upload-avatar')->middleware('role.permission:users,edit');
     
     // Update plain password via AJAX
-    Route::post('/{id}/update-password', [UserController::class, 'updatePassword'])->name('update-password');
+    Route::post('/{id}/update-password', [UserController::class, 'updatePassword'])->name('update-password')->middleware('role.permission:users,edit');
 });
 
 // Employee Management Sheet (E.M.S) - HR has view-only, others have full access
 Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', 'role:CEO|Trainer|Super Admin|HR|Co-ordinator|Manager']], function () {
     // View and export - accessible to all roles in this group
-    Route::get('/', [EmployeeController::class, 'index'])->name('ems');
-    Route::get('/export', [EmployeeController::class, 'export'])->name('export');
+    Route::get('/', [EmployeeController::class, 'index'])->name('ems')->middleware('role.permission:ems,view');
+    Route::get('/export', [EmployeeController::class, 'export'])->name('export')->middleware('role.permission:ems,view');
     
     // Modification routes - accessible to all roles in this group (including HR)
-    Route::post('/store', [EmployeeController::class, 'store'])->name('store');
-    Route::post('/import', [EmployeeController::class, 'import'])->name('import');
-    Route::post('/update/{employee}', [EmployeeController::class, 'update'])->name('update');
-    Route::delete('/terminate/{id}', [EmployeeController::class, 'terminate'])->name('terminate');
-    Route::post('/restore/{id}', [EmployeeController::class, 'restore'])->name('restore');
-    Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('destroy');
+    Route::post('/store', [EmployeeController::class, 'store'])->name('store')->middleware('role.permission:ems,edit');
+    Route::post('/import', [EmployeeController::class, 'import'])->name('import')->middleware('role.permission:ems,edit');
+    Route::post('/update/{employee}', [EmployeeController::class, 'update'])->name('update')->middleware('role.permission:ems,edit');
+    Route::delete('/terminate/{id}', [EmployeeController::class, 'terminate'])->name('terminate')->middleware('role.permission:ems,full');
+    Route::post('/restore/{id}', [EmployeeController::class, 'restore'])->name('restore')->middleware('role.permission:ems,edit');
+    Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('destroy')->middleware('role.permission:ems,full');
 });
 
 // Dupe Checker (CEO, Super Admin and Co-ordinator)
 Route::group(['prefix' => 'admin/dupe-checker', 'as' => 'admin.dupe-checker.', 'middleware' => ['auth', 'role:CEO|Super Admin|Co-ordinator']], function () {
-    Route::get('/', [DupeCheckerController::class, 'index'])->name('index');
-    Route::post('/self-check', [DupeCheckerController::class, 'selfCheck'])->name('self-check');
-    Route::post('/file-comparison', [DupeCheckerController::class, 'fileComparison'])->name('file-comparison');
-    Route::post('/run-deduplication', [DupeCheckerController::class, 'runDeduplication'])->name('run-deduplication');
+    Route::get('/', [DupeCheckerController::class, 'index'])->name('index')->middleware('role.permission:duplicate-checker,view');
+    Route::post('/self-check', [DupeCheckerController::class, 'selfCheck'])->name('self-check')->middleware('role.permission:duplicate-checker,edit');
+    Route::post('/file-comparison', [DupeCheckerController::class, 'fileComparison'])->name('file-comparison')->middleware('role.permission:duplicate-checker,edit');
+    Route::post('/run-deduplication', [DupeCheckerController::class, 'runDeduplication'])->name('run-deduplication')->middleware('role.permission:duplicate-checker,full');
 });
 
 // Account Switching Log (CEO, Super Admin and Co-ordinator)
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'role:CEO|Super Admin|Co-ordinator']], function () {
-    Route::get('/account-switching-log', [AuditLogController::class, 'accountSwitchingLog'])->name('admin.account-switching-log');
+    Route::get('/account-switching-log', [AuditLogController::class, 'accountSwitchingLog'])->name('admin.account-switching-log')->middleware('role.permission:account-switch-log,view');
 });
 
 // Communities API routes (used by chat system)
@@ -184,35 +184,35 @@ Route::group(['prefix' => 'agents', 'as' => 'agents.', 'middleware' => ['auth', 
 
 // Partners Management (CEO & Super Admin & Manager & Co-ordinator)
 Route::group(['prefix' => 'admin/partners', 'as' => 'admin.partners.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Co-ordinator']], function () {
-    Route::get('/', [App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\Admin\PartnerController::class, 'create'])->name('create');
-    Route::post('/store', [App\Http\Controllers\Admin\PartnerController::class, 'store'])->name('store');
-    Route::get('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'show'])->name('show');
-    Route::get('/{id}/edit', [App\Http\Controllers\Admin\PartnerController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'update'])->name('update');
-    Route::delete('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'destroy'])->name('destroy');
-    Route::delete('/{partnerId}/carriers/{carrierId}', [App\Http\Controllers\Admin\PartnerController::class, 'removeCarrierAssignment'])->name('remove-carrier-assignment');
+    Route::get('/', [App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('index')->middleware('role.permission:partners,view');
+    Route::get('/create', [App\Http\Controllers\Admin\PartnerController::class, 'create'])->name('create')->middleware('role.permission:partners,edit');
+    Route::post('/store', [App\Http\Controllers\Admin\PartnerController::class, 'store'])->name('store')->middleware('role.permission:partners,edit');
+    Route::get('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'show'])->name('show')->middleware('role.permission:partners,view');
+    Route::get('/{id}/edit', [App\Http\Controllers\Admin\PartnerController::class, 'edit'])->name('edit')->middleware('role.permission:partners,edit');
+    Route::put('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'update'])->name('update')->middleware('role.permission:partners,edit');
+    Route::delete('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'destroy'])->name('destroy')->middleware('role.permission:partners,full');
+    Route::delete('/{partnerId}/carriers/{carrierId}', [App\Http\Controllers\Admin\PartnerController::class, 'removeCarrierAssignment'])->name('remove-carrier-assignment')->middleware('role.permission:partners,edit');
 });
 
 // Insurance Carriers Management (CEO & Super Admin & Manager & Co-ordinator)
 Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-carriers.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Co-ordinator']], function () {
-    Route::get('/', [InsuranceCarrierController::class, 'index'])->name('index');
-    Route::get('/create', [InsuranceCarrierController::class, 'create'])->name('create');
-    Route::post('/store', [InsuranceCarrierController::class, 'store'])->name('store');
-    Route::post('/{insuranceCarrier}/toggle-active', [InsuranceCarrierController::class, 'toggleActive'])->name('toggle-active');
-    Route::get('/{insuranceCarrier}', [InsuranceCarrierController::class, 'show'])->name('show');
-    Route::get('/{insuranceCarrier}/edit', [InsuranceCarrierController::class, 'edit'])->name('edit');
-    Route::put('/{insuranceCarrier}', [InsuranceCarrierController::class, 'update'])->name('update');
-    Route::delete('/{insuranceCarrier}', [InsuranceCarrierController::class, 'destroy'])->name('destroy');
+    Route::get('/', [InsuranceCarrierController::class, 'index'])->name('index')->middleware('role.permission:carriers,view');
+    Route::get('/create', [InsuranceCarrierController::class, 'create'])->name('create')->middleware('role.permission:carriers,edit');
+    Route::post('/store', [InsuranceCarrierController::class, 'store'])->name('store')->middleware('role.permission:carriers,edit');
+    Route::post('/{insuranceCarrier}/toggle-active', [InsuranceCarrierController::class, 'toggleActive'])->name('toggle-active')->middleware('role.permission:carriers,edit');
+    Route::get('/{insuranceCarrier}', [InsuranceCarrierController::class, 'show'])->name('show')->middleware('role.permission:carriers,view');
+    Route::get('/{insuranceCarrier}/edit', [InsuranceCarrierController::class, 'edit'])->name('edit')->middleware('role.permission:carriers,edit');
+    Route::put('/{insuranceCarrier}', [InsuranceCarrierController::class, 'update'])->name('update')->middleware('role.permission:carriers,edit');
+    Route::delete('/{insuranceCarrier}', [InsuranceCarrierController::class, 'destroy'])->name('destroy')->middleware('role.permission:carriers,full');
 });
 
 // Leads Management (Add/Import only - no actions)
 Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager']], function () {
-    Route::get('/', [LeadController::class, 'index'])->name('index');
-    Route::get('/peregrine', [LeadController::class, 'peregrineLeads'])->name('peregrine');
-    Route::get('/create', [LeadController::class, 'create'])->name('create');
-    Route::post('/store', [LeadController::class, 'store'])->name('store');
-    Route::post('/import', [LeadController::class, 'import'])->name('import');
+    Route::get('/', [LeadController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
+    Route::get('/peregrine', [LeadController::class, 'peregrineLeads'])->name('peregrine')->middleware('role.permission:leads-peregrine,view');
+    Route::get('/create', [LeadController::class, 'create'])->name('create')->middleware('role.permission:leads-peregrine,edit');
+    Route::post('/store', [LeadController::class, 'store'])->name('store')->middleware('role.permission:leads-peregrine,edit');
+    Route::post('/import', [LeadController::class, 'import'])->name('import')->middleware('role.permission:leads-peregrine,edit');
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show');
     Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit');
     Route::put('/update/{id}', [LeadController::class, 'update'])->name('update');
@@ -224,41 +224,41 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', 'r
 
 // Sales Management (with actions and status management)
 Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Employee|Agent|Vendor|Co-ordinator|QA']], function () {
-    Route::get('/', [LeadController::class, 'sales'])->name('index');
-    Route::get('/pretty-print/{id}', [LeadController::class, 'prettyPrint'])->name('prettyPrint');
-    Route::post('/manual-entry', [LeadController::class, 'storeManualSale'])->name('storeManual');
-    Route::get('/show/{id}', [LeadController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [LeadController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [LeadController::class, 'destroy'])->name('delete');
-    Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus');
-    Route::post('/{id}/update-field', [LeadController::class, 'updateSalesField'])->name('updateField');
-    Route::post('/{id}/comment', [LeadController::class, 'updateComment'])->name('updateComment');
-    Route::post('/carriers/{carrierId}/status', [LeadController::class, 'updateCarrierStatus'])->name('updateCarrierStatus');
-    Route::post('/update-during-call', [LeadController::class, 'updateDuringCall'])->name('updateDuringCall');
-    Route::post('/forward', [LeadController::class, 'forwardLead'])->name('forwardLead');
-    Route::post('/{id}/qa-status', [LeadController::class, 'updateQaStatus'])->name('updateQaStatus');
-    Route::post('/{id}/qa-status/reset', [LeadController::class, 'resetQaStatus'])->name('resetQaStatus');
-    Route::post('/{id}/manager-status', [LeadController::class, 'updateManagerStatus'])->name('updateManagerStatus');
-    Route::post('/{id}/manager-status/reset', [LeadController::class, 'resetManagerStatus'])->name('resetManagerStatus');
-    Route::post('/{id}/update-manager-reason', [LeadController::class, 'updateManagerReason'])->name('updateManagerReason');
-    Route::post('/{id}/retention-sale', [LeadController::class, 'markRetentionSale'])->name('markRetentionSale');
+    Route::get('/', [LeadController::class, 'sales'])->name('index')->middleware('role.permission:sales,view');
+    Route::get('/pretty-print/{id}', [LeadController::class, 'prettyPrint'])->name('prettyPrint')->middleware('role.permission:sales,view');
+    Route::post('/manual-entry', [LeadController::class, 'storeManualSale'])->name('storeManual')->middleware('role.permission:sales,edit');
+    Route::get('/show/{id}', [LeadController::class, 'show'])->name('show')->middleware('role.permission:sales,view');
+    Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit')->middleware('role.permission:sales,edit');
+    Route::put('/update/{id}', [LeadController::class, 'update'])->name('update')->middleware('role.permission:sales,edit');
+    Route::delete('/delete/{id}', [LeadController::class, 'destroy'])->name('delete')->middleware('role.permission:sales,full');
+    Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/update-field', [LeadController::class, 'updateSalesField'])->name('updateField')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/comment', [LeadController::class, 'updateComment'])->name('updateComment')->middleware('role.permission:sales,edit');
+    Route::post('/carriers/{carrierId}/status', [LeadController::class, 'updateCarrierStatus'])->name('updateCarrierStatus')->middleware('role.permission:sales,edit');
+    Route::post('/update-during-call', [LeadController::class, 'updateDuringCall'])->name('updateDuringCall')->middleware('role.permission:sales,edit');
+    Route::post('/forward', [LeadController::class, 'forwardLead'])->name('forwardLead')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/qa-status', [LeadController::class, 'updateQaStatus'])->name('updateQaStatus')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/qa-status/reset', [LeadController::class, 'resetQaStatus'])->name('resetQaStatus')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/manager-status', [LeadController::class, 'updateManagerStatus'])->name('updateManagerStatus')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/manager-status/reset', [LeadController::class, 'resetManagerStatus'])->name('resetManagerStatus')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/update-manager-reason', [LeadController::class, 'updateManagerReason'])->name('updateManagerReason')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/retention-sale', [LeadController::class, 'markRetentionSale'])->name('markRetentionSale')->middleware('role.permission:sales,edit');
 });
 
-// Issuance Management Routes
+// Issuance Management Routes (with permission enforcement)
 Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Co-ordinator']], function () {
-    Route::get('/', [LeadController::class, 'issuance'])->name('index');
-    Route::get('/show/{id}', [LeadController::class, 'show'])->name('show');
-    Route::post('/{id}/issuance-status', [LeadController::class, 'updateIssuanceStatus'])->name('updateIssuanceStatus');
-    Route::post('/{id}/issuance-status/reset', [LeadController::class, 'resetIssuanceStatus'])->name('resetIssuanceStatus');
-    Route::post('/{id}/unlock-field', [LeadController::class, 'unlockIssuanceField'])->name('unlockField');
-    Route::post('/{id}/recalculate-commission', [LeadController::class, 'recalculateCommission'])->name('recalculateCommission');
-    Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission');
+    Route::get('/', [LeadController::class, 'issuance'])->name('index')->middleware('role.permission:issuance,view');
+    Route::get('/show/{id}', [LeadController::class, 'show'])->name('show')->middleware('role.permission:issuance,view');
+    Route::post('/{id}/issuance-status', [LeadController::class, 'updateIssuanceStatus'])->name('updateIssuanceStatus')->middleware('role.permission:issuance,edit');
+    Route::post('/{id}/issuance-status/reset', [LeadController::class, 'resetIssuanceStatus'])->name('resetIssuanceStatus')->middleware('role.permission:issuance,edit');
+    Route::post('/{id}/unlock-field', [LeadController::class, 'unlockIssuanceField'])->name('unlockField')->middleware('role.permission:issuance,full');
+    Route::post('/{id}/recalculate-commission', [LeadController::class, 'recalculateCommission'])->name('recalculateCommission')->middleware('role.permission:issuance,full');
+    Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission')->middleware('role.permission:issuance,full');
 });
 
-// QA Review Routes
+// QA Review Routes (with permission enforcement)
 Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|QA|Co-ordinator']], function () {
-    Route::get('/review', [LeadController::class, 'qaReview'])->name('review');
+    Route::get('/review', [LeadController::class, 'qaReview'])->name('review')->middleware('role.permission:qa-review,view');
 });
 
 // Followup Routes (everyone except Vendor/partners)
@@ -295,11 +295,11 @@ Route::group([
     'as' => 'peregrine.closers.',
     'middleware' => ['auth', 'role:CEO|Peregrine Closer|Super Admin|Co-ordinator']
 ], function () {
-    Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index');
-    Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit');
-    Route::put('/{lead}/update', [PeregrineController::class, 'closerUpdate'])->name('update');
-    Route::put('/{lead}/mark-failed', [PeregrineController::class, 'closerMarkFailed'])->name('mark-failed');
-    Route::put('/{lead}/mark-pending', [PeregrineController::class, 'closerMarkPending'])->name('mark-pending');
+    Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index')->middleware('role.permission:leads-peregrine,view');
+    Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/update', [PeregrineController::class, 'closerUpdate'])->name('update')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-failed', [PeregrineController::class, 'closerMarkFailed'])->name('mark-failed')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-pending', [PeregrineController::class, 'closerMarkPending'])->name('mark-pending')->middleware('role.permission:leads-peregrine,edit');
 });
 
 // Peregrine Validator
@@ -308,15 +308,15 @@ Route::group([
     'as' => 'validator.',
     'middleware' => ['auth', 'role:CEO|Peregrine Validator|Manager|Super Admin|Co-ordinator']
 ], function () {
-    Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index');
-    Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit');
-    Route::put('/{lead}/update', [\App\Http\Controllers\ValidatorController::class, 'update'])->name('update');
-    Route::put('/{lead}/mark-sale', [\App\Http\Controllers\ValidatorController::class, 'markAsSale'])->name('mark-sale');
-    Route::put('/{lead}/mark-forwarded', [\App\Http\Controllers\ValidatorController::class, 'markAsForwarded'])->name('mark-forwarded');
-    Route::put('/{lead}/mark-failed', [\App\Http\Controllers\ValidatorController::class, 'markAsFailed'])->name('mark-failed');
-    Route::put('/{lead}/mark-simple-declined', [\App\Http\Controllers\ValidatorController::class, 'markAsSimpleDeclined'])->name('mark-simple-declined');
-    Route::put('/{lead}/mark-home-office-sale', [\App\Http\Controllers\ValidatorController::class, 'markHomeOfficeSale'])->name('mark-home-office-sale');
-    Route::put('/{lead}/return-to-closer', [\App\Http\Controllers\ValidatorController::class, 'returnToCloser'])->name('return-to-closer');
+    Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
+    Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/update', [\App\Http\Controllers\ValidatorController::class, 'update'])->name('update')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-sale', [\App\Http\Controllers\ValidatorController::class, 'markAsSale'])->name('mark-sale')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-forwarded', [\App\Http\Controllers\ValidatorController::class, 'markAsForwarded'])->name('mark-forwarded')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-failed', [\App\Http\Controllers\ValidatorController::class, 'markAsFailed'])->name('mark-failed')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-simple-declined', [\App\Http\Controllers\ValidatorController::class, 'markAsSimpleDeclined'])->name('mark-simple-declined')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/mark-home-office-sale', [\App\Http\Controllers\ValidatorController::class, 'markHomeOfficeSale'])->name('mark-home-office-sale')->middleware('role.permission:leads-peregrine,edit');
+    Route::put('/{lead}/return-to-closer', [\App\Http\Controllers\ValidatorController::class, 'returnToCloser'])->name('return-to-closer')->middleware('role.permission:leads-peregrine,edit');
 });
 
 // Call Logs - Temporarily Disabled
@@ -351,16 +351,16 @@ Route::group([
 
 // Dock Section - READ and ADD access for HR, Super Admin, Manager, QA, Co-ordinator
 Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', 'role:Super Admin|Manager|QA|HR|Co-ordinator|CEO']], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\DockController::class, 'index'])->name('index');
-    Route::post('/', [\App\Http\Controllers\Admin\DockController::class, 'store'])->name('store');
-    Route::get('/history/{userId}', [\App\Http\Controllers\Admin\DockController::class, 'history'])->name('history');
+    Route::get('/', [\App\Http\Controllers\Admin\DockController::class, 'index'])->name('index')->middleware('role.permission:dock,view');
+    Route::post('/', [\App\Http\Controllers\Admin\DockController::class, 'store'])->name('store')->middleware('role.permission:dock,edit');
+    Route::get('/history/{userId}', [\App\Http\Controllers\Admin\DockController::class, 'history'])->name('history')->middleware('role.permission:dock,view');
 });
 
 // Dock Section - EDIT and DELETE access for Super Admin, Manager, QA, Co-ordinator only (NOT HR)
 Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', 'role:Super Admin|Manager|QA|Co-ordinator']], function () {
-    Route::put('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'update'])->name('update');
-    Route::patch('/{dockRecord}/cancel', [\App\Http\Controllers\Admin\DockController::class, 'cancel'])->name('cancel');
-    Route::delete('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'destroy'])->name('destroy');
+    Route::put('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'update'])->name('update')->middleware('role.permission:dock,edit');
+    Route::patch('/{dockRecord}/cancel', [\App\Http\Controllers\Admin\DockController::class, 'cancel'])->name('cancel')->middleware('role.permission:dock,edit');
+    Route::delete('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'destroy'])->name('destroy')->middleware('role.permission:dock,full');
 });
 
 // Employee Dock View - Read-only access for employees to view their own dock records
@@ -368,20 +368,20 @@ Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::clas
 
 // Attendance
 Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', 'role:CEO|Super Admin|Manager|Employee|Agent|HR|Vendor|Retention Officer|Ravens Closer|Peregrine Closer|Peregrine Validator|Verifier|QA|Co-ordinator']], function () {
-    Route::get('/', [AttendanceController::class, 'index'])->name('index');
-    Route::get('/history', [AttendanceController::class, 'history'])->name('history');
-    Route::get('/print-view', [AttendanceController::class, 'printView'])->name('print-view');
-    Route::get('/print', [AttendanceController::class, 'print'])->name('print');
-    Route::get('/employee-report/{userId}', [AttendanceController::class, 'employeeReport'])->name('employee-report');
-    Route::get('/export', [AttendanceController::class, 'index'])->name('export');
-    Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json');
+    Route::get('/', [AttendanceController::class, 'index'])->name('index')->middleware('role.permission:attendance,view');
+    Route::get('/history', [AttendanceController::class, 'history'])->name('history')->middleware('role.permission:attendance,view');
+    Route::get('/print-view', [AttendanceController::class, 'printView'])->name('print-view')->middleware('role.permission:attendance,view');
+    Route::get('/print', [AttendanceController::class, 'print'])->name('print')->middleware('role.permission:attendance,view');
+    Route::get('/employee-report/{userId}', [AttendanceController::class, 'employeeReport'])->name('employee-report')->middleware('role.permission:attendance,view');
+    Route::get('/export', [AttendanceController::class, 'index'])->name('export')->middleware('role.permission:attendance,view');
+    Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json')->middleware('role.permission:attendance,view');
     
-    // Manual entry, editing, and deleting - CEO, Super Admin & Co-ordinator
-    Route::middleware(['role:CEO|Super Admin|Co-ordinator'])->group(function () {
-        Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual');
-        Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post');
-        Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update');
-        Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete');
+    // Manual entry, editing, and deleting - CEO, Super Admin, Co-ordinator, HR & Trainer
+    Route::middleware(['role:CEO|Super Admin|Co-ordinator|HR|Trainer'])->group(function () {
+        Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual')->middleware('role.permission:attendance,edit');
+        Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post')->middleware('role.permission:attendance,edit');
+        Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update')->middleware('role.permission:attendance,edit');
+        Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete')->middleware('role.permission:attendance,full');
     });
 });
 
@@ -485,20 +485,20 @@ Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', 'rol
 
 // Payroll - View Access (CEO, Super Admin, Co-ordinator & Manager can view)
 Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', 'role:CEO|Super Admin|Co-ordinator|Manager']], function () {
-    Route::get('/', [SalaryController::class, 'payroll'])->name('index');
-    Route::get('/print', [SalaryController::class, 'printPayroll'])->name('print');
+    Route::get('/', [SalaryController::class, 'payroll'])->name('index')->middleware('role.permission:payroll,view');
+    Route::get('/print', [SalaryController::class, 'printPayroll'])->name('print')->middleware('role.permission:payroll,view');
 });
 
 // Payroll - Edit Access (Only CEO, Super Admin & Co-ordinator can edit)
 Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', 'role:CEO|Super Admin|Co-ordinator']], function () {
-    Route::post('/working-days', [SalaryController::class, 'updateWorkingDays'])->name('working-days.update');
+    Route::post('/working-days', [SalaryController::class, 'updateWorkingDays'])->name('working-days.update')->middleware('role.permission:payroll,edit');
     
     // Manual Payroll Entries (for non-system users like ex-employees) - MUST come before /{userId} route
-    Route::post('/manual', [SalaryController::class, 'storeManualEntry'])->name('manual.store');
-    Route::put('/manual/{id}', [SalaryController::class, 'updateManualEntry'])->name('manual.update');
-    Route::delete('/manual/{id}', [SalaryController::class, 'destroyManualEntry'])->name('manual.destroy');
+    Route::post('/manual', [SalaryController::class, 'storeManualEntry'])->name('manual.store')->middleware('role.permission:payroll,edit');
+    Route::put('/manual/{id}', [SalaryController::class, 'updateManualEntry'])->name('manual.update')->middleware('role.permission:payroll,edit');
+    Route::delete('/manual/{id}', [SalaryController::class, 'destroyManualEntry'])->name('manual.destroy')->middleware('role.permission:payroll,full');
     
-    Route::match(['post', 'put'], '/{userId}', [SalaryController::class, 'updatePayroll'])->name('update');
+    Route::match(['post', 'put'], '/{userId}', [SalaryController::class, 'updatePayroll'])->name('update')->middleware('role.permission:payroll,edit');
 });
 
 // Vendors
@@ -569,32 +569,50 @@ Route::get('/check-my-ip', function () {
 
 // Settings (Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', 'role:Super Admin']], function () {
-    Route::get('/', [SettingsController::class, 'index'])->name('index');
-    Route::post('/', [SettingsController::class, 'update'])->name('update');
-    Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network');
+    Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
+    Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
+    Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
+});
+
+// Permission Management (Super Admin and Co-ordinator)
+Route::group(['prefix' => 'settings/permissions', 'as' => 'settings.permissions.', 'middleware' => ['auth', 'role:Super Admin|Co-ordinator']], function () {
+    // Main permission management page (list of roles)
+    Route::get('/', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('index');
+    
+    // Role permission management
+    Route::get('/roles/{role}', [\App\Http\Controllers\Admin\PermissionController::class, 'editRole'])->name('roles.edit');
+    Route::post('/roles/{role}', [\App\Http\Controllers\Admin\PermissionController::class, 'updateRole'])->name('roles.update');
+    
+    // User permission overrides
+    Route::get('/users/{user}', [\App\Http\Controllers\Admin\PermissionController::class, 'editUser'])->name('users.edit');
+    Route::post('/users/{user}', [\App\Http\Controllers\Admin\PermissionController::class, 'updateUser'])->name('users.update');
+    
+    // AJAX endpoints for real-time updates
+    Route::post('/sync', [\App\Http\Controllers\Admin\PermissionController::class, 'syncPermissions'])->name('sync');
+    Route::post('/clear-cache', [\App\Http\Controllers\Admin\PermissionController::class, 'clearCache'])->name('clear-cache');
 });
 
 // Holidays (Super Admin and Manager and Co-ordinator)
 Route::group(['prefix' => 'holidays', 'as' => 'admin.holidays.', 'middleware' => ['auth', 'role:Super Admin|Manager|Co-ordinator']], function () {
-    Route::get('/', [HolidayController::class, 'index'])->name('index');
-    Route::get('/create', [HolidayController::class, 'create'])->name('create');
-    Route::post('/', [HolidayController::class, 'store'])->name('store');
-    Route::get('/{holiday}/edit', [HolidayController::class, 'edit'])->name('edit');
-    Route::put('/{holiday}', [HolidayController::class, 'update'])->name('update');
-    Route::delete('/{holiday}', [HolidayController::class, 'destroy'])->name('destroy');
-    Route::post('/check-date', [HolidayController::class, 'checkDate'])->name('check-date');
+    Route::get('/', [HolidayController::class, 'index'])->name('index')->middleware('role.permission:holidays,view');
+    Route::get('/create', [HolidayController::class, 'create'])->name('create')->middleware('role.permission:holidays,edit');
+    Route::post('/', [HolidayController::class, 'store'])->name('store')->middleware('role.permission:holidays,edit');
+    Route::get('/{holiday}/edit', [HolidayController::class, 'edit'])->name('edit')->middleware('role.permission:holidays,edit');
+    Route::put('/{holiday}', [HolidayController::class, 'update'])->name('update')->middleware('role.permission:holidays,edit');
+    Route::delete('/{holiday}', [HolidayController::class, 'destroy'])->name('destroy')->middleware('role.permission:holidays,full');
+    Route::post('/check-date', [HolidayController::class, 'checkDate'])->name('check-date')->middleware('role.permission:holidays,view');
 });
 
 // Public Holidays Management (Super Admin only - HR and Co-ordinator can view)
 Route::group(['prefix' => 'admin/public-holidays', 'as' => 'admin.public-holidays.', 'middleware' => ['auth', 'role:Super Admin|HR|Co-ordinator']], function () {
-    Route::get('/', [PublicHolidayController::class, 'index'])->name('index');
-    Route::get('/create', [PublicHolidayController::class, 'create'])->name('create');
-    Route::post('/', [PublicHolidayController::class, 'store'])->name('store');
-    Route::get('/{holiday}/edit', [PublicHolidayController::class, 'edit'])->name('edit');
-    Route::put('/{holiday}', [PublicHolidayController::class, 'update'])->name('update');
-    Route::delete('/{holiday}', [PublicHolidayController::class, 'destroy'])->name('destroy');
-    Route::post('/{holiday}/toggle', [PublicHolidayController::class, 'toggle'])->name('toggle');
-    Route::post('/check-date', [PublicHolidayController::class, 'checkDate'])->name('check-date');
+    Route::get('/', [PublicHolidayController::class, 'index'])->name('index')->middleware('role.permission:public-holidays,view');
+    Route::get('/create', [PublicHolidayController::class, 'create'])->name('create')->middleware('role.permission:public-holidays,edit');
+    Route::post('/', [PublicHolidayController::class, 'store'])->name('store')->middleware('role.permission:public-holidays,edit');
+    Route::get('/{holiday}/edit', [PublicHolidayController::class, 'edit'])->name('edit')->middleware('role.permission:public-holidays,edit');
+    Route::put('/{holiday}', [PublicHolidayController::class, 'update'])->name('update')->middleware('role.permission:public-holidays,edit');
+    Route::delete('/{holiday}', [PublicHolidayController::class, 'destroy'])->name('destroy')->middleware('role.permission:public-holidays,full');
+    Route::post('/{holiday}/toggle', [PublicHolidayController::class, 'toggle'])->name('toggle')->middleware('role.permission:public-holidays,edit');
+    Route::post('/check-date', [PublicHolidayController::class, 'checkDate'])->name('check-date')->middleware('role.permission:public-holidays,view');
     Route::get('/month', [PublicHolidayController::class, 'getMonthHolidays'])->name('month');
 });
 
@@ -674,42 +692,43 @@ Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' =>
 
 // Retention
 Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['auth', 'role:Super Admin|Manager|Employee|Agent|Vendor|Retention Officer|Co-ordinator|CEO']], function () {
-    Route::get('/', [RetentionController::class, 'index'])->name('index');
-    Route::post('/{id}/status', [RetentionController::class, 'updateStatus'])->name('updateStatus');
-    Route::get('/incomplete', [RetentionController::class, 'incompleteIssuance'])->name('incomplete');
-    Route::get('/incomplete/{id}/details', [RetentionController::class, 'showIncompleteDetails'])->name('incompleteDetails');
-    Route::post('/{id}/disposition', [RetentionController::class, 'saveDisposition'])->name('saveDisposition');
-    Route::get('/check-other-insurances/{id}', [RetentionController::class, 'checkOtherInsurances'])->name('checkOtherInsurances');
+    Route::get('/', [RetentionController::class, 'index'])->name('index')->middleware('role.permission:retention,view');
+    Route::post('/{id}/status', [RetentionController::class, 'updateStatus'])->name('updateStatus')->middleware('role.permission:retention,edit');
+    Route::get('/incomplete', [RetentionController::class, 'incompleteIssuance'])->name('incomplete')->middleware('role.permission:retention,view');
+    Route::get('/incomplete/{id}/details', [RetentionController::class, 'showIncompleteDetails'])->name('incompleteDetails')->middleware('role.permission:retention,view');
+    Route::post('/{id}/disposition', [RetentionController::class, 'saveDisposition'])->name('saveDisposition')->middleware('role.permission:retention,edit');
+    Route::get('/check-other-insurances/{id}', [RetentionController::class, 'checkOtherInsurances'])->name('checkOtherInsurances')->middleware('role.permission:retention,view');
 });
 
 // Retention Officer Dashboard
 Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'])
     ->middleware(['auth', 'role:Retention Officer|Super Admin|Co-ordinator|CEO'])
+    ->middleware('role.permission:retention,view')
     ->name('retention.dashboard');
 
 // Bank Verification (Super Admin Only)
 Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', 'role:Super Admin|CEO|Manager|Co-ordinator']], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index');
-    Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show');
-    Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update');
-    Route::post('/{id}/assign-verifier', [\App\Http\Controllers\Admin\BankVerificationController::class, 'assignVerifier'])->name('assignVerifier');
-    Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment');
+    Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index')->middleware('role.permission:bank-verification,view');
+    Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show')->middleware('role.permission:bank-verification,view');
+    Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update')->middleware('role.permission:bank-verification,edit');
+    Route::post('/{id}/assign-verifier', [\App\Http\Controllers\Admin\BankVerificationController::class, 'assignVerifier'])->name('assignVerifier')->middleware('role.permission:bank-verification,edit');
+    Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment')->middleware('role.permission:bank-verification,edit');
 });
 
 // Revenue Analytics (Super Admin Only)
 Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', 'role:Super Admin|CEO|Co-ordinator|Manager']], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\RevenueAnalyticsController::class, 'index'])->name('index');
+    Route::get('/', [\App\Http\Controllers\Admin\RevenueAnalyticsController::class, 'index'])->name('index')->middleware('role.permission:revenue-analytics,view');
 });
 
 // Ravens Routes
 Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 'role:Super Admin|Manager|Ravens Closer|Co-ordinator']], function () {
-    Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling');
-    Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data');
-    Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save');
-    Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale');
-    Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose');
-    Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore');
+    Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard')->middleware('role.permission:leads,view');
+    Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling')->middleware('role.permission:leads,view');
+    Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data')->middleware('role.permission:leads,view');
+    Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save')->middleware('role.permission:leads,edit');
+    Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale')->middleware('role.permission:leads,edit');
+    Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose')->middleware('role.permission:leads,edit');
+    Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore')->middleware('role.permission:leads,edit');
     Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
     Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');
     Route::get('/leads/dial-status', [RavensDashboardController::class, 'getDialStatus'])->name('leads.dial-status');

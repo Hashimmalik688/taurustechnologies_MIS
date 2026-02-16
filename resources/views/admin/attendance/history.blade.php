@@ -374,7 +374,7 @@
                                                             <i class="mdi mdi-eye font-size-16 text-info me-1"></i> View
                                                             Details
                                                         </a>
-                                                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                                                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator|HR|Trainer'))
                                                         <a class="dropdown-item" href="#"
                                                             onclick="editRecord({{ $attendance->id }})">
                                                             <i class="mdi mdi-pencil font-size-16 text-primary me-1"></i>
@@ -440,7 +440,7 @@
                         <button class="btn btn-outline-primary" onclick="bulkExport()">
                             <i class="mdi mdi-download me-2"></i>Export Selected
                         </button>
-                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator|HR|Trainer'))
                         <button class="btn btn-outline-info" onclick="bulkUpdateStatus()">
                             <i class="mdi mdi-pencil me-2"></i>Update Status
                         </button>

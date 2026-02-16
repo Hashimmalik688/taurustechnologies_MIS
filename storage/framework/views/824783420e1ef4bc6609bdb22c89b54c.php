@@ -324,7 +324,12 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="mb-3">
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Date of Termination (DOT)</label>
+                                                    <input type="date" name="date_of_termination" class="form-control" value="<?php echo e($emp->date_of_termination ? (\Carbon\Carbon::parse($emp->date_of_termination)->format('Y-m-d')) : ''); ?>">
+                                                </div>
+                                            </div>
                                                 <label class="form-label">Passport Size Image (WebP only)</label>
                                                 <input type="file" name="passport_image" accept="image/webp" class="form-control">
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->passport_image): ?>
@@ -374,6 +379,7 @@
                                     <th>Contact</th>
                                     <th>CNIC</th>
                                     <th>Position</th>
+                                    <th>DOT</th>
                                     <th>MIS</th>
                                     <th>Photo</th>
                                     <th>Actions</th>
@@ -388,6 +394,13 @@
                                     <td><?php echo e($emp->contact_info); ?></td>
                                     <td><?php echo e($emp->cnic); ?></td>
                                     <td><?php echo e($emp->position); ?></td>
+                                    <td>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->date_of_termination): ?>
+                                            <strong class="text-danger"><?php echo e(\Carbon\Carbon::parse($emp->date_of_termination)->format('d M Y')); ?></strong>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    </td>
                                     <td>
                                         <span class="badge badge-danger" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
                                             <i class="bx bx-x-circle me-1"></i>No
@@ -418,7 +431,7 @@
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="9" class="text-center py-5">
+                                    <td colspan="10" class="text-center py-5">
                                         <div style="opacity: 0.5;">
                                             <i class="bx bx-check-circle" style="font-size: 4rem; color: #10b981;"></i>
                                             <h5 class="mt-3 text-muted">No Terminated Employees</h5>
@@ -527,6 +540,10 @@
                                     <option value="Not Active">Not Active</option>
                                     <option value="Terminated">Terminated</option>
                                 </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">DOT</label>
+                                <input type="date" name="date_of_termination" class="form-control">
                             </div>
                         </div>
                         <div class="mb-3">
