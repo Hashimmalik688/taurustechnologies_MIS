@@ -52,10 +52,7 @@ class AttendanceController extends Controller
      */
     public function updateAjax(Request $request, $id)
     {
-        // Prevent HR from modifying attendance records
-        if (auth()->user()->hasRole('HR')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. HR has view-only access.'], 403);
-        }
+        // Authorization handled by route middleware
 
         $attendance = Attendance::find($id);
         if (!$attendance) {
@@ -552,10 +549,7 @@ class AttendanceController extends Controller
      */
     public function markManual(Request $request)
     {
-        // Prevent HR from marking manual attendance
-        if (auth()->user()->hasRole('HR')) {
-            return redirect()->back()->with('error', 'Unauthorized. HR has view-only access.');
-        }
+        // Authorization handled by route middleware
 
         // Validate inputs
         $request->validate([
@@ -690,10 +684,7 @@ class AttendanceController extends Controller
      */
     public function delete($id)
     {
-        // Prevent HR from deleting attendance records
-        if (auth()->user()->hasRole('HR')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized. HR has view-only access.'], 403);
-        }
+        // Authorization handled by route middleware
 
         try {
             $attendance = Attendance::findOrFail($id);

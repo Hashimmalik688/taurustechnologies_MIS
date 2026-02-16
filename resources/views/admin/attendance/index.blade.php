@@ -214,7 +214,7 @@
                         <a href="{{ route('attendance.print-view') }}" class="btn btn-sm btn-outline-success ms-2" target="_blank">
                             <i class="mdi mdi-printer"></i> Print View
                         </a>
-                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                        @if(auth()->user()->hasRole('Super Admin|Co-ordinator|HR|Trainer'))
                         <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
                             <i class="mdi mdi-plus"></i> Manual Entry
                         </button>
@@ -417,7 +417,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if(auth()->user()->hasRole('Super Admin|Co-ordinator'))
+                                            @if(auth()->user()->hasRole('Super Admin|Co-ordinator|HR|Trainer'))
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-soft-primary" 
                                                     onclick="editAttendance({{ $attendance->id }})" 

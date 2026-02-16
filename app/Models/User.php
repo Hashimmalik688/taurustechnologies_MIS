@@ -248,6 +248,98 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get user-specific permission overrides
+     */
+    public function permissionOverrides()
+    {
+        return $this->hasMany(UserModulePermission::class);
+    }
+
+    /**
+     * Get permission level for a specific module
+     * Returns the highest permission level from user override or roles
+     * 
+     * @param string $moduleSlug
+     * @return string (none|view|edit|full)
+     */
+    public function getPermissionForModule($moduleSlug)
+    {
+        // Super Admin always has full access
+        if ($this->hasRole('Super Admin')) {
+            return 'full';
+        }
+
+        // Check for user-specific override first
+        $module = Module::where('slug', $moduleSlug)->first();
+        if (!$module) {
+            return 'none';
+        }
+
+        $userOverride = $this->permissionOverrides()
+            ->where('module_id', $module->id)
+            ->first();
+
+        if ($userOverride) {
+            return $userOverride->permission_level;
+        }
+
+        // Get highest permission from all user's roles
+        $roleIds = $this->roles->pluck('id')->toArray();
+        if (empty($roleIds)) {
+            return 'none';
+        }
+
+        $rolePermission = RoleModulePermission::where('module_id', $module->id)
+            ->whereIn('role_id', $roleIds)
+            ->orderByRaw("FIELD(permission_level, 'full', 'edit', 'view', 'none')")
+            ->first();
+
+        return $rolePermission ? $rolePermission->permission_level : 'none';
+    }
+
+    /**
+     * Check if user has permission for a module at a specific level
+     * 
+     * @param string $moduleSlug
+     * @param string $level (view|edit|full)
+     * @return bool
+     */
+    public function hasModulePermission($moduleSlug, $level)
+    {
+        $userLevel = $this->getPermissionForModule($moduleSlug);
+
+        $levels = ['none' => 0, 'view' => 1, 'edit' => 2, 'full' => 3];
+        $userNumeric = $levels[$userLevel] ?? 0;
+        $requiredNumeric = $levels[$level] ?? 0;
+
+        return $userNumeric >= $requiredNumeric;
+    }
+
+    /**
+     * Check if user can view a module
+     */
+    public function canViewModule($moduleSlug): bool
+    {
+        return $this->hasModulePermission($moduleSlug, 'view');
+    }
+
+    /**
+     * Check if user can edit a module
+     */
+    public function canEditModule($moduleSlug): bool
+    {
+        return $this->hasModulePermission($moduleSlug, 'edit');
+    }
+
+    /**
+     * Check if user can delete in a module (requires full access)
+     */
+    public function canDeleteInModule($moduleSlug): bool
+    {
+        return $this->hasModulePermission($moduleSlug, 'full');
+    }
+
+    /**
      * Get sticky notes for this user
      */
     public function stickyNotes()

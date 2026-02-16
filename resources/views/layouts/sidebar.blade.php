@@ -383,10 +383,17 @@
                     </a>
 
                     <div class="menu-dropdown" id="settingsDropdown">
-                        <a href="{{ route('settings.index') }}" class="dropdown-item {{ Request::is('settings') ? 'active' : '' }}">
+                        <a href="{{ route('settings.index') }}" class="dropdown-item {{ Request::is('settings') && !Request::is('settings/permissions*') ? 'active' : '' }}">
                             <i class="bx bx-slider-alt"></i>
                             <span class="menu-text">System Settings</span>
                         </a>
+
+                        @hasanyrole('Super Admin|Co-ordinator')
+                            <a href="{{ route('settings.permissions.index') }}" class="dropdown-item {{ Request::is('settings/permissions*') ? 'active' : '' }}">
+                                <i class="bx bx-shield-alt"></i>
+                                <span class="menu-text">Permissions Manager</span>
+                            </a>
+                        @endhasanyrole
 
                         <a href="{{ route('admin.dupe-checker.index') }}" class="dropdown-item {{ Request::is('admin/dupe-checker*') ? 'active' : '' }}">
                             <i class="bx bx-copy-alt"></i>

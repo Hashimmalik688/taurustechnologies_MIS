@@ -70,5 +70,7 @@ class Kernel extends HttpKernel
         'partner.auth' => \App\Http\Middleware\PartnerAuthenticate::class,
         'prevent.partner' => \App\Http\Middleware\PreventPartnerAccess::class,
         'prevent.user' => \App\Http\Middleware\PreventUserAccess::class,
+        'module.permission' => \App\Http\Middleware\CheckModulePermission::class,
+        'role.permission' => \App\Http\Middleware\CheckModulePermissionWithRole::class,
     ];
 }

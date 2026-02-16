@@ -126,6 +126,7 @@ class EmployeeController extends Controller
             'position' => 'nullable|string|max:255',
             'area_of_residence' => 'nullable|string|max:255',
             'status' => 'nullable|string|max:20',
+            'date_of_termination' => 'nullable|date',
             'passport_image' => 'nullable|file|mimes:webp|max:2048',
         ]);
 
@@ -157,6 +158,11 @@ class EmployeeController extends Controller
         // MIS is automatically "Yes" for Active/Not Active, "No" for Terminated
         $saveData['mis'] = ($status === 'Terminated') ? 'No' : 'Yes';
 
+        // Handle date_of_termination
+        if ($request->filled('date_of_termination')) {
+            $saveData['date_of_termination'] = $request->date_of_termination;
+        }
+
         // Handle image
         if ($request->hasFile('passport_image')) {
             $saveData['passport_image'] = $request->file('passport_image')->store('employee_passports', 'public');
@@ -177,6 +183,7 @@ class EmployeeController extends Controller
             'position' => 'nullable|string|max:255',
             'area_of_residence' => 'nullable|string|max:255',
             'status' => 'nullable|string|max:20',
+            'date_of_termination' => 'nullable|date',
             'passport_image' => 'nullable|file|mimes:webp|max:2048',
         ]);
 
@@ -215,6 +222,9 @@ class EmployeeController extends Controller
         }
         if ($request->filled('area_of_residence')) {
             $updateData['area_of_residence'] = trim($request->area_of_residence);
+        }
+        if ($request->filled('date_of_termination')) {
+            $updateData['date_of_termination'] = $request->date_of_termination;
         }
         
         // Auto-set MIS based on status (not user-editable)

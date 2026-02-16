@@ -19,5 +19,10 @@ class Employee extends Model
         'status',
         'mis',
         'passport_image',
+        'date_of_termination',
+    ];
+
+    protected $casts = [
+        'date_of_termination' => 'date',
     ];
 }
