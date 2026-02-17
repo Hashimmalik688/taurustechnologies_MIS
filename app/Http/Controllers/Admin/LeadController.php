@@ -214,28 +214,24 @@ class LeadController extends Controller
         
         $carriers = $insuranceCarriers; // Use insurance carriers for filter
         
-        // Get KPI statistics for manager_status (Sales Management uses manager_status, not status)
+        // Get KPI statistics for manager_status in a single query instead of 4 separate COUNT queries
+        $statusAgg = Lead::whereNotNull('closer_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+            })
+            ->selectRaw("
+                SUM(CASE WHEN manager_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+                SUM(CASE WHEN manager_status = 'approved' THEN 1 ELSE 0 END) as accepted_count,
+                SUM(CASE WHEN manager_status = 'declined' THEN 1 ELSE 0 END) as rejected_count,
+                SUM(CASE WHEN manager_status = 'underwriting' THEN 1 ELSE 0 END) as underwritten_count
+            ")
+            ->first();
+        
         $statusCounts = [
-            'pending' => Lead::whereNotNull('closer_name')
-                ->where(function($q) {
-                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
-                })
-                ->where('manager_status', 'pending')->count(),
-            'accepted' => Lead::whereNotNull('closer_name')
-                ->where(function($q) {
-                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
-                })
-                ->where('manager_status', 'approved')->count(),
-            'rejected' => Lead::whereNotNull('closer_name')
-                ->where(function($q) {
-                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
-                })
-                ->where('manager_status', 'declined')->count(),
-            'underwritten' => Lead::whereNotNull('closer_name')
-                ->where(function($q) {
-                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
-                })
-                ->where('manager_status', 'underwriting')->count(),
+            'pending' => (int) ($statusAgg->pending_count ?? 0),
+            'accepted' => (int) ($statusAgg->accepted_count ?? 0),
+            'rejected' => (int) ($statusAgg->rejected_count ?? 0),
+            'underwritten' => (int) ($statusAgg->underwritten_count ?? 0),
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
@@ -999,9 +995,8 @@ class LeadController extends Controller
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at');
         
-        // Create a separate query for analytics with all filters applied (except qa_status filter to show all statuses)
-        $analyticsQuery = Lead::with('insuranceCarrier')
-            ->whereNotNull('closer_name')
+        // Build analytics query (no eager loading needed — counts only)
+        $analyticsQuery = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at');
         
         // Apply all filters to analytics query (except qa_status to see breakdown of all statuses)
@@ -1015,12 +1010,10 @@ class LeadController extends Controller
             });
         }
         
-        // Filter by carrier
         if ($request->filled('carrier')) {
             $analyticsQuery->where('carrier_name', $request->carrier);
         }
         
-        // Apply month/year filters to analytics (using sale_date as primary filter)
         if ($request->filled('month')) {
             $analyticsQuery->whereMonth('sale_date', $request->month);
         }
@@ -1028,26 +1021,31 @@ class LeadController extends Controller
             $analyticsQuery->whereYear('sale_date', $request->year);
         }
         
-        // Get analytics counts
+        // Single query for all QA analytics counts instead of 5 separate COUNT queries
+        $qaAgg = $analyticsQuery->selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN qa_status = 'Pending' THEN 1 ELSE 0 END) as pending_count,
+            SUM(CASE WHEN qa_status = 'Good' THEN 1 ELSE 0 END) as good_count,
+            SUM(CASE WHEN qa_status = 'Avg' THEN 1 ELSE 0 END) as avg_count,
+            SUM(CASE WHEN qa_status = 'Bad' THEN 1 ELSE 0 END) as bad_count
+        ")->first();
+        
+        $total = (int) ($qaAgg->total ?? 0);
         $qaAnalytics = [
-            'total' => $analyticsQuery->count(),
-            'pending' => (clone $analyticsQuery)->where('qa_status', 'Pending')->count(),
-            'good' => (clone $analyticsQuery)->where('qa_status', 'Good')->count(),
-            'avg' => (clone $analyticsQuery)->where('qa_status', 'Avg')->count(),
-            'bad' => (clone $analyticsQuery)->where('qa_status', 'Bad')->count(),
+            'total' => $total,
+            'pending' => (int) ($qaAgg->pending_count ?? 0),
+            'good' => (int) ($qaAgg->good_count ?? 0),
+            'avg' => (int) ($qaAgg->avg_count ?? 0),
+            'bad' => (int) ($qaAgg->bad_count ?? 0),
         ];
         
         // Calculate percentages
-        $qaAnalytics['pending_percent'] = $qaAnalytics['total'] > 0 ? 
-            round(($qaAnalytics['pending'] / $qaAnalytics['total']) * 100) : 0;
-        $qaAnalytics['good_percent'] = $qaAnalytics['total'] > 0 ? 
-            round(($qaAnalytics['good'] / $qaAnalytics['total']) * 100) : 0;
-        $qaAnalytics['avg_percent'] = $qaAnalytics['total'] > 0 ? 
-            round(($qaAnalytics['avg'] / $qaAnalytics['total']) * 100) : 0;
-        $qaAnalytics['bad_percent'] = $qaAnalytics['total'] > 0 ? 
-            round(($qaAnalytics['bad'] / $qaAnalytics['total']) * 100) : 0;
-        $qaAnalytics['issues_percent'] = $qaAnalytics['total'] > 0 ? 
-            round((($qaAnalytics['avg'] + $qaAnalytics['bad']) / $qaAnalytics['total']) * 100) : 0;
+        $qaAnalytics['pending_percent'] = $total > 0 ? round(($qaAnalytics['pending'] / $total) * 100) : 0;
+        $qaAnalytics['good_percent'] = $total > 0 ? round(($qaAnalytics['good'] / $total) * 100) : 0;
+        $qaAnalytics['avg_percent'] = $total > 0 ? round(($qaAnalytics['avg'] / $total) * 100) : 0;
+        $qaAnalytics['bad_percent'] = $total > 0 ? round(($qaAnalytics['bad'] / $total) * 100) : 0;
+        $qaAnalytics['issues_percent'] = $total > 0 ? 
+            round((($qaAnalytics['avg'] + $qaAnalytics['bad']) / $total) * 100) : 0;
         
         // Search functionality
         if ($request->filled('search')) {
@@ -1401,51 +1399,55 @@ class LeadController extends Controller
         }
 
         $commissionService = new CommissionCalculationService();
-        $leads = Lead::where('issuance_status', 'Issued')
-            ->whereNotNull('assigned_agent_id')
-            ->where('monthly_premium', '>', 0)
-            ->get();
+        
+        // Use chunking instead of loading ALL leads into memory at once
+        // Pre-load carrier name→id map to avoid N+1 queries inside the loop
+        $carrierMap = \App\Models\InsuranceCarrier::pluck('id', 'name')->toArray();
         
         $processed = 0;
         $failed = 0;
         
-        foreach ($leads as $lead) {
-            // Get carrier ID
-            $carrierId = $lead->insurance_carrier_id;
-            if (!$carrierId && $lead->carrier_name) {
-                $carrier = \App\Models\InsuranceCarrier::where('name', $lead->carrier_name)->first();
-                if ($carrier) {
-                    $carrierId = $carrier->id;
-                    $lead->insurance_carrier_id = $carrierId;
+        Lead::where('issuance_status', 'Issued')
+            ->whereNotNull('assigned_agent_id')
+            ->where('monthly_premium', '>', 0)
+            ->chunk(100, function ($leads) use ($commissionService, $carrierMap, &$processed, &$failed) {
+                foreach ($leads as $lead) {
+                    // Get carrier ID — use pre-loaded map instead of per-lead query
+                    $carrierId = $lead->insurance_carrier_id;
+                    if (!$carrierId && $lead->carrier_name) {
+                        $carrierId = $carrierMap[$lead->carrier_name] ?? null;
+                        if ($carrierId) {
+                            $lead->insurance_carrier_id = $carrierId;
+                        }
+                    }
+                    
+                    if ($carrierId) {
+                        $settlementType = $this->getSettlementType($lead->settlement_type ?? $lead->policy_type);
+                        
+                        $commissionResult = $commissionService->calculateCommission(
+                            agentId: $lead->assigned_agent_id,
+                            carrierId: $carrierId,
+                            state: $lead->state ?? 'Unknown',
+                            settlementType: $settlementType,
+                            monthlyPremium: (float) $lead->monthly_premium
+                        );
+                        
+                        if ($commissionResult['success']) {
+                            $lead->agent_commission = $commissionResult['commission'];
+                            $lead->agent_revenue = $commissionResult['commission'];
+                            $lead->settlement_percentage = $commissionResult['settlement_pct'];
+                            $lead->commission_calculation_notes = $commissionResult['message'];
+                            $lead->commission_calculated_at = now();
+                            $lead->save();
+                            $processed++;
+                        } else {
+                            $failed++;
+                        }
+                    } else {
+                        $failed++;
+                    }
                 }
-            }
-            
-            if ($carrierId) {
-                $settlementType = $this->getSettlementType($lead->settlement_type ?? $lead->policy_type);
-                
-                $commissionResult = $commissionService->calculateCommission(
-                    agentId: $lead->assigned_agent_id,
-                    carrierId: $carrierId,
-                    state: $lead->state ?? 'Unknown',
-                    settlementType: $settlementType,
-                    monthlyPremium: (float) $lead->monthly_premium
-                );
-                
-                if ($commissionResult['success']) {
-                    $lead->agent_commission = $commissionResult['commission'];
-                    $lead->agent_revenue = $commissionResult['commission'];
-                    $lead->settlement_percentage = $commissionResult['settlement_pct'];
-                    $lead->commission_calculation_notes = $commissionResult['message'];
-                    $lead->commission_calculated_at = now();
-                    $lead->save();
-                    $processed++;
-                } else {
-                    $failed++;
-                }
-            } else {
-                $failed++;
-            }
-        }
+            });
         
         return redirect()->back()->with('success', "Recalculated commissions for {$processed} leads. {$failed} failed.");
     }

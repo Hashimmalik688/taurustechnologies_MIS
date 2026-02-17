@@ -86,6 +86,29 @@
             background-color: #6f42c1 !important;
             color: #fff !important;
         }
+        
+        /* Pagination - hide large icons and use text */
+        .pagination .page-link svg {
+            display: none !important;
+        }
+        .pagination .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        /* Add text content for Previous/Next */
+        .pagination .page-item:first-child .page-link::before {
+            content: "‹ Previous";
+        }
+        .pagination .page-item:last-child .page-link::before {
+            content: "Next ›";
+        }
+        .pagination .page-item:first-child .page-link span,
+        .pagination .page-item:last-child .page-link span {
+            display: none;
+        }
     </style>
 @endsection
 
@@ -156,7 +179,7 @@
                             <tbody id="leadsTableBody">
                                 @forelse($leads as $index => $lead)
                                     <tr class="lead-row" data-lead-id="{{ $lead->id }}" data-phone="{{ $lead->phone_number }}" data-secondary-phone="{{ $lead->secondary_phone_number ?? '' }}">
-                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $leads->firstItem() + $index }}</td>
                                         <td>
                                             <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
                                             @if(
@@ -216,6 +239,12 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($leads->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                        <small class="text-muted">Showing {{ $leads->firstItem() }}–{{ $leads->lastItem() }} of {{ $leads->total() }} leads</small>
+                        {{ $leads->links() }}
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

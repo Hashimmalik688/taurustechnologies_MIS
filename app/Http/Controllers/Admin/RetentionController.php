@@ -88,15 +88,21 @@ class RetentionController extends Controller
         // Get unique carriers for filter dropdown
         $carriers = Lead::distinct()->pluck('carrier_name')->filter();
 
-        // Calculate stats
-        $cb_count = Lead::where('status', 'chargeback')->count();
-        $yet_to_retain_count = Lead::where('status', 'chargeback')
-            ->where(function($q) {
-                $q->whereNull('retention_status')
-                  ->orWhere('retention_status', 'pending');
-            })->count();
-        $retained_count = Lead::where('retention_status', 'retained')->count();
-        $rewrite_count = Lead::where('status', 'chargeback')->where('is_rewrite', true)->count();
+        // Calculate stats — consolidated into 2 queries instead of 5
+        // Query 1: All chargeback/retention stats in a single pass
+        $retentionAgg = Lead::selectRaw("
+            SUM(CASE WHEN status = 'chargeback' THEN 1 ELSE 0 END) as cb_count,
+            SUM(CASE WHEN status = 'chargeback' AND (retention_status IS NULL OR retention_status = 'pending') THEN 1 ELSE 0 END) as yet_to_retain_count,
+            SUM(CASE WHEN retention_status = 'retained' THEN 1 ELSE 0 END) as retained_count,
+            SUM(CASE WHEN status = 'chargeback' AND is_rewrite = 1 THEN 1 ELSE 0 END) as rewrite_count
+        ")->first();
+        
+        $cb_count = (int) ($retentionAgg->cb_count ?? 0);
+        $yet_to_retain_count = (int) ($retentionAgg->yet_to_retain_count ?? 0);
+        $retained_count = (int) ($retentionAgg->retained_count ?? 0);
+        $rewrite_count = (int) ($retentionAgg->rewrite_count ?? 0);
+        
+        // Query 2: Disposition count (different base conditions)
         $disposition_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
             ->where('manager_status', 'approved')

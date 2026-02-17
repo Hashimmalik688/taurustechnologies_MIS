@@ -39,13 +39,18 @@ class ZoomController extends Controller
         }
         
         // Exchange code for token
-        $response = Http::asForm()->post('https://zoom.us/oauth/token', [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => config('zoom.oauth.redirect_uri'),
-            'client_id' => config('zoom.oauth.client_id'),
-            'client_secret' => config('zoom.oauth.client_secret'),
-        ]);
+        try {
+            $response = Http::timeout(15)->asForm()->post('https://zoom.us/oauth/token', [
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => config('zoom.oauth.redirect_uri'),
+                'client_id' => config('zoom.oauth.client_id'),
+                'client_secret' => config('zoom.oauth.client_secret'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Zoom OAuth token exchange failed', ['error' => $e->getMessage()]);
+            return redirect()->route('root')->with('error', 'Could not connect to Zoom servers. Please try again.');
+        }
         
         if ($response->successful()) {
             $data = $response->json();
@@ -73,15 +78,16 @@ class ZoomController extends Controller
     public function makeCall(Request $request, $leadId)
     {
         $lead = Lead::findOrFail($leadId);
-        $token = $this->getValidToken();
-        
-        if (!$token) {
-            return response()->json(['error' => 'Zoom not authorized. Please connect your Zoom account.'], 401);
-        }
         
         try {
+            $token = $this->getValidToken();
+            
+            if (!$token) {
+                return response()->json(['error' => 'Zoom not authorized. Please connect your Zoom account.'], 401);
+            }
+            
             // Get user's Zoom Phone info to verify they have access
-            $phoneResponse = Http::withToken($token)->get($this->baseUrl . '/phone/users/me');
+            $phoneResponse = Http::timeout(15)->withToken($token)->get($this->baseUrl . '/phone/users/me');
             
             if (!$phoneResponse->successful()) {
                 Log::error('Failed to get Zoom phone info', ['response' => $phoneResponse->body()]);
@@ -532,23 +538,31 @@ class ZoomController extends Controller
         
         // Check if token expired
         if ($tokenRecord->expires_at->isPast()) {
-            // Refresh token
-            $response = Http::asForm()->post('https://zoom.us/oauth/token', [
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $tokenRecord->refresh_token,
-                'client_id' => config('zoom.oauth.client_id'),
-                'client_secret' => config('zoom.oauth.client_secret'),
-            ]);
-            
-            if ($response->successful()) {
-                $data = $response->json();
-                $tokenRecord->update([
-                    'access_token' => $data['access_token'],
-                    'refresh_token' => $data['refresh_token'],
-                    'expires_at' => now()->addSeconds($data['expires_in']),
+            try {
+                // Refresh token
+                $response = Http::timeout(15)->asForm()->post('https://zoom.us/oauth/token', [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $tokenRecord->refresh_token,
+                    'client_id' => config('zoom.oauth.client_id'),
+                    'client_secret' => config('zoom.oauth.client_secret'),
                 ]);
-            } else {
-                Log::error('Token refresh failed', ['response' => $response->body()]);
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    $tokenRecord->update([
+                        'access_token' => $data['access_token'],
+                        'refresh_token' => $data['refresh_token'],
+                        'expires_at' => now()->addSeconds($data['expires_in']),
+                    ]);
+                } else {
+                    Log::error('Token refresh failed', ['response' => $response->body()]);
+                    return null;
+                }
+            } catch (\Exception $e) {
+                Log::error('Token refresh request failed', [
+                    'error' => $e->getMessage(),
+                    'userId' => $tokenRecord->user_id,
+                ]);
                 return null;
             }
         }

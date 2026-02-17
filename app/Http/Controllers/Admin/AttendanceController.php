@@ -378,26 +378,39 @@ class AttendanceController extends Controller
         $currentMonth = $request->get('month', now()->format('Y-m'));
         $date = Carbon::parse($currentMonth . '-01');
         
-        $startOfMonth = $date->copy()->startOfMonth();
-        $endOfMonth = $date->copy()->endOfMonth();
+        // Custom pay period: 26th of previous month to 25th of current month
+        // For example, "February 2026" shows Jan 26, 2026 to Feb 25, 2026
+        $startOfMonth = $date->copy()->subMonth()->day(26);
+        $endOfMonth = $date->copy()->day(25);
         
-        // Get all attendance records for this month
+        // Get all attendance records for this pay period
         $attendances = Attendance::where('user_id', $user->id)
             ->whereBetween('date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->get()
             ->keyBy(function ($a) { return $a->date->format('Y-m-d'); });
         
-        // Get public holidays for this month (new system)
-        $newHolidays = PublicHoliday::getMonthHolidays($date->year, $date->month);
+        // Get public holidays for this pay period (spans two months)
+        // Get holidays for both start and end months
+        $newHolidaysStart = PublicHoliday::getMonthHolidays($startOfMonth->year, $startOfMonth->month);
+        $newHolidaysEnd = PublicHoliday::getMonthHolidays($endOfMonth->year, $endOfMonth->month);
         
-        // Get legacy holidays for this month
-        $legacyHolidays = \App\Models\Holiday::whereYear('date', $date->year)
-            ->whereMonth('date', $date->month)
+        // Get legacy holidays for both months
+        $legacyHolidaysStart = \App\Models\Holiday::whereYear('date', $startOfMonth->year)
+            ->whereMonth('date', $startOfMonth->month)
+            ->orderBy('date')
+            ->get();
+        $legacyHolidaysEnd = \App\Models\Holiday::whereYear('date', $endOfMonth->year)
+            ->whereMonth('date', $endOfMonth->month)
             ->orderBy('date')
             ->get();
         
-        // Merge both holiday sources
-        $holidays = $newHolidays->merge($legacyHolidays)
+        // Merge all holiday sources and filter to pay period
+        $holidays = $newHolidaysStart->merge($newHolidaysEnd)
+            ->merge($legacyHolidaysStart)
+            ->merge($legacyHolidaysEnd)
+            ->filter(function($h) use ($startOfMonth, $endOfMonth) {
+                return $h->date->between($startOfMonth, $endOfMonth);
+            })
             ->unique(function($h) { return $h->date->format('Y-m-d'); })
             ->keyBy(function ($h) { return $h->date->format('Y-m-d'); });
         
@@ -434,12 +447,11 @@ class AttendanceController extends Controller
             $calendar[] = $week;
         }
         
-        // Calculate statistics for current month
+        // Calculate statistics for current pay period (26th to 25th)
         $monthAttendances = $attendances->values();
-        // Calculate total days in the current month (excluding weekends)
+        // Calculate total days in the pay period (excluding weekends)
         $crmStartDate = Carbon::create(2020, 1, 1); // Set to very old date to include all data
-        $startOfMonth = Carbon::parse($currentMonth)->startOfMonth();
-        $endOfMonth = Carbon::parse($currentMonth)->endOfMonth();
+        // Use the pay period dates already calculated above
         $totalDays = 0;
         $absent = 0;
         $present = 0;
@@ -491,11 +503,11 @@ class AttendanceController extends Controller
             'avg_hours' => $totalDays > 0 ? round($totalHours / $totalDays, 1) : 0,
         ];
         
-        // Today's attendance - for night shift, if before 5am, show yesterday's attendance
+        // Today's attendance - for night shift, if before 6am, show yesterday's attendance
         $now = Carbon::now('Asia/Karachi');
         $attendanceDate = $now->copy();
-        if ($now->hour < 5) {
-            // We're still in previous day's shift
+        if ($now->hour < 6) {
+            // We're still in previous day's shift (cutoff is 6am, 1 hour after shift ends)
             $attendanceDate->subDay();
         }
         
@@ -503,18 +515,17 @@ class AttendanceController extends Controller
             ->whereDate('date', $attendanceDate)
             ->first();
         
-        // Also check for any unchecked-out attendance from recent days (for checkout button)
-        $pendingCheckout = null;
-        if (!$todayAttendance || $todayAttendance->logout_time) {
-            $pendingCheckout = Attendance::where('user_id', $user->id)
-                ->whereNotNull('login_time')
-                ->whereNull('logout_time')
-                ->where('date', '>=', Carbon::now()->subDays(3)->format('Y-m-d'))
-                ->orderBy('date', 'desc')
-                ->first();
-        }
+        // Checkout is only allowed before 6am cutoff for current shift
+        // After 6am, missed checkout is missed - no retroactive checkout allowed
+        $canCheckout = $todayAttendance && 
+                       !$todayAttendance->logout_time && 
+                       $todayAttendance->login_time && 
+                       $now->hour < 6;
         
-        return view('attendance.dashboard', compact('calendar', 'stats', 'currentMonth', 'todayAttendance', 'pendingCheckout'));
+        // Format pay period label for display
+        $payPeriodLabel = $startOfMonth->format('M d, Y') . ' - ' . $endOfMonth->format('M d, Y');
+        
+        return view('attendance.dashboard', compact('calendar', 'stats', 'currentMonth', 'todayAttendance', 'canCheckout', 'payPeriodLabel'));
     }
 
     /**

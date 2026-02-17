@@ -257,22 +257,21 @@
                     <button id="btnCheckin" class="btn-checkin" @if($todayAttendance && $todayAttendance->login_time) disabled @endif>
                         <i class="bx bx-log-in"></i> Check In
                     </button>
-                    <button id="btnCheckout" class="btn-checkin btn-checkout" 
-                        @if((!$todayAttendance || $todayAttendance->logout_time || !$todayAttendance->login_time) && !$pendingCheckout) disabled @endif>
+                    <button id="btnCheckout" class="btn-checkin btn-checkout" @if(!$canCheckout) disabled @endif>
                         <i class="bx bx-log-out"></i> Check Out
-                        @if($pendingCheckout)
-                            <small class="d-block" style="font-size: 0.7rem;">({{ $pendingCheckout->date->format('M d') }})</small>
-                        @endif
                     </button>
                 </div>
                 @if($todayAttendance && $todayAttendance->logout_time)
                     <p class="text-muted mt-2">Total hours: {{ $todayAttendance->working_hours ?? 0 }} hrs</p>
-                @elseif($pendingCheckout)
-                    <p class="text-warning mt-2"><i class="bx bx-info-circle"></i> Pending checkout for {{ $pendingCheckout->date->format('M d, Y') }}</p>
+                @elseif(!$canCheckout && $todayAttendance && $todayAttendance->login_time && !$todayAttendance->logout_time)
+                    <p class="text-danger mt-2"><i class="bx bx-info-circle"></i> Checkout window closed (cutoff: 6:00 AM)</p>
                 @endif
             </div>
 
             <!-- Statistics -->
+            <div class="mb-2">
+                <small class="text-muted"><i class="bx bx-info-circle"></i> Statistics are calculated for the pay period (26th to 25th cycle)</small>
+            </div>
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-value">{{ $stats['total_days'] }}</div>
@@ -314,7 +313,10 @@
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='?month={{ \Carbon\Carbon::parse($currentMonth)->subMonth()->format('Y-m') }}'">
                         <i class="bx bx-chevron-left"></i> Previous
                     </button>
-                    <h4>{{ \Carbon\Carbon::parse($currentMonth)->format('F Y') }}</h4>
+                    <div class="text-center">
+                        <h4>{{ \Carbon\Carbon::parse($currentMonth)->format('F Y') }}</h4>
+                        <small class="text-muted">Pay Period: {{ $payPeriodLabel }}</small>
+                    </div>
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='?month={{ \Carbon\Carbon::parse($currentMonth)->addMonth()->format('Y-m') }}'">
                         Next <i class="bx bx-chevron-right"></i>
                     </button>

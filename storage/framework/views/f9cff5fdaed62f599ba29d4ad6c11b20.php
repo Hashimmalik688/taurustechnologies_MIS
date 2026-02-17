@@ -84,6 +84,29 @@
             background-color: #6f42c1 !important;
             color: #fff !important;
         }
+        
+        /* Pagination - hide large icons and use text */
+        .pagination .page-link svg {
+            display: none !important;
+        }
+        .pagination .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        /* Add text content for Previous/Next */
+        .pagination .page-item:first-child .page-link::before {
+            content: "‹ Previous";
+        }
+        .pagination .page-item:last-child .page-link::before {
+            content: "Next ›";
+        }
+        .pagination .page-item:first-child .page-link span,
+        .pagination .page-item:last-child .page-link span {
+            display: none;
+        }
     </style>
 <?php $__env->stopSection(); ?>
 
@@ -154,7 +177,7 @@
                             <tbody id="leadsTableBody">
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <tr class="lead-row" data-lead-id="<?php echo e($lead->id); ?>" data-phone="<?php echo e($lead->phone_number); ?>" data-secondary-phone="<?php echo e($lead->secondary_phone_number ?? ''); ?>">
-                                        <td><?php echo e($index + 1); ?></td>
+                                        <td><?php echo e($leads->firstItem() + $index); ?></td>
                                         <td>
                                             <strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong>
                                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(
@@ -215,6 +238,13 @@
                             </tbody>
                         </table>
                     </div>
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($leads->hasPages()): ?>
+                    <div class="d-flex justify-content-between align-items-center mt-3 px-2">
+                        <small class="text-muted">Showing <?php echo e($leads->firstItem()); ?>–<?php echo e($leads->lastItem()); ?> of <?php echo e($leads->total()); ?> leads</small>
+                        <?php echo e($leads->links()); ?>
+
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
