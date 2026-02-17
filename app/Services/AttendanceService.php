@@ -198,29 +198,28 @@ class AttendanceService
 
     public function markLogout($userId)
     {
-        $currentTime = Carbon::now();
+        $currentTime = Carbon::now('Asia/Karachi');
         
-        // First, try to find any unchecked-out attendance from the last 3 days
-        // This allows users to checkout even if they forgot or system issues occurred
+        // Checkout cutoff is 6am (1 hour after shift ends at 5am)
+        // After 6am, missed checkout is missed - no retroactive checkout allowed
+        if ($currentTime->hour >= 6) {
+            return [
+                'success' => false,
+                'message' => 'Checkout window has closed. Cutoff time is 6:00 AM.',
+            ];
+        }
+        
+        // For night shift (7 PM - 6 AM), if current time is before 6 AM,
+        // the attendance belongs to previous day's shift
+        $shiftDate = $currentTime->hour < 6 
+            ? Carbon::yesterday('Asia/Karachi') 
+            : Carbon::today('Asia/Karachi');
+
         $attendance = Attendance::where('user_id', $userId)
+            ->where('date', $shiftDate)
             ->whereNotNull('login_time')
             ->whereNull('logout_time')
-            ->where('date', '>=', Carbon::now()->subDays(3)->format('Y-m-d'))
-            ->orderBy('date', 'desc')
             ->first();
-
-        // If no unchecked-out attendance found, check today/yesterday based on shift time
-        if (!$attendance) {
-            // For night shift (7 PM - 5 AM), if current time is before 5 AM,
-            // the attendance belongs to previous day's shift
-            $shiftDate = $currentTime->hour < 5 
-                ? Carbon::yesterday() 
-                : Carbon::today();
-
-            $attendance = Attendance::where('user_id', $userId)
-                ->where('date', $shiftDate)
-                ->first();
-        }
 
         if ($attendance && ! $attendance->logout_time) {
             $attendance->update([

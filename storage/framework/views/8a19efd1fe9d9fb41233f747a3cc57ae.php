@@ -256,22 +256,21 @@
                     <button id="btnCheckin" class="btn-checkin" <?php if($todayAttendance && $todayAttendance->login_time): ?> disabled <?php endif; ?>>
                         <i class="bx bx-log-in"></i> Check In
                     </button>
-                    <button id="btnCheckout" class="btn-checkin btn-checkout" 
-                        <?php if((!$todayAttendance || $todayAttendance->logout_time || !$todayAttendance->login_time) && !$pendingCheckout): ?> disabled <?php endif; ?>>
+                    <button id="btnCheckout" class="btn-checkin btn-checkout" <?php if(!$canCheckout): ?> disabled <?php endif; ?>>
                         <i class="bx bx-log-out"></i> Check Out
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($pendingCheckout): ?>
-                            <small class="d-block" style="font-size: 0.7rem;">(<?php echo e($pendingCheckout->date->format('M d')); ?>)</small>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </button>
                 </div>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($todayAttendance && $todayAttendance->logout_time): ?>
                     <p class="text-muted mt-2">Total hours: <?php echo e($todayAttendance->working_hours ?? 0); ?> hrs</p>
-                <?php elseif($pendingCheckout): ?>
-                    <p class="text-warning mt-2"><i class="bx bx-info-circle"></i> Pending checkout for <?php echo e($pendingCheckout->date->format('M d, Y')); ?></p>
+                <?php elseif(!$canCheckout && $todayAttendance && $todayAttendance->login_time && !$todayAttendance->logout_time): ?>
+                    <p class="text-danger mt-2"><i class="bx bx-info-circle"></i> Checkout window closed (cutoff: 6:00 AM)</p>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
 
             <!-- Statistics -->
+            <div class="mb-2">
+                <small class="text-muted"><i class="bx bx-info-circle"></i> Statistics are calculated for the pay period (26th to 25th cycle)</small>
+            </div>
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-value"><?php echo e($stats['total_days']); ?></div>
@@ -313,7 +312,10 @@
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='?month=<?php echo e(\Carbon\Carbon::parse($currentMonth)->subMonth()->format('Y-m')); ?>'">
                         <i class="bx bx-chevron-left"></i> Previous
                     </button>
-                    <h4><?php echo e(\Carbon\Carbon::parse($currentMonth)->format('F Y')); ?></h4>
+                    <div class="text-center">
+                        <h4><?php echo e(\Carbon\Carbon::parse($currentMonth)->format('F Y')); ?></h4>
+                        <small class="text-muted">Pay Period: <?php echo e($payPeriodLabel); ?></small>
+                    </div>
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='?month=<?php echo e(\Carbon\Carbon::parse($currentMonth)->addMonth()->format('Y-m')); ?>'">
                         Next <i class="bx bx-chevron-right"></i>
                     </button>

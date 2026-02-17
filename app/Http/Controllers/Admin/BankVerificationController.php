@@ -44,26 +44,22 @@ class BankVerificationController extends Controller
 
         $leads = $query->orderBy('issuance_date', 'desc')->paginate(50);
         
-        // Get counts for each status
-        $good_count = Lead::where('status', 'accepted')
+        // Single query for all bank verification status counts (instead of 4 separate COUNTs)
+        $bvAgg = Lead::where('status', 'accepted')
             ->where('manager_status', 'approved')
             ->where('issuance_status', 'Issued')
-            ->where('bank_verification_status', 'Good')->count();
-        
-        $average_count = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
-            ->where('bank_verification_status', 'Average')->count();
-        
-        $bad_count = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
-            ->where('bank_verification_status', 'Bad')->count();
-        
-        $unverified_count = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
-            ->whereNull('bank_verification_status')->count();
+            ->selectRaw("
+                SUM(CASE WHEN bank_verification_status = 'Good' THEN 1 ELSE 0 END) as good_count,
+                SUM(CASE WHEN bank_verification_status = 'Average' THEN 1 ELSE 0 END) as average_count,
+                SUM(CASE WHEN bank_verification_status = 'Bad' THEN 1 ELSE 0 END) as bad_count,
+                SUM(CASE WHEN bank_verification_status IS NULL THEN 1 ELSE 0 END) as unverified_count
+            ")
+            ->first();
+
+        $good_count = (int) ($bvAgg->good_count ?? 0);
+        $average_count = (int) ($bvAgg->average_count ?? 0);
+        $bad_count = (int) ($bvAgg->bad_count ?? 0);
+        $unverified_count = (int) ($bvAgg->unverified_count ?? 0);
 
         // Get users who can be assigned for bank verification
         $bankVerifiers = User::role(['Employee', 'Manager', 'Co-ordinator'])

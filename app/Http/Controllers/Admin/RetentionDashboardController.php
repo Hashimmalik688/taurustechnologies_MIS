@@ -92,21 +92,21 @@ class RetentionDashboardController extends Controller
             'average_working_hours' => $workdays > 0 ? round($totalHours / $workdays, 1) : 0,
         ];
 
-        // Get retention stats
+        // Get retention stats — single query for chargeback/retention counts
+        $retAgg = Lead::selectRaw("
+            SUM(CASE WHEN status = 'chargeback' THEN 1 ELSE 0 END) as total_chargebacks,
+            SUM(CASE WHEN status = 'chargeback' AND (retention_status IS NULL OR retention_status = 'pending') THEN 1 ELSE 0 END) as yet_to_retain,
+            SUM(CASE WHEN retention_status = 'retained' AND DATE(retained_at) = ? THEN 1 ELSE 0 END) as retained_today,
+            SUM(CASE WHEN retention_status = 'retained' AND MONTH(retained_at) = ? AND YEAR(retained_at) = ? THEN 1 ELSE 0 END) as retained_mtd,
+            SUM(CASE WHEN status = 'chargeback' AND is_rewrite = 1 THEN 1 ELSE 0 END) as rewrite_count
+        ", [today()->toDateString(), now()->month, now()->year])->first();
+
         $stats = [
-            'total_chargebacks' => Lead::where('status', 'chargeback')->count(),
-            'yet_to_retain' => Lead::where('status', 'chargeback')
-                ->where(function($q) {
-                    $q->whereNull('retention_status')
-                      ->orWhere('retention_status', 'pending');
-                })->count(),
-            'retained_today' => Lead::where('retention_status', 'retained')
-                ->whereDate('retained_at', today())->count(),
-            'retained_mtd' => Lead::where('retention_status', 'retained')
-                ->whereMonth('retained_at', now()->month)
-                ->whereYear('retained_at', now()->year)->count(),
-            'rewrite_count' => Lead::where('status', 'chargeback')
-                ->where('is_rewrite', true)->count(),
+            'total_chargebacks' => (int) ($retAgg->total_chargebacks ?? 0),
+            'yet_to_retain' => (int) ($retAgg->yet_to_retain ?? 0),
+            'retained_today' => (int) ($retAgg->retained_today ?? 0),
+            'retained_mtd' => (int) ($retAgg->retained_mtd ?? 0),
+            'rewrite_count' => (int) ($retAgg->rewrite_count ?? 0),
             'attendance_summary' => $attendanceSummary,
             'today_status' => Attendance::where('user_id', $user->id)->whereDate('date', today())->first(),
         ];
