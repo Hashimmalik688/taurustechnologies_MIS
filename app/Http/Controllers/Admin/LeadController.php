@@ -891,15 +891,26 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         
         // Check if status has already been set (edit-once logic) - only Super Admin can change
-        if (!empty($lead->issuance_date) && !auth()->user()->hasRole('Super Admin')) {
+        // Allow Pending status to bypass this check (for unassigning partner)
+        if (!empty($lead->issuance_date) && !auth()->user()->hasRole('Super Admin') && $request->issuance_status !== 'Pending') {
             return back()->with('error', 'Issuance status has already been set and can only be changed by Super Admin.');
         }
         
+        // Convert empty partner_id to null for easier handling
+        if (empty($request->partner_id)) {
+            $request->merge(['partner_id' => null]);
+        }
+        
+        // Validate partner_id only if status is not Pending
+        $partnerValidation = $request->issuance_status === 'Pending' 
+            ? 'nullable' 
+            : 'required|integer|exists:partners,id';
+        
         $request->validate([
-            'issuance_status' => 'required|in:Issued,Incomplete',
+            'issuance_status' => 'required|in:Issued,Incomplete,Pending',
             'issuance_reason' => 'nullable|string|max:1000',
             'issued_policy_number' => 'required|string|max:255',
-            'partner_id' => 'required|exists:partners,id'
+            'partner_id' => $partnerValidation
         ]);
 
         $commissionService = new CommissionCalculationService();
@@ -912,7 +923,8 @@ class LeadController extends Controller
         }
         
         // Check if assigned partner has already been set (edit-once logic)
-        if (!empty($lead->partner_set_at) && $request->partner_id != $lead->partner_id) {
+        // Allow Pending status to bypass this check (for unassigning partner)
+        if (!empty($lead->partner_set_at) && $request->partner_id != $lead->partner_id && $request->issuance_status !== 'Pending') {
             if (!auth()->user()->hasRole('Super Admin')) {
                 return back()->with('error', 'Assigned partner has already been set and cannot be changed.');
             }
@@ -928,10 +940,17 @@ class LeadController extends Controller
             $lead->policy_number_set_at = now();
         }
         
-        // Set assigned partner and timestamp if not already set
-        if (empty($lead->partner_set_at)) {
-            $lead->partner_id = $request->partner_id;
-            $lead->partner_set_at = now();
+        // Handle Pending status - unassign partner
+        if ($request->issuance_status === 'Pending') {
+            $lead->partner_id = null;
+            $lead->partner_set_at = null;
+            $lead->issuance_date = null; // Clear the issued date when marking as Pending
+        } else {
+            // Set assigned partner and timestamp if not already set (for non-Pending statuses)
+            if (empty($lead->partner_set_at)) {
+                $lead->partner_id = $request->partner_id;
+                $lead->partner_set_at = now();
+            }
         }
         
         if ($request->issuance_status === 'Issued') {

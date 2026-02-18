@@ -702,7 +702,7 @@ Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['a
 
 // Retention Officer Dashboard
 Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'])
-    ->middleware(['auth', 'role:Retention Officer|Super Admin|Co-ordinator|CEO'])
+    ->middleware(['auth', 'role:Retention Officer|Super Admin|Co-ordinator|CEO|Manager'])
     ->middleware('role.permission:retention,view')
     ->name('retention.dashboard');
 
