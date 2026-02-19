@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 {{-- File: resources/views/salary/records.blade.php --}}
 
 @extends('layouts.master')
@@ -51,7 +52,7 @@
                                                     <label class="form-label">Employee</label>
                                                     <select name="employee" class="form-select">
                                                         <option value="">All Employees</option>
-                                                        @foreach (\App\Models\User::role('Employee')->excludePartners()->orderBy('name')->get() as $emp)
+                                                        @foreach (\App\Models\User::role(Roles::EMPLOYEE)->excludePartners()->orderBy('name')->get() as $emp)
                                                             <option value="{{ $emp->id }}"
                                                                 {{ request('employee') == $emp->id ? 'selected' : '' }}>
                                                                 {{ $emp->name }}

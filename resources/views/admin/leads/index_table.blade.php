@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 <div class="card-body">
     <!-- Top Scrollbar -->
     <div class="top-scrollbar-wrapper" id="topScrollbarLeads">
@@ -20,7 +21,7 @@
                     <th>DOB</th>
                     <th>Gender</th>
                     <th>Smoker</th>
-                    @hasrole('Super Admin')
+                    @hasrole(Roles::SUPER_ADMIN)
                         <th>DL#</th>
                         <th>Height</th>
                         <th>Weight</th>
@@ -35,7 +36,7 @@
                     <th>Coverage</th>
                     <th>Premium</th>
                     <th>Beneficiaries (Name / Relation / DOB)</th>
-                    @hasrole('Super Admin')
+                    @hasrole(Roles::SUPER_ADMIN)
                         <th>Emergency Contact</th>
                         <th>Acc Verified By</th>
                         <th>Policy Type</th>
@@ -65,7 +66,7 @@
                                 <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @hasrole('Super Admin|Manager')
+                                @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER])
                                     <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
@@ -120,7 +121,7 @@
                                 <span class="badge bg-success">No</span>
                             @endif
                         </td>
-                        @hasrole('Super Admin')
+                        @hasrole(Roles::SUPER_ADMIN)
                             <td>{{ $lead->driving_license ?? '—' }}</td>
                             <td>{{ $lead->height ?? '—' }}</td>
                             <td>{{ $lead->weight ? $lead->weight . ' lbs' : '—' }}</td>
@@ -164,7 +165,7 @@
                                 —
                             @endif
                         </td>
-                        @hasrole('Super Admin')
+                        @hasrole(Roles::SUPER_ADMIN)
                             <td>{{ $lead->emergency_contact ?? '—' }}</td>
                             <td>{{ $lead->account_verified_by ?? '—' }}</td>
                             <td>{{ $lead->policy_type ?? '—' }}</td>

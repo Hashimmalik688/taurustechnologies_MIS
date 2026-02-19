@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 
 class FollowupController extends Controller
@@ -53,7 +54,7 @@ class FollowupController extends Controller
         $carriers = Lead::distinct()->pluck('carrier_name')->filter();
         
         // Get all employees who can be assigned for followup
-        $followupUsers = User::role('Employee')
+        $followupUsers = User::role(Roles::EMPLOYEE)
             ->orderBy('name')
             ->get(['id', 'name']);
         
@@ -168,7 +169,7 @@ class FollowupController extends Controller
         $lead = Lead::findOrFail($id);
         
         // Only the assigned followup person can update the status
-        if ($lead->assigned_followup_person != auth()->id() && !auth()->user()->hasAnyRole(['Super Admin', 'Manager', 'CEO', 'Co-ordinator'])) {
+        if ($lead->assigned_followup_person != auth()->id() && !auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::CEO, Roles::COORDINATOR])) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to update this followup status.'
@@ -197,7 +198,7 @@ class FollowupController extends Controller
         $lead = Lead::findOrFail($id);
         
         // Only the assigned bank verifier can update
-        if ($lead->assigned_bank_verifier != auth()->id() && !auth()->user()->hasAnyRole(['Super Admin', 'Manager', 'CEO', 'Co-ordinator'])) {
+        if ($lead->assigned_bank_verifier != auth()->id() && !auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::CEO, Roles::COORDINATOR])) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to update this bank verification.'
@@ -205,7 +206,7 @@ class FollowupController extends Controller
         }
         
         // Check if status is already set and user is just a bank verifier (not admin/manager)
-        if ($lead->bank_verification_status && !auth()->user()->hasAnyRole(['Super Admin', 'Manager', 'CEO', 'Co-ordinator'])) {
+        if ($lead->bank_verification_status && !auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::CEO, Roles::COORDINATOR])) {
             // Bank verifier can only update comment, not status once it's set
             $lead->bank_verification_comment = $request->bank_verification_comment;
         } else {

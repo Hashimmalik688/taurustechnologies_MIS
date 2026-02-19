@@ -29,6 +29,7 @@ return [
 
     // API Base URL
     'base_url' => env('ZOOM_API_URL', 'https://api.zoom.us/v2'),
+    'oauth_url' => env('ZOOM_OAUTH_URL', 'https://zoom.us/oauth/token'),
     'timeout' => env('ZOOM_API_TIMEOUT', 30),
 
     // Webhook Configuration

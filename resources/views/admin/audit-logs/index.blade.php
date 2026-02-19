@@ -4,22 +4,36 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-md-8">
-            <h1 class="h3">Audit Logs</h1>
+            <h1 class="h3">Account Switch Log</h1>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('audit-logs.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn btn-success">
-                <i class="fas fa-download"></i> Export CSV
+            <a href="{{ route('admin.audit-logs.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn btn-success">
+                <i class="bx bx-download me-1"></i> Export CSV
             </a>
         </div>
     </div>
 
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.account-switching-log') }}">
+                <i class="bx bx-transfer me-1"></i> Suspicious Devices
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ route('admin.audit-logs.index') }}">
+                <i class="bx bx-list-ul me-1"></i> All Activity Logs
+            </a>
+        </li>
+    </ul>
+
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-header">
-            <h5>Filters</h5>
+            <h5 class="mb-0"><i class="bx bx-filter me-1"></i> Filters</h5>
         </div>
         <div class="card-body">
-            <form method="GET" action="{{ route('audit-logs.index') }}" class="row g-3">
+            <form method="GET" action="{{ route('admin.audit-logs.index') }}" class="row g-3">
                 <div class="col-md-3">
                     <label for="action" class="form-label">Action</label>
                     <select name="action" id="action" class="form-select">
@@ -98,7 +112,7 @@
                             </td>
                             <td>{{ $log->created_at->format('M d, Y H:i:s') }}</td>
                             <td>
-                                <a href="{{ route('audit-logs.show', $log->id) }}" class="btn btn-sm btn-info" title="View Details">
+                                <a href="{{ route('admin.audit-logs.show', $log->id) }}" class="btn btn-sm btn-info" title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>

@@ -10,6 +10,7 @@ use App\Models\Lead;
 use App\Events\LeadCreated;
 use App\Events\SaleCreated;
 use App\Services\CommissionCalculationService;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -99,7 +100,7 @@ class LeadController extends Controller
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
         
         // Get Peregrine closer names for tagging
-        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
         return view('admin.leads.index_simple', compact('leads', 'peregrineClosers'));
     }
@@ -147,7 +148,7 @@ class LeadController extends Controller
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
         
         // Get Peregrine closer names for tagging
-        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
         return view('admin.leads.peregrine', compact('leads', 'peregrineClosers'));
     }
@@ -238,7 +239,7 @@ class LeadController extends Controller
         $statusColors = $this->getStatusColors();
         
         // Get Peregrine closer names for tagging
-        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
         return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers'));
     }
@@ -270,7 +271,7 @@ class LeadController extends Controller
             // Determine source_type based on user role
             $user = Auth::user();
             $sourceType = null;
-            if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
                 $sourceType = 'peregrine';
             }
 
@@ -316,7 +317,7 @@ class LeadController extends Controller
 
         // Mark lead as 'peregrine' if created by a peregrine team member
         $user = Auth::user();
-        if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+        if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
             $leadData['source_type'] = 'peregrine';
         }
 
@@ -873,11 +874,9 @@ class LeadController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'code']);
         
-        // Get all users for followup assignment dropdown except partners (Agent role users)
-        // Include all employees, closers, verifiers, QA, etc.
-        $followupUsers = \App\Models\User::whereDoesntHave('roles', function($query) {
-            $query->whereIn('name', ['Agent', 'Vendor', 'US Agent']);
-        })->orderBy('name')->get(['id', 'name']);
+        // Get all users for followup assignment dropdown
+        // Partners are managed separately in the Partner system
+        $followupUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
         return view('admin.issuance.index', compact('leads', 'carriers', 'partners', 'followupUsers'));
@@ -892,7 +891,7 @@ class LeadController extends Controller
         
         // Check if status has already been set (edit-once logic) - only Super Admin can change
         // Allow Pending status to bypass this check (for unassigning partner)
-        if (!empty($lead->issuance_date) && !auth()->user()->hasRole('Super Admin') && $request->issuance_status !== 'Pending') {
+        if (!empty($lead->issuance_date) && !auth()->user()->hasRole(Roles::SUPER_ADMIN) && $request->issuance_status !== 'Pending') {
             return back()->with('error', 'Issuance status has already been set and can only be changed by Super Admin.');
         }
         
@@ -917,7 +916,7 @@ class LeadController extends Controller
         
         // Check if policy number has already been set (edit-once logic)
         if (!empty($lead->policy_number_set_at) && $request->issued_policy_number != $lead->issued_policy_number) {
-            if (!auth()->user()->hasRole('Super Admin')) {
+            if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
                 return back()->with('error', 'Policy number has already been set and cannot be changed.');
             }
         }
@@ -925,7 +924,7 @@ class LeadController extends Controller
         // Check if assigned partner has already been set (edit-once logic)
         // Allow Pending status to bypass this check (for unassigning partner)
         if (!empty($lead->partner_set_at) && $request->partner_id != $lead->partner_id && $request->issuance_status !== 'Pending') {
-            if (!auth()->user()->hasRole('Super Admin')) {
+            if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
                 return back()->with('error', 'Assigned partner has already been set and cannot be changed.');
             }
         }
@@ -1211,7 +1210,7 @@ class LeadController extends Controller
     public function resetQaStatus(Request $request, $id)
     {
         // Check if user is Super Admin
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only Super Admin can reset QA status.'
@@ -1237,7 +1236,7 @@ class LeadController extends Controller
     public function resetManagerStatus(Request $request, $id)
     {
         // Check if user is Super Admin
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only Super Admin can reset Manager status.'
@@ -1269,7 +1268,7 @@ class LeadController extends Controller
     public function resetIssuanceStatus(Request $request, $id)
     {
         // Check if user is Super Admin
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only Super Admin can reset Issuance status.'
@@ -1301,7 +1300,7 @@ class LeadController extends Controller
     public function unlockIssuanceField(Request $request, $id)
     {
         // Check if user is Super Admin
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only Super Admin can unlock issuance fields.'
@@ -1338,7 +1337,7 @@ class LeadController extends Controller
      */
     public function recalculateCommission($id)
     {
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Only Super Admin can recalculate commission.'
@@ -1413,7 +1412,7 @@ class LeadController extends Controller
      */
     public function bulkRecalculateCommission()
     {
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole(Roles::SUPER_ADMIN)) {
             return redirect()->back()->with('error', 'Only Super Admin can recalculate commissions.');
         }
 

@@ -9,18 +9,30 @@ use Illuminate\Support\Facades\Http;
 
 class IpDetectionService
 {
+    /** External services used to detect the server's public IP */
+    public const PUBLIC_IP_SERVICES = [
+        'https://api.ipify.org',
+        'https://icanhazip.com',
+        'https://ipinfo.io/ip',
+        'https://checkip.amazonaws.com',
+    ];
+
+    /** RFC 1918 / link-local private address ranges */
+    public const PRIVATE_RANGES = [
+        '127.0.0.0/8',    // Localhost
+        '10.0.0.0/8',     // Private A
+        '172.16.0.0/12',  // Private B
+        '192.168.0.0/16', // Private C
+        '169.254.0.0/16', // Link-local
+    ];
+
     /**
      * Get the real public IP address (not localhost)
      */
     public function getRealPublicIp()
     {
         // Try multiple services to get public IP
-        $services = [
-            'https://api.ipify.org',
-            'https://icanhazip.com',
-            'https://ipinfo.io/ip',
-            'https://checkip.amazonaws.com',
-        ];
+        $services = self::PUBLIC_IP_SERVICES;
 
         foreach ($services as $service) {
             try {
@@ -60,13 +72,7 @@ class IpDetectionService
      */
     public function isLocalhost($ip)
     {
-        $privateRanges = [
-            '127.0.0.0/8',    // Localhost
-            '10.0.0.0/8',     // Private A
-            '172.16.0.0/12',  // Private B
-            '192.168.0.0/16', // Private C
-            '169.254.0.0/16', // Link-local
-        ];
+        $privateRanges = self::PRIVATE_RANGES;
 
         foreach ($privateRanges as $range) {
             if ($this->ipInRange($ip, $range)) {

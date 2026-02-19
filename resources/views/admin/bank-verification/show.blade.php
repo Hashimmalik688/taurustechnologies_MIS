@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -287,7 +288,7 @@
                                 <button type="submit" name="bank_verification_status" value="UnIssued" class="btn btn-danger btn-lg">
                                     <i class="mdi mdi-close-circle me-2"></i>UnIssued
                                 </button>
-                                @if(auth()->user()->hasRole('Super Admin') && $lead->bank_verification_status !== null)
+                                @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->bank_verification_status !== null)
                                     <button type="button" class="btn btn-info btn-lg reset-manager-status-banking" data-lead-id="{{ $lead->id }}" data-bs-dismiss="modal">
                                         <i class="mdi mdi-undo me-2"></i>Reset Manager Status
                                     </button>

@@ -19,6 +19,9 @@
     <!-- Include head CSS -->
     <?php echo $__env->make('layouts.head-css', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     
+    <!-- Device Fingerprinting -->
+    <script src="<?php echo e(URL::asset('js/device-fingerprint.js')); ?>"></script>
+    
     <!-- Page specific CSS -->
     <?php echo $__env->yieldContent('css'); ?>
 </head>

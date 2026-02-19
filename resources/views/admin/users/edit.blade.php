@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -126,81 +127,66 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="role-super-admin" 
-                                                    {{ in_array('Super Admin', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-super-admin">Super Admin</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::SUPER_ADMIN }}" id="role-super-admin" 
+                                                    {{ in_array(Roles::SUPER_ADMIN, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-super-admin">{{ Roles::SUPER_ADMIN }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="role-manager"
-                                                    {{ in_array('Manager', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-manager">Manager</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::MANAGER }}" id="role-manager"
+                                                    {{ in_array(Roles::MANAGER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-manager">{{ Roles::MANAGER }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="role-hr"
-                                                    {{ in_array('HR', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-hr">HR</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HR }}" id="role-hr"
+                                                    {{ in_array(Roles::HR, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hr">{{ Roles::HR }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="role-employee"
-                                                    {{ in_array('Employee', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-employee">Employee</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::EMPLOYEE }}" id="role-employee"
+                                                    {{ in_array(Roles::EMPLOYEE, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-employee">{{ Roles::EMPLOYEE }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Co-ordinator" id="role-co-ordinator"
-                                                    {{ in_array('Co-ordinator', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-co-ordinator">Co-ordinator</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::COORDINATOR }}" id="role-co-ordinator"
+                                                    {{ in_array(Roles::COORDINATOR, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-co-ordinator">{{ Roles::COORDINATOR }}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="role-agent"
-                                                    {{ in_array('Agent', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-agent">Agent</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="role-vendor"
-                                                    {{ in_array('Vendor', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-vendor">Vendor</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="role-qa"
-                                                    {{ in_array('QA', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-qa">QA</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="role-trainer"
-                                                    {{ in_array('Trainer', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-trainer">Trainer</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::QA }}" id="role-qa"
+                                                    {{ in_array(Roles::QA, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-qa">{{ Roles::QA }}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label text-primary">Peregrine Team</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Closer" id="role-peregrine-closer"
-                                                    {{ in_array('Peregrine Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-peregrine-closer">Peregrine Closer</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="role-peregrine-closer"
+                                                    {{ in_array(Roles::PEREGRINE_CLOSER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-peregrine-closer">{{ Roles::PEREGRINE_CLOSER }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Validator" id="role-peregrine-validator"
-                                                    {{ in_array('Peregrine Validator', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-peregrine-validator">Peregrine Validator</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_VALIDATOR }}" id="role-peregrine-validator"
+                                                    {{ in_array(Roles::PEREGRINE_VALIDATOR, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-peregrine-validator">{{ Roles::PEREGRINE_VALIDATOR }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="role-verifier"
-                                                    {{ in_array('Verifier', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-verifier">Verifier</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="role-verifier"
+                                                    {{ in_array(Roles::VERIFIER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-verifier">{{ Roles::VERIFIER }}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="role-ravens-closer"
-                                                    {{ in_array('Ravens Closer', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-ravens-closer">Ravens Closer</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RAVENS_CLOSER }}" id="role-ravens-closer"
+                                                    {{ in_array(Roles::RAVENS_CLOSER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-ravens-closer">{{ Roles::RAVENS_CLOSER }}</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="role-retention-officer"
-                                                    {{ in_array('Retention Officer', old('roles', $currentRoles)) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="role-retention-officer">Retention Officer</label>
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RETENTION_OFFICER }}" id="role-retention-officer"
+                                                    {{ in_array(Roles::RETENTION_OFFICER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-retention-officer">{{ Roles::RETENTION_OFFICER }}</label>
                                             </div>
                                         </div>
                                     </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -17,7 +18,7 @@ class VerifierController extends Controller
         }
 
         // Fetch Peregrine closers (by role or department)
-        $closers = User::role('Peregrine Closer')
+        $closers = User::role(Roles::PEREGRINE_CLOSER)
             ->orWhere('department', 'peregrine')
             ->orderBy('name')
             ->get(['id', 'name']);

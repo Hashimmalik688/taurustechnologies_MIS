@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Announcement;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Auth\Access\Response;
 
 class AnnouncementPolicy
@@ -13,7 +14,7 @@ class AnnouncementPolicy
      */
     private function isAuthorized(User $user): bool
     {
-        return $user->hasRole(['Super Admin', 'Co-ordinator']);
+        return $user->hasRole([Roles::SUPER_ADMIN, Roles::COORDINATOR]);
     }
 
     /**

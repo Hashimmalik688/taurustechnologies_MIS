@@ -84,7 +84,18 @@
         fullFingerprint: `${deviceFingerprint}_${deviceId}`
     };
 
-    // Auto-attach to all AJAX requests
+    // Store in cookies so the server can read them on ALL requests
+    // (form POSTs, page loads, redirects - not just AJAX)
+    function setCookie(name, value, days) {
+        const maxAge = days * 24 * 60 * 60;
+        document.cookie = name + '=' + encodeURIComponent(value) + ';path=/;max-age=' + maxAge + ';SameSite=Lax';
+    }
+
+    setCookie('device_fingerprint', deviceFingerprint, 365);
+    setCookie('device_id', deviceId, 365);
+    setCookie('device_name', deviceName, 365);
+
+    // Auto-attach to all AJAX requests (headers for backwards compatibility)
     if (window.axios) {
         axios.interceptors.request.use(config => {
             config.headers['X-Device-Fingerprint'] = window.deviceInfo.fingerprint;

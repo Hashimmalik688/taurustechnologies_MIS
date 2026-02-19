@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title', $ticket->ticket_code . ' - ' . $ticket->subject)
@@ -94,7 +95,7 @@
                 <div class="card-body">
                     <h6 class="card-title">Actions</h6>
                     <div class="d-grid gap-2">
-                        @if($ticket->created_by === auth()->id() || auth()->user()->hasRole(['Super Admin', 'CEO']))
+                        @if($ticket->created_by === auth()->id() || auth()->user()->hasRole([Roles::SUPER_ADMIN, Roles::CEO]))
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal">Edit Ticket</button>
                         @endif
                         
@@ -108,7 +109,7 @@
                             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#closeModal">Close Ticket</button>
                         @endif
                         
-                        @if($ticket->created_by === auth()->id() || auth()->user()->hasRole(['Super Admin', 'CEO']))
+                        @if($ticket->created_by === auth()->id() || auth()->user()->hasRole([Roles::SUPER_ADMIN, Roles::CEO]))
                             <form action="{{ route('pabs.tickets.destroy', $ticket) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
                                 @csrf
                                 @method('DELETE')

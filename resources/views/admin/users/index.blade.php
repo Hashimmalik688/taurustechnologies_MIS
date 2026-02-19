@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -95,13 +96,14 @@
                                         @endforeach
                                     </td>
                                     <td>
-                                        @hasrole('Super Admin|Manager|HR')
-                                            @if (!$user->roles->contains('name', 'Super Admin'))
-                                                <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target="#edit-user-{{ $user->id }}"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                        @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::HR])
+                                            <a href="#" data-bs-toggle="modal"
+                                                data-bs-target="#edit-user-{{ $user->id }}"
+                                                class="btn btn-primary btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {{-- Prevent deleting yourself or the last Super Admin --}}
+                                            @if ($user->id !== auth()->id())
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                     onclick="confirmDelete({{ $user->id }})">
                                                     <i class="fas fa-trash"></i>
@@ -169,82 +171,67 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="modal-role-super-admin-{{ $user->id }}" 
-                                                {{ in_array('Super Admin', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::SUPER_ADMIN }}" id="modal-role-super-admin-{{ $user->id }}" 
+                                                {{ in_array(Roles::SUPER_ADMIN, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-super-admin-{{ $user->id }}">Super Admin</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="modal-role-manager-{{ $user->id }}"
-                                                {{ in_array('Manager', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::MANAGER }}" id="modal-role-manager-{{ $user->id }}"
+                                                {{ in_array(Roles::MANAGER, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-manager-{{ $user->id }}">Manager</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="modal-role-hr-{{ $user->id }}"
-                                                {{ in_array('HR', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HR }}" id="modal-role-hr-{{ $user->id }}"
+                                                {{ in_array(Roles::HR, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-hr-{{ $user->id }}">HR</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="modal-role-employee-{{ $user->id }}"
-                                                {{ in_array('Employee', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::EMPLOYEE }}" id="modal-role-employee-{{ $user->id }}"
+                                                {{ in_array(Roles::EMPLOYEE, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-employee-{{ $user->id }}">Employee</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Co-ordinator" id="modal-role-co-ordinator-{{ $user->id }}"
-                                                {{ in_array('Co-ordinator', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::COORDINATOR }}" id="modal-role-co-ordinator-{{ $user->id }}"
+                                                {{ in_array(Roles::COORDINATOR, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-co-ordinator-{{ $user->id }}">Co-ordinator</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="modal-role-agent-{{ $user->id }}"
-                                                {{ in_array('Agent', $currentRoles) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="modal-role-agent-{{ $user->id }}">Agent</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="modal-role-vendor-{{ $user->id }}"
-                                                {{ in_array('Vendor', $currentRoles) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="modal-role-vendor-{{ $user->id }}">Vendor</label>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-primary fw-bold">Peregrine Team</small>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Closer" id="modal-role-peregrine-closer-{{ $user->id }}"
-                                                {{ in_array('Peregrine Closer', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="modal-role-peregrine-closer-{{ $user->id }}"
+                                                {{ in_array(Roles::PEREGRINE_CLOSER, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-peregrine-closer-{{ $user->id }}">Peregrine Closer</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Validator" id="modal-role-peregrine-validator-{{ $user->id }}"
-                                                {{ in_array('Peregrine Validator', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_VALIDATOR }}" id="modal-role-peregrine-validator-{{ $user->id }}"
+                                                {{ in_array(Roles::PEREGRINE_VALIDATOR, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-peregrine-validator-{{ $user->id }}">Peregrine Validator</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="modal-role-verifier-{{ $user->id }}"
-                                                {{ in_array('Verifier', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="modal-role-verifier-{{ $user->id }}"
+                                                {{ in_array(Roles::VERIFIER, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-verifier-{{ $user->id }}">Verifier</label>
                                         </div>
                                         <hr class="my-2">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="modal-role-ravens-closer-{{ $user->id }}"
-                                                {{ in_array('Ravens Closer', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RAVENS_CLOSER }}" id="modal-role-ravens-closer-{{ $user->id }}"
+                                                {{ in_array(Roles::RAVENS_CLOSER, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-ravens-closer-{{ $user->id }}">Ravens Closer</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="modal-role-retention-officer-{{ $user->id }}"
-                                                {{ in_array('Retention Officer', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RETENTION_OFFICER }}" id="modal-role-retention-officer-{{ $user->id }}"
+                                                {{ in_array(Roles::RETENTION_OFFICER, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-retention-officer-{{ $user->id }}">Retention Officer</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="modal-role-trainer-{{ $user->id }}"
-                                                {{ in_array('Trainer', $currentRoles) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="modal-role-trainer-{{ $user->id }}">Trainer</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="modal-role-qa-{{ $user->id }}"
-                                                {{ in_array('QA', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::QA }}" id="modal-role-qa-{{ $user->id }}"
+                                                {{ in_array(Roles::QA, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-qa-{{ $user->id }}">QA</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="roles[]" value="CEO" id="modal-role-ceo-{{ $user->id }}"
-                                                {{ in_array('CEO', $currentRoles) ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::CEO }}" id="modal-role-ceo-{{ $user->id }}"
+                                                {{ in_array(Roles::CEO, $currentRoles) ? 'checked' : '' }}>
                                             <label class="form-check-label" for="modal-role-ceo-{{ $user->id }}">CEO</label>
                                         </div>
                                     </div>

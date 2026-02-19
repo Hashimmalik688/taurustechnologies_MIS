@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -25,7 +26,7 @@ class PeregrineController extends Controller
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
         
         // Get validators for dropdown (only Managers and Peregrine Validators)
-        $validators = User::role(['Peregrine Validator', 'Manager'])
+        $validators = User::role([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])
             ->orderBy('name')
             ->get(['id', 'name']);
         
@@ -91,7 +92,7 @@ class PeregrineController extends Controller
             ->findOrFail($id);
 
         // Get validators for dropdown (only Managers and Peregrine Validators)
-        $validators = User::role(['Peregrine Validator', 'Manager'])
+        $validators = User::role([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])
             ->orderBy('name')
             ->get(['id', 'name']);
 

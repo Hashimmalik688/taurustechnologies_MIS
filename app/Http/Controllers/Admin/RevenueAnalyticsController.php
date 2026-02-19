@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 
 class RevenueAnalyticsController extends Controller
@@ -94,7 +95,7 @@ class RevenueAnalyticsController extends Controller
             });
 
         // Get Verifier Stats
-        $verifiers = User::role('Verifier')->get();
+        $verifiers = User::role(Roles::VERIFIER)->get();
         $verifier_stats = [];
         
         foreach ($verifiers as $verifier) {

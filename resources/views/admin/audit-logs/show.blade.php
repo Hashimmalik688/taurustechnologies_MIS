@@ -7,7 +7,7 @@
             <h1 class="h3">Audit Log Details</h1>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('audit-logs.index') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.audit-logs.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to Logs
             </a>
         </div>
@@ -140,12 +140,12 @@
                     <h5>Navigation</h5>
                 </div>
                 <div class="card-body">
-                    <a href="{{ route('audit-logs.index', ['action' => $auditLog->action]) }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                    <a href="{{ route('admin.audit-logs.index', ['action' => $auditLog->action]) }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
                         <i class="fas fa-filter"></i> Show All "{{ ucfirst(str_replace('_', ' ', $auditLog->action)) }}"
                     </a>
 
                     @if ($auditLog->user)
-                        <a href="{{ route('audit-logs.index', ['user_id' => $auditLog->user_id]) }}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{{ route('admin.audit-logs.index', ['user_id' => $auditLog->user_id]) }}" class="btn btn-sm btn-outline-primary w-100">
                             <i class="fas fa-user"></i> Show All from {{ $auditLog->user->email }}
                         </a>
                     @endif

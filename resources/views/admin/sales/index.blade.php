@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -164,7 +165,7 @@
                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#manualSaleModal">
                             <i class="bx bx-plus-circle me-1"></i> Manual Entry
                         </button>
-                        @if(!auth()->user()->hasRole('QA'))
+                        @if(!auth()->user()->hasRole(Roles::QA))
                             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importOldDataModal">
                                 <i class="bx bx-upload me-1"></i> Import Data
                             </button>
@@ -235,7 +236,7 @@
                     <div class="table-header-fixed" id="tableHeader">
                         <table class="table table-bordered table-sm mb-0" style="table-layout: fixed;">
                             <colgroup>
-                                @if(auth()->user()->hasRole('QA'))
+                                @if(auth()->user()->hasRole(Roles::QA))
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
                                     <col style="min-width:160px; width:160px;">
@@ -267,7 +268,7 @@
                             </colgroup>
                             <thead class="table-light">
                                 <tr>
-                                    @if(auth()->user()->hasRole('QA'))
+                                    @if(auth()->user()->hasRole(Roles::QA))
                                         {{-- QA View: Limited columns --}}
                                         <th>Client Name</th>
                                         <th>Phone</th>
@@ -307,7 +308,7 @@
                     <div class="table-responsive" id="tableWrapper">
                         <table class="table table-striped table-bordered table-hover table-sm align-middle" id="salesTable" style="table-layout: fixed;">
                             <colgroup>
-                                @if(auth()->user()->hasRole('QA'))
+                                @if(auth()->user()->hasRole(Roles::QA))
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
                                     <col style="min-width:160px; width:160px;">
@@ -340,7 +341,7 @@
                             <tbody>
                                 @forelse($leads as $lead)
                                     <tr>
-                                        @if(auth()->user()->hasRole('QA'))
+                                        @if(auth()->user()->hasRole(Roles::QA))
                                             {{-- QA View: Limited data --}}
                                             <td><strong>{{ $lead->cn_name }}</strong></td>
                                             <td>{{ $lead->phone_number }}</td>
@@ -551,7 +552,7 @@
                                                 <button class="btn btn-sm btn-success mt-1 save-manager-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
-                                                @if(auth()->user()->hasRole('Super Admin') && $lead->manager_status !== 'pending')
+                                                @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->manager_status !== 'pending')
                                                     <button class="btn btn-sm btn-warning mt-1 reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
                                                         <i class="bx bx-undo"></i> Reset
                                                     </button>
@@ -577,7 +578,7 @@
                                         @endif
                                     </tr>
 
-                                    @if(!auth()->user()->hasRole('QA'))
+                                    @if(!auth()->user()->hasRole(Roles::QA))
                                         <!-- Delete Modal -->
                                         <div class="modal fade" id="delete-{{ $lead->id }}" tabindex="-1">
                                             <div class="modal-dialog modal-dialog-centered">
@@ -603,7 +604,7 @@
                                     @endif
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->hasRole('QA') ? '6' : '15' }}" class="text-center py-5 text-muted">
+                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '6' : '15' }}" class="text-center py-5 text-muted">
                                             <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
                                             <p class="mb-0">No sales data available</p>
                                         </td>

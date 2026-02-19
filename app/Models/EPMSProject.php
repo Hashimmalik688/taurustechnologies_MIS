@@ -200,11 +200,16 @@ class EPMSProject extends Model
     }
 
     /**
+     * Default kanban board columns
+     */
+    public const KANBAN_COLUMNS = ['backlog', 'todo', 'in-progress', 'review', 'testing', 'done'];
+
+    /**
      * Get kanban columns with tasks
      */
     public function getKanbanBoardAttribute(): array
     {
-        $columns = ['backlog', 'todo', 'in-progress', 'review', 'testing', 'done'];
+        $columns = self::KANBAN_COLUMNS;
         $board = [];
 
         foreach ($columns as $col) {

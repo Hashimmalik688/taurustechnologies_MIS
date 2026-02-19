@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -305,7 +306,7 @@
                     <div class="chat-sidebar-header">
                         <h5>Communities</h5>
                         <div class="btn-group">
-                            @if(Auth::user()->hasRole(['Manager', 'Super Admin', 'Co-ordinator']))
+                            @if(Auth::user()->hasRole([Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                                 <button class="btn" data-bs-toggle="modal" data-bs-target="#newCommunityModal" title="Create community">
                                     <i class="bx bx-plus"></i>
                                 </button>
@@ -806,7 +807,7 @@ if (typeof window.userRoles === 'undefined') {
     window.userRoles = {!! json_encode(auth()->user()->roles->pluck('name')->toArray()) !!};
 }
 if (typeof window.isSuperAdmin === 'undefined') {
-    window.isSuperAdmin = window.userRoles.includes('Super Admin') || window.userRoles.includes('CEO');
+    window.isSuperAdmin = window.userRoles.includes('{{ Roles::SUPER_ADMIN }}') || window.userRoles.includes('{{ Roles::CEO }}');
 }
 if (typeof window.currentConversationId === 'undefined') {
     window.currentConversationId = null;

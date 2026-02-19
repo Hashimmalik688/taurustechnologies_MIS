@@ -1,0 +1,29 @@
+dashboard (Company Overview) - ACTIVE
+pabs-tickets (PABS Tickets) - ACTIVE
+petty-cash (Petty Cash) - ACTIVE
+general-ledger (General Ledger) - ACTIVE
+chart-of-accounts (Chart of Accounts) - ACTIVE
+payroll (Payroll) - ACTIVE
+attendance (Attendance) - ACTIVE
+holidays (Public Holidays) - ACTIVE
+ems (E.M.S) - ACTIVE
+dock (Dock Management) - ACTIVE
+partners (Partner Management) - ACTIVE
+carriers (Insurance Cluster) - ACTIVE
+peregrine (Peregrine Operations) - ACTIVE
+epms (Project Management) - ACTIVE
+ravens (Ravens Operations) - ACTIVE
+retention (Retention Management) - ACTIVE
+chargebacks (Chargebacks) - ACTIVE
+sales (Sales Records) - ACTIVE
+leads (Raven Leads) - ACTIVE
+qa-review (QA Review) - ACTIVE
+issuance (Policy Submission) - ACTIVE
+revenue-analytics (Revenue Analytics) - ACTIVE
+live-analytics (Live Analytics) - ACTIVE
+leads-peregrine (Peregrine Leads) - ACTIVE
+bank-verification (Bank Verification) - ACTIVE
+settings (System Settings) - ACTIVE
+duplicate-checker (Duplicate Checker) - ACTIVE
+account-switch-log (Account Switch Log) - ACTIVE
+users (Users MGMT) - ACTIVE

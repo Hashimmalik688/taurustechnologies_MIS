@@ -98,11 +98,6 @@ class PermissionService
      */
     protected function calculatePermission(User $user, string $moduleSlug): string
     {
-        // Super Admin always has full access to everything
-        if ($user->hasRole('Super Admin')) {
-            return 'full';
-        }
-
         // Get module
         $module = Module::where('slug', $moduleSlug)->where('is_active', true)->first();
         if (!$module) {
@@ -269,8 +264,8 @@ class PermissionService
      */
     public function clearUserPermissionCache(int $userId): void
     {
-        // Get all module slugs
-        $modules = Module::pluck('slug');
+        // Get all active module slugs
+        $modules = Module::where('is_active', true)->pluck('slug');
 
         foreach ($modules as $moduleSlug) {
             Cache::forget("user_permission_{$userId}_{$moduleSlug}");
@@ -285,11 +280,23 @@ class PermissionService
      */
     public function clearRolePermissionCache(int $roleId): void
     {
-        // Get all users with this role
-        $users = User::role(\Spatie\Permission\Models\Role::find($roleId)->name)->get();
+        // Get the role safely
+        $role = \Spatie\Permission\Models\Role::find($roleId);
+        
+        if (!$role) {
+            Log::warning("Attempted to clear cache for non-existent role: {$roleId}");
+            return;
+        }
 
-        foreach ($users as $user) {
-            $this->clearUserPermissionCache($user->id);
+        // Get all users with this role
+        try {
+            $users = User::role($role->name)->get();
+
+            foreach ($users as $user) {
+                $this->clearUserPermissionCache($user->id);
+            }
+        } catch (\Exception $e) {
+            Log::error("Error clearing permission cache for role {$roleId}: " . $e->getMessage());
         }
     }
 

@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title', 'Employee Management Sheet (E.M.S)')
@@ -104,14 +105,12 @@
                     <p class="text-muted">Centralized employee records, passport images, and data management</p>
                 </div>
                 <div class="d-flex gap-2">
-                    @unlessrole('Trainer')
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
                             <i class="bx bx-plus me-1"></i> Add Employee
                         </button>
                         <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importEmployeeModal">
                             <i class="bx bx-upload me-1"></i> Import CSV
                         </button>
-                    @endunlessrole
                     <a href="{{ route('employee.export') }}" class="btn btn-success">
                         <i class="bx bx-download me-1"></i> Export CSV
                     </a>
@@ -259,14 +258,12 @@
                                 @endif
                             </td>
                             <td>
-                                @unlessrole('Trainer')
                                     <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ $emp->id }}" title="Edit Employee">
                                         <i class="bx bx-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-danger" onclick="deleteEmployee({{ $emp->id }}, '{{ $emp->name }}');" title="Delete Employee">
                                         <i class="bx bx-trash"></i>
                                     </button>
-                                @endunlessrole
                             </td>
                         </tr>
                         <!-- Edit Modal (one per employee) -->
@@ -414,7 +411,6 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @unlessrole('Trainer')
                                         <div class="d-flex gap-1">
                                             <form method="POST" action="{{ route('employee.restore', $emp->id) }}" class="d-inline" onsubmit="return confirm('Restore {{ $emp->name }} back to active status?');">
                                                 @csrf
@@ -426,7 +422,6 @@
                                                 <i class="bx bx-trash"></i>
                                             </button>
                                         </div>
-                                        @endunlessrole
                                     </td>
                                 </tr>
                                 @empty

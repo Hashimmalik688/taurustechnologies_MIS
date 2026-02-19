@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Lead;
 use App\Repositories\Contracts\LeadRepositoryInterface;
+use App\Support\Roles;
 
 class LeadRepository implements LeadRepositoryInterface
 {
@@ -43,7 +44,7 @@ class LeadRepository implements LeadRepositoryInterface
         // Mark as peregrine if user has peregrine role
         if (!isset($leadData['source_type']) && auth()->check()) {
             $user = auth()->user();
-            if ($user->hasAnyRole(['Verifier', 'Peregrine Closer', 'Peregrine Validator'])) {
+            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
                 $leadData['source_type'] = 'peregrine';
             }
         }

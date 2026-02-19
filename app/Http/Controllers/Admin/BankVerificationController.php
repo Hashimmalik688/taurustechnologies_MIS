@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 
 class BankVerificationController extends Controller
@@ -62,7 +63,7 @@ class BankVerificationController extends Controller
         $unverified_count = (int) ($bvAgg->unverified_count ?? 0);
 
         // Get users who can be assigned for bank verification
-        $bankVerifiers = User::role(['Employee', 'Manager', 'Co-ordinator'])
+        $bankVerifiers = User::role([Roles::EMPLOYEE, Roles::MANAGER, Roles::COORDINATOR])
             ->orderBy('name')
             ->get(['id', 'name']);
 

@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 <!-- ========== Left Sidebar Start ========== -->
 <div id="sidebar">
     <!-- Logo -->
@@ -19,286 +20,230 @@
     <!-- Menu -->
     <nav class="sidebar-menu">
         {{-- RETENTION OFFICER --}}
-        @hasrole('Retention Officer')
-            <a href="{{ route('retention.dashboard') }}" class="menu-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
-                <i class="bx bx-home-circle"></i>
-                <span class="menu-text">Company Overview</span>
-            </a>
+        @hasrole(Roles::RETENTION_OFFICER)
+            @canViewModule('dashboard')
+                <a href="{{ route('retention.dashboard') }}" class="menu-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
+                    <i class="bx bx-home-circle"></i>
+                    <span class="menu-text">Company Overview</span>
+                </a>
+            @endcanViewModule
 
-            <a href="{{ route('retention.index') }}" class="menu-item {{ Request::is('retention') || Request::is('retention/*') ? 'active' : '' }}">
-                <i class="bx bx-refresh"></i>
-                <span class="menu-text">Retention Management</span>
-            </a>
-        @endhasrole
-
-        {{-- TRAINER --}}
-        @hasrole('Trainer')
-            <a href="{{ route('employee.ems') }}" class="menu-item {{ Request::is('ems*') ? 'active' : '' }}">
-                <i class="bx bx-id-card"></i>
-                <span class="menu-text">E.M.S</span>
-            </a>
+            @canViewModule('retention')
+                <a href="{{ route('retention.index') }}" class="menu-item {{ Request::is('retention') || Request::is('retention/*') ? 'active' : '' }}">
+                    <i class="bx bx-refresh"></i>
+                    <span class="menu-text">Retention Management</span>
+                </a>
+            @endcanViewModule
         @endhasrole
 
         {{-- MAIN MENU (NON-RESTRICTED ROLES) --}}
-        @unlessrole('Verifier|Peregrine Closer|Peregrine Validator|Employee|Ravens Closer|Retention Officer|QA|HR')
-            @hasrole('Employee')
+        @unlessrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::RETENTION_OFFICER, Roles::QA, Roles::HR])
+            @hasrole(Roles::EMPLOYEE)
                 <!-- Employee only sees COMMUNICATION section below -->
-            @elsehasrole('Ravens Closer')
+            @elsehasrole(Roles::RAVENS_CLOSER)
                 <!-- Ravens Closer sees same as Employee - attendance and chat only -->
-            @elsehasrole('QA')
+            @elsehasrole(Roles::QA)
                 <!-- QA only sees QA Review and COMMUNICATION section below -->
-            @elsehasrole('HR')
+            @elsehasrole(Roles::HR)
                 <!-- HR only sees Dock, Attendance, and Public Holidays -->
-            @elsehasrole('Co-ordinator')
-                <a href="{{ route('root') }}" class="menu-item {{ Request::is('/') ? 'active' : '' }}">
-                    <i class="bx bx-home-circle"></i>
-                    <span class="menu-text">Company Overview</span>
-                </a>
-
-                <a href="{{ route('followup.my-followups') }}" class="menu-item {{ Request::is('followup*') ? 'active' : '' }}">
-                    <i class="bx bx-task"></i>
-                    <span class="menu-text">My Followup & Bank Verification</span>
-                </a>
-
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdownCoord')">
-                    <i class="bx bx-briefcase-alt"></i>
-                    <span class="menu-text">Sales Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="misDropdownCoord">
-                    @hasanyrole('QA|Super Admin|Manager|Co-ordinator|CEO')
-                        <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
-                            <i class="bx bx-check-circle"></i>
-                            <span class="menu-text">QA Review</span>
-                        </a>
-                    @endhasanyrole
-
-                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
-
-                    <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
-                        <i class="bx bx-send"></i>
-                        <span class="menu-text">Policy Submission</span>
-                    </a>
-
-                    <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
-                        <i class="bx bx-check-shield"></i>
-                        <span class="menu-text">Bank Verification</span>
-                    </a>
-
-                    <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
-                        <i class="bx bx-line-chart"></i>
-                        <span class="menu-text">Revenue Analytics</span>
-                    </a>
-                    @hasanyrole('Super Admin|Manager|Co-ordinator|CEO')
-                        <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
-                            <i class="bx bx-line-chart"></i>
-                            <span class="menu-text">Live Analytics</span>
-                        </a>
-                    @endhasanyrole
-                </div>
-
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdownCoord')">
-                    <i class="bx bx-refresh"></i>
-                    <span class="menu-text">Retention & Chargebacks</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="retentionDropdownCoord">
-                    <a href="{{ route('retention.dashboard') }}" class="dropdown-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
-                        <i class="bx bx-tachometer"></i>
-                        <span class="menu-text">Retention Dashboard</span>
-                    </a>
-
-                    <a href="{{ route('retention.index') }}" class="dropdown-item {{ Request::is('retention') && !Request::is('retention-dashboard*') && !Request::is('retention/incomplete*') ? 'active' : '' }}">
-                        <i class="bx bx-user-check"></i>
-                        <span class="menu-text">Manage Retention</span>
-                    </a>
-
-                    <a href="{{ route('chargebacks.index') }}" class="dropdown-item {{ Request::is('chargebacks*') ? 'active' : '' }}">
-                        <i class="bx bx-error-circle"></i>
-                        <span class="menu-text">Chargebacks</span>
-                    </a>
-                </div>
             @else
-                <a href="{{ route('root') }}" class="menu-item {{ Request::is('/') ? 'active' : '' }}">
-                    <i class="bx bx-home-circle"></i>
-                    <span class="menu-text">Company Overview</span>
-                </a>
+                @canViewModule('dashboard')
+                    <a href="{{ route('dashboard') }}" class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-home-circle"></i>
+                        <span class="menu-text">Company Overview</span>
+                    </a>
+                @endcanViewModule
 
-                @hasanyrole('Super Admin|CEO|Employee|Agent|Co-ordinator|Manager|Trainer|Ravens Closer|Peregrine Closer|Peregrine Validator|Verifier|QA|Retention Officer|HR')
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'quickActionsDropdown')">
-                        <i class="bx bx-bolt-circle"></i>
-                        <span class="menu-text">Quick Actions</span>
+                @canViewModule('sales')
+                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
+                        <i class="bx bx-briefcase-alt"></i>
+                        <span class="menu-text">Sales Operations</span>
                         <i class="bx bx-chevron-down dropdown-icon"></i>
                     </a>
 
-                    <div class="menu-dropdown" id="quickActionsDropdown">
-                        <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
-                            <i class="bx bx-task"></i>
-                            <span class="menu-text">My Followup & Bank Verification</span>
+                    <div class="menu-dropdown" id="misDropdown">
+                        @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
+                            @canViewModule('leads-peregrine')
+                                <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
+                                    <i class="bx bx-user-voice"></i>
+                                    <span class="menu-text">Peregrine Leads</span>
+                                </a>
+                            @endcanViewModule
+
+                            @canViewModule('leads')
+                                <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
+                                    <i class="bx bx-briefcase"></i>
+                                    <span class="menu-text">Raven Leads</span>
+                                </a>
+                            @endcanViewModule
+                        @endhasanyrole
+
+                        @hasanyrole([Roles::QA, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
+                            @canViewModule('qa-review')
+                                <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
+                                    <i class="bx bx-check-circle"></i>
+                                    <span class="menu-text">QA Review</span>
+                                </a>
+                            @endcanViewModule
+                        @endhasanyrole
+
+                        @canViewModule('sales')
+                            <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
+                                <i class="bx bx-dollar-circle"></i>
+                                <span class="menu-text">Sales Records</span>
+                            </a>
+                        @endcanViewModule
+
+                        @canViewModule('issuance')
+                            <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
+                                <i class="bx bx-send"></i>
+                                <span class="menu-text">Policy Submission</span>
+                            </a>
+                        @endcanViewModule
+
+                        @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
+                            @canViewModule('bank-verification')
+                                <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
+                                    <i class="bx bx-check-shield"></i>
+                                    <span class="menu-text">Bank Verification</span>
+                                </a>
+                            @endcanViewModule
+
+                            @canViewModule('revenue-analytics')
+                                <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
+                                    <i class="bx bx-line-chart"></i>
+                                    <span class="menu-text">Revenue Analytics</span>
+                                </a>
+                            @endcanViewModule
+
+                            @canViewModule('live-analytics')
+                                <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
+                                    <i class="bx bx-line-chart"></i>
+                                    <span class="menu-text">Live Analytics</span>
+                                </a>
+                            @endcanViewModule
+                        @endhasanyrole
+                    </div>
+                @endcanViewModule
+
+                @canViewModule('retention')
+                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
+                        <i class="bx bx-refresh"></i>
+                        <span class="menu-text">Retention & Chargebacks</span>
+                        <i class="bx bx-chevron-down dropdown-icon"></i>
+                    </a>
+
+                    <div class="menu-dropdown" id="retentionDropdown">
+                        <a href="{{ route('retention.dashboard') }}" class="dropdown-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
+                            <i class="bx bx-tachometer"></i>
+                            <span class="menu-text">Retention Dashboard</span>
+                        </a>
+
+                        <a href="{{ route('retention.index') }}" class="dropdown-item {{ Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : '' }}">
+                            <i class="bx bx-user-check"></i>
+                            <span class="menu-text">Manage Retention</span>
+                        </a>
+
+                        <a href="{{ route('chargebacks.index') }}" class="dropdown-item {{ Request::is('chargebacks*') ? 'active' : '' }}">
+                            <i class="bx bx-error-circle"></i>
+                            <span class="menu-text">Chargebacks</span>
                         </a>
                     </div>
-                @endhasanyrole
-
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
-                    <i class="bx bx-briefcase-alt"></i>
-                    <span class="menu-text">Sales Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="misDropdown">
-                    @hasanyrole('Super Admin|CEO|Manager')
-                        <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
-                            <i class="bx bx-user-voice"></i>
-                            <span class="menu-text">Peregrine Leads</span>
-                        </a>
-
-                        <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
-                            <i class="bx bx-briefcase"></i>
-                            <span class="menu-text">Raven Leads</span>
-                        </a>
-                    @endhasanyrole
-
-                    @hasanyrole('QA|Super Admin|Manager|Co-ordinator|CEO')
-                        <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
-                            <i class="bx bx-check-circle"></i>
-                            <span class="menu-text">QA Review</span>
-                        </a>
-                    @endhasanyrole
-
-                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
-
-                    <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
-                        <i class="bx bx-send"></i>
-                        <span class="menu-text">Policy Submission</span>
-                    </a>
-
-                    @hasanyrole('Super Admin|Manager|Co-ordinator|CEO|Manager')
-                        <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
-                            <i class="bx bx-check-shield"></i>
-                            <span class="menu-text">Bank Verification</span>
-                        </a>
-
-                        <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
-                            <i class="bx bx-line-chart"></i>
-                            <span class="menu-text">Revenue Analytics</span>
-                        </a>
-
-                        <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
-                            <i class="bx bx-line-chart"></i>
-                            <span class="menu-text">Live Analytics</span>
-                        </a>
-                    @endhasanyrole
-                </div>
-
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
-                    <i class="bx bx-refresh"></i>
-                    <span class="menu-text">Retention & Chargebacks</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="retentionDropdown">
-                    <a href="{{ route('retention.dashboard') }}" class="dropdown-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
-                        <i class="bx bx-tachometer"></i>
-                        <span class="menu-text">Retention Dashboard</span>
-                    </a>
-
-                    <a href="{{ route('retention.index') }}" class="dropdown-item {{ Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : '' }}">
-                        <i class="bx bx-user-check"></i>
-                        <span class="menu-text">Manage Retention</span>
-                    </a>
-
-                    <a href="{{ route('chargebacks.index') }}" class="dropdown-item {{ Request::is('chargebacks*') ? 'active' : '' }}">
-                        <i class="bx bx-error-circle"></i>
-                        <span class="menu-text">Chargebacks</span>
-                    </a>
-                </div>
+                @endcanViewModule
             @endhasrole
         @endunlessrole
 
         {{-- PEREGRINE SECTION --}}
-        @hasanyrole('Verifier|Peregrine Closer|Peregrine Validator|Manager|Super Admin|Co-ordinator|CEO')
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
-                <i class="bx bx-shield-alt"></i>
-                <span class="menu-text">Peregrine Operations</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
-            </a>
+        @hasanyrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
+            @canViewModule('peregrine')
+                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
+                    <i class="bx bx-shield-alt"></i>
+                    <span class="menu-text">Peregrine Operations</span>
+                    <i class="bx bx-chevron-down dropdown-icon"></i>
+                </a>
 
-            <div class="menu-dropdown" id="peregrineDropdown">
-                @hasanyrole('Verifier|Super Admin|Co-ordinator|CEO')
-                    @unlessrole('Peregrine Validator')
-                        <a href="{{ route('verifier.dashboard') }}" class="dropdown-item {{ Request::is('verifier/dashboard') ? 'active' : '' }}">
-                            <i class="bx bx-shield-alt"></i>
-                            <span class="menu-text">Peregrine Dashboard</span>
-                        </a>
+                <div class="menu-dropdown" id="peregrineDropdown">
+                    @hasanyrole([Roles::VERIFIER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
+                        @unlessrole(Roles::PEREGRINE_VALIDATOR)
+                            @canViewModule('peregrine-dashboard')
+                                <a href="{{ route('verifier.dashboard') }}" class="dropdown-item {{ Request::is('verifier/dashboard') ? 'active' : '' }}">
+                                    <i class="bx bx-shield-alt"></i>
+                                    <span class="menu-text">Peregrine Dashboard</span>
+                                </a>
+                            @endcanViewModule
 
-                        <a href="{{ route('verifier.create.team', 'peregrine') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
-                            <i class="bx bx-edit-alt"></i>
-                            <span class="menu-text">Verifier Form</span>
-                        </a>
-                    @endunlessrole
-                @endhasanyrole
+                            @canViewModule('peregrine-verifier')
+                                <a href="{{ route('verifier.create.team', 'peregrine') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
+                                    <i class="bx bx-edit-alt"></i>
+                                    <span class="menu-text">Verifier Form</span>
+                                </a>
+                            @endcanViewModule
+                        @endunlessrole
+                    @endhasanyrole
 
-                @hasanyrole('Peregrine Closer|Super Admin|Co-ordinator|CEO')
-                    <a href="{{ route('peregrine.closers.index') }}" class="dropdown-item {{ Request::is('peregrine/closers*') ? 'active' : '' }}">
-                        <i class="bx bx-shield-alt"></i>
-                        <span class="menu-text">Peregrine Closers</span>
-                    </a>
+                    @hasanyrole([Roles::PEREGRINE_CLOSER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
+                        @canViewModule('peregrine-closers')
+                            <a href="{{ route('peregrine.closers.index') }}" class="dropdown-item {{ Request::is('peregrine/closers*') ? 'active' : '' }}">
+                                <i class="bx bx-shield-alt"></i>
+                                <span class="menu-text">Peregrine Closers</span>
+                            </a>
+                        @endcanViewModule
+                    @endhasanyrole
 
-                    <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
-                        <i class="bx bx-task"></i>
-                        <span class="menu-text">My Followup & Bank Verification</span>
-                    </a>
-                @endhasanyrole
-
-                @hasanyrole('Peregrine Validator|Manager|Super Admin|Co-ordinator|CEO')
-                    <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
-                        <i class="bx bx-check-shield"></i>
-                        <span class="menu-text">Validation Dashboard</span>
-                    </a>
-                @endhasanyrole
-            </div>
+                    @hasanyrole([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
+                        @canViewModule('peregrine-validation')
+                            <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
+                                <i class="bx bx-check-shield"></i>
+                                <span class="menu-text">Validation Dashboard</span>
+                            </a>
+                        @endcanViewModule
+                    @endhasanyrole
+                </div>
+            @endcanViewModule
         @endhasanyrole
 
         {{-- RAVENS SECTION --}}
-        @hasanyrole('Ravens Closer|Super Admin|Manager|Co-ordinator|CEO')
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
-                <i class="bx bx-phone-call"></i>
-                <span class="menu-text">Ravens Operations</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
-            </a>
-
-            <div class="menu-dropdown" id="ravensDropdown">
-                <a href="{{ route('ravens.dashboard') }}" class="dropdown-item {{ Request::is('ravens/dashboard') ? 'active' : '' }}">
+        @hasanyrole([Roles::RAVENS_CLOSER, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
+            @canViewModule('ravens')
+                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
                     <i class="bx bx-phone-call"></i>
-                    <span class="menu-text">Ravens Dashboard</span>
+                    <span class="menu-text">Ravens Operations</span>
+                    <i class="bx bx-chevron-down dropdown-icon"></i>
                 </a>
 
-                <a href="{{ route('ravens.calling') }}" class="dropdown-item {{ Request::is('ravens/calling*') ? 'active' : '' }}">
-                    <i class="bx bx-phone"></i>
-                    <span class="menu-text">Ravens Calling</span>
-                </a>
+                <div class="menu-dropdown" id="ravensDropdown">
+                    @canViewModule('ravens-dashboard')
+                        <a href="{{ route('ravens.dashboard') }}" class="dropdown-item {{ Request::is('ravens/dashboard') ? 'active' : '' }}">
+                            <i class="bx bx-phone-call"></i>
+                            <span class="menu-text">Ravens Dashboard</span>
+                        </a>
+                    @endcanViewModule
 
-                <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
-                    <i class="bx bx-x-circle"></i>
-                    <span class="menu-text">Bad Leads</span>
-                </a>
+                    @canViewModule('ravens-calling')
+                        <a href="{{ route('ravens.calling') }}" class="dropdown-item {{ Request::is('ravens/calling*') ? 'active' : '' }}">
+                            <i class="bx bx-phone"></i>
+                            <span class="menu-text">Ravens Calling</span>
+                        </a>
+                    @endcanViewModule
 
-                <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
-                    <i class="bx bx-task"></i>
-                    <span class="menu-text">My Followup & Bank Verification</span>
-                </a>
-            </div>
+                    @canViewModule('ravens-bad-leads')
+                        <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
+                            <i class="bx bx-x-circle"></i>
+                            <span class="menu-text">Bad Leads</span>
+                        </a>
+                    @endcanViewModule
+
+                    @canViewModule('ravens-followups')
+                        <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
+                            <i class="bx bx-task"></i>
+                            <span class="menu-text">My Followup & Bank Verification</span>
+                        </a>
+                    @endcanViewModule
+                </div>
+            @endcanViewModule
         @endhasanyrole
 
-        @hasanyrole('QA|HR|Super Admin|Manager|Co-ordinator|CEO')
+        @hasanyrole([Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'hrOpsDropdown')">
                 <i class="bx bx-user-check"></i>
                 <span class="menu-text">HR Operations</span>
@@ -306,7 +251,7 @@
             </a>
 
             <div class="menu-dropdown" id="hrOpsDropdown">
-                @hasanyrole('Super Admin|Manager|Co-ordinator|HR|CEO')
+                @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::HR, Roles::CEO])
                     <a href="{{ route('employee.ems') }}" class="dropdown-item {{ Request::is('ems*') ? 'active' : '' }}">
                         <i class="bx bx-id-card"></i>
                         <span class="menu-text">E.M.S</span>
@@ -318,14 +263,14 @@
                     </a>
                 @endhasanyrole
 
-                @hasanyrole('QA|HR|Super Admin|Manager|Co-ordinator|CEO')
+                @hasanyrole([Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
                     <a href="{{ route('dock.index') }}" class="dropdown-item {{ Request::is('dock*') ? 'active' : '' }}">
                         <i class="bx bx-dock-top"></i>
                         <span class="menu-text">Dock Management</span>
                     </a>
                 @endhasanyrole
 
-                @hasanyrole('HR|Super Admin|Co-ordinator|CEO')
+                @hasanyrole([Roles::HR, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
                     <a href="{{ route('admin.public-holidays.index') }}" class="dropdown-item {{ Request::is('admin/public-holidays*') ? 'active' : '' }}">
                         <i class="bx bx-calendar"></i>
                         <span class="menu-text">Public Holidays</span>
@@ -335,7 +280,7 @@
         @endhasanyrole
 
         {{-- EPMS - Project Management (CEO, Super Admin Only) --}}
-        @hasanyrole('Super Admin|CEO')
+        @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO])
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
                 <i class="bx bx-briefcase-alt"></i>
                 <span class="menu-text">Project Management</span>
@@ -355,8 +300,8 @@
         @endhasanyrole
 
         {{-- ADMIN SECTION --}}
-        @unlessrole('Verifier|Peregrine Closer|Peregrine Validator|Employee|Ravens Closer')
-            @hasanyrole('Super Admin|Co-ordinator|CEO|Manager')
+        @unlessrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER])
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO, Roles::MANAGER])
                 <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
                     <i class="bx bx-group"></i>
                     <span class="menu-text">Partner Management</span>
@@ -375,7 +320,7 @@
                     </a>
                 </div>
 
-                @hasanyrole('Super Admin|Manager|CEO')
+                @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
                     <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'settingsDropdown')">
                         <i class="bx bx-cog"></i>
                         <span class="menu-text">Settings</span>
@@ -388,12 +333,12 @@
                             <span class="menu-text">System Settings</span>
                         </a>
 
-                        @hasanyrole('Super Admin|Co-ordinator')
+                        @hasrole(Roles::SUPER_ADMIN)
                             <a href="{{ route('settings.permissions.index') }}" class="dropdown-item {{ Request::is('settings/permissions*') ? 'active' : '' }}">
                                 <i class="bx bx-shield-alt"></i>
                                 <span class="menu-text">Permissions Manager</span>
                             </a>
-                        @endhasanyrole
+                        @endhasrole
 
                         <a href="{{ route('admin.dupe-checker.index') }}" class="dropdown-item {{ Request::is('admin/dupe-checker*') ? 'active' : '' }}">
                             <i class="bx bx-copy-alt"></i>
@@ -409,7 +354,7 @@
             @endhasanyrole
 
             {{-- FINANCE SECTION --}}
-            @hasanyrole('Super Admin|Manager|Co-ordinator|CEO')
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
                 <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'financeDropdown')">
                     <i class="bx bx-dollar-circle"></i>
                     <span class="menu-text">Finance & Accounts</span>
@@ -427,7 +372,7 @@
                         <span class="menu-text">General Ledger</span>
                     </a>
 
-                    @hasanyrole('Super Admin|Co-ordinator|CEO')
+                    @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
                         <a href="{{ route('petty-cash.index') }}" class="dropdown-item {{ Request::is('petty-cash*') ? 'active' : '' }}">
                             <i class="bx bx-wallet"></i>
                             <span class="menu-text">Petty Cash</span>
@@ -448,7 +393,7 @@
         @endunlessrole
 
         {{-- USERS MANAGEMENT SECTION --}}
-        @hasanyrole('Super Admin|Co-ordinator|CEO')
+        @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
             <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
                 <i class="bx bx-user-circle"></i>
                 <span class="menu-text">Users MGMT</span>

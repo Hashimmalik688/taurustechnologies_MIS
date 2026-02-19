@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title', 'Payroll')
@@ -425,9 +426,9 @@
                 <div class="col-md-2">
                     <label class="form-label fw-bold">Working Days</label>
                     <input type="number" name="working_days" class="form-control form-control-lg text-center fw-bold payroll-working-days-input" 
-                           value="{{ $totalWorkingDays }}" min="1" max="31" required @if(!auth()->user()->hasAnyRole(['CEO', 'Super Admin', 'Co-ordinator'])) readonly @endif>
+                           value="{{ $totalWorkingDays }}" min="1" max="31" required @if(!auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR])) readonly @endif>
                 </div>
-                @if(auth()->user()->hasAnyRole(['CEO', 'Super Admin', 'Co-ordinator']))
+                @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100 btn-lg">
                         <i class="bx bx-save me-1"></i>Update
@@ -446,7 +447,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <small class="text-muted me-2">Date Range: {{ $startDate->format('Y-m-d') }} to {{ $endDate->format('Y-m-d') }}</small>
                     <input type="text" id="payrollSearch" class="form-control form-control-sm" placeholder="Search employees..." style="width: 200px;">
-                    @if(auth()->user()->hasAnyRole(['CEO', 'Super Admin', 'Co-ordinator']))
+                    @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                     <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addManualEntryModal">
                         <i class="bx bx-plus me-1"></i>Add Manual Entry
                     </button>
@@ -648,7 +649,7 @@
                                 </strong>
                             </td>
                             <td>
-                                @if(auth()->user()->hasAnyRole(['CEO', 'Super Admin', 'Co-ordinator']))
+                                @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editPayrollModal{{ $employee->id }}" title="Edit">
                                     <i class="bx bx-edit"></i>
                                 </button>
@@ -866,7 +867,7 @@
                             <td style="color: #ff6b6b;">{{ number_format($salaryAdvance, 2) }}</td>
                             <td><strong style="color: #10b981; font-size: 1.1rem;">{{ number_format($payable, 2) }}</strong></td>
                             <td>
-                                @if(auth()->user()->hasAnyRole(['CEO', 'Super Admin', 'Co-ordinator']))
+                                @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editManualEntryModal{{ $entry->id }}" title="Edit Manual Entry">
                                     <i class="bx bx-edit"></i>
                                 </button>

@@ -10,6 +10,7 @@ use App\Models\UserDetail;
 use App\Models\Employee;
 use App\Models\AuditLog;
 use App\Services\FileUploadService;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -82,8 +83,8 @@ class UserController extends Controller
         $userDetail->save();
 
         // Sync with EMS - create or update employee record
-        // Skip EMS entry for CEO and Agent (partners) as they are outside the system
-        if (!$user->hasRole('CEO') && !$user->hasRole('Agent')) {
+        // Skip EMS entry for CEO as they are outside the employee system
+        if (!$user->hasRole(Roles::CEO)) {
             $employee = Employee::where('email', $user->email)->first();
             if ($employee) {
                 $employee->update([
@@ -187,9 +188,9 @@ class UserController extends Controller
         }
 
         // Sync with EMS - update employee record
-        // CEO and Agent (partners) should not be in EMS as they are outside the system
-        if ($user->hasRole('CEO') || $user->hasRole('Agent')) {
-            // If user became CEO or Agent, remove from EMS
+        // CEO should not be in EMS as they are outside the employee system
+        if ($user->hasRole(Roles::CEO)) {
+            // If user became CEO, remove from EMS
             Employee::where('email', $user->email)->update(['mis' => 'No']);
         } else {
             // Regular user - sync with EMS
@@ -236,6 +237,11 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+
+        // Prevent deleting yourself
+        if ($user->id === auth()->id()) {
+            return redirect()->route('users.index')->with('error', 'You cannot delete your own account.');
+        }
 
         // Soft delete the user
         $user->delete();

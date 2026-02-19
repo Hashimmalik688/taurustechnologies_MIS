@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -201,7 +202,7 @@
                                             <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                 <i class="bx bx-save"></i> Save QA Review
                                             </button>
-                                            @if(auth()->user()->hasRole('Super Admin') && $lead->qa_status !== 'Pending')
+                                            @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->qa_status !== 'Pending')
                                                 <button class="btn btn-sm btn-warning mt-1 reset-qa-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
                                                     <i class="bx bx-undo"></i> Reset
                                                 </button>

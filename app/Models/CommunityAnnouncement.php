@@ -73,16 +73,29 @@ class CommunityAnnouncement extends Model
     }
 
     /**
+     * Priority-to-color mapping for UI
+     */
+    public const PRIORITY_COLORS = [
+        'urgent' => 'red',
+        'warning' => 'yellow',
+        'info' => 'blue',
+    ];
+
+    /**
+     * Priority-to-icon mapping for UI
+     */
+    public const PRIORITY_ICONS = [
+        'urgent' => 'exclamation-circle',
+        'warning' => 'alert-circle',
+        'info' => 'info-circle',
+    ];
+
+    /**
      * Get priority color for UI
      */
     public function getPriorityColor(): string
     {
-        return match($this->priority) {
-            'urgent' => 'red',
-            'warning' => 'yellow',
-            'info' => 'blue',
-            default => 'blue',
-        };
+        return self::PRIORITY_COLORS[$this->priority] ?? 'blue';
     }
 
     /**
@@ -90,11 +103,6 @@ class CommunityAnnouncement extends Model
      */
     public function getPriorityIcon(): string
     {
-        return match($this->priority) {
-            'urgent' => 'exclamation-circle',
-            'warning' => 'alert-circle',
-            'info' => 'info-circle',
-            default => 'info-circle',
-        };
+        return self::PRIORITY_ICONS[$this->priority] ?? 'info-circle';
     }
 }

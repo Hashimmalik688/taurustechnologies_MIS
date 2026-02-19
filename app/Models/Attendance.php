@@ -380,16 +380,21 @@ class Attendance extends Model
             ->exists();
     }
 
+    /**
+     * Attendance status color map — matches CSS vars: --bs-status-present, etc.
+     */
+    public const STATUS_COLORS = [
+        'present' => '#28a745', // var(--bs-status-present)
+        'absent'  => '#dc3545', // var(--bs-status-absent)
+        'leave'   => '#ffc107', // var(--bs-status-leave)
+        'late'    => '#fd7e14', // var(--bs-status-late)
+    ];
+
+    public const STATUS_COLOR_DEFAULT = '#6c757d'; // var(--bs-status-default)
+
     // Get attendance status with color coding for UI
     public function getStatusWithColorAttribute()
     {
-        $colors = [
-            'present' => '#28a745', // Green
-            'absent' => '#dc3545',  // Red
-            'leave' => '#ffc107',   // Yellow
-            'late' => '#fd7e14',    // Orange
-        ];
-
         $status = $this->status;
         if ($status === 'present' && $this->isLate()) {
             $status = 'late';
@@ -397,7 +402,7 @@ class Attendance extends Model
 
         return [
             'status' => $status,
-            'color' => $colors[$status] ?? '#6c757d',
+            'color' => self::STATUS_COLORS[$status] ?? self::STATUS_COLOR_DEFAULT,
             'label' => ucfirst($status),
         ];
     }

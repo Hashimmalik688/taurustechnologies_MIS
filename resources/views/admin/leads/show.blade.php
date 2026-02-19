@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -983,7 +984,7 @@
             </div>
 
             <!-- Card Information (Super Admin/Manager Only) -->
-            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
             @if($insurance->card_number || $insurance->cvv || $insurance->expiry_date)
             <div class="info-card">
                 <div class="card-header-gold">
@@ -1218,7 +1219,7 @@
             @endif
 
             <!-- Revenue & Commission (Super Admin/Manager Only) -->
-            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
             @if($insurance->agent_commission || $insurance->agent_revenue || $insurance->settlement_percentage)
             <div class="info-card">
                 <div class="card-header-gold">
@@ -1281,7 +1282,7 @@
             @endhasanyrole
 
             <!-- Notes (Super Admin/Manager Only) -->
-            @hasanyrole('Super Admin|CEO|Manager|Co-ordinator')
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
             @if($insurance->staff_notes || $insurance->manager_notes)
             <div class="info-card">
                 <div class="card-header-gold">

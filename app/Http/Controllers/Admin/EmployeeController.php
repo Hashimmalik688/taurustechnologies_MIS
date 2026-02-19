@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Employee;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -19,7 +20,7 @@ class EmployeeController extends Controller
         $this->middleware(function ($request, $next) {
             $user = auth()->user();
             \Log::debug('EMS: middleware user', ['user' => $user ? $user->email : null, 'roles' => $user ? $user->getRoleNames() : null]);
-            if (!$user->hasAnyRole(['CEO', 'Trainer', 'Super Admin', 'HR', 'Co-ordinator', 'Manager'])) {
+            if (!$user->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::HR, Roles::COORDINATOR, Roles::MANAGER])) {
                 \Log::debug('EMS: aborting 403 for user', ['user' => $user ? $user->email : null]);
                 abort(403, 'Unauthorized action.');
             }
@@ -32,10 +33,10 @@ class EmployeeController extends Controller
         \Log::debug('EMS index: started');
         try {
             // Sync all ACTIVE users (not soft-deleted) as employees
-            // Exclude CEO and Agent (partners) - they are outside the employee system
+            // Exclude CEO - they are outside the employee system
             $activeUsers = \App\Models\User::whereNull('deleted_at')
                 ->get()
-                ->filter(fn($user) => !$user->hasRole('CEO') && !$user->hasRole('Agent'));
+                ->filter(fn($user) => !$user->hasRole(Roles::CEO));
             
             $userEmails = $activeUsers->pluck('email', 'id')->toArray();
             \Log::debug('EMS index: userEmails', ['userEmails' => $userEmails]);
@@ -73,19 +74,6 @@ class EmployeeController extends Controller
                     ->update(['mis' => 'No']);
             }
 
-            // Update MIS to 'No' for partners (users with Agent role)
-            $partnerEmails = \App\Models\User::whereNull('deleted_at')
-                ->whereHas('roles', function($query) {
-                    $query->where('name', 'Agent');
-                })
-                ->pluck('email')
-                ->toArray();
-            if (!empty($partnerEmails)) {
-                Employee::whereIn('email', $partnerEmails)
-                    ->where('mis', '=', 'Yes')
-                    ->update(['mis' => 'No']);
-            }
-
             // Update MIS to 'No' for employees without any corresponding user (not in active or deleted users)
             $allUserEmails = \App\Models\User::withTrashed()->pluck('email')->toArray();
             Employee::whereNotIn('email', $allUserEmails)
@@ -104,7 +92,7 @@ class EmployeeController extends Controller
                 
                 // Exclude CEO role users
                 $user = \App\Models\User::withTrashed()->where('email', $employee->email)->first();
-                return !$user || !$user->hasRole('CEO');
+                return !$user || !$user->hasRole(Roles::CEO);
             });
             
             \Log::debug('EMS index: rendering view', ['employees_count' => $employees->count()]);
@@ -256,7 +244,7 @@ class EmployeeController extends Controller
         // If status changed to Terminated, soft-delete the user account
         if ($statusChangedToTerminated) {
             $user = \App\Models\User::where('email', $employee->email)->first();
-            if ($user && !$user->hasRole('CEO')) {
+            if ($user && !$user->hasRole(Roles::CEO)) {
                 $user->delete(); // Soft delete - preserves all historical data
             }
         }
@@ -287,7 +275,7 @@ class EmployeeController extends Controller
             
             // Find the user by email and soft-delete it (preserves all historical data)
             $user = \App\Models\User::where('email', $employee->email)->first();
-            if ($user && !$user->hasRole('CEO')) {
+            if ($user && !$user->hasRole(Roles::CEO)) {
                 // Only soft-delete non-CEO users
                 $user->delete(); // Soft delete using SoftDeletes trait - preserves all relationships and data
             }
@@ -313,7 +301,7 @@ class EmployeeController extends Controller
             if (!$user) return true; // Include if user not found
             
             // Exclude if user has CEO role
-            return !$user->roles()->where('name', 'CEO')->exists();
+            return !$user->roles()->where('name', Roles::CEO)->exists();
         })->values();
         
         $headers = [
@@ -345,7 +333,7 @@ class EmployeeController extends Controller
             
             // Also hard-delete the associated user if exists
             $user = User::withTrashed()->where('email', $email)->first();
-            if ($user && !$user->hasRole('CEO')) {
+            if ($user && !$user->hasRole(Roles::CEO)) {
                 $user->forceDelete(); // Permanently remove user
             }
             

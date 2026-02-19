@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PabsTicket;
 use App\Models\PabsTicketComment;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -264,7 +265,7 @@ class TicketController extends Controller
     public function destroy(PabsTicket $ticket)
     {
         // Only creator or admin can delete
-        if ($ticket->created_by !== auth()->id() && !auth()->user()->hasRole(['Super Admin', 'CEO'])) {
+        if ($ticket->created_by !== auth()->id() && !auth()->user()->hasRole([Roles::SUPER_ADMIN, Roles::CEO])) {
             return redirect()->back()->with('error', 'Unauthorized to delete this ticket.');
         }
 

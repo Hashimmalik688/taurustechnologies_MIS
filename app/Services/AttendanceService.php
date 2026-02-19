@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Request;
 
 class AttendanceService
 {
+    /** Office timezone used for all attendance time calculations */
+    public const TIMEZONE = 'Asia/Karachi';
+
     public function isInOfficeNetwork($ipAddress = null)
     {
         // Check if attendance is enabled
@@ -20,7 +23,7 @@ class AttendanceService
         }
 
         $ip = $ipAddress ?: Request::ip();
-        $allowedNetworks = Setting::get('office_networks', ['192.168.1.0/24']);
+        $allowedNetworks = Setting::get('office_networks', []);
 
         // If it's an array string from database, convert it
         if (is_string($allowedNetworks)) {
@@ -55,13 +58,13 @@ class AttendanceService
     public function markAttendance($userId, $forceOffice = false)
     {
         // Always use internet-based PKT (Asia/Karachi) time for attendance
-        $currentTime = Carbon::now('Asia/Karachi');
+        $currentTime = Carbon::now(self::TIMEZONE);
         // Allow marking attendance only at or after Office Start Time
         $officeStartTimeRaw = Setting::get('office_start_time', '19:00');
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
         }
         if ($currentTime->lessThan($startTime)) {
             return [
@@ -70,7 +73,7 @@ class AttendanceService
             ];
         }
         // Always use internet-based PKT (Asia/Karachi) time for attendance
-        $currentTime = Carbon::now('Asia/Karachi');
+        $currentTime = Carbon::now(self::TIMEZONE);
         $currentHour = $currentTime->hour;
 
         // Get office start time and late time from settings
@@ -79,16 +82,16 @@ class AttendanceService
 
         // Accept both '19:00' and '07:00 PM' formats for office start
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
         }
 
         // Accept both '19:15' and '07:15 PM' formats for late time
         try {
-            $lateTime = Carbon::createFromFormat('H:i', $lateTimeRaw, 'Asia/Karachi');
+            $lateTime = Carbon::createFromFormat('H:i', $lateTimeRaw, self::TIMEZONE);
         } catch (\Exception $e) {
-            $lateTime = Carbon::createFromFormat('h:i A', $lateTimeRaw, 'Asia/Karachi');
+            $lateTime = Carbon::createFromFormat('h:i A', $lateTimeRaw, self::TIMEZONE);
         }
 
         // Get configurable attendance window settings
@@ -157,7 +160,7 @@ class AttendanceService
 
         // Night shift logic: if office start is in evening (e.g., 19:00/7pm), attendance window is 7pm today to 5am next day
         $nightShift = $startTime->hour >= 12; // 12:00 or later is night shift
-        $attendanceDate = $currentTime->copy()->setTimezone('Asia/Karachi')->toDateString();
+        $attendanceDate = $currentTime->copy()->setTimezone(self::TIMEZONE)->toDateString();
 
         if ($nightShift) {
             // Attendance window: 7pm today to 5am next day
@@ -183,8 +186,12 @@ class AttendanceService
             'date' => $shiftDate,
             'login_time' => $currentTime,
             'ip_address' => Request::ip(),
-            'device_fingerprint' => Request::header('X-Device-Fingerprint') ?: Request::header('X-Device-ID'),
-            'device_name' => Request::header('X-Device-Name'),
+            'device_fingerprint' => Request::header('X-Device-Fingerprint')
+                ?: Request::cookie('device_fingerprint')
+                ?: Request::header('X-Device-ID')
+                ?: Request::cookie('device_id'),
+            'device_name' => Request::header('X-Device-Name')
+                ?: Request::cookie('device_name'),
             'status' => $status,
         ]);
 
@@ -198,7 +205,7 @@ class AttendanceService
 
     public function markLogout($userId)
     {
-        $currentTime = Carbon::now('Asia/Karachi');
+        $currentTime = Carbon::now(self::TIMEZONE);
         
         // Checkout cutoff is 6am (1 hour after shift ends at 5am)
         // After 6am, missed checkout is missed - no retroactive checkout allowed
@@ -212,8 +219,8 @@ class AttendanceService
         // For night shift (7 PM - 6 AM), if current time is before 6 AM,
         // the attendance belongs to previous day's shift
         $shiftDate = $currentTime->hour < 6 
-            ? Carbon::yesterday('Asia/Karachi') 
-            : Carbon::today('Asia/Karachi');
+            ? Carbon::yesterday(self::TIMEZONE) 
+            : Carbon::today(self::TIMEZONE);
 
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $shiftDate)
@@ -242,14 +249,14 @@ class AttendanceService
     // New method to check and mark attendance on dashboard visits
     public function checkAndMarkDailyAttendance($userId)
     {
-        $currentTime = Carbon::now('Asia/Karachi');
+        $currentTime = Carbon::now(self::TIMEZONE);
         
         // Get office start time from settings
         $officeStartTimeRaw = Setting::get('office_start_time', '19:00');
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
         }
         
         // Calculate allowed attendance window with 1-hour buffer

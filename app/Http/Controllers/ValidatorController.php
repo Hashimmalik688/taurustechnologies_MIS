@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -185,7 +186,7 @@ class ValidatorController extends Controller
             ->where('status', 'closed')
             ->findOrFail($id);
 
-        $validators = User::role(['Verification Officer', 'Verifier', 'Peregrine Validator', 'Manager'])->get(['id', 'name']);
+        $validators = User::role([Roles::VERIFIER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])->get(['id', 'name']);
 
         return view('validator.edit', compact('lead', 'validators'));
     }

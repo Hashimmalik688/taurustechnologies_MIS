@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title', 'Dock Section - Employee Fines')
@@ -181,7 +182,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if (!Auth::user()->hasRole('HR'))
+                                    @if (!Auth::user()->hasRole(Roles::HR))
                                     <button type="button" class="btn btn-sm btn-info" 
                                             data-record-id="{{ $record->id }}"
                                             data-employee-name="{{ $record->user?->name ?? 'Unknown' }}"

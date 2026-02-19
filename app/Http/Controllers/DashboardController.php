@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use App\Services\RevenueCalculationService;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -50,60 +51,70 @@ class DashboardController extends Controller
     }
 
     /**
-     * Executive Dashboard with live data from boss's dashboard
+     * Smart router - redirects each user to their appropriate landing page based on role.
+     * This is the entry point for / and post-login redirects.
      */
     public function root()
     {
-        // Redirect Agents to their own dashboard
-        if (Auth::check() && Auth::user()->hasRole('Agent')) {
-            return redirect()->route('agent.dashboard');
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
 
-        // Redirect Verifiers to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Verifier')) {
-            return redirect()->route('verifier.dashboard');
-        }
-        
-        // Redirect Peregrine Closers to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Peregrine Closer')) {
-            return redirect()->route('peregrine.closers.index');
+        $user = Auth::user();
+
+        // Role-based redirects to each role's primary workspace
+        $roleRedirects = [
+            Roles::VERIFIER            => 'verifier.dashboard',
+            Roles::PEREGRINE_CLOSER    => 'peregrine.closers.index',
+            Roles::PEREGRINE_VALIDATOR => 'validator.index',
+            Roles::EMPLOYEE            => 'attendance.dashboard',
+            Roles::RAVENS_CLOSER       => 'ravens.dashboard',
+            Roles::QA                  => 'qa.review',
+            Roles::RETENTION_OFFICER   => 'retention.dashboard',
+            Roles::HR                  => 'attendance.index',
+        ];
+
+        foreach ($roleRedirects as $role => $routeName) {
+            if ($user->hasRole($role)) {
+                return redirect()->route($routeName);
+            }
         }
 
-        // Redirect Peregrine Validators to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Peregrine Validator')) {
-            return redirect()->route('validator.index');
-        }
-        
-        // Redirect employees to attendance dashboard (they only have access to attendance + chat)
-        if (Auth::check() && Auth::user()->hasRole('Employee')) {
-            return redirect()->route('attendance.dashboard');
-        }
-        
-        // Redirect Ravens Closer to their dashboard
-        if (Auth::check() && Auth::user()->hasRole('Ravens Closer')) {
-            return redirect()->route('ravens.dashboard');
+        // Admin roles (Super Admin, CEO, Manager, Co-ordinator) - check dashboard permission
+        if ($user->canViewModule('dashboard')) {
+            return redirect()->route('dashboard');
         }
 
-        // Redirect QA to QA Review page
-        if (Auth::check() && Auth::user()->hasRole('QA')) {
-            return redirect()->route('qa.review');
+        // If dashboard is restricted, find first accessible module
+        $fallbackRoutes = [
+            'sales'      => 'sales.index',
+            'leads'      => 'leads.index',
+            'retention'  => 'retention.index',
+            'attendance' => 'attendance.index',
+            'users'      => 'users.index',
+            'settings'   => 'settings.index',
+        ];
+
+        foreach ($fallbackRoutes as $moduleSlug => $routeName) {
+            if ($user->canViewModule($moduleSlug)) {
+                try {
+                    return redirect()->route($routeName);
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
         }
 
-        // Redirect Retention Officer to retention page
-        if (Auth::check() && Auth::user()->hasRole('Retention Officer')) {
-            return redirect()->route('retention.dashboard');
-        }
+        // Last resort - attendance dashboard (everyone should have this)
+        return redirect()->route('attendance.dashboard');
+    }
 
-        // Redirect HR to attendance (HR has view-only access to Attendance and E.M.S)
-        if (Auth::check() && Auth::user()->hasRole('HR')) {
-            return redirect()->route('attendance.index');
-        }
-
-        // Redirect Trainer to attendance dashboard
-        if (Auth::check() && Auth::user()->hasRole('Trainer')) {
-            return redirect()->route('attendance.dashboard');
-        }
-
+    /**
+     * Executive Dashboard (Company Overview) with live data.
+     * Accessible at /dashboard with role.permission:dashboard,view middleware.
+     */
+    public function executiveDashboard()
+    {
         // Fetch data from boss's dashboard with caching (for attendance only)
         $bossData = $this->fetchBossDashboardData();
 
@@ -166,7 +177,7 @@ class DashboardController extends Controller
         // Attendance - Use local database instead of external API
         // Use USA Eastern Time for consistency
         $usaToday = now()->setTimezone('America/New_York')->toDateString();
-        $trackableRoles = ['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer'];
+        $trackableRoles = [Roles::EMPLOYEE, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RAVENS_CLOSER];
         $todayAttendances = \App\Models\Attendance::with('user')
             ->whereDate('date', $usaToday)
             ->get();
@@ -199,7 +210,7 @@ class DashboardController extends Controller
             $user = User::where('name', $closerName)->first();
             $team = 'ravens'; // default
             if ($user) {
-                if ($user->hasRole(['Peregrine Closer', 'Peregrine Validator'])) {
+                if ($user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
                     $team = 'peregrine';
                 }
             }
@@ -221,10 +232,10 @@ class DashboardController extends Controller
         });
         
         // Get team counts from users with roles
-        $peregrine_count = User::role(['Peregrine Closer', 'Peregrine Validator'])
+        $peregrine_count = User::role([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])
             ->where('status', '!=', 'inactive')
             ->count();
-        $ravens_count = User::role('Ravens Closer')
+        $ravens_count = User::role(Roles::RAVENS_CLOSER)
             ->where('status', '!=', 'inactive')
             ->count();
 
@@ -383,7 +394,7 @@ class DashboardController extends Controller
             $user = User::where('name', $closerName)->first();
             $team = 'ravens'; // default
             if ($user) {
-                if ($user->hasRole(['Peregrine Closer', 'Peregrine Validator'])) {
+                if ($user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
                     $team = 'peregrine';
                 }
             }

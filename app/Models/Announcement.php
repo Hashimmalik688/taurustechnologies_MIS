@@ -80,18 +80,24 @@ class Announcement extends Model
     }
 
     /**
+     * Icon-to-class mapping for BoxIcons
+     */
+    public const ICON_MAP = [
+        'warning' => 'bx-exclamation-circle',
+        'info' => 'bx-info-circle',
+        'important' => 'bx-star',
+        'star' => 'bx-star-fill',
+        'check' => 'bx-check-circle',
+        'alert' => 'bx-bell',
+    ];
+
+    public const DEFAULT_ICON = 'bx-info-circle';
+
+    /**
      * Get icon class
      */
     public function getIconClass()
     {
-        $icons = [
-            'warning' => 'bx-exclamation-circle',
-            'info' => 'bx-info-circle',
-            'important' => 'bx-star',
-            'star' => 'bx-star-fill',
-            'check' => 'bx-check-circle',
-            'alert' => 'bx-bell',
-        ];
-        return 'bx ' . ($icons[$this->icon] ?? 'bx-info-circle');
+        return 'bx ' . (self::ICON_MAP[$this->icon] ?? self::DEFAULT_ICON);
     }
 }

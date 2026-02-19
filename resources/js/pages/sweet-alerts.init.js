@@ -181,7 +181,7 @@ File: Sweetalert Js File
                 width: 600,
                 padding: 100,
                 confirmButtonColor: "#556ee6",
-                background: '#fff url(//subtlepatterns2015.subtlepatterns.netdna-cdn.com/patterns/geometry.png)'
+                background: '#fff'
             })
         });
 

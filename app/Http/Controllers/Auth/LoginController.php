@@ -45,41 +45,11 @@ class LoginController extends Controller
      *
      * @return string
      */
+    /**
+     * All users redirect to / (smart router) which handles role-based landing pages.
+     */
     protected function redirectTo()
     {
-        $user = auth()->user();
-        
-        // Agents go to their dashboard
-        if ($user->hasRole('Agent')) {
-            return route('agent.dashboard');
-        }
-        
-        // Verifiers should only access verifier form and chat
-        if ($user->hasRole('Verifier')) {
-            return route('verifier.dashboard');
-        }
-        
-        // Peregrine Closers go to their dashboard
-        if ($user->hasRole('Peregrine Closer')) {
-            return route('peregrine.closers.index');
-        }
-
-        // Peregrine Validators go to validator dashboard
-        if ($user->hasRole('Peregrine Validator')) {
-            return route('validator.index');
-        }
-        
-        // Managers can access validator dashboard too (they're also validators)
-        if ($user->hasRole('Manager')) {
-            return route('validator.index');
-        }
-        
-        // Employees go to their dashboard
-        if ($user->hasRole('Employee')) {
-            return route('employee.dashboard');
-        }
-        
-        // Everyone else goes to main dashboard
         return RouteServiceProvider::HOME;
     }
 

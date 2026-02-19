@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Partner;
+use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -75,7 +76,7 @@ class PartnerUserSeparationTest extends TestCase
         ]);
 
         // Assign role
-        $user->assignRole('Employee');
+        $user->assignRole(Roles::EMPLOYEE);
 
         // Attempt login via web guard
         $this->post('/login', [
@@ -121,7 +122,7 @@ class PartnerUserSeparationTest extends TestCase
             'is_partner' => false,
         ]);
 
-        $user->assignRole('Employee');
+        $user->assignRole(Roles::EMPLOYEE);
         Auth::guard('web')->login($user);
 
         // Try to access partner dashboard
@@ -151,7 +152,7 @@ class PartnerUserSeparationTest extends TestCase
             'is_partner' => true,
         ]);
 
-        $user->assignRole('Employee');
+        $user->assignRole(Roles::EMPLOYEE);
         $this->actingAs($user);
 
         // Get chat users

@@ -4,6 +4,19 @@
 
 //theme-light
 :root {
+    // Taurus Brand
+    --#{$prefix}gold:                                   #{$taurus-gold};
+    --#{$prefix}gold-dark:                              #{$taurus-gold-dark};
+    --#{$prefix}gold-gradient:                          linear-gradient(135deg, #{$taurus-gold} 0%, #{$taurus-gold-dark} 100%);
+    --#{$prefix}navy:                                   #{$taurus-navy};
+
+    // Attendance Status Colors
+    --#{$prefix}status-present:                         #{$status-present};
+    --#{$prefix}status-absent:                          #{$status-absent};
+    --#{$prefix}status-leave:                           #{$status-leave};
+    --#{$prefix}status-late:                            #{$status-late};
+    --#{$prefix}status-default:                         #{$status-default};
+
     // Topbar - Default Light
     --#{$prefix}header-bg:                              #{$header-bg}; 
     --#{$prefix}header-item-color:                      #{$header-item-color}; 
@@ -101,15 +114,15 @@
         }
 
         .table-light {
-            --bs-table-color:                                   #a6b0cf;
-            --bs-table-bg:                                      #32394e;
-            --bs-table-border-color:                            #32394e;
+            --bs-table-color:                                   #{$body-color-dark};
+            --bs-table-bg:                                      #{$body-tertiary-bg-dark};
+            --bs-table-border-color:                            #{$body-tertiary-bg-dark};
         }
 
         .table-dark {
-            --bs-table-color:                                   #a6b0cf;
-            --bs-table-bg:                                      #32394e;
-            --bs-table-border-color:                            #3a425a;
+            --bs-table-color:                                   #{$body-color-dark};
+            --bs-table-bg:                                      #{$body-tertiary-bg-dark};
+            --bs-table-border-color:                            #{$border-color-translucent-dark};
         }
 
     }
