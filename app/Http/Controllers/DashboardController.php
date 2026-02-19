@@ -260,11 +260,15 @@ class DashboardController extends Controller
             ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
             ->sum('monthly_premium') ?? 0;
 
-        // Retention - Only count chargebacks (CB)
-        // Retention metric tracks leads that were chargedback
+        // Retention — matches RetentionController logic
         $retention_cb = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
-        $retention_retained = 0; // Not tracking retained separately
-        $retention_pending = 0; // Not tracking pending separately
+        $retention_retained = Lead::where('retention_status', Statuses::RETENTION_RETAINED)->count();
+        $retention_pending = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where(function($q) {
+                $q->whereNull('retention_status')
+                  ->orWhere('retention_status', Statuses::RETENTION_PENDING);
+            })
+            ->count();
 
         // Financial overview
         $financial = $bossData['financialOverview'] ?? [];
@@ -441,14 +445,14 @@ class DashboardController extends Controller
             ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
             ->sum('monthly_premium') ?? 0;
 
-        // Retention
+        // Retention — matches RetentionController logic
         $retention_cb = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
-        $retention_retained = Lead::whereIn('status', [Statuses::LEAD_ACCEPTED, Statuses::LEAD_UNDERWRITTEN])
-            ->where('sale_at', '<', now()->subDays(30))
-            ->count();
-        // Only count 'accepted' (not yet underwritten) in pending retention
-        $retention_pending = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('sale_at', '>=', now()->subDays(30))
+        $retention_retained = Lead::where('retention_status', Statuses::RETENTION_RETAINED)->count();
+        $retention_pending = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where(function($q) {
+                $q->whereNull('retention_status')
+                  ->orWhere('retention_status', Statuses::RETENTION_PENDING);
+            })
             ->count();
 
         // Calculate revenue from issued and approved sales (same logic as root method)

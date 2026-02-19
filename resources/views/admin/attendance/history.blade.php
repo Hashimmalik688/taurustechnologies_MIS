@@ -375,18 +375,20 @@
                                                             <i class="mdi mdi-eye font-size-16 text-info me-1"></i> View
                                                             Details
                                                         </a>
-                                                        @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+                                                        @canEditModule('attendance')
                                                         <a class="dropdown-item" href="#"
                                                             onclick="editRecord({{ $attendance->id }})">
                                                             <i class="mdi mdi-pencil font-size-16 text-primary me-1"></i>
                                                             Edit Record
                                                         </a>
+                                                        @endcanEditModule
+                                                        @canDeleteInModule('attendance')
                                                         <div class="dropdown-divider"></div>
                                                         <a class="dropdown-item text-danger" href="#"
                                                             onclick="deleteRecord({{ $attendance->id }})">
                                                             <i class="mdi mdi-delete font-size-16 me-1"></i> Delete
                                                         </a>
-                                                        @endif
+                                                        @endcanDeleteInModule
                                                     </div>
                                                 </div>
                                             </td>
@@ -441,14 +443,16 @@
                         <button class="btn btn-outline-primary" onclick="bulkExport()">
                             <i class="mdi mdi-download me-2"></i>Export Selected
                         </button>
-                        @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+                        @canEditModule('attendance')
                         <button class="btn btn-outline-info" onclick="bulkUpdateStatus()">
                             <i class="mdi mdi-pencil me-2"></i>Update Status
                         </button>
+                        @endcanEditModule
+                        @canDeleteInModule('attendance')
                         <button class="btn btn-outline-danger" onclick="bulkDelete()">
                             <i class="mdi mdi-delete me-2"></i>Delete Selected
                         </button>
-                        @endif
+                        @endcanDeleteInModule
                     </div>
                     <div id="selected-count" class="text-muted mt-2">
                         No records selected

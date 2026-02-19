@@ -114,81 +114,32 @@
 
 /* =================== TOP HEADER =================== */
 [data-theme="dark"] .top-header {
-    background: var(--bg-primary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    background: linear-gradient(135deg, #0a0f1a 0%, #111827 100%) !important;
+    border-bottom: 1px solid rgba(212,175,55,.08) !important;
 }
 
-[data-theme="dark"] .top-header * {
-    border-color: var(--border-color) !important;
-}
+[data-theme="dark"] .th-brand-name { color: #f1f5f9; }
+
+[data-theme="dark"] .th-clocks { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08); }
+[data-theme="dark"] .th-clock-label { color: #94a3b8; }
+[data-theme="dark"] .th-clock-time { color: #f8fafc; }
+[data-theme="dark"] .th-clock-dot { background: var(--gold); }
+[data-theme="dark"] .th-action { color: #94a3b8; }
+[data-theme="dark"] .th-action:hover { background: rgba(212,175,55,.1); color: var(--gold); }
+[data-theme="dark"] .th-action-badge { border-color: #0f172a; }
 
 [data-theme="dark"] .notification-btn {
-    background: var(--bg-tertiary) !important;
+    background: transparent !important;
     color: var(--text-primary) !important;
     border: none !important;
 }
 
 [data-theme="dark"] .notification-btn:hover {
-    background: var(--bg-card) !important;
+    background: rgba(212, 175, 55, 0.1) !important;
 }
 
 [data-theme="dark"] .user-avatar {
     border: 2px solid var(--border-color) !important;
-}
-
-/* User menu area - clean styling */
-[data-theme="dark"] .user-menu > *,
-[data-theme="dark"] .user-menu > div,
-[data-theme="dark"] .user-menu button,
-[data-theme="dark"] .user-menu a {
-    border: none !important;
-    box-shadow: none !important;
-}
-
-/* User profile box - rounded and subtle */
-[data-theme="dark"] .user-menu > div[style*="background: #f3f4f6"],
-[data-theme="dark"] .user-menu > div[style*="background:#f3f4f6"] {
-    background: transparent !important;
-    border: none !important;
-}
-
-/* Theme toggle button - clean */
-[data-theme="dark"] .theme-toggle-btn {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 8px !important;
-}
-
-[data-theme="dark"] .theme-toggle-btn:hover {
-    background: rgba(212, 175, 55, 0.1) !important;
-    border: none !important;
-}
-
-/* Notification and chat buttons - no boxes */
-[data-theme="dark"] .notification-btn {
-    background: transparent !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 0.5rem !important;
-}
-
-[data-theme="dark"] .notification-btn:hover {
-    background: rgba(212, 175, 55, 0.1) !important;
-    border: none !important;
-}
-
-/* User avatar and profile area - rounded */
-[data-theme="dark"] .user-avatar {
-    border: none !important;
-    border-radius: 50% !important;
-}
-
-/* Remove all boxes from top header elements */
-[data-theme="dark"] .top-header > div,
-[data-theme="dark"] .top-header > div > *,
-[data-theme="dark"] .user-menu > * {
-    border: none !important;
-    box-shadow: none !important;
 }
 
 /* =================== CARDS =================== */
@@ -1233,16 +1184,12 @@
 }
 
 /* =================== THEME TOGGLE BUTTON =================== */
-.theme-toggle-btn {
+.theme-toggle-btn,
+.th-action[title="Toggle Theme"] {
     background: transparent;
     border: none;
-    padding: 0.5rem;
-    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: all 0.15s ease;
 }
 
 .theme-toggle-btn:hover {
@@ -1254,7 +1201,8 @@
     color: var(--gold);
 }
 
-[data-theme="dark"] .theme-toggle-btn i {
+[data-theme="dark"] .theme-toggle-btn i,
+[data-theme="dark"] .th-action[title="Toggle Theme"] i {
     color: #fbbf24;
 }
 

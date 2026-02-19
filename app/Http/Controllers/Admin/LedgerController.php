@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLedgerEntryRequest;
 use App\Models\LedgerEntry;
-use App\Models\Vendor;
 use App\Models\Lead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,13 +19,8 @@ class LedgerController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $entries = LedgerEntry::with(['vendor', 'user', 'lead'])
+            $entries = LedgerEntry::with(['user', 'lead'])
                 ->select('ledger_entries.*');
-
-            // Apply filters
-            if ($request->has('vendor_id') && $request->vendor_id) {
-                $entries->where('vendor_id', $request->vendor_id);
-            }
 
             if ($request->has('type') && $request->type) {
                 $entries->where('type', $request->type);
@@ -46,9 +40,6 @@ class LedgerController extends Controller
 
             return DataTables::of($entries)
                 ->addIndexColumn()
-                ->addColumn('vendor_name', function ($entry) {
-                    return $entry->vendor->name ?? 'N/A';
-                })
                 ->addColumn('recorded_by', function ($entry) {
                     return $entry->user->name ?? 'N/A';
                 })
@@ -73,8 +64,7 @@ class LedgerController extends Controller
                 ->make(true);
         }
 
-        $vendors = Vendor::active()->orderBy('name')->get();
-        return view('admin.ledger.index', compact('vendors'));
+        return view('admin.ledger.index');
     }
 
     /**
@@ -82,9 +72,8 @@ class LedgerController extends Controller
      */
     public function create()
     {
-        $vendors = Vendor::active()->orderBy('name')->get();
         $leads = Lead::orderBy('first_name')->get();
-        return view('admin.ledger.create', compact('vendors', 'leads'));
+        return view('admin.ledger.create', compact('leads'));
     }
 
     /**
@@ -107,57 +96,8 @@ class LedgerController extends Controller
      */
     public function show($id)
     {
-        $entry = LedgerEntry::with(['vendor', 'user', 'lead'])->findOrFail($id);
+        $entry = LedgerEntry::with(['user', 'lead'])->findOrFail($id);
         return view('admin.ledger.show', compact('entry'));
-    }
-
-    /**
-     * Display ledger entries for a specific vendor.
-     */
-    public function vendorLedger(Request $request, $vendorId)
-    {
-        $vendor = Vendor::findOrFail($vendorId);
-
-        if ($request->ajax()) {
-            $entries = LedgerEntry::with(['user', 'lead'])
-                ->where('vendor_id', $vendorId)
-                ->select('ledger_entries.*')
-                ->orderBy('transaction_date', 'desc');
-
-            return DataTables::of($entries)
-                ->addIndexColumn()
-                ->addColumn('recorded_by', function ($entry) {
-                    return $entry->user->name ?? 'N/A';
-                })
-                ->addColumn('type_badge', function ($entry) {
-                    $badges = [
-                        'debit' => '<span class="badge bg-danger">Debit</span>',
-                        'credit' => '<span class="badge bg-success">Credit</span>',
-                    ];
-                    return $badges[$entry->type] ?? '';
-                })
-                ->addColumn('formatted_amount', function ($entry) {
-                    $sign = $entry->type === 'debit' ? '-' : '+';
-                    return $sign . '$' . number_format($entry->amount, 2);
-                })
-                ->addColumn('formatted_date', function ($entry) {
-                    return $entry->transaction_date->format('M d, Y');
-                })
-                ->addColumn('action', function ($entry) {
-                    return '<a href="' . route('ledger.show', $entry->id) . '" class="btn btn-sm btn-info">View</a>';
-                })
-                ->rawColumns(['type_badge', 'action'])
-                ->make(true);
-        }
-
-        $summary = [
-            'total_credits' => $vendor->ledgerEntries()->where('type', 'credit')->sum('amount'),
-            'total_debits' => $vendor->ledgerEntries()->where('type', 'debit')->sum('amount'),
-            'balance' => $vendor->balance,
-            'entry_count' => $vendor->ledgerEntries()->count(),
-        ];
-
-        return view('admin.ledger.vendor', compact('vendor', 'summary'));
     }
 
     /**
@@ -167,12 +107,7 @@ class LedgerController extends Controller
     {
         $format = $request->input('format', 'csv');
 
-        $entries = LedgerEntry::with(['vendor', 'user', 'lead']);
-
-        // Apply filters
-        if ($request->has('vendor_id') && $request->vendor_id) {
-            $entries->where('vendor_id', $request->vendor_id);
-        }
+        $entries = LedgerEntry::with(['user', 'lead']);
 
         if ($request->has('start_date') && $request->start_date) {
             $entries->where('transaction_date', '>=', $request->start_date);
@@ -198,12 +133,11 @@ class LedgerController extends Controller
 
         $callback = function () use ($entries) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Date', 'Vendor', 'Type', 'Amount', 'Category', 'Reference', 'Description', 'Recorded By']);
+            fputcsv($file, ['Date', 'Type', 'Amount', 'Category', 'Reference', 'Description', 'Recorded By']);
 
             foreach ($entries as $entry) {
                 fputcsv($file, [
                     $entry->transaction_date->format('Y-m-d'),
-                    $entry->vendor->name ?? 'N/A',
                     ucfirst($entry->type),
                     number_format($entry->amount, 2),
                     $entry->category ?? 'N/A',
@@ -246,15 +180,7 @@ class LedgerController extends Controller
             ->get()
             ->groupBy('category');
 
-        // Vendor breakdown
-        $vendorBreakdown = LedgerEntry::with('vendor')
-            ->dateRange($startDate, $endDate)
-            ->selectRaw('vendor_id, type, SUM(amount) as total')
-            ->groupBy('vendor_id', 'type')
-            ->get()
-            ->groupBy('vendor_id');
-
-        return view('admin.ledger.summary', compact('summary', 'categoryBreakdown', 'vendorBreakdown', 'startDate', 'endDate'));
+        return view('admin.ledger.summary', compact('summary', 'categoryBreakdown', 'startDate', 'endDate'));
     }
 
     /**

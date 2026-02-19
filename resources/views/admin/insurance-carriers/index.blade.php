@@ -239,6 +239,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Partner & Carrier Analytics</small>
                         <div class="d-flex gap-2">
+                            @canEditModule('carriers')
                             @if(isset($pc['partner']->is_partner_model) && $pc['partner']->is_partner_model)
                                 <a href="{{ route('admin.partners.edit', $pc['partner']->id) }}" class="btn btn-sm btn-outline-primary" title="Edit Partner">
                                     <i class="mdi mdi-account-edit me-1"></i>Edit Partner
@@ -251,6 +252,8 @@
                             <a href="{{ route('admin.insurance-carriers.edit', $pc['carrier']->id) }}" class="btn btn-sm btn-outline-info" title="Edit Carrier">
                                 <i class="mdi mdi-briefcase-edit me-1"></i>Edit Carrier
                             </a>
+                            @endcanEditModule
+                            @canDeleteInModule('carriers')
  <form class="d-inline" action="{{ route('admin.insurance-carriers.destroy', $pc['carrier']->id) }}" method="POST" onsubmit="return confirm('⚠️ DANGER: Are you sure you want to PERMANENTLY DELETE the carrier {{ $pc['carrier']->name }} from the entire system? This will remove ALL partner assignments and cannot be undone!')">
                                 @csrf
                                 @method('DELETE')
@@ -275,6 +278,7 @@
                                     </button>
                                 </form>
                             @endif
+                            @endcanDeleteInModule
                             </form>
                         </div>
                     </div>

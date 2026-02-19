@@ -101,9 +101,11 @@
                 @endif
             </small>
             <div>
+                @canEditModule('carriers')
                 <a href="{{ route('admin.insurance-carriers.edit', $insuranceCarrier) }}" class="btn btn-outline-primary btn-sm" target="_blank">
                     <i class="mdi mdi-pencil"></i> Edit
                 </a>
+                @endcanEditModule
             </div>
         </div>
     </div>

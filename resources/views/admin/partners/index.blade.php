@@ -110,11 +110,14 @@
                                                    title="View Details">
                                                     <i class="mdi mdi-eye"></i>
                                                 </a>
+                                                @canEditModule('partners')
                                                 <a href="{{ route('admin.partners.edit', $partner->id) }}" 
                                                    class="btn btn-sm btn-outline-primary" 
                                                    title="Edit Partner">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </a>
+                                                @endcanEditModule
+                                                @canDeleteInModule('partners')
                                                 <form action="{{ route('admin.partners.destroy', $partner->id) }}" 
                                                       method="POST" 
 
@@ -127,6 +130,7 @@
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
                                                 </form>
+                                                @endcanDeleteInModule
                                             </div>
                                         </td>
                                     </tr>

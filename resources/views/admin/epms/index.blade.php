@@ -208,7 +208,9 @@
                         </div>
                         <div class="mt-3 d-flex gap-2">
                             <a href="{{ route('epms.show', $project) }}" class="btn btn-sm btn-outline-primary flex-fill"><i class="bx bx-show"></i> View</a>
+                            @canEditModule('epms')
                             <a href="{{ route('epms.edit', $project) }}" class="btn btn-sm btn-outline-secondary flex-fill"><i class="bx bx-edit"></i> Edit</a>
+                            @endcanEditModule
                         </div>
                     </div>
                 </div>

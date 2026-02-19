@@ -287,10 +287,12 @@
                                             </button>
                                         @endif
 
-                                        @unlessrole(Roles::EMPLOYEE)
+                                        @canViewModule('leads')
                                             <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i>
                                             </a>
+                                        @endcanViewModule
+                                        @canDeleteInModule('leads')
                                             <form action="{{ route('leads.delete', $lead->id) }}" method="POST" 
  class="m-0">
                                                 @csrf
@@ -300,7 +302,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                        @endhasrole
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                             @endforeach

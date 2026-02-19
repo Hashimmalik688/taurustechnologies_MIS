@@ -15,7 +15,6 @@ class LedgerEntry extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'vendor_id',
         'user_id',
         'lead_id',
         'transaction_date',
@@ -36,14 +35,6 @@ class LedgerEntry extends Model
         'transaction_date' => 'date',
         'amount' => 'decimal:2',
     ];
-
-    /**
-     * Get the vendor that owns the ledger entry.
-     */
-    public function vendor()
-    {
-        return $this->belongsTo(Vendor::class);
-    }
 
     /**
      * Get the user who recorded the ledger entry.

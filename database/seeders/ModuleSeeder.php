@@ -172,6 +172,13 @@ class ModuleSeeder extends Seeder
 
             // 6. HR Operations
             [
+                'name' => 'HR Operations',
+                'slug' => 'hr',
+                'description' => 'HR Operations hub — employee management, attendance, dock, and holidays',
+                'category' => 'HR Operations',
+                'sort_order' => 135,
+            ],
+            [
                 'name' => 'E.M.S',
                 'slug' => 'ems',
                 'description' => 'Employee Management System - manage employee records and profiles',
@@ -193,11 +200,18 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 160,
             ],
             [
-                'name' => 'Public Holidays',
+                'name' => 'Holidays',
                 'slug' => 'holidays',
-                'description' => 'Manage public holidays and office closures',
+                'description' => 'Manage company holidays and office closures',
                 'category' => 'HR Operations',
                 'sort_order' => 170,
+            ],
+            [
+                'name' => 'Public Holidays',
+                'slug' => 'public-holidays',
+                'description' => 'Manage public/national holidays for attendance calculations',
+                'category' => 'HR Operations',
+                'sort_order' => 175,
             ],
 
             // 7. Project Management
@@ -249,6 +263,13 @@ class ModuleSeeder extends Seeder
             ],
 
             // 10. Finance & Accounts
+            [
+                'name' => 'Finance & Accounts',
+                'slug' => 'finance',
+                'description' => 'Finance & Accounts hub — chart of accounts, ledger, petty cash, payroll, PABS tickets',
+                'category' => 'Finance & Accounts',
+                'sort_order' => 235,
+            ],
             [
                 'name' => 'Chart of Accounts',
                 'slug' => 'chart-of-accounts',

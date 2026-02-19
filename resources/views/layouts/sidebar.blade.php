@@ -275,130 +275,83 @@
         @endhasanyrole
 
         @hasanyrole([Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'hrOpsDropdown')">
-                <i class="bx bx-user-check"></i>
-                <span class="menu-text">HR Operations</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
-            </a>
-
-            <div class="menu-dropdown" id="hrOpsDropdown">
-                @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::HR, Roles::CEO])
-                    <a href="{{ route('employee.ems') }}" class="dropdown-item {{ Request::is('ems*') ? 'active' : '' }}">
-                        <i class="bx bx-id-card"></i>
-                        <span class="menu-text">E.M.S</span>
-                    </a>
-
-                    <a href="{{ route('attendance.index') }}" class="dropdown-item {{ Request::is('attendance*') ? 'active' : '' }}">
-                        <i class="bx bx-time-five"></i>
-                        <span class="menu-text">Attendance</span>
-                    </a>
-                @endhasanyrole
-
-                @hasanyrole([Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                    <a href="{{ route('dock.index') }}" class="dropdown-item {{ Request::is('dock*') ? 'active' : '' }}">
-                        <i class="bx bx-dock-top"></i>
-                        <span class="menu-text">Dock Management</span>
-                    </a>
-                @endhasanyrole
-
-                @hasanyrole([Roles::HR, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-                    <a href="{{ route('admin.public-holidays.index') }}" class="dropdown-item {{ Request::is('admin/public-holidays*') ? 'active' : '' }}">
-                        <i class="bx bx-calendar"></i>
-                        <span class="menu-text">Public Holidays</span>
-                    </a>
-                @endhasanyrole
-            </div>
+            @canViewModule('hr')
+                <a href="{{ route('hr.hub') }}" class="menu-item {{ Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : '' }}">
+                    <i class="bx bx-user-check"></i>
+                    <span class="menu-text">HR Operations</span>
+                </a>
+            @endcanViewModule
         @endhasanyrole
 
         {{-- EPMS - Project Management (CEO, Super Admin Only) --}}
         @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO])
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
-                <i class="bx bx-briefcase-alt"></i>
-                <span class="menu-text">Project Management</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
-            </a>
+            @canViewModule('epms')
+                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
+                    <i class="bx bx-briefcase-alt"></i>
+                    <span class="menu-text">Project Management</span>
+                    <i class="bx bx-chevron-down dropdown-icon"></i>
+                </a>
 
-            <div class="menu-dropdown" id="epmsDropdown">
-                <a href="{{ route('epms.index') }}" class="dropdown-item {{ Request::is('epms') && !Request::is('epms/*') ? 'active' : '' }}">
-                    <i class="bx bx-list-ul"></i>
-                    <span class="menu-text">All Projects</span>
-                </a>
-                <a href="{{ route('epms.create') }}" class="dropdown-item {{ Request::is('epms/create') ? 'active' : '' }}">
-                    <i class="bx bx-plus-circle"></i>
-                    <span class="menu-text">New Project</span>
-                </a>
-            </div>
+                <div class="menu-dropdown" id="epmsDropdown">
+                    <a href="{{ route('epms.index') }}" class="dropdown-item {{ Request::is('epms') && !Request::is('epms/*') ? 'active' : '' }}">
+                        <i class="bx bx-list-ul"></i>
+                        <span class="menu-text">All Projects</span>
+                    </a>
+                    <a href="{{ route('epms.create') }}" class="dropdown-item {{ Request::is('epms/create') ? 'active' : '' }}">
+                        <i class="bx bx-plus-circle"></i>
+                        <span class="menu-text">New Project</span>
+                    </a>
+                </div>
+            @endcanViewModule
         @endhasanyrole
 
         {{-- ADMIN SECTION --}}
         @unlessrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER])
             @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO, Roles::MANAGER])
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
-                    <i class="bx bx-group"></i>
-                    <span class="menu-text">Partner Management</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="partnersDropdown">
-                    <a href="{{ route('agents.index') }}" class="dropdown-item {{ Request::is('agents*') ? 'active' : '' }}">
-                        <i class="bx bx-user-circle"></i>
-                        <span class="menu-text">Partners</span>
+                @canViewModule('partners')
+                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
+                        <i class="bx bx-group"></i>
+                        <span class="menu-text">Partner Management</span>
+                        <i class="bx bx-chevron-down dropdown-icon"></i>
                     </a>
 
-                    <a href="{{ route('admin.insurance-carriers.index') }}" class="dropdown-item {{ Request::is('admin/insurance-carriers*') ? 'active' : '' }}">
-                        <i class="bx bx-buildings"></i>
-                        <span class="menu-text">Insurance Cluster</span>
-                    </a>
-                </div>
+                    <div class="menu-dropdown" id="partnersDropdown">
+                        @canViewModule('partners')
+                            <a href="{{ route('agents.index') }}" class="dropdown-item {{ Request::is('agents*') ? 'active' : '' }}">
+                                <i class="bx bx-user-circle"></i>
+                                <span class="menu-text">Partners</span>
+                            </a>
+                        @endcanViewModule
 
-
+                        @canViewModule('carriers')
+                            <a href="{{ route('admin.insurance-carriers.index') }}" class="dropdown-item {{ Request::is('admin/insurance-carriers*') ? 'active' : '' }}">
+                                <i class="bx bx-buildings"></i>
+                                <span class="menu-text">Insurance Cluster</span>
+                            </a>
+                        @endcanViewModule
+                    </div>
+                @endcanViewModule
             @endhasanyrole
 
             {{-- FINANCE SECTION --}}
             @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'financeDropdown')">
-                    <i class="bx bx-dollar-circle"></i>
-                    <span class="menu-text">Finance & Accounts</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="financeDropdown">
-                    <a href="{{ route('chart-of-accounts.index') }}" class="dropdown-item {{ Request::is('chart-of-accounts*') ? 'active' : '' }}">
-                        <i class="bx bx-list-ul"></i>
-                        <span class="menu-text">Chart of Accounts</span>
+                @canViewModule('finance')
+                    <a href="{{ route('finance.hub') }}" class="menu-item {{ Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : '' }}">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span class="menu-text">Finance & Accounts</span>
                     </a>
-
-                    <a href="{{ route('ledger.index') }}" class="dropdown-item {{ Request::is('ledger*') ? 'active' : '' }}">
-                        <i class="bx bx-book-open"></i>
-                        <span class="menu-text">General Ledger</span>
-                    </a>
-
-                    @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-                        <a href="{{ route('petty-cash.index') }}" class="dropdown-item {{ Request::is('petty-cash*') ? 'active' : '' }}">
-                            <i class="bx bx-wallet"></i>
-                            <span class="menu-text">Petty Cash</span>
-                        </a>
-                    @endhasanyrole
-
-                    <a href="{{ route('payroll.index') }}" class="dropdown-item {{ Request::is('payroll*') ? 'active' : '' }}">
-                        <i class="bx bx-credit-card-alt"></i>
-                        <span class="menu-text">Payroll</span>
-                    </a>
-
-                    <a href="{{ route('pabs.tickets.index') }}" class="dropdown-item {{ Request::is('pabs/tickets*') ? 'active' : '' }}">
-                        <i class="bx bx-message-square-error"></i>
-                        <span class="menu-text">PABS Tickets</span>
-                    </a>
-                </div>
+                @endcanViewModule
             @endhasanyrole
         @endunlessrole
 
         {{-- USERS MANAGEMENT SECTION --}}
         @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-            <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
-                <i class="bx bx-user-circle"></i>
-                <span class="menu-text">Users MGMT</span>
-            </a>
+            @canViewModule('users')
+                <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
+                    <i class="bx bx-user-circle"></i>
+                    <span class="menu-text">Users MGMT</span>
+                </a>
+            @endcanViewModule
         @endhasanyrole
 
         {{-- PERSONAL RECORDS SECTION (ALL USERS) --}}
@@ -423,12 +376,14 @@
 
     {{-- Settings pinned to bottom --}}
     @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-        <div class="sidebar-bottom">
-            <a href="{{ route('settings.hub') }}" class="sidebar-bottom-item {{ Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : '' }}">
-                <i class="bx bx-cog"></i>
-                <span class="sidebar-bottom-text">Settings</span>
-            </a>
-        </div>
+        @canViewModule('settings')
+            <div class="sidebar-bottom">
+                <a href="{{ route('settings.hub') }}" class="sidebar-bottom-item {{ Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : '' }}">
+                    <i class="bx bx-cog"></i>
+                    <span class="sidebar-bottom-text">Settings</span>
+                </a>
+            </div>
+        @endcanViewModule
     @endhasanyrole
 </div>
 
@@ -440,10 +395,12 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 18px 16px;
+        padding: 12px 16px;
         border-bottom: 1px solid rgba(212, 175, 55, 0.1);
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), transparent);
         position: relative;
+        height: 58px;
+        box-sizing: border-box;
     }
 
     .sidebar-avatar-wrapper {
@@ -453,10 +410,10 @@
     }
 
     .sidebar-avatar {
-        width: 42px;
-        height: 42px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        border: 2.5px solid var(--gold, #d4af37);
+        border: 2px solid var(--gold, #d4af37);
         object-fit: cover;
         transition: all 0.25s ease;
         box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);

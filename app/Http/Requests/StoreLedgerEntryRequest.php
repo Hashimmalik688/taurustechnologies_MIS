@@ -22,7 +22,6 @@ class StoreLedgerEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'vendor_id' => ['required', 'exists:vendors,id'],
             'lead_id' => ['nullable', 'exists:leads,id'],
             'transaction_date' => ['required', 'date'],
             'type' => ['required', 'in:debit,credit'],
@@ -42,8 +41,6 @@ class StoreLedgerEntryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'vendor_id.required' => 'Please select a vendor.',
-            'vendor_id.exists' => 'The selected vendor does not exist.',
             'lead_id.exists' => 'The selected lead does not exist.',
             'transaction_date.required' => 'Transaction date is required.',
             'transaction_date.date' => 'Please provide a valid date.',

@@ -66,10 +66,12 @@
                                 <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER])
+                                @canEditModule('leads')
                                     <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                @endcanEditModule
+                                @canDeleteInModule('leads')
                                     <form action="{{ route('leads.delete', $lead->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
                                         @csrf
                                         @method('DELETE')
@@ -77,7 +79,7 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
-                                @endhasrole
+                                @endcanDeleteInModule
                             </div>
                         </td>
                         <td>{{ $lead->id }}</td>

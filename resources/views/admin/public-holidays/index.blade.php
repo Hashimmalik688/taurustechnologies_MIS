@@ -150,10 +150,13 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
+                                            @canEditModule('holidays')
                                             <a href="{{ route('admin.public-holidays.edit', $holiday) }}" 
                                                class="btn btn-sm btn-primary" title="Edit">
                                                 <i class="mdi mdi-pencil"></i>
                                             </a>
+                                            @endcanEditModule
+                                            @canDeleteInModule('holidays')
                                             <form action="{{ route('admin.public-holidays.destroy', $holiday) }}" 
                                                   method="POST" 
                                                   onsubmit="return confirm('Are you sure you want to delete this holiday?');"
@@ -164,6 +167,7 @@
                                                     <i class="mdi mdi-delete"></i>
                                                 </button>
                                             </form>
+                                            @endcanDeleteInModule
                                         </div>
                                     </td>
                                 </tr>

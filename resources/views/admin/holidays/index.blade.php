@@ -104,10 +104,13 @@
                                                 @endif
                                             </td>
                                             <td class="text-end">
+                                                @canEditModule('holidays')
                                                 <a href="{{ route('admin.holidays.edit', $holiday) }}" 
                                                    class="btn btn-sm btn-soft-primary">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </a>
+                                                @endcanEditModule
+                                                @canDeleteInModule('holidays')
                                                 <form action="{{ route('admin.holidays.destroy', $holiday) }}" 
                                                       method="POST" 
                                                       class="d-inline"
@@ -118,6 +121,7 @@
                                                         <i class="mdi mdi-delete"></i>
                                                     </button>
                                                 </form>
+                                                @endcanDeleteInModule
                                             </td>
                                         </tr>
                                     @endforeach

@@ -136,8 +136,6 @@
             border: 2px solid white;
         }
     </style>
-    
-    <?php echo $__env->yieldContent('css'); ?>
 </head>
 
 <body>
@@ -147,47 +145,47 @@
     <div id="page-content">
         <!-- Top Header -->
         <div class="top-header">
- <div class="d-flex align-items-center" style="gap: 1rem">
-                <button class="mobile-toggle" onclick="toggleSidebar()">
-                    <i class="bx bx-menu"></i>
-                </button>
-                <div class="company-branding d-none d-lg-flex align-items-center" style="gap: 10px">
-                    <img src="<?php echo e(asset('images/icon.png')); ?>" alt="Taurus" style="height: 32px; width: auto;" onerror="this.style.display='none'">
-                    <div style="display: flex; flex-direction: column; line-height: 1.1">
-                        <span class="text-gold" style="font-weight: 800; font-size: 1.05rem; letter-spacing: 1.5px">TAURUS</span>
-                        <span style="font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted, #6b7280); text-transform: uppercase">Management Information System</span>
+            <div class="th-left">
+                <div class="th-brand">
+                    <img src="<?php echo e(asset('images/favicon.ico')); ?>" alt="Taurus" class="th-favicon">
+                    <div class="th-brand-text">
+                        <span class="th-brand-name">taurus</span>
+                        <span class="th-brand-dot"></span>
+                        <span class="th-brand-tag">mis</span>
                     </div>
                 </div>
             </div>
 
-            <div class="user-menu">
-                <!-- USA Timer Display -->
- <div class="d-flex align-items-center u-rounded-8 text-white u-fw-600 u-fs-090" style="gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%)">
-                    <i class="bx bx-time-five"></i>
-                    <span class="u-fs-080" style="opacity: 0.9">USA</span>
-                    <span id="usaTimerDisplay">--:-- --</span>
+            <div class="th-right">
+                
+                <div class="th-clocks">
+                    <div class="th-clock">
+                        <span class="th-clock-label">NY</span>
+                        <span class="th-clock-time" id="navFloridaTime">--:--</span>
+                    </div>
+                    <span class="th-clock-dot"></span>
+                    <div class="th-clock">
+                        <span class="th-clock-label">PK</span>
+                        <span class="th-clock-time" id="navPakistanTime">--:--</span>
+                    </div>
                 </div>
 
-                <!-- Theme Toggle Button -->
-                <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                
+                <button class="th-action" onclick="toggleTheme()" title="Toggle Theme">
                     <i class="bx bx-moon" id="themeIcon"></i>
                 </button>
 
-                <!-- Chat Button -->
- <div class="d-flex align-items-center position-relative u-gap-8">
- <a href="<?php echo e(route('chat.index')); ?>" class="notification-btn d-flex align-items-center text-decoration-none u-gap-6" title="Team Chat">
-                        <i class="bx bx-message-square-dots u-fs-150"></i>
- <span class="u-fw-600 u-fs-095" >Chat</span>
- <span class="chat-badge notification-badge d-none u-fs-085 text-center u-fw-700 bg-ui-success" style="padding: 4px 8px; min-width: 24px">0</span>
-                    </a>
-                </div>
+                
+                <a href="<?php echo e(route('chat.index')); ?>" class="th-action" title="Team Chat">
+                    <i class="bx bx-chat"></i>
+                    <span class="th-action-badge th-badge-green chat-badge d-none">0</span>
+                </a>
 
-                <!-- Notifications -->
+                
                 <div class="position-relative">
- <button class="notification-btn d-flex align-items-center u-gap-6" onclick="toggleNotifications()">
-                        <i class="bx bx-bell u-fs-150"></i>
- <span class="u-fw-600 u-fs-095" >Notif</span>
- <span class="notification-badge u-fs-085 text-center u-fw-700" id="notifBadge" style="padding: 4px 8px; min-width: 24px"><?php echo e(Auth::user()->unread_notifications_count); ?></span>
+                    <button class="th-action" onclick="toggleNotifications()" title="Notifications">
+                        <i class="bx bx-bell"></i>
+                        <span class="th-action-badge" id="notifBadge"><?php echo e(Auth::user()->unread_notifications_count); ?></span>
                     </button>
 
                     <!-- Notification Dropdown -->
@@ -212,8 +210,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
 
@@ -465,9 +461,9 @@
         // Close notifications when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('notificationDropdown');
-            const btn = event.target.closest('.notification-btn');
+            const notifWrapper = event.target.closest('.position-relative');
 
-            if (!btn && dropdown && !dropdown.contains(event.target)) {
+            if (!notifWrapper?.contains(dropdown) && dropdown && !dropdown.contains(event.target)) {
                 dropdown.classList.remove('show');
             }
         });
@@ -568,8 +564,6 @@
             }
         });
     </script>
-
-    <?php echo $__env->yieldContent('script'); ?>
 
     
     <script type="module">
@@ -744,27 +738,33 @@
     </div>
 
     <script>
-    // USA Timer Display in Topbar
-    function updateUSATimer() {
-        const usaTime = new Date().toLocaleString('en-US', {
+    // Dual Clock Display in Topbar
+    function updateNavClocks() {
+        const now = new Date();
+
+        const usaTime = now.toLocaleString('en-US', {
             timeZone: 'America/New_York',
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit',
             hour12: true
         });
-        
-        const timerElement = document.getElementById('usaTimerDisplay');
-        if (timerElement) {
-            timerElement.textContent = usaTime;
-        }
+        const el1 = document.getElementById('navFloridaTime');
+        if (el1) el1.textContent = usaTime;
+
+        const pakTime = now.toLocaleString('en-US', {
+            timeZone: 'Asia/Karachi',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        const el2 = document.getElementById('navPakistanTime');
+        if (el2) el2.textContent = pakTime;
     }
 
     // Initialize timer on page load
     document.addEventListener('DOMContentLoaded', function() {
-        updateUSATimer();
-        // Update every second
-        setInterval(updateUSATimer, 1000);
+        updateNavClocks();
+        setInterval(updateNavClocks, 1000);
     });
 
     // Avatar Preview

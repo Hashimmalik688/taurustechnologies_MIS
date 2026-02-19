@@ -128,9 +128,11 @@
                             Account Details
                         </h5>
                         <div>
+                            @canEditModule('chart-of-accounts')
                             <a href="{{ route('chart-of-accounts.edit', $account->id) }}" class="btn gold-gradient-btn me-2">
                                 <i class="bx bx-edit"></i> Edit
                             </a>
+                            @endcanEditModule
                             <a href="{{ route('chart-of-accounts.index') }}" class="btn btn-secondary-custom">
                                 <i class="bx bx-arrow-back"></i> Back
                             </a>

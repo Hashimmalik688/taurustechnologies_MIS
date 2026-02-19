@@ -395,10 +395,12 @@
                                                             ${{ number_format($deduction->calculated_amount, 2) }}
                                                         </td>
                                                         <td>
+                                                            @canDeleteInModule('payroll')
                                                             <button class="btn btn-sm btn-outline-danger"
                                                                 onclick="removeDeduction({{ $deduction->id }})">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
+                                                            @endcanDeleteInModule
                                                         </td>
                                                     </tr>
                                                 @endforeach

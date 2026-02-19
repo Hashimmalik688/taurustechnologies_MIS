@@ -88,11 +88,13 @@
                             <a href="{{ route('admin.public-holidays.index') }}" class="btn btn-secondary">
                                 <i class="mdi mdi-close me-1"></i>Cancel
                             </a>
+                            @canDeleteInModule('holidays')
                             <button type="button" 
                                     class="btn btn-danger float-end" 
                                     onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this holiday?')) document.getElementById('delete-form').submit();">
                                 <i class="mdi mdi-delete me-1"></i>Delete Holiday
                             </button>
+                            @endcanDeleteInModule
                         </div>
                     </form>
 

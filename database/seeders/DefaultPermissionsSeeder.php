@@ -30,6 +30,7 @@ class DefaultPermissionsSeeder extends Seeder
                 // Super Admin gets full access to everything
                 'dashboard' => 'full',
                 'leads-peregrine' => 'full',
+                'hr' => 'full',
                 'ems' => 'full',
                 'attendance' => 'full',
                 'dock' => 'full',
@@ -53,6 +54,7 @@ class DefaultPermissionsSeeder extends Seeder
                 'chargebacks' => 'full',
                 'partners' => 'full',
                 'carriers' => 'full',
+                'finance' => 'full',
                 'payroll' => 'full',
                 'chart-of-accounts' => 'full',
                 'general-ledger' => 'full',
@@ -70,6 +72,7 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::CEO => [
                 'dashboard' => 'full',
                 'leads-peregrine' => 'full',
+                'hr' => 'full',
                 'ems' => 'full',
                 'attendance' => 'full',
                 'dock' => 'full',
@@ -93,6 +96,7 @@ class DefaultPermissionsSeeder extends Seeder
                 'chargebacks' => 'full',
                 'partners' => 'full',
                 'carriers' => 'full',
+                'finance' => 'full',
                 'payroll' => 'full',
                 'chart-of-accounts' => 'full',
                 'general-ledger' => 'full',
@@ -108,6 +112,8 @@ class DefaultPermissionsSeeder extends Seeder
             ],
 
             Roles::MANAGER => [
+                'hr' => 'full',
+                'finance' => 'full',
                 'dashboard' => 'full',
                 'leads-peregrine' => 'full',
                 'ems' => 'full',
@@ -150,6 +156,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::COORDINATOR => [
                 'dashboard' => 'full',
                 'leads-peregrine' => 'edit',
+                'hr' => 'full',
+                'finance' => 'full',
                 'ems' => 'full',
                 'attendance' => 'full',
                 'dock' => 'full',
@@ -190,6 +198,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::HR => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'full',
+                'finance' => 'none',
                 'ems' => 'full',
                 'attendance' => 'full',
                 'dock' => 'edit',
@@ -230,6 +240,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::QA => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'view',
+                'finance' => 'none',
                 'ems' => 'view',
                 'attendance' => 'view',
                 'dock' => 'full',
@@ -270,6 +282,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::EMPLOYEE => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',
@@ -310,6 +324,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::VERIFIER => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',
@@ -350,6 +366,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::PEREGRINE_CLOSER => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',
@@ -390,6 +408,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::PEREGRINE_VALIDATOR => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',
@@ -430,6 +450,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::RAVENS_CLOSER => [
                 'dashboard' => 'none',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',
@@ -470,6 +492,8 @@ class DefaultPermissionsSeeder extends Seeder
             Roles::RETENTION_OFFICER => [
                 'dashboard' => 'view',
                 'leads-peregrine' => 'none',
+                'hr' => 'none',
+                'finance' => 'none',
                 'ems' => 'none',
                 'attendance' => 'view',
                 'dock' => 'view',

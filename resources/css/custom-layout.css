@@ -161,18 +161,153 @@
     margin-left: var(--sidebar-collapsed);
 }
 
-/* Top Header */
+/* ── Top Header ── */
 .top-header {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    background: #ffffff;
+    padding: 0 1.25rem;
+    height: 58px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 999;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Left: Brand */
+.th-left {
+    display: flex;
+    align-items: center;
+}
+.th-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+.th-favicon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+.th-brand-text {
+    display: flex;
+    align-items: baseline;
+    gap: 0;
+}
+.th-brand-name {
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    color: #1e293b;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+.th-brand-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold, #d4af37);
+    display: inline-block;
+    margin: 0 0.25rem;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+.th-brand-tag {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    color: var(--gold, #d4af37);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Right: Actions */
+.th-right {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+/* Clocks */
+.th-clocks {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(0,0,0,.04);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 2rem;
+    margin-right: 0.4rem;
+}
+.th-clock {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.th-clock-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+.th-clock-time {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e293b;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.2px;
+}
+.th-clock-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--gold, #d4af37);
+    opacity: .6;
+}
+
+/* Action buttons */
+.th-action {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: #475569;
+    cursor: pointer;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all .2s ease;
+}
+.th-action:hover {
+    background: rgba(212,175,55,.1);
+    color: var(--gold, #d4af37);
+}
+.th-action-badge {
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.52rem;
+    font-weight: 700;
+    min-width: 14px;
+    height: 14px;
+    padding: 0 3px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 1.5px solid #ffffff;
+}
+.th-badge-green {
+    background: #10b981;
 }
 
 /* Header specific styling */
@@ -202,7 +337,7 @@
 .user-menu {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.35rem;
 }
 
 .notification-btn {
@@ -212,7 +347,6 @@
     border: none;
     color: #6b7280;
     cursor: pointer;
-    
 }
 
 .notification-btn:hover {
@@ -221,16 +355,21 @@
 
 .notification-badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 3px;
+    right: 2px;
     background: #ef4444;
     color: white;
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
+    font-size: 0.55rem;
     font-weight: 700;
-    min-width: 20px;
-    text-align: center;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 1.5px solid #0f172a;
 }
 
 /* Notification Dropdown */

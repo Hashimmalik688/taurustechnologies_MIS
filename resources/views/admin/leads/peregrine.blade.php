@@ -247,9 +247,12 @@
                                                 <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
                                                     <i class="fas fa-eye" aria-hidden="true"></i>
                                                 </a>
+                                                @canEditModule('leads-peregrine')
                                                 <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                                     <i class="fas fa-edit" aria-hidden="true"></i>
                                                 </a>
+                                                @endcanEditModule
+                                                @canDeleteInModule('leads-peregrine')
  <form class="d-inline" action="{{ route('leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -257,6 +260,7 @@
                                                         <i class="fas fa-trash" aria-hidden="true"></i>
                                                     </button>
                                                 </form>
+                                                @endcanDeleteInModule
                                             </div>
                                         </td>
                                         <td>{{ $lead->phone_number ?? 'N/A' }}</td>

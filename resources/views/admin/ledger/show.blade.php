@@ -195,14 +195,6 @@
 
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-label">Vendor</div>
-                        <div class="info-value">John Smith</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Company</div>
-                        <div class="info-value">Smith Insurance Co.</div>
-                    </div>
-                    <div class="info-item">
                         <div class="info-label">Category</div>
                         <div class="info-value">Commission</div>
                     </div>
@@ -227,12 +219,16 @@
                 </div>
 
                 <div class="p-3 text-center" style="border-top: 1px solid rgba(212, 175, 55, 0.2);">
+                    @canEditModule('general-ledger')
                     <button class="action-btn btn-edit">
                         <i class="mdi mdi-pencil me-1"></i>Edit Transaction
                     </button>
+                    @endcanEditModule
+                    @canDeleteInModule('general-ledger')
                     <button class="action-btn btn-delete">
                         <i class="mdi mdi-delete me-1"></i>Delete Transaction
                     </button>
+                    @endcanDeleteInModule
                 </div>
             </div>
         </div>
@@ -256,7 +252,7 @@
                             <div class="timeline-icon"></div>
                             <div class="timeline-content">
                                 <div class="timeline-time">September 28, 2025 - 10:35 AM</div>
-                                <div class="timeline-text"><strong>Vendor Notified</strong><br>Email sent to vendor</div>
+                                <div class="timeline-text"><strong>Notification Sent</strong><br>Email notification sent</div>
                             </div>
                         </div>
                         <div class="timeline-item">

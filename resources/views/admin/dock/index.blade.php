@@ -182,7 +182,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if (!Auth::user()->hasRole(Roles::HR))
+                                    @canEditModule('dock')
                                     <button type="button" class="btn btn-sm btn-info" 
                                             data-record-id="{{ $record->id }}"
                                             data-employee-name="{{ $record->user?->name ?? 'Unknown' }}"
@@ -207,7 +207,9 @@
                                         </button>
                                     </form>
                                     @endif
+                                    @endcanEditModule
 
+                                    @canDeleteInModule('dock')
                                     <form action="{{ route('dock.destroy', $record->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
@@ -216,7 +218,7 @@
                                             <i class="mdi mdi-delete"></i>
                                         </button>
                                     </form>
-                                    @endif
+                                    @endcanDeleteInModule
                                 </td>
                             </tr>
                             @if ($record->notes)

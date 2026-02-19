@@ -488,6 +488,7 @@
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0 position-relative u-z-1">
                 <div class="btn-group" role="group">
+                    @canEditModule('epms')
                     <a href="{{ route('epms.edit', $project) }}" class="btn btn-light">
                         <i class="bx bx-edit me-1"></i> Edit
                     </a>
@@ -497,6 +498,7 @@
                     <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addMilestoneModal">
                         <i class="bx bx-flag me-1"></i> Milestone
                     </button>
+                    @endcanEditModule
                 </div>
             </div>
         </div>

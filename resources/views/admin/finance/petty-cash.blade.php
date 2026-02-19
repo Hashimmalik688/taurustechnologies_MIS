@@ -263,18 +263,22 @@
                                     <strong class="text-primary">{{ number_format($balanceMap[$entry->id] ?? 0, 2) }}</strong>
                                 </td>
                                 <td class="text-center">
+                                    @canEditModule('petty-cash')
                                     <button class="btn btn-sm btn-light" 
                                             onclick="editEntry({{ $entry->id }})"
                                             data-bs-toggle="tooltip" 
                                             title="Edit">
                                         <i class="bx bx-pencil text-warning"></i>
                                     </button>
+                                    @endcanEditModule
+                                    @canDeleteInModule('petty-cash')
                                     <button class="btn btn-sm btn-light" 
                                             onclick="deleteEntry({{ $entry->id }})"
                                             data-bs-toggle="tooltip" 
                                             title="Delete">
                                         <i class="bx bx-trash text-danger"></i>
                                     </button>
+                                    @endcanDeleteInModule
                                 </td>
                             </tr>
                         @empty
