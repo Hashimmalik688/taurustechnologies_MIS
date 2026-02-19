@@ -8,7 +8,7 @@
 @section('css')
     <style>
         :root {
---gold-light: #f5e6c8;
+--gold-light: var(--bs-gold-light);
 }
 
         .lead-header {
@@ -50,7 +50,7 @@
         .btn-call {
             background: var(--bs-status-present);
             border: none;
-            color: white;
+            color: var(--bs-white);
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
             font-weight: 600;
@@ -58,9 +58,9 @@
         }
 
         .btn-call:hover {
-            background: #218838;
+            background: var(--bs-ui-success-dark);
             transform: translateY(-2px);
-            color: white;
+            color: var(--bs-white);
         }
 
         .btn-back {
@@ -73,7 +73,7 @@
         }
 
         .info-card {
-            background: white;
+            background: var(--bs-card-bg);
             border-radius: 10px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 1.5rem;
@@ -121,12 +121,12 @@
         .info-value {
             font-size: 0.9rem;
             font-weight: 500;
-            color: #2d3436;
+            color: var(--bs-surface-700);
             word-wrap: break-word;
         }
 
         .info-value.empty {
-            color: #95a5a6;
+            color: var(--bs-surface-muted);
             font-style: italic;
         }
 
@@ -155,14 +155,14 @@
             font-size: 0.85rem;
         }
 
-        .status-accepted { background: #d4edda; color: #155724; }
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-rejected { background: #f8d7da; color: #721c24; }
-        .status-closed { background: #d1ecf1; color: #0c5460; }
-        .status-chargeback { background: #f5c6cb; color: #721c24; }
+        .status-accepted { background: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
+        .status-pending { background: var(--bs-surface-50); color: var(--bs-gold-dark); }
+        .status-rejected { background: var(--bs-surface-50); color: var(--bs-ui-danger-dark); }
+        .status-closed { background: var(--bs-surface-100); color: var(--bs-ui-info-dark); }
+        .status-chargeback { background: var(--bs-surface-200); color: var(--bs-ui-danger-dark); }
 
         .section-divider {
-            border-top: 2px solid #e9ecef;
+            border-top: 2px solid var(--bs-surface-200);
             margin: 1.5rem 0;
         }
 
@@ -174,7 +174,7 @@
             display: flex;
             align-items: center;
             padding: 0.75rem 1rem;
-            border-left: 3px solid #e9ecef;
+            border-left: 3px solid var(--bs-surface-200);
             margin-bottom: 0.5rem;
             transition: all 0.3s ease;
             border-radius: 0 8px 8px 0;
@@ -194,7 +194,7 @@
         .checklist-checkbox {
             width: 24px;
             height: 24px;
-            border: 2px solid #dee2e6;
+            border: 2px solid var(--bs-surface-200);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -216,7 +216,7 @@
         }
 
         .checklist-checkbox i {
-            color: white;
+            color: var(--bs-white);
             font-size: 14px;
         }
 

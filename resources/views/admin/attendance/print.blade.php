@@ -15,7 +15,7 @@
             font-family: Calibri, 'Segoe UI', Arial, sans-serif;
             font-size: 11px;
             line-height: 1.4;
-            color: #000;
+            color: var(--bs-surface-900);
             background: white;
             padding: 15px;
         }
@@ -23,28 +23,28 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 3px solid #000;
+            border-bottom: 3px solid var(--bs-surface-900);
             padding-bottom: 12px;
         }
 
         .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #000;
+            color: var(--bs-surface-900);
             margin-bottom: 5px;
             letter-spacing: 1px;
         }
 
         .company-subtext {
             font-size: 12px;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 8px;
         }
 
         .report-title {
             font-size: 15px;
             font-weight: 600;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 3px;
         }
 
@@ -54,9 +54,9 @@
             gap: 12px;
             font-size: 11px;
             margin-bottom: 15px;
-            background: #f5f5f5;
+            background: var(--bs-surface-50);
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bs-surface-200);
         }
 
         .info-item {
@@ -66,13 +66,13 @@
 
         .info-label {
             font-weight: bold;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 2px;
             font-size: 10px;
         }
 
         .info-value {
-            color: #000;
+            color: var(--bs-surface-900);
             font-weight: 600;
             font-size: 12px;
         }
@@ -88,9 +88,9 @@
         .print-buttons button,
         .print-buttons a {
             padding: 10px 20px;
-            background: #333;
+            background: var(--bs-surface-700);
             color: white;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             border-radius: 4px;
             cursor: pointer;
             font-size: 13px;
@@ -103,44 +103,44 @@
 
         .print-buttons button:hover,
         .print-buttons a:hover {
-            background: #000;
+            background: var(--bs-surface-900);
         }
 
         .back-btn {
-            background: #666 !important;
+            background: var(--bs-surface-500) !important;
         }
 
         .back-btn:hover {
-            background: #555 !important;
+            background: var(--bs-surface-500) !important;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
         }
 
         th {
-            background-color: #333;
-            color: #fff;
+            background-color: var(--bs-surface-700);
+            color: var(--bs-white, #fff);
             font-weight: bold;
             padding: 6px 3px;
             text-align: center;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             font-size: 10px;
             white-space: nowrap;
         }
 
         td {
             padding: 5px 3px;
-            border: 1px solid #333;
+            border: 1px solid var(--bs-surface-700);
             font-size: 10px;
             text-align: center;
         }
 
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: var(--bs-surface-50);
         }
 
         .text-left {
@@ -149,48 +149,48 @@
 
         /* Status color coding */
         .status-p {
-            background-color: #d4edda !important;
-            color: #155724;
+            background-color: var(--bs-surface-50) !important;
+            color: var(--bs-ui-success-dark);
             font-weight: 600;
         }
 
         .status-l {
-            background-color: #fff3cd !important;
-            color: #856404;
+            background-color: var(--bs-surface-50) !important;
+            color: var(--bs-gold-dark);
             font-weight: 600;
         }
 
         .status-a {
-            background-color: #f8d7da !important;
-            color: #721c24;
+            background-color: var(--bs-surface-50) !important;
+            color: var(--bs-ui-danger-dark);
             font-weight: 600;
         }
 
         .status-pl {
-            background-color: #d1ecf1 !important;
-            color: #0c5460;
+            background-color: var(--bs-surface-100) !important;
+            color: var(--bs-ui-info-dark);
             font-weight: 600;
         }
 
         .status-h {
-            background-color: #e2e3e5 !important;
-            color: #383d41;
+            background-color: var(--bs-surface-200) !important;
+            color: var(--bs-surface-600);
             font-weight: 600;
         }
 
         .status-weekend {
             background-color: var(--bs-status-absent) !important;
-            color: #fff;
+            color: var(--bs-white, #fff);
             font-weight: 600;
         }
 
         .terminated-row {
-            background-color: #f5f5f5 !important;
+            background-color: var(--bs-surface-50) !important;
             opacity: 0.85;
         }
 
         .terminated-badge {
-            color: #921c1c;
+            color: var(--bs-ui-danger-dark);
             font-weight: 600;
             font-size: 9px;
             margin-left: 3px;
@@ -198,19 +198,19 @@
 
         .weekend-header {
             background-color: var(--bs-status-absent) !important;
-            color: #fff !important;
+            color: var(--bs-white, #fff) !important;
         }
 
         .totals-cell {
             font-weight: 700;
-            background-color: #e9ecef !important;
+            background-color: var(--bs-surface-200) !important;
         }
 
         .legend {
             margin: 12px 0;
             padding: 8px;
             background-color: var(--bs-surface-bg-light);
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             border-radius: 4px;
         }
 
@@ -236,7 +236,7 @@
         .legend-box {
             width: 20px;
             height: 20px;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -255,7 +255,7 @@
                 display: none;
             }
             th {
-                background-color: #333 !important;
+                background-color: var(--bs-surface-700) !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -354,8 +354,8 @@
         <thead>
             <tr>
                 <th rowspan="2" style="width: 25px;">S.No</th>
-                <th rowspan="2" style="width: 40px;">ID</th>
-                <th rowspan="2" style="width: 140px;">Name</th>
+                <th rowspan="2" class="u-w-40">ID</th>
+                <th rowspan="2" class="u-w-140">Name</th>
                 <th rowspan="2" style="width: 110px;">Position</th>
                 <th colspan="{{ count($dates) }}">Dates</th>
                 <th colspan="5">Totals</th>
@@ -369,11 +369,11 @@
                         {{ $date->format('d') }}
                     </th>
                 @endforeach
-                <th style="width: 30px;">P</th>
-                <th style="width: 30px;">L</th>
-                <th style="width: 30px;">A</th>
-                <th style="width: 30px;">PL</th>
-                <th style="width: 30px;">H</th>
+                <th class="u-w-30">P</th>
+                <th class="u-w-30">L</th>
+                <th class="u-w-30">A</th>
+                <th class="u-w-30">PL</th>
+                <th class="u-w-30">H</th>
             </tr>
         </thead>
         <tbody>
@@ -413,7 +413,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="{{ count($dates) + 9 }}" style="text-align: center; padding: 20px;">
+ <td class="text-center p-4" colspan="{{ count($dates) + 9 }}">
                         No employee data available for this period.
                     </td>
                 </tr>
@@ -422,7 +422,7 @@
     </table>
 
     <!-- Summary Section -->
-    <div style="margin-top: 20px; font-size: 10px; color: #666;">
+    <div class="u-fs-10 text-surface-500" style="margin-top: 20px">
         <strong>Note:</strong> This report includes all trackable employees. Weekends (Saturday & Sunday) and public holidays are marked with (-) and highlighted in red.
     </div>
 </body>

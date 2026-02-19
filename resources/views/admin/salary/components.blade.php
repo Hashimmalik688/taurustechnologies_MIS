@@ -8,16 +8,16 @@
 <link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
 <style>
     .component-badge-basic {
-        background: #0d6efd;
-        color: white;
+        background: var(--bs-primary);
+        color: var(--bs-white);
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-weight: 600;
         font-size: 0.75rem;
     }
     .component-badge-bonus {
-        background: #198754;
-        color: white;
+        background: var(--bs-ui-success);
+        color: var(--bs-white);
         padding: 0.35rem 0.85rem;
         border-radius: 20px;
         font-weight: 600;
@@ -30,11 +30,11 @@
         font-size: 0.75rem;
     }
     .status-calculated { background: var(--bs-status-leave); color: black; }
-    .status-approved { background: #17a2b8; color: white; }
-    .status-paid { background: var(--bs-status-present); color: white; }
-    .status-draft { background: var(--bs-status-default); color: white; }
+    .status-approved { background: var(--bs-info); color: var(--bs-white); }
+    .status-paid { background: var(--bs-status-present); color: var(--bs-white); }
+    .status-draft { background: var(--bs-status-default); color: var(--bs-white); }
     .payment-date {
-        background: #e7f3ff;
+        background: var(--bs-surface-50);
         padding: 0.25rem 0.6rem;
         border-radius: 4px;
         font-size: 0.85rem;
@@ -64,7 +64,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1" style="color: var(--bs-gold);">
+ <h1 class="h3 mb-1 text-gold" >
                         <i class="bx bx-wallet me-2"></i>
                         Salary Components (Basic & Bonus Sheets)
                     </h1>
@@ -135,12 +135,12 @@
     <!-- Components Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0"><i class="bx bx-table me-2" style="color: var(--bs-gold);"></i> Salary Components</h5>
+ <h5 class="mb-0 text-gold"><i class="bx bx-table me-2" ></i> Salary Components</h5>
         </div>
         <div class="card-body">
             @if($components->isEmpty())
                 <div class="text-center py-5" style="opacity: 0.6;">
-                    <i class="bx bx-inbox" style="font-size: 4rem; color: var(--bs-gold);"></i>
+ <i class="bx bx-inbox u-fs-4 text-gold" ></i>
                     <h5 class="mt-3 text-muted">No Salary Components Found</h5>
                     <p class="text-muted">Calculate salaries to generate basic and bonus salary sheets</p>
                 </div>
@@ -202,7 +202,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <strong style="color: var(--bs-ui-success);">Rs{{ number_format($component->net_amount, 2) }}</strong>
+ <strong class="text-ui-success" >Rs{{ number_format($component->net_amount, 2) }}</strong>
                                 </td>
                                 <td>
                                     <span class="status-badge status-{{ $component->status }}">
@@ -245,7 +245,7 @@
                             @empty
                             <tr>
                                 <td colspan="9" class="text-center py-4">
-                                    <i class="bx bx-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
+ <i class="bx bx-inbox u-fs-2 u-opacity-50"></i>
                                     <p class="text-muted mt-2">No components match your filters</p>
                                 </td>
                             </tr>

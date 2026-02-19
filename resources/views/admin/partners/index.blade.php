@@ -117,7 +117,7 @@
                                                 </a>
                                                 <form action="{{ route('admin.partners.destroy', $partner->id) }}" 
                                                       method="POST" 
-                                                      style="display: inline;" 
+
                                                       onsubmit="return confirm('Are you sure you want to delete {{ $partner->name }}? This will remove all carrier assignments.');">
                                                     @csrf
                                                     @method('DELETE')
@@ -160,7 +160,7 @@
         .avatar-title {
             align-items: center;
             background-color: var(--bs-chart-primary);
-            color: #fff;
+            color: var(--bs-white, #fff);
             display: flex;
             font-weight: 500;
             height: 100%;

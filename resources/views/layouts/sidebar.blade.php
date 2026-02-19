@@ -1,14 +1,45 @@
 @use('App\Support\Roles')
 <!-- ========== Left Sidebar Start ========== -->
 <div id="sidebar">
-    <!-- Logo -->
-    <div class="sidebar-logo">
-        <div class="logo-icon">
-            <img src="{{ asset('images/icon.png') }}" alt="Taurus" onerror="this.style.display='none'">
+    <!-- User Profile -->
+    <div class="sidebar-profile" id="sidebarProfile">
+        <div class="sidebar-avatar-wrapper" onclick="toggleProfileDropdown(event)">
+            @if(Auth::user()->avatar)
+                <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="sidebar-avatar">
+            @else
+                <div class="sidebar-avatar sidebar-avatar-initial">
+                    {{ substr(Auth::user()->name, 0, 1) }}
+                </div>
+            @endif
         </div>
-        <div class="logo-content">
-            <span class="logo-text">TAURUS</span>
-            <span class="logo-subtext">Management System</span>
+        <div class="sidebar-profile-info">
+            <span class="sidebar-profile-name">{{ Auth::user()->name }}</span>
+            <span class="sidebar-profile-role">{{ Auth::user()->roles->first()?->name ?? 'User' }}</span>
+        </div>
+        <!-- Profile Dropdown -->
+        <div class="sidebar-profile-dropdown" id="profileDropdown">
+            <div class="profile-dropdown-header">
+                <div class="profile-dropdown-avatar">
+                    @if(Auth::user()->avatar)
+                        <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                    @else
+                        <div class="avatar-initial">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                    @endif
+                </div>
+                <div class="profile-dropdown-info">
+                    <span class="profile-dropdown-name">{{ Auth::user()->name }}</span>
+                    <span class="profile-dropdown-email">{{ Auth::user()->email }}</span>
+                </div>
+            </div>
+            <div class="profile-dropdown-divider"></div>
+            <a href="#" class="profile-dropdown-item" data-bs-toggle="modal" data-bs-target="#profileSettingsModal" onclick="closeProfileDropdown()">
+                <i class="bx bx-edit-alt"></i>
+                <span>Edit Profile</span>
+            </a>
+            <a href="{{ route('logout.get') }}" class="profile-dropdown-item profile-dropdown-logout">
+                <i class="bx bx-log-out"></i>
+                <span>Logout</span>
+            </a>
         </div>
     </div>
 
@@ -320,37 +351,7 @@
                     </a>
                 </div>
 
-                @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'settingsDropdown')">
-                        <i class="bx bx-cog"></i>
-                        <span class="menu-text">Settings</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
-                    </a>
 
-                    <div class="menu-dropdown" id="settingsDropdown">
-                        <a href="{{ route('settings.index') }}" class="dropdown-item {{ Request::is('settings') && !Request::is('settings/permissions*') ? 'active' : '' }}">
-                            <i class="bx bx-slider-alt"></i>
-                            <span class="menu-text">System Settings</span>
-                        </a>
-
-                        @hasrole(Roles::SUPER_ADMIN)
-                            <a href="{{ route('settings.permissions.index') }}" class="dropdown-item {{ Request::is('settings/permissions*') ? 'active' : '' }}">
-                                <i class="bx bx-shield-alt"></i>
-                                <span class="menu-text">Permissions Manager</span>
-                            </a>
-                        @endhasrole
-
-                        <a href="{{ route('admin.dupe-checker.index') }}" class="dropdown-item {{ Request::is('admin/dupe-checker*') ? 'active' : '' }}">
-                            <i class="bx bx-copy-alt"></i>
-                            <span class="menu-text">Duplicate Checker</span>
-                        </a>
-
-                        <a href="{{ route('admin.account-switching-log') }}" class="dropdown-item {{ Request::is('admin/account-switching-log*') ? 'active' : '' }}">
-                            <i class="bx bx-transfer"></i>
-                            <span class="menu-text">Account Switch Log</span>
-                        </a>
-                    </div>
-                @endhasanyrole
             @endhasanyrole
 
             {{-- FINANCE SECTION --}}
@@ -419,58 +420,239 @@
             </a>
         </div>
     </nav>
+
+    {{-- Settings pinned to bottom --}}
+    @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
+        <div class="sidebar-bottom">
+            <a href="{{ route('settings.hub') }}" class="sidebar-bottom-item {{ Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : '' }}">
+                <i class="bx bx-cog"></i>
+                <span class="sidebar-bottom-text">Settings</span>
+            </a>
+        </div>
+    @endhasanyrole
 </div>
 
 <style>
     /* ===== MODERN FLAT SIDEBAR DESIGN ===== */
-    
-    /* Logo Section */
-    .sidebar-logo {
+
+    /* Sidebar Profile Section */
+    .sidebar-profile {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 22px 18px;
+        gap: 12px;
+        padding: 18px 16px;
         border-bottom: 1px solid rgba(212, 175, 55, 0.1);
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), transparent);
+        position: relative;
     }
 
-    .logo-icon img {
+    .sidebar-avatar-wrapper {
+        cursor: pointer;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .sidebar-avatar {
         width: 42px;
         height: 42px;
-        object-fit: contain;
-        border-radius: 8px;
+        border-radius: 50%;
+        border: 2.5px solid var(--gold, #d4af37);
+        object-fit: cover;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
     }
 
-    .logo-content {
+    .sidebar-avatar-initial {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--gold, #d4af37), #b8922e);
+        color: #fff;
+    }
+
+    .sidebar-avatar-wrapper:hover .sidebar-avatar {
+        transform: scale(1.05);
+        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+        border-color: var(--gold-dark, #b8922e);
+    }
+
+    .sidebar-profile-info {
         display: flex;
         flex-direction: column;
         gap: 2px;
+        overflow: hidden;
+        min-width: 0;
     }
 
-    .logo-text {
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: var(--gold, var(--bs-gold));
-        letter-spacing: 0.8px;
-        line-height: 1;
+    .sidebar-profile-name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-primary, var(--bs-surface-700));
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
     }
 
-    .logo-subtext {
-        font-size: 0.68rem;
-        color: var(--text-muted, var(--bs-surface-muted));
-        font-weight: 500;
-        letter-spacing: 0.5px;
+    .sidebar-profile-role {
+        font-size: 0.72rem;
+        color: var(--gold, #d4af37);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
-    #sidebar.collapsed .logo-content {
+    #sidebar.collapsed .sidebar-profile-info {
         display: none;
+    }
+
+    #sidebar.collapsed .sidebar-profile {
+        justify-content: center;
+        padding: 14px 8px;
+    }
+
+    /* Profile Dropdown */
+    .sidebar-profile-dropdown {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 12px;
+        width: 240px;
+        background: var(--bg-panel, #ffffff);
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .sidebar-profile-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    #sidebar.collapsed .sidebar-profile-dropdown {
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px);
+    }
+
+    #sidebar.collapsed .sidebar-profile-dropdown.show {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .profile-dropdown-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.06), transparent);
+    }
+
+    .profile-dropdown-avatar img,
+    .profile-dropdown-avatar .avatar-initial {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 2px solid var(--gold, #d4af37);
+        object-fit: cover;
+    }
+
+    .profile-dropdown-avatar .avatar-initial {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        background: linear-gradient(135deg, var(--gold, #d4af37), #b8922e);
+        color: #fff;
+    }
+
+    .profile-dropdown-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+    }
+
+    .profile-dropdown-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary, #111827);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .profile-dropdown-email {
+        font-size: 0.72rem;
+        color: var(--text-muted, #6b7280);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .profile-dropdown-divider {
+        height: 1px;
+        background: rgba(212, 175, 55, 0.1);
+        margin: 0;
+    }
+
+    .profile-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 16px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: var(--text-secondary, #374151) !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .profile-dropdown-item i {
+        font-size: 18px;
+        color: var(--text-muted, #6b7280);
+        transition: all 0.2s ease;
+    }
+
+    .profile-dropdown-item:hover {
+        background: rgba(212, 175, 55, 0.08);
+        color: var(--gold, #d4af37) !important;
+    }
+
+    .profile-dropdown-item:hover i {
+        color: var(--gold, #d4af37);
+    }
+
+    .profile-dropdown-logout {
+        border-top: 1px solid rgba(220, 38, 38, 0.06);
+    }
+
+    .profile-dropdown-logout:hover {
+        background: rgba(220, 38, 38, 0.06) !important;
+        color: #dc2626 !important;
+    }
+
+    .profile-dropdown-logout:hover i {
+        color: #dc2626 !important;
     }
 
     /* Sidebar Menu */
     .sidebar-menu {
         padding: 12px 0;
         overflow-y: auto;
-        max-height: calc(100vh - 100px);
+        flex: 1;
+        min-height: 0;
     }
 
     /* Menu Items - Flat Design */
@@ -653,7 +835,7 @@
         width: 26px;
         height: 26px;
         background: linear-gradient(135deg, var(--gold, var(--bs-gold)), var(--gold-dark, var(--bs-gold-dark))) !important;
-        color: white !important;
+        color: var(--bs-white) !important;
         border: 2px solid white;
         border-radius: 50%;
         display: flex;
@@ -729,9 +911,85 @@
     @@hasrole + @@hasrole .menu-item:first-child {
         margin-top: 8px;
     }
+
+    /* Sidebar Bottom - Pinned Settings */
+    .sidebar-bottom {
+        padding: 8px 12px;
+        border-top: 1px solid rgba(212, 175, 55, 0.1);
+        flex-shrink: 0;
+    }
+
+    .sidebar-bottom-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-secondary, var(--bs-surface-500)) !important;
+        text-decoration: none !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+    .sidebar-bottom-item i {
+        font-size: 21px;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar-bottom-item:hover {
+        background: rgba(212, 175, 55, 0.1);
+        color: var(--gold, var(--bs-gold)) !important;
+    }
+
+    .sidebar-bottom-item:hover i {
+        color: var(--gold, var(--bs-gold));
+        transform: rotate(90deg);
+    }
+
+    .sidebar-bottom-item.active {
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%);
+        color: var(--gold, var(--bs-gold)) !important;
+        font-weight: 600;
+    }
+
+    .sidebar-bottom-item.active i {
+        color: var(--gold, var(--bs-gold));
+    }
+
+    #sidebar.collapsed .sidebar-bottom-item {
+        justify-content: center;
+        padding: 12px;
+    }
+
+    #sidebar.collapsed .sidebar-bottom-text {
+        display: none;
+    }
 </style>
 
 <script>
+    function toggleProfileDropdown(event) {
+        event.stopPropagation();
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    function closeProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        dropdown.classList.remove('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const profile = document.getElementById('sidebarProfile');
+        if (dropdown && profile && !profile.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+
     function toggleDropdown(event, dropdownId) {
         event.preventDefault();
         const dropdown = document.getElementById(dropdownId);

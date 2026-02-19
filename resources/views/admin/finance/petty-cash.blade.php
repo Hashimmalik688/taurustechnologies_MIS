@@ -29,7 +29,7 @@
                 <!-- Category Filter -->
                 <div>
                     <label class="form-label small mb-2">Category</label>
-                    <select name="head" class="form-select form-select-sm" style="min-width: 150px;">
+ <select name="head" class="form-select form-select-sm u-min-w-150" >
                         <option value="">-- All Categories --</option>
                         @foreach($heads as $head)
                             <option value="{{ $head }}" {{ $selectedHead === $head ? 'selected' : '' }}>
@@ -42,13 +42,13 @@
                 <!-- Date From Filter -->
                 <div>
                     <label class="form-label small mb-2">From Date</label>
-                    <input type="date" name="from_date" class="form-control form-control-sm" value="{{ $fromDate }}" style="min-width: 140px;">
+ <input type="date" name="from_date" class="form-control form-control-sm u-min-w-140" value="{{ $fromDate }}" >
                 </div>
 
                 <!-- Date To Filter -->
                 <div>
                     <label class="form-label small mb-2">To Date</label>
-                    <input type="date" name="to_date" class="form-control form-control-sm" value="{{ $toDate }}" style="min-width: 140px;">
+ <input type="date" name="to_date" class="form-control form-control-sm u-min-w-140" value="{{ $toDate }}" >
                 </div>
 
                 <!-- Action Buttons -->
@@ -122,7 +122,7 @@
                             <p class="text-muted mb-1">Total Debits</p>
                             <h4 class="mb-0 text-success">{{ number_format($totalDebit, 2) }}</h4>
                         </div>
-                        <div class="text-success" style="font-size: 2rem;">
+ <div class="text-success u-fs-2" >
                             <i class="bx bx-arrow-from-left"></i>
                         </div>
                     </div>
@@ -137,7 +137,7 @@
                             <p class="text-muted mb-1">Total Credits</p>
                             <h4 class="mb-0 text-danger">{{ number_format($totalCredit, 2) }}</h4>
                         </div>
-                        <div class="text-danger" style="font-size: 2rem;">
+ <div class="text-danger u-fs-2" >
                             <i class="bx bx-arrow-to-left"></i>
                         </div>
                     </div>
@@ -154,7 +154,7 @@
                                 {{ number_format($currentBalance, 2) }}
                             </h4>
                         </div>
-                        <div style="font-size: 2rem; color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }};">
+ <div class="u-fs-2" style="color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }}">
                             <i class="bx bx-wallet"></i>
                         </div>
                     </div>
@@ -169,7 +169,7 @@
                             <p class="text-muted mb-1">Total Entries</p>
                             <h4 class="mb-0 text-info">{{ $entries->count() }}</h4>
                         </div>
-                        <div class="text-info" style="font-size: 2rem;">
+ <div class="text-info u-fs-2" >
                             <i class="bx bx-list-check"></i>
                         </div>
                     </div>
@@ -220,14 +220,14 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-center" style="width: 60px;">S.N.</th>
+                            <th class="text-center u-w-60">S.N.</th>
                             <th>Date</th>
                             <th>Description</th>
                             <th>Head/Category</th>
                             <th class="text-end">Debit</th>
                             <th class="text-end">Credit</th>
                             <th class="text-end">Balance</th>
-                            <th class="text-center" style="width: 120px;">Actions</th>
+ <th class="text-center u-w-120" >Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -281,7 +281,7 @@
                             <tr>
                                 <td colspan="8" class="text-center py-5">
                                     <p class="text-muted mb-0">
-                                        <i class="bx bx-inbox" style="font-size: 2rem;"></i><br>
+ <i class="bx bx-inbox u-fs-2" ></i><br>
                                         No entries found. Click "Add Entry" to create one.
                                     </p>
                                 </td>
@@ -429,14 +429,14 @@
             </div>
             <div class="modal-body">
                 <p class="text-center my-3">
-                    <i class="bx bx-question-mark" style="font-size: 2rem; color: var(--bs-status-absent);"></i>
+ <i class="bx bx-question-mark u-fs-2" style="color: var(--bs-status-absent)"></i>
                 </p>
                 <p class="text-center">Are you sure you want to delete this entry?</p>
                 <p class="text-muted text-center"><small>This action cannot be undone.</small></p>
             </div>
             <div class="modal-footer border-top">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
+ <form class="d-inline" id="deleteForm" method="POST" >
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">

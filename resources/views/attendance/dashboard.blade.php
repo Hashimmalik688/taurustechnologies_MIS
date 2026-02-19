@@ -5,7 +5,7 @@
 @section('css')
 <style>
 .attendance-calendar {
-    background: white;
+    background: var(--bs-card-bg);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -47,7 +47,7 @@
     position: relative;
     cursor: pointer;
     transition: all 0.2s;
-    background: white;
+    background: var(--bs-card-bg);
 }
 
 .calendar-day:hover {
@@ -65,32 +65,32 @@
 }
 
 .calendar-day.present {
-    background: #d1fae5;
+    background: var(--bs-surface-50);
     border-color: var(--bs-ui-success);
 }
 
 .calendar-day.late {
-    background: #fed7aa;
+    background: var(--bs-surface-50);
     border-color: var(--bs-ui-warning);
 }
 
 .calendar-day.absent {
-    background: #fee2e2;
+    background: var(--bs-surface-50);
     border-color: var(--bs-ui-danger);
 }
 
 .calendar-day.half_day {
-    background: #dbeafe;
+    background: var(--bs-surface-50);
     border-color: var(--bs-ui-info);
 }
 
 .calendar-day.paid_leave {
-    background: #e9d5ff;
-    border-color: #a855f7;
+    background: var(--bs-surface-50);
+    border-color: var(--bs-ui-purple);
 }
 
 .calendar-day.holiday {
-    background: #e0e7ff;
+    background: var(--bs-surface-50);
     border-color: var(--bs-ui-indigo);
 }
 
@@ -120,7 +120,7 @@
 }
 
 .stat-box {
-    background: white;
+    background: var(--bs-card-bg);
     border: 2px solid var(--bs-surface-200);
     border-radius: 8px;
     padding: 1rem;
@@ -129,27 +129,27 @@
 
 .stat-box.present {
     border-color: var(--bs-ui-success);
-    background: #d1fae5;
+    background: var(--bs-surface-50);
 }
 
 .stat-box.absent {
     border-color: var(--bs-ui-danger);
-    background: #fee2e2;
+    background: var(--bs-surface-50);
 }
 
 .stat-box.late {
     border-color: var(--bs-ui-warning);
-    background: #fed7aa;
+    background: var(--bs-surface-50);
 }
 
 .stat-box.half_day {
     border-color: var(--bs-ui-info);
-    background: #dbeafe;
+    background: var(--bs-surface-50);
 }
 
 .stat-box.paid_leave {
-    border-color: #a855f7;
-    background: #e9d5ff;
+    border-color: var(--bs-ui-purple);
+    background: var(--bs-surface-50);
 }
 
 .stat-value {
@@ -167,7 +167,7 @@
 }
 
 .checkin-widget {
-    background: white;
+    background: var(--bs-card-bg);
     border: 2px solid var(--bs-gold);
     border-radius: 8px;
     padding: 1.5rem;
@@ -177,7 +177,7 @@
 
 .btn-checkin {
     background: var(--bs-gold);
-    color: white;
+    color: var(--bs-white);
     border: none;
     padding: 0.75rem 2rem;
     border-radius: 8px;
@@ -195,11 +195,11 @@
 
 .btn-checkout {
     background: var(--bs-surface-500);
-    color: white;
+    color: var(--bs-white);
 }
 
 .btn-checkout:hover {
-    background: #4b5563;
+    background: var(--bs-surface-600);
 }
 
 .today-status {
@@ -211,18 +211,18 @@
 }
 
 .today-status.present {
-    background: #d1fae5;
-    color: #065f46;
+    background: var(--bs-surface-50);
+    color: var(--bs-ui-success-dark);
 }
 
 .today-status.late {
-    background: #fed7aa;
-    color: #92400e;
+    background: var(--bs-surface-50);
+    color: var(--bs-ui-warning);
 }
 
 .today-status.absent {
-    background: #fee2e2;
-    color: #991b1b;
+    background: var(--bs-surface-50);
+    color: var(--bs-ui-danger-dark);
 }
 </style>
 @endsection
@@ -353,7 +353,7 @@
                             <div class="{{ implode(' ', $classes) }}" title="{{ $title }}">
                                 <div class="day-number">{{ $day['date']->format('j') }}</div>
                                 @if($day['holiday'])
-                                    <div class="day-status" style="color: var(--bs-ui-indigo);">
+ <div class="day-status text-ui-indigo" >
                                         <i class="bx bx-calendar-star"></i> HOLIDAY
                                     </div>
                                     <div class="day-time" style="font-size: 0.55rem;">

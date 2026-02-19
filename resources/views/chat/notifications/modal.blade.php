@@ -19,15 +19,15 @@
                 </div>
 
                 <!-- Content -->
-                <div id="notificationModalContent" style="display: none;">
+ <div class="d-none" id="notificationModalContent" >
                     <!-- Notification Permission Status -->
-                    <div id="permissionAlert" class="alert alert-info" style="display: none;">
+ <div id="permissionAlert" class="alert alert-info d-none" >
                         <i class="bx bx-info-circle"></i>
                         <small id="permissionAlertText">
                             Enable notifications in your browser settings to receive desktop notifications
                         </small>
                         <button type="button" class="btn btn-sm btn-outline-primary float-end" 
-                            id="enableNotificationsBtn" style="display: none;">
+ id="enableNotificationsBtn" >
                             Enable
                         </button>
                     </div>
@@ -96,7 +96,7 @@
         top: -5px;
         right: -5px;
         background-color: var(--bs-status-absent);
-        color: white;
+        color: var(--bs-white);
         border-radius: 50%;
         width: 20px;
         height: 20px;

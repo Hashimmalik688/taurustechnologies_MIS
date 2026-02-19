@@ -70,14 +70,14 @@
                 margin-left: 4px;
             }
             .form-control:disabled, .form-select:disabled {
-                background-color: #e9ecef;
+                background-color: var(--bs-surface-200);
                 opacity: 1;
             }
             .readonly-value {
                 background-color: var(--bs-surface-bg-light);
                 padding: 10px 14px;
                 border-radius: 6px;
-                border: 1px solid #e0e0e0;
+                border: 1px solid var(--bs-surface-200);
                 font-weight: 500;
             }
         </style>

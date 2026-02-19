@@ -1,25 +1,25 @@
 <!-- Sticky Notes Floating Button & Modal -->
 <div id="sticky-notes-wrapper">
     <!-- Floating Button -->
-    <button id="sticky-notes-btn" class="btn btn-warning rounded-circle shadow-lg" 
-            style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; z-index: 9999; border: none;">
+    <button id="sticky-notes-btn" class="btn btn-warning rounded-circle shadow-lg position-fixed u-w-60 u-z-9999" 
+ style="bottom: 30px; right: 30px; height: 60px">
         <i class="bx bx-note" style="font-size: 24px;"></i>
     </button>
 
     <!-- Sticky Notes Container (Hidden by default) -->
-    <div id="sticky-notes-container" style="display: none; position: fixed; bottom: 100px; right: 30px; z-index: 9998; width: 350px; max-height: 500px; overflow-y: auto; background: rgba(255,255,255,0.95); border-radius: 10px; backdrop-filter: blur(10px); padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
+ <div class="d-none u-overflow-y-auto u-rounded-10 position-fixed" id="sticky-notes-container" style="bottom: 100px; right: 30px; z-index: 9998; width: 350px; max-height: 500px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.2)">
         <!-- Notes will be rendered here -->\n    </div>
 
     <!-- Add Note Button (visible when container is shown) -->
-    <button id="add-sticky-note-btn" class="btn btn-sm btn-success" 
-            style="display: none; position: fixed; bottom: 100px; right: 30px; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+    <button id="add-sticky-note-btn" class="btn btn-sm btn-success position-fixed u-z-9999" 
+ style="bottom: 100px; right: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.2)">
         <i class="bx bx-plus"></i> New Note
     </button>
 </div>
 
 <style>
 .sticky-note {
-    background: #ffd700;
+    background: var(--bs-gold);
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -95,7 +95,7 @@
 }
 
 .color-option.active {
-    border-color: #000;
+    border-color: var(--bs-surface-900);
 }
 
 #sticky-notes-container::-webkit-scrollbar {
@@ -103,17 +103,17 @@
 }
 
 #sticky-notes-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--bs-surface-50);
     border-radius: 10px;
 }
 
 #sticky-notes-container::-webkit-scrollbar-thumb {
-    background: #d4af37;
+    background: var(--bs-gold);
     border-radius: 10px;
 }
 
 #sticky-notes-container::-webkit-scrollbar-thumb:hover {
-    background: #b8941f;
+    background: var(--bs-gold-dark);
 }
 
 /* Prevent selection and scrolling during drag */

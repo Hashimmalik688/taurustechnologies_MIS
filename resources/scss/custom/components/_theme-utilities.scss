@@ -4,6 +4,9 @@
 // Use these classes instead of inline style= attributes with hardcoded colors.
 // All colors reference CSS custom properties so they adapt to theme changes.
 //
+// Convention: Bootstrap-compatible naming. For layout/sizing helpers that
+// Bootstrap doesn't cover, use "u-" prefix (u-min-w-120, u-fs-095, etc.)
+//
 
 // ═══════════════════════════════════════════════════════════════════
 //  Brand / Gold utilities
@@ -15,19 +18,26 @@
 .bg-gold-light        { background-color: var(--#{$prefix}gold-light) !important; }
 .bg-gold-gradient     { background: var(--#{$prefix}gold-gradient) !important; }
 .border-gold          { border-color: var(--#{$prefix}gold) !important; }
+.border-left-gold     { border-left: 3px solid var(--#{$prefix}gold) !important; }
 
 // ═══════════════════════════════════════════════════════════════════
 //  Semantic UI color utilities
 // ═══════════════════════════════════════════════════════════════════
 
 .text-ui-success      { color: var(--#{$prefix}ui-success) !important; }
+.text-ui-success-dark { color: var(--#{$prefix}ui-success-dark) !important; }
 .text-ui-danger       { color: var(--#{$prefix}ui-danger) !important; }
+.text-ui-danger-dark  { color: var(--#{$prefix}ui-danger-dark) !important; }
 .text-ui-warning      { color: var(--#{$prefix}ui-warning) !important; }
 .text-ui-info         { color: var(--#{$prefix}ui-info) !important; }
+.text-ui-info-dark    { color: var(--#{$prefix}ui-info-dark) !important; }
 .text-ui-purple       { color: var(--#{$prefix}ui-purple) !important; }
 .text-ui-indigo       { color: var(--#{$prefix}ui-indigo) !important; }
 .text-surface-muted   { color: var(--#{$prefix}surface-muted) !important; }
+.text-surface-400     { color: var(--#{$prefix}surface-400) !important; }
 .text-surface-500     { color: var(--#{$prefix}surface-500) !important; }
+.text-surface-600     { color: var(--#{$prefix}surface-600) !important; }
+.text-surface-700     { color: var(--#{$prefix}surface-700) !important; }
 
 .bg-ui-success        { background-color: var(--#{$prefix}ui-success) !important; }
 .bg-ui-danger         { background-color: var(--#{$prefix}ui-danger) !important; }
@@ -42,12 +52,190 @@
 .bg-surface-50        { background-color: var(--#{$prefix}surface-50) !important; }
 .bg-surface-100       { background-color: var(--#{$prefix}surface-100) !important; }
 .bg-surface-200       { background-color: var(--#{$prefix}surface-200) !important; }
+.bg-surface-bg-light  { background-color: var(--#{$prefix}surface-bg-light) !important; }
+.text-print-body      { color: var(--#{$prefix}print-body-dark) !important; }
 
 // ═══════════════════════════════════════════════════════════════════
 //  Gradient utilities
 // ═══════════════════════════════════════════════════════════════════
 
 .bg-gradient-primary  { background: var(--#{$prefix}gradient-primary) !important; }
+.bg-gradient-gold     { background: linear-gradient(135deg, var(--#{$prefix}gold) 0%, var(--#{$prefix}gold-dark) 100%) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Font-size utilities  (covers common inline font-size values)
+//  BS5 has .fs-1 through .fs-6 but doesn't cover rem fractions.
+// ═══════════════════════════════════════════════════════════════════
+
+.u-fs-070             { font-size: 0.70rem !important; }
+.u-fs-075             { font-size: 0.75rem !important; }
+.u-fs-080             { font-size: 0.80rem !important; }
+.u-fs-085             { font-size: 0.85rem !important; }
+.u-fs-0875            { font-size: 0.875rem !important; }
+.u-fs-090             { font-size: 0.90rem !important; }
+.u-fs-095             { font-size: 0.95rem !important; }
+.u-fs-1               { font-size: 1rem !important; }
+.u-fs-110             { font-size: 1.1rem !important; }
+.u-fs-115             { font-size: 1.15rem !important; }
+.u-fs-120             { font-size: 1.2rem !important; }
+.u-fs-150             { font-size: 1.5rem !important; }
+.u-fs-2               { font-size: 2rem !important; }
+.u-fs-250             { font-size: 2.5rem !important; }
+.u-fs-4               { font-size: 4rem !important; }
+.u-fs-10              { font-size: 10px !important; }
+.u-fs-11              { font-size: 11px !important; }
+.u-fs-12              { font-size: 12px !important; }
+.u-fs-13              { font-size: 13px !important; }
+.u-fs-14              { font-size: 14px !important; }
+.u-fs-32              { font-size: 32px !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Font-weight utility that BS5 doesn't provide
+// ═══════════════════════════════════════════════════════════════════
+
+.u-fw-500             { font-weight: 500 !important; }
+.u-fw-600             { font-weight: 600 !important; }
+.u-fw-700             { font-weight: 700 !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Min-width utilities  (used heavily on table columns / data cells)
+// ═══════════════════════════════════════════════════════════════════
+
+.u-min-w-80           { min-width: 80px !important; }
+.u-min-w-100          { min-width: 100px !important; }
+.u-min-w-110          { min-width: 110px !important; }
+.u-min-w-120          { min-width: 120px !important; }
+.u-min-w-130          { min-width: 130px !important; }
+.u-min-w-140          { min-width: 140px !important; }
+.u-min-w-150          { min-width: 150px !important; }
+.u-min-w-160          { min-width: 160px !important; }
+.u-min-w-180          { min-width: 180px !important; }
+.u-min-w-200          { min-width: 200px !important; }
+.u-min-w-220          { min-width: 220px !important; }
+.u-min-w-250          { min-width: 250px !important; }
+
+// Fixed-width (used with min-width for table columns)
+.u-w-30               { width: 30px !important; }
+.u-w-35               { width: 35px !important; }
+.u-w-36               { width: 36px !important; }
+.u-w-40               { width: 40px !important; }
+.u-w-60               { width: 60px !important; }
+.u-w-65               { width: 65px !important; }
+.u-w-80               { width: 80px !important; }
+.u-w-100              { width: 100px !important; }
+.u-w-120              { width: 120px !important; }
+.u-w-140              { width: 140px !important; }
+.u-w-150              { width: 150px !important; }
+.u-w-160              { width: 160px !important; }
+.u-w-180              { width: 180px !important; }
+.u-w-220              { width: 220px !important; }
+
+// Height utilities
+.u-h-20               { height: 20px !important; }
+.u-h-36               { height: 36px !important; }
+
+// Gap utilities (BS5 has gap-* but only at responsive breakpoints)
+.u-gap-4              { gap: 4px !important; }
+.u-gap-6              { gap: 6px !important; }
+.u-gap-8              { gap: 8px !important; }
+.u-gap-10             { gap: 10px !important; }
+.u-gap-12             { gap: 12px !important; }
+
+// Max-width utilities
+.u-max-w-200          { max-width: 200px !important; }
+.u-max-w-250          { max-width: 250px !important; }
+.u-max-w-300          { max-width: 300px !important; }
+.u-max-w-400          { max-width: 400px !important; }
+.u-max-w-500          { max-width: 500px !important; }
+.u-max-w-600          { max-width: 600px !important; }
+
+// Max-height utilities
+.u-max-h-200          { max-height: 200px !important; }
+.u-max-h-300          { max-height: 300px !important; }
+.u-max-h-400          { max-height: 400px !important; }
+
+// Letter-spacing
+.u-ls-05              { letter-spacing: 0.5px !important; }
+.u-ls-1               { letter-spacing: 1px !important; }
+
+// Opacity (BS5 has .opacity-* but only 0/25/50/75/100)
+.u-opacity-50         { opacity: 0.5 !important; }
+.u-opacity-70         { opacity: 0.7 !important; }
+.u-opacity-80         { opacity: 0.8 !important; }
+
+// Z-index helpers
+.u-z-1                { z-index: 1 !important; }
+.u-z-10               { z-index: 10 !important; }
+.u-z-50               { z-index: 50 !important; }
+.u-z-100              { z-index: 100 !important; }
+.u-z-1000             { z-index: 1000 !important; }
+.u-z-9999             { z-index: 9999 !important; }
+
+// Object-fit (BS5 has .object-fit-* in v5.3+)
+.u-obj-cover          { object-fit: cover !important; }
+.u-obj-contain        { object-fit: contain !important; }
+
+// White-space
+.u-ws-nowrap          { white-space: nowrap !important; }
+
+// Additional color utilities for remaining hardcoded values
+.text-surface-300     { color: var(--#{$prefix}surface-300) !important; }
+.text-surface-900     { color: var(--#{$prefix}surface-900) !important; }
+.bg-surface-900       { background-color: var(--#{$prefix}surface-900) !important; }
+.text-gradient-start  { color: var(--#{$prefix}gradient-start) !important; }
+.bg-white             { background-color: #fff !important; }
+
+// Border helpers with semantic colors
+.border-surface-200   { border: 1px solid var(--#{$prefix}surface-200) !important; }
+.border-top-surface   { border-top: 1px solid var(--#{$prefix}surface-200) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Border-radius utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.u-rounded-4          { border-radius: 4px !important; }
+.u-rounded-6          { border-radius: 6px !important; }
+.u-rounded-8          { border-radius: 8px !important; }
+.u-rounded-10         { border-radius: 10px !important; }
+.u-rounded-12         { border-radius: 12px !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Cursor utility
+// ═══════════════════════════════════════════════════════════════════
+
+.u-cursor-pointer     { cursor: pointer !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Overflow utilities (BS5 has overflow-auto/hidden but not -y/-x)
+// ═══════════════════════════════════════════════════════════════════
+
+.u-overflow-y-auto    { overflow-y: auto !important; }
+.u-overflow-x-auto    { overflow-x: auto !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Composite "section header" pattern
+//  (background-surface-100 + gold left border + rounded)
+//  Replaces: style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 600; padding: 10px 14px;"
+// ═══════════════════════════════════════════════════════════════════
+
+.section-header {
+  background: var(--#{$prefix}surface-100);
+  border-left: 3px solid var(--#{$prefix}gold);
+  border-radius: 4px;
+  font-weight: 600;
+  padding: 10px 14px;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Label-value layout pattern (used in show/detail pages)
+// ═══════════════════════════════════════════════════════════════════
+
+.label-value {
+  font-weight: 600;
+  color: var(--#{$prefix}surface-700);
+  margin-bottom: 8px;
+  display: block;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 //  Dashboard stat card pattern
@@ -94,3 +282,4 @@
 .bg-print-header      { background-color: var(--#{$prefix}print-header-bg) !important; }
 .bg-print-alt         { background-color: var(--#{$prefix}print-bg-alt) !important; }
 .border-print         { border-color: var(--#{$prefix}print-border) !important; }
+.text-print-dark      { color: var(--#{$prefix}print-body-dark) !important; }

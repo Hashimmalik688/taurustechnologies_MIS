@@ -127,7 +127,7 @@
                     @if ($auditLog->user_agent)
                         <div class="mt-3">
                             <label class="form-label text-muted">Full User Agent:</label>
-                            <code style="word-break: break-all; font-size: 0.75rem;">
+ <code class="u-fs-075 text-break">
                                 {{ $auditLog->user_agent }}
                             </code>
                         </div>
@@ -159,7 +159,7 @@
 @section('styles')
 <style>
     pre {
-        background: #f4f4f4;
+        background: var(--bs-surface-50);
         padding: 12px;
         border-radius: 4px;
         max-height: 300px;
@@ -168,7 +168,7 @@
     }
 
     code {
-        background: #f4f4f4;
+        background: var(--bs-surface-50);
         padding: 2px 6px;
         border-radius: 3px;
     }

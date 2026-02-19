@@ -37,7 +37,7 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: var(--bs-surface-500); margin-bottom: 0.5rem;">
+ <div class="u-fs-2 text-surface-500" style="margin-bottom: 0.5rem">
                         <i class="bx bx-bar-chart-alt-2"></i>
                     </div>
                     <h6 class="text-muted mb-2">Total Sales</h6>
@@ -50,11 +50,11 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-warning) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: var(--bs-ui-warning); margin-bottom: 0.5rem;">
+ <div class="u-fs-2 text-ui-warning" style="margin-bottom: 0.5rem">
                         <i class="bx bx-time-five"></i>
                     </div>
                     <h6 class="text-muted mb-2">Pending</h6>
-                    <h3 class="fw-bold" style="color: var(--bs-ui-warning);">{{ $qaAnalytics['pending'] }}</h3>
+ <h3 class="fw-bold text-ui-warning" >{{ $qaAnalytics['pending'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['pending_percent'] }}% awaiting review</small>
                 </div>
             </div>
@@ -63,11 +63,11 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-success) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: var(--bs-ui-success); margin-bottom: 0.5rem;">
+ <div class="u-fs-2 text-ui-success" style="margin-bottom: 0.5rem">
                         <i class="bx bx-check-circle"></i>
                     </div>
                     <h6 class="text-muted mb-2">Good</h6>
-                    <h3 class="fw-bold" style="color: var(--bs-ui-success);">{{ $qaAnalytics['good'] }}</h3>
+ <h3 class="fw-bold text-ui-success" >{{ $qaAnalytics['good'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['good_percent'] }}% passed</small>
                 </div>
             </div>
@@ -76,11 +76,11 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-danger) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: var(--bs-ui-danger); margin-bottom: 0.5rem;">
+ <div class="u-fs-2 text-ui-danger" style="margin-bottom: 0.5rem">
                         <i class="bx bx-x-circle"></i>
                     </div>
                     <h6 class="text-muted mb-2">Issues</h6>
-                    <h3 class="fw-bold" style="color: var(--bs-ui-danger);">{{ $qaAnalytics['avg'] + $qaAnalytics['bad'] }}</h3>
+ <h3 class="fw-bold text-ui-danger" >{{ $qaAnalytics['avg'] + $qaAnalytics['bad'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['issues_percent'] }}% need attention</small>
                 </div>
             </div>
@@ -146,11 +146,11 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="min-width:150px;">Client Name</th>
-                                    <th style="min-width:130px;">Closer</th>
-                                    <th style="min-width:110px;">Sale Date</th>
-                                    <th style="min-width:140px;">QA Status</th>
-                                    <th style="min-width:250px;">QA Reason</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Closer</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-140" >QA Status</th>
+ <th class="u-min-w-250" >QA Reason</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,7 +179,7 @@
                                             <select class="form-select form-select-sm qa-status-dropdown" 
                                                     data-lead-id="{{ $lead->id }}" 
                                                     data-current-status="{{ $lead->qa_status ?? Statuses::QA_PENDING }}"
-                                                    style="min-width: 130px;">
+ >
                                                 <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>
                                                     ⏳ Pending
                                                 </option>

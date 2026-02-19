@@ -1,37 +1,37 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     System Settings
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-@endsection
+<?php $__env->startSection('css'); ?>
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Settings
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             System Configuration
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
+            <strong>Success!</strong> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @if (session('error'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> {{ session('error') }}
+            <strong>Error!</strong> <?php echo e(session('error')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Current IP Info -->
     <div class="row mb-4">
@@ -42,7 +42,7 @@
                         <div class="flex-grow-1">
                             <h6 class="mb-1 text-primary">Your IP Address Information</h6>
                             <p class="mb-1">
-                                <strong>Current IP:</strong> <code id="current-ip">{{ app(\App\Services\IpDetectionService::class)->getBestIpForAttendance() }}</code>
+                                <strong>Current IP:</strong> <code id="current-ip"><?php echo e(app(\App\Services\IpDetectionService::class)->getBestIpForAttendance()); ?></code>
                                 <span id="ip-type-badge" class="badge badge-soft-warning ms-2">Checking...</span>
                             </p>
                             <p class="mb-0 text-muted">
@@ -84,61 +84,63 @@
         </div>
     </div>
 
-    <form action="{{ route('settings.update') }}" method="POST">
-        @csrf
+    <form action="<?php echo e(route('settings.update')); ?>" method="POST">
+        <?php echo csrf_field(); ?>
 
-        @foreach ($settings as $group => $groupSettings)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $settings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group => $groupSettings): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title mb-0">
-                                <i class="mdi mdi-{{ $group === 'attendance' ? 'account-clock' : 'cog' }} me-2"></i>
-                                {{ ucwords(str_replace('_', ' ', $group)) }} Settings
+                                <i class="mdi mdi-<?php echo e($group === 'attendance' ? 'account-clock' : 'cog'); ?> me-2"></i>
+                                <?php echo e(ucwords(str_replace('_', ' ', $group))); ?> Settings
                             </h4>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                @foreach ($groupSettings as $setting)
-                                    @if($setting->key !== 'late_threshold_minutes')
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $groupSettings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $setting): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($setting->key !== 'late_threshold_minutes'): ?>
                                     <div class="col-md-6 mb-3">
-                                        <label for="{{ $setting->key }}" class="form-label">
-                                            {{ ucwords(str_replace('_', ' ', str_replace($group . '_', '', $setting->key))) }}
-                                            @if ($setting->description)
+                                        <label for="<?php echo e($setting->key); ?>" class="form-label">
+                                            <?php echo e(ucwords(str_replace('_', ' ', str_replace($group . '_', '', $setting->key)))); ?>
+
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($setting->description): ?>
                                                 <i class="mdi mdi-information-outline text-muted" data-bs-toggle="tooltip"
-                                                    title="{{ $setting->description }}"></i>
-                                            @endif
+                                                    title="<?php echo e($setting->description); ?>"></i>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </label>
 
-                                        @if ($setting->type === 'boolean')
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($setting->type === 'boolean'): ?>
                                             <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="{{ $setting->key }}"
-                                                    name="settings[{{ $setting->key }}]"
-                                                    {{ $setting->value === 'true' ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="{{ $setting->key }}">
-                                                    {{ $setting->value === 'true' ? 'Enabled' : 'Disabled' }}
+                                                <input class="form-check-input" type="checkbox" id="<?php echo e($setting->key); ?>"
+                                                    name="settings[<?php echo e($setting->key); ?>]"
+                                                    <?php echo e($setting->value === 'true' ? 'checked' : ''); ?>>
+                                                <label class="form-check-label" for="<?php echo e($setting->key); ?>">
+                                                    <?php echo e($setting->value === 'true' ? 'Enabled' : 'Disabled'); ?>
+
                                                 </label>
                                             </div>
-                                        @elseif($setting->type === 'array' && $setting->key === 'office_networks')
+                                        <?php elseif($setting->type === 'array' && $setting->key === 'office_networks'): ?>
                                             <div id="network-inputs">
-                                                @php
+                                                <?php
                                                     $networks = is_string($setting->value)
                                                         ? explode(',', $setting->value)
                                                         : [$setting->value];
-                                                @endphp
-                                                @foreach ($networks as $index => $network)
+                                                ?>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $networks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $network): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <div class="input-group mb-2 network-input-group">
                                                         <input type="text" class="form-control"
-                                                            name="settings[{{ $setting->key }}][]"
-                                                            value="{{ trim($network) }}" placeholder="192.168.1.0/24">
-                                                        @if ($index > 0)
+                                                            name="settings[<?php echo e($setting->key); ?>][]"
+                                                            value="<?php echo e(trim($network)); ?>" placeholder="192.168.1.0/24">
+                                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($index > 0): ?>
                                                             <button class="btn btn-outline-danger" type="button"
                                                                 onclick="removeNetwork(this)">
                                                                 <i class="mdi mdi-delete"></i>
                                                             </button>
-                                                        @endif
+                                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     </div>
-                                                @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </div>
                                             <button type="button" class="btn btn-outline-primary btn-sm"
                                                 onclick="addNetwork()">
@@ -147,24 +149,24 @@
                                             <div class="form-text">
                                                 Enter IP addresses or CIDR ranges (e.g., 192.168.1.0/24, 10.0.0.100)
                                             </div>
-                                        @else
-                                            <input type="{{ $setting->key === 'office_start_time' || $setting->key === 'late_time' ? 'time' : 'text' }}"
-                                                class="form-control" id="{{ $setting->key }}"
-                                                name="settings[{{ $setting->key }}]" value="{{ $setting->value }}">
-                                        @endif
+                                        <?php else: ?>
+                                            <input type="<?php echo e($setting->key === 'office_start_time' || $setting->key === 'late_time' ? 'time' : 'text'); ?>"
+                                                class="form-control" id="<?php echo e($setting->key); ?>"
+                                                name="settings[<?php echo e($setting->key); ?>]" value="<?php echo e($setting->value); ?>">
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-                                        @if ($setting->description)
-                                            <div class="form-text">{{ $setting->description }}</div>
-                                        @endif
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($setting->description): ?>
+                                            <div class="form-text"><?php echo e($setting->description); ?></div>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </div>
-                                    @endif
-                                @endforeach
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         <div class="row">
             <div class="col-12">
@@ -179,9 +181,9 @@
             </div>
         </div>
     </form>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
     <script>
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -199,10 +201,10 @@
             badgeElement.textContent = 'Checking...';
             badgeElement.className = 'badge badge-soft-warning ms-2';
 
-            fetch('{{ route('settings.test-network') }}', {
+            fetch('<?php echo e(route('settings.test-network')); ?>', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                         'Content-Type': 'application/json'
                     }
                 })
@@ -330,4 +332,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/settings/index.blade.php ENDPATH**/ ?>

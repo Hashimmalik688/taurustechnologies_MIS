@@ -158,7 +158,7 @@
 
 <style>
     .carrier-state-section {
-        border: 2px solid #e9ecef;
+        border: 2px solid var(--bs-surface-200);
         padding: 20px;
         border-radius: 8px;
         background-color: var(--bs-surface-bg-light);

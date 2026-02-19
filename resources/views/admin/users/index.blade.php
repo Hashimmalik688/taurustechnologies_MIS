@@ -75,7 +75,7 @@
                                                data-user-id="{{ $user->id }}" 
                                                value="{{ $user->userDetail->plain_password ?? '' }}" 
                                                placeholder="Enter password"
-                                               style="min-width: 120px;">
+ >
                                     </td>
                                     <td>{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : 'N/A' }}</td>
                                     <td>{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : 'N/A' }}</td>
@@ -308,7 +308,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+ <form class="d-inline" id="deleteForm" method="POST" >
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Delete</button>
@@ -351,7 +351,7 @@
                     .then(data => {
                         if (data.success) {
                             // Show subtle success indicator
-                            this.style.borderColor = '#10b981';
+                            this.style.borderColor = themeColors.success;
                             setTimeout(() => {
                                 this.style.borderColor = '';
                             }, 1000);
@@ -359,7 +359,7 @@
                     })
                     .catch(error => {
                         console.error('Error saving password:', error);
-                        this.style.borderColor = '#ef4444';
+                        this.style.borderColor = themeColors.danger;
                     });
                 });
             });

@@ -20,17 +20,17 @@
             padding: 0;
             font-size: 12px;
             line-height: 1.4;
-            color: #333;
+            color: var(--bs-surface-700);
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: #fff;
+            background: var(--bs-white, #fff);
         }
 
         .header {
-            border-bottom: 3px solid #007bff;
+            border-bottom: 3px solid var(--bs-primary);
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
@@ -43,13 +43,13 @@
         .company-name {
             font-size: 24px;
             font-weight: bold;
-            color: #007bff;
+            color: var(--bs-primary);
             margin-bottom: 5px;
         }
 
         .company-details {
             font-size: 11px;
-            color: #666;
+            color: var(--bs-surface-500);
             line-height: 1.3;
         }
 
@@ -59,7 +59,7 @@
             font-weight: bold;
             background: var(--bs-surface-bg-light);
             padding: 12px;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             margin: 20px 0;
         }
 
@@ -75,7 +75,7 @@
 
         .employee-info td {
             padding: 8px 12px;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             vertical-align: top;
         }
 
@@ -90,8 +90,8 @@
             font-weight: bold;
             margin: 25px 0 15px 0;
             padding: 8px 12px;
-            background: #e9ecef;
-            border-left: 4px solid #007bff;
+            background: var(--bs-surface-200);
+            border-left: 4px solid var(--bs-primary);
         }
 
         .breakdown-table {
@@ -102,14 +102,14 @@
 
         .breakdown-table th,
         .breakdown-table td {
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             padding: 10px;
             text-align: left;
         }
 
         .breakdown-table th {
-            background: #007bff;
-            color: white;
+            background: var(--bs-primary);
+            color: var(--bs-white);
             font-weight: bold;
             text-align: center;
         }
@@ -120,11 +120,11 @@
         }
 
         .breakdown-table .description {
-            color: #666;
+            color: var(--bs-surface-500);
         }
 
         .net-salary {
-            background: #d4edda;
+            background: var(--bs-surface-50);
             border: 2px solid var(--bs-status-present);
             padding: 20px;
             text-align: center;
@@ -135,14 +135,14 @@
         .net-salary-label {
             font-size: 16px;
             font-weight: bold;
-            color: #155724;
+            color: var(--bs-ui-success-dark);
             margin-bottom: 10px;
         }
 
         .net-salary-amount {
             font-size: 28px;
             font-weight: bold;
-            color: #155724;
+            color: var(--bs-ui-success-dark);
         }
 
         .summary-grid {
@@ -150,7 +150,7 @@
             width: 100%;
             background: var(--bs-surface-bg-light);
             padding: 15px;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             margin: 20px 0;
             border-radius: 3px;
         }
@@ -159,7 +159,7 @@
             display: table-cell;
             text-align: center;
             padding: 10px;
-            border-right: 1px solid #dee2e6;
+            border-right: 1px solid var(--bs-surface-200);
         }
 
         .summary-item:last-child {
@@ -169,12 +169,12 @@
         .summary-number {
             font-size: 18px;
             font-weight: bold;
-            color: #007bff;
+            color: var(--bs-primary);
         }
 
         .summary-label {
             font-size: 11px;
-            color: #666;
+            color: var(--bs-surface-500);
             margin-top: 5px;
         }
 
@@ -199,7 +199,7 @@
         }
 
         .text-info {
-            color: #17a2b8;
+            color: var(--bs-info);
         }
 
         .text-warning {
@@ -209,9 +209,9 @@
         .footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid var(--bs-surface-200);
             font-size: 10px;
-            color: #666;
+            color: var(--bs-surface-500);
         }
 
         .signature-section {
@@ -229,7 +229,7 @@
         }
 
         .signature-line {
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--bs-surface-700);
             height: 40px;
             margin-bottom: 5px;
         }
@@ -353,7 +353,7 @@
         <table class="breakdown-table">
             <thead>
                 <tr>
-                    <th style="width: 50%;">Description</th>
+                    <th class="w-50">Description</th>
                     <th style="width: 20%;">Details</th>
                     <th style="width: 30%;">Amount (Rs)</th>
                 </tr>
@@ -418,7 +418,7 @@
                 @endif
 
                 {{-- Gross Salary --}}
-                <tr style="background: var(--bs-surface-bg-light);">
+ <tr class="bg-surface-bg-light" >
                     <td><strong>GROSS SALARY</strong></td>
                     <td class="description">Basic + Bonuses + Adjustments</td>
                     <td class="amount"><strong>{{ number_format($salaryRecord->gross_salary, 2) }}</strong></td>
@@ -443,7 +443,7 @@
                             <td class="amount text-danger">-{{ number_format($deduction->calculated_amount, 2) }}</td>
                         </tr>
                     @endforeach
-                    <tr style="background: var(--bs-surface-bg-light);">
+ <tr class="bg-surface-bg-light" >
                         <td><strong>TOTAL DEDUCTIONS</strong></td>
                         <td></td>
                         <td class="amount text-danger">
@@ -481,13 +481,7 @@
                             <td>{{ $attendance->date->format('D') }}</td>
                             <td>
                                 <span
-                                    style="
-                            padding: 2px 6px; 
-                            border-radius: 3px; 
-                            font-size: 10px; 
-                            background: {{ $attendance->status == 'present' ? 'var(--bs-status-present)' : ($attendance->status == 'leave' ? 'var(--bs-status-absent)' : 'var(--bs-status-leave)') }}; 
-                            color: white;
-                        ">
+                                    class="u-fs-10 text-white" style="padding: 2px 6px; border-radius: 3px; background: {{ $attendance->status == 'present' ? 'var(--bs-status-present)' : ($attendance->status == 'leave' ? 'var(--bs-status-absent)' : 'var(--bs-status-leave)') }}">
                                     {{ strtoupper($attendance->status) }}
                                 </span>
                             </td>
@@ -519,7 +513,7 @@
                             <td>
                                 {{ $sale->name ?? ($sale->company_name ?? 'Unknown Client') }}
                                 @if ($sale->email)
-                                    <br><small style="color: #666;">{{ $sale->email }}</small>
+                                    <br><small class="text-surface-500">{{ $sale->email }}</small>
                                 @endif
                             </td>
                             <td class="amount">
@@ -531,13 +525,13 @@
                             </td>
                             <td class="text-center">
                                 <span
-                                    style="background: var(--bs-status-present); color: white; padding: 2px 8px; border-radius: 3px; font-size: 10px;">
+ class="u-fs-10" style="background: var(--bs-status-present); padding: 2px 8px; border-radius: 3px">
                                     CLOSED
                                 </span>
                             </td>
                         </tr>
                     @endforeach
-                    <tr style="background: var(--bs-surface-bg-light);">
+ <tr class="bg-surface-bg-light" >
                         <td colspan="2"><strong>TOTAL SALES VALUE</strong></td>
                         <td class="amount"><strong>Rs{{ number_format($salesDetails->sum('deal_amount'), 2) }}</strong>
                         </td>
@@ -551,7 +545,7 @@
         @if ($salaryRecord->notes)
             <div class="section-title">Calculation Notes</div>
             <div
-                style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 3px; margin: 20px 0;">
+                class="bg-surface-50" style="border: 1px solid var(--bs-gold-bright); padding: 15px; border-radius: 3px; margin: 20px 0">
                 <strong>System Notes:</strong><br>
                 {{ $salaryRecord->notes }}
             </div>
@@ -563,19 +557,19 @@
                 <div style="margin-bottom: 50px;"><strong>Employee Signature:</strong></div>
                 <div class="signature-line"></div>
                 <div class="text-center">{{ $salaryRecord->user->name }}</div>
-                <div class="text-center" style="font-size: 10px; color: #666;">Date: ________________</div>
+                <div class="text-center u-fs-10 text-surface-500">Date: ________________</div>
             </div>
             <div class="signature-right">
                 <div style="margin-bottom: 50px;"><strong>HR/Manager Signature:</strong></div>
                 <div class="signature-line"></div>
                 <div class="text-center">HR Department</div>
-                <div class="text-center" style="font-size: 10px; color: #666;">Date: ________________</div>
+                <div class="text-center u-fs-10 text-surface-500">Date: ________________</div>
             </div>
         </div>
 
         {{-- Footer --}}
         <div class="footer">
-            <div style="text-align: center;">
+ <div class="text-center" >
                 <strong>CONFIDENTIAL DOCUMENT</strong><br>
                 This payslip is generated electronically and is valid without signature.<br>
                 <strong>Attendance Policy:</strong> Perfect attendance (no leaves) = Rs5,000 bonus. Leave rule: 1

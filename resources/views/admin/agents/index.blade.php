@@ -19,7 +19,7 @@
         }
 
         .agents-header h3 {
-            color: var(--gold);
+            color: var(--bs-gold);
             font-weight: 900;
             margin: 0;
             font-size: 2rem;
@@ -50,16 +50,16 @@
         }
 
         .agents-card .card-title {
-            color: var(--gold);
+            color: var(--bs-gold);
             font-weight: 900;
             font-size: 1.3rem;
             margin: 0;
         }
 
         .btn-gold {
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            background: linear-gradient(135deg, var(--bs-gold), var(--bs-gold-light));
             border: none;
-            color: #111;
+            color: var(--bs-surface-700);
             font-weight: 700;
             padding: 0.6rem 1.5rem;
             border-radius: 12px;
@@ -70,13 +70,13 @@
         .btn-gold:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 24px rgba(212, 175, 55, 0.5);
-            color: #111;
+            color: var(--bs-surface-700);
         }
 
         .btn-outline-gold {
             background: transparent;
-            border: 2px solid var(--gold);
-            color: var(--gold);
+            border: 2px solid var(--bs-gold);
+            color: var(--bs-gold);
             font-weight: 700;
             padding: 0.6rem 1.5rem;
             border-radius: 12px;
@@ -84,13 +84,13 @@
         }
 
         .btn-outline-gold:hover {
-            background: var(--gold);
-            color: #111;
+            background: var(--bs-gold);
+            color: var(--bs-surface-700);
             transform: translateY(-2px);
         }
 
         #datatable {
-            color: #e2e8f0;
+            color: var(--bs-surface-200);
         }
 
         #datatable thead th {
@@ -99,9 +99,9 @@
             text-transform: uppercase;
             font-size: 0.75rem;
             padding: 1.25rem 1rem;
-            border-bottom: 2px solid var(--gold);
+            border-bottom: 2px solid var(--bs-gold);
             letter-spacing: 1.5px;
-            color: var(--gold) !important;
+            color: var(--bs-gold) !important;
         }
 
         #datatable tbody tr {
@@ -118,7 +118,7 @@
         #datatable tbody td {
             padding: 1.25rem 1rem;
             vertical-align: middle;
-            color: #e2e8f0;
+            color: var(--bs-surface-200);
             border-color: rgba(212, 175, 55, 0.1);
         }
 
@@ -126,20 +126,20 @@
             width: 50px;
             height: 50px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            background: linear-gradient(135deg, var(--bs-gold), var(--bs-gold-light));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
             font-size: 1.2rem;
-            color: #111;
+            color: var(--bs-surface-700);
             box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
         }
 
         .agent-info-name {
             font-weight: 700;
             font-size: 1rem;
-            color: #fff;
+            color: var(--bs-white, #fff);
             margin-bottom: 0.25rem;
         }
 
@@ -152,7 +152,7 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: #34d399;
+            background-color: var(--bs-ui-success);
             box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
             animation: pulse 2s ease-in-out infinite;
         }
@@ -164,8 +164,8 @@
 
         .badge-gold {
             background: rgba(212, 175, 55, 0.2);
-            color: var(--gold);
-            border: 1px solid var(--gold);
+            color: var(--bs-gold);
+            border: 1px solid var(--bs-gold);
             font-weight: 700;
             padding: 0.4rem 0.8rem;
             border-radius: 8px;
@@ -174,7 +174,7 @@
 
         .badge-carrier {
             background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
+            color: var(--bs-ui-success);
             border: 1px solid var(--bs-ui-success);
             font-weight: 700;
             padding: 0.4rem 0.8rem;
@@ -186,7 +186,7 @@
 
         .badge-state {
             background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
+            color: var(--bs-ui-warning);
             border: 1px solid var(--bs-ui-warning);
             font-weight: 700;
             padding: 0.4rem 0.8rem;
@@ -222,18 +222,18 @@
         }
 
         .dropdown-item {
-            color: #e2e8f0;
+            color: var(--bs-surface-200);
             padding: 0.75rem 1.25rem;
             transition: all 0.2s ease;
         }
 
         .dropdown-item:hover {
             background: rgba(212, 175, 55, 0.15);
-            color: var(--gold);
+            color: var(--bs-gold);
         }
 
         .dropdown-item i {
-            color: var(--gold);
+            color: var(--bs-gold);
         }
 
         .modal-content {
@@ -241,7 +241,7 @@
             backdrop-filter: blur(20px);
             border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 20px;
-            color: #e2e8f0;
+            color: var(--bs-surface-200);
         }
 
         .modal-header {
@@ -249,7 +249,7 @@
         }
 
         .modal-title {
-            color: var(--gold);
+            color: var(--bs-gold);
             font-weight: 900;
         }
 
@@ -265,37 +265,37 @@
         .alert-success {
             background: rgba(16, 185, 129, 0.1);
             border-left-color: var(--bs-ui-success);
-            color: #34d399;
+            color: var(--bs-ui-success);
         }
 
         .alert-danger {
             background: rgba(239, 68, 68, 0.1);
             border-left-color: var(--bs-ui-danger);
-            color: #f87171;
+            color: var(--bs-ui-danger);
         }
 
         .alert-warning {
             background: rgba(245, 158, 11, 0.1);
             border-left-color: var(--bs-ui-warning);
-            color: #fbbf24;
+            color: var(--bs-ui-warning);
         }
 
         /* DataTables Custom Styling */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
-            color: var(--gold) !important;
+            color: var(--bs-gold) !important;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--gold) !important;
-            color: #111 !important;
-            border-color: var(--gold) !important;
+            background: var(--bs-gold) !important;
+            color: var(--bs-surface-700) !important;
+            border-color: var(--bs-gold) !important;
         }
 
         .dataTables_wrapper .dataTables_length select,
         .dataTables_wrapper .dataTables_filter input {
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #e2e8f0;
+            color: var(--bs-surface-200);
             border-radius: 8px;
             padding: 0.5rem;
         }
@@ -386,7 +386,7 @@
                                                     <div class="agent-info-email">{{ $agent->email }}</div>
                                                     <div class="agent-status mt-1 d-flex align-items-center gap-2">
                                                         <span class="status-indicator"></span>
-                                                        <small style="color: #34d399; font-weight: 600;">Active</small>
+ <small class="u-fw-600" style="color: var(--bs-ui-success)">Active</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -399,7 +399,7 @@
                                                     {{ $agent->userDetail->phone }}
                                                 </span>
                                             @else
-                                                <span style="color: var(--bs-surface-600);">-</span>
+ <span class="text-surface-600" >-</span>
                                             @endif
                                         </td>
 
@@ -409,7 +409,7 @@
                                                     ***-**-{{ $agent->userDetail->ssn_last4 }}
                                                 </span>
                                             @else
-                                                <span style="color: var(--bs-surface-600);">-</span>
+ <span class="text-surface-600" >-</span>
                                             @endif
                                         </td>
 
@@ -419,7 +419,7 @@
                                                     {{ $agent->userDetail->dob->format('m/d/Y') }}
                                                 </span>
                                             @else
-                                                <span style="color: var(--bs-surface-600);">-</span>
+ <span class="text-surface-600" >-</span>
                                             @endif
                                         </td>
 
@@ -430,7 +430,7 @@
                                                     {{ $agent->userDetail->state }}
                                                 </span>
                                             @else
-                                                <span style="color: var(--bs-surface-600);">Not specified</span>
+ <span class="text-surface-600" >Not specified</span>
                                             @endif
                                         </td>
 
@@ -444,7 +444,7 @@
                                                         </span>
                                                     @endforeach
                                                 @else
-                                                    <span style="color: var(--bs-surface-600);">
+ <span class="text-surface-600" >
                                                         <i class="bx bx-car me-1"></i>
                                                         No carriers
                                                     </span>
@@ -469,12 +469,12 @@
                                                         </span>
                                                     @endif
                                                     <div class="mt-2">
-                                                        <small style="color: var(--bs-surface-400); font-weight: 600;">
+ <small class="text-surface-400 u-fw-600" >
                                                             {{ $uniqueStates->count() }} state(s)
                                                         </small>
                                                     </div>
                                                 @else
-                                                    <span style="color: var(--bs-surface-600);">
+ <span class="text-surface-600" >
                                                         <i class="bx bx-map-alt me-1"></i>
                                                         No active states
                                                     </span>
@@ -521,9 +521,9 @@
                                                             <hr class="dropdown-divider" style="border-color: rgba(212, 175, 55, 0.2);">
                                                         </li>
                                                         <li>
-                                                            <button class="dropdown-item" style="color: #f87171;"
+                                                            <button class="dropdown-item text-ui-danger"
                                                                 onclick="confirmDelete({{ $agent->id }})">
-                                                                <i class="bx bx-trash me-2" style="color: var(--bs-ui-danger);"></i>Delete Agent
+ <i class="bx bx-trash me-2 text-ui-danger" ></i>Delete Agent
                                                             </button>
                                                         </li>
                                                     @endhasanyrole
@@ -583,14 +583,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" style="color: #f87171;">
+                    <h5 class="modal-title text-ui-danger">
                         <i class="bx bx-error-circle me-2"></i>
                         Confirm Delete
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
                 </div>
                 <div class="modal-body">
-                    <p style="color: var(--bs-surface-300);">Are you sure you want to delete this agent? This action cannot be undone.</p>
+                    <p class="text-surface-300">Are you sure you want to delete this agent? This action cannot be undone.</p>
                     <div class="alert alert-warning">
                         <i class="bx bx-error me-2"></i>
                         <strong>Warning:</strong> All associated data will be permanently removed.
@@ -598,10 +598,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-gold" data-bs-dismiss="modal">Cancel</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+ <form class="d-inline" id="deleteForm" method="POST" >
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn" style="background: var(--bs-ui-danger); color: white; font-weight: 700; border-radius: 8px; padding: 0.5rem 1rem;">
+ <button type="submit" class="btn text-white u-fw-700 u-rounded-8 bg-ui-danger" style="padding: 0.5rem 1rem">
                             <i class="bx bx-trash me-1"></i>
                             Delete Agent
                         </button>

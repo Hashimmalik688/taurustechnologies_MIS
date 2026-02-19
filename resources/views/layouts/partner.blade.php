@@ -31,7 +31,7 @@
         }
         
         .partner-navbar .navbar-brand {
-            color: white !important;
+            color: var(--bs-white) !important;
             font-weight: 700;
             font-size: 1.5rem;
             letter-spacing: 1px;
@@ -44,14 +44,14 @@
         }
         
         .partner-navbar .nav-link:hover {
-            color: white !important;
+            color: var(--bs-white) !important;
             transform: translateY(-2px);
         }
         
         .partner-navbar .btn-logout {
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
-            color: white;
+            color: var(--bs-white);
             padding: 8px 20px;
             border-radius: 8px;
             transition: all 0.3s;
@@ -67,7 +67,7 @@
         }
         
         .partner-info {
-            background: white;
+            background: var(--bs-card-bg);
             padding: 15px 20px;
             border-radius: 10px;
             display: inline-block;

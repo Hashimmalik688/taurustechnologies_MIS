@@ -67,7 +67,7 @@
                             <div class="card-body">
                                 <div class="text-center mb-3">
                                     <img src="{{ $salaryRecord->user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($salaryRecord->user->name) }}"
-                                        alt="Avatar" class="rounded-circle mb-2" style="width: 80px; height: 80px;">
+ alt="Avatar" class="rounded-circle mb-2 u-w-80" style="height: 80px">
                                     <h5 class="mb-1">{{ $salaryRecord->user->name }}</h5>
                                     <p class="text-muted mb-0">{{ $salaryRecord->user->email }}</p>
                                 </div>
@@ -595,7 +595,7 @@
             top: 20px;
             height: 20px;
             width: 2px;
-            background-color: #dee2e6;
+            background-color: var(--bs-surface-200);
         }
 
         .timeline-marker {
@@ -605,11 +605,11 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            border: 2px solid #fff;
+            border: 2px solid var(--bs-white, #fff);
         }
 
         .timeline-item.completed .timeline-marker {
-            box-shadow: 0 0 0 2px #fff;
+            box-shadow: 0 0 0 2px var(--bs-white, #fff);
         }
     </style>
 

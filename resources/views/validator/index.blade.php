@@ -11,10 +11,10 @@
         padding: 4px 12px;
         border-radius: 12px;
     }
-    .status-pending { background: var(--bs-status-leave); color: #000; }
-    .status-closed { background: #17a2b8; color: white; }
-    .status-sale { background: var(--bs-status-present); color: white; }
-    .status-failed { background: var(--bs-status-absent); color: white; }
+    .status-pending { background: var(--bs-status-leave); color: var(--bs-surface-900); }
+    .status-closed { background: var(--bs-info); color: var(--bs-white); }
+    .status-sale { background: var(--bs-status-present); color: var(--bs-white); }
+    .status-failed { background: var(--bs-status-absent); color: var(--bs-white); }
 </style>
 @endsection
 
@@ -109,7 +109,7 @@
         <div class="col-md-2">
             <div class="card border-primary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-clipboard-check text-primary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-clipboard-check text-primary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['total_processed'] ?? 0 }}</h3>
                     <small class="text-muted">Processed</small>
                 </div>
@@ -118,7 +118,7 @@
         <div class="col-md-2">
             <div class="card border-warning">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-send text-warning" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-send text-warning u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['submitted'] ?? 0 }}</h3>
                     <small class="text-muted">Submitted to You</small>
                 </div>
@@ -127,7 +127,7 @@
         <div class="col-md-2">
             <div class="card border-success">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-check-circle text-success u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['sales'] ?? 0 }}</h3>
                     <small class="text-muted">Sales</small>
                 </div>
@@ -136,7 +136,7 @@
         <div class="col-md-2">
             <div class="card border-info">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-arrow-u-left-top text-info" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-arrow-u-left-top text-info u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['returned'] ?? 0 }}</h3>
                     <small class="text-muted">Returned</small>
                 </div>
@@ -145,7 +145,7 @@
         <div class="col-md-2">
             <div class="card border-danger">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-close-circle text-danger" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-close-circle text-danger u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['declined'] ?? 0 }}</h3>
                     <small class="text-muted">Declined</small>
                 </div>
@@ -154,7 +154,7 @@
         <div class="col-md-2">
             <div class="card border-secondary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-clock-alert text-secondary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-clock-alert text-secondary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['pending'] ?? 0 }}</h3>
                     <small class="text-muted">Pending</small>
                 </div>
@@ -274,7 +274,7 @@
                                                         <form method="POST" action="{{ route('validator.update', $lead->id) }}" id="validatorForm{{ $lead->id }}">
                                                             @csrf
                                                             @method('PUT')
-                                                            <div class="modal-body" style="max-height: calc(100vh - 250px); overflow-y: auto;">
+ <div class="modal-body u-overflow-y-auto" style="max-height: calc(100vh - 250px)">
                                                                 @include('peregrine.closers.form', ['lead' => $lead, 'isValidator' => true])
                                                             </div>
                                                             <div class="modal-footer">
@@ -297,11 +297,11 @@
                                                         </form>
                                                         
                                                         <!-- Hidden forms for other actions -->
-                                                        <form method="POST" action="{{ route('validator.mark-forwarded', $lead->id) }}" id="forwardForm{{ $lead->id }}" style="display:none;">
+                                                        <form method="POST" action="{{ route('validator.mark-forwarded', $lead->id) }}" id="forwardForm{{ $lead->id }}" class="d-none">
                                                             @csrf
                                                             @method('PUT')
                                                         </form>
-                                                        <form method="POST" action="{{ route('validator.mark-simple-declined', $lead->id) }}" id="declineForm{{ $lead->id }}" style="display:none;">
+                                                        <form method="POST" action="{{ route('validator.mark-simple-declined', $lead->id) }}" id="declineForm{{ $lead->id }}" class="d-none">
                                                             @csrf
                                                             @method('PUT')
                                                         </form>

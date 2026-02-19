@@ -7,7 +7,7 @@
 @section('css')
     <style>
         .permission-matrix {
-            background: #fff;
+            background: var(--bs-white, #fff);
             border-radius: 8px;
         }
         .permission-row {
@@ -20,7 +20,7 @@
         }
         .module-name {
             font-weight: 500;
-            color: #495057;
+            color: var(--bs-surface-600);
         }
         .module-description {
             font-size: 0.875rem;
@@ -61,11 +61,11 @@
         }
         .badge-inherit { background: var(--bs-status-default); }
         .badge-view { background: var(--bs-status-leave); }
-        .badge-edit { background: #0dcaf0; }
-        .badge-full { background: #198754; }
+        .badge-edit { background: var(--bs-info); }
+        .badge-full { background: var(--bs-ui-success); }
         .badge-none { background: var(--bs-status-absent); }
         .inherited-badge {
-            background: #e9ecef;
+            background: var(--bs-surface-200);
             color: var(--bs-status-default);
             padding: 2px 8px;
             border-radius: 12px;
@@ -74,8 +74,8 @@
             margin-left: 8px;
         }
         .override-badge {
-            background: #fff3cd;
-            color: #856404;
+            background: var(--bs-surface-50);
+            color: var(--bs-gold-dark);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.75rem;
@@ -120,7 +120,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h4 class="card-title mb-1">
-                                    <i class="bx bx-user me-2" style="color: var(--bs-gold);"></i>
+ <i class="bx bx-user me-2 text-gold" ></i>
                                     {{ $user->name }} - Permission Overrides
                                 </h4>
                                 <p class="text-muted mb-0">
@@ -288,7 +288,7 @@
         document.querySelectorAll('.permission-radio').forEach(radio => {
             radio.addEventListener('change', function() {
                 const row = this.closest('.permission-row');
-                row.style.background = '#fffbea';
+                row.style.background = themeColors.goldLight;
                 setTimeout(() => {
                     row.style.background = '';
                 }, 2000);

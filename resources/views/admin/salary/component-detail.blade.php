@@ -12,7 +12,7 @@
     }
     .detail-header {
         background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-        color: white;
+        color: var(--bs-white);
         padding: 2rem;
         border-radius: 12px;
         margin-bottom: 2rem;
@@ -70,8 +70,8 @@
         font-size: 0.9rem;
     }
     .status-calculated { background: var(--bs-status-leave); color: black; }
-    .status-approved { background: #17a2b8; color: white; }
-    .status-paid { background: var(--bs-status-present); color: white; }
+    .status-approved { background: var(--bs-info); color: var(--bs-white); }
+    .status-paid { background: var(--bs-status-present); color: var(--bs-white); }
 </style>
 @endsection
 
@@ -116,9 +116,9 @@
                             <div class="detail-field-label">Component Type</div>
                             <div class="detail-field-value">
                                 @if($component->component_type === 'basic')
-                                    <i class="bx bx-money me-2" style="color: #0d6efd;"></i>Basic Salary
+                                    <i class="bx bx-money me-2" style="color: var(--bs-primary);"></i>Basic Salary
                                 @else
-                                    <i class="bx bx-gift me-2" style="color: #198754;"></i>Bonus Salary
+                                    <i class="bx bx-gift me-2 text-ui-success"></i>Bonus Salary
                                 @endif
                             </div>
                         </div>
@@ -134,7 +134,7 @@
 
             <!-- Financial Breakdown -->
             <div class="detail-card">
-                <h5 class="mb-4" style="color: var(--bs-gold);">
+ <h5 class="mb-4 text-gold" >
                     <i class="bx bx-calculator me-2"></i>Financial Summary
                 </h5>
 
@@ -149,20 +149,20 @@
                         @if($component->attendance_bonus > 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Attendance/Punctuality Bonus</span>
-                            <span class="breakdown-value" style="color: var(--bs-ui-success);">+ Rs {{ number_format($component->attendance_bonus, 2) }}</span>
+ <span class="breakdown-value text-ui-success" >+ Rs {{ number_format($component->attendance_bonus, 2) }}</span>
                         </div>
                         @endif
                         
                         <hr class="my-3">
                         
-                        <div class="breakdown-row" style="font-size: 1.1rem;">
-                            <span class="breakdown-label" style="font-weight: 700;">Calculated Amount</span>
-                            <span class="breakdown-value" style="color: var(--bs-gradient-start); font-size: 1.25rem;">Rs {{ number_format($component->calculated_amount, 2) }}</span>
+                        <div class="breakdown-row u-fs-110">
+ <span class="breakdown-label u-fw-700" >Calculated Amount</span>
+                            <span class="breakdown-value text-gradient-start" style="font-size: 1.25rem">Rs {{ number_format($component->calculated_amount, 2) }}</span>
                         </div>
                     </div>
 
                     <!-- Attendance Details -->
-                    <h6 class="mt-4 mb-3" style="color: var(--bs-surface-500);">Attendance Information</h6>
+ <h6 class="mt-4 mb-3 text-surface-500" >Attendance Information</h6>
                     <div class="breakdown-table">
                         <div class="breakdown-row">
                             <span class="breakdown-label">Working Days</span>
@@ -192,14 +192,14 @@
                         @if($component->attendance_bonus > 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Punctuality Bonus Earned</span>
-                            <span class="breakdown-value" style="color: var(--bs-ui-success);">Rs {{ number_format($component->attendance_bonus, 2) }}</span>
+ <span class="breakdown-value text-ui-success" >Rs {{ number_format($component->attendance_bonus, 2) }}</span>
                         </div>
                         @endif
                         
                         @if($component->attendance_deduction < 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Attendance Deduction</span>
-                            <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format(abs($component->attendance_deduction), 2) }}</span>
+ <span class="breakdown-value text-ui-danger" >Rs {{ number_format(abs($component->attendance_deduction), 2) }}</span>
                         </div>
                         @endif
                     </div>
@@ -236,20 +236,20 @@
                         </div>
                         <div class="breakdown-row">
                             <span class="breakdown-label">Sales Bonus</span>
-                            <span class="breakdown-value" style="color: var(--bs-ui-success);">Rs {{ number_format($component->calculated_amount, 2) }}</span>
+ <span class="breakdown-value text-ui-success" >Rs {{ number_format($component->calculated_amount, 2) }}</span>
                         </div>
                         @else
                         <div class="breakdown-row">
                             <span class="breakdown-label">Status</span>
-                            <span class="breakdown-value" style="color: var(--bs-ui-danger);">Below Target - No Bonus</span>
+ <span class="breakdown-value text-ui-danger" >Below Target - No Bonus</span>
                         </div>
                         @endif
                         
                         <hr class="my-3">
                         
-                        <div class="breakdown-row" style="font-size: 1.1rem;">
-                            <span class="breakdown-label" style="font-weight: 700;">Bonus Amount</span>
-                            <span class="breakdown-value" style="color: #198754; font-size: 1.25rem;">Rs {{ number_format($component->calculated_amount, 2) }}</span>
+                        <div class="breakdown-row u-fs-110">
+ <span class="breakdown-label u-fw-700" >Bonus Amount</span>
+                            <span class="breakdown-value text-ui-success" style="font-size: 1.25rem">Rs {{ number_format($component->calculated_amount, 2) }}</span>
                         </div>
                         @endif
                     </div>
@@ -257,41 +257,41 @@
 
                 <!-- Deductions -->
                 @if($component->deductions > 0)
-                <h6 class="mt-4 mb-3" style="color: var(--bs-surface-500);">Deductions</h6>
+ <h6 class="mt-4 mb-3 text-surface-500" >Deductions</h6>
                 <div class="breakdown-table">
                     @if($component->dock_deductions > 0)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Dock Deductions</span>
-                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->dock_deductions, 2) }}</span>
+ <span class="breakdown-value text-ui-danger" >Rs {{ number_format($component->dock_deductions, 2) }}</span>
                     </div>
                     @endif
                     
                     @if($component->manual_deductions > 0)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Manual Deductions</span>
-                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->manual_deductions, 2) }}</span>
+ <span class="breakdown-value text-ui-danger" >Rs {{ number_format($component->manual_deductions, 2) }}</span>
                     </div>
                     @endif
                     
                     <hr class="my-3">
                     
                     <div class="breakdown-row">
-                        <span class="breakdown-label" style="font-weight: 700;">Total Deductions</span>
-                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->deductions, 2) }}</span>
+ <span class="breakdown-label u-fw-700" >Total Deductions</span>
+ <span class="breakdown-value text-ui-danger" >Rs {{ number_format($component->deductions, 2) }}</span>
                     </div>
                 </div>
                 @endif
 
                 <!-- Final Amount -->
-                <div class="detail-card" style="background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); color: white; border: none; margin-top: 2rem;">
+ <div class="detail-card text-white border-0" style="background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); margin-top: 2rem">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="detail-field-label" style="color: rgba(255,255,255,0.8);">Calculated Amount</div>
-                            <div style="font-size: 1.5rem; font-weight: 700;">Rs {{ number_format($component->calculated_amount, 2) }}</div>
+ <div class="u-fw-700 u-fs-150">Rs {{ number_format($component->calculated_amount, 2) }}</div>
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="detail-field-label" style="color: rgba(255,255,255,0.8);">Net Amount</div>
-                            <div style="font-size: 1.5rem; font-weight: 700;">Rs {{ number_format($component->net_amount, 2) }}</div>
+ <div class="u-fw-700 u-fs-150">Rs {{ number_format($component->net_amount, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -300,7 +300,7 @@
             <!-- Notes -->
             @if($component->notes)
             <div class="detail-card">
-                <h6 class="mb-3" style="color: var(--bs-surface-500);">
+ <h6 class="mb-3 text-surface-500" >
                     <i class="bx bx-note me-2"></i>Notes
                 </h6>
                 <p class="text-muted mb-0">{{ $component->notes }}</p>
@@ -312,7 +312,7 @@
         <div class="col-lg-4">
             <!-- Status & Approval Info -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: var(--bs-gold);">
+ <h6 class="mb-3 text-gold" >
                     <i class="bx bx-info-circle me-2"></i>Workflow Status
                 </h6>
                 
@@ -329,21 +329,21 @@
                     @if($component->calculated_at)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Calculated On</span>
-                        <span class="breakdown-value" style="font-size: 0.9rem;">{{ $component->calculated_at->format('d M Y, h:i A') }}</span>
+                        <span class="breakdown-value u-fs-090">{{ $component->calculated_at->format('d M Y, h:i A') }}</span>
                     </div>
                     @endif
                     
                     @if($component->approved_at)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Approved On</span>
-                        <span class="breakdown-value" style="font-size: 0.9rem;">{{ $component->approved_at->format('d M Y, h:i A') }}</span>
+                        <span class="breakdown-value u-fs-090">{{ $component->approved_at->format('d M Y, h:i A') }}</span>
                     </div>
                     @endif
                     
                     @if($component->paid_at)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Paid On</span>
-                        <span class="breakdown-value" style="font-size: 0.9rem;">{{ $component->paid_at->format('d M Y, h:i A') }}</span>
+                        <span class="breakdown-value u-fs-090">{{ $component->paid_at->format('d M Y, h:i A') }}</span>
                     </div>
                     @endif
                 </div>
@@ -351,7 +351,7 @@
 
             <!-- Actions -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: var(--bs-gold);">
+ <h6 class="mb-3 text-gold" >
                     <i class="bx bx-cog me-2"></i>Actions
                 </h6>
                 
@@ -386,78 +386,42 @@
 
             <!-- Timeline -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: var(--bs-gold);">
+ <h6 class="mb-3 text-gold" >
                     <i class="bx bx-time me-2"></i>Timeline
                 </h6>
                 
                 <div class="timeline">
                     <div class="timeline-item" style="margin-bottom: 1.5rem;">
-                        <div style="display: flex; align-items: flex-start;">
-                            <div style="
-                                width: 24px;
-                                height: 24px;
-                                background: var(--bs-gold);
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                color: white;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="bg-gold rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; margin-right: 1rem">
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: var(--bs-surface-700);">Calculated</div>
+ <div class="u-fw-600 text-surface-700" >Calculated</div>
                                 <small class="text-muted">{{ $component->calculated_at ? $component->calculated_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>
                     </div>
                     
                     <div class="timeline-item" style="margin-bottom: 1.5rem;">
-                        <div style="display: flex; align-items: flex-start;">
-                            <div style="
-                                width: 24px;
-                                height: 24px;
-                                background: {{ $component->approved_at ? 'var(--bs-ui-success)' : '#d1d5db' }};
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                color: white;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; background: {{ $component->approved_at ? 'var(--bs-ui-success)' : 'var(--bs-surface-300)' }}; margin-right: 1rem">
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: var(--bs-surface-700);">Approved</div>
+ <div class="u-fw-600 text-surface-700" >Approved</div>
                                 <small class="text-muted">{{ $component->approved_at ? $component->approved_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>
                     </div>
                     
                     <div class="timeline-item">
-                        <div style="display: flex; align-items: flex-start;">
-                            <div style="
-                                width: 24px;
-                                height: 24px;
-                                background: {{ $component->paid_at ? '#0d6efd' : '#d1d5db' }};
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                color: white;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; background: {{ $component->paid_at ? 'var(--bs-primary)' : 'var(--bs-surface-300)' }}; margin-right: 1rem">
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: var(--bs-surface-700);">Paid</div>
+ <div class="u-fw-600 text-surface-700" >Paid</div>
                                 <small class="text-muted">{{ $component->paid_at ? $component->paid_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>

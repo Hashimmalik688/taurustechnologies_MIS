@@ -17,11 +17,11 @@
         }
         .dataTables_wrapper .dataTables_filter label {
             font-weight: 600;
-            color: #495057;
+            color: var(--bs-surface-600);
             margin-right: 10px;
         }
         .dataTables_wrapper .dataTables_filter input {
-            border: 2px solid #e3e6f0;
+            border: 2px solid var(--bs-surface-200);
             border-radius: 0.35rem;
             padding: 0.5rem 1rem;
             width: 300px;
@@ -40,15 +40,15 @@
         }
         .dataTables_wrapper .dataTables_length label {
             font-weight: 600;
-            color: #495057;
+            color: var(--bs-surface-600);
         }
         .dataTables_wrapper .dataTables_length select {
-            border: 2px solid #e3e6f0;
+            border: 2px solid var(--bs-surface-200);
             border-radius: 0.35rem;
             padding: 0.45rem 2rem 0.45rem 0.75rem;
             margin: 0 0.75rem;
             font-size: 0.95rem;
-            background: white;
+            background: var(--bs-card-bg);
             transition: all 0.3s ease;
         }
         .dataTables_wrapper .dataTables_length select:focus {
@@ -58,7 +58,7 @@
         .dataTables_wrapper .dataTables_info {
             padding-top: 1.5em;
             font-size: 0.9rem;
-            color: #74788d;
+            color: var(--bs-surface-muted);
             font-weight: 500;
         }
         .dataTables_wrapper .dataTables_paginate {
@@ -67,19 +67,19 @@
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             padding: 0.5rem 0.9rem;
             margin: 0 3px;
-            border: 1px solid #e3e6f0;
+            border: 1px solid var(--bs-surface-200);
             border-radius: 0.35rem;
             font-weight: 500;
             transition: all 0.2s ease;
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, #4d63d4 100%);
-            color: white !important;
+            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, var(--bs-ui-info) 100%);
+            color: var(--bs-white) !important;
             border-color: var(--bs-chart-primary);
             box-shadow: 0 2px 6px rgba(85,110,230,0.3);
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-            background: #f8f9fc;
+            background: var(--bs-surface-50);
             border-color: var(--bs-chart-primary);
             color: var(--bs-chart-primary) !important;
         }
@@ -93,7 +93,7 @@
         }
         #attendance-table thead th {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.75rem;
@@ -105,7 +105,7 @@
             transition: all 0.2s ease;
         }
         #attendance-table tbody tr:hover {
-            background-color: #f8f9fc;
+            background-color: var(--bs-surface-50);
             transform: scale(1.01);
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
@@ -121,7 +121,7 @@
         .btn-soft-primary:hover {
             background-color: var(--bs-chart-primary);
             border-color: var(--bs-chart-primary);
-            color: white;
+            color: var(--bs-white);
         }
         .btn-soft-danger {
             background-color: rgba(244, 106, 106, 0.1);
@@ -131,7 +131,7 @@
         .btn-soft-danger:hover {
             background-color: var(--bs-chart-danger);
             border-color: var(--bs-chart-danger);
-            color: white;
+            color: var(--bs-white);
         }
     </style>
 @endsection
@@ -351,7 +351,7 @@
                                                 <div>
                                                     <h6 class="mb-0">{{ $attendance->user->name }}
                                                         @if($attendance->user->trashed())
-                                                            <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
+                                                            <span class="badge bg-danger-subtle text-danger ms-1 u-fs-10">Terminated</span>
                                                         @endif
                                                     </h6>
                                                     <p class="text-muted mb-0">{{ $attendance->user->email }}</p>
@@ -575,7 +575,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3" id="overnight_shift_alert" style="display: none;">
+ <div class="mb-3 d-none" id="overnight_shift_alert" >
                             <div class="alert alert-info mb-0">
                                 <i class="mdi mdi-information me-2"></i>
                                 <strong>Overnight Shift Detected!</strong>

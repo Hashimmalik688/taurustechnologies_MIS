@@ -15,43 +15,43 @@
             content: ''; position: absolute; top: -80%; right: -30%; width: 60%; height: 250%;
             background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
         }
-        .epms-hero h2 { color: #fff; font-weight: 700; position: relative; z-index: 1; }
+        .epms-hero h2 { color: var(--bs-white, #fff); font-weight: 700; position: relative; z-index: 1; }
         .epms-hero p { color: rgba(255,255,255,0.85); position: relative; z-index: 1; }
 
         .stat-card-epms {
-            background: #fff; border-radius: 16px; padding: 25px;
+            background: var(--bs-white, #fff); border-radius: 16px; padding: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--bs-print-bg-alt);
             transition: all 0.3s ease; height: 100%;
         }
         .stat-card-epms:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
         .stat-card-epms .stat-icon {
             width: 55px; height: 55px; border-radius: 14px; display: flex;
-            align-items: center; justify-content: center; font-size: 24px; color: #fff; margin-bottom: 15px;
+            align-items: center; justify-content: center; font-size: 24px; color: var(--bs-white, #fff); margin-bottom: 15px;
         }
-        .stat-card-epms .stat-value { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+        .stat-card-epms .stat-value { font-size: 2rem; font-weight: 700; color: var(--bs-surface-900); }
         .stat-card-epms .stat-label { color: var(--bs-status-default); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; }
 
         .project-card-v2 {
-            background: #fff; border-radius: 16px; border: 1px solid #eef0f3;
+            background: var(--bs-white, #fff); border-radius: 16px; border: 1px solid var(--bs-surface-200);
             transition: all 0.3s ease; overflow: hidden;
         }
         .project-card-v2:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .project-card-v2 .card-header-strip { height: 6px; }
         .project-card-v2 .card-body { padding: 25px; }
-        .project-card-v2 .project-name { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; text-decoration: none; }
+        .project-card-v2 .project-name { font-size: 1.1rem; font-weight: 600; color: var(--bs-surface-900); text-decoration: none; }
         .project-card-v2 .project-name:hover { color: var(--bs-gradient-start); }
 
         .priority-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .priority-critical { background: #fee2e2; color: var(--bs-ui-danger-dark); }
-        .priority-high { background: #fef3c7; color: #d97706; }
-        .priority-medium { background: #dbeafe; color: #2563eb; }
-        .priority-low { background: #dcfce7; color: #16a34a; }
+        .priority-critical { background: var(--bs-surface-50); color: var(--bs-ui-danger-dark); }
+        .priority-high { background: var(--bs-surface-50); color: var(--bs-ui-warning); }
+        .priority-medium { background: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+        .priority-low { background: var(--bs-surface-50); color: var(--bs-ui-success); }
 
         .methodology-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .method-agile { background: #ede9fe; color: #7c3aed; }
-        .method-waterfall { background: #e0f2fe; color: #0284c7; }
-        .method-hybrid { background: #fce7f3; color: #db2777; }
-        .method-kanban { background: #ecfdf5; color: var(--bs-ui-success-dark); }
+        .method-agile { background: var(--bs-surface-50); color: var(--bs-ui-purple); }
+        .method-waterfall { background: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+        .method-hybrid { background: var(--bs-surface-50); color: var(--bs-ui-danger); }
+        .method-kanban { background: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
 
         .health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
         .health-dot.green { background: var(--bs-ui-success); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
@@ -63,11 +63,11 @@
 
         .ai-banner {
             background: linear-gradient(135deg, var(--bs-surface-900) 0%, var(--bs-surface-800) 100%);
-            border-radius: 16px; padding: 30px; color: #fff;
+            border-radius: 16px; padding: 30px; color: var(--bs-white, #fff);
             position: relative; overflow: hidden;
         }
         .ai-banner::before { content: '🤖'; position: absolute; right: 30px; top: 50%; transform: translateY(-50%); font-size: 80px; opacity: 0.15; }
-        .ai-banner h5 { color: #a78bfa; font-weight: 700; }
+        .ai-banner h5 { color: var(--bs-ui-purple); font-weight: 700; }
         .ai-banner p { color: var(--bs-surface-400); }
     </style>
 @endsection
@@ -118,21 +118,21 @@
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-info), #2563eb);"><i class="bx bx-edit-alt"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-info), var(--bs-ui-info-dark));"><i class="bx bx-edit-alt"></i></div>
                 <div class="stat-value">{{ $stats['planning'] }}</div>
                 <div class="stat-label">Planning</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-warning), #d97706);"><i class="bx bx-check-circle"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-warning), var(--bs-ui-warning));"><i class="bx bx-check-circle"></i></div>
                 <div class="stat-value">{{ $stats['completed'] }}</div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-purple), #7c3aed);"><i class="bx bx-task"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-purple), var(--bs-ui-purple));"><i class="bx bx-task"></i></div>
                 <div class="stat-value">{{ $stats['total_tasks'] }}</div>
                 <div class="stat-label">Total Tasks</div>
             </div>
@@ -168,8 +168,8 @@
                 <div class="project-card-v2">
                     <div class="card-header-strip" style="background: linear-gradient(90deg,
                         {{ $project->priority === 'critical' ? 'var(--bs-ui-danger), var(--bs-ui-danger-dark)' :
-                           ($project->priority === 'high' ? 'var(--bs-ui-warning), #d97706' :
-                           ($project->priority === 'medium' ? 'var(--bs-ui-info), #2563eb' : 'var(--bs-ui-success), var(--bs-ui-success-dark)')) }});"></div>
+                           ($project->priority === 'high' ? 'var(--bs-ui-warning), var(--bs-ui-warning)' :
+                           ($project->priority === 'medium' ? 'var(--bs-ui-info), var(--bs-ui-info-dark)' : 'var(--bs-ui-success), var(--bs-ui-success-dark)')) }});"></div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <a href="{{ route('epms.show', $project) }}" class="project-name">{{ $project->name }}</a>

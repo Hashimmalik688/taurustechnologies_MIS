@@ -1,5 +1,5 @@
 <!-- Community Announcements Banner - Auto-rotating announcements from user's communities -->
-<div id="community-announcements-banner" class="community-announcements-banner" style="display: none;">
+<div id="community-announcements-banner" class="community-announcements-banner d-none" >
     <div class="announcements-container">
         <div class="announcements-carousel">
             <!-- Individual announcements will be added here -->
@@ -23,7 +23,7 @@
     left: 0;
     right: 0;
     background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-    color: white;
+    color: var(--bs-white);
     z-index: 9998;
     padding: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -92,7 +92,7 @@
 .announcement-item-close {
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    color: white;
+    color: var(--bs-white);
     padding: 0.5rem;
     border-radius: 50%;
     cursor: pointer;
@@ -122,7 +122,7 @@
 .control-btn {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
+    color: var(--bs-white);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -160,7 +160,7 @@
 }
 
 .dot.active {
-    background: white;
+    background: var(--bs-card-bg);
     width: 24px;
     border-radius: 4px;
 }
@@ -171,11 +171,11 @@
 
 /* Color variations by priority */
 .community-announcements-banner.priority-urgent {
-    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger) 100%);
 }
 
 .community-announcements-banner.priority-warning {
-    background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-warning) 100%);
 }
 
 .community-announcements-banner.priority-info {

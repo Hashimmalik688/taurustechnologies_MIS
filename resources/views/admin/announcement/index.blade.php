@@ -74,7 +74,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge" style="background-color: var(--gold); color: #111;">
+                                            <span class="badge bg-gold text-surface-700">
                                                 {{ ucfirst($announcement->animation) }}
                                             </span>
                                         </td>
@@ -92,7 +92,7 @@
                                                 <a href="{{ route('admin.announcements.edit', $announcement->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="bx bx-pencil"></i>
                                                 </a>
-                                                <form method="POST" action="{{ route('admin.announcements.destroy', $announcement->id) }}" style="display: inline;">
+ <form class="d-inline" method="POST" action="{{ route('admin.announcements.destroy', $announcement->id) }}" >
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" onclick="return confirm('Are you sure?')">
@@ -113,7 +113,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="bx bx-bell-off" style="font-size: 3rem; color: #d1d5db;"></i>
+                        <i class="bx bx-bell-off text-surface-300" style="font-size: 3rem"></i>
                         <p class="text-muted mt-3">No announcements yet. Create one to get started!</p>
                     </div>
                 @endif

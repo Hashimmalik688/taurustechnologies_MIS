@@ -15,7 +15,7 @@
             height: 100%;
             z-index: -1;
             overflow: hidden;
-            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start)10 0%, var(--bs-gradient-end)10 100%);
         }
 
         .gradient-orb {
@@ -37,7 +37,7 @@
         .orb-2 {
             width: 350px;
             height: 350px;
-            background: linear-gradient(135deg, #2193b0, #6dd5ed);
+            background: linear-gradient(135deg, var(--bs-ui-info), var(--bs-ui-info));
             bottom: -175px;
             left: -175px;
             animation-delay: 7s;
@@ -70,7 +70,7 @@
 
         .partner-header {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
             border-radius: 16px 16px 0 0;
             padding: 2rem;
             position: relative;
@@ -123,7 +123,7 @@
         }
 
         .status-active .status-dot {
-            background: #38ef7d;
+            background: var(--bs-ui-success);
             box-shadow: 0 0 0 0 rgba(56, 239, 125, 0.7);
         }
 
@@ -140,11 +140,11 @@
         }
 
         .info-card {
-            background: white;
+            background: var(--bs-card-bg);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1rem;
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--bs-surface-200);
             transition: all 0.3s ease;
         }
 
@@ -171,7 +171,7 @@
 
         .carrier-card {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--bs-surface-200);
             border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -193,7 +193,7 @@
             display: inline-block;
             padding: 0.5rem 1rem;
             background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
-            color: white;
+            color: var(--bs-white);
             border-radius: 8px;
             font-weight: 600;
             font-size: 0.875rem;
@@ -201,11 +201,11 @@
         }
 
         .settlement-row {
-            background: white;
+            background: var(--bs-card-bg);
             padding: 1rem;
             border-radius: 8px;
             margin-bottom: 0.75rem;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
         }
 
         .settlement-row strong {
@@ -215,7 +215,7 @@
         .btn-gradient-primary {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             border: none;
-            color: white;
+            color: var(--bs-white);
             font-weight: 600;
             padding: 0.625rem 1.5rem;
             border-radius: 12px;
@@ -226,7 +226,7 @@
         .btn-gradient-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            color: white;
+            color: var(--bs-white);
         }
 
         .btn-secondary {

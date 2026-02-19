@@ -164,7 +164,7 @@
                                     <a href="{{ route('dock.history', $record->user_id) }}" class="text-body fw-bold">
                                         {{ $record->user?->name ?? 'Unknown User' }}
                                         @if($record->user?->trashed())
-                                            <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
+                                            <span class="badge bg-danger-subtle text-danger ms-1 u-fs-10">Terminated</span>
                                         @endif
                                     </a>
                                 </td>
@@ -236,7 +236,7 @@
                 </div>
                 @else
                 <div class="text-center py-4">
-                    <i class="mdi mdi-information-outline" style="font-size: 48px; color: #ccc;"></i>
+                    <i class="mdi mdi-information-outline text-surface-300" style="font-size: 48px"></i>
                     <p class="text-muted mt-2">No dock records found for the selected period.</p>
                 </div>
                 @endif

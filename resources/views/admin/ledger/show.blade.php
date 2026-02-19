@@ -125,7 +125,7 @@
 
         .badge-credit {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.5rem 1rem;
             border-radius: 8px;
             font-size: 0.875rem;
@@ -134,7 +134,7 @@
 
         .badge-debit {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.5rem 1rem;
             border-radius: 8px;
             font-size: 0.875rem;
@@ -151,13 +151,13 @@
         }
 
         .btn-edit {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success) 100%);
+            color: var(--bs-white);
         }
 
         .btn-delete {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
     </style>
 @endsection
@@ -217,7 +217,7 @@
                     <div class="info-item">
                         <div class="info-label">Related Lead</div>
                         <div class="info-value">
-                            <a href="#" style="color: var(--bs-gold);">Lead #1234 - John Doe</a>
+ <a class="text-gold" href="#" >Lead #1234 - John Doe</a>
                         </div>
                     </div>
                     <div class="info-item">
@@ -240,7 +240,7 @@
         <div class="col-lg-4">
             <div class="glassmorphism-card">
                 <div class="card-body">
-                    <h5 style="color: var(--bs-gold); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
+ <h5 class="text-gold" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(212, 175, 55, 0.3)">
                         <i class="mdi mdi-timeline-clock me-2"></i>Transaction Timeline
                     </h5>
 

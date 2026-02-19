@@ -15,7 +15,7 @@
             font-family: Calibri, 'Segoe UI', Arial, sans-serif;
             font-size: 13px;
             line-height: 1.5;
-            color: #000;
+            color: var(--bs-surface-900);
             background: white;
             padding: 20px;
         }
@@ -23,35 +23,35 @@
         .header {
             text-align: center;
             margin-bottom: 25px;
-            border-bottom: 3px solid #000;
+            border-bottom: 3px solid var(--bs-surface-900);
             padding-bottom: 15px;
         }
 
         .company-name {
             font-size: 26px;
             font-weight: bold;
-            color: #000;
+            color: var(--bs-surface-900);
             margin-bottom: 5px;
             letter-spacing: 1px;
         }
 
         .company-subtext {
             font-size: 13px;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 10px;
         }
 
         .report-title {
             font-size: 16px;
             font-weight: 600;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 5px;
         }
 
         .payment-due {
             font-size: 14px;
             font-weight: 600;
-            color: #2e7d32;
+            color: var(--bs-ui-success-dark);
             margin-bottom: 10px;
         }
 
@@ -61,9 +61,9 @@
             gap: 15px;
             font-size: 12px;
             margin-bottom: 20px;
-            background: #f5f5f5;
+            background: var(--bs-surface-50);
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bs-surface-200);
         }
 
         .info-item {
@@ -73,13 +73,13 @@
 
         .info-label {
             font-weight: bold;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 3px;
             font-size: 11px;
         }
 
         .info-value {
-            color: #000;
+            color: var(--bs-surface-900);
             font-weight: 600;
             font-size: 13px;
         }
@@ -88,28 +88,28 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 25px;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
         }
 
         th {
-            background-color: #333;
-            color: #fff;
+            background-color: var(--bs-surface-700);
+            color: var(--bs-white, #fff);
             font-weight: bold;
             padding: 9px 6px;
             text-align: center;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             font-size: 12px;
             white-space: nowrap;
         }
 
         td {
             padding: 7px 6px;
-            border: 1px solid #333;
+            border: 1px solid var(--bs-surface-700);
             font-size: 12px;
         }
 
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: var(--bs-surface-50);
         }
 
         .number {
@@ -129,16 +129,16 @@
         .summary-section {
             margin-top: 25px;
             padding: 18px;
-            background: #f5f5f5;
-            border: 2px solid #000;
+            background: var(--bs-surface-50);
+            border: 2px solid var(--bs-surface-900);
         }
 
         .summary-title {
             font-size: 18px;
             font-weight: bold;
-            color: #000;
+            color: var(--bs-surface-900);
             margin-bottom: 15px;
-            border-bottom: 2px solid #333;
+            border-bottom: 2px solid var(--bs-surface-700);
             padding-bottom: 8px;
         }
 
@@ -156,14 +156,14 @@
         .summary-label {
             font-size: 13px;
             font-weight: bold;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 5px;
         }
 
         .summary-value {
             font-size: 18px;
             font-weight: bold;
-            color: #000;
+            color: var(--bs-surface-900);
         }
 
         .print-buttons {
@@ -177,9 +177,9 @@
         .print-buttons button,
         .print-buttons a {
             padding: 10px 20px;
-            background: #333;
+            background: var(--bs-surface-700);
             color: white;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             border-radius: 4px;
             cursor: pointer;
             font-size: 13px;
@@ -192,15 +192,15 @@
 
         .print-buttons button:hover,
         .print-buttons a:hover {
-            background: #000;
+            background: var(--bs-surface-900);
         }
 
         .back-btn {
-            background: #666 !important;
+            background: var(--bs-surface-500) !important;
         }
 
         .back-btn:hover {
-            background: #555 !important;
+            background: var(--bs-surface-500) !important;
         }
 
         .no-print {
@@ -218,7 +218,7 @@
                 display: none;
             }
             th {
-                background-color: #333 !important;
+                background-color: var(--bs-surface-700) !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -227,31 +227,31 @@
         .badge {
             display: inline-block;
             padding: 3px 6px;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
             border-radius: 3px;
             font-size: 10px;
             font-weight: bold;
         }
 
         .badge-yes {
-            background: #e6e6e6;
-            color: #000;
+            background: var(--bs-surface-200);
+            color: var(--bs-surface-900);
         }
 
         .badge-no {
-            background: #333;
-            color: #fff;
+            background: var(--bs-surface-700);
+            color: var(--bs-white, #fff);
         }
 
         tfoot tr {
-            background: #e6e6e6 !important;
+            background: var(--bs-surface-200) !important;
             font-weight: bold;
-            border-top: 2px solid #000;
+            border-top: 2px solid var(--bs-surface-900);
         }
 
         tfoot td {
             font-weight: bold;
-            border: 1px solid #000;
+            border: 1px solid var(--bs-surface-900);
         }
     </style>
 </head>
@@ -298,21 +298,21 @@
         <thead>
             <tr>
                 <th style="width: 25px;">Sr#</th>
-                <th style="width: 100px;">Employee Name</th>
-                <th style="width: 65px;">Join Date</th>
-                <th style="width: 65px;">Basic Salary</th>
-                <th style="width: 60px;">Per Day Wage</th>
-                <th style="width: 60px;">Punctuality</th>
-                <th style="width: 60px;">Total</th>
+                <th class="u-w-100">Employee Name</th>
+                <th class="u-w-65">Join Date</th>
+                <th class="u-w-65">Basic Salary</th>
+                <th class="u-w-60">Per Day Wage</th>
+                <th class="u-w-60">Punctuality</th>
+                <th class="u-w-60">Total</th>
                 <th style="width: 45px;">Full Days</th>
                 <th style="width: 45px;">Half Days</th>
                 <th style="width: 45px;">Late</th>
                 <th style="width: 50px;">Qualified</th>
-                <th style="width: 65px;">Dock Amount</th>
-                <th style="width: 65px;">Other Deduct.</th>
-                <th style="width: 65px;">Net Salary</th>
-                <th style="width: 60px;">Advance</th>
-                <th style="width: 65px;">Payable</th>
+                <th class="u-w-65">Dock Amount</th>
+                <th class="u-w-65">Other Deduct.</th>
+                <th class="u-w-65">Net Salary</th>
+                <th class="u-w-60">Advance</th>
+                <th class="u-w-65">Payable</th>
             </tr>
         </thead>
         <tbody>
@@ -323,7 +323,7 @@
                     <td class="employee-name">
                         @if(isset($data['isManual']) && $data['isManual'])
                             {{ $data['employeeName'] }}
-                            <span style="font-size: 10px; color: #856404; background: #fff3cd; padding: 2px 6px; border-radius: 3px; margin-left: 5px;">MANUAL</span>
+                            <span class="u-fs-10 bg-surface-50" style="color: var(--bs-gold-dark); padding: 2px 6px; border-radius: 3px; margin-left: 5px">MANUAL</span>
                         @else
                             {{ $data['employee']->name }}
                         @endif
@@ -343,13 +343,13 @@
                     </td>
                     <td class="number">{{ number_format($data['dockAmount'], 2) }}</td>
                     <td class="number">{{ number_format($data['otherDeductions'], 2) }}</td>
-                    <td class="number" style="font-weight: bold;">{{ number_format($data['netSalary'], 2) }}</td>
+ <td class="number fw-bold" >{{ number_format($data['netSalary'], 2) }}</td>
                     <td class="number">{{ number_format($data['advance'], 2) }}</td>
-                    <td class="number" style="font-weight: bold;">{{ number_format($data['payable'], 2) }}</td>
+ <td class="number fw-bold" >{{ number_format($data['payable'], 2) }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="16" class="text-center" style="padding: 20px;">
+                    <td colspan="16" class="text-center p-4">
                         <strong>No active employees found for the selected period</strong>
                     </td>
                 </tr>
@@ -357,7 +357,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" class="text-center" style="text-align: right; padding: 8px 5px;"><strong>TOTALS:</strong></td>
+ <td colspan="3" class="text-center text-end" style="padding: 8px 5px"><strong>TOTALS:</strong></td>
                 <td class="number"><strong>{{ number_format($totalBasicSalary, 2) }}</strong></td>
                 <td class="text-center">-</td>
                 <td class="number"><strong>{{ number_format($totalPunctuality, 2) }}</strong></td>
@@ -419,10 +419,10 @@
     </div>
 
     <!-- FOOTER -->
-    <div style="margin-top: 35px; text-align: center; border-top: 2px solid #000; padding-top: 12px; color: #333; font-size: 11px;">
+ <div class="text-center u-fs-11 text-surface-700" style="margin-top: 35px; border-top: 2px solid var(--bs-surface-900); padding-top: 12px">
         <p><strong>This is a system-generated document. Please verify all figures before processing.</strong></p>
-        <p style="margin-top: 8px;">Generated: {{ now()->format('F d, Y H:i:s') }}</p>
-        <p style="margin-top: 5px; font-style: italic;">Taurus Technologies - Management Information System</p>
+ <p class="mt-2" >Generated: {{ now()->format('F d, Y H:i:s') }}</p>
+        <p class="fst-italic" style="margin-top: 5px">Taurus Technologies - Management Information System</p>
     </div>
 </body>
 </html>

@@ -114,7 +114,7 @@
 
         .badge-credit {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -123,7 +123,7 @@
 
         .badge-debit {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -184,8 +184,8 @@
                             <div class="vendor-info">
                                 <h3>John Smith</h3>
                                 <p>Smith Insurance Co.</p>
-                                <span class="badge" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); color: white;">US Agent</span>
-                                <span class="badge ms-2" style="background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%); color: white;">Active</span>
+ <span class="badge text-white" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%)">US Agent</span>
+ <span class="badge ms-2 text-white" style="background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%)">Active</span>
                             </div>
                         </div>
                         <div class="balance-display">
@@ -214,15 +214,15 @@
                     <div class="filter-section">
                         <form class="row g-3 align-items-end">
                             <div class="col-md-3">
-                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">From Date</label>
+                                <label class="form-label text-surface-300 u-fs-0875">From Date</label>
                                 <input type="text" class="form-control" id="date_from" placeholder="Select date">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">To Date</label>
+                                <label class="form-label text-surface-300 u-fs-0875">To Date</label>
                                 <input type="text" class="form-control" id="date_to" placeholder="Select date">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">Type</label>
+                                <label class="form-label text-surface-300 u-fs-0875">Type</label>
                                 <select class="form-select">
                                     <option value="">All Types</option>
                                     <option value="credit">Credit</option>
@@ -230,7 +230,7 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); color: white; font-weight: 600;">
+ <button type="submit" class="btn w-100 text-white u-fw-600" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%)">
                                     <i class="mdi mdi-filter me-2"></i>Filter
                                 </button>
                             </div>
@@ -263,10 +263,10 @@
                                     <td>Commission</td>
                                     <td>INV-001234</td>
                                     <td>Policy sale commission</td>
-                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$1,250.00</td>
-                                    <td style="color: var(--bs-gold); font-weight: 600;">$12,450.00</td>
+ <td class="text-ui-success u-fw-600" >+$1,250.00</td>
+ <td class="text-gold u-fw-600" >$12,450.00</td>
                                     <td>
-                                        <a href="{{ route('ledger.show', 1) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                                        <a href="{{ route('ledger.show', 1) }}" class="btn btn-sm text-ui-info" style="background: rgba(59, 130, 246, 0.2)">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
                                     </td>
@@ -277,10 +277,10 @@
                                     <td>Payment</td>
                                     <td>PAY-005678</td>
                                     <td>Monthly payment</td>
-                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$500.00</td>
-                                    <td style="color: var(--bs-gold); font-weight: 600;">$11,200.00</td>
+ <td class="text-ui-danger u-fw-600" >-$500.00</td>
+ <td class="text-gold u-fw-600" >$11,200.00</td>
                                     <td>
-                                        <a href="{{ route('ledger.show', 2) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                                        <a href="{{ route('ledger.show', 2) }}" class="btn btn-sm text-ui-info" style="background: rgba(59, 130, 246, 0.2)">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
                                     </td>
@@ -291,10 +291,10 @@
                                     <td>Commission</td>
                                     <td>INV-001200</td>
                                     <td>Large policy sale</td>
-                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$2,100.00</td>
-                                    <td style="color: var(--bs-gold); font-weight: 600;">$11,700.00</td>
+ <td class="text-ui-success u-fw-600" >+$2,100.00</td>
+ <td class="text-gold u-fw-600" >$11,700.00</td>
                                     <td>
-                                        <a href="{{ route('ledger.show', 3) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
+                                        <a href="{{ route('ledger.show', 3) }}" class="btn btn-sm text-ui-info" style="background: rgba(59, 130, 246, 0.2)">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
                                     </td>

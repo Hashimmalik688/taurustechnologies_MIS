@@ -21,7 +21,7 @@
             background-color: var(--bs-chart-primary);
         }
         .badge-past {
-            background-color: #74788d;
+            background-color: var(--bs-surface-muted);
         }
     </style>
 @endsection
@@ -137,7 +137,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <form action="{{ route('admin.public-holidays.toggle', $holiday) }}" method="POST" style="display: inline;">
+ <form class="d-inline" action="{{ route('admin.public-holidays.toggle', $holiday) }}" method="POST" >
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-link p-0">
                                                 @if($holiday->is_active)
@@ -157,7 +157,7 @@
                                             <form action="{{ route('admin.public-holidays.destroy', $holiday) }}" 
                                                   method="POST" 
                                                   onsubmit="return confirm('Are you sure you want to delete this holiday?');"
-                                                  style="display: inline;">
+ >
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger" title="Delete">

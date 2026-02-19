@@ -237,14 +237,14 @@
                                         <div class="type-radio">
                                             <input type="radio" id="type_debit" name="type" value="debit" required>
                                             <label for="type_debit">
-                                                <i class="mdi mdi-minus-circle me-2" style="color: var(--bs-ui-danger);"></i>
+ <i class="mdi mdi-minus-circle me-2 text-ui-danger" ></i>
                                                 Debit
                                             </label>
                                         </div>
                                         <div class="type-radio">
                                             <input type="radio" id="type_credit" name="type" value="credit" checked required>
                                             <label for="type_credit">
-                                                <i class="mdi mdi-plus-circle me-2" style="color: var(--bs-ui-success);"></i>
+ <i class="mdi mdi-plus-circle me-2 text-ui-success" ></i>
                                                 Credit
                                             </label>
                                         </div>

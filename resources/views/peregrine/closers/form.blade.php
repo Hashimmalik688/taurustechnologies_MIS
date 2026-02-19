@@ -3,7 +3,7 @@
         background-color: var(--bs-surface-bg-light);
         padding: 10px 14px;
         border-radius: 6px;
-        border: 1px solid #e0e0e0;
+        border: 1px solid var(--bs-surface-200);
         font-weight: 500;
     }
     .form-label {
@@ -412,7 +412,7 @@
             <option value="0" {{ old('followup_required', $lead->followup_required ?? '') === '0' || old('followup_required', $lead->followup_required ?? '') === 0 ? 'selected' : '' }}>No</option>
         </select>
     </div>
-    <div class="col-md-12" id="followup_schedule_fields" style="display: none;">
+ <div class="col-md-12 d-none" id="followup_schedule_fields" >
         <label for="followup_scheduled_at" class="form-label required">Follow Up Date & Time</label>
         <input type="datetime-local" class="form-control" name="followup_scheduled_at" id="followup_scheduled_at" value="{{ old('followup_scheduled_at', $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '') }}">
         <small class="text-muted">When should the follow-up call be scheduled?</small>

@@ -25,7 +25,7 @@
     .locked-table tbody td:nth-child(3),
     .locked-table tbody td:nth-child(4) {
         position: sticky;
-        background: white;
+        background: var(--bs-card-bg);
         z-index: 10;
     }
 
@@ -103,8 +103,8 @@
     
     /* Peregrine badge style */
     .bg-purple {
-        background-color: #6f42c1 !important;
-        color: #fff !important;
+        background-color: var(--bs-ui-purple) !important;
+        color: var(--bs-white, #fff) !important;
     }
 </style>
 @endsection
@@ -246,7 +246,7 @@
                                                 <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
                                                     <i class="fas fa-edit" aria-hidden="true"></i>
                                                 </a>
-                                                <form action="{{ route('leads.delete', $lead->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
+ <form class="d-inline" action="{{ route('leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
@@ -294,7 +294,7 @@
                                         <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
                                         <td>{{ $lead->preset_line ?? 'N/A' }}</td>
                                         <td>
-                                            <div contenteditable="true" class="editable-comment" data-lead-id="{{ $lead->id }}" style="min-width: 150px; max-width: 300px; padding: 4px; border: 1px solid #ddd; border-radius: 4px;">{{ $lead->comments ?? 'Click to add...' }}</div>
+ <div contenteditable="true" class="editable-comment u-min-w-150 u-rounded-4 u-max-w-300 border-surface-200" data-lead-id="{{ $lead->id }}" style="padding: 4px">{{ $lead->comments ?? 'Click to add...' }}</div>
                                         </td>
                                     </tr>
                                 @empty
@@ -348,7 +348,7 @@
                         <div class="alert alert-success mb-0">
                             <strong><i class="bx bx-columns"></i> Flexible Column Names:</strong>
                             <small>
-                                <ul class="mb-0" style="font-size: 0.85rem;">
+ <ul class="mb-0 u-fs-085" >
                                     <li><strong>Phone:</strong> "Phone Number", "Phone", "Cell Phone", "Mobile", "Contact Number"</li>
                                     <li><strong>Name:</strong> "Customer Name", "Name", "CN Name"</li>
                                     <li><strong>DOB:</strong> "Date of Birth", "DOB", "Birth Date"</li>
@@ -479,15 +479,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    this.style.borderColor = '#22c55e';
+                    this.style.borderColor = themeColors.success;
                     setTimeout(() => {
-                        this.style.borderColor = '#ddd';
+                        this.style.borderColor = themeColors.surface200;
                     }, 1000);
                 }
             })
             .catch(error => {
                 console.error('Error updating comment:', error);
-                this.style.borderColor = '#ef4444';
+                this.style.borderColor = themeColors.danger;
             });
         });
 

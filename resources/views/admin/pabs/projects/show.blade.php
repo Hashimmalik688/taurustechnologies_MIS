@@ -11,19 +11,19 @@
         align-items: center;
         margin-bottom: 1rem;
         padding: 1rem;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 0.375rem;
         background-color: var(--bs-surface-bg-light);
     }
 
     .workflow-step.active {
-        background-color: #e7f3ff;
-        border-color: #084298;
+        background-color: var(--bs-surface-50);
+        border-color: var(--bs-ui-info-dark);
     }
 
     .workflow-step.completed {
-        background-color: #d1e7dd;
-        border-color: #0f5132;
+        background-color: var(--bs-surface-50);
+        border-color: var(--bs-ui-success-dark);
     }
 
     .workflow-step-icon {
@@ -35,16 +35,16 @@
         justify-content: center;
         margin-right: 1rem;
         font-weight: bold;
-        color: white;
+        color: var(--bs-white);
         flex-shrink: 0;
     }
 
     .workflow-step.completed .workflow-step-icon {
-        background-color: #198754;
+        background-color: var(--bs-ui-success);
     }
 
     .workflow-step.active .workflow-step-icon {
-        background-color: #0d6efd;
+        background-color: var(--bs-primary);
     }
 
     .workflow-step .workflow-step-icon {
@@ -64,7 +64,7 @@
 
     .budget-item {
         padding: 1rem;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 0.375rem;
         background-color: var(--bs-surface-bg-light);
     }
@@ -79,13 +79,13 @@
     .budget-item-value {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #000;
+        color: var(--bs-surface-900);
     }
 
     .variance-alert {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
+        background-color: var(--bs-surface-50);
+        border: 1px solid var(--bs-surface-200);
+        color: var(--bs-ui-danger-dark);
         padding: 1rem;
         border-radius: 0.375rem;
         margin-bottom: 1rem;
@@ -93,20 +93,20 @@
 
     .quote-card {
         padding: 1rem;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 0.375rem;
         margin-bottom: 1rem;
     }
 
     .quote-card.lowest {
         border: 2px solid var(--bs-status-present);
-        background-color: #f1f9f6;
+        background-color: var(--bs-surface-50);
     }
 
     .comments-section {
         max-height: 400px;
         overflow-y: auto;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 0.375rem;
         padding: 1rem;
         background-color: var(--bs-surface-bg-light);
@@ -116,8 +116,8 @@
     .comment-item {
         padding: 0.75rem;
         margin-bottom: 0.75rem;
-        border-left: 3px solid #0d6efd;
-        background-color: white;
+        border-left: 3px solid var(--bs-primary);
+        background-color: var(--bs-card-bg);
         border-radius: 0.25rem;
     }
 
@@ -446,7 +446,7 @@
                                 @if($project->approved_budget)
                                     ${{ number_format($project->approved_budget, 2) }}
                                 @else
-                                    <span class="text-muted" style="font-size: 0.875rem;">Pending</span>
+                                    <span class="text-muted u-fs-0875">Pending</span>
                                 @endif
                             </div>
                         </div>
@@ -456,7 +456,7 @@
                                 @if($project->actual_cost)
                                     ${{ number_format($project->actual_cost, 2) }}
                                 @else
-                                    <span class="text-muted" style="font-size: 0.875rem;">Pending</span>
+                                    <span class="text-muted u-fs-0875">Pending</span>
                                 @endif
                             </div>
                         </div>

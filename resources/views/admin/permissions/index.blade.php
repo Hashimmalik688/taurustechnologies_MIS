@@ -8,7 +8,7 @@
     <style>
         .role-card {
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 1px solid #e3e6f0;
+            border: 1px solid var(--bs-surface-200);
         }
         .role-card:hover {
             transform: translateY(-2px);
@@ -22,10 +22,10 @@
             font-weight: 500;
             margin: 2px;
         }
-        .stat-full { background: #d4edda; color: #155724; }
-        .stat-edit { background: #cce5ff; color: #004085; }
-        .stat-view { background: #fff3cd; color: #856404; }
-        .stat-none { background: #f8d7da; color: #721c24; }
+        .stat-full { background: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
+        .stat-edit { background: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+        .stat-view { background: var(--bs-surface-50); color: var(--bs-gold-dark); }
+        .stat-none { background: var(--bs-surface-50); color: var(--bs-ui-danger-dark); }
     </style>
 @endsection
 
@@ -83,7 +83,7 @@
                                         <div class="d-flex justify-content-between align-items-start mb-3">
                                             <div>
                                                 <h5 class="card-title mb-1">
-                                                    <i class="bx bx-shield-alt me-2" style="color: var(--bs-gold);"></i>
+ <i class="bx bx-shield-alt me-2 text-gold" ></i>
                                                     {{ $role->name }}
                                                 </h5>
                                                 <p class="text-muted small mb-0">
@@ -134,7 +134,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title mb-3">
-                        <i class="bx bx-user me-2" style="color: var(--bs-gold);"></i>
+ <i class="bx bx-user me-2 text-gold" ></i>
                         User Permission Overrides
                     </h5>
                     <p class="text-muted mb-3">

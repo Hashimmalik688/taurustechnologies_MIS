@@ -101,7 +101,7 @@
                         </div>
                         <div class="flex-shrink-0 text-end">
                             <div class="avatar-sm rounded-circle align-self-center" style="background: rgba(212, 175, 55, 0.18);">
-                                <span class="avatar-title rounded-circle fs-3" style="background: var(--gold); color: white;">
+ <span class="avatar-title rounded-circle fs-3 text-white bg-gold">
                                     <i class="bx bx-trophy"></i>
                                 </span>
                             </div>

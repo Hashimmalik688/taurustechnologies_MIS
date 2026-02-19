@@ -33,7 +33,33 @@
         // Set current user ID globally for chat notifications
         window.currentUserId = {{ auth()->id() }};
     </script>
-    
+
+    <!-- Theme Colors Bridge — reads CSS custom properties for JS chart/widget usage -->
+    <script>
+        (function() {
+            var s = getComputedStyle(document.documentElement);
+            var g = function(v) { return s.getPropertyValue('--bs-' + v).trim(); };
+            window.themeColors = {
+                gold: g('gold'), goldDark: g('gold-dark'), goldLight: g('gold-light'), goldBright: g('gold-bright'),
+                success: g('ui-success'), successDark: g('ui-success-dark'),
+                danger: g('ui-danger'), dangerDark: g('ui-danger-dark'),
+                warning: g('ui-warning'),
+                info: g('ui-info'), infoDark: g('ui-info-dark'),
+                purple: g('ui-purple'), indigo: g('ui-indigo'),
+                gradientStart: g('gradient-start'), gradientEnd: g('gradient-end'),
+                surface50: g('surface-50'), surface100: g('surface-100'), surface200: g('surface-200'),
+                surface300: g('surface-300'), surface400: g('surface-400'), surface500: g('surface-500'),
+                surface600: g('surface-600'), surface700: g('surface-700'), surface800: g('surface-800'),
+                surface900: g('surface-900'), surfaceMuted: g('surface-muted'), surfaceBgLight: g('surface-bg-light'),
+                printHeaderBg: g('print-header-bg'), printBodyDark: g('print-body-dark'),
+                printBorder: g('print-border'), printBgAlt: g('print-bg-alt'),
+                chartPrimary: g('chart-primary'), chartSuccess: g('chart-success'),
+                chartWarning: g('chart-warning'), chartDanger: g('chart-danger'),
+                chartInfo: g('chart-info'), chartMuted: g('chart-muted'),
+            };
+        })();
+    </script>
+
     <!-- Community Announcement Pop-up Styles -->
     <style>
         .ann-popup {
@@ -43,7 +69,7 @@
             z-index: 10050;
             width: 380px;
             max-width: calc(100vw - 40px);
-            background: white;
+            background: var(--bs-card-bg);
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
@@ -72,7 +98,7 @@
             height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
-            color: white;
+            color: var(--bs-white);
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(102,126,234,0.4);
@@ -98,7 +124,7 @@
             top: -4px;
             right: -4px;
             background: var(--bs-ui-danger);
-            color: white;
+            color: var(--bs-white);
             border-radius: 50%;
             width: 22px;
             height: 22px;
@@ -121,22 +147,24 @@
     <div id="page-content">
         <!-- Top Header -->
         <div class="top-header">
-            <div style="display: flex; align-items: center; gap: 1rem;">
+ <div class="d-flex align-items-center" style="gap: 1rem">
                 <button class="mobile-toggle" onclick="toggleSidebar()">
                     <i class="bx bx-menu"></i>
                 </button>
-                <div class="company-branding d-none d-lg-block">
-                    <span style="color: var(--bs-gold); font-weight: 800; font-size: 1.5rem; letter-spacing: 2px;">
-                        TAURUS TECHNOLOGIES
-                    </span>
+                <div class="company-branding d-none d-lg-flex align-items-center" style="gap: 10px">
+                    <img src="{{ asset('images/icon.png') }}" alt="Taurus" style="height: 32px; width: auto;" onerror="this.style.display='none'">
+                    <div style="display: flex; flex-direction: column; line-height: 1.1">
+                        <span class="text-gold" style="font-weight: 800; font-size: 1.05rem; letter-spacing: 1.5px">TAURUS</span>
+                        <span style="font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px; color: var(--text-muted, #6b7280); text-transform: uppercase">Management Information System</span>
+                    </div>
                 </div>
             </div>
 
             <div class="user-menu">
                 <!-- USA Timer Display -->
-                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); border-radius: 8px; color: white; font-weight: 600; font-size: 0.9rem;">
+ <div class="d-flex align-items-center u-rounded-8 text-white u-fw-600 u-fs-090" style="gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%)">
                     <i class="bx bx-time-five"></i>
-                    <span style="font-size: 0.8rem; opacity: 0.9;">USA</span>
+                    <span class="u-fs-080" style="opacity: 0.9">USA</span>
                     <span id="usaTimerDisplay">--:-- --</span>
                 </div>
 
@@ -146,69 +174,46 @@
                 </button>
 
                 <!-- Chat Button -->
-                <div style="position: relative; display: flex; align-items: center; gap: 8px;">
-                    <a href="{{ route('chat.index') }}" class="notification-btn" title="Team Chat" style="text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                        <i class="bx bx-message-square-dots" style="font-size: 1.5rem;"></i>
-                        <span style="font-weight: 600; font-size: 0.95rem;">Chat</span>
-                        <span class="chat-badge notification-badge" style="background: var(--bs-ui-success); display: none; font-size: 0.85rem; padding: 4px 8px; min-width: 24px; text-align: center; font-weight: 700;">0</span>
+ <div class="d-flex align-items-center position-relative u-gap-8">
+ <a href="{{ route('chat.index') }}" class="notification-btn d-flex align-items-center text-decoration-none u-gap-6" title="Team Chat">
+                        <i class="bx bx-message-square-dots u-fs-150"></i>
+ <span class="u-fw-600 u-fs-095" >Chat</span>
+ <span class="chat-badge notification-badge d-none u-fs-085 text-center u-fw-700 bg-ui-success" style="padding: 4px 8px; min-width: 24px">0</span>
                     </a>
                 </div>
 
                 <!-- Notifications -->
-                <div style="position: relative;">
-                    <button class="notification-btn" onclick="toggleNotifications()" style="display: flex; align-items: center; gap: 6px;">
-                        <i class="bx bx-bell" style="font-size: 1.5rem;"></i>
-                        <span style="font-weight: 600; font-size: 0.95rem;">Notif</span>
-                        <span class="notification-badge" id="notifBadge" style="font-size: 0.85rem; padding: 4px 8px; min-width: 24px; text-align: center; font-weight: 700;">{{ Auth::user()->unread_notifications_count }}</span>
+                <div class="position-relative">
+ <button class="notification-btn d-flex align-items-center u-gap-6" onclick="toggleNotifications()">
+                        <i class="bx bx-bell u-fs-150"></i>
+ <span class="u-fw-600 u-fs-095" >Notif</span>
+ <span class="notification-badge u-fs-085 text-center u-fw-700" id="notifBadge" style="padding: 4px 8px; min-width: 24px">{{ Auth::user()->unread_notifications_count }}</span>
                     </button>
 
                     <!-- Notification Dropdown -->
                     <div class="notification-dropdown" id="notificationDropdown">
                         <div class="notification-header">
                             <h6>Notifications</h6>
-                            <button class="btn btn-sm btn-link" style="color: var(--gold); text-decoration: none; font-weight: 600;" onclick="markAllRead()">
+ <button class="btn btn-sm btn-link u-fw-600 text-decoration-none text-gold" onclick="markAllRead()">
                                 Mark all read
                             </button>
                         </div>
                         <div id="notificationList">
                             <!-- Notifications will be loaded via AJAX -->
-                            <div style="text-align: center; padding: 2rem; color: var(--bs-surface-400);">
-                                <i class="bx bx-loader-alt bx-spin" style="font-size: 2rem;"></i>
+ <div class="text-center text-surface-400" style="padding: 2rem">
+ <i class="bx bx-loader-alt bx-spin u-fs-2" ></i>
                                 <div style="margin-top: 0.5rem;">Loading notifications...</div>
                             </div>
                         </div>
-                        <div style="padding: 1rem; text-align: center; border-top: 1px solid var(--bs-surface-200);">
-                            <a href="{{ route('notifications.index') }}" style="color: var(--gold); font-weight: 600; text-decoration: none;">
+ <div class="text-center border-top-surface" style="padding: 1rem">
+ <a class="u-fw-600 text-decoration-none text-gold" href="{{ route('notifications.index') }}">
                                 View all notifications
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- User Profile -->
-                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--bs-surface-100); border-radius: 8px; cursor: pointer;" onclick="document.getElementById('profileSettingsModal').querySelector('.modal').classList.add('show'); document.getElementById('profileSettingsModal').querySelector('.modal').style.display='block';" data-bs-toggle="modal" data-bs-target="#profileSettingsModal">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="user-avatar">
-                    @else
-                        <div class="user-avatar" style="background: var(--gold); display: flex; align-items: center; justify-content: center; color: #111; font-weight: 700;">
-                            {{ substr(Auth::user()->name, 0, 1) }}
-                        </div>
-                    @endif
-                    <div style="text-align: left;">
-                        <div style="font-weight: 600; font-size: 0.875rem;">{{ Auth::user()->name }}</div>
-                        <div style="font-size: 0.75rem; color: var(--bs-surface-500);">{{ Auth::user()->email }}</div>
-                    </div>
-                </div>
 
-                <!-- Profile Settings Button -->
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#profileSettingsModal">
-                    <i class="bx bx-user-circle"></i>
-                </button>
-
-                <!-- Logout Button -->
-                <a href="{{ route('logout.get') }}" class="btn btn-danger btn-sm">
-                    <i class="bx bx-log-out me-1"></i> Logout
-                </a>
             </div>
         </div>
 
@@ -258,7 +263,7 @@
     </div>
     
     <!-- Community Context Menu (Hidden by default) - Available globally -->
-    <div id="communityContextMenu" class="dropdown-menu" style="display: none; position: fixed; z-index: 9999;">
+ <div id="communityContextMenu" class="dropdown-menu d-none position-fixed u-z-9999">
         <a class="dropdown-item" href="#" id="ctxManageMembers">
             <i class="bx bx-user-plus me-2"></i> Manage Members
         </a>
@@ -406,7 +411,7 @@
                 .then(data => {
                     if (data.notifications.length === 0) {
                         listContainer.innerHTML = `
-                            <div style="text-align: center; padding: 3rem 2rem; color: #94a3b8;">
+                            <div style="text-align: center; padding: 3rem 2rem; color: ${themeColors.surface400};">
                                 <i class="bx bx-bell-off" style="font-size: 3rem; opacity: 0.5;"></i>
                                 <div style="margin-top: 1rem; font-weight: 600;">No notifications</div>
                                 <div style="font-size: 0.875rem; margin-top: 0.5rem;">You're all caught up!</div>
@@ -415,8 +420,8 @@
                     } else {
                         listContainer.innerHTML = data.notifications.map(notif => `
                             <div class="notification-item ${notif.is_read ? '' : 'unread'}">
-                                <div style="font-weight: 600; color: #111;">${notif.title}</div>
-                                <div style="font-size: 0.875rem; color: #6b7280;">${notif.message}</div>
+                                <div style="font-weight: 600; color: ${themeColors.surface700};">${notif.title}</div>
+                                <div style="font-size: 0.875rem; color: ${themeColors.surface500};">${notif.message}</div>
                                 <div class="time">${notif.time_ago}</div>
                             </div>
                         `).join('');
@@ -428,7 +433,7 @@
                 .catch(error => {
                     console.error('Error loading notifications:', error);
                     listContainer.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        <div style="text-align: center; padding: 2rem; color: ${themeColors.danger};">
                             <i class="bx bx-error-circle" style="font-size: 2rem;"></i>
                             <div style="margin-top: 0.5rem;">Failed to load notifications</div>
                         </div>
@@ -698,9 +703,9 @@
                         <!-- Avatar Preview -->
                         <div class="text-center mb-3">
                             @if(Auth::user()->avatar)
-                                <img src="{{ Auth::user()->avatar }}" id="avatarPreview" alt="{{ Auth::user()->name }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
+ <img class="rounded-circle u-obj-cover" src="{{ Auth::user()->avatar }}" id="avatarPreview" alt="{{ Auth::user()->name }}" style="width: 100px; height: 100px">
                             @else
-                                <div id="avatarPreview" style="width: 100px; height: 100px; border-radius: 50%; background: var(--gold); display: inline-flex; align-items: center; justify-content: center; color: #111; font-weight: 700; font-size: 2.5rem;">
+ <div class="rounded-circle d-inline-flex align-items-center justify-content-center u-fw-700 u-w-100 u-fs-250 bg-gold text-surface-700" id="avatarPreview" style="height: 100px">
                                     {{ substr(Auth::user()->name, 0, 1) }}
                                 </div>
                             @endif
@@ -863,10 +868,10 @@
         } catch(e) { lastAnnouncement = null; }
 
         const PRIORITY = {
-            urgent:  { color: '#ef4444', icon: 'bx-error-circle', label: 'URGENT' },
-            warning: { color: '#f59e0b', icon: 'bx-error',        label: 'Warning' },
-            info:    { color: '#3b82f6', icon: 'bx-info-circle',  label: 'Info' },
-            normal:  { color: '#6b7280', icon: 'bx-info-circle',  label: 'Normal' },
+            urgent:  { color: themeColors.danger, icon: 'bx-error-circle', label: 'URGENT' },
+            warning: { color: themeColors.warning, icon: 'bx-error',        label: 'Warning' },
+            info:    { color: themeColors.info, icon: 'bx-info-circle',  label: 'Info' },
+            normal:  { color: themeColors.surface500, icon: 'bx-info-circle',  label: 'Normal' },
         };
 
         function renderPopup(ann) {
@@ -876,7 +881,7 @@
             const p = PRIORITY[ann.priority] || PRIORITY.normal;
 
             document.getElementById('annCommunity').textContent = ann.community_name;
-            document.getElementById('annIcon').style.background = ann.community_color || '#667eea';
+            document.getElementById('annIcon').style.background = ann.community_color || themeColors.gradientStart;
 
             const badge = document.getElementById('annPriority');
             badge.style.background = p.color;
@@ -1022,28 +1027,28 @@
 
     <!-- Announcement Pop-up -->
     <div id="annPopup" class="ann-popup">
-        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--bs-surface-200);">
-            <div id="annIcon" style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0;">
+        <div class="d-flex align-items-center u-gap-12" style="padding:14px 16px; border-bottom:1px solid var(--bs-surface-200)">
+            <div id="annIcon" class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:38px; height:38px">
                 <i class="bx bx-bullhorn" style="font-size:18px;"></i>
             </div>
             <div style="flex:1; min-width:0;">
-                <div style="font-size:12px; color:var(--bs-surface-muted); font-weight:500;">New Announcement</div>
-                <div id="annCommunity" style="font-weight:700; font-size:15px; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+                <div class="u-fs-12 text-surface-muted u-fw-500">New Announcement</div>
+                <div id="annCommunity" class="u-fw-700 u-ws-nowrap overflow-hidden text-surface-700" style="font-size:15px; text-overflow:ellipsis"></div>
             </div>
-            <button onclick="closeAnnPopup()" style="background:none; border:none; color:var(--bs-surface-muted); cursor:pointer; font-size:22px; padding:0; line-height:1;">
+            <button onclick="closeAnnPopup()" class="border-0 text-surface-muted u-cursor-pointer p-0" style="background:none; font-size:22px; line-height:1">
                 <i class="bx bx-x"></i>
             </button>
         </div>
         <div style="padding:14px 16px;">
-            <span id="annPriority" style="display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; color:white; margin-bottom:10px;"></span>
-            <h6 id="annTitle" style="font-weight:700; font-size:15px; color:#111; margin:8px 0 6px;"></h6>
-            <p id="annMsg" style="font-size:13px; color:#4b5563; line-height:1.6; margin:0; max-height:120px; overflow-y:auto;"></p>
+            <span id="annPriority" class="d-inline-flex align-items-center u-rounded-6 u-fs-11 u-fw-600 text-white" style="gap:5px; padding:3px 10px; margin-bottom:10px"></span>
+            <h6 id="annTitle" class="u-fw-700 text-surface-700" style="font-size:15px; margin:8px 0 6px"></h6>
+            <p id="annMsg" class="u-fs-13 m-0 u-overflow-y-auto text-surface-600" style="line-height:1.6; max-height:120px"></p>
         </div>
-        <div style="padding:10px 16px; background:var(--bs-surface-50); border-top:1px solid var(--bs-surface-200);">
+        <div class="py-2 px-3 bg-surface-50 border-top-surface">
             <div id="annProgress" class="ann-popup-progress"></div>
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
-                <span style="font-size:12px; color:var(--bs-surface-muted);">Just now</span>
-                <a id="annLink" href="/chat" style="color:var(--bs-gradient-start); font-weight:600; font-size:13px; text-decoration:none;">View in Community →</a>
+            <div class="d-flex align-items-center justify-content-between mt-2">
+                <span class="u-fs-12 text-surface-muted">Just now</span>
+                <a id="annLink" href="/chat" class="text-gradient-start u-fw-600 u-fs-13 text-decoration-none">View in Community →</a>
             </div>
         </div>
     </div>

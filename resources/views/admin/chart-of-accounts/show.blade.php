@@ -93,12 +93,12 @@
 
         .status-active {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .status-inactive {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
     </style>
 @endsection
@@ -156,7 +156,7 @@
                             <div class="detail-label">Parent Account</div>
                             <div class="detail-value">
                                 @if($account->parentAccount)
-                                    <a href="{{ route('chart-of-accounts.show', $account->parentAccount->id) }}" style="color: var(--bs-gold);">
+ <a class="text-gold" href="{{ route('chart-of-accounts.show', $account->parentAccount->id) }}" >
                                         {{ $account->parentAccount->account_code }} - {{ $account->parentAccount->account_name }}
                                     </a>
                                 @else

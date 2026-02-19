@@ -251,7 +251,7 @@
                             <a href="{{ route('admin.insurance-carriers.edit', $pc['carrier']->id) }}" class="btn btn-sm btn-outline-info" title="Edit Carrier">
                                 <i class="mdi mdi-briefcase-edit me-1"></i>Edit Carrier
                             </a>
-                            <form action="{{ route('admin.insurance-carriers.destroy', $pc['carrier']->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('⚠️ DANGER: Are you sure you want to PERMANENTLY DELETE the carrier {{ $pc['carrier']->name }} from the entire system? This will remove ALL partner assignments and cannot be undone!')">
+ <form class="d-inline" action="{{ route('admin.insurance-carriers.destroy', $pc['carrier']->id) }}" method="POST" onsubmit="return confirm('⚠️ DANGER: Are you sure you want to PERMANENTLY DELETE the carrier {{ $pc['carrier']->name }} from the entire system? This will remove ALL partner assignments and cannot be undone!')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger" title="Delete Carrier Permanently">
@@ -259,7 +259,7 @@
                                 </button>
                             </form>
                             @if(isset($pc['partner']->is_partner_model) && $pc['partner']->is_partner_model)
-                                <form action="{{ route('admin.partners.remove-carrier-assignment', [$pc['partner']->id, $pc['carrier']->id]) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove {{ $pc['carrier']->name }} assignment from partner {{ $pc['partner']->name }}? This will remove all state assignments for this carrier.');">
+ <form class="d-inline" action="{{ route('admin.partners.remove-carrier-assignment', [$pc['partner']->id, $pc['carrier']->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove {{ $pc['carrier']->name }} assignment from partner {{ $pc['partner']->name }}? This will remove all state assignments for this carrier.');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Carrier Assignment">
@@ -267,7 +267,7 @@
                                     </button>
                                 </form>
                             @else
-                                <form action="{{ route('admin.partners.remove-carrier-assignment', [$pc['partner']->id, $pc['carrier']->id]) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove {{ $pc['carrier']->name }} assignment from agent {{ $pc['partner']->name }}? This will remove all state assignments for this carrier.');">
+ <form class="d-inline" action="{{ route('admin.partners.remove-carrier-assignment', [$pc['partner']->id, $pc['carrier']->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove {{ $pc['carrier']->name }} assignment from agent {{ $pc['partner']->name }}? This will remove all state assignments for this carrier.');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Carrier Assignment">

@@ -747,7 +747,7 @@
 
         .card-header {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .text-primary {
@@ -760,13 +760,13 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-purple) 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .border-bottom {
-            border-bottom: 2px solid #e9ecef !important;
+            border-bottom: 2px solid var(--bs-surface-200) !important;
         }
 
         .form-control:focus,

@@ -9,7 +9,7 @@
 <style>
     .info-card {
         border-radius: 8px;
-        box-shadow: 0px 0px 14px 4px #12263f24;
+        box-shadow: 0px 0px 14px 4px rgba(18, 38, 63, 0.14);
         transition: all 0.3s ease;
     }
 
@@ -29,7 +29,7 @@
     .info-value {
         font-size: 15px;
         font-weight: 500;
-        color: #495057;
+        color: var(--bs-surface-600);
     }
 
     .section-title {
@@ -50,7 +50,7 @@
         align-items: center;
         justify-content: center;
         font-size: 48px;
-        color: white;
+        color: var(--bs-white);
         font-weight: bold;
         margin: 0 auto 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -61,7 +61,7 @@
         padding: 20px;
         border-radius: 8px;
         background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-        color: white;
+        color: var(--bs-white);
         margin-bottom: 15px;
     }
 
@@ -86,17 +86,17 @@
 
     .badge-manager {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
+        color: var(--bs-white);
     }
 
     .badge-employee {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        color: white;
+        color: var(--bs-white);
     }
 
     .badge-active {
         background-color: var(--bs-chart-success);
-        color: white;
+        color: var(--bs-white);
         padding: 5px 10px;
         border-radius: 12px;
         font-size: 12px;
@@ -104,7 +104,7 @@
 
     .badge-inactive {
         background-color: var(--bs-chart-danger);
-        color: white;
+        color: var(--bs-white);
         padding: 5px 10px;
         border-radius: 12px;
         font-size: 12px;

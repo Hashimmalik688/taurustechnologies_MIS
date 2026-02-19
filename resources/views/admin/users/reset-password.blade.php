@@ -140,11 +140,11 @@
 <style>
     .card-header {
         background-color: var(--bs-surface-bg-light);
-        border-bottom: 1px solid #dee2e6;
+        border-bottom: 1px solid var(--bs-surface-200);
     }
     .card-header h5 {
         margin-bottom: 0;
-        color: #333;
+        color: var(--bs-surface-700);
     }
 </style>
 @endsection

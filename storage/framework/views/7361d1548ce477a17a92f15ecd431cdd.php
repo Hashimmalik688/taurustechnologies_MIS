@@ -1,11 +1,9 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     My Dashboard
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    <link href="{{ URL::asset('css/light-theme.css') }}" rel="stylesheet" type="text/css" />
+<?php $__env->startSection('css'); ?>
+    <link href="<?php echo e(URL::asset('css/light-theme.css')); ?>" rel="stylesheet" type="text/css" />
     <style>
         /* Modern card hover effects */
         .card {
@@ -45,26 +43,26 @@
             }
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Ravens
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             My Dashboard
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
     <!-- Quick Action Bar -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="d-flex justify-content-end gap-2">
-                <a href="{{ route('ravens.calling') }}" class="btn btn-primary btn-sm">
+                <a href="<?php echo e(route('ravens.calling')); ?>" class="btn btn-primary btn-sm">
                     <i class="bx bx-phone me-1"></i> Start Calling
                 </a>
-                <a href="{{ route('attendance.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="<?php echo e(route('attendance.index')); ?>" class="btn btn-outline-secondary btn-sm">
                     <i class="bx bx-time me-1"></i> My Attendance
                 </a>
             </div>
@@ -81,7 +79,7 @@
                         <div>
  <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Dialed Today</p>
                             <h3 class="mb-0 fw-bold">
-                                <span class="counter-value" data-target="{{ $stats['dialed_today'] ?? 0 }}">{{ $stats['dialed_today'] ?? 0 }}</span>
+                                <span class="counter-value" data-target="<?php echo e($stats['dialed_today'] ?? 0); ?>"><?php echo e($stats['dialed_today'] ?? 0); ?></span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
@@ -102,7 +100,7 @@
                         <div>
  <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Connected</p>
                             <h3 class="mb-0 fw-bold">
-                                <span class="counter-value" data-target="{{ $stats['calls_connected'] ?? 0 }}">{{ $stats['calls_connected'] ?? 0 }}</span>
+                                <span class="counter-value" data-target="<?php echo e($stats['calls_connected'] ?? 0); ?>"><?php echo e($stats['calls_connected'] ?? 0); ?></span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
@@ -123,7 +121,7 @@
                         <div>
  <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Sales Today</p>
                             <h3 class="mb-0 fw-bold text-success">
-                                <span class="counter-value" data-target="{{ $stats['sales_today'] ?? 0 }}">{{ $stats['sales_today'] ?? 0 }}</span>
+                                <span class="counter-value" data-target="<?php echo e($stats['sales_today'] ?? 0); ?>"><?php echo e($stats['sales_today'] ?? 0); ?></span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
@@ -144,7 +142,7 @@
                         <div>
  <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">MTD Sales</p>
                             <h3 class="mb-0 fw-bold" style="color: var(--gold, var(--bs-gold));">
-                                <span class="counter-value" data-target="{{ $stats['mtd_sales'] ?? 0 }}">{{ $stats['mtd_sales'] ?? 0 }}</span>
+                                <span class="counter-value" data-target="<?php echo e($stats['mtd_sales'] ?? 0); ?>"><?php echo e($stats['mtd_sales'] ?? 0); ?></span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
@@ -168,19 +166,20 @@
                             <i class="bx bx-dollar-circle text-success me-2"></i>My Sales Records
                         </h5>
                         <span class="badge bg-success-subtle text-success u-fs-0875" style="padding: 0.5rem 0.75rem">
-                            Total: {{ $mySales->total() ?? 0 }}
+                            Total: <?php echo e($mySales->total() ?? 0); ?>
+
                         </span>
                     </div>
                 </div>
 
                 <div class="card-body">
-                    @if(isset($mySales) && $mySales->count() > 0)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($mySales) && $mySales->count() > 0): ?>
                         <!-- Sales Summary Cards -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-3 col-6">
                                 <div class="card border border-success-subtle bg-success-subtle mb-0">
                                     <div class="card-body text-center py-3">
-                                        <h4 class="text-success mb-1 fw-bold">{{ $mySales->where('status', 'accepted')->count() }}</h4>
+                                        <h4 class="text-success mb-1 fw-bold"><?php echo e($mySales->where('status', 'accepted')->count()); ?></h4>
                                         <p class="mb-0 text-success small">Accepted</p>
                                     </div>
                                 </div>
@@ -188,7 +187,7 @@
                             <div class="col-md-3 col-6">
                                 <div class="card border border-info-subtle bg-info-subtle mb-0">
                                     <div class="card-body text-center py-3">
-                                        <h4 class="text-info mb-1 fw-bold">{{ $mySales->where('status', 'underwritten')->count() }}</h4>
+                                        <h4 class="text-info mb-1 fw-bold"><?php echo e($mySales->where('status', 'underwritten')->count()); ?></h4>
                                         <p class="mb-0 text-info small">Underwritten</p>
                                     </div>
                                 </div>
@@ -196,7 +195,7 @@
                             <div class="col-md-3 col-6">
                                 <div class="card border border-warning-subtle bg-warning-subtle mb-0">
                                     <div class="card-body text-center py-3">
-                                        <h4 class="text-warning mb-1 fw-bold">{{ $mySales->where('status', 'pending')->count() }}</h4>
+                                        <h4 class="text-warning mb-1 fw-bold"><?php echo e($mySales->where('status', 'pending')->count()); ?></h4>
                                         <p class="mb-0 text-warning small">Pending</p>
                                     </div>
                                 </div>
@@ -204,7 +203,7 @@
                             <div class="col-md-3 col-6">
                                 <div class="card border border-danger-subtle bg-danger-subtle mb-0">
                                     <div class="card-body text-center py-3">
-                                        <h4 class="text-danger mb-1 fw-bold">{{ $mySales->where('status', 'declined')->count() }}</h4>
+                                        <h4 class="text-danger mb-1 fw-bold"><?php echo e($mySales->where('status', 'declined')->count()); ?></h4>
                                         <p class="mb-0 text-danger small">Declined</p>
                                     </div>
                                 </div>
@@ -226,23 +225,24 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($mySales as $index => $sale)
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $mySales; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $sale): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td class="text-center text-muted">{{ $mySales->firstItem() + $index }}</td>
+                                            <td class="text-center text-muted"><?php echo e($mySales->firstItem() + $index); ?></td>
                                             <td>
-                                                <div class="fw-semibold">{{ $sale->cn_name ?? 'N/A' }}</div>
-                                                @if($sale->phone_number)
-                                                    <small class="text-muted">{{ $sale->phone_number }}</small>
-                                                @endif
+                                                <div class="fw-semibold"><?php echo e($sale->cn_name ?? 'N/A'); ?></div>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->phone_number): ?>
+                                                    <small class="text-muted"><?php echo e($sale->phone_number); ?></small>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
                                                 <small class="text-muted">
                                                     <i class="bx bx-calendar me-1"></i>
-                                                    {{ $sale->sale_at ? $sale->sale_at->format('M d, Y') : 'N/A' }}
+                                                    <?php echo e($sale->sale_at ? $sale->sale_at->format('M d, Y') : 'N/A'); ?>
+
                                                 </small>
                                             </td>
                                             <td>
-                                                @php
+                                                <?php
                                                     $statusColors = [
                                                         'accepted' => 'success',
                                                         'underwritten' => 'info',
@@ -251,47 +251,48 @@
                                                         'chargeback' => 'dark',
                                                     ];
                                                     $color = $statusColors[$sale->status] ?? 'secondary';
-                                                @endphp
-                                                <span class="badge bg-{{ $color }}-subtle text-{{ $color }}">{{ ucfirst($sale->status) }}</span>
-                                                @if($sale->qa_status)
-                                                    <br><small class="text-muted">QA: {{ $sale->qa_status }}</small>
-                                                @endif
+                                                ?>
+                                                <span class="badge bg-<?php echo e($color); ?>-subtle text-<?php echo e($color); ?>"><?php echo e(ucfirst($sale->status)); ?></span>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->qa_status): ?>
+                                                    <br><small class="text-muted">QA: <?php echo e($sale->qa_status); ?></small>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td class="text-end">
-                                                @if($sale->coverage_amount)
-                                                    <span class="fw-semibold">${{ number_format($sale->coverage_amount, 0) }}</span>
-                                                @else
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->coverage_amount): ?>
+                                                    <span class="fw-semibold">$<?php echo e(number_format($sale->coverage_amount, 0)); ?></span>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td class="text-end">
-                                                @if($sale->monthly_premium)
-                                                    <span class="fw-semibold">${{ number_format($sale->monthly_premium, 2) }}</span>
-                                                @else
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->monthly_premium): ?>
+                                                    <span class="fw-semibold">$<?php echo e(number_format($sale->monthly_premium, 2)); ?></span>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                            <td><small>{{ $sale->carrier_name ?? 'N/A' }}</small></td>
+                                            <td><small><?php echo e($sale->carrier_name ?? 'N/A'); ?></small></td>
                                             <td class="text-center">
-                                                <a href="{{ route('sales.index') }}?search={{ $sale->phone_number }}" 
+                                                <a href="<?php echo e(route('sales.index')); ?>?search=<?php echo e($sale->phone_number); ?>" 
                                                    class="btn btn-sm btn-light" 
                                                    title="View in Sales">
                                                     <i class="bx bx-show"></i>
                                                 </a>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
                             <div class="text-muted small">
-                                Showing {{ $mySales->firstItem() }} to {{ $mySales->lastItem() }} of {{ $mySales->total() }}
+                                Showing <?php echo e($mySales->firstItem()); ?> to <?php echo e($mySales->lastItem()); ?> of <?php echo e($mySales->total()); ?>
+
                             </div>
-                            <div>{{ $mySales->links() }}</div>
+                            <div><?php echo e($mySales->links()); ?></div>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-5">
                             <div class="avatar-xl mx-auto mb-3">
                                 <div class="avatar-title bg-light rounded-circle">
@@ -300,18 +301,18 @@
                             </div>
                             <h5 class="text-muted">No sales yet</h5>
                             <p class="text-muted mb-3">Start calling leads to make your first sale!</p>
-                            <a href="{{ route('ravens.calling') }}" class="btn btn-primary">
+                            <a href="<?php echo e(route('ravens.calling')); ?>" class="btn btn-primary">
                                 <i class="bx bx-phone-call me-1"></i> Start Calling
                             </a>
                         </div>
-                    @endif
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
     <script>
         // Counter animation
         document.querySelectorAll('.counter-value').forEach(counter => {
@@ -330,4 +331,6 @@
             updateCounter();
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/ravens/dashboard.blade.php ENDPATH**/ ?>

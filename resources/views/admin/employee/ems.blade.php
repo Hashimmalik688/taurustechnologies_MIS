@@ -25,7 +25,7 @@
         width: 50px;
         height: 50px;
         background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-        color: white;
+        color: var(--bs-white);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -35,7 +35,7 @@
     }
     .stats-card {
         background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-        color: white;
+        color: var(--bs-white);
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
@@ -53,8 +53,8 @@
         transition: all 0.3s;
     }
     .import-zone:hover {
-        background: #fff;
-        border-color: #c49b2e;
+        background: var(--bs-white, #fff);
+        border-color: var(--bs-gold-dark);
     }
     .badge-status {
         padding: 0.35rem 0.85rem;
@@ -62,9 +62,9 @@
         font-weight: 600;
         font-size: 0.75rem;
     }
-    .badge-active { background: var(--bs-ui-success); color: white; }
-    .badge-inactive { background: var(--bs-ui-danger); color: white; }
-    .badge-pending { background: var(--bs-ui-warning); color: white; }
+    .badge-active { background: var(--bs-ui-success); color: var(--bs-white); }
+    .badge-inactive { background: var(--bs-ui-danger); color: var(--bs-white); }
+    .badge-pending { background: var(--bs-ui-warning); color: var(--bs-white); }
     .nav-tabs .nav-link {
         color: var(--bs-status-default);
         font-weight: 600;
@@ -77,12 +77,12 @@
         background: transparent;
     }
     .nav-tabs .nav-link:hover:not(.active) {
-        color: #333;
-        border-bottom: 3px solid #ddd;
+        color: var(--bs-surface-700);
+        border-bottom: 3px solid var(--bs-surface-200);
     }
     .terminated-count {
         background: var(--bs-ui-danger);
-        color: white;
+        color: var(--bs-white);
         border-radius: 50%;
         padding: 0.15rem 0.5rem;
         font-size: 0.7rem;
@@ -98,7 +98,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1" style="color: var(--bs-gold);">
+ <h1 class="h3 mb-1 text-gold" >
                         <i class="bx bx-id-card me-2"></i>
                         Employee Management Sheet
                     </h1>
@@ -237,7 +237,7 @@
                                         default => 'bx-help-circle',
                                     };
                                 @endphp
-                                <span class="badge {{ $statusClass }}" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+ <span class="badge {{ $statusClass }} u-fs-085" style="padding: 0.5rem 0.75rem">
                                     <i class="bx {{ $statusIcon }} me-1"></i>{{ $emp->status }}
                                 </span>
                             </td>
@@ -246,13 +246,13 @@
                                     $misClass = ($emp->mis === 'Yes') ? 'badge-success' : 'badge-danger';
                                     $misIcon = ($emp->mis === 'Yes') ? 'bx-check-circle' : 'bx-x-circle';
                                 @endphp
-                                <span class="badge {{ $misClass }}" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+ <span class="badge {{ $misClass }} u-fs-085" style="padding: 0.5rem 0.75rem">
                                     <i class="bx {{ $misIcon }} me-1"></i>{{ $emp->mis }}
                                 </span>
                             </td>
                             <td>
                                 @if($emp->passport_image)
-                                    <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="employee-avatar" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                    <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="employee-avatar u-obj-cover u-rounded-4" style="width:40px; height:40px">
                                 @else
                                     <div class="no-avatar">{{ strtoupper(substr($emp->name, 0, 1)) }}</div>
                                 @endif
@@ -330,7 +330,7 @@
                                                 <label class="form-label">Passport Size Image (WebP only)</label>
                                                 <input type="file" name="passport_image" accept="image/webp" class="form-control">
                                                 @if($emp->passport_image)
-                                                    <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="Passport" style="width:60px;height:60px;object-fit:cover;border-radius:4px;margin-top:8px;">
+                                                    <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="Passport" class="u-obj-cover u-rounded-4" style="width:60px; height:60px; margin-top:8px">
                                                 @endif
                                             </div>
                                         </div>
@@ -347,8 +347,8 @@
                         @empty
                         <tr>
                             <td colspan="14" class="text-center py-5">
-                                <div style="opacity: 0.5;">
-                                    <i class="bx bx-inbox" style="font-size: 4rem; color: var(--bs-gold);"></i>
+                                <div class="u-opacity-50">
+ <i class="bx bx-inbox u-fs-4 text-gold" ></i>
                                     <h5 class="mt-3 text-muted">No Active Employees</h5>
                                     <p class="text-muted">Click "Add Employee" button above to create your first employee record</p>
                                 </div>
@@ -399,15 +399,15 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge badge-danger" style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
+ <span class="badge badge-danger u-fs-085" style="padding: 0.5rem 0.75rem">
                                             <i class="bx bx-x-circle me-1"></i>No
                                         </span>
                                     </td>
                                     <td>
                                         @if($emp->passport_image)
-                                            <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="employee-avatar" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">
+                                            <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="employee-avatar u-obj-cover u-rounded-4" style="width:40px; height:40px">
                                         @else
-                                            <div class="no-avatar" style="opacity:0.5;">{{ strtoupper(substr($emp->name, 0, 1)) }}</div>
+                                            <div class="no-avatar u-opacity-50">{{ strtoupper(substr($emp->name, 0, 1)) }}</div>
                                         @endif
                                     </td>
                                     <td>
@@ -427,8 +427,8 @@
                                 @empty
                                 <tr>
                                     <td colspan="10" class="text-center py-5">
-                                        <div style="opacity: 0.5;">
-                                            <i class="bx bx-check-circle" style="font-size: 4rem; color: var(--bs-ui-success);"></i>
+                                        <div class="u-opacity-50">
+ <i class="bx bx-check-circle u-fs-4 text-ui-success" ></i>
                                             <h5 class="mt-3 text-muted">No Terminated Employees</h5>
                                             <p class="text-muted">All employees are currently active</p>
                                         </div>

@@ -33,14 +33,14 @@
     
     .disposition-radio:checked + .btn-outline-secondary {
         background-color: var(--bs-status-default);
-        color: white;
+        color: var(--bs-white);
         border-color: var(--bs-status-default);
     }
     
     .disposition-radio:checked + .btn-outline-success {
-        background-color: #198754;
-        color: white;
-        border-color: #198754;
+        background-color: var(--bs-ui-success);
+        color: var(--bs-white);
+        border-color: var(--bs-ui-success);
     }
 </style>
 @endsection
@@ -218,18 +218,18 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center" style="min-width:100px;">Call</th>
+ <th class="text-center u-min-w-100" >Call</th>
                                             <th style="min-width:70px;">ID</th>
-                                            <th style="min-width:100px;">Sale Date</th>
-                                            <th style="min-width:150px;">Customer Name</th>
-                                            <th style="min-width:130px;">Phone</th>
-                                            <th style="min-width:120px;">Closer</th>
-                                            <th style="min-width:120px;">Carrier</th>
-                                            <th style="min-width:120px;">Coverage</th>
-                                            <th style="min-width:120px;">Premium</th>
-                                            <th style="min-width:140px;">Retention Status</th>
-                                            <th style="min-width:140px;">Type</th>
-                                            <th style="min-width:200px;">Manager Reason</th>
+ <th class="u-min-w-100" >Sale Date</th>
+ <th class="u-min-w-150" >Customer Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-120" >Closer</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-120" >Premium</th>
+ <th class="u-min-w-140" >Retention Status</th>
+ <th class="u-min-w-140" >Type</th>
+ <th class="u-min-w-200" >Manager Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -271,7 +271,7 @@
                                                 <td>
                                                     <select class="form-select form-select-sm retention-status-dropdown" 
                                                             data-lead-id="{{ $lead->id }}" 
-                                                            style="min-width: 140px;">
+ >
                                                         <option value="pending" {{ ($lead->retention_status == Statuses::RETENTION_PENDING || !$lead->retention_status) ? 'selected' : '' }}>
                                                             Yet to Retain
                                                         </option>
@@ -320,18 +320,18 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-success">
                                         <tr>
-                                            <th class="text-center" style="min-width:100px;">Actions</th>
+ <th class="text-center u-min-w-100" >Actions</th>
                                             <th style="min-width:70px;">ID</th>
-                                            <th style="min-width:100px;">Sale Date</th>
-                                            <th style="min-width:120px;">Retained Date</th>
-                                            <th style="min-width:150px;">Customer Name</th>
-                                            <th style="min-width:130px;">Phone</th>
-                                            <th style="min-width:120px;">Closer</th>
-                                            <th style="min-width:120px;">Carrier</th>
-                                            <th style="min-width:120px;">Coverage</th>
-                                            <th style="min-width:120px;">Premium</th>
-                                            <th style="min-width:100px;">Status</th>
-                                            <th style="min-width:200px;">Manager Reason</th>
+ <th class="u-min-w-100" >Sale Date</th>
+ <th class="u-min-w-120" >Retained Date</th>
+ <th class="u-min-w-150" >Customer Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-120" >Closer</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-120" >Premium</th>
+ <th class="u-min-w-100" >Status</th>
+ <th class="u-min-w-200" >Manager Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -389,19 +389,19 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-warning">
                                         <tr>
-                                            <th class="text-center" style="min-width:100px;">Actions</th>
+ <th class="text-center u-min-w-100" >Actions</th>
                                             <th style="min-width:70px;">ID</th>
-                                            <th style="min-width:100px;">Sale Date</th>
-                                            <th style="min-width:120px;">CB Date</th>
-                                            <th style="min-width:80px;">Days Old</th>
-                                            <th style="min-width:150px;">Customer Name</th>
-                                            <th style="min-width:130px;">Phone</th>
-                                            <th style="min-width:120px;">Closer</th>
-                                            <th style="min-width:120px;">Carrier</th>
-                                            <th style="min-width:120px;">Coverage</th>
-                                            <th style="min-width:120px;">Premium</th>
-                                            <th style="min-width:140px;">Retention Status</th>
-                                            <th style="min-width:200px;">Manager Reason</th>
+ <th class="u-min-w-100" >Sale Date</th>
+ <th class="u-min-w-120" >CB Date</th>
+ <th class="u-min-w-80" >Days Old</th>
+ <th class="u-min-w-150" >Customer Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-120" >Closer</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-120" >Premium</th>
+ <th class="u-min-w-140" >Retention Status</th>
+ <th class="u-min-w-200" >Manager Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -433,7 +433,7 @@
                                                 <td>
                                                     <select class="form-select form-select-sm retention-status-dropdown" 
                                                             data-lead-id="{{ $lead->id }}" 
-                                                            style="min-width: 120px;">
+ >
                                                         <option value="pending" {{ ($lead->retention_status == Statuses::RETENTION_PENDING || !$lead->retention_status) ? 'selected' : '' }}>
                                                             Pending
                                                         </option>
@@ -473,13 +473,13 @@
                                 <table class="table table-striped table-bordered table-hover table-sm align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center" style="min-width:100px;">Actions</th>
-                                            <th style="min-width:150px;">Client Name</th>
-                                            <th style="min-width:130px;">Phone</th>
-                                            <th style="min-width:110px;">Sale Date</th>
-                                            <th style="min-width:120px;">Carrier</th>
-                                            <th style="min-width:140px;">Unissued Status</th>
-                                            <th style="min-width:200px;">Reason</th>
+ <th class="text-center u-min-w-100" >Actions</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-140" >Unissued Status</th>
+ <th class="u-min-w-200" >Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -524,7 +524,7 @@
                                             <div class="modal fade" id="dispositionModal-{{ $lead->id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-dialog-centered modal-xl">
                                                     <div class="modal-content">
-                                                        <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                                                             <h5 class="modal-title">
                                                                 <i class="mdi mdi-clipboard-list me-2"></i>Set Issuance Status - {{ $lead->cn_name }}
                                                             </h5>
@@ -541,12 +541,12 @@
                                                                     </label>
                                                                     <div class="btn-group w-100" role="group">
                                                                         <input type="radio" class="btn-check disposition-radio" name="issuance_disposition" id="notApplicable-{{ $lead->id }}" value="Not Applicable" {{ $lead->issuance_disposition == 'Not Applicable' ? 'checked' : '' }}>
-                                                                        <label class="btn btn-outline-secondary" for="notApplicable-{{ $lead->id }}" style="flex: 1;">
+ <label class="btn btn-outline-secondary flex-grow-1" for="notApplicable-{{ $lead->id }}" >
                                                                             <i class="mdi mdi-close-circle me-2"></i>Not Applicable
                                                                         </label>
 
                                                                         <input type="radio" class="btn-check disposition-radio" name="issuance_disposition" id="issued-{{ $lead->id }}" value="Issued" {{ $lead->issuance_disposition == Statuses::ISSUANCE_ISSUED ? 'checked' : '' }} data-lead-id="{{ $lead->id }}">
-                                                                        <label class="btn btn-outline-success" for="issued-{{ $lead->id }}" style="flex: 1;">
+ <label class="btn btn-outline-success flex-grow-1" for="issued-{{ $lead->id }}" >
                                                                             <i class="mdi mdi-check-circle me-2"></i>Issued (Send to Bank Verification)
                                                                         </label>
                                                                     </div>
@@ -602,29 +602,29 @@
     <div class="modal fade" id="callDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);">
+ <div class="modal-header bg-gradient-gold" >
                     <h5 class="modal-title text-white"><i class="fas fa-phone-alt me-2"></i><span id="callModalStatus">Call Connected - Retention</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="callModalBody">
 
                     <!-- PHASE 1: CALL CONNECTED -->
-                    <div id="phase1" style="display: none;">
+ <div class="d-none" id="phase1" >
                         <div class="text-center py-5">
                             <div class="mb-4">
-                                <i class="fas fa-phone-alt text-success" style="font-size: 4rem;"></i>
+ <i class="fas fa-phone-alt text-success u-fs-4" ></i>
                             </div>
-                            <h3 class="mb-3" style="color: var(--bs-gold);" id="callerName">Connecting...</h3>
+ <h3 class="mb-3 text-gold" id="callerName">Connecting...</h3>
                             <p class="lead mb-2" id="callerPhone"></p>
                             <p class="text-muted">Call in progress</p>
-                            <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" onclick="goToPhase2()">
+ <button type="button" class="btn btn-lg mt-4 bg-gradient-gold text-white" onclick="goToPhase2()">
                                 Start Call Info <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
-                    <div id="phase2" style="display: none;">
+ <div class="d-none" id="phase2" >
                         <div class="alert alert-info mb-3">
                             <i class="fas fa-info-circle me-2"></i> Fill all required fields to unlock detailed information
                         </div>
@@ -725,14 +725,14 @@
                             <button type="button" class="btn btn-secondary" onclick="goToPhase1()">
                                 <i class="fas fa-arrow-left me-2"></i> Back
                             </button>
-                            <button type="button" class="btn btn-lg" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" id="showMoreBtn" disabled onclick="goToPhase3()">
+ <button type="button" class="btn btn-lg bg-gradient-gold text-white" id="showMoreBtn" disabled onclick="goToPhase3()">
                                 <i class="fas fa-unlock me-2"></i> Show More Details
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 3: FULL DETAILS WITH CHANGE TRACKING -->
-                    <div id="phase3" style="display: none;">
+ <div class="d-none" id="phase3" >
                         <div class="alert alert-success mb-3">
                             <i class="fas fa-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
                         </div>
@@ -740,7 +740,7 @@
                         <div class="row g-3">
                             <!-- Personal Information Section -->
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Personal Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Personal Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -813,7 +813,7 @@
 
                             <!-- Medical Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Medical Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Medical Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -842,7 +842,7 @@
 
                             <!-- Policy Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Policy Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Policy Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -889,7 +889,7 @@
 
                             <!-- Banking Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Banking Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Banking Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -934,7 +934,7 @@
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Additional Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Additional Information</h5>
                             </div>
 
                             <div class="col-md-6">

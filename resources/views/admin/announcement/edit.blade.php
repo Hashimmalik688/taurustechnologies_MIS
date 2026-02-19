@@ -211,7 +211,7 @@
     }
 
     .form-label {
-        color: #1f2937;
+        color: var(--bs-surface-800);
         margin-bottom: 0.5rem;
     }
 
@@ -220,7 +220,7 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--gold);
+        border-color: var(--bs-gold);
         box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
     }
 </style>

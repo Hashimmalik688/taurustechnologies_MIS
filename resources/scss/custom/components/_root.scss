@@ -12,6 +12,13 @@
     --#{$prefix}gold-gradient:                          linear-gradient(135deg, #{$taurus-gold} 0%, #{$taurus-gold-dark} 100%);
     --#{$prefix}navy:                                   #{$taurus-navy};
 
+    // Short aliases (used by auth pages and standalone views)
+    --gold:                                             var(--#{$prefix}gold);
+    --gold-dark:                                        var(--#{$prefix}gold-dark);
+    --gold-light:                                       var(--#{$prefix}gold-light);
+    --gold-bright:                                      var(--#{$prefix}gold-bright);
+    --on-gold:                                          #{$surface-900};
+
     // Semantic UI Colors
     --#{$prefix}ui-success:                             #{$ui-success};
     --#{$prefix}ui-success-dark:                        #{$ui-success-dark};

@@ -19,7 +19,7 @@
             height: 100%;
             z-index: -1;
             overflow: hidden;
-            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start)10 0%, var(--bs-gradient-end)10 100%);
         }
 
         .gradient-orb {
@@ -41,7 +41,7 @@
         .orb-2 {
             width: 350px;
             height: 350px;
-            background: linear-gradient(135deg, #f5af19, #f12711);
+            background: linear-gradient(135deg, var(--bs-ui-warning), var(--bs-ui-danger));
             bottom: -175px;
             left: -175px;
             animation-delay: 7s;
@@ -54,7 +54,7 @@
 
         .required::after {
             content: " *";
-            color: #ee0979;
+            color: var(--bs-ui-danger);
             font-weight: bold;
         }
 
@@ -80,7 +80,7 @@
 
         .card-header {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
             border-radius: 16px 16px 0 0 !important;
             padding: 1.5rem;
             border: none;
@@ -93,12 +93,12 @@
 
         .form-label {
             font-weight: 600;
-            color: #495057;
+            color: var(--bs-surface-600);
             margin-bottom: 0.5rem;
         }
 
         .form-control, .form-select {
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--bs-surface-200);
             border-radius: 10px;
             padding: 0.625rem 0.875rem;
             transition: all 0.3s ease;
@@ -117,7 +117,7 @@
         .btn-gradient-primary {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             border: none;
-            color: white;
+            color: var(--bs-white);
             font-weight: 600;
             padding: 0.625rem 1.5rem;
             border-radius: 12px;
@@ -128,7 +128,7 @@
         .btn-gradient-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            color: white;
+            color: var(--bs-white);
         }
 
         .btn-secondary {
@@ -142,7 +142,7 @@
         }
 
         .select2-selection {
-            border: 2px solid #e9ecef !important;
+            border: 2px solid var(--bs-surface-200) !important;
             border-radius: 10px !important;
             min-height: 42px !important;
             transition: all 0.3s ease !important;
@@ -156,13 +156,13 @@
         .select2-selection--multiple .select2-selection__choice {
             background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end)) !important;
             border: none !important;
-            color: white !important;
+            color: var(--bs-white) !important;
             border-radius: 8px !important;
             padding: 0.25rem 0.5rem !important;
         }
 
         .carrier-state-section {
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--bs-surface-200);
             padding: 1.5rem;
             border-radius: 12px;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
@@ -183,11 +183,11 @@
         }
 
         .state-settlement-row {
-            background-color: white;
+            background-color: var(--bs-card-bg);
             padding: 1rem;
             border-radius: 10px;
             margin-bottom: 0.75rem;
-            border: 1px solid #dee2e6;
+            border: 1px solid var(--bs-surface-200);
             transition: all 0.2s ease;
         }
 
@@ -204,14 +204,14 @@
 
         .alert-success {
             background: linear-gradient(135deg, rgba(17, 153, 142, 0.15), rgba(56, 239, 125, 0.15));
-            color: #11998e;
-            border-left: 4px solid #11998e;
+            color: var(--bs-ui-success);
+            border-left: 4px solid var(--bs-ui-success);
         }
 
         .alert-danger {
             background: linear-gradient(135deg, rgba(238, 9, 121, 0.15), rgba(255, 106, 0, 0.15));
-            color: #ee0979;
-            border-left: 4px solid #ee0979;
+            color: var(--bs-ui-danger);
+            border-left: 4px solid var(--bs-ui-danger);
         }
     </style>
 @endsection

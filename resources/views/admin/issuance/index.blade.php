@@ -103,23 +103,23 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="min-width:150px;">Client Name</th>
-                                    <th style="min-width:130px;">Phone</th>
-                                    <th style="min-width:130px;">Closer</th>
-                                    <th style="min-width:110px;">Sale Date</th>
-                                    <th style="min-width:120px;">Carrier</th>
-                                    <th style="min-width:120px;">Policy Type</th>
-                                    <th style="min-width:150px;">Policy Number</th>
-                                    <th style="min-width:150px;">Assigned Partner</th>
-                                    <th style="min-width:120px;">Coverage</th>
-                                    <th style="min-width:110px;">Premium</th>
-                                    <th style="min-width:110px;">Initial Draft</th>
-                                    <th style="min-width:110px;">Future Draft</th>
-                                    <th style="min-width:120px;">Status</th>
-                                    <th style="min-width:200px;">Reason</th>
-                                    <th style="min-width:180px;">Assigned Followup</th>
-                                    <th style="min-width:140px;">Followup Status</th>
-                                    <th style="min-width:150px;">Actions</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-130" >Closer</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Policy Type</th>
+ <th class="u-min-w-150" >Policy Number</th>
+ <th class="u-min-w-150" >Assigned Partner</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-110" >Premium</th>
+ <th class="u-min-w-110" >Initial Draft</th>
+ <th class="u-min-w-110" >Future Draft</th>
+ <th class="u-min-w-120" >Status</th>
+ <th class="u-min-w-200" >Reason</th>
+ <th class="u-min-w-180" >Assigned Followup</th>
+ <th class="u-min-w-140" >Followup Status</th>
+ <th class="u-min-w-150" >Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -200,7 +200,7 @@
                                     <div class="modal fade" id="statusModal-{{ $lead->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                                                     <h5 class="modal-title fw-semibold">
                                                         <i class="mdi mdi-check-circle me-2"></i>Update Status - {{ $lead->cn_name }}
                                                     </h5>

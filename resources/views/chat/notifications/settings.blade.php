@@ -133,12 +133,12 @@
                             </a>
                         </div>
 
-                        <div id="successMessage" class="alert alert-success mt-3" style="display: none;">
+ <div id="successMessage" class="alert alert-success mt-3 d-none" >
                             <i class="bx bx-check-circle me-2"></i>
                             <span id="successText">Preferences saved successfully!</span>
                         </div>
 
-                        <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+ <div id="errorMessage" class="alert alert-danger mt-3 d-none" >
                             <i class="bx bx-x-circle me-2"></i>
                             <span id="errorText">An error occurred while saving preferences</span>
                         </div>

@@ -15,9 +15,9 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .filter-btn.active {
-        background-color: #405189 !important;
-        color: white !important;
-        border-color: #405189 !important;
+        background-color: var(--bs-surface-600) !important;
+        color: var(--bs-white) !important;
+        border-color: var(--bs-surface-600) !important;
     }
 </style>
 @endsection
@@ -56,7 +56,7 @@
                                 </button>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="text" id="customDateRange" class="form-control" placeholder="Select date range" style="display: none; width: 250px;">
+ <input type="text" id="customDateRange" class="form-control d-none" placeholder="Select date range" style="width: 250px">
                                 <button type="button" class="btn btn-success" id="refreshBtn">
                                     <i class="bx bx-refresh"></i> Refresh
                                 </button>
@@ -103,7 +103,7 @@
                                     <tr>
                                         <td><strong>{{ $validator['name'] }}</strong></td>
                                         <td class="text-center">
-                                            <span class="badge bg-info-subtle text-info fs-6 metric-card" style="cursor: pointer;" data-drill="validator_total_assigned">
+ <span class="badge bg-info-subtle text-info fs-6 metric-card u-cursor-pointer" data-drill="validator_total_assigned">
                                                 {{ $validator['total_assigned'] }}
                                             </span>
                                         </td>
@@ -118,17 +118,17 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success-subtle text-success fs-6 metric-card" style="cursor: pointer;" data-drill="validator_approved">
+ <span class="badge bg-success-subtle text-success fs-6 metric-card u-cursor-pointer" data-drill="validator_approved">
                                                 {{ $validator['approved'] }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-warning-subtle text-warning fs-6 metric-card" style="cursor: pointer;" data-drill="validator_returned">
+ <span class="badge bg-warning-subtle text-warning fs-6 metric-card u-cursor-pointer" data-drill="validator_returned">
                                                 {{ $validator['returned'] }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-danger-subtle text-danger fs-6 metric-card" style="cursor: pointer;" data-drill="validator_declined">
+ <span class="badge bg-danger-subtle text-danger fs-6 metric-card u-cursor-pointer" data-drill="validator_declined">
                                                 {{ $validator['declined'] }}
                                             </span>
                                         </td>
@@ -180,7 +180,7 @@
         </div>
 
         <!-- Individual Validator Performance (Hidden) -->
-        <div class="row mt-2" style="display: none;">
+ <div class="row mt-2 d-none" >
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
@@ -188,7 +188,7 @@
                             <i class="bx bx-user-check me-2"></i>Individual Validator Performance
                         </h5>
                     </div>
-                    <div class="card-body" style="display: none;">
+ <div class="card-body d-none" >
                         <!-- Hidden duplicate section -->
                     </div>
                 </div>

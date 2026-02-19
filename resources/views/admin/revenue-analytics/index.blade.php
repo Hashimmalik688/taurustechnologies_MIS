@@ -12,7 +12,7 @@
 
     .text-success i[class*="mdi"],
     i[class*="mdi"].text-success {
-        color: #198754 !important;
+        color: var(--bs-ui-success) !important;
     }
 
     .text-warning i[class*="mdi"],
@@ -118,7 +118,7 @@
     <!-- Total Revenue Card -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow-sm" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="card shadow-sm text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -151,7 +151,7 @@
                             <span class="fw-semibold">Good Sales</span>
                             <span class="text-success fw-bold">{{ number_format($good_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $good_percentage }}%;" title="{{ $good_count }} sales">{{ $good_count }}</div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                             <span class="fw-semibold">Average Sales</span>
                             <span class="text-warning fw-bold">{{ number_format($average_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $average_percentage }}%;" title="{{ $average_count }} sales">{{ $average_count }}</div>
                         </div>
                     </div>
@@ -169,7 +169,7 @@
                             <span class="fw-semibold">Bad Sales</span>
                             <span class="text-danger fw-bold">{{ number_format($bad_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $bad_percentage }}%;" title="{{ $bad_count }} sales">{{ $bad_count }}</div>
                         </div>
                     </div>
@@ -178,7 +178,7 @@
                             <span class="fw-semibold">Unverified</span>
                             <span class="text-secondary fw-bold">{{ number_format($unverified_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ $unverified_percentage }}%;" title="{{ $unverified_count }} sales">{{ $unverified_count }}</div>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                             <span class="fw-semibold">Good Revenue</span>
                             <span class="text-success fw-bold">{{ number_format($good_revenue_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-success" role="progressbar" style="width: {{ $good_revenue_percentage }}%;">${{ number_format($good_revenue, 0) }}</div>
                         </div>
                     </div>
@@ -208,7 +208,7 @@
                             <span class="fw-semibold">Average Revenue</span>
                             <span class="text-warning fw-bold">{{ number_format($average_revenue_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $average_revenue_percentage }}%;">${{ number_format($average_revenue, 0) }}</div>
                         </div>
                     </div>
@@ -217,7 +217,7 @@
                             <span class="fw-semibold">Bad Revenue</span>
                             <span class="text-danger fw-bold">{{ number_format($bad_revenue_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-danger" role="progressbar" style="width: {{ $bad_revenue_percentage }}%;">${{ number_format($bad_revenue, 0) }}</div>
                         </div>
                     </div>
@@ -226,7 +226,7 @@
                             <span class="fw-semibold">Unverified Revenue</span>
                             <span class="text-secondary fw-bold">{{ number_format($unverified_revenue_percentage, 1) }}%</span>
                         </div>
-                        <div class="progress" style="height: 20px;">
+                        <div class="progress u-h-20">
                             <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ $unverified_revenue_percentage }}%;">${{ number_format($unverified_revenue, 0) }}</div>
                         </div>
                     </div>
@@ -306,7 +306,7 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                                <div class="progress" style="width: 100px; height: 20px;">
+                                                <div class="progress u-w-100 u-h-20">
                                                     <div class="progress-bar bg-info" role="progressbar" style="width: {{ $verifier['transfer_rate'] }}%;" title="{{ number_format($verifier['transfer_rate'], 1) }}%">
                                                         @if($verifier['transfer_rate'] > 20)
                                                             <small class="text-white fw-semibold">{{ number_format($verifier['transfer_rate'], 1) }}%</small>

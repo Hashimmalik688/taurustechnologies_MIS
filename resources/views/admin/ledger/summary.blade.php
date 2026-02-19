@@ -59,12 +59,12 @@
 
         .stat-icon-credit {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .stat-icon-debit {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .stat-icon-balance {
@@ -74,7 +74,7 @@
 
         .stat-icon-count {
             background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .stat-value {
@@ -205,7 +205,7 @@
         .btn-filter {
             background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             border: none;
-            color: white;
+            color: var(--bs-white);
             font-weight: 600;
             padding: 0.6rem 1.5rem;
             border-radius: 8px;
@@ -314,7 +314,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 85%;"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">54% of total</small>
+ <small class="text-surface-400 u-fs-075" >54% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -325,7 +325,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 65%;"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">27% of total</small>
+ <small class="text-surface-400 u-fs-075" >27% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -336,7 +336,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 35%;"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">12% of total</small>
+ <small class="text-surface-400 u-fs-075" >12% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -345,9 +345,9 @@
                                         <span class="category-amount">$2,100</span>
                                     </div>
                                     <div class="category-bar">
-                                        <div class="category-bar-fill" style="width: 25%;"></div>
+                                        <div class="category-bar-fill w-25"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">5% of total</small>
+ <small class="text-surface-400 u-fs-075" >5% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -358,7 +358,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 15%;"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">2% of total</small>
+ <small class="text-surface-400 u-fs-075" >2% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -369,7 +369,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 10%;"></div>
                                     </div>
-                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">0.4% of total</small>
+ <small class="text-surface-400 u-fs-075" >0.4% of total</small>
                                 </div>
                             </div>
                         </div>
@@ -390,7 +390,7 @@
                                     <span class="vendor-name">John Smith</span>
                                     <span class="vendor-amount">$12,450</span>
                                 </div>
-                                <small style="color: var(--bs-surface-400);">156 transactions</small>
+ <small class="text-surface-400" >156 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -398,7 +398,7 @@
                                     <span class="vendor-name">Sarah Johnson</span>
                                     <span class="vendor-amount">$8,230</span>
                                 </div>
-                                <small style="color: var(--bs-surface-400);">92 transactions</small>
+ <small class="text-surface-400" >92 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -406,7 +406,7 @@
                                     <span class="vendor-name">Michael Brown</span>
                                     <span class="vendor-amount">$6,890</span>
                                 </div>
-                                <small style="color: var(--bs-surface-400);">78 transactions</small>
+ <small class="text-surface-400" >78 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -414,7 +414,7 @@
                                     <span class="vendor-name">Emily Davis</span>
                                     <span class="vendor-amount">$4,120</span>
                                 </div>
-                                <small style="color: var(--bs-surface-400);">45 transactions</small>
+ <small class="text-surface-400" >45 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -422,11 +422,11 @@
                                     <span class="vendor-name">Robert Wilson</span>
                                     <span class="vendor-amount">$3,540</span>
                                 </div>
-                                <small style="color: var(--bs-surface-400);">38 transactions</small>
+ <small class="text-surface-400" >38 transactions</small>
                             </div>
 
                             <div class="text-center mt-3">
-                                <a href="{{ route('ledger.index') }}" style="color: var(--bs-gold); font-weight: 600; text-decoration: none;">
+ <a class="text-gold u-fw-600 text-decoration-none" href="{{ route('ledger.index') }}">
                                     View All Vendors <i class="mdi mdi-arrow-right"></i>
                                 </a>
                             </div>
@@ -445,9 +445,9 @@
                                 Monthly Trends
                             </h5>
 
-                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: var(--bs-surface-400);">
+ <div class="d-flex align-items-center justify-content-center text-surface-400" style="height: 300px">
                                 <div class="text-center">
-                                    <i class="mdi mdi-chart-areaspline" style="font-size: 4rem; color: var(--bs-gold); opacity: 0.5;"></i>
+ <i class="mdi mdi-chart-areaspline u-fs-4 text-gold u-opacity-50"></i>
                                     <p class="mt-3">Chart visualization would be displayed here<br>
                                     <small>Integrate with Chart.js or similar library</small></p>
                                 </div>

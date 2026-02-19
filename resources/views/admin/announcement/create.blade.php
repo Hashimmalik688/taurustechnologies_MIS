@@ -177,8 +177,8 @@
                     <!-- Preview Section -->
                     <div class="mb-4">
                         <label class="fw-bold mb-2">Preview</label>
-                        <div id="previewAnnouncement" class="p-3 rounded" style="background-color: var(--bs-surface-100);">
-                            <div class="d-flex align-items-center gap-2" style="color: #666;">
+ <div id="previewAnnouncement" class="p-3 rounded bg-surface-100" >
+                            <div class="d-flex align-items-center gap-2 text-surface-500">
                                 <i class="bx bx-bell"></i>
                                 <div>
                                     <strong id="previewTitle">Your announcement title here</strong>
@@ -220,7 +220,7 @@
     }
 
     .form-label {
-        color: #1f2937;
+        color: var(--bs-surface-800);
         margin-bottom: 0.5rem;
     }
 
@@ -229,7 +229,7 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: var(--gold);
+        border-color: var(--bs-gold);
         box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
     }
 </style>

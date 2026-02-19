@@ -70,7 +70,7 @@
     
     .attendance-print-table th,
     .attendance-print-table td {
-        border: 1px solid #000;
+        border: 1px solid var(--bs-surface-900);
         padding: 6px 4px;
         text-align: center;
         font-size: 11px;
@@ -78,7 +78,7 @@
     }
     
     .attendance-print-table thead th {
-        background-color: #6f42c1;
+        background-color: var(--bs-ui-purple);
         color: white;
         font-weight: 600;
         font-size: 10px;
@@ -93,7 +93,7 @@
     }
     
     .attendance-print-table tbody tr:hover {
-        background-color: #e9ecef;
+        background-color: var(--bs-surface-200);
     }
     
     .text-left {
@@ -102,48 +102,48 @@
     
     /* Status color coding */
     .status-p {
-        background-color: #d4edda !important;
-        color: #155724;
+        background-color: var(--bs-surface-50) !important;
+        color: var(--bs-ui-success-dark);
         font-weight: 600;
     }
     
     .status-l {
-        background-color: #fff3cd !important;
-        color: #856404;
+        background-color: var(--bs-surface-50) !important;
+        color: var(--bs-gold-dark);
         font-weight: 600;
     }
     
     .status-a {
-        background-color: #f8d7da !important;
-        color: #721c24;
+        background-color: var(--bs-surface-50) !important;
+        color: var(--bs-ui-danger-dark);
         font-weight: 600;
     }
     
     .status-pl {
-        background-color: #d1ecf1 !important;
-        color: #0c5460;
+        background-color: var(--bs-surface-100) !important;
+        color: var(--bs-ui-info-dark);
         font-weight: 600;
     }
     
     .status-h {
-        background-color: #e2e3e5 !important;
-        color: #383d41;
+        background-color: var(--bs-surface-200) !important;
+        color: var(--bs-surface-600);
         font-weight: 600;
     }
     
     .status-weekend {
         background-color: var(--bs-status-absent) !important;
-        color: #fff;
+        color: var(--bs-white, #fff);
         font-weight: 600;
     }
     
     .terminated-row {
-        background-color: #f5f5f5 !important;
+        background-color: var(--bs-surface-50) !important;
         opacity: 0.85;
     }
     
     .terminated-badge {
-        color: #921c1c;
+        color: var(--bs-ui-danger-dark);
         font-weight: 600;
         font-size: 9px;
         margin-left: 3px;
@@ -151,12 +151,12 @@
     
     .weekend-header {
         background-color: var(--bs-status-absent) !important;
-        color: #fff !important;
+        color: var(--bs-white, #fff) !important;
     }
     
     .totals-cell {
         font-weight: 700;
-        background-color: #e9ecef !important;
+        background-color: var(--bs-surface-200) !important;
     }
     
     .print-header {
@@ -168,20 +168,20 @@
         margin: 0;
         font-size: 20px;
         font-weight: 700;
-        color: #333;
+        color: var(--bs-surface-700);
     }
     
     .print-header p {
         margin: 5px 0 0 0;
         font-size: 14px;
-        color: #666;
+        color: var(--bs-surface-500);
     }
     
     .legend {
         margin: 15px 0;
         padding: 10px;
         background-color: var(--bs-surface-bg-light);
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 4px;
     }
     
@@ -207,7 +207,7 @@
     .legend-box {
         width: 22px;
         height: 22px;
-        border: 1px solid #000;
+        border: 1px solid var(--bs-surface-900);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -294,7 +294,7 @@
                     <div class="print-header">
                         <h3>Employee Attendance Record</h3>
                         <p><strong>Period:</strong> {{ $periodStart->format('d M Y') }} - {{ $periodEnd->format('d M Y') }}{{ $department ? ' | Department: ' . $department : ' | All Departments' }}</p>
-                        <p style="font-size: 12px; color: #999;">Showing {{ count($dates) }} days | Generated: {{ now()->format('d M Y, h:i A') }}</p>
+ <p class="u-fs-12 text-surface-muted">Showing {{ count($dates) }} days | Generated: {{ now()->format('d M Y, h:i A') }}</p>
                     </div>
 
                     <!-- Legend -->
@@ -332,10 +332,10 @@
                     <table class="attendance-print-table">
                         <thead>
                             <tr>
-                                <th rowspan="2" style="width: 35px;">S.No</th>
+                                <th rowspan="2" class="u-w-35">S.No</th>
                                 <th rowspan="2" style="width: 50px;">ID</th>
-                                <th rowspan="2" style="width: 150px;">Name</th>
-                                <th rowspan="2" style="width: 120px;">Position</th>
+                                <th rowspan="2" class="u-w-150">Name</th>
+ <th class="u-w-120" rowspan="2" >Position</th>
                                 <th colspan="{{ count($dates) }}">Dates</th>
                                 <th colspan="5">Totals</th>
                             </tr>
@@ -344,15 +344,15 @@
                                     @php
                                         $isWeekend = in_array($date->dayOfWeek, [0, 6]);
                                     @endphp
-                                    <th style="width: 20px;" class="{{ $isWeekend ? 'weekend-header' : '' }}" title="{{ $date->format('D, M d') }}">
+                                    <th class="{{ $isWeekend ? 'weekend-header' : '' }} u-w-20" title="{{ $date->format('D, M d') }}">
                                         {{ $date->format('d') }}
                                     </th>
                                 @endforeach
-                                <th style="width: 35px;">P</th>
-                                <th style="width: 35px;">L</th>
-                                <th style="width: 35px;">A</th>
-                                <th style="width: 35px;">PL</th>
-                                <th style="width: 35px;">H</th>
+                                <th class="u-w-35">P</th>
+                                <th class="u-w-35">L</th>
+                                <th class="u-w-35">A</th>
+                                <th class="u-w-35">PL</th>
+                                <th class="u-w-35">H</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -393,7 +393,7 @@
                             @empty
                                 <tr>
                                     <td colspan="{{ count($dates) + 9 }}" 
-                                        style="text-align: center; padding: 20px;">
+ class="p-4">
                                         No employee data available for this period.
                                     </td>
                                 </tr>
@@ -402,8 +402,8 @@
                     </table>
 
                     <!-- Summary Section (Print Only) -->
-                    <div style="margin-top: 30px; display: none;" class="print-only">
-                        <p style="font-size: 11px; color: #666;">
+ <div style="margin-top: 30px" class="print-only d-none">
+ <p class="u-fs-11 text-surface-500">
                             <strong>Note:</strong> This report includes all trackable roles. 
                             Weekends and public holidays are marked with (-).
                         </p>
