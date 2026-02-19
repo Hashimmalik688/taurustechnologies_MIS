@@ -15,7 +15,7 @@ class OpenAIProjectPlannerService
     {
         $this->apiKey = config('services.openai.api_key', env('OPENAI_API_KEY', ''));
         $this->model = config('services.openai.model', 'gpt-4o');
-        $this->baseUrl = 'https://api.openai.com/v1';
+        $this->baseUrl = config('services.openai.base_url', 'https://api.openai.com/v1');
     }
 
     /**

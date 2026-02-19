@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\LeadCreated;
 use App\Models\Notification;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -29,7 +30,7 @@ class SendLeadCreatedNotification implements ShouldQueue
         $message = "New lead for {$lead->cn_name} has been created.";
         
         // Notify managers
-        $managers = User::role('Manager')->get();
+        $managers = User::role(Roles::MANAGER)->get();
         
         foreach ($managers as $manager) {
             Notification::createForUser(

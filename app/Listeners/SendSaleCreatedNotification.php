@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\SaleCreated;
 use App\Models\Notification;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -31,7 +32,7 @@ class SendSaleCreatedNotification implements ShouldQueue
         $message = "New sale completed by {$closerName} for {$lead->cn_name} - {$lead->carrier_name}";
         
         // Notify managers
-        $managers = User::role('Manager')->get();
+        $managers = User::role(Roles::MANAGER)->get();
         
         foreach ($managers as $manager) {
             Notification::createForUser(

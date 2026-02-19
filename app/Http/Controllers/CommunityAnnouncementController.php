@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Community;
 use App\Models\CommunityAnnouncement;
 use App\Models\ChatConversation;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -302,7 +303,7 @@ class CommunityAnnouncementController extends Controller
             }
 
             $user = auth()->user();
-            if ($announcement->created_by !== $user->id && !$user->hasRole(['Super Admin', 'Manager'])) {
+            if ($announcement->created_by !== $user->id && !$user->hasRole([Roles::SUPER_ADMIN, Roles::MANAGER])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized to update this announcement',
@@ -356,7 +357,7 @@ class CommunityAnnouncementController extends Controller
             }
 
             $user = auth()->user();
-            if ($announcement->created_by !== $user->id && !$user->hasRole(['Super Admin', 'Manager'])) {
+            if ($announcement->created_by !== $user->id && !$user->hasRole([Roles::SUPER_ADMIN, Roles::MANAGER])) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized to delete this announcement',

@@ -8,6 +8,7 @@ use App\Models\PublicHoliday;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\AttendanceService;
+use App\Support\Roles;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,7 +18,19 @@ class AttendanceController extends Controller
     private $attendanceService;
 
     // Roles that should track attendance (all non-admin roles)
-    private $trackableRoles = ['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer', 'Manager', 'HR', 'QA', 'Retention Officer', 'Co-Ordinator', 'Super Admin'];
+    private $trackableRoles = [
+        Roles::EMPLOYEE,
+        Roles::PEREGRINE_CLOSER,
+        Roles::PEREGRINE_VALIDATOR,
+        Roles::VERIFIER,
+        Roles::RAVENS_CLOSER,
+        Roles::MANAGER,
+        Roles::HR,
+        Roles::QA,
+        Roles::RETENTION_OFFICER,
+        Roles::COORDINATOR,
+        Roles::SUPER_ADMIN,
+    ];
 
     public function __construct(AttendanceService $attendanceService)
     {

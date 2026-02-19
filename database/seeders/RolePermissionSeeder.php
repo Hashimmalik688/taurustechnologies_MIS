@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Support\Roles;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -35,10 +36,9 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Create roles
-        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
-        $manager = Role::firstOrCreate(['name' => 'Manager']);
-        $employee = Role::firstOrCreate(['name' => 'Employee']);
-        $agent = Role::firstOrCreate(['name' => 'Agent']);
+        $superAdmin = Role::firstOrCreate(['name' => Roles::SUPER_ADMIN]);
+        $manager = Role::firstOrCreate(['name' => Roles::MANAGER]);
+        $employee = Role::firstOrCreate(['name' => Roles::EMPLOYEE]);
 
         // Assign permissions
         $allPermissionNames = Permission::pluck('name')->toArray();
@@ -52,13 +52,10 @@ class RolePermissionSeeder extends Seeder
         // Employee: limited permissions
         $employee->syncPermissions(['manage_leads','edit_leads','import_leads']);
 
-        // Agent: very limited
-        $agent->syncPermissions(['manage_leads']);
-
         // Assign Super Admin to first user if present
         $firstUser = User::orderBy('id')->first();
         if ($firstUser) {
-            $firstUser->assignRole('Super Admin');
+            $firstUser->assignRole(Roles::SUPER_ADMIN);
         }
     }
 }

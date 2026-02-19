@@ -76,7 +76,7 @@ class ZoomService
             ? Crypt::decrypt($token->refresh_token)
             : $token->refresh_token;
 
-        $response = Http::post('https://zoom.us/oauth/token', [
+        $response = Http::post(config('zoom.oauth_url', 'https://zoom.us/oauth/token'), [
             'grant_type' => 'refresh_token',
             'refresh_token' => $refreshToken,
             'client_id' => $config['client_id'],

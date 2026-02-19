@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\AttendanceService;
+use App\Support\Roles;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,7 +53,7 @@ class CheckDailyAttendance
     {
         // Only run auto-check for worker roles. Adjust the roles list as needed.
         return method_exists($user, 'hasAnyRole')
-            ? $user->hasAnyRole(['Employee', 'Peregrine Closer', 'Peregrine Validator', 'Verifier', 'Trainer', 'Ravens Closer'])
+            ? $user->hasAnyRole([Roles::EMPLOYEE, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RAVENS_CLOSER])
             : false;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class TeamDashboardController extends Controller
         // Get peregrine team members
         $peregrineTeam = User::where('department', 'peregrine')
             ->orWhereHas('roles', function($q) {
-                $q->whereIn('name', ['Verifier', 'Live Closer', 'Verification Officer']);
+                $q->whereIn('name', [Roles::VERIFIER]);
             })
             ->get();
 
@@ -75,7 +76,7 @@ class TeamDashboardController extends Controller
 
         $ravensTeam = User::where('department', 'ravens')
             ->orWhereHas('roles', function($q) {
-                $q->whereIn('name', ['Employee', 'Agent']);
+                $q->whereIn('name', [Roles::EMPLOYEE]);
             })
             ->get();
 

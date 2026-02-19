@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -131,70 +132,58 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Super Admin" id="role-super-admin">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::SUPER_ADMIN }}" id="role-super-admin">
                                                 <label class="form-check-label" for="role-super-admin">Super Admin</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Manager" id="role-manager">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::MANAGER }}" id="role-manager">
                                                 <label class="form-check-label" for="role-manager">Manager</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="HR" id="role-hr">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HR }}" id="role-hr">
                                                 <label class="form-check-label" for="role-hr">HR</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Employee" id="role-employee">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::EMPLOYEE }}" id="role-employee">
                                                 <label class="form-check-label" for="role-employee">Employee</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Co-ordinator" id="role-co-ordinator">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::COORDINATOR }}" id="role-co-ordinator">
                                                 <label class="form-check-label" for="role-co-ordinator">Co-ordinator</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Agent" id="role-agent">
-                                                <label class="form-check-label" for="role-agent">Agent</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Vendor" id="role-vendor">
-                                                <label class="form-check-label" for="role-vendor">Vendor</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="QA" id="role-qa">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::QA }}" id="role-qa">
                                                 <label class="form-check-label" for="role-qa">QA</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Trainer" id="role-trainer">
-                                                <label class="form-check-label" for="role-trainer">Trainer</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label text-primary">Peregrine Team</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Closer" id="role-peregrine-closer">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="role-peregrine-closer">
                                                 <label class="form-check-label" for="role-peregrine-closer">Peregrine Closer</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Peregrine Validator" id="role-peregrine-validator">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_VALIDATOR }}" id="role-peregrine-validator">
                                                 <label class="form-check-label" for="role-peregrine-validator">Peregrine Validator</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Verifier" id="role-verifier">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="role-verifier">
                                                 <label class="form-check-label" for="role-verifier">Verifier</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Ravens Closer" id="role-ravens-closer">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RAVENS_CLOSER }}" id="role-ravens-closer">
                                                 <label class="form-check-label" for="role-ravens-closer">Ravens Closer</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="Retention Officer" id="role-retention-officer">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::RETENTION_OFFICER }}" id="role-retention-officer">
                                                 <label class="form-check-label" for="role-retention-officer">Retention Officer</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="CEO" id="role-ceo">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::CEO }}" id="role-ceo">
                                                 <label class="form-check-label" for="role-ceo">CEO</label>
                                             </div>
                                         </div>

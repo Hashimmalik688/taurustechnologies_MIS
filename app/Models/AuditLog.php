@@ -56,8 +56,12 @@ class AuditLog extends Model
             'model_id' => $model_id,
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
-            'device_fingerprint' => request()->header('X-Device-Fingerprint') ?: request()->header('X-Device-ID'),
-            'device_name' => request()->header('X-Device-Name'),
+            'device_fingerprint' => request()->header('X-Device-Fingerprint')
+                ?: request()->cookie('device_fingerprint')
+                ?: request()->header('X-Device-ID')
+                ?: request()->cookie('device_id'),
+            'device_name' => request()->header('X-Device-Name')
+                ?: request()->cookie('device_name'),
             'changes' => $changes,
             'description' => $description,
         ]);

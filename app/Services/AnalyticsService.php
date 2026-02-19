@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Lead;
+use App\Support\Roles;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -217,7 +218,7 @@ class AnalyticsService
         $end = $endDate ?: Carbon::now();
 
         // Get validators by role (Managers and Peregrine Validators) OR users currently assigned as validators
-        $validatorsByRole = \App\Models\User::role(['Peregrine Validator', 'Manager'])
+        $validatorsByRole = \App\Models\User::role([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])
             ->select('id', 'name')
             ->get();
 

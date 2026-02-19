@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -135,7 +136,7 @@
                         <p class="text-muted mb-2">{{ $user->email }}</p>
                         <div class="mb-2">
                             @foreach ($user->roles as $role)
-                                <span class="badge badge-role {{ in_array($role->name, ['Manager', 'Super Admin']) ? 'badge-manager' : 'badge-employee' }} me-1">
+                                <span class="badge badge-role {{ in_array($role->name, [Roles::MANAGER, Roles::SUPER_ADMIN]) ? 'badge-manager' : 'badge-employee' }} me-1">
                                     <i class="mdi mdi-account-circle me-1"></i>
                                     {{ $role->name }}
                                 </span>

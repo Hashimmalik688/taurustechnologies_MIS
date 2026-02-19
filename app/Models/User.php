@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Support\Roles;
 use Spatie\Permission\Traits\HasRoles;
 use Carbon\Carbon;
 
@@ -264,11 +265,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getPermissionForModule($moduleSlug)
     {
-        // Super Admin always has full access
-        if ($this->hasRole('Super Admin')) {
-            return 'full';
-        }
-
         // Check for user-specific override first
         $module = Module::where('slug', $moduleSlug)->first();
         if (!$module) {
@@ -376,7 +372,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // CEO users are excluded from EMS as they are above the system
         static::created(function ($user) {
             // Skip EMS entry for CEO users
-            if ($user->hasRole('CEO')) {
+            if ($user->hasRole(Roles::CEO)) {
                 \Log::info('Skipping EMS entry for CEO user', [
                     'user_id' => $user->id,
                     'email' => $user->email,

@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Services\AttendanceService;
+use App\Support\Roles;
 use Illuminate\Support\Facades\Log;
 
 class MarkAttendanceOnLogin
@@ -44,7 +45,7 @@ class MarkAttendanceOnLogin
     private function shouldMarkAttendance($user)
     {
         // Don't mark attendance for CEO role (owner/executive level)
-        if ($user->hasRole('CEO')) {
+        if ($user->hasRole(Roles::CEO)) {
             return false;
         }
 

@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -500,7 +501,7 @@
                                                             <i class="bx bx-show me-2"></i>View Details
                                                         </a>
                                                     </li>
-                                                    @hasanyrole('Super Admin|Manager')
+                                                    @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER])
                                                         <li>
                                                             <a class="dropdown-item"
                                                                 href="{{ route('agents.edit', $agent->id) }}">

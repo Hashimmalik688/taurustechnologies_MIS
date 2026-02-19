@@ -104,24 +104,29 @@ class AuditLogController extends Controller
         );
     }
     /**
-     * Show device fingerprints used by multiple users (Account Switching Log)
+     * Show suspicious account switching activity
+     * Detects IPs or device fingerprints used by multiple users
      * Super Admin only
      */
     public function accountSwitchingLog()
     {
-        // Group by device_fingerprint, get all with >1 user
-        $suspicious = \App\Models\AuditLog::select('device_fingerprint')
+        // Detect device fingerprints used by multiple users (account sharing)
+        $suspiciousFingerprints = \App\Models\AuditLog::select('device_fingerprint')
             ->whereNotNull('device_fingerprint')
+            ->where('device_fingerprint', '!=', '')
+            ->where('action', 'login')
             ->groupBy('device_fingerprint')
             ->havingRaw('COUNT(DISTINCT user_id) > 1')
             ->pluck('device_fingerprint');
 
-        // Get all login events for these fingerprints
         $logs = \App\Models\AuditLog::with('user')
-            ->whereIn('device_fingerprint', $suspicious)
+            ->whereIn('device_fingerprint', $suspiciousFingerprints)
+            ->where('action', 'login')
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.account-switching-log', compact('logs'));
+        $detectionMethod = 'fingerprint';
+
+        return view('admin.account-switching-log', compact('logs', 'detectionMethod'));
     }
 }

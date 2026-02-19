@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title', $project->project_code . ' - ' . $project->project_name)
@@ -187,13 +188,13 @@
                             <a href="{{ route('pabs.projects.edit', $project) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         @elseif($project->status === 'QUOTING')
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#quotesModal">Add Vendor Quotes</button>
-                        @elseif($project->status === 'PENDING APPROVAL' && auth()->user()->hasRole('CEO|Super Admin'))
+                        @elseif($project->status === 'PENDING APPROVAL' && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
                             <a href="{{ route('pabs.projects.approval', $project) }}" class="btn btn-sm btn-outline-warning">Review for Approval</a>
                         @elseif($project->status === 'BUDGET ALLOCATED')
                             <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#executionModal">Start Execution</button>
                         @elseif($project->status === 'IN PROGRESS')
                             <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#completeModal">Mark Complete</button>
-                        @elseif($project->status === 'COMPLETED' && auth()->user()->hasRole('CEO|Super Admin'))
+                        @elseif($project->status === 'COMPLETED' && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
                             <form action="{{ route('pabs.projects.archive', $project) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Archive Project</button>

@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 <div id="announcement-bar" class="announcement-bar announcement-hidden" style="display: none !important;">
     <div class="announcement-content">
         <i class="announcement-icon"></i>
@@ -6,7 +7,7 @@
             <p class="mb-0 announcement-message"></p>
         </div>
         @auth
-            @if(Auth::user()->hasRole(['Super Admin', 'Co-ordinator']))
+            @if(Auth::user()->hasRole([Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                 <button type="button" class="btn btn-sm btn-outline-light announcement-edit-btn" style="display: none;">
                     <i class="bx bx-pencil"></i> Edit
                 </button>
@@ -25,7 +26,7 @@
 
 <!-- Edit Announcement Modal -->
 @auth
-@if(Auth::user()->hasRole(['Super Admin', 'Co-ordinator']))
+@if(Auth::user()->hasRole([Roles::SUPER_ADMIN, Roles::COORDINATOR]))
 <div class="modal fade" id="editAnnouncementModal" tabindex="-1" aria-labelledby="editAnnouncementModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

@@ -9,9 +9,14 @@ use Illuminate\Support\Facades\Log;
 
 class ZoomPhoneLogService
 {
-    private $baseUrl = 'https://api.zoom.us/v2';
+    private $baseUrl;
 
     private $cacheTimeout = 300; // 5 minutes cache
+
+    public function __construct()
+    {
+        $this->baseUrl = config('zoom.base_url', 'https://api.zoom.us/v2');
+    }
 
     /**
      * Get Server-to-Server OAuth token with caching
@@ -32,7 +37,7 @@ class ZoomPhoneLogService
                 $response = Http::withHeaders([
                     'Authorization' => 'Basic '.base64_encode($clientId.':'.$clientSecret),
                     'Content-Type' => 'application/x-www-form-urlencoded',
-                ])->asForm()->post('https://zoom.us/oauth/token', [
+                ])->asForm()->post(config('zoom.oauth_url', 'https://zoom.us/oauth/token'), [
                     'grant_type' => 'account_credentials',
                     'account_id' => $accountId,
                 ]);

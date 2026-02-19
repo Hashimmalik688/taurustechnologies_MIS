@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Services\AttendanceService;
+use App\Support\Roles;
 use Carbon\Carbon;
 
 class MarkAbsent extends Command
@@ -40,8 +41,19 @@ class MarkAbsent extends Command
 
         $roles = $this->option('roles');
         if (empty($roles)) {
-            // default list of worker roles - adjust as needed
-            $roles = ['Employee', 'Live Closer', 'Verification Officer', 'Verifier', 'Trainer', 'Ravens Closer'];
+            // default list of worker roles
+            $roles = [
+                Roles::EMPLOYEE,
+                Roles::VERIFIER,
+                Roles::RAVENS_CLOSER,
+                Roles::PEREGRINE_CLOSER,
+                Roles::PEREGRINE_VALIDATOR,
+                Roles::RETENTION_OFFICER,
+                Roles::QA,
+                Roles::HR,
+                Roles::MANAGER,
+                Roles::COORDINATOR,
+            ];
         }
 
         $cutoff = $this->option('cutoff') ?: '19:30';

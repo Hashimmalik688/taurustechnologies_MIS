@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 <!-- Teams-Style Announcement Banner -->
 <div id="teams-announcement-banner" class="teams-announcement-banner" style="display: none;">
     <div class="teams-announcement-content">
@@ -10,7 +11,7 @@
         </div>
         <div class="teams-announcement-actions">
             @auth
-                @if(Auth::user()->hasRole(['Super Admin', 'Co-ordinator']))
+                @if(Auth::user()->hasRole([Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                     <button type="button" class="btn btn-sm btn-light teams-announcement-edit" title="Edit announcement">
                         <i class="bx bx-pencil"></i>
                     </button>

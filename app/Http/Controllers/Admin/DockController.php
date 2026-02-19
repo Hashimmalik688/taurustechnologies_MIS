@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DockRecord;
 use App\Models\User;
+use App\Support\Roles;
 use App\Traits\PayrollMonthCalculation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class DockController extends Controller
         $employees = User::where('status', '!=', 'inactive')
             ->get()
             ->filter(function ($user) {
-                return $user && method_exists($user, 'hasRole') && !$user->hasRole('CEO');
+                return $user && method_exists($user, 'hasRole') && !$user->hasRole(Roles::CEO);
             })
             ->sortBy('name')
             ->values();
@@ -74,7 +75,7 @@ class DockController extends Controller
 
         // Prevent docking CEO users - they are above the system
         $user = User::find($validated['user_id']);
-        if ($user && $user->hasRole('CEO')) {
+        if ($user && $user->hasRole(Roles::CEO)) {
             return redirect()->back()
                 ->with('error', 'CEO users cannot be docked - they are above the system.');
         }

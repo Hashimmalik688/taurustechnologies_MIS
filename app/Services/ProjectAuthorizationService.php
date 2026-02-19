@@ -10,24 +10,27 @@ use Carbon\Carbon;
 
 class ProjectAuthorizationService
 {
+    /** The organizational domains (sections) used for project categorization */
+    public const SECTIONS = [
+        1 => 'Office Upgradations',
+        2 => 'Employees',
+        3 => 'Accounts',
+        4 => 'Govt Liaison and Fee',
+        5 => 'Vendors',
+        6 => 'Clients',
+        7 => 'IT and Equipment',
+        8 => 'R and D',
+        9 => 'Legal and Compliance',
+        10 => 'Marketing and Events',
+        11 => 'Utilities and General Admin',
+    ];
+
     /**
      * The 11 organizational domains (sections)
      */
     public static function getSections()
     {
-        return [
-            1 => 'Office Upgradations',
-            2 => 'Employees',
-            3 => 'Accounts',
-            4 => 'Govt Liaison and Fee',
-            5 => 'Vendors',
-            6 => 'Clients',
-            7 => 'IT and Equipment',
-            8 => 'R and D',
-            9 => 'Legal and Compliance',
-            10 => 'Marketing and Events',
-            11 => 'Utilities and General Admin',
-        ];
+        return self::SECTIONS;
     }
 
     /**

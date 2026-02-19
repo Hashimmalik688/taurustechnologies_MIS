@@ -10,6 +10,7 @@ use App\Models\CallLog;
 use App\Services\NotificationService;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -87,7 +88,7 @@ class RavensDashboardController extends Controller
         ->paginate(100);
 
         // Get Peregrine closer names for tagging
-        $peregrineClosers = \App\Models\User::role('Peregrine Closer')->pluck('name')->toArray();
+        $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
 
         // Get carrier-partner combinations with their approved states
         $carrierPartnerData = \App\Models\AgentCarrierState::with(['insuranceCarrier', 'partner'])
@@ -732,10 +733,10 @@ class RavensDashboardController extends Controller
         $notificationService = app(NotificationService::class);
 
         // Get QA users
-        $qaUsers = User::role('QA')->get();
+        $qaUsers = User::role(Roles::QA)->get();
         
         // Get Managers
-        $managers = User::role('Manager')->get();
+        $managers = User::role(Roles::MANAGER)->get();
 
         $message = "New sale submitted by " . Auth::user()->name . " for customer: " . $lead->cn_name;
 

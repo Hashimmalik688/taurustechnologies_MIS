@@ -1,3 +1,4 @@
+@use('App\Support\Roles')
 @extends('layouts.master')
 
 @section('title')
@@ -181,14 +182,14 @@
                                 <th>DOB</th>
                                 <th>Gender</th>
                                 <th>Smoker</th>
-                                @hasrole('Super Admin|Manager')
+                                @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER])
                                     <th>Policy Type</th>
                                     <th>Coverage Amount</th>
                                     <th>Monthly Premium</th>
                                     <th>Beneficiary</th>
                                     <th>Beneficiary DOB</th>
                                 @endhasrole
-                                @hasrole('Super Admin')
+                                @hasrole(Roles::SUPER_ADMIN)
                                     <th>Card Number</th>
                                     <th>CVV</th>
                                     <th>Expiry</th>
@@ -225,14 +226,14 @@
                                             <span class="badge bg-success"><i class="bx bx-check"></i> No</span>
                                         @endif
                                     </td>
-                                    @hasrole('Super Admin|Manager')
+                                    @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER])
                                         <td>{{ $lead->policy_type }}</td>
                                         <td>${{ number_format($lead->coverage_amount, 2) }}</td>
                                         <td>${{ number_format($lead->monthly_premium, 2) }}</td>
                                         <td>{{ $lead->beneficiary ?? 'N/A' }}</td>
                                         <td>{{ $lead->beneficiary_dob ? \Carbon\Carbon::parse($lead->beneficiary_dob)->format('M d, Y') : 'N/A' }}</td>
                                     @endhasrole
-                                    @hasrole('Super Admin')
+                                    @hasrole(Roles::SUPER_ADMIN)
                                         <td>
                                             @if($lead->card_number)
                                                 <span class="text-muted">****{{ substr($lead->card_number, -4) }}</span>
@@ -285,7 +286,7 @@
                                             </button>
                                         @endif
 
-                                        @unlessrole('Employee')
+                                        @unlessrole(Roles::EMPLOYEE)
                                             <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i>
                                             </a>

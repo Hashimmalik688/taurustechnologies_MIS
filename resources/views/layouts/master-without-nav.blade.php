@@ -19,6 +19,9 @@
     <!-- Include head CSS -->
     @include('layouts.head-css')
     
+    <!-- Device Fingerprinting -->
+    <script src="{{ URL::asset('js/device-fingerprint.js') }}"></script>
+    
     <!-- Page specific CSS -->
     @yield('css')
 </head>
