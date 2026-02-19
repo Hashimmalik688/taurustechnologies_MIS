@@ -191,6 +191,51 @@ class DockController extends Controller
             ->where('status', Statuses::DOCK_ACTIVE)
             ->sum('amount');
 
-        return view('employee.dock-records', compact('user', 'dockRecords', 'totalDocked'));
+        // Total applied (already deducted)
+        $totalApplied = DockRecord::where('user_id', $user->id)
+            ->where('status', 'applied')
+            ->sum('amount');
+
+        // Total cancelled
+        $totalCancelled = DockRecord::where('user_id', $user->id)
+            ->where('status', 'cancelled')
+            ->sum('amount');
+
+        // Status counts
+        $statusCounts = DockRecord::where('user_id', $user->id)
+            ->selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+        // Monthly breakdown for trend chart (last 6 months)
+        $monthlyData = DockRecord::where('user_id', $user->id)
+            ->where('status', '!=', 'cancelled')
+            ->selectRaw('dock_month, dock_year, sum(amount) as total, count(*) as count')
+            ->groupBy('dock_year', 'dock_month')
+            ->orderBy('dock_year', 'desc')
+            ->orderBy('dock_month', 'desc')
+            ->limit(6)
+            ->get()
+            ->reverse()
+            ->values();
+
+        // Reason breakdown for donut chart
+        $reasonBreakdown = DockRecord::where('user_id', $user->id)
+            ->where('status', '!=', 'cancelled')
+            ->selectRaw('reason, sum(amount) as total, count(*) as count')
+            ->groupBy('reason')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get();
+
+        // Total records count (all statuses)
+        $totalRecords = DockRecord::where('user_id', $user->id)->count();
+
+        return view('employee.dock-records', compact(
+            'user', 'dockRecords', 'totalDocked', 'totalApplied',
+            'totalCancelled', 'statusCounts', 'monthlyData',
+            'reasonBreakdown', 'totalRecords'
+        ));
     }
 }

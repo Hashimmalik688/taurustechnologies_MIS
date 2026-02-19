@@ -407,12 +407,16 @@
  <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white d-flex align-items-center justify-content-center u-rounded-6" title="View" style="width: 36px; height: 36px">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+                                                    @canEditModule('sales')
  <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center u-rounded-6" title="Edit" style="width: 36px; height: 36px">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    @endcanEditModule
+                                                    @canDeleteInModule('sales')
  <button type="button" class="btn btn-danger btn-sm d-flex align-items-center justify-content-center u-rounded-6" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete" style="width: 36px; height: 36px">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
+                                                    @endcanDeleteInModule
                                                 </div>
                                             </td>
                                             <td><strong>{{ $lead->cn_name }}</strong></td>

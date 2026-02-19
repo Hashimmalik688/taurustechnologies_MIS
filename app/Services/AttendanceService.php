@@ -208,9 +208,10 @@ class AttendanceService
     {
         $currentTime = Carbon::now(self::TIMEZONE);
         
-        // Checkout cutoff is 6am (1 hour after shift ends at 5am)
-        // After 6am, missed checkout is missed - no retroactive checkout allowed
-        if ($currentTime->hour >= 6) {
+        // Night shift runs ~7 PM to 5 AM, checkout cutoff is 6 AM
+        // Checkout is allowed during shift hours: 7 PM (hour 19) through 5:59 AM (hour < 6)
+        // Blocked during daytime non-shift window: 6 AM to 6:59 PM (hour >= 6 && hour < 19)
+        if ($currentTime->hour >= 6 && $currentTime->hour < 19) {
             return [
                 'success' => false,
                 'message' => 'Checkout window has closed. Cutoff time is 6:00 AM.',

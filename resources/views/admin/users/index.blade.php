@@ -96,12 +96,14 @@
                                         @endforeach
                                     </td>
                                     <td>
-                                        @hasrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::HR])
+                                        @canEditModule('users')
                                             <a href="#" data-bs-toggle="modal"
                                                 data-bs-target="#edit-user-{{ $user->id }}"
                                                 class="btn btn-primary btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                        @endcanEditModule
+                                        @canDeleteInModule('users')
                                             {{-- Prevent deleting yourself or the last Super Admin --}}
                                             @if ($user->id !== auth()->id())
                                                 <button type="button" class="btn btn-danger btn-sm"
@@ -109,7 +111,7 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             @endif
-                                        @endhasrole
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                             @endforeach

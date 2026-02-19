@@ -282,7 +282,7 @@
                 </div>
 
                 <!-- Groups Tab -->
- <div id="groups-tab" class="chat-sidebar-content d-none" >
+ <div id="groups-tab" class="chat-sidebar-content" >
                     <div class="chat-sidebar-header">
                         <h5>Groups</h5>
                         <div class="btn-group">
@@ -302,7 +302,7 @@
                 </div>
 
                 <!-- Communities Tab -->
- <div id="communities-tab" class="chat-sidebar-content d-none" >
+ <div id="communities-tab" class="chat-sidebar-content" >
                     <div class="chat-sidebar-header">
                         <h5>Communities</h5>
                         <div class="btn-group">
@@ -324,7 +324,7 @@
                 </div>
 
                 <!-- People Tab -->
- <div id="people-tab" class="chat-sidebar-content d-none" >
+ <div id="people-tab" class="chat-sidebar-content" >
                     <!-- People tab now uses full container width when active -->
                 </div>
             </div>
@@ -339,7 +339,7 @@
             </div>
 
             <!-- PEOPLE FULL PAGE -->
- <div class="people-main d-none w-100 p-4" id="peopleMain" style="background: var(--chat-bg-secondary)">
+ <div class="people-main w-100 p-4" id="peopleMain" style="display: none; background: var(--chat-bg-secondary)">
                 <div class="people-header" style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid var(--chat-border-color);">
  <div class="d-flex justify-content-between align-items-center mx-auto" style="max-width: 1200px">
                         <div>
@@ -665,7 +665,7 @@
                                     <i class="bx bx-bullhorn" style="font-size: 28px;"></i>
                                 </div>
  <div class="flex-grow-1" >
- <input type="color" class="form-control form-control-color u-rounded-8 u-cursor-pointer w-100" id="communityColor" name="color" value="var(--bs-gradient-start)" style="height: 50px">
+ <input type="color" class="form-control form-control-color u-rounded-8 u-cursor-pointer w-100" id="communityColor" name="color" value="#667eea" style="height: 50px">
  <small class="d-block text-surface-500 u-fs-12" style="margin-top: 6px">Pick a color to represent this community</small>
                                 </div>
                             </div>
@@ -845,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tabButtons.forEach(btn => btn.classList.remove('active'));
             
             // Hide all tab contents
-            tabContents.forEach(content => content.style.display = 'none');
+            tabContents.forEach(content => content.classList.remove('active'));
             
             // Add active class to clicked button
             this.classList.add('active');
@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show selected tab
             const selectedTab = document.getElementById(tabName + '-tab');
             if (selectedTab) {
-                selectedTab.style.display = 'flex';
+                selectedTab.classList.add('active');
             }
             
             // Handle sidebar and main area visibility
@@ -1080,7 +1080,7 @@ function renderPeopleList(users) {
         <button class="user-item" onclick="openPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}', event)" data-user-id="${user.id}" data-user-name="${user.name}" data-user-email="${user.email}" style="width: 100%; text-align: left; background: none; border: none; padding: 10px; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="user-avatar" style="width: 45px; height: 45px; flex-shrink: 0;">
-                    ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : `<div style=`width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, ${themeColors.gradientStart} 0%, ${themeColors.gradientEnd} 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;`>${user.name.charAt(0).toUpperCase()}</div>`}
+                    ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : `<div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, ${themeColors.gradientStart} 0%, ${themeColors.gradientEnd} 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">${user.name.charAt(0).toUpperCase()}</div>`}
                 </div>
                 <div style="flex: 1; min-width: 0;">
                     <div class="user-name" style="font-weight: 600; color: ${themeColors.surface700}; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.name}</div>
@@ -1260,10 +1260,10 @@ function renderGroupConversationsList(conversations) {
             </div>
             <div class="conversation-info" style="flex: 1; min-width: 0;">
                 <div class="conversation-name">${displayName}</div>
-                ${conv.latest_message ? `<div class="conversation-preview" style="font-size: 13px; color: ${themeColors.surfaceMuted}; margin-top: 2px;">${(conv.latest_message.message || `').substring(0, 40)}...</div>` : ''}
+                ${conv.latest_message ? `<div class="conversation-preview" style="font-size: 13px; color: ${themeColors.surfaceMuted}; margin-top: 2px;">${(conv.latest_message.message || '').substring(0, 40)}...</div>` : ''}
             </div>
-            ${conv.updated_at ? `<div class="conversation-time" style="font-size: 12px; color: ${themeColors.surfaceMuted};">${conv.updated_at}</div>` : `'}
-            ${conv.unread_count > 0 ? `<span class="unread-badge" style="background: ${themeColors.danger}; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; margin-left: 4px;">${conv.unread_count}</span>` : `'}
+            ${conv.updated_at ? `<div class="conversation-time" style="font-size: 12px; color: ${themeColors.surfaceMuted};">${conv.updated_at}</div>` : ''}
+            ${conv.unread_count > 0 ? `<span class="unread-badge" style="background: ${themeColors.danger}; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; margin-left: 4px;">${conv.unread_count}</span>` : ''}
         </div>
         `;
     }).join('');
@@ -1485,7 +1485,7 @@ function renderAnnouncements(announcements, communityColor) {
                             </div>
                             ${creatorId === window.currentUserId ? `
                                 <div style="display: flex; gap: 8px;">
-                                    <button onclick='editAnnouncement(${announcement.id}, ${JSON.stringify(announcement.title || "")}, ${JSON.stringify(announcement.message)}, "${announcement.priority || "normal"}")` style="background: none; border: none; color: ${themeColors.info}; cursor: pointer; padding: 4px 8px;" title="Edit">
+                                    <button onclick='editAnnouncement(${announcement.id}, ${JSON.stringify(announcement.title || "")}, ${JSON.stringify(announcement.message)}, "${announcement.priority || "normal"}")' style="background: none; border: none; color: ${themeColors.info}; cursor: pointer; padding: 4px 8px;" title="Edit">
                                         <i class="bx bx-edit" style="font-size: 18px;"></i>
                                     </button>
                                     <button onclick="deleteAnnouncement(${announcement.id})" style="background: none; border: none; color: ${themeColors.danger}; cursor: pointer; padding: 4px 8px;" title="Delete">
@@ -1599,7 +1599,7 @@ async function loadCommunityAnnouncements(conversationId, communityColor) {
                     <div style="flex: 1; min-width: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
                             <div>
-                                <div style="font-weight: 600; color: ${themeColors.surface700}; font-size: 14px;">${msg.user?.name || `Unknown'}</div>
+                                <div style="font-weight: 600; color: ${themeColors.surface700}; font-size: 14px;">${msg.user?.name || 'Unknown'}</div>
                                 <div style="font-size: 12px; color: ${themeColors.surfaceMuted};">${msg.created_at}</div>
                             </div>
                             ${msg.user_id === window.currentUserId ? `

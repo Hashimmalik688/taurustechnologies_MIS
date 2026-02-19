@@ -96,9 +96,11 @@
                 <div class="card-body">
                     <h6 class="card-title">Actions</h6>
                     <div class="d-grid gap-2">
+                        @canEditModule('pabs-tickets')
                         @if($ticket->created_by === auth()->id() || auth()->user()->hasRole([Roles::SUPER_ADMIN, Roles::CEO]))
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal">Edit Ticket</button>
                         @endif
+                        @endcanEditModule
                         
                         <!-- Assigned User Actions -->
                         @if($ticket->assigned_to === auth()->id() && $ticket->approval_status === Statuses::APPROVAL_PENDING)
@@ -110,6 +112,7 @@
                             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#closeModal">Close Ticket</button>
                         @endif
                         
+                        @canDeleteInModule('pabs-tickets')
                         @if($ticket->created_by === auth()->id() || auth()->user()->hasRole([Roles::SUPER_ADMIN, Roles::CEO]))
                             <form action="{{ route('pabs.tickets.destroy', $ticket) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this ticket?');">
                                 @csrf
@@ -117,6 +120,7 @@
                                 <button type="submit" class="btn btn-sm btn-danger w-100">Delete Ticket</button>
                             </form>
                         @endif
+                        @endcanDeleteInModule
                     </div>
                 </div>
             </div>

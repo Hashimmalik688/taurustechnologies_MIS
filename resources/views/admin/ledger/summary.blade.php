@@ -148,30 +148,6 @@
             transition: width 0.3s ease;
         }
 
-        .vendor-breakdown-item {
-            background: rgba(15, 23, 42, 0.4);
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            margin-bottom: 1rem;
-        }
-
-        .vendor-breakdown-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .vendor-name {
-            color: var(--bs-surface-300);
-            font-weight: 600;
-        }
-
-        .vendor-amount {
-            color: var(--bs-ui-success);
-            font-weight: 700;
-        }
-
         .filter-panel {
             background: rgba(15, 23, 42, 0.6);
             padding: 1.5rem;
@@ -297,7 +273,7 @@
 
             <!-- Category Breakdown -->
             <div class="row mb-4">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="glassmorphism-card">
                         <div class="card-body">
                             <h5 class="section-title">
@@ -376,62 +352,6 @@
                     </div>
                 </div>
 
-                <!-- Vendor Breakdown -->
-                <div class="col-lg-4">
-                    <div class="glassmorphism-card">
-                        <div class="card-body">
-                            <h5 class="section-title">
-                                <i class="mdi mdi-account-group me-2"></i>
-                                Top Vendors
-                            </h5>
-
-                            <div class="vendor-breakdown-item">
-                                <div class="vendor-breakdown-header">
-                                    <span class="vendor-name">John Smith</span>
-                                    <span class="vendor-amount">$12,450</span>
-                                </div>
- <small class="text-surface-400" >156 transactions</small>
-                            </div>
-
-                            <div class="vendor-breakdown-item">
-                                <div class="vendor-breakdown-header">
-                                    <span class="vendor-name">Sarah Johnson</span>
-                                    <span class="vendor-amount">$8,230</span>
-                                </div>
- <small class="text-surface-400" >92 transactions</small>
-                            </div>
-
-                            <div class="vendor-breakdown-item">
-                                <div class="vendor-breakdown-header">
-                                    <span class="vendor-name">Michael Brown</span>
-                                    <span class="vendor-amount">$6,890</span>
-                                </div>
- <small class="text-surface-400" >78 transactions</small>
-                            </div>
-
-                            <div class="vendor-breakdown-item">
-                                <div class="vendor-breakdown-header">
-                                    <span class="vendor-name">Emily Davis</span>
-                                    <span class="vendor-amount">$4,120</span>
-                                </div>
- <small class="text-surface-400" >45 transactions</small>
-                            </div>
-
-                            <div class="vendor-breakdown-item">
-                                <div class="vendor-breakdown-header">
-                                    <span class="vendor-name">Robert Wilson</span>
-                                    <span class="vendor-amount">$3,540</span>
-                                </div>
- <small class="text-surface-400" >38 transactions</small>
-                            </div>
-
-                            <div class="text-center mt-3">
- <a class="text-gold u-fw-600 text-decoration-none" href="{{ route('ledger.index') }}">
-                                    View All Vendors <i class="mdi mdi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 

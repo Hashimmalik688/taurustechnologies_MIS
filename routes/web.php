@@ -215,9 +215,9 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Ro
     Route::post('/store', [LeadController::class, 'store'])->name('store')->middleware('role.permission:leads-peregrine,edit');
     Route::post('/import', [LeadController::class, 'import'])->name('import')->middleware('role.permission:leads-peregrine,edit');
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [LeadController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [LeadController::class, 'destroy'])->name('delete');
+    Route::get('/edit/{id}', [LeadController::class, 'edit'])->name('edit')->middleware('role.permission:leads,edit');
+    Route::put('/update/{id}', [LeadController::class, 'update'])->name('update')->middleware('role.permission:leads,edit');
+    Route::delete('/delete/{id}', [LeadController::class, 'destroy'])->name('delete')->middleware('role.permission:leads,full');
     Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/{id}/update-comment', [LeadController::class, 'updateComment'])->name('updateComment');
     Route::post('/{id}/unassign-partner', [LeadController::class, 'unassignPartner'])->name('unassignPartner');
@@ -428,13 +428,13 @@ Route::prefix('api/notifications')->name('api.notifications.')->middleware(['aut
 // EPMS - Effective Project Management System (CEO, Super Admin Only)
 Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN)]], function () {
     // Project CRUD
-    Route::get('/', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'create'])->name('create');
-    Route::post('/store', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'store'])->name('store');
-    Route::get('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'show'])->name('show');
-    Route::get('/{id}/edit', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'update'])->name('update');
-    Route::delete('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'destroy'])->name('destroy');
+    Route::get('/', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'index'])->name('index')->middleware('role.permission:epms,view');
+    Route::get('/create', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'create'])->name('create')->middleware('role.permission:epms,edit');
+    Route::post('/store', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'store'])->name('store')->middleware('role.permission:epms,edit');
+    Route::get('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'show'])->name('show')->middleware('role.permission:epms,view');
+    Route::get('/{id}/edit', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'edit'])->name('edit')->middleware('role.permission:epms,edit');
+    Route::put('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'update'])->name('update')->middleware('role.permission:epms,edit');
+    Route::delete('/{id}', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'destroy'])->name('destroy')->middleware('role.permission:epms,full');
     
     // Milestones
     Route::post('/{id}/milestones', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'addMilestone'])->name('milestones.store');
@@ -504,48 +504,47 @@ Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth'
 
 // Chart of Accounts
 Route::group(['prefix' => 'chart-of-accounts', 'as' => 'chart-of-accounts.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
-    Route::get('/', [ChartOfAccountController::class, 'index'])->name('index');
-    Route::get('/create', [ChartOfAccountController::class, 'create'])->name('create');
-    Route::post('/store', [ChartOfAccountController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [ChartOfAccountController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [ChartOfAccountController::class, 'edit'])->name('edit');
-    Route::put('/update/{id}', [ChartOfAccountController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [ChartOfAccountController::class, 'destroy'])->name('delete');
+    Route::get('/', [ChartOfAccountController::class, 'index'])->name('index')->middleware('role.permission:chart-of-accounts,view');
+    Route::get('/create', [ChartOfAccountController::class, 'create'])->name('create')->middleware('role.permission:chart-of-accounts,edit');
+    Route::post('/store', [ChartOfAccountController::class, 'store'])->name('store')->middleware('role.permission:chart-of-accounts,edit');
+    Route::get('/show/{id}', [ChartOfAccountController::class, 'show'])->name('show')->middleware('role.permission:chart-of-accounts,view');
+    Route::get('/edit/{id}', [ChartOfAccountController::class, 'edit'])->name('edit')->middleware('role.permission:chart-of-accounts,edit');
+    Route::put('/update/{id}', [ChartOfAccountController::class, 'update'])->name('update')->middleware('role.permission:chart-of-accounts,edit');
+    Route::delete('/delete/{id}', [ChartOfAccountController::class, 'destroy'])->name('delete')->middleware('role.permission:chart-of-accounts,full');
 });
 
 // Ledger
 Route::group(['prefix' => 'ledger', 'as' => 'ledger.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
-    Route::get('/', [LedgerController::class, 'index'])->name('index');
-    Route::get('/create', [LedgerController::class, 'create'])->name('create');
-    Route::post('/store', [LedgerController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [LedgerController::class, 'show'])->name('show');
-    Route::get('/vendor/{vendorId}', [LedgerController::class, 'vendorLedger'])->name('vendor');
-    Route::get('/export', [LedgerController::class, 'export'])->name('export');
-    Route::get('/summary', [LedgerController::class, 'summary'])->name('summary');
+    Route::get('/', [LedgerController::class, 'index'])->name('index')->middleware('role.permission:general-ledger,view');
+    Route::get('/create', [LedgerController::class, 'create'])->name('create')->middleware('role.permission:general-ledger,edit');
+    Route::post('/store', [LedgerController::class, 'store'])->name('store')->middleware('role.permission:general-ledger,edit');
+    Route::get('/show/{id}', [LedgerController::class, 'show'])->name('show')->middleware('role.permission:general-ledger,view');
+    Route::get('/export', [LedgerController::class, 'export'])->name('export')->middleware('role.permission:general-ledger,view');
+    Route::get('/summary', [LedgerController::class, 'summary'])->name('summary')->middleware('role.permission:general-ledger,view');
 });
 
 // Petty Cash Ledger (CEO, Super Admin & Co-ordinator only)
 Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
-    Route::get('/', [LedgerController::class, 'pettyCashIndex'])->name('index');
-    Route::post('/store', [LedgerController::class, 'pettyCashStore'])->name('store');
-    Route::get('/{id}/edit', [LedgerController::class, 'pettyCashEdit'])->name('edit');
-    Route::put('/{id}', [LedgerController::class, 'pettyCashUpdate'])->name('update');
-    Route::delete('/{id}', [LedgerController::class, 'pettyCashDestroy'])->name('destroy');
-    Route::get('/print', [LedgerController::class, 'pettyCashPrint'])->name('print');
-    Route::get('/export', [LedgerController::class, 'pettyCashExport'])->name('export');
+    Route::get('/', [LedgerController::class, 'pettyCashIndex'])->name('index')->middleware('role.permission:petty-cash,view');
+    Route::post('/store', [LedgerController::class, 'pettyCashStore'])->name('store')->middleware('role.permission:petty-cash,edit');
+    Route::get('/{id}/edit', [LedgerController::class, 'pettyCashEdit'])->name('edit')->middleware('role.permission:petty-cash,edit');
+    Route::put('/{id}', [LedgerController::class, 'pettyCashUpdate'])->name('update')->middleware('role.permission:petty-cash,edit');
+    Route::delete('/{id}', [LedgerController::class, 'pettyCashDestroy'])->name('destroy')->middleware('role.permission:petty-cash,full');
+    Route::get('/print', [LedgerController::class, 'pettyCashPrint'])->name('print')->middleware('role.permission:petty-cash,view');
+    Route::get('/export', [LedgerController::class, 'pettyCashExport'])->name('export')->middleware('role.permission:petty-cash,view');
 });
 
 // Revenue Analytics (Super Admin & Manager only)
 Route::get('/revenue', [DashboardController::class, 'revenue'])
     ->name('revenue.index')
-    ->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER)]);
+    ->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER), 'role.permission:revenue-analytics,view']);
 
 // Live Analytics Dashboard (CEO, Super Admin, Manager & Co-ordinator)
 Route::group(['prefix' => 'analytics', 'as' => 'analytics.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
-    Route::get('/live', [\App\Http\Controllers\Admin\AnalyticsController::class, 'live'])->name('live');
-    Route::get('/live/data', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getLiveData'])->name('live.data');
-    Route::get('/historical', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getHistoricalData'])->name('historical');
-    Route::get('/drill-down', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getDrillDown'])->name('drill-down');
+    Route::get('/live', [\App\Http\Controllers\Admin\AnalyticsController::class, 'live'])->name('live')->middleware('role.permission:live-analytics,view');
+    Route::get('/live/data', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getLiveData'])->name('live.data')->middleware('role.permission:live-analytics,view');
+    Route::get('/historical', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getHistoricalData'])->name('historical')->middleware('role.permission:live-analytics,view');
+    Route::get('/drill-down', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getDrillDown'])->name('drill-down')->middleware('role.permission:live-analytics,view');
 });
 
 // Utility Routes
@@ -557,8 +556,10 @@ Route::get('/check-my-ip', function () {
     ]);
 });
 
-// Settings Hub (Super Admin, Manager, Coordinator, CEO)
+// Hub Pages
 Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
+Route::get('/hr/hub', function () { return view('admin.hr.hub'); })->name('hr.hub')->middleware(['auth', Roles::middleware(Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
+Route::get('/finance/hub', function () { return view('admin.finance.hub'); })->name('finance.hub')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
 
 // Settings (Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
@@ -806,17 +807,17 @@ Route::middleware(['auth'])->group(function () {
 // Project Authorization & Budget System (PABS) Routes - CEO, Super Admin, Manager, Co-ordinator
 Route::group(['prefix' => 'pabs', 'as' => 'pabs.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
     // Tickets
-    Route::get('/tickets', [App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index');
-    Route::get('/tickets/create', [App\Http\Controllers\Admin\TicketController::class, 'create'])->name('tickets.create');
-    Route::post('/tickets', [App\Http\Controllers\Admin\TicketController::class, 'store'])->name('tickets.store');
-    Route::get('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show');
-    Route::put('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'update'])->name('tickets.update');
-    Route::delete('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'destroy'])->name('tickets.destroy');
-    Route::post('/tickets/{ticket}/add-comment', [App\Http\Controllers\Admin\TicketController::class, 'addComment'])->name('tickets.addComment');
-    Route::post('/tickets/{ticket}/approve', [App\Http\Controllers\Admin\TicketController::class, 'approve'])->name('tickets.approve');
-    Route::post('/tickets/{ticket}/reject', [App\Http\Controllers\Admin\TicketController::class, 'reject'])->name('tickets.reject');
-    Route::post('/tickets/{ticket}/resolve', [App\Http\Controllers\Admin\TicketController::class, 'resolve'])->name('tickets.resolve');
-    Route::post('/tickets/{ticket}/close', [App\Http\Controllers\Admin\TicketController::class, 'close'])->name('tickets.close');
+    Route::get('/tickets', [App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index')->middleware('role.permission:pabs-tickets,view');
+    Route::get('/tickets/create', [App\Http\Controllers\Admin\TicketController::class, 'create'])->name('tickets.create')->middleware('role.permission:pabs-tickets,edit');
+    Route::post('/tickets', [App\Http\Controllers\Admin\TicketController::class, 'store'])->name('tickets.store')->middleware('role.permission:pabs-tickets,edit');
+    Route::get('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'show'])->name('tickets.show')->middleware('role.permission:pabs-tickets,view');
+    Route::put('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'update'])->name('tickets.update')->middleware('role.permission:pabs-tickets,edit');
+    Route::delete('/tickets/{ticket}', [App\Http\Controllers\Admin\TicketController::class, 'destroy'])->name('tickets.destroy')->middleware('role.permission:pabs-tickets,full');
+    Route::post('/tickets/{ticket}/add-comment', [App\Http\Controllers\Admin\TicketController::class, 'addComment'])->name('tickets.addComment')->middleware('role.permission:pabs-tickets,edit');
+    Route::post('/tickets/{ticket}/approve', [App\Http\Controllers\Admin\TicketController::class, 'approve'])->name('tickets.approve')->middleware('role.permission:pabs-tickets,edit');
+    Route::post('/tickets/{ticket}/reject', [App\Http\Controllers\Admin\TicketController::class, 'reject'])->name('tickets.reject')->middleware('role.permission:pabs-tickets,edit');
+    Route::post('/tickets/{ticket}/resolve', [App\Http\Controllers\Admin\TicketController::class, 'resolve'])->name('tickets.resolve')->middleware('role.permission:pabs-tickets,edit');
+    Route::post('/tickets/{ticket}/close', [App\Http\Controllers\Admin\TicketController::class, 'close'])->name('tickets.close')->middleware('role.permission:pabs-tickets,edit');
 });
 
 // Sticky Notes Routes - All authenticated users

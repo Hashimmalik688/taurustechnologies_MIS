@@ -407,9 +407,11 @@
                         <a href="{{ route('admin.partners.index') }}" class="btn btn-secondary">
                             <i class="mdi mdi-arrow-left me-1"></i>Back to List
                         </a>
+                        @canEditModule('partners')
                         <a href="{{ route('admin.partners.edit', $partner->id) }}" class="btn btn-gradient-primary">
                             <i class="mdi mdi-pencil me-1"></i>Edit Partner
                         </a>
+                        @endcanEditModule
                     </div>
                 </div>
             </div>

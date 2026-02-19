@@ -89,9 +89,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
+                                                @canEditModule('settings')
                                                 <a href="{{ route('admin.announcements.edit', $announcement->id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
                                                     <i class="bx bx-pencil"></i>
                                                 </a>
+                                                @endcanEditModule
+                                                @canDeleteInModule('settings')
  <form class="d-inline" method="POST" action="{{ route('admin.announcements.destroy', $announcement->id) }}" >
                                                     @csrf
                                                     @method('DELETE')
@@ -99,6 +102,7 @@
                                                         <i class="bx bx-trash"></i>
                                                     </button>
                                                 </form>
+                                                @endcanDeleteInModule
                                             </div>
                                         </td>
                                     </tr>

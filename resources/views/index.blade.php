@@ -4,347 +4,349 @@
 
 @section('css')
 <style>
-/* Compact Dashboard Styles */
-.page-header {
+/* ═══════════════════════════════════════════════════
+   Executive Dashboard — Polished CRM Design
+   ═══════════════════════════════════════════════════ */
+
+/* Glass-card base */
+.ex-card {
     background: var(--bs-card-bg);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 0.6rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: box-shadow .2s;
+}
+.ex-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+
+/* ── KPI Stat Cards ── */
+.kpi-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.65rem; }
+.kpi-card {
+    flex: 1 1 80px;
+    min-width: 75px;
+    padding: 0.65rem 0.6rem;
+    border-radius: 0.55rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.06);
+    transition: transform .15s, box-shadow .15s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0.55rem 0.55rem 0 0;
+}
+.kpi-card .k-icon {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+    display: block;
+    opacity: .7;
+}
+.kpi-card .k-val { font-size: 1.35rem; font-weight: 700; line-height: 1; }
+.kpi-card .k-lbl {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: .4px;
+    color: var(--bs-surface-500);
+    margin-top: 0.2rem;
+}
+
+/* KPI color variants */
+.kpi-card.k-gold    { background: rgba(212,175,55,.06); }
+.kpi-card.k-gold::before    { background: linear-gradient(90deg, #d4af37, #e8c84a); }
+.kpi-card.k-gold .k-val, .kpi-card.k-gold .k-icon { color: #b89730; }
+
+.kpi-card.k-blue    { background: rgba(85,110,230,.06); }
+.kpi-card.k-blue::before    { background: linear-gradient(90deg, #556ee6, #8b9cf7); }
+.kpi-card.k-blue .k-val, .kpi-card.k-blue .k-icon { color: #556ee6; }
+
+.kpi-card.k-green   { background: rgba(52,195,143,.06); }
+.kpi-card.k-green::before   { background: linear-gradient(90deg, #34c38f, #6eddb8); }
+.kpi-card.k-green .k-val, .kpi-card.k-green .k-icon { color: #1a8754; }
+
+.kpi-card.k-teal    { background: rgba(80,165,241,.06); }
+.kpi-card.k-teal::before    { background: linear-gradient(90deg, #50a5f1, #8cc5f7); }
+.kpi-card.k-teal .k-val, .kpi-card.k-teal .k-icon { color: #2b81c9; }
+
+.kpi-card.k-red     { background: rgba(244,106,106,.06); }
+.kpi-card.k-red::before     { background: linear-gradient(90deg, #f46a6a, #f89b9b); }
+.kpi-card.k-red .k-val, .kpi-card.k-red .k-icon { color: #c84646; }
+
+.kpi-card.k-warn    { background: rgba(241,180,76,.06); }
+.kpi-card.k-warn::before    { background: linear-gradient(90deg, #f1b44c, #f5cd7e); }
+.kpi-card.k-warn .k-val, .kpi-card.k-warn .k-icon { color: #b87a14; }
+
+.kpi-card.k-purple  { background: rgba(124,105,239,.06); }
+.kpi-card.k-purple::before  { background: linear-gradient(90deg, #7c69ef, #a899f5); }
+.kpi-card.k-purple .k-val, .kpi-card.k-purple .k-icon { color: #5b49c7; }
+
+.kpi-card.k-gray    { background: rgba(108,117,125,.05); }
+.kpi-card.k-gray::before    { background: linear-gradient(90deg, #6c757d, #95a0a8); }
+.kpi-card.k-gray .k-val, .kpi-card.k-gray .k-icon { color: #6c757d; }
+
+/* ── Section Cards ── */
+.sec-card {
+    padding: 0;
+    margin-bottom: 0.65rem;
+    overflow: hidden;
+}
+.sec-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.sec-hdr h6 {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.sec-hdr h6 i { opacity: .6; font-size: 0.95rem; }
+.sec-body { padding: 0.6rem 0.75rem; }
+
+/* ── Team Tabs ── */
+.team-tabs {
+    display: flex;
+    gap: 0.3rem;
+}
+.team-tab-btn {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.22rem 0.6rem;
+    border-radius: 1rem;
+    border: 1px solid var(--bs-surface-300);
+    background: transparent;
+    color: var(--bs-surface-500);
+    cursor: pointer;
+    transition: all .15s;
+}
+.team-tab-btn.active {
+    background: var(--bs-gold, #d4af37);
+    border-color: var(--bs-gold);
+    color: #fff;
+}
+.team-tab-btn:hover:not(.active) {
+    border-color: var(--bs-gold);
+    color: var(--bs-gold);
+}
+
+/* ── Compact Table ── */
+.ex-tbl {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.75rem;
+}
+.ex-tbl thead th {
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    color: var(--bs-surface-500);
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--bs-surface-200);
+    white-space: nowrap;
+    background: var(--bs-surface-100);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.ex-tbl tbody td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,.03);
+    vertical-align: middle;
+}
+.ex-tbl tbody tr { transition: background .12s; }
+.ex-tbl tbody tr:hover { background: rgba(212,175,55,.03); }
+
+/* Badge mini */
+.bd-mini {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    display: inline-block;
+    min-width: 22px;
+    text-align: center;
+}
+.bd-mini.bd-blue   { background: rgba(85,110,230,.12); color: #556ee6; }
+.bd-mini.bd-green  { background: rgba(52,195,143,.12); color: #1a8754; }
+.bd-mini.bd-red    { background: rgba(244,106,106,.12); color: #c84646; }
+.bd-mini.bd-warn   { background: rgba(241,180,76,.12); color: #b87a14; }
+.bd-mini.bd-teal   { background: rgba(80,165,241,.12); color: #2b81c9; }
+.bd-mini.bd-gold   { background: rgba(212,175,55,.12); color: #b89730; }
+
+/* ── Attendance mini ── */
+.att-mini-list {
+    max-height: 180px;
+    overflow-y: auto;
+}
+.att-mini-list::-webkit-scrollbar { width: 3px; }
+.att-mini-list::-webkit-scrollbar-thumb { background: var(--bs-surface-300); border-radius: 3px; }
+
+.att-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.3rem 0.15rem;
+    border-bottom: 1px solid rgba(0,0,0,.03);
+    font-size: 0.72rem;
+}
+.att-row:last-child { border: none; }
+.att-row .att-name { font-weight: 500; }
+.att-pill {
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 0.12rem 0.4rem;
+    border-radius: 1rem;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+.att-pill.p { background: rgba(52,195,143,.12); color: #1a8754; }
+.att-pill.a { background: rgba(244,106,106,.12); color: #c84646; }
+.att-pill.l { background: rgba(255,171,0,.12); color: #b37a00; }
+.att-pill.h { background: rgba(80,141,237,.12); color: #3b6fc0; }
+
+/* Attendance summary capsules */
+.att-caps {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+.att-cap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 1.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.att-cap.cap-p { background: rgba(52,195,143,.12); color: #1a8754; border: 1px solid rgba(52,195,143,.25); }
+.att-cap.cap-a { background: rgba(244,106,106,.12); color: #c84646; border: 1px solid rgba(244,106,106,.25); }
+.att-cap.cap-l { background: rgba(255,171,0,.12); color: #b37a00; border: 1px solid rgba(255,171,0,.25); }
+.att-cap.cap-h { background: rgba(80,141,237,.12); color: #3b6fc0; border: 1px solid rgba(80,141,237,.25); }
+
+/* ── Target Chart ── */
+.target-chart-wrap {
+    text-align: center;
+    padding: 0.5rem 0;
+}
+.target-chart-wrap canvas {
+    max-height: 130px;
+}
+.target-info {
+    margin-top: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--bs-surface-500);
+}
+.target-info strong { font-weight: 700; }
+
+/* ── Retention mini blocks ── */
+.ret-row {
+    display: flex;
+    gap: 0.4rem;
+}
+.ret-block {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0.3rem;
+    border-radius: 0.45rem;
+    border: 1px solid;
+    transition: transform .15s;
+}
+.ret-block:hover { transform: translateY(-1px); }
+.ret-block .r-val { font-size: 1.2rem; font-weight: 700; line-height: 1; }
+.ret-block .r-lbl {
+    font-size: 0.55rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    color: var(--bs-surface-500);
+    margin-top: 0.15rem;
+}
+.ret-block.r-cb   { border-color: rgba(244,106,106,.3); background: rgba(244,106,106,.04); }
+.ret-block.r-cb .r-val   { color: #c84646; }
+.ret-block.r-ret  { border-color: rgba(52,195,143,.3); background: rgba(52,195,143,.04); }
+.ret-block.r-ret .r-val  { color: #1a8754; }
+.ret-block.r-pend { border-color: rgba(241,180,76,.3); background: rgba(241,180,76,.04); }
+.ret-block.r-pend .r-val { color: #b87a14; }
+
+/* ── Chargebacks display ── */
+.cb-display { text-align: center; padding: 0.3rem 0; }
+.cb-big { font-size: 1.6rem; font-weight: 700; color: #c84646; line-height: 1; }
+.cb-sub { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: var(--bs-surface-500); margin-top: 0.15rem; }
+.cb-amt { font-size: 0.95rem; font-weight: 700; color: #c84646; margin-top: 0.1rem; }
+
+/* ── Scrollable table wrapper ── */
+.scroll-tbl { max-height: 200px; overflow-y: auto; }
+.scroll-tbl::-webkit-scrollbar { width: 3px; }
+.scroll-tbl::-webkit-scrollbar-thumb { background: var(--bs-surface-300); border-radius: 3px; }
+
+/* ── Link button ── */
+.link-btn {
+    font-size: 0.62rem;
+    padding: 0.18rem 0.45rem;
+    border-radius: 0.3rem;
+    border: 1px solid var(--bs-surface-300);
+    background: transparent;
+    color: var(--bs-surface-500);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .15s;
+}
+.link-btn:hover { border-color: var(--bs-gold); color: var(--bs-gold); }
+
+/* Alert compact */
+.att-alert {
+    padding: 0.55rem 0.85rem;
+    margin-bottom: 0.65rem;
+    border-left: 3px solid #f1b44c;
+    background: linear-gradient(135deg, rgba(241,180,76,.06) 0%, rgba(241,180,76,.02) 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    font-size: 0.78rem;
 }
-
-.page-title {
-    font-size: 1.25rem;
-    margin: 0;
-}
-
-.page-subtitle {
-    font-size: 0.8rem;
-    color: var(--bs-surface-500);
-}
-
-.time-display {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-}
-
-.time-box {
-    text-align: center;
-}
-
-.time-box .label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--bs-surface-500);
-}
-
-.time-box .time {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--bs-gold);
-}
-
-/* Compact Stat Cards */
-.stat-card.compact {
-    padding: 0.75rem;
-}
-
-.stat-card.compact .stat-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.stat-card.compact .stat-value {
-    font-size: 1.5rem;
-}
-
-.stat-card.compact .stat-label {
-    font-size: 0.65rem;
-}
-
-/* Compact Status Boxes */
-.status-box.compact {
-    padding: 0.75rem;
-}
-
-.status-box.compact.bordered {
-    border: 2px solid;
-}
-
-.status-box.compact.bordered.blue {
-    border-color: var(--bs-ui-info);
-}
-
-.status-box.compact.bordered.green {
-    border-color: var(--bs-ui-success);
-}
-
-.status-box.compact.bordered.yellow {
-    border-color: var(--bs-ui-warning);
-}
-
-.status-box.compact.bordered.red {
-    border-color: var(--bs-ui-danger);
-}
-
-.status-box.compact .status-number {
-    font-size: 1.5rem;
-}
-
-.status-box.compact .status-label {
-    font-size: 0.65rem;
-}
-
-/* Compact Team Tabs */
-.team-tab.compact {
-    padding: 0.75rem;
-}
-
-.team-tab.compact .tab-title {
-    font-size: 0.85rem;
-    margin-bottom: 0.25rem;
-}
-
-.team-tab.compact .tab-count {
-    font-size: 1.5rem;
-}
-
-/* Compact Cards */
-.compact-card {
-    margin-bottom: 0;
-}
-
-.compact-card.bordered {
-    border: 2px solid var(--bs-surface-200);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-.compact-header {
-    padding: 0.5rem 0.75rem;
-    background: var(--bs-surface-bg-light);
-    border-bottom: 1px solid var(--bs-surface-200);
-}
-
-.compact-header h6 {
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.compact-body {
-    padding: 0.75rem;
-}
-
-/* Compact Table */
-.table-sm th, .table-sm td {
-    padding: 0.4rem;
-    font-size: 0.8rem;
-}
-
-.table-sm thead th {
+.att-alert strong { font-weight: 700; }
+.att-alert .btn-mark {
     font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: var(--bs-surface-bg-light);
-}
-
-/* Mini Stat Values */
-.mini-stat-value.small {
-    font-size: 1.25rem;
-    font-weight: 700;
-}
-
-.mini-stat-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--bs-surface-500);
-}
-
-/* Team Item Compact */
-.team-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.4rem;
-    margin-bottom: 0.35rem;
-    background: var(--bs-surface-bg-light);
-    border-radius: 6px;
-    border-left: 2px solid var(--bs-gold);
-}
-
-.team-item .name {
-    font-weight: 600;
-    font-size: 0.8rem;
-    color: var(--bs-surface-800);
-}
-
-.team-item .badge {
-    font-size: 0.65rem;
-}
-
-/* Badge Sizes */
-.badge-xs {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.4rem;
-}
-
-/* Button Sizes */
-.btn-xs {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
-}
-
-/* Text Gold */
-.text-gold {
-    color: var(--bs-gold) !important;
-}
-
-/* Retention Blocks */
-.retention-block {
-    background: var(--bs-card-bg);
-    border: 2px solid;
-    border-radius: 8px;
-    padding: 0.5rem;
-    transition: all 0.2s;
-}
-
-.retention-block:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.retention-block.cb {
-    border-color: var(--bs-ui-danger);
-    background: rgba(239, 68, 68, 0.05);
-}
-
-.retention-block.retained {
-    border-color: var(--bs-ui-success);
-    background: rgba(16, 185, 129, 0.05);
-}
-
-.retention-block.pending {
-    border-color: var(--bs-ui-warning);
-    background: rgba(245, 158, 11, 0.05);
-}
-
-.ret-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.retention-block.cb .ret-number {
-    color: var(--bs-ui-danger);
-}
-
-.retention-block.retained .ret-number {
-    color: var(--bs-ui-success);
-}
-
-.retention-block.pending .ret-number {
-    color: var(--bs-ui-warning);
-}
-
-.ret-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--bs-surface-500);
-    margin-top: 0.25rem;
-}
-
-/* Chargebacks Display */
-.cb-count {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--bs-ui-danger);
-    line-height: 1;
-}
-
-.cb-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--bs-surface-500);
-    margin: 0.25rem 0;
-}
-
-.cb-amount {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--bs-ui-danger);
-}
-
-/* Button Gold */
-.btn-gold {
-    background: var(--bs-gold);
-    color: var(--bs-white);
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.35rem;
     border: none;
+    cursor: pointer;
+    font-weight: 600;
 }
-
-.btn-gold:hover {
-    background: var(--bs-gold-dark);
-    color: var(--bs-white);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .time-display {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
+.att-alert .btn-mark.primary { background: var(--bs-gold); color: #fff; }
+.att-alert .btn-mark.secondary { background: var(--bs-surface-200); color: var(--bs-surface-600); }
 </style>
 @endsection
 
 @section('content')
-<!-- Page Header -->
-<div class="page-header">
-    <div>
-        <h1 class="page-title"><i class="bx bx-grid-alt"></i> Executive Dashboard</h1>
-        <div class="page-subtitle">Welcome back! Here's what's happening with your sales today.</div>
-    </div>
-    <div class="time-display">
-        <div class="time-box">
-            <div class="label">USA</div>
-            <div class="time" id="floridaTime">--:--:--</div>
-        </div>
-        <div class="time-box">
-            <div class="label">Pakistan</div>
-            <div class="time" id="pakistanTime">--:--:--</div>
-        </div>
-    </div>
-    <div class="action-buttons">
-        <button class="btn btn-outline-gold btn-sm" onclick="window.location.reload()">
-            <i class="bx bx-refresh"></i> Refresh
-        </button>
-    </div>
-</div>
-
 @if(session('attendance_manual_needed'))
-    <div class="alert alert-warning d-flex align-items-center" role="alert" id="attendance-manual-banner" style="margin-bottom: 1rem;">
-        <div style="flex:1">
-            <strong>Mark Attendance:</strong>
-            <div>{{ session('attendance_manual_needed') }}</div>
+    <div class="ex-card att-alert" id="attendance-manual-banner">
+        <div>
+            <strong><i class="bx bx-time-five"></i> Mark Attendance:</strong>
+            <span>{{ session('attendance_manual_needed') }}</span>
         </div>
-        <div style="margin-left: 1rem">
-            <button id="markAttendanceBtn" class="btn btn-gold btn-sm">Mark Attendance</button>
-            <button id="markAttendanceForceBtn" class="btn btn-outline-secondary btn-sm">Mark (Force)</button>
+        <div class="d-flex gap-2">
+            <button id="markAttendanceBtn" class="btn-mark primary">Mark Attendance</button>
+            <button id="markAttendanceForceBtn" class="btn-mark secondary">Force</button>
         </div>
     </div>
     <script>
@@ -370,10 +372,8 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        // simple success feedback, then hide the banner
                         alert(data.message || 'Attendance marked successfully');
                         if (banner) banner.style.display = 'none';
-                        // optionally reload to refresh attendance counts
                         setTimeout(() => location.reload(), 600);
                     } else {
                         alert(data.message || 'Could not mark attendance: ' + (data.debug_ip || ''));
@@ -399,241 +399,214 @@
     </script>
 @endif
 
-<!-- Top Statistics Section with Right Sidebar -->
-<div class="row g-2 mb-3">
-    <!-- Left: 8 Stat Boxes -->
-    <div class="col-lg-9">
-        <!-- Top 4 Metrics -->
-        <div class="row g-2 mb-2">
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="stat-card compact">
-                    <div class="stat-icon gold">
-                        <i class="bx bx-trending-up"></i>
-                    </div>
-                    <div class="stat-value" id="salesToday">{{ $total_sales_today }}</div>
-                    <div class="stat-label">Today</div>
+{{-- KPI Row 1 — Primary Metrics --}}
+<div class="kpi-row">
+    <div class="kpi-card k-gold ex-card">
+        <i class="bx bx-trending-up k-icon"></i>
+        <div class="k-val" id="salesToday">{{ $total_sales_today }}</div>
+        <div class="k-lbl">Today</div>
+    </div>
+    <div class="kpi-card k-blue ex-card">
+        <i class="bx bx-bar-chart-alt-2 k-icon"></i>
+        <div class="k-val" id="salesMTD">{{ $total_monthly_sales }}</div>
+        <div class="k-lbl">MTD Sales</div>
+    </div>
+    <div class="kpi-card k-green ex-card">
+        <i class="bx bx-dollar-circle k-icon"></i>
+        <div class="k-val" id="revenue">${{ number_format($total_revenue, 0) }}</div>
+        <div class="k-lbl">Revenue</div>
+    </div>
+    <div class="kpi-card k-teal ex-card">
+        <i class="bx bx-user-check k-icon"></i>
+        <div class="k-val" id="activeTeam">{{ count($attendance) }}</div>
+        <div class="k-lbl">Active</div>
+    </div>
+</div>
+
+{{-- KPI Row 2 — Pipeline Status --}}
+<div class="kpi-row">
+    <div class="kpi-card k-blue ex-card">
+        <i class="bx bx-send k-icon"></i>
+        <div class="k-val" id="statusDone">{{ $done_count }}</div>
+        <div class="k-lbl">Submitted</div>
+    </div>
+    <div class="kpi-card k-green ex-card">
+        <i class="bx bx-check-double k-icon"></i>
+        <div class="k-val" id="statusApproved">{{ $approved_count }}</div>
+        <div class="k-lbl">Approved</div>
+    </div>
+    <div class="kpi-card k-warn ex-card">
+        <i class="bx bx-loader-alt k-icon"></i>
+        <div class="k-val" id="statusUW">{{ $underwriting_count }}</div>
+        <div class="k-lbl">UW</div>
+    </div>
+    <div class="kpi-card k-red ex-card">
+        <i class="bx bx-x-circle k-icon"></i>
+        <div class="k-val" id="statusDeclined">{{ $declined_count }}</div>
+        <div class="k-lbl">Declined</div>
+    </div>
+</div>
+
+{{-- Main Content Grid --}}
+<div class="row g-2">
+
+    {{-- LEFT: Team Performance + Attendance --}}
+    <div class="col-xl-9 col-lg-8">
+
+        {{-- Team Performance Table --}}
+        <div class="ex-card sec-card">
+            <div class="sec-hdr">
+                <h6><i class="bx bx-group"></i> Team Performance</h6>
+                <div class="team-tabs">
+                    <button class="team-tab-btn active" onclick="switchTeam('peregrine')" id="peregrineTab">
+                        Peregrine (<span id="peregrineCount">{{ $peregrine_count ?? 0 }}</span>)
+                    </button>
+                    <button class="team-tab-btn" onclick="switchTeam('ravens')" id="ravensTab">
+                        Ravens (<span id="ravensCount">{{ $ravens_count ?? 0 }}</span>)
+                    </button>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="stat-card compact">
-                    <div class="stat-icon info">
-                        <i class="bx bx-bar-chart-alt-2"></i>
-                    </div>
-                    <div class="stat-value" id="salesMTD">{{ $total_monthly_sales }}</div>
-                    <div class="stat-label">MTD Sales</div>
+            <div class="scroll-tbl">
+                <table class="ex-tbl">
+                    <thead>
+                        <tr>
+                            <th>Closer</th>
+                            <th class="text-center">Today</th>
+                            <th class="text-center">MTD</th>
+                            <th class="text-center">Approved</th>
+                            <th class="text-center">Declined</th>
+                            <th class="text-center">UW</th>
+                        </tr>
+                    </thead>
+                    <tbody id="closerTable">
+                        @forelse($sales_per_closer as $closer)
+                        <tr class="closer-row" data-team="{{ $closer['team'] ?? '' }}">
+                            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>{{ $closer['closer'] ?? 'N/A' }}</td>
+                            <td class="text-center"><span class="bd-mini bd-teal">{{ $closer['today'] ?? 0 }}</span></td>
+                            <td class="text-center"><span class="bd-mini bd-blue">{{ $closer['mtd'] ?? 0 }}</span></td>
+                            <td class="text-center"><span class="bd-mini bd-green">{{ $closer['approvedMTD'] ?? 0 }}</span></td>
+                            <td class="text-center"><span class="bd-mini bd-red">{{ $closer['declinedMTD'] ?? 0 }}</span></td>
+                            <td class="text-center"><span class="bd-mini bd-warn">{{ $closer['uwMTD'] ?? $closer['uw'] ?? $closer['underwriting'] ?? 0 }}</span></td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No closers data available</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Attendance --}}
+        @php
+            $lateCount = 0;
+            $halfDayCount = 0;
+            foreach($attendance as $a) {
+                $s = strtolower($a['status'] ?? '');
+                if ($s === 'late') $lateCount++;
+                elseif (in_array($s, ['half day', 'half_day', 'halfday'])) $halfDayCount++;
+            }
+        @endphp
+        <div class="ex-card sec-card">
+            <div class="sec-hdr">
+                <h6><i class="bx bx-time-five"></i> Attendance</h6>
+                <div class="att-caps">
+                    <span class="att-cap cap-p"><span id="presentCount">{{ $present_count }}</span>&nbsp;P</span>
+                    <span class="att-cap cap-a"><span id="absentCount">{{ $absent_count }}</span>&nbsp;A</span>
+                    <span class="att-cap cap-l"><span id="lateCount">{{ $lateCount }}</span>&nbsp;L</span>
+                    <span class="att-cap cap-h"><span id="halfDayCount">{{ $halfDayCount }}</span>&nbsp;HD</span>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="stat-card compact">
-                    <div class="stat-icon success">
-                        <i class="bx bx-dollar-circle"></i>
+            <div class="sec-body">
+                <div class="att-mini-list" id="attendanceTable">
+                    @forelse($attendance as $att)
+                    @php
+                        $status = strtolower($att['status'] ?? '');
+                        if ($status === 'late') {
+                            $pillClass = 'l';
+                            $pillText = 'Late';
+                        } elseif (in_array($status, ['half day', 'half_day', 'halfday'])) {
+                            $pillClass = 'h';
+                            $pillText = 'Half Day';
+                        } elseif (in_array($status, ['present', 'p', 'on time', 'ontime'])) {
+                            $pillClass = 'p';
+                            $pillText = 'Present';
+                        } else {
+                            $pillClass = 'a';
+                            $pillText = ucfirst($att['status'] ?? 'Absent');
+                        }
+                    @endphp
+                    <div class="att-row">
+                        <span class="att-name">{{ $att['name'] ?? 'N/A' }}</span>
+                        <span class="att-pill {{ $pillClass }}">{{ $pillText }}</span>
                     </div>
-                    <div class="stat-value" id="revenue">${{ number_format($total_revenue, 0) }}</div>
-                    <div class="stat-label">Revenue</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="stat-card compact">
-                    <div class="stat-icon gold">
-                        <i class="bx bx-user"></i>
-                    </div>
-                    <div class="stat-value" id="activeTeam">{{ count($attendance) }}</div>
-                    <div class="stat-label">Active</div>
+                    @empty
+                    <div class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No attendance data</div>
+                    @endforelse
                 </div>
             </div>
         </div>
 
-        <!-- Bottom 4 Status Boxes -->
-        <div class="row g-2 mb-2">
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="status-box blue compact bordered">
-                    <div class="status-number" id="statusDone">{{ $done_count }}</div>
-                    <div class="status-label">Submitted</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="status-box green compact bordered">
-                    <div class="status-number" id="statusApproved">{{ $approved_count }}</div>
-                    <div class="status-label">Approved</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="status-box yellow compact bordered">
-                    <div class="status-number" id="statusUW">{{ $underwriting_count }}</div>
-                    <div class="status-label">UW</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-3 col-6">
-                <div class="status-box red compact bordered">
-                    <div class="status-number" id="statusDeclined">{{ $declined_count }}</div>
-                    <div class="status-label">Declined</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Team and Attendance Row (Below 4 Status Boxes) -->
-        <div class="row g-2 mb-2">
-            <!-- Live Team Performance (Left - 9 cols) -->
-            <div class="col-lg-9">
-                <div class="card compact-card bordered">
-                    <div class="card-header compact-header d-flex justify-content-between align-items-center">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button type="button" class="btn btn-outline-gold btn-sm active" onclick="switchTeam('peregrine')" id="peregrineTab">
-                                Peregrine (<span id="peregrineCount">{{ $peregrine_count ?? 0 }}</span>)
-                            </button>
-                            <button type="button" class="btn btn-outline-gold btn-sm" onclick="switchTeam('ravens')" id="ravensTab">
-                                Ravens (<span id="ravensCount">{{ $ravens_count ?? 0 }}</span>)
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
- <div class="u-overflow-y-auto u-max-h-200">
-                            <table class="table table-sm table-hover mb-0">
-                                <thead class="position-sticky bg-white u-z-1" style="top: 0">
-                                    <tr>
-                                        <th>Closer</th>
-                                        <th class="text-center">Today</th>
-                                        <th class="text-center">MTD</th>
-                                        <th class="text-center">Approved</th>
-                                        <th class="text-center">Declined</th>
-                                        <th class="text-center">UW</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="closerTable">
-                                    @forelse($sales_per_closer as $closer)
-                                    <tr class="closer-row" data-team="{{ $closer['team'] ?? '' }}">
-                                        <td><i class="bx bx-user-circle me-1 text-gold"></i>{{ $closer['closer'] ?? 'N/A' }}</td>
-                                        <td class="text-center"><span class="badge badge-xs bg-info">{{ $closer['today'] ?? 0 }}</span></td>
-                                        <td class="text-center"><span class="badge badge-xs bg-primary">{{ $closer['mtd'] ?? 0 }}</span></td>
-                                        <td class="text-center"><span class="badge badge-xs bg-success">{{ $closer['approvedMTD'] ?? 0 }}</span></td>
-                                        <td class="text-center"><span class="badge badge-xs bg-danger">{{ $closer['declinedMTD'] ?? 0 }}</span></td>
-                                        <td class="text-center"><span class="badge badge-xs bg-warning">{{ $closer['uwMTD'] ?? $closer['uw'] ?? $closer['underwriting'] ?? 0 }}</span></td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-3 text-muted">No closers data available</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attendance (Right - 3 cols) -->
-            <div class="col-lg-3">
-                <div class="card compact-card bordered">
-                    <div class="card-header compact-header">
-                        <h6 class="mb-0"><i class="bx bx-time-five"></i> Attendance</h6>
-                    </div>
-                    <div class="card-body compact-body">
-                        <!-- Summary Counts - Compact Capsules -->
-                        <div class="d-flex gap-2 justify-content-center mb-2">
- <div class="px-3 py-1 d-inline-flex align-items-center u-gap-6" style="background: rgba(16, 185, 129, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-success)">
- <span class="u-fw-700 text-ui-success u-fs-110" id="presentCount">{{ $present_count }}</span>
- <span class="u-fw-600 u-fs-070 text-ui-success-dark">P</span>
-                            </div>
- <div class="px-3 py-1 d-inline-flex align-items-center u-gap-6" style="background: rgba(239, 68, 68, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-danger)">
- <span class="u-fw-700 text-ui-danger u-fs-110" id="absentCount">{{ $absent_count }}</span>
- <span class="u-fw-600 u-fs-070 text-ui-danger-dark">A</span>
-                            </div>
-                        </div>
-
-                        <!-- Attendance Table -->
- <div class="u-overflow-y-auto" style="max-height: 130px">
-                            <table class="table table-sm mb-0">
-                                <thead class="position-sticky bg-white u-z-1" style="top: 0">
-                                    <tr>
-                                        <th class="u-fs-070">Name</th>
-                                        <th class="text-center u-fs-070">Status</th>
-                                    </tr>
-                                </thead>
- <tbody class="u-fs-075" id="attendanceTable" >
-                                    @forelse($attendance as $att)
-                                    @php
-                                        $status = strtolower($att['status'] ?? '');
-                                        $isPresent = in_array($status, ['present', 'p', 'on time', 'ontime', 'late', 'half day']);
-                                        $badgeClass = $isPresent ? 'bg-success' : 'bg-danger';
-                                        $statusText = $isPresent ? 'Present' : ucfirst($att['status'] ?? 'Absent');
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $att['name'] ?? 'N/A' }}</td>
-                                        <td class="text-center"><span class="badge badge-xs {{ $badgeClass }}">{{ $statusText }}</span></td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="2" class="text-center py-3 text-muted">No attendance data</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Right: Monthly Target + Attendance + Retention + Chargebacks -->
-    <div class="col-lg-3">
-        <!-- Monthly Target Pie Chart -->
-        <div class="card compact-card bordered mb-2">
-            <div class="card-header compact-header">
-                <h6 class="mb-0"><i class="bx bx-target-lock"></i> Monthly Target</h6>
-            </div>
-            <div class="card-body compact-body text-center p-2">
-                <canvas id="monthlyTargetChart" style="height: 140px; max-height: 140px;"></canvas>
- <div class="mt-2 u-fs-075" >
-                    <div><span class="text-muted">Target:</span> <strong class="text-gold">500</strong></div>
-                    <div><span class="text-muted">Achieved:</span> <strong class="text-success">{{ $total_monthly_sales }}</strong></div>
-                </div>
-            </div>
-        </div>
+    {{-- RIGHT: Target + Retention + Chargebacks --}}
+    <div class="col-xl-3 col-lg-4">
 
-        <!-- Retention -->
-        <div class="card compact-card bordered mb-2">
-            <div class="card-header compact-header">
-                <h6 class="mb-0"><i class="bx bx-refresh"></i> Retention</h6>
+        {{-- Monthly Target --}}
+        <div class="ex-card sec-card">
+            <div class="sec-hdr">
+                <h6><i class="bx bx-target-lock"></i> Monthly Target</h6>
             </div>
-            <div class="card-body compact-body">
-                <div class="row g-1 text-center">
-                    <div class="col-4">
-                        <div class="retention-block cb">
-                            <div class="ret-number" id="retCB">{{ $retention_cb }}</div>
-                            <div class="ret-label">CB</div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="retention-block retained">
-                            <div class="ret-number" id="retRetained">{{ $retention_retained }}</div>
-                            <div class="ret-label">Retained</div>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="retention-block pending">
-                            <div class="ret-number" id="retPending">{{ $retention_pending }}</div>
-                            <div class="ret-label">Pending</div>
-                        </div>
+            <div class="sec-body">
+                <div class="target-chart-wrap">
+                    <canvas id="monthlyTargetChart"></canvas>
+                    <div class="target-info">
+                        Target: <strong style="color:var(--bs-gold)">500</strong> &nbsp;|&nbsp;
+                        Achieved: <strong style="color:#1a8754">{{ $total_monthly_sales }}</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Chargebacks -->
-        <div class="card compact-card bordered">
-            <div class="card-header compact-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="bx bx-error"></i> Chargebacks</h6>
-                <a href="{{ route('chargebacks.index') }}" class="btn btn-xs btn-outline-gold">Details</a>
+        {{-- Retention --}}
+        <div class="ex-card sec-card">
+            <div class="sec-hdr">
+                <h6><i class="bx bx-refresh"></i> Retention</h6>
             </div>
-            <div class="card-body compact-body">
-                <div class="text-center">
-                    <div class="cb-count" id="cbThis">{{ $cb_this_count }}</div>
-                    <div class="cb-label">This Month</div>
-                    <div class="cb-amount" id="cbThisAmt">${{ number_format($cb_this_amt, 0) }}</div>
+            <div class="sec-body">
+                <div class="ret-row">
+                    <div class="ret-block r-cb">
+                        <div class="r-val" id="retCB">{{ $retention_cb }}</div>
+                        <div class="r-lbl">CB</div>
+                    </div>
+                    <div class="ret-block r-ret">
+                        <div class="r-val" id="retRetained">{{ $retention_retained }}</div>
+                        <div class="r-lbl">Retained</div>
+                    </div>
+                    <div class="ret-block r-pend">
+                        <div class="r-val" id="retPending">{{ $retention_pending }}</div>
+                        <div class="r-lbl">Pending</div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        {{-- Chargebacks --}}
+        <div class="ex-card sec-card">
+            <div class="sec-hdr">
+                <h6><i class="bx bx-error"></i> Chargebacks</h6>
+                <a href="{{ route('chargebacks.index') }}" class="link-btn">Details</a>
+            </div>
+            <div class="sec-body">
+                <div class="cb-display">
+                    <div class="cb-big" id="cbThis">{{ $cb_this_count }}</div>
+                    <div class="cb-sub">This Month</div>
+                    <div class="cb-amt" id="cbThisAmt">${{ number_format($cb_this_amt, 0) }}</div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -782,23 +755,27 @@ if (typeof window !== 'undefined') {
     window.serverData = serverData;
 }
 
-// Update Clocks
+// Update Clocks (targets navbar elements)
 function updateClocks() {
     const now = new Date();
 
-    // Florida (EST/EDT)
     const floridaTime = now.toLocaleTimeString('en-US', {
         timeZone: 'America/New_York',
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: true
     });
-    $('#floridaTime').text(floridaTime);
+    const el1 = document.getElementById('navFloridaTime');
+    if (el1) el1.textContent = floridaTime;
 
-    // Pakistan (PKT)
     const pakistanTime = now.toLocaleTimeString('en-US', {
         timeZone: 'Asia/Karachi',
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: true
     });
-    $('#pakistanTime').text(pakistanTime);
+    const el2 = document.getElementById('navPakistanTime');
+    if (el2) el2.textContent = pakistanTime;
 }
 
 // Load Data
@@ -880,42 +857,53 @@ function renderClosers(closers) {
     tbody.empty();
 
     if (!closers || closers.length === 0) {
-        tbody.html('<tr><td colspan="6" class="text-center py-3 text-muted">No closers in this team</td></tr>');
+        tbody.html('<tr><td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No closers in this team</td></tr>');
         return;
     }
 
     closers.forEach(c => {
         tbody.append(`
             <tr class="closer-row" data-team="${c.team || 'peregrine'}">
-                <td><i class="bx bx-user-circle me-1 text-gold"></i>${c.closer || 'N/A'}</td>
-                <td class="text-center"><span class="badge badge-xs bg-info">${c.today || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-primary">${c.mtd || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-success">${c.approved || c.approvedMTD || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-danger">${c.declined || c.declinedMTD || 0}</span></td>
-                <td class="text-center"><span class="badge badge-xs bg-warning">${c.uw || c.uwMTD || c.underwriting || 0}</span></td>
+                <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>${c.closer || 'N/A'}</td>
+                <td class="text-center"><span class="bd-mini bd-teal">${c.today || 0}</span></td>
+                <td class="text-center"><span class="bd-mini bd-blue">${c.mtd || 0}</span></td>
+                <td class="text-center"><span class="bd-mini bd-green">${c.approved || c.approvedMTD || 0}</span></td>
+                <td class="text-center"><span class="bd-mini bd-red">${c.declined || c.declinedMTD || 0}</span></td>
+                <td class="text-center"><span class="bd-mini bd-warn">${c.uw || c.uwMTD || c.underwriting || 0}</span></td>
             </tr>
         `);
     });
 }
 
 function renderTeam(team) {
-    const list = $('#teamList');
+    const list = $('#attendanceTable');
     list.empty();
-    let present = 0, absent = 0;
+    let present = 0, absent = 0, late = 0, halfDay = 0;
 
     team.forEach(t => {
         const status = (t.status || '').toLowerCase();
-        const isPresent = ['present','p','on time'].includes(status);
-        if (isPresent) present++; else if (status === 'absent') absent++;
+        let pillClass, pillText;
 
-        list.append(`<div class="team-item">
-            <span class="name"><i class="bx ${isPresent ? 'bx-check-circle' : 'bx-x-circle'} me-2 ${isPresent ? 'text-success' : 'text-danger'}"></i>${t.name}</span>
-            <span class="badge ${isPresent ? 'bg-success' : 'bg-danger'}">${isPresent ? 'Present' : 'Absent'}</span>
+        if (status === 'late') {
+            pillClass = 'l'; pillText = 'Late'; late++;
+        } else if (['half day','half_day','halfday'].includes(status)) {
+            pillClass = 'h'; pillText = 'Half Day'; halfDay++;
+        } else if (['present','p','on time','ontime'].includes(status)) {
+            pillClass = 'p'; pillText = 'Present'; present++;
+        } else {
+            pillClass = 'a'; pillText = 'Absent'; absent++;
+        }
+
+        list.append(`<div class="att-row">
+            <span class="att-name">${t.name}</span>
+            <span class="att-pill ${pillClass}">${pillText}</span>
         </div>`);
     });
 
-    $('#presentBadge').text(present);
-    $('#absentBadge').text(absent);
+    $('#presentCount').text(present);
+    $('#absentCount').text(absent);
+    $('#lateCount').text(late);
+    $('#halfDayCount').text(halfDay);
 }
 
 function updateCharts(salesData) {

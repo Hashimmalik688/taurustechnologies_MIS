@@ -223,10 +223,12 @@
                     @endif
 
                     <div class="d-grid gap-2 mt-4">
+                        @canEditModule('users')
                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary">
                             <i class="mdi mdi-pencil me-1"></i>
                             Edit User
                         </a>
+                        @endcanEditModule
                         <a href="{{ route('users.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left me-1"></i>
                             Back to List

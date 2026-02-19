@@ -316,19 +316,10 @@
                 <form action="{{ route('ledger.index') }}" method="GET">
                     <div class="row align-items-end">
                         <div class="col-md-3">
-                            <label for="vendor_id" class="form-label">Vendor</label>
-                            <select class="form-select" id="vendor_id" name="vendor_id">
-                                <option value="">All Vendors</option>
-                                <option value="1">John Smith</option>
-                                <option value="2">Sarah Johnson</option>
-                                <option value="3">Michael Brown</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
                             <label for="date_from" class="form-label">From Date</label>
                             <input type="text" class="form-control" id="date_from" name="date_from" placeholder="Select date">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label for="date_to" class="form-label">To Date</label>
                             <input type="text" class="form-control" id="date_to" name="date_to" placeholder="Select date">
                         </div>
@@ -385,7 +376,6 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Date</th>
-                                    <th>Vendor</th>
                                     <th>Type</th>
                                     <th>Category</th>
                                     <th>Amount</th>
@@ -398,7 +388,6 @@
                                 <tr>
                                     <td>1</td>
                                     <td>2025-09-28</td>
-                                    <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
  <td class="text-ui-success u-fw-600" >+$1,250.00</td>
@@ -408,33 +397,35 @@
                                         <a href="{{ route('ledger.show', 1) }}" class="action-btn action-btn-view">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
+                                        @canDeleteInModule('general-ledger')
                                         <button class="action-btn action-btn-delete">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2</td>
                                     <td>2025-09-25</td>
-                                    <td>Sarah Johnson</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-payment">Payment</span></td>
  <td class="text-ui-danger u-fw-600" >-$500.00</td>
                                     <td>PAY-005678</td>
-                                    <td>Monthly payment to vendor</td>
+                                    <td>Monthly payment</td>
                                     <td>
                                         <a href="{{ route('ledger.show', 2) }}" class="action-btn action-btn-view">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
+                                        @canDeleteInModule('general-ledger')
                                         <button class="action-btn action-btn-delete">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>3</td>
                                     <td>2025-09-20</td>
-                                    <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
  <td class="text-ui-success u-fw-600" >+$2,100.00</td>
@@ -444,15 +435,16 @@
                                         <a href="{{ route('ledger.show', 3) }}" class="action-btn action-btn-view">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
+                                        @canDeleteInModule('general-ledger')
                                         <button class="action-btn action-btn-delete">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>4</td>
                                     <td>2025-09-18</td>
-                                    <td>Michael Brown</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-expense">Expense</span></td>
  <td class="text-ui-danger u-fw-600" >-$350.00</td>
@@ -462,9 +454,11 @@
                                         <a href="{{ route('ledger.show', 4) }}" class="action-btn action-btn-view">
                                             <i class="mdi mdi-eye"></i>
                                         </a>
+                                        @canDeleteInModule('general-ledger')
                                         <button class="action-btn action-btn-delete">
                                             <i class="mdi mdi-delete"></i>
                                         </button>
+                                        @endcanDeleteInModule
                                     </td>
                                 </tr>
                             </tbody>

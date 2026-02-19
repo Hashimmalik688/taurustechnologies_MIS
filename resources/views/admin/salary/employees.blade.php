@@ -242,10 +242,12 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
+                                                    @canEditModule('payroll')
                                                     <butt9n class="btn btn-sm btn-outline-primary"
                                                         onclick="editEmployee({{ $employee->id }}, '{{ $employee->name }}', {{ $employee->basic_salary }}, {{ $employee->target_sales }}, {{ $employee->bonus_per_extra_sale }})">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
+                                                    @endcanEditModule
                                                     <button class="btn btn-sm btn-outline-info"
                                                         onclick="viewSalaryHistory({{ $employee->id }})">
                                                         <i class="fas fa-history"></i>

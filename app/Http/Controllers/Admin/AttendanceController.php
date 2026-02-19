@@ -528,12 +528,13 @@ class AttendanceController extends Controller
             ->whereDate('date', $attendanceDate)
             ->first();
         
-        // Checkout is only allowed before 6am cutoff for current shift
-        // After 6am, missed checkout is missed - no retroactive checkout allowed
+        // Checkout allowed during active shift hours: 7 PM (hour 19) through 5:59 AM (hour < 6)
+        // Blocked during daytime non-shift window: 6 AM to 6:59 PM
+        $isShiftHours = $now->hour < 6 || $now->hour >= 19;
         $canCheckout = $todayAttendance && 
                        !$todayAttendance->logout_time && 
                        $todayAttendance->login_time && 
-                       $now->hour < 6;
+                       $isShiftHours;
         
         // Format pay period label for display
         $payPeriodLabel = $startOfMonth->format('M d, Y') . ' - ' . $endOfMonth->format('M d, Y');

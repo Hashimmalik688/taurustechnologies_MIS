@@ -867,10 +867,12 @@
                             <td class="text-ui-danger">{{ number_format($salaryAdvance, 2) }}</td>
  <td><strong class="text-ui-success u-fs-110">{{ number_format($payable, 2) }}</strong></td>
                             <td>
-                                @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
+                                @canEditModule('payroll')
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editManualEntryModal{{ $entry->id }}" title="Edit Manual Entry">
                                     <i class="bx bx-edit"></i>
                                 </button>
+                                @endcanEditModule
+                                @canDeleteInModule('payroll')
                                 <button class="btn btn-sm btn-danger" onclick="if(confirm('Delete manual entry for {{ $entry->employee_name }}?')) { document.getElementById('delete-manual-{{ $entry->id }}').submit(); }" title="Delete Manual Entry">
                                     <i class="bx bx-trash"></i>
                                 </button>
@@ -878,7 +880,7 @@
                                     @csrf
                                     @method('DELETE')
                                 </form>
-                                @endif
+                                @endcanDeleteInModule
                             </td>
                         </tr>
 

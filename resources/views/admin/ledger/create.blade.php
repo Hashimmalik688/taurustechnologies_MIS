@@ -195,21 +195,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="vendor_id" class="form-label required">Vendor</label>
-                                    <select class="form-select select2" id="vendor_id" name="vendor_id" required>
-                                        <option value="">Select Vendor</option>
-                                        <option value="1">John Smith - Smith Insurance Co.</option>
-                                        <option value="2">Sarah Johnson - Johnson & Associates</option>
-                                        <option value="3">Michael Brown - Brown Supplies Ltd.</option>
-                                    </select>
-                                    @error('vendor_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
                                     <label for="lead_id" class="form-label">Related Lead (Optional)</label>
                                     <select class="form-select select2" id="lead_id" name="lead_id">
                                         <option value="">Select Lead (if applicable)</option>

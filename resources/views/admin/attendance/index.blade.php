@@ -10,129 +10,141 @@
     <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
-        /* Modern DataTable Styling */
-        .dataTables_wrapper .dataTables_filter {
-            float: right;
-            margin-bottom: 15px;
+        /* ── Compact CRM Attendance Styles ── */
+
+        /* Stat mini-cards */
+        .stat-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: 0.5rem;
+            background: var(--bs-card-bg);
+            border: 1px solid var(--bs-surface-200);
+            transition: box-shadow .15s;
         }
-        .dataTables_wrapper .dataTables_filter label {
-            font-weight: 600;
-            color: var(--bs-surface-600);
-            margin-right: 10px;
+        .stat-mini:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+        .stat-mini .stat-icon {
+            width: 36px; height: 36px;
+            border-radius: 0.45rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
         }
+        .stat-mini .stat-info { line-height: 1.2; }
+        .stat-mini .stat-value { font-size: 1.15rem; font-weight: 700; }
+        .stat-mini .stat-label { font-size: 0.7rem; color: var(--bs-surface-500); text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
+
+        /* Compact filter bar */
+        .filter-bar .card-body { padding: 0.65rem 0.85rem; }
+        .filter-bar .form-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--bs-surface-500); margin-bottom: 0.15rem; }
+        .filter-bar .form-control,
+        .filter-bar .form-select { font-size: 0.82rem; padding: 0.3rem 0.5rem; height: auto; }
+        .filter-bar .btn { font-size: 0.78rem; padding: 0.3rem 0.65rem; }
+
+        /* Quick action pills */
+        .quick-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.45rem; }
+        .quick-actions .btn { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 1rem; }
+
+        /* Compact DataTable */
+        .dataTables_wrapper .dataTables_filter { margin-bottom: 8px; }
         .dataTables_wrapper .dataTables_filter input {
-            border: 2px solid var(--bs-surface-200);
-            border-radius: 0.35rem;
-            padding: 0.5rem 1rem;
-            width: 300px;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--bs-surface-200);
+            border-radius: 0.3rem;
+            padding: 0.3rem 0.6rem;
+            width: 220px;
+            font-size: 0.82rem;
         }
         .dataTables_wrapper .dataTables_filter input:focus {
             border-color: var(--bs-chart-primary);
-            box-shadow: 0 0 0 0.2rem rgba(85,110,230,0.15);
+            box-shadow: 0 0 0 .15rem rgba(85,110,230,.12);
             outline: none;
         }
-        .dataTables_wrapper .dataTables_length {
-            float: left;
-            margin-bottom: 15px;
-        }
-        .dataTables_wrapper .dataTables_length label {
-            font-weight: 600;
-            color: var(--bs-surface-600);
-        }
+        .dataTables_wrapper .dataTables_length { margin-bottom: 8px; }
+        .dataTables_wrapper .dataTables_length label { font-weight: 500; font-size: 0.8rem; }
         .dataTables_wrapper .dataTables_length select {
-            border: 2px solid var(--bs-surface-200);
-            border-radius: 0.35rem;
-            padding: 0.45rem 2rem 0.45rem 0.75rem;
-            margin: 0 0.75rem;
-            font-size: 0.95rem;
-            background: var(--bs-card-bg);
-            transition: all 0.3s ease;
-        }
-        .dataTables_wrapper .dataTables_length select:focus {
-            border-color: var(--bs-chart-primary);
-            outline: none;
-        }
-        .dataTables_wrapper .dataTables_info {
-            padding-top: 1.5em;
-            font-size: 0.9rem;
-            color: var(--bs-surface-muted);
-            font-weight: 500;
-        }
-        .dataTables_wrapper .dataTables_paginate {
-            padding-top: 1.5em;
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.5rem 0.9rem;
-            margin: 0 3px;
             border: 1px solid var(--bs-surface-200);
-            border-radius: 0.35rem;
+            border-radius: 0.3rem;
+            padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+            margin: 0 0.4rem;
+            font-size: 0.82rem;
+        }
+        .dataTables_wrapper .dataTables_info { padding-top: .8em; font-size: 0.78rem; }
+        .dataTables_wrapper .dataTables_paginate { padding-top: .8em; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.3rem 0.6rem;
+            margin: 0 2px;
+            border: 1px solid var(--bs-surface-200);
+            border-radius: 0.3rem;
+            font-size: 0.78rem;
             font-weight: 500;
-            transition: all 0.2s ease;
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, var(--bs-ui-info) 100%);
-            color: var(--bs-white) !important;
+            background: var(--bs-chart-primary);
+            color: #fff !important;
             border-color: var(--bs-chart-primary);
-            box-shadow: 0 2px 6px rgba(85,110,230,0.3);
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
             background: var(--bs-surface-50);
             border-color: var(--bs-chart-primary);
             color: var(--bs-chart-primary) !important;
         }
-        .dataTables_wrapper .row {
-            margin-bottom: 1rem;
-        }
-        /* Table styling improvements */
-        #attendance-table {
-            border-collapse: separate;
-            border-spacing: 0;
-        }
+
+        /* Compact table */
+        #attendance-table { border-collapse: separate; border-spacing: 0; font-size: 0.82rem; }
         #attendance-table thead th {
-            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: var(--bs-white);
+            background: var(--bs-surface-100);
+            color: var(--bs-surface-600);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            padding: 1rem 0.75rem;
-            border: none;
+            font-size: 0.68rem;
+            letter-spacing: .4px;
+            padding: 0.5rem 0.6rem;
+            border-bottom: 2px solid var(--bs-surface-200);
+            white-space: nowrap;
         }
-        #attendance-table tbody tr {
-            transition: all 0.2s ease;
-        }
-        #attendance-table tbody tr:hover {
-            background-color: var(--bs-surface-50);
-            transform: scale(1.01);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        #attendance-table tbody td {
-            vertical-align: middle;
-            padding: 1rem 0.75rem;
-        }
+        #attendance-table tbody tr { transition: background .15s; }
+        #attendance-table tbody tr:hover { background-color: var(--bs-surface-50); }
+        #attendance-table tbody td { vertical-align: middle; padding: 0.45rem 0.6rem; }
+        #attendance-table .avatar-xs { width: 28px; height: 28px; }
+        #attendance-table .avatar-title { font-size: 0.7rem; }
+
+        /* Sidebar cards */
+        .sidebar-card .card-header { padding: 0.55rem 0.85rem; }
+        .sidebar-card .card-header .card-title { font-size: 0.82rem; }
+        .sidebar-card .card-body { padding: 0.55rem 0.85rem; }
+
+        /* Absent employee row — compact */
+        .absent-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid var(--bs-surface-100); }
+        .absent-row:last-child { border-bottom: none; }
+        .absent-row .avatar-xs { width: 26px; height: 26px; }
+        .absent-row .avatar-title { font-size: 0.65rem; }
+        .absent-row h6 { font-size: 0.78rem; margin: 0; }
+        .absent-row p { font-size: 0.68rem; margin: 0; }
+
+        /* Soft buttons */
         .btn-soft-primary {
             background-color: rgba(85, 110, 230, 0.1);
-            border-color: rgba(85, 110, 230, 0.2);
+            border-color: transparent;
             color: var(--bs-chart-primary);
         }
-        .btn-soft-primary:hover {
-            background-color: var(--bs-chart-primary);
-            border-color: var(--bs-chart-primary);
-            color: var(--bs-white);
-        }
+        .btn-soft-primary:hover { background-color: var(--bs-chart-primary); color: #fff; }
         .btn-soft-danger {
             background-color: rgba(244, 106, 106, 0.1);
-            border-color: rgba(244, 106, 106, 0.2);
+            border-color: transparent;
             color: var(--bs-chart-danger);
         }
-        .btn-soft-danger:hover {
-            background-color: var(--bs-chart-danger);
-            border-color: var(--bs-chart-danger);
-            color: var(--bs-white);
-        }
+        .btn-soft-danger:hover { background-color: var(--bs-chart-danger); color: #fff; }
+
+        /* Weekly trend table */
+        .trend-table th, .trend-table td { font-size: 0.75rem; padding: 0.3rem 0.45rem; }
+        .trend-table .progress { height: 5px; }
+
+        /* Remove heavy card margins */
+        .attendance-page .card { margin-bottom: 0.65rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); border: 1px solid var(--bs-surface-100); }
+        .attendance-page .card .card-body { /* already scoped per context */ }
+        .attendance-page .card .card-header { background: transparent; border-bottom: 1px solid var(--bs-surface-100); }
+        .attendance-page .card-header .card-title { font-size: 0.85rem; font-weight: 600; }
     </style>
 @endsection
 
@@ -147,42 +159,44 @@
     @endcomponent
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-2" role="alert">
+            <i class="mdi mdi-check-all me-1"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-danger alert-dismissible fade show py-2 mb-2" role="alert">
+            <i class="mdi mdi-block-helper me-1"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <!-- Enhanced Filters -->
-    <div class="card mb-3">
+    <div class="attendance-page">
+
+    <!-- Compact Filter Bar -->
+    <div class="card filter-bar mb-2">
         <div class="card-body">
             <form method="GET" action="{{ route('attendance.index') }}" id="filterForm">
-                <div class="row g-3">
-                    <div class="col-md-3">
+                <div class="row g-2 align-items-end">
+                    <div class="col-lg-2 col-md-3">
                         <label class="form-label">Start Date</label>
                         <input type="date" class="form-control" name="start_date"
                             value="{{ $startDate }}" max="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-lg-2 col-md-3">
                         <label class="form-label">End Date</label>
                         <input type="date" class="form-control" name="end_date"
                             value="{{ $endDate }}" max="{{ date('Y-m-d') }}">
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Search Employee</label>
+                    <div class="col-lg-3 col-md-3">
+                        <label class="form-label">Employee</label>
                         <input type="text" class="form-control" name="search_name"
-                            placeholder="Enter employee name..." value="{{ $searchName ?? '' }}">
+                            placeholder="Search name..." value="{{ $searchName ?? '' }}">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-lg-2 col-md-2">
                         <label class="form-label">Status</label>
                         <select class="form-select" name="status">
                             <option value="">All</option>
@@ -193,146 +207,111 @@
                             <option value="paid_leave" {{ ($searchStatus ?? '') == 'paid_leave' ? 'selected' : '' }}>Paid Leave</option>
                         </select>
                     </div>
-                    <div class="col-md-1 d-flex align-items-end">
+                    <div class="col-lg-1 col-md-1">
                         <button type="submit" class="btn btn-primary w-100">
-                            <i class="mdi mdi-magnify"></i> Filter
+                            <i class="mdi mdi-magnify"></i>
                         </button>
                     </div>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-12">
-                        <button type="button" class="btn btn-sm btn-outline-info" id="prevDayBtn">
-                            <i class="mdi mdi-chevron-left"></i> Previous Day
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-info ms-2" id="nextDayBtn">
-                            <i class="mdi mdi-chevron-right"></i> Next Day
-                        </button>
-                        <a href="{{ route('attendance.index') }}" class="btn btn-sm btn-outline-secondary ms-2">
-                            <i class="mdi mdi-refresh"></i> Reset Filters
-                        </a>
-                        <a href="{{ route('attendance.history') }}" class="btn btn-sm btn-outline-primary ms-2">
-                            <i class="mdi mdi-history"></i> View History
-                        </a>
-                        <a href="{{ route('attendance.print-view') }}" class="btn btn-sm btn-outline-success ms-2" target="_blank">
-                            <i class="mdi mdi-printer"></i> Print View
-                        </a>
-                        @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
-                        <button type="button" class="btn btn-sm btn-success ms-2" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
-                            <i class="mdi mdi-plus"></i> Manual Entry
-                        </button>
-                        @endif
-                    </div>
+                <div class="quick-actions">
+                    <button type="button" class="btn btn-outline-secondary" id="prevDayBtn">
+                        <i class="mdi mdi-chevron-left"></i> Prev
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="nextDayBtn">
+                        Next <i class="mdi mdi-chevron-right"></i>
+                    </button>
+                    <a href="{{ route('attendance.index') }}" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-refresh"></i> Reset
+                    </a>
+                    <a href="{{ route('attendance.history') }}" class="btn btn-outline-primary">
+                        <i class="mdi mdi-history"></i> History
+                    </a>
+                    <a href="{{ route('attendance.print-view') }}" class="btn btn-outline-success" target="_blank">
+                        <i class="mdi mdi-printer"></i> Print
+                    </a>
+                    @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
+                        <i class="mdi mdi-plus"></i> Manual
+                    </button>
+                    @endif
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Statistics Cards -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-6">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Total Employees</span>
-                            <h4 class="mb-3">{{ $totalEmployees }}</h4>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <div id="total-employees-chart" data-colors='["--bs-primary"]'></div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Stat Mini-Cards -->
+    <div class="row g-2 mb-2">
+        <div class="col-xl-3 col-sm-6">
+            <div class="stat-mini">
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="mdi mdi-account-group"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ $totalEmployees }}</div>
+                    <div class="stat-label">Total Staff</div>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-6">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Present</span>
-                            <h4 class="mb-3 text-success">{{ $presentCount }}</h4>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <div class="badge badge-soft-success rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100, 1) : 0 }}%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="stat-mini">
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="mdi mdi-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value text-success">{{ $presentCount }}</div>
+                    <div class="stat-label">Present <span class="text-muted">({{ $totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100) : 0 }}%)</span></div>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-6">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Late Arrivals</span>
-                            <h4 class="mb-3 text-warning">{{ $lateCount }}</h4>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <div class="badge badge-soft-warning rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($lateCount / $totalEmployees) * 100, 1) : 0 }}%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="stat-mini">
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="mdi mdi-clock-alert"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value text-warning">{{ $lateCount }}</div>
+                    <div class="stat-label">Late <span class="text-muted">({{ $totalEmployees > 0 ? round(($lateCount / $totalEmployees) * 100) : 0 }}%)</span></div>
                 </div>
             </div>
         </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-6">
-                            <span class="text-muted mb-3 lh-1 d-block text-truncate">Absent</span>
-                            <h4 class="mb-3 text-danger">{{ $absentCount }}</h4>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-end">
-                                <div class="badge badge-soft-danger rounded-pill fs-12">
-                                    {{ $totalEmployees > 0 ? round(($absentCount / $totalEmployees) * 100, 1) : 0 }}%
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="stat-mini">
+                <div class="stat-icon bg-danger-subtle text-danger">
+                    <i class="mdi mdi-account-off"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value text-danger">{{ $absentCount }}</div>
+                    <div class="stat-label">Absent <span class="text-muted">({{ $totalEmployees > 0 ? round(($absentCount / $totalEmployees) * 100) : 0 }}%)</span></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Today's Attendance Details -->
+    <div class="row g-2">
+        <!-- Attendance Details Table -->
         <div class="col-xl-8">
             <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">
-                        Attendance Details
+                <div class="card-header d-flex align-items-center justify-content-between py-2">
+                    <h4 class="card-title mb-0" style="font-size:.85rem">
+                        <i class="mdi mdi-table me-1"></i>
                         @if($startDate == $endDate)
-                            - {{ \Carbon\Carbon::parse($startDate)->format('F j, Y') }}
+                            {{ \Carbon\Carbon::parse($startDate)->format('M j, Y') }}
                         @else
-                            - {{ \Carbon\Carbon::parse($startDate)->format('M j') }} to {{ \Carbon\Carbon::parse($endDate)->format('M j, Y') }}
+                            {{ \Carbon\Carbon::parse($startDate)->format('M j') }} – {{ \Carbon\Carbon::parse($endDate)->format('M j, Y') }}
                         @endif
-                        <span class="badge badge-soft-primary ms-2">{{ $attendanceDetails->count() }} Records</span>
                     </h4>
+                    <span class="badge badge-soft-primary rounded-pill" style="font-size:.68rem">{{ $attendanceDetails->count() }} records</span>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-centered table-nowrap mb-0" id="attendance-table">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th>Employee</th>
-                                    <th>Login Time</th>
-                                    <th>Logout Time</th>
+                                    <th>Login</th>
+                                    <th>Logout</th>
                                     <th>Status</th>
-                                    <th>Working Hours</th>
+                                    <th>Hours</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -342,19 +321,17 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 @if($attendance->user)
-                                                <div class="avatar-xs me-3">
-                                                    <span
-                                                        class="avatar-title rounded-circle bg-primary-subtle text-primary">
+                                                <div class="avatar-xs me-2">
+                                                    <span class="avatar-title rounded-circle bg-primary-subtle text-primary">
                                                         {{ substr($attendance->user->name, 0, 1) }}
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0">{{ $attendance->user->name }}
+                                                    <span class="fw-semibold" style="font-size:.82rem">{{ $attendance->user->name }}
                                                         @if($attendance->user->trashed())
-                                                            <span class="badge bg-danger-subtle text-danger ms-1 u-fs-10">Terminated</span>
+                                                            <span class="badge bg-danger-subtle text-danger ms-1" style="font-size:.6rem">Ended</span>
                                                         @endif
-                                                    </h6>
-                                                    <p class="text-muted mb-0">{{ $attendance->user->email }}</p>
+                                                    </span>
                                                 </div>
                                                 @else
                                                 <span class="text-muted"><em>User Deleted</em></span>
@@ -419,22 +396,24 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+                                            @canEditModule('attendance')
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-soft-primary" 
                                                     onclick="editAttendance({{ $attendance->id }})" 
                                                     title="Edit Attendance">
                                                     <i class="mdi mdi-pencil"></i>
                                                 </button>
+                                                @canDeleteInModule('attendance')
                                                 <button type="button" class="btn btn-sm btn-soft-danger" 
                                                     onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user ? $attendance->user->name : 'Unknown User' }}', '{{ $attendance->date->format('M d, Y') }}')" 
                                                     title="Delete Attendance">
                                                     <i class="mdi mdi-delete"></i>
                                                 </button>
+                                                @endcanDeleteInModule
                                             </div>
                                             @else
                                             <span class="text-muted">-</span>
-                                            @endif
+                                            @endcanEditModule
                                         </td>
                                     </tr>
                                 @empty
@@ -454,31 +433,30 @@
             </div>
         </div>
 
-        <!-- Absent Employees & Weekly Trends -->
+        <!-- Sidebar: Absent & Trends -->
         <div class="col-xl-4">
             <!-- Absent Employees -->
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">
-                        Absent Today
-                        <span class="badge badge-soft-danger ms-2">{{ $absentEmployees->count() }}</span>
+            <div class="card sidebar-card">
+                <div class="card-header d-flex align-items-center justify-content-between py-2">
+                    <h4 class="card-title mb-0" style="font-size:.82rem">
+                        <i class="mdi mdi-account-off-outline me-1 text-danger"></i> Absent Today
                     </h4>
+                    <span class="badge badge-soft-danger rounded-pill" style="font-size:.65rem">{{ $absentEmployees->count() }}</span>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="max-height: 260px; overflow-y: auto;">
                     @forelse($absentEmployees as $employee)
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar-xs me-3">
+                        <div class="absent-row">
+                            <div class="avatar-xs flex-shrink-0">
                                 <span class="avatar-title rounded-circle bg-danger-subtle text-danger">
                                     {{ substr($employee->name, 0, 1) }}
                                 </span>
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0">{{ $employee->name }}</h6>
-                                <p class="text-muted mb-0 fs-13">{{ $employee->email }}</p>
+                            <div class="flex-grow-1 min-width-0">
+                                <h6 class="text-truncate">{{ $employee->name }}</h6>
                             </div>
-                            <div class="dropdown">
-                                <a href="#" class="text-muted dropdown-toggle" data-bs-toggle="dropdown">
-                                    <i class="mdi mdi-dots-horizontal"></i>
+                            <div class="dropdown flex-shrink-0">
+                                <a href="#" class="text-muted" data-bs-toggle="dropdown" style="font-size:.8rem">
+                                    <i class="mdi mdi-dots-vertical"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <a class="dropdown-item" href="#"
@@ -489,54 +467,55 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center text-muted py-3">
-                            <i class="mdi mdi-check-circle-outline font-size-24 mb-2 d-block text-success"></i>
-                            All employees are present!
+                        <div class="text-center text-muted py-2">
+                            <i class="mdi mdi-check-circle-outline d-block text-success" style="font-size:1.4rem"></i>
+                            <span style="font-size:.78rem">All present!</span>
                         </div>
                     @endforelse
                 </div>
             </div>
 
             <!-- Weekly Trends -->
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">Weekly Attendance Trend</h4>
+            <div class="card sidebar-card">
+                <div class="card-header py-2">
+                    <h4 class="card-title mb-0" style="font-size:.82rem">
+                        <i class="mdi mdi-chart-timeline-variant me-1 text-primary"></i> Weekly Trend
+                    </h4>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-centered mb-0">
-                            <thead>
+                <div class="card-body p-0">
+                    <table class="table table-sm mb-0 trend-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Present</th>
+                                <th>Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($weeklyStats as $stat)
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Present</th>
-                                    <th>Rate</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($weeklyStats as $stat)
-                                    <tr>
-                                        <td>{{ $stat['date'] }}</td>
-                                        <td>
-                                            <span class="badge badge-soft-primary">
-                                                {{ $stat['present'] + $stat['late'] }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar" style="width: {{ $stat['percentage'] }}%">
-                                                </div>
+                                    <td>{{ $stat['date'] }}</td>
+                                    <td>
+                                        <span class="badge badge-soft-primary" style="font-size:.68rem">{{ $stat['present'] + $stat['late'] }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div class="progress flex-grow-1" style="height:5px">
+                                                <div class="progress-bar bg-primary" style="width:{{ $stat['percentage'] }}%"></div>
                                             </div>
-                                            <span class="fs-12 text-muted">{{ $stat['percentage'] }}%</span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                            <span style="font-size:.68rem;min-width:28px" class="text-muted">{{ $stat['percentage'] }}%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+
+    </div><!-- /.attendance-page -->
 
     <!-- Manual Entry Modal -->
     <div class="modal fade" id="manualEntryModal" tabindex="-1" aria-labelledby="manualEntryModalLabel" aria-hidden="true">
@@ -656,13 +635,6 @@
             </div>
         </div>
     </div>
-@endsection
-
-@section('css')
-    <!-- DataTables Bootstrap 4 -->
-    <link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
-    <!-- Flatpickr -->
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 @endsection
 
 @section('script')
@@ -989,10 +961,15 @@
             const endDateInput = document.querySelector('input[name="end_date"]');
             
             if (startDateInput && startDateInput.value) {
-                const currentDate = new Date(startDateInput.value);
+                const [year, month, day] = startDateInput.value.split('-').map(Number);
+                const currentDate = new Date(year, month - 1, day);
                 currentDate.setDate(currentDate.getDate() - 1);
                 
-                const newDate = currentDate.toISOString().split('T')[0];
+                const newYear = currentDate.getFullYear();
+                const newMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const newDay = String(currentDate.getDate()).padStart(2, '0');
+                const newDate = `${newYear}-${newMonth}-${newDay}`;
+                
                 startDateInput.value = newDate;
                 endDateInput.value = newDate;
                 
@@ -1005,7 +982,8 @@
             const endDateInput = document.querySelector('input[name="end_date"]');
             
             if (startDateInput && startDateInput.value) {
-                const currentDate = new Date(startDateInput.value);
+                const [year, month, day] = startDateInput.value.split('-').map(Number);
+                const currentDate = new Date(year, month - 1, day);
                 currentDate.setDate(currentDate.getDate() + 1);
                 
                 const today = new Date();
@@ -1013,7 +991,11 @@
                 
                 // Don't allow navigation beyond today
                 if (currentDate <= today) {
-                    const newDate = currentDate.toISOString().split('T')[0];
+                    const newYear = currentDate.getFullYear();
+                    const newMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                    const newDay = String(currentDate.getDate()).padStart(2, '0');
+                    const newDate = `${newYear}-${newMonth}-${newDay}`;
+                    
                     startDateInput.value = newDate;
                     endDateInput.value = newDate;
                     
