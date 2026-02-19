@@ -70,17 +70,17 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="min-width:150px;">Client Name</th>
-                                    <th style="min-width:130px;">Phone</th>
-                                    <th style="min-width:130px;">Closer</th>
-                                    <th style="min-width:110px;">Sale Date</th>
-                                    <th style="min-width:120px;">Carrier</th>
-                                    <th style="min-width:120px;">Policy Type</th>
-                                    <th style="min-width:150px;">Policy Number</th>
-                                    <th style="min-width:120px;">Coverage</th>
-                                    <th style="min-width:110px;">Premium</th>
-                                    <th style="min-width:140px;">Followup Status</th>
-                                    <th style="min-width:120px;">Actions</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-130" >Closer</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Policy Type</th>
+ <th class="u-min-w-150" >Policy Number</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-110" >Premium</th>
+ <th class="u-min-w-140" >Followup Status</th>
+ <th class="u-min-w-120" >Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -182,19 +182,19 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="min-width:150px;">Client Name</th>
-                                    <th style="min-width:130px;">Phone</th>
-                                    <th style="min-width:130px;">Closer</th>
-                                    <th style="min-width:110px;">Sale Date</th>
-                                    <th style="min-width:120px;">Carrier</th>
-                                    <th style="min-width:120px;">Policy Type</th>
-                                    <th style="min-width:150px;">Policy Number</th>
-                                    <th style="min-width:120px;">Coverage</th>
-                                    <th style="min-width:110px;">Premium</th>
-                                    <th style="min-width:150px;">Assigned B.V</th>
-                                    <th style="min-width:200px;">Comment</th>
-                                    <th style="min-width:140px;">B.V Status</th>
-                                    <th style="min-width:120px;">Actions</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-130" >Closer</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-120" >Policy Type</th>
+ <th class="u-min-w-150" >Policy Number</th>
+ <th class="u-min-w-120" >Coverage</th>
+ <th class="u-min-w-110" >Premium</th>
+ <th class="u-min-w-150" >Assigned B.V</th>
+ <th class="u-min-w-200" >Comment</th>
+ <th class="u-min-w-140" >B.V Status</th>
+ <th class="u-min-w-120" >Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -80,7 +80,7 @@
 
         .badge-us-agent {
             background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -88,8 +88,8 @@
         }
 
         .badge-vendor {
-            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-purple) 100%);
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -97,8 +97,8 @@
         }
 
         .badge-supplier {
-            background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-danger-dark) 100%);
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -107,7 +107,7 @@
 
         .badge-active {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -116,7 +116,7 @@
 
         .badge-inactive {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -124,8 +124,8 @@
         }
 
         .badge-suspended {
-            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-gold-dark) 100%);
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -142,7 +142,7 @@
 
         .action-btn-view {
             background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            color: var(--bs-ui-info);
         }
 
         .action-btn-view:hover {
@@ -152,7 +152,7 @@
 
         .action-btn-edit {
             background: rgba(34, 197, 94, 0.2);
-            color: #4ade80;
+            color: var(--bs-ui-success);
         }
 
         .action-btn-edit:hover {
@@ -162,7 +162,7 @@
 
         .action-btn-delete {
             background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
+            color: var(--bs-ui-danger);
         }
 
         .action-btn-delete:hover {
@@ -227,7 +227,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h5 class="card-title text-gold" style="margin: 0;">All Vendors</h5>
+                            <h5 class="card-title text-gold m-0">All Vendors</h5>
                             <p class="text-muted mb-0 text-small-muted">Manage your vendors, US agents, and suppliers</p>
                         </div>
                         <div>

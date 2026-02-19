@@ -119,24 +119,24 @@
 
         .action-btn-view {
             background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            color: var(--bs-ui-info);
             border: 1px solid rgba(59, 130, 246, 0.3);
         }
 
         .action-btn-view:hover {
             background: rgba(59, 130, 246, 0.3);
-            color: #93c5fd;
+            color: var(--bs-ui-info);
         }
 
         .action-btn-edit {
             background: rgba(245, 158, 11, 0.2);
-            color: #fbbf24;
+            color: var(--bs-ui-warning);
             border: 1px solid rgba(245, 158, 11, 0.3);
         }
 
         .action-btn-edit:hover {
             background: rgba(245, 158, 11, 0.3);
-            color: #fcd34d;
+            color: var(--bs-gold-bright);
         }
 
         .page-title-box {
@@ -163,10 +163,10 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <ol class="breadcrumb m-0" style="color: var(--bs-surface-400);">
-                            <li class="breadcrumb-item"><a href="{{ route('root') }}" style="color: var(--bs-surface-300);">Dashboard</a></li>
-                            <li class="breadcrumb-item" style="color: var(--bs-gold);">Finance and Accounts</li>
-                            <li class="breadcrumb-item active" style="color: var(--bs-gold);">Chart of Accounts</li>
+ <ol class="breadcrumb m-0 text-surface-400" >
+                            <li class="breadcrumb-item"><a href="{{ route('root') }}" class="text-surface-300">Dashboard</a></li>
+ <li class="breadcrumb-item text-gold" >Finance and Accounts</li>
+ <li class="breadcrumb-item active text-gold" >Chart of Accounts</li>
                         </ol>
                     </div>
                     <h4 class="page-title">Chart of Accounts</h4>
@@ -213,7 +213,7 @@
                 <div class="card glassmorphism-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title" style="color: var(--bs-gold); margin: 0;">Chart of Accounts</h5>
+ <h5 class="card-title text-gold m-0">Chart of Accounts</h5>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('chart-of-accounts.create') }}" class="gold-gradient-btn">
                                     <i class="bx bx-plus-circle"></i> Add Account

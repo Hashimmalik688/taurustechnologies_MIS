@@ -48,7 +48,7 @@
                             <p class="mb-0 text-muted">
                                 <span id="network-status">Checking network status...</span>
                             </p>
-                            <div id="ip-details" class="mt-2" style="display: none;">
+ <div id="ip-details" class="mt-2 d-none" >
                                 <small class="text-muted">
                                     <div id="all-ips"></div>
                                 </small>
@@ -65,7 +65,7 @@
                     </div>
 
                     <!-- Help Section for Localhost -->
-                    <div id="localhost-help" class="alert alert-warning mt-3" style="display: none;">
+ <div id="localhost-help" class="alert alert-warning mt-3 d-none" >
                         <h6><i class="mdi mdi-alert-triangle"></i> Development Environment Detected</h6>
                         <p class="mb-2">You're running on localhost. To get your real office IP:</p>
                         <ul class="mb-2">

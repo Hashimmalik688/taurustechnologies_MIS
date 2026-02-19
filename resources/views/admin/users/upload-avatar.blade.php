@@ -53,9 +53,9 @@
                             </small>
                         </div>
 
-                        <div id="preview-container" style="display:none;" class="mb-3">
+                        <div id="preview-container" class="mb-3 d-none">
                             <label>Preview:</label>
-                            <img id="preview-image" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ccc;">
+ <img class="u-rounded-8 u-max-w-200 u-max-h-200 border-surface-200" id="preview-image" src="" alt="Preview">
                         </div>
 
                         <div class="d-grid gap-2">
@@ -77,11 +77,11 @@
                     @if (auth()->user()->avatar && \Storage::disk('local')->exists(auth()->user()->avatar))
                         <img src="{{ \Storage::disk('local')->url(auth()->user()->avatar) }}" 
                              alt="Current Avatar" 
-                             style="max-width: 250px; max-height: 250px; border-radius: 8px; border: 2px solid #ddd;">
+ class="u-max-w-250" style="max-height: 250px; border: 2px solid var(--bs-surface-200)">
                         <p class="mt-3 text-muted">File: {{ basename(auth()->user()->avatar) }}</p>
                     @else
-                        <div style="width: 200px; height: 200px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <i class="fas fa-user" style="font-size: 80px; color: #999;"></i>
+ <div class="u-rounded-8 d-flex align-items-center justify-content-center mx-auto bg-surface-200" style="width: 200px; height: 200px">
+                            <i class="fas fa-user text-surface-muted" style="font-size: 80px"></i>
                         </div>
                         <p class="mt-3 text-muted">No avatar uploaded yet</p>
                     @endif

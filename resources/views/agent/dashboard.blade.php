@@ -14,17 +14,17 @@
     <style>
         /* ===== Modern Color Palette ===== */
         :root {
-            --gradient-gold: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            --gradient-gold: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-danger) 100%);
             --gradient-purple: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            --gradient-blue: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
-            --gradient-green: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            --gradient-red: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-            --gradient-teal: linear-gradient(135deg, #13547a 0%, #80d0c7 100%);
+            --gradient-blue: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info) 100%);
+            --gradient-green: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success) 100%);
+            --gradient-red: linear-gradient(135deg, var(--bs-ui-danger) 0%, #ff6a00 100%);
+            --gradient-teal: linear-gradient(135deg, var(--bs-ui-info-dark) 0%, var(--bs-ui-success) 100%);
             --gradient-pink: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
         }
 
         body {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start)15 0%, var(--bs-gradient-end)15 100%);
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             position: relative;
@@ -44,7 +44,7 @@
         body::before {
             width: 500px;
             height: 500px;
-            background: linear-gradient(135deg, #f5af19, #f12711);
+            background: linear-gradient(135deg, var(--bs-ui-warning), var(--bs-ui-danger));
             top: -250px;
             right: -250px;
         }
@@ -67,7 +67,7 @@
         /* Top Bar */
         .top-bar {
             background: linear-gradient(135deg, rgba(245, 175, 25, 0.95) 0%, rgba(241, 39, 17, 0.95) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 1.25rem 2rem;
             box-shadow: 0 4px 20px rgba(245, 175, 25, 0.3);
             display: flex;
@@ -153,7 +153,7 @@
         }
 
         .stat-card h2 {
-            color: #f5af19;
+            color: var(--bs-ui-warning);
             font-weight: 800;
             margin-bottom: 0.25rem;
             font-size: 1.75rem;
@@ -173,16 +173,16 @@
         }
 
         .stat-card-approved::before { background: var(--gradient-green); }
-        .stat-card-approved h2 { color: #11998e; }
+        .stat-card-approved h2 { color: var(--bs-ui-success); }
 
         .stat-card-declined::before { background: var(--gradient-red); }
-        .stat-card-declined h2 { color: #ee0979; }
+        .stat-card-declined h2 { color: var(--bs-ui-danger); }
 
         .stat-card-revenue::before { background: var(--gradient-blue); }
-        .stat-card-revenue h2 { color: #2193b0; }
+        .stat-card-revenue h2 { color: var(--bs-ui-info); }
 
         .stat-card-company::before { background: var(--gradient-teal); }
-        .stat-card-company h2 { color: #13547a; }
+        .stat-card-company h2 { color: var(--bs-ui-info-dark); }
 
         .stat-card-issued::before { background: var(--gradient-purple); }
         .stat-card-issued h2 { color: var(--bs-gradient-start); }
@@ -221,7 +221,7 @@
             font-weight: 700;
             margin-bottom: 1.5rem;
             padding-bottom: 0.75rem;
-            border-bottom: 2px solid #f5af1920;
+            border-bottom: 2px solid var(--bs-ui-warning)20;
         }
 
         /* Filter Bar */
@@ -235,13 +235,13 @@
         .filter-bar .form-control,
         .filter-bar .form-select {
             border-radius: 10px;
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--bs-surface-200);
             transition: all 0.3s ease;
         }
 
         .filter-bar .form-control:focus,
         .filter-bar .form-select:focus {
-            border-color: #f5af19;
+            border-color: var(--bs-ui-warning);
             box-shadow: 0 0 0 0.2rem rgba(245, 175, 25, 0.15);
         }
 
@@ -261,7 +261,7 @@
             letter-spacing: 0.5px;
             padding: 0.875rem;
             border: none;
-            color: #f5af19;
+            color: var(--bs-ui-warning);
         }
 
         .table tbody tr {
@@ -290,19 +290,19 @@
         }
 
         .bg-warning {
-            background: linear-gradient(135deg, #f5af19, #f12711) !important;
+            background: linear-gradient(135deg, var(--bs-ui-warning), var(--bs-ui-danger)) !important;
         }
 
         .bg-success {
-            background: linear-gradient(135deg, #11998e, #38ef7d) !important;
+            background: linear-gradient(135deg, var(--bs-ui-success), var(--bs-ui-success)) !important;
         }
 
         .bg-danger {
-            background: linear-gradient(135deg, #ee0979, #ff6a00) !important;
+            background: linear-gradient(135deg, var(--bs-ui-danger), #ff6a00) !important;
         }
 
         .bg-info {
-            background: linear-gradient(135deg, #2193b0, #6dd5ed) !important;
+            background: linear-gradient(135deg, var(--bs-ui-info), var(--bs-ui-info)) !important;
         }
 
         .bg-primary {
@@ -320,14 +320,14 @@
 
         .alert-success {
             background: linear-gradient(135deg, rgba(17, 153, 142, 0.15), rgba(56, 239, 125, 0.15));
-            color: #11998e;
-            border-left: 4px solid #11998e;
+            color: var(--bs-ui-success);
+            border-left: 4px solid var(--bs-ui-success);
         }
 
         .alert-info {
             background: linear-gradient(135deg, rgba(33, 147, 176, 0.15), rgba(109, 213, 237, 0.15));
-            color: #2193b0;
-            border-left: 4px solid #2193b0;
+            color: var(--bs-ui-info);
+            border-left: 4px solid var(--bs-ui-info);
         }
 
         @keyframes slideInRight {
@@ -351,18 +351,18 @@
 
         .btn-light {
             background: rgba(255, 255, 255, 0.95);
-            color: #f5af19;
+            color: var(--bs-ui-warning);
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .btn-light:hover {
-            background: white;
+            background: var(--bs-card-bg);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, var(--bs-status-default), #495057);
+            background: linear-gradient(135deg, var(--bs-status-default), var(--bs-surface-600));
         }
 
         .btn-secondary:hover {
@@ -410,7 +410,7 @@
             <small>Welcome, {{ $agent->name }}</small>
         </div>
         <div>
-            <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+ <form class="d-inline" action="{{ route('logout') }}" method="POST" >
                 @csrf
                 <button type="submit" class="btn btn-light btn-sm">
                     <i class="bx bx-log-out"></i> Logout
@@ -463,7 +463,7 @@
         <!-- Issued Applications Section -->
         @if($issuedLeads->count() > 0)
         <div class="table-wrapper mb-4">
-            <h5 class="mb-3" style="color: var(--bs-gold); font-weight: 600;">
+ <h5 class="mb-3 text-gold u-fw-600" >
                 <i class="bx bx-check-circle me-2"></i>Issued Applications - Revenue Tracking
             </h5>
             
@@ -536,19 +536,19 @@
 
         <!-- Table -->
         <div class="table-wrapper">
-            <h5 class="mb-3" style="color: var(--bs-status-default); font-weight: 600;">
+ <h5 class="mb-3 u-fw-600" style="color: var(--bs-status-default)">
                 <i class="bx bx-list-ul me-2"></i>All My Sales
             </h5>
             <div class="filter-bar">
-                <input type="text" class="form-control" id="searchBox" placeholder="Search by name, phone..." style="max-width: 300px;">
-                <select class="form-select" id="statusFilter" style="max-width: 200px;">
+                <input type="text" class="form-control u-max-w-300" id="searchBox" placeholder="Search by name, phone...">
+                <select class="form-select u-max-w-200" id="statusFilter">
                     <option value="">All Status</option>
                     <option value="pending">Pending</option>
                     <option value="accepted">Approved</option>
                     <option value="rejected">Declined</option>
                     <option value="forwarded">Forwarded</option>
                 </select>
-                <select class="form-select" id="carrierFilter" style="max-width: 200px;">
+                <select class="form-select u-max-w-200" id="carrierFilter">
                     <option value="">All Carriers</option>
                     @foreach($leads->unique('carrier_name')->pluck('carrier_name')->filter() as $carrier)
                         <option value="{{ $carrier }}">{{ $carrier }}</option>

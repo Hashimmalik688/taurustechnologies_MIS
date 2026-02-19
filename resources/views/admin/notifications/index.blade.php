@@ -17,7 +17,7 @@
         }
 
         .notification-item.unread {
-            background-color: #f8f9fb;
+            background-color: var(--bs-surface-50);
             border-left-color: var(--bs-chart-primary);
         }
 
@@ -35,7 +35,7 @@
         }
 
         .date-group-header {
-            background: linear-gradient(45deg, var(--bs-chart-primary), #74788d);
+            background: linear-gradient(45deg, var(--bs-chart-primary), var(--bs-surface-muted));
             background-size: 100% 2px;
             background-repeat: no-repeat;
             background-position: bottom;
@@ -44,8 +44,8 @@
         }
 
         .notification-stats {
-            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, #74788d 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, var(--bs-surface-muted) 100%);
+            color: var(--bs-white);
             border-radius: 10px;
         }
 
@@ -59,13 +59,13 @@
 
         .filter-tabs .nav-link.active {
             background-color: var(--bs-chart-primary);
-            color: white;
+            color: var(--bs-white);
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #74788d;
+            color: var(--bs-surface-muted);
         }
 
         .empty-state i {

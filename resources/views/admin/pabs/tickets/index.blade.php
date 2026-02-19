@@ -4,9 +4,9 @@
 
 @section('css')
 <style>
-    .border-left-primary { border-left: 4px solid #0d6efd; }
-    .border-left-info { border-left: 4px solid #0dcaf0; }
-    .border-left-success { border-left: 4px solid #198754; }
+    .border-left-primary { border-left: 4px solid var(--bs-primary); }
+    .border-left-info { border-left: 4px solid var(--bs-info); }
+    .border-left-success { border-left: 4px solid var(--bs-ui-success); }
     .border-left-danger { border-left: 4px solid var(--bs-status-absent); }
     .border-left-warning { border-left: 4px solid var(--bs-status-leave); }
 
@@ -35,17 +35,17 @@
 
     .kpi-icon.text-primary,
     .kpi-icon.text-primary i {
-        color: #0d6efd !important;
+        color: var(--bs-primary) !important;
     }
 
     .kpi-icon.text-info,
     .kpi-icon.text-info i {
-        color: #0dcaf0 !important;
+        color: var(--bs-info) !important;
     }
 
     .kpi-icon.text-success,
     .kpi-icon.text-success i {
-        color: #198754 !important;
+        color: var(--bs-ui-success) !important;
     }
 
     .kpi-icon.text-danger,
@@ -79,11 +79,11 @@
         font-size: 0.8rem;
         font-weight: 500;
     }
-    .status-open { background-color: #cfe2ff; color: #084298; }
-    .status-in-progress { background-color: #d1ecf1; color: #055160; }
-    .status-on-hold { background-color: #fff3cd; color: #664d03; }
-    .status-resolved { background-color: #d1e7dd; color: #0f5132; }
-    .status-closed { background-color: #e2e3e5; color: #41464b; }
+    .status-open { background-color: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+    .status-in-progress { background-color: var(--bs-surface-100); color: var(--bs-ui-info-dark); }
+    .status-on-hold { background-color: var(--bs-surface-50); color: var(--bs-gold-dark); }
+    .status-resolved { background-color: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
+    .status-closed { background-color: var(--bs-surface-200); color: var(--bs-surface-600); }
 
     .priority-high { color: var(--bs-status-absent); font-weight: 600; }
     .priority-medium { color: var(--bs-status-late); font-weight: 600; }
@@ -95,7 +95,7 @@
         border-radius: 0.2rem;
         font-size: 0.75rem;
         background-color: var(--bs-print-bg-alt);
-        color: #333;
+        color: var(--bs-surface-700);
     }
 </style>
 @endsection

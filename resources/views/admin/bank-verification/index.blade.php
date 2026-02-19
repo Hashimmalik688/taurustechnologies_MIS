@@ -12,7 +12,7 @@
 
     .text-success i[class*="mdi"],
     i[class*="mdi"].text-success {
-        color: #198754 !important;
+        color: var(--bs-ui-success) !important;
     }
 
     .text-warning i[class*="mdi"],
@@ -63,37 +63,37 @@
     <div class="row mb-4 justify-content-center">
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);">
-                    <i class="mdi mdi-check-circle mb-2" style="font-size: 4rem; color: white;"></i>
-                    <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">GOOD</p>
-                    <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $good_count }}</h1>
+ <div class="mb-3 d-flex flex-column align-items-center justify-content-center u-w-180 rounded-circle" style="height: 180px; background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%); box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3)">
+ <i class="mdi mdi-check-circle mb-2 u-fs-4 text-white" ></i>
+ <p class="text-uppercase fw-semibold mb-1 text-white u-fs-075" style="letter-spacing: 1.5px">GOOD</p>
+                    <h1 class="fw-bold mb-0 text-white u-fs-250">{{ $good_count }}</h1>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
-                    <i class="mdi mdi-alert-circle mb-2" style="font-size: 4rem; color: white;"></i>
-                    <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">AVERAGE</p>
-                    <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $average_count }}</h1>
+ <div class="mb-3 d-flex flex-column align-items-center justify-content-center u-w-180 rounded-circle" style="height: 180px; background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-warning) 100%); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3)">
+ <i class="mdi mdi-alert-circle mb-2 u-fs-4 text-white" ></i>
+ <p class="text-uppercase fw-semibold mb-1 text-white u-fs-075" style="letter-spacing: 1.5px">AVERAGE</p>
+                    <h1 class="fw-bold mb-0 text-white u-fs-250">{{ $average_count }}</h1>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);">
-                    <i class="mdi mdi-close-circle mb-2" style="font-size: 4rem; color: white;"></i>
-                    <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">BAD</p>
-                    <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $bad_count }}</h1>
+ <div class="mb-3 d-flex flex-column align-items-center justify-content-center u-w-180 rounded-circle" style="height: 180px; background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3)">
+ <i class="mdi mdi-close-circle mb-2 u-fs-4 text-white" ></i>
+ <p class="text-uppercase fw-semibold mb-1 text-white u-fs-075" style="letter-spacing: 1.5px">BAD</p>
+                    <h1 class="fw-bold mb-0 text-white u-fs-250">{{ $bad_count }}</h1>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-purple) 0%, #7c3aed 100%); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
-                    <i class="mdi mdi-help-circle mb-2" style="font-size: 4rem; color: white;"></i>
-                    <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">UNVERIFIED</p>
-                    <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $unverified_count }}</h1>
+ <div class="mb-3 d-flex flex-column align-items-center justify-content-center u-w-180 rounded-circle" style="height: 180px; background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-purple) 100%); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3)">
+ <i class="mdi mdi-help-circle mb-2 u-fs-4 text-white" ></i>
+ <p class="text-uppercase fw-semibold mb-1 text-white u-fs-075" style="letter-spacing: 1.5px">UNVERIFIED</p>
+                    <h1 class="fw-bold mb-0 text-white u-fs-250">{{ $unverified_count }}</h1>
                 </div>
             </div>
         </div>
@@ -148,17 +148,17 @@
                         <table class="table table-hover table-bordered">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="min-width: 150px;">Customer</th>
-                                    <th style="min-width: 120px;">Phone</th>
-                                    <th style="min-width: 100px;">Carrier</th>
-                                    <th style="min-width: 100px;">Policy #</th>
-                                    <th style="min-width: 100px;">Premium</th>
-                                    <th style="min-width: 120px;">Issued Date</th>
-                                    <th style="min-width: 150px;">Assigned B.V</th>
-                                    <th style="min-width: 200px;">Comment</th>
-                                    <th style="min-width: 120px;">Bank Status</th>
-                                    <th style="min-width: 200px;">Bank Reason</th>
-                                    <th style="min-width: 150px;">Actions</th>
+ <th class="u-min-w-150" >Customer</th>
+ <th class="u-min-w-120" >Phone</th>
+ <th class="u-min-w-100" >Carrier</th>
+ <th class="u-min-w-100" >Policy #</th>
+ <th class="u-min-w-100" >Premium</th>
+ <th class="u-min-w-120" >Issued Date</th>
+ <th class="u-min-w-150" >Assigned B.V</th>
+ <th class="u-min-w-200" >Comment</th>
+ <th class="u-min-w-120" >Bank Status</th>
+ <th class="u-min-w-200" >Bank Reason</th>
+ <th class="u-min-w-150" >Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -210,7 +210,7 @@
                                     <div class="modal fade" id="verificationModal-{{ $lead->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                                                     <h5 class="modal-title fw-semibold">
                                                         <i class="mdi mdi-bank me-2"></i>Update Status - {{ $lead->cn_name }}
                                                     </h5>

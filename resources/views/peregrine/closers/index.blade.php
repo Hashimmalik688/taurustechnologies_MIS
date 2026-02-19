@@ -12,12 +12,12 @@
         padding: 4px 12px;
         border-radius: 12px;
     }
-    .status-pending { background: var(--bs-status-leave); color: #000; }
-    .status-transferred { background: #17a2b8; color: white; }
-    .status-sent { background: var(--bs-status-present); color: white; }
-    .status-sale { background: #007bff; color: white; }
-    .status-failed { background: var(--bs-status-absent); color: white; }
-    .status-returned { background: #17a2b8; color: white; }
+    .status-pending { background: var(--bs-status-leave); color: var(--bs-surface-900); }
+    .status-transferred { background: var(--bs-info); color: var(--bs-white); }
+    .status-sent { background: var(--bs-status-present); color: var(--bs-white); }
+    .status-sale { background: var(--bs-primary); color: var(--bs-white); }
+    .status-failed { background: var(--bs-status-absent); color: var(--bs-white); }
+    .status-returned { background: var(--bs-info); color: var(--bs-white); }
     .modal-header-custom {
         background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);
         color: var(--bs-gold);
@@ -36,10 +36,10 @@
         background-color: var(--bs-surface-bg-light);
     }
     .table td, .table th {
-        color: #212529;
+        color: var(--bs-surface-800);
     }
     .bg-warning h5 {
-        color: #000;
+        color: var(--bs-surface-900);
     }
 </style>
 @endsection
@@ -135,7 +135,7 @@
         <div class="col-md-2">
             <div class="card border-primary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-account-multiple text-primary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-account-multiple text-primary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['total_assigned'] ?? 0 }}</h3>
                     <small class="text-muted">Assigned</small>
                 </div>
@@ -144,7 +144,7 @@
         <div class="col-md-2">
             <div class="card border-info">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-transfer text-info" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-transfer text-info u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['transferred'] ?? 0 }}</h3>
                     <small class="text-muted">Transferred</small>
                 </div>
@@ -153,7 +153,7 @@
         <div class="col-md-2">
             <div class="card border-warning">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-check-circle text-warning" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-check-circle text-warning u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['closed'] ?? 0 }}</h3>
                     <small class="text-muted">Closed</small>
                 </div>
@@ -162,7 +162,7 @@
         <div class="col-md-2">
             <div class="card border-success">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-currency-usd text-success" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-currency-usd text-success u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['sales'] ?? 0 }}</h3>
                     <small class="text-muted">Sales</small>
                 </div>
@@ -171,7 +171,7 @@
         <div class="col-md-2">
             <div class="card border-secondary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-arrow-u-left-top text-secondary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-arrow-u-left-top text-secondary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['returned'] ?? 0 }}</h3>
                     <small class="text-muted">Returned</small>
                 </div>
@@ -180,7 +180,7 @@
         <div class="col-md-2">
             <div class="card border-danger">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-close-circle text-danger" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-close-circle text-danger u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['declined'] ?? 0 }}</h3>
                     <small class="text-muted">Rejected</small>
                 </div>
@@ -311,7 +311,7 @@
                                                     <h5 class="modal-title">Complete Lead Information - {{ $lead->cn_name }}</h5>
                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                 </div>
-                                                <div class="modal-body" style="max-height: calc(100vh - 250px); overflow-y: auto;">
+ <div class="modal-body u-overflow-y-auto" style="max-height: calc(100vh - 250px)">
                                                     <form method="POST" action="{{ route('peregrine.closers.update', $lead->id) }}" id="leadForm{{ $lead->id }}">
                                                         @csrf
                                                         @method('PUT')

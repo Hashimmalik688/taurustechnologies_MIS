@@ -4,7 +4,7 @@
 <style>
 /* Compact Dashboard Styles */
 .page-header {
-    background: white;
+    background: var(--bs-card-bg);
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 0.75rem;
@@ -23,7 +23,7 @@
 
 .page-subtitle {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 .time-display {
@@ -40,13 +40,13 @@
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 .time-box .time {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--gold);
+    color: var(--bs-gold);
 }
 
 /* Compact Stat Cards */
@@ -79,19 +79,19 @@
 }
 
 .status-box.compact.bordered.blue {
-    border-color: #3b82f6;
+    border-color: var(--bs-ui-info);
 }
 
 .status-box.compact.bordered.green {
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
 }
 
 .status-box.compact.bordered.yellow {
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
 }
 
 .status-box.compact.bordered.red {
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
 }
 
 .status-box.compact .status-number {
@@ -122,14 +122,14 @@
 }
 
 .compact-card.bordered {
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--bs-surface-200);
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .compact-header {
     padding: 0.5rem 0.75rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--bs-surface-bg-light);
+    border-bottom: 1px solid var(--bs-surface-200);
 }
 
 .compact-header h6 {
@@ -151,7 +151,7 @@
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    background: #f8f9fa;
+    background: var(--bs-surface-bg-light);
 }
 
 /* Mini Stat Values */
@@ -164,7 +164,7 @@
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 /* Team Item Compact */
@@ -174,15 +174,15 @@
     align-items: center;
     padding: 0.4rem;
     margin-bottom: 0.35rem;
-    background: #f8f9fa;
+    background: var(--bs-surface-bg-light);
     border-radius: 6px;
-    border-left: 2px solid var(--gold);
+    border-left: 2px solid var(--bs-gold);
 }
 
 .team-item .name {
     font-weight: 600;
     font-size: 0.8rem;
-    color: #1f2937;
+    color: var(--bs-surface-800);
 }
 
 .team-item .badge {
@@ -203,12 +203,12 @@
 
 /* Text Gold */
 .text-gold {
-    color: var(--gold) !important;
+    color: var(--bs-gold) !important;
 }
 
 /* Retention Blocks */
 .retention-block {
-    background: white;
+    background: var(--bs-card-bg);
     border: 2px solid;
     border-radius: 8px;
     padding: 0.5rem;
@@ -221,17 +221,17 @@
 }
 
 .retention-block.cb {
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
     background: rgba(239, 68, 68, 0.05);
 }
 
 .retention-block.retained {
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
     background: rgba(16, 185, 129, 0.05);
 }
 
 .retention-block.pending {
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
     background: rgba(245, 158, 11, 0.05);
 }
 
@@ -242,22 +242,22 @@
 }
 
 .retention-block.cb .ret-number {
-    color: #ef4444;
+    color: var(--bs-ui-danger);
 }
 
 .retention-block.retained .ret-number {
-    color: #10b981;
+    color: var(--bs-ui-success);
 }
 
 .retention-block.pending .ret-number {
-    color: #f59e0b;
+    color: var(--bs-ui-warning);
 }
 
 .ret-label {
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin-top: 0.25rem;
 }
 
@@ -265,7 +265,7 @@
 .cb-count {
     font-size: 2rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--bs-ui-danger);
     line-height: 1;
 }
 
@@ -273,26 +273,26 @@
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin: 0.25rem 0;
 }
 
 .cb-amount {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--bs-ui-danger);
 }
 
 /* Button Gold */
 .btn-gold {
-    background: var(--gold);
-    color: white;
+    background: var(--bs-gold);
+    color: var(--bs-white);
     border: none;
 }
 
 .btn-gold:hover {
-    background: #b8941f;
-    color: white;
+    background: var(--bs-gold-dark);
+    color: var(--bs-white);
 }
 
 /* Responsive */
@@ -485,9 +485,9 @@
                         </div>
                     </div>
                     <div class="card-body p-0">
-                        <div style="max-height: 200px; overflow-y: auto;">
+ <div class="u-overflow-y-auto u-max-h-200">
                             <table class="table table-sm table-hover mb-0">
-                                <thead style="position: sticky; top: 0; background: #fff; z-index: 1;">
+                                <thead class="position-sticky bg-white u-z-1" style="top: 0">
                                     <tr>
                                         <th>Closer</th>
                                         <th class="text-center">Today</th>
@@ -528,26 +528,26 @@
                     <div class="card-body compact-body">
                         <!-- Summary Counts - Compact Capsules -->
                         <div class="d-flex gap-2 justify-content-center mb-2">
-                            <div class="px-3 py-1" style="background: rgba(16, 185, 129, 0.15); border-radius: 20px; border: 1px solid #10b981; display: inline-flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 1.1rem; font-weight: 700; color: #10b981;" id="presentCount"><?php echo e($present_count); ?></span>
-                                <span style="font-size: 0.7rem; font-weight: 600; color: #065f46;">P</span>
+ <div class="px-3 py-1 d-inline-flex align-items-center u-gap-6" style="background: rgba(16, 185, 129, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-success)">
+ <span class="u-fw-700 text-ui-success u-fs-110" id="presentCount"><?php echo e($present_count); ?></span>
+ <span class="u-fw-600 u-fs-070 text-ui-success-dark">P</span>
                             </div>
-                            <div class="px-3 py-1" style="background: rgba(239, 68, 68, 0.15); border-radius: 20px; border: 1px solid #ef4444; display: inline-flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 1.1rem; font-weight: 700; color: #ef4444;" id="absentCount"><?php echo e($absent_count); ?></span>
-                                <span style="font-size: 0.7rem; font-weight: 600; color: #991b1b;">A</span>
+ <div class="px-3 py-1 d-inline-flex align-items-center u-gap-6" style="background: rgba(239, 68, 68, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-danger)">
+ <span class="u-fw-700 text-ui-danger u-fs-110" id="absentCount"><?php echo e($absent_count); ?></span>
+ <span class="u-fw-600 u-fs-070 text-ui-danger-dark">A</span>
                             </div>
                         </div>
 
                         <!-- Attendance Table -->
-                        <div style="max-height: 130px; overflow-y: auto;">
+ <div class="u-overflow-y-auto" style="max-height: 130px">
                             <table class="table table-sm mb-0">
-                                <thead style="position: sticky; top: 0; background: #fff; z-index: 1;">
+                                <thead class="position-sticky bg-white u-z-1" style="top: 0">
                                     <tr>
-                                        <th style="font-size: 0.7rem;">Name</th>
-                                        <th class="text-center" style="font-size: 0.7rem;">Status</th>
+                                        <th class="u-fs-070">Name</th>
+                                        <th class="text-center u-fs-070">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="attendanceTable" style="font-size: 0.75rem;">
+ <tbody class="u-fs-075" id="attendanceTable" >
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $attendance; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <?php
                                         $status = strtolower($att['status'] ?? '');
@@ -582,7 +582,7 @@
             </div>
             <div class="card-body compact-body text-center p-2">
                 <canvas id="monthlyTargetChart" style="height: 140px; max-height: 140px;"></canvas>
-                <div class="mt-2" style="font-size: 0.75rem;">
+ <div class="mt-2 u-fs-075" >
                     <div><span class="text-muted">Target:</span> <strong class="text-gold">500</strong></div>
                     <div><span class="text-muted">Achieved:</span> <strong class="text-success"><?php echo e($total_monthly_sales); ?></strong></div>
                 </div>
@@ -935,12 +935,12 @@ function updateCharts(salesData) {
             datasets: [{
                 data: [currentMTD, Math.max(target - currentMTD, 0)],
                 backgroundColor: [
-                    '#10b981', // Green for achieved
-                    '#fbbf24'  // Yellow for remaining
+                    themeColors.success, // Green for achieved
+                    themeColors.warning  // Yellow for remaining
                 ],
                 borderColor: [
-                    '#10b981',
-                    '#fbbf24'
+                    themeColors.success,
+                    themeColors.warning
                 ],
                 borderWidth: 2
             }]
@@ -976,7 +976,7 @@ function updateCharts(salesData) {
                 const fontSize = (height / 80).toFixed(2);
                 ctx.font = "bold " + fontSize + "em sans-serif";
                 ctx.textBaseline = "middle";
-                ctx.fillStyle = "#d4af37";
+                ctx.fillStyle = themeColors.gold;
 
                 const text = currentMTD + "";
                 const textX = Math.round((width - ctx.measureText(text).width) / 2);
@@ -985,7 +985,7 @@ function updateCharts(salesData) {
                 ctx.fillText(text, textX, textY);
 
                 ctx.font = fontSize * 0.5 + "em sans-serif";
-                ctx.fillStyle = "#6b7280";
+                ctx.fillStyle = themeColors.surface500;
                 const subText = percentage.toFixed(0) + "%";
                 const subTextX = Math.round((width - ctx.measureText(subText).width) / 2);
                 const subTextY = height / 2 + 15;

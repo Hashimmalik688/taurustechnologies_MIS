@@ -11,10 +11,10 @@
         padding: 4px 12px;
         border-radius: 12px;
     }
-    .status-transferred { background: #17a2b8; color: white; }
-    .status-xfer { background: var(--bs-status-present); color: white; }
-    .status-failed { background: var(--bs-status-absent); color: white; }
-    .status-pending { background: var(--bs-status-leave); color: #000; }
+    .status-transferred { background: var(--bs-info); color: var(--bs-white); }
+    .status-xfer { background: var(--bs-status-present); color: var(--bs-white); }
+    .status-failed { background: var(--bs-status-absent); color: var(--bs-white); }
+    .status-pending { background: var(--bs-status-leave); color: var(--bs-surface-900); }
 </style>
 @endsection
 
@@ -98,7 +98,7 @@
         <div class="col-md-2">
             <div class="card border-primary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-account-check text-primary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-account-check text-primary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['total_verified'] ?? 0 }}</h3>
                     <small class="text-muted">Verified</small>
                 </div>
@@ -107,7 +107,7 @@
         <div class="col-md-2">
             <div class="card border-info">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-transfer text-info" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-transfer text-info u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['transferred'] ?? 0 }}</h3>
                     <small class="text-muted">Transferred</small>
                 </div>
@@ -116,7 +116,7 @@
         <div class="col-md-2">
             <div class="card border-warning">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-check-circle text-warning" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-check-circle text-warning u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['closed'] ?? 0 }}</h3>
                     <small class="text-muted">Closed</small>
                 </div>
@@ -125,7 +125,7 @@
         <div class="col-md-2">
             <div class="card border-success">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-currency-usd text-success" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-currency-usd text-success u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['sales'] ?? 0 }}</h3>
                     <small class="text-muted">Sales</small>
                 </div>
@@ -134,7 +134,7 @@
         <div class="col-md-2">
             <div class="card border-secondary">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-clock-alert text-secondary" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-clock-alert text-secondary u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['pending'] ?? 0 }}</h3>
                     <small class="text-muted">Pending</small>
                 </div>
@@ -143,7 +143,7 @@
         <div class="col-md-2">
             <div class="card border-danger">
                 <div class="card-body text-center">
-                    <i class="mdi mdi-close-circle text-danger" style="font-size: 2rem;"></i>
+ <i class="mdi mdi-close-circle text-danger u-fs-2" ></i>
                     <h3 class="mb-0 fw-bold mt-2">{{ $todayStats['declined'] ?? 0 }}</h3>
                     <small class="text-muted">Declined</small>
                 </div>

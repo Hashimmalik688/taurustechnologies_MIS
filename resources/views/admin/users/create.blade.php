@@ -272,7 +272,7 @@
         font-weight: 600;
         margin-bottom: 0.5rem;
         display: block;
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid var(--bs-surface-200);
         padding-bottom: 0.25rem;
     }
 </style>

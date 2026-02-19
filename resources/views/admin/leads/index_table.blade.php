@@ -61,7 +61,7 @@
                 @forelse($leads as $index => $lead)
                     <tr>
                         <td class="text-center"><strong>{{ $leads->firstItem() + $index }}</strong></td>
-                        <td class="text-center" style="min-width: 140px;">
+ <td class="text-center u-min-w-140" >
                             <div class="btn-group" role="group">
                                 <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
                                     <i class="fas fa-eye"></i>
@@ -148,9 +148,9 @@
                                 }
                             @endphp
                             @if(!empty($beneficiaries))
-                                <div style="max-width: 300px; font-size: 0.85rem;">
+ <div class="u-fs-085 u-max-w-300">
                                     @foreach($beneficiaries as $index => $beneficiary)
-                                        <div class="mb-2 p-1 border-start border-2" style="border-color: var(--bs-gold);">
+                                        <div class="mb-2 p-1 border-start border-2 border-gold">
                                             <div><strong>{{ $index + 1 }}. {{ $beneficiary['name'] ?? '—' }}</strong></div>
                                             @if(!empty($beneficiary['relation']))
                                                 <div><small class="text-muted">Rel: {{ $beneficiary['relation'] }}</small></div>
@@ -183,26 +183,26 @@
                             <td>{{ $lead->assigned_partner ?? '—' }}</td>
                             <td>
                                 @if($lead->preset_line)
-                                    <span class="badge" style="background: var(--gold); color: white;">{{ $lead->preset_line }}</span>
+ <span class="badge text-white bg-gold">{{ $lead->preset_line }}</span>
                                 @else
                                     —
                                 @endif
                             </td>
                             <td>
-                                <div class="comment-editable" data-lead-id="{{ $lead->id }}" style="max-width: 200px;">
+                                <div class="comment-editable u-max-w-200" data-lead-id="{{ $lead->id }}">
                                     <div class="comment-display" title="Click to edit">
-                                        <span class="comment-text text-truncate d-inline-block" style="max-width: 180px; cursor: pointer;">
+ <span class="comment-text text-truncate d-inline-block u-cursor-pointer" style="max-width: 180px">
                                             {{ $lead->comments ?? 'Click to add comment' }}
                                         </span>
-                                        <i class="fas fa-edit text-muted ms-1" style="font-size: 11px; cursor: pointer;"></i>
+ <i class="fas fa-edit text-muted ms-1 u-fs-11 u-cursor-pointer" ></i>
                                     </div>
-                                    <div class="comment-edit" style="display: none;">
-                                        <textarea class="form-control form-control-sm comment-input" rows="2" style="font-size: 12px;">{{ $lead->comments }}</textarea>
+ <div class="comment-edit d-none" >
+ <textarea class="form-control form-control-sm comment-input u-fs-12" rows="2" >{{ $lead->comments }}</textarea>
                                         <div class="mt-1">
-                                            <button class="btn btn-success btn-sm save-comment" style="padding: 2px 8px; font-size: 11px;">
+ <button class="btn btn-success btn-sm save-comment u-fs-11" style="padding: 2px 8px">
                                                 <i class="fas fa-check"></i>
                                             </button>
-                                            <button class="btn btn-secondary btn-sm cancel-comment" style="padding: 2px 8px; font-size: 11px;">
+ <button class="btn btn-secondary btn-sm cancel-comment u-fs-11" style="padding: 2px 8px">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>

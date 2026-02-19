@@ -77,6 +77,12 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        // Clear intended URL if it points to an API/AJAX endpoint
+        $intended = session('url.intended');
+        if ($intended && (str_contains($intended, '/api/') || str_contains($intended, '/unread-count') || str_contains($intended, '/new-messages'))) {
+            session()->forget('url.intended');
+        }
+
         // Detect suspicious account switching
         $detection = AccountSwitchingDetector::detectSuspiciousLogin(
             $user->id,

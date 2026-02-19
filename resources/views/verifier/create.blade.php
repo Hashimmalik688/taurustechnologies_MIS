@@ -11,7 +11,7 @@
         color: red;
     }
     input[readonly] {
-        background-color: #f5f5f5;
+        background-color: var(--bs-surface-50);
         cursor: not-allowed;
     }
 </style>

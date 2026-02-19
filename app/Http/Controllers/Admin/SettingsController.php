@@ -14,6 +14,11 @@ class SettingsController extends Controller
         // $this->middleware('role:admin'); // If you have role middleware
     }
 
+    public function hub()
+    {
+        return view('admin.settings.hub');
+    }
+
     public function index()
     {
         $settings = Setting::orderBy('group')->orderBy('key')->get()->groupBy('group');

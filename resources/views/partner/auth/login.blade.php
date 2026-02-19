@@ -94,7 +94,7 @@
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             padding: 40px;
             text-align: center;
-            color: white;
+            color: var(--bs-white);
             position: relative;
         }
 
@@ -124,7 +124,7 @@
 
         .logo-icon i {
             font-size: 45px;
-            color: white;
+            color: var(--bs-white);
         }
 
         .login-header h2 {
@@ -148,7 +148,7 @@
 
         .form-label {
             font-weight: 600;
-            color: #495057;
+            color: var(--bs-surface-600);
             margin-bottom: 10px;
             display: block;
             font-size: 0.9rem;
@@ -181,7 +181,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--bs-gradient-start);
-            background: white;
+            background: var(--bs-card-bg);
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
@@ -202,7 +202,7 @@
         .btn-login {
             width: 100%;
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
             border: none;
             border-radius: 12px;
             padding: 16px;
@@ -233,9 +233,9 @@
         }
 
         .alert-danger {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
+            background: var(--bs-surface-50);
+            color: var(--bs-ui-danger-dark);
+            border: 1px solid var(--bs-surface-50);
         }
 
         .footer-text {

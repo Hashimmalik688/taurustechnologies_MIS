@@ -557,6 +557,9 @@ Route::get('/check-my-ip', function () {
     ]);
 });
 
+// Settings Hub (Super Admin, Manager, Coordinator, CEO)
+Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
+
 // Settings (Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
@@ -705,17 +708,17 @@ Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'mi
 
 // Ravens Routes
 Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::RAVENS_CLOSER, Roles::COORDINATOR)]], function () {
-    Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard')->middleware('role.permission:leads,view');
-    Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling')->middleware('role.permission:leads,view');
-    Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data')->middleware('role.permission:leads,view');
-    Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save')->middleware('role.permission:leads,edit');
-    Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale')->middleware('role.permission:leads,edit');
-    Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose')->middleware('role.permission:leads,edit');
-    Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore')->middleware('role.permission:leads,edit');
+    Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard')->middleware('role.permission:ravens-dashboard,view');
+    Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling')->middleware('role.permission:ravens-calling,view');
+    Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data')->middleware('role.permission:ravens,view');
+    Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save')->middleware('role.permission:ravens,edit');
+    Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale')->middleware('role.permission:ravens,edit');
+    Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose')->middleware('role.permission:ravens,edit');
+    Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore')->middleware('role.permission:ravens,edit');
     Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
     Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');
     Route::get('/leads/dial-status', [RavensDashboardController::class, 'getDialStatus'])->name('leads.dial-status');
-    Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads');
+    Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads')->middleware('role.permission:ravens-bad-leads,view');
 });
 
 // Public (authenticated) attendance endpoints for all users - MUST BE BEFORE CATCH-ALL

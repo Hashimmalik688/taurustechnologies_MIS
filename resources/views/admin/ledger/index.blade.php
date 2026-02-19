@@ -158,7 +158,7 @@
 
         .badge-debit {
             background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -167,7 +167,7 @@
 
         .badge-credit {
             background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
-            color: white;
+            color: var(--bs-white);
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -179,14 +179,14 @@
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 600;
-            color: white;
+            color: var(--bs-white);
         }
 
-        .category-commission { background: linear-gradient(135deg, var(--bs-ui-purple) 0%, #6d28d9 100%); }
+        .category-commission { background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-purple) 100%); }
         .category-payment { background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); }
-        .category-refund { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); }
+        .category-refund { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-warning) 100%); }
         .category-expense { background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); }
-        .category-other { background: linear-gradient(135deg, var(--bs-surface-600) 0%, #475569 100%); }
+        .category-other { background: linear-gradient(135deg, var(--bs-surface-600) 0%, var(--bs-surface-600) 100%); }
 
         .action-btn {
             padding: 0.4rem 0.8rem;
@@ -198,7 +198,7 @@
 
         .action-btn-view {
             background: rgba(59, 130, 246, 0.2);
-            color: #60a5fa;
+            color: var(--bs-ui-info);
         }
 
         .action-btn-view:hover {
@@ -207,7 +207,7 @@
 
         .action-btn-delete {
             background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
+            color: var(--bs-ui-danger);
         }
 
         .action-btn-delete:hover {
@@ -243,7 +243,7 @@
         .btn-filter {
             background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             border: none;
-            color: white;
+            color: var(--bs-white);
             font-weight: 600;
             padding: 0.6rem 1.5rem;
             border-radius: 8px;
@@ -363,8 +363,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h5 class="card-title" style="color: var(--bs-gold); margin: 0;">All Ledger Entries</h5>
-                            <p class="text-muted mb-0" style="color: var(--bs-surface-400);">Manage all financial transactions</p>
+ <h5 class="card-title text-gold m-0">All Ledger Entries</h5>
+ <p class="text-muted mb-0 text-surface-400" >Manage all financial transactions</p>
                         </div>
                         <div>
                             <button class="export-btn">
@@ -401,7 +401,7 @@
                                     <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
-                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$1,250.00</td>
+ <td class="text-ui-success u-fw-600" >+$1,250.00</td>
                                     <td>INV-001234</td>
                                     <td>Policy sale commission</td>
                                     <td>
@@ -419,7 +419,7 @@
                                     <td>Sarah Johnson</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-payment">Payment</span></td>
-                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$500.00</td>
+ <td class="text-ui-danger u-fw-600" >-$500.00</td>
                                     <td>PAY-005678</td>
                                     <td>Monthly payment to vendor</td>
                                     <td>
@@ -437,7 +437,7 @@
                                     <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
-                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$2,100.00</td>
+ <td class="text-ui-success u-fw-600" >+$2,100.00</td>
                                     <td>INV-001200</td>
                                     <td>Large policy sale</td>
                                     <td>
@@ -455,7 +455,7 @@
                                     <td>Michael Brown</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-expense">Expense</span></td>
-                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$350.00</td>
+ <td class="text-ui-danger u-fw-600" >-$350.00</td>
                                     <td>EXP-000891</td>
                                     <td>Office supplies</td>
                                     <td>

@@ -13,7 +13,7 @@
         
         body {
             font-family: Calibri, Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: var(--bs-surface-50);
             padding: 20px;
         }
         
@@ -26,7 +26,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             line-height: 1.6;
             font-size: 12px;
-            color: #333;
+            color: var(--bs-surface-700);
             white-space: pre-wrap;
             word-wrap: break-word;
             font-family: Calibri, Arial, sans-serif;
@@ -38,7 +38,7 @@
         }
         
         .btn {
-            background-color: #007bff;
+            background-color: var(--bs-primary);
             color: white;
             padding: 10px 20px;
             border: none;
@@ -49,7 +49,7 @@
         }
         
         .btn:hover {
-            background-color: #0056b3;
+            background-color: var(--bs-ui-info-dark);
         }
         
         @media print {

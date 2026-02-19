@@ -7,7 +7,7 @@
 @section('css')
     <style>
         .permission-matrix {
-            background: #fff;
+            background: var(--bs-white, #fff);
             border-radius: 8px;
         }
         .permission-row {
@@ -20,7 +20,7 @@
         }
         .module-name {
             font-weight: 500;
-            color: #495057;
+            color: var(--bs-surface-600);
         }
         .module-description {
             font-size: 0.875rem;
@@ -65,8 +65,8 @@
             margin-right: 6px;
         }
         .badge-view { background: var(--bs-status-leave); }
-        .badge-edit { background: #0dcaf0; }
-        .badge-full { background: #198754; }
+        .badge-edit { background: var(--bs-info); }
+        .badge-full { background: var(--bs-ui-success); }
         .badge-none { background: var(--bs-status-absent); }
     </style>
 @endsection
@@ -106,7 +106,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h4 class="card-title mb-1">
-                                    <i class="bx bx-shield-alt me-2" style="color: var(--bs-gold);"></i>
+ <i class="bx bx-shield-alt me-2 text-gold" ></i>
                                     {{ $role->name }} Role Permissions
                                 </h4>
                                 <p class="text-muted mb-0">Configure access levels for all CRM modules</p>

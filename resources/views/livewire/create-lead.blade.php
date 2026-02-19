@@ -42,7 +42,7 @@
             margin-left: 4px;
         }
         .form-control, .form-select {
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--bs-surface-200);
             border-radius: 6px;
             padding: 10px 14px;
             font-size: 0.875rem;
@@ -56,7 +56,7 @@
             margin-bottom: 20px;
         }
         .btn-submit {
-            background: linear-gradient(135deg, var(--bs-gold) 0%, #f4d77a 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-bright) 100%);
             border: none;
             color: var(--bs-print-body-dark);
             font-weight: 600;
@@ -338,16 +338,16 @@
 
                     <!-- Beneficiary Information -->
                     <h6 class="form-section-title mt-4">Beneficiary Information</h6>
-                    <div class="alert alert-info mb-3" style="background-color: #e8f4fd; border-color: var(--bs-gold); color: var(--bs-print-body-dark);">
+ <div class="alert alert-info mb-3 text-print-body border-gold bg-surface-50">
                         <i class="bx bx-info-circle me-2"></i>
                         You can add multiple beneficiaries. Click "Add Another Beneficiary" to add more.
                     </div>
                     
                     @foreach($beneficiaries as $index => $beneficiary)
-                    <div class="card mb-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
+ <div class="card mb-3 u-rounded-8 border-surface-200">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0" style="color: var(--bs-gold); font-weight: 600;">
+ <h6 class="mb-0 text-gold u-fw-600" >
                                     <i class="bx bx-user-circle"></i>
                                     Beneficiary {{ $index + 1 }}
                                 </h6>
@@ -493,7 +493,7 @@
 
                     <!-- Card Information (Optional & Encrypted) -->
                     <h6 class="form-section-title mt-4">Payment Card Information (Optional)</h6>
-                    <div class="alert alert-info" style="background-color: #f0f8ff; border-color: var(--bs-gold); color: var(--bs-print-body-dark);">
+ <div class="alert alert-info text-print-body border-gold bg-surface-50">
                         <i class="bx bx-lock-alt me-2"></i>
                         <strong>Secure:</strong> All payment card information is encrypted before storage.
                     </div>

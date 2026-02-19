@@ -99,7 +99,7 @@
                     <form id="delete-form" 
                           action="{{ route('admin.public-holidays.destroy', $holiday) }}" 
                           method="POST" 
-                          style="display: none;">
+ >
                         @csrf
                         @method('DELETE')
                     </form>

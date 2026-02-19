@@ -1,6 +1,6 @@
 @use('App\Support\Roles')
 <!-- Teams-Style Announcement Banner -->
-<div id="teams-announcement-banner" class="teams-announcement-banner" style="display: none;">
+<div id="teams-announcement-banner" class="teams-announcement-banner d-none" >
     <div class="teams-announcement-content">
         <div class="teams-announcement-icon">
             <i class="bx bx-info-circle"></i>
@@ -31,7 +31,7 @@
     left: 0;
     right: 0;
     background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-    color: white;
+    color: var(--bs-white);
     z-index: 9999;
     padding: 0.75rem 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -83,7 +83,7 @@
 .teams-announcement-close {
     background: rgba(255, 255, 255, 0.2) !important;
     border: none !important;
-    color: white !important;
+    color: var(--bs-white) !important;
     padding: 0.4rem 0.6rem !important;
     font-size: 0.9rem !important;
     transition: all 0.2s ease;
@@ -235,10 +235,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Apply color theme
     function applyColorTheme(color) {
         const colors = {
-            'blue': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'blue': `linear-gradient(135deg, ${themeColors.gradientStart} 0%, ${themeColors.gradientEnd} 100%)`,
             'red': 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)',
-            'green': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            'yellow': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            'green': `linear-gradient(135deg, ${themeColors.success} 0%, ${themeColors.successDark} 100%)`,
+            'yellow': `linear-gradient(135deg, ${themeColors.warning} 0%, ${themeColors.warning} 100%)`,
             'purple': 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
             'orange': 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
         };

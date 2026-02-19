@@ -46,12 +46,12 @@
             border-radius: 50%;
             font-size: 0.65rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--bs-white, #fff);
             cursor: default;
             position: relative;
         }
         .dial-badge.is-mine {
-            outline: 2px solid #000;
+            outline: 2px solid var(--bs-surface-900);
             outline-offset: 1px;
         }
         .dial-badge .dial-time {
@@ -60,8 +60,8 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: #333;
-            color: #fff;
+            background: var(--bs-surface-700);
+            color: var(--bs-white, #fff);
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.7rem;
@@ -74,7 +74,7 @@
         /* Row highlighting for dialed-by-me leads */
         .lead-row.dialed-by-me {
             background-color: rgba(78, 115, 223, 0.06) !important;
-            border-left: 3px solid #4e73df;
+            border-left: 3px solid var(--bs-primary);
         }
         /* Row highlighting for dialed-by-others */
         .lead-row.dialed-by-others {
@@ -83,8 +83,8 @@
         
         /* Peregrine badge style */
         .bg-purple {
-            background-color: #6f42c1 !important;
-            color: #fff !important;
+            background-color: var(--bs-ui-purple) !important;
+            color: var(--bs-white, #fff) !important;
         }
         
         /* Pagination - hide large icons and use text */
@@ -159,10 +159,10 @@
 
                 <div class="card-body">
                     <!-- Dial Tracking Legend -->
-                    <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded" style="background: var(--bs-surface-bg-light); font-size: 0.85rem;">
+ <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded bg-surface-bg-light u-fs-085" >
                         <strong><i class="bx bx-info-circle me-1"></i> Dial Tracking:</strong>
-                        <span><span class="dial-badge is-mine" style="background-color: #4e73df; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">ME</span> = You dialed</span>
-                        <span><span class="dial-badge" style="background-color: #e74a3b; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">AB</span> = Another closer dialed</span>
+ <span><span class="dial-badge is-mine d-inline-flex u-w-20 u-h-20" style="background-color: var(--bs-primary); font-size: 0.55rem">ME</span> = You dialed</span>
+ <span><span class="dial-badge d-inline-flex u-w-20 u-h-20" style="background-color: var(--bs-danger); font-size: 0.55rem">AB</span> = Another closer dialed</span>
                         <span class="text-muted">| Hover badge to see name & time | Updates every 30s</span>
                     </div>
                     <div class="table-responsive">
@@ -210,7 +210,7 @@
                                                 value="{{ $noteValue }}"
                                                 placeholder="e.g., John's callback - 2pm"
                                                 onblur="saveCallbackNote({{ $lead->id }}, this.value)"
-                                                style="font-size: 0.85rem;">
+ >
                                             @if($showNote && $lead->callback_note_updated_at)
                                                 <small class="text-muted d-block mt-1">
                                                     <i class="bx bx-time-five"></i> {{ $lead->callback_note_updated_at->diffForHumans() }}
@@ -254,29 +254,29 @@
     <div class="modal fade" id="callDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);">
+ <div class="modal-header bg-gradient-gold" >
                     <h5 class="modal-title text-white"><i class="fas fa-phone-alt me-2"></i><span id="callModalStatus">Call Connected</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="callModalBody">
 
                     <!-- PHASE 1: CALL CONNECTED -->
-                    <div id="phase1" style="display: none;">
+ <div class="d-none" id="phase1" >
                         <div class="text-center py-5">
                             <div class="mb-4">
-                                <i class="fas fa-phone-alt text-success" style="font-size: 4rem;"></i>
+ <i class="fas fa-phone-alt text-success u-fs-4" ></i>
                             </div>
-                            <h3 class="mb-3" style="color: var(--bs-gold);" id="callerName">Connecting...</h3>
+ <h3 class="mb-3 text-gold" id="callerName">Connecting...</h3>
                             <p class="lead mb-2" id="callerPhone"></p>
                             <p class="text-muted">Call in progress</p>
-                            <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" onclick="goToPhase2()">
+ <button type="button" class="btn btn-lg mt-4 bg-gradient-gold text-white" onclick="goToPhase2()">
                                 Start Call Info <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
-                    <div id="phase2" style="display: none;">
+ <div class="d-none" id="phase2" >
                         <div class="alert alert-info mb-3">
                             <i class="fas fa-info-circle me-2"></i> <strong>Review and update information as needed</strong>
                         </div>
@@ -393,14 +393,14 @@
                             <button type="button" class="btn btn-light btn-lg px-4 me-2" onclick="goToPhase1()">
                                 <i class="fas fa-arrow-left me-2"></i> Back
                             </button>
-                            <button type="button" class="btn btn-lg px-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" id="showMoreBtn" onclick="goToPhase3()">
+ <button type="button" class="btn btn-lg px-4 bg-gradient-gold text-white" id="showMoreBtn" onclick="goToPhase3()">
                                 <i class="fas fa-arrow-right me-2"></i> Continue
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 3: FULL DETAILS WITH CHANGE TRACKING -->
-                    <div id="phase3" style="display: none;">
+ <div class="d-none" id="phase3" >
                         <div class="alert alert-success mb-3">
                             <i class="fas fa-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
                         </div>
@@ -408,7 +408,7 @@
                         <div class="row g-3">
                             <!-- Personal Information Section -->
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Personal Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Personal Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -565,7 +565,7 @@
 
                             <!-- Medical Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Medical Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Medical Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -615,7 +615,7 @@
 
                             <!-- Policy Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Policy Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Policy Information</h5>
                             </div>
 
                             <!-- Beneficiaries Section -->
@@ -703,7 +703,7 @@
 
                             <!-- Banking Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Banking Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Banking Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -775,7 +775,7 @@
 
                             <!-- Card Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-credit-card me-2"></i>Card Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-credit-card me-2"></i>Card Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -807,7 +807,7 @@
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Additional Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Additional Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -824,7 +824,7 @@
 
                             <!-- Sale Assignment Section (moved from Phase 2) -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-user-tag me-2"></i>Sale Assignment</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-user-tag me-2"></i>Sale Assignment</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -851,7 +851,7 @@
                             </div>
 
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Assigned Partner:</label>
@@ -861,7 +861,7 @@
 
                             <!-- Follow Up Schedule -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Follow Up Required:</label>
@@ -871,7 +871,7 @@
                                     <option value="0">No</option>
                                 </select>
                             </div>
-                            <div class="col-md-12" id="followup_datetime_field" style="display: none;">
+ <div class="col-md-12 d-none" id="followup_datetime_field" >
                                 <label class="form-label fw-bold">Follow Up Date & Time:</label>
                                 <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
                                 <small class="text-muted">When should the follow-up call be scheduled?</small>
@@ -2012,53 +2012,34 @@
         });
         
         if (phase1) {
+            phase1.classList.remove('d-none');
             phase1.style.display = 'block';
-            console.log('✅ Phase 1 set to display: block');
+            console.log('✅ Phase 1 visible');
         } else {
             console.error('❌ Phase 1 element not found!');
         }
         
-        if (phase2) phase2.style.display = 'none';
-        if (phase3) phase3.style.display = 'none';
+        if (phase2) { phase2.classList.add('d-none'); phase2.style.display = 'none'; }
+        if (phase3) { phase3.classList.add('d-none'); phase3.style.display = 'none'; }
         
         console.log('📋 Phase 1 should now be visible');
     }
 
     function goToPhase2() {
         console.log('Navigating to Phase 2...');
-        document.getElementById('phase1').style.display = 'none';
-        document.getElementById('phase2').style.display = 'block';
-        document.getElementById('phase3').style.display = 'none';
+        const phase1 = document.getElementById('phase1');
+        const phase2 = document.getElementById('phase2');
+        const phase3 = document.getElementById('phase3');
+        if (phase1) { phase1.classList.add('d-none'); phase1.style.display = 'none'; }
+        if (phase2) { phase2.classList.remove('d-none'); phase2.style.display = 'block'; }
+        if (phase3) { phase3.classList.add('d-none'); phase3.style.display = 'none'; }
     }
 
-    function goToPhase3() {
-        console.log('Navigating to Phase 3...');
-        
-        // Transfer Phase 2 data to Phase 3 displays
-        document.getElementById('orig_name').textContent = document.getElementById('phase2_name').value || document.getElementById('displayName').textContent;
-        document.getElementById('orig_phone').textContent = document.getElementById('phase2_phone').value || document.getElementById('displayPhone').textContent;
-        document.getElementById('orig_secondary_phone').textContent = document.getElementById('phase2_secondary_phone').value || '-';
-        document.getElementById('orig_state').textContent = document.getElementById('phase2_state').value || '-';
-        document.getElementById('orig_zip').textContent = document.getElementById('phase2_zip').value || '-';
-        document.getElementById('orig_dob').textContent = document.getElementById('phase2_dob').value || document.getElementById('displayDOB').textContent;
-        document.getElementById('orig_ssn').textContent = document.getElementById('phase2_ssn').value || document.getElementById('displaySSN').textContent;
-        document.getElementById('orig_address').textContent = document.getElementById('phase2_address').value || document.getElementById('displayAddress').textContent;
-        document.getElementById('orig_emergency_contact').textContent = document.getElementById('phase2_emergency_contact').value || '-';
-        document.getElementById('orig_carrier').textContent = document.getElementById('phase2_carrier').value || document.getElementById('displayCarrier').textContent;
-        document.getElementById('orig_coverage').textContent = document.getElementById('phase2_coverage').value || document.getElementById('displayCoverage').textContent;
-        document.getElementById('orig_premium').textContent = document.getElementById('phase2_premium').value || document.getElementById('displayPremium').textContent;
-        
-        document.getElementById('phase1').style.display = 'none';
-        document.getElementById('phase2').style.display = 'none';
-        document.getElementById('phase3').style.display = 'block';
+    function goToPhase3_old() {
+        // Superseded by goToPhase3() below
     }
 
-    function goToPhase1() {
-        console.log('Returning to Phase 1...');
-        document.getElementById('phase1').style.display = 'block';
-        document.getElementById('phase2').style.display = 'none';
-        document.getElementById('phase3').style.display = 'none';
-    }
+    // Second goToPhase1 removed - using the primary definition above
 
     // Add beneficiary row dynamically
     window.addBeneficiaryRow = function() {
@@ -2146,9 +2127,12 @@
     function goToPhase3() {
         populatePhase3WithData();
         copyBeneficiariesFromPhase2ToPhase3();
-        document.getElementById('phase1').style.display = 'none';
-        document.getElementById('phase2').style.display = 'none';
-        document.getElementById('phase3').style.display = 'block';
+        const phase1 = document.getElementById('phase1');
+        const phase2 = document.getElementById('phase2');
+        const phase3 = document.getElementById('phase3');
+        if (phase1) { phase1.classList.add('d-none'); phase1.style.display = 'none'; }
+        if (phase2) { phase2.classList.add('d-none'); phase2.style.display = 'none'; }
+        if (phase3) { phase3.classList.remove('d-none'); phase3.style.display = 'block'; }
     }
 
     // Copy beneficiaries from Phase 2 to Phase 3
@@ -2585,11 +2569,9 @@
                 // Double-check phase1 visibility
                 const phase1 = document.getElementById('phase1');
                 if (phase1) {
-                    console.log('🔍 Phase1 display style:', phase1.style.display);
-                    if (phase1.style.display === 'none' || phase1.style.display === '') {
-                        phase1.style.display = 'block';
-                        console.log('🔧 Phase1 forced to display: block');
-                    }
+                    phase1.classList.remove('d-none');
+                    phase1.style.display = 'block';
+                    console.log('🔧 Phase1 forced visible');
                 }
             }, 100);
             

@@ -79,7 +79,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Dialed Today</p>
+ <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Dialed Today</p>
                             <h3 class="mb-0 fw-bold">
                                 <span class="counter-value" data-target="{{ $stats['dialed_today'] ?? 0 }}">{{ $stats['dialed_today'] ?? 0 }}</span>
                             </h3>
@@ -100,7 +100,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Connected</p>
+ <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Connected</p>
                             <h3 class="mb-0 fw-bold">
                                 <span class="counter-value" data-target="{{ $stats['calls_connected'] ?? 0 }}">{{ $stats['calls_connected'] ?? 0 }}</span>
                             </h3>
@@ -121,7 +121,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Sales Today</p>
+ <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">Sales Today</p>
                             <h3 class="mb-0 fw-bold text-success">
                                 <span class="counter-value" data-target="{{ $stats['sales_today'] ?? 0 }}">{{ $stats['sales_today'] ?? 0 }}</span>
                             </h3>
@@ -142,13 +142,13 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">MTD Sales</p>
+ <p class="text-muted mb-2 text-uppercase u-fs-075 u-ls-05">MTD Sales</p>
                             <h3 class="mb-0 fw-bold" style="color: var(--gold, var(--bs-gold));">
                                 <span class="counter-value" data-target="{{ $stats['mtd_sales'] ?? 0 }}">{{ $stats['mtd_sales'] ?? 0 }}</span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
-                            <div class="avatar-title rounded-3" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #f9d670 100%);">
+                            <div class="avatar-title rounded-3" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-bright) 100%);">
                                 <i class="bx bx-trophy fs-4 text-white"></i>
                             </div>
                         </div>
@@ -167,7 +167,7 @@
                         <h5 class="mb-0 fw-semibold">
                             <i class="bx bx-dollar-circle text-success me-2"></i>My Sales Records
                         </h5>
-                        <span class="badge bg-success-subtle text-success" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+                        <span class="badge bg-success-subtle text-success u-fs-0875" style="padding: 0.5rem 0.75rem">
                             Total: {{ $mySales->total() ?? 0 }}
                         </span>
                     </div>

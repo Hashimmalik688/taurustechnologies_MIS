@@ -25,7 +25,7 @@
     .table-header-fixed {
         overflow-x: auto;
         overflow-y: hidden;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-bottom: none;
         background: var(--bs-surface-bg-light);
     }
@@ -38,7 +38,7 @@
     .table-header-fixed thead th {
         background: var(--bs-surface-bg-light) !important;
         font-weight: 600;
-        border-bottom: 2px solid #dee2e6 !important;
+        border-bottom: 2px solid var(--bs-surface-200) !important;
         white-space: nowrap;
         padding: 12px 8px;
     }
@@ -49,7 +49,7 @@
         overflow-x: auto;
         overflow-y: auto;
         position: relative;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
     }
     
     .table-responsive table {
@@ -85,7 +85,7 @@
     
     .top-scrollbar-wrapper::-webkit-scrollbar-track,
     .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: var(--bs-surface-50);
         border-radius: 6px;
     }
     
@@ -102,8 +102,8 @@
     
     /* Peregrine badge style */
     .bg-purple {
-        background-color: #6f42c1 !important;
-        color: #fff !important;
+        background-color: var(--bs-ui-purple) !important;
+        color: var(--bs-white, #fff) !important;
     }
 </style>
 @endsection
@@ -144,10 +144,10 @@
                 <div class="card border-0 shadow" style="background: {{ $config['gradient'] }} !important; min-height: 180px;">
                     <div class="card-body text-center p-4">
                         <div class="d-flex justify-content-center align-items-center mb-3">
-                            <i class="mdi {{ $config['icon'] }}" style="font-size: 2.5rem !important; color: #fff !important;"></i>
+                            <i class="mdi {{ $config['icon'] }} text-white" style="font-size: 2.5rem !important"></i>
                         </div>
-                        <h6 class="mb-2 fw-semibold text-uppercase" style="letter-spacing: 0.5px; color: #fff !important;">{{ $config['label'] }}</h6>
-                        <h1 class="mb-0 fw-bold" style="color: #fff !important; font-size: 2.5rem;">{{ number_format($count) }}</h1>
+                        <h6 class="mb-2 fw-semibold text-uppercase u-ls-05 text-white">{{ $config['label'] }}</h6>
+                        <h1 class="mb-0 fw-bold text-white u-fs-250">{{ number_format($count) }}</h1>
                     </div>
                 </div>
             </div>
@@ -238,33 +238,33 @@
                         <table class="table table-bordered table-sm mb-0" style="table-layout: fixed;">
                             <colgroup>
                                 @if(auth()->user()->hasRole(Roles::QA))
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:150px; width:150px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:220px; width:220px;">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-150 u-w-150">
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-160 u-w-160" >
+                                    <col class="u-min-w-220 u-w-220">
                                 @else
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:150px; width:150px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:200px; width:200px;">
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-150 u-w-150">
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-160 u-w-160" >
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-200" style="width:200px">
                                 @endif
                             </colgroup>
                             <thead class="table-light">
@@ -310,33 +310,33 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle" id="salesTable" style="table-layout: fixed;">
                             <colgroup>
                                 @if(auth()->user()->hasRole(Roles::QA))
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:150px; width:150px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:220px; width:220px;">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-150 u-w-150">
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-160 u-w-160" >
+                                    <col class="u-min-w-220 u-w-220">
                                 @else
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:150px; width:150px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:140px; width:140px;">
-                                    <col style="min-width:160px; width:160px;">
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:220px; width:220px;">
-                                    <col style="min-width:180px; width:180px;">
-                                    <col style="min-width:200px; width:200px;">
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-150 u-w-150">
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-160 u-w-160" >
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-140 u-w-140">
+ <col class="u-min-w-160 u-w-160" >
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+                                    <col class="u-min-w-220 u-w-220">
+ <col class="u-min-w-180 u-w-180" >
+ <col class="u-min-w-200" style="width:200px">
                                 @endif
                             </colgroup>
                             <tbody>
@@ -365,7 +365,7 @@
                                             </td>
                                             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
                                             <td>
-                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" style="min-width: 130px;">
+ <select class="form-select form-select-sm qa-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" >
                                                     <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>
                                                         ⏳ Pending
                                                     </option>
@@ -385,7 +385,7 @@
                                                           data-lead-id="{{ $lead->id }}" 
                                                           placeholder="Enter QA reason/comment..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->qa_reason ?? '' }}</textarea>
+ >{{ $lead->qa_reason ?? '' }}</textarea>
                                                 <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
@@ -398,19 +398,19 @@
                                                         $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
                                                         $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
                                                     @endphp
-                                                    <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+ <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm d-flex align-items-center justify-content-center u-rounded-6" title="Pretty Print" target="_blank" style="width: 36px; height: 36px">
                                                         <i class="fas fa-print"></i>
                                                     </a>
-                                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm" title="Call" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+ <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm d-flex align-items-center justify-content-center u-rounded-6 u-w-36 u-h-36" title="Call">
                                                         <i class="fas fa-phone-alt"></i>
                                                     </button>
-                                                    <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white" title="View" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+ <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white d-flex align-items-center justify-content-center u-rounded-6" title="View" style="width: 36px; height: 36px">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm" title="Edit" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+ <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center u-rounded-6" title="Edit" style="width: 36px; height: 36px">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+ <button type="button" class="btn btn-danger btn-sm d-flex align-items-center justify-content-center u-rounded-6" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete" style="width: 36px; height: 36px">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -443,7 +443,7 @@
                                                         <small class="text-danger">Not set</small>
                                                     @endif
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <select class="form-select form-select-sm editable-carrier" data-lead-id="{{ $lead->id }}" style="min-width: 120px;">
+ <select class="form-select form-select-sm editable-carrier u-min-w-120" data-lead-id="{{ $lead->id }}" >
                                                             <option value="">-- None --</option>
                                                             @foreach($insuranceCarriers as $carrier)
                                                                 <option value="{{ $carrier }}" {{ $lead->carrier_name == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
@@ -463,7 +463,7 @@
                                                         <small class="text-danger">Not set</small>
                                                     @endif
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="{{ $lead->id }}" style="min-width: 110px;">
+ <select class="form-select form-select-sm editable-policy-type u-min-w-110" data-lead-id="{{ $lead->id }}" >
                                                             <option value="">-- None --</option>
                                                             <option value="G.I" {{ $lead->policy_type == 'G.I' ? 'selected' : '' }}>G.I</option>
                                                             <option value="Graded" {{ $lead->policy_type == 'Graded' ? 'selected' : '' }}>Graded</option>
@@ -484,7 +484,7 @@
                                                         <small class="text-danger">Not set</small>
                                                     @endif
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-coverage" data-lead-id="{{ $lead->id }}" value="{{ $lead->coverage_amount ?? '' }}" placeholder="0.00" style="min-width: 100px;">
+ <input type="number" step="0.01" class="form-control form-control-sm editable-coverage u-min-w-100" data-lead-id="{{ $lead->id }}" value="{{ $lead->coverage_amount ?? '' }}" placeholder="0.00" >
                                                         <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="coverage" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
@@ -518,7 +518,7 @@
                                             <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
                                             <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
                                             <td>
-                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" style="min-width: 130px;">
+ <select class="form-select form-select-sm qa-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" >
                                                     <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>⏳ Pending</option>
                                                     <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>✅ Good</option>
                                                     <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>⚠️ Avg</option>
@@ -530,13 +530,13 @@
                                                           data-lead-id="{{ $lead->id }}" 
                                                           placeholder="QA comments..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->qa_reason ?? '' }}</textarea>
+ >{{ $lead->qa_reason ?? '' }}</textarea>
                                                 <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                             </td>
                                             <td>
-                                                <select class="form-select form-select-sm manager-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}" style="min-width: 130px;">
+ <select class="form-select form-select-sm manager-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}" >
                                                     <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>⏳ Pending</option>
                                                     <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>✅ Approved</option>
                                                     <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>❌ Declined</option>
@@ -549,7 +549,7 @@
                                                           data-lead-id="{{ $lead->id }}" 
                                                           placeholder="Manager comments..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->manager_reason ?? '' }}</textarea>
+ >{{ $lead->manager_reason ?? '' }}</textarea>
                                                 <button class="btn btn-sm btn-success mt-1 save-manager-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
@@ -593,7 +593,7 @@
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                        <form action="{{ route('sales.delete', $lead->id) }}" method="POST" style="display: inline;">
+ <form class="d-inline" action="{{ route('sales.delete', $lead->id) }}" method="POST" >
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
@@ -1089,24 +1089,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const status = select.value;
         switch(status) {
             case 'pending':
-                select.style.background = '#fef3c7';
-                select.style.color = '#92400e';
+                select.style.background = themeColors.goldLight;
+                select.style.color = themeColors.goldDark;
                 break;
             case 'approved':
-                select.style.background = '#d1fae5';
-                select.style.color = '#065f46';
+                select.style.background = themeColors.surface50;
+                select.style.color = themeColors.successDark;
                 break;
             case 'declined':
-                select.style.background = '#fee2e2';
-                select.style.color = '#991b1b';
+                select.style.background = themeColors.surface50;
+                select.style.color = themeColors.dangerDark;
                 break;
             case 'underwriting':
-                select.style.background = '#dbeafe';
-                select.style.color = '#1e40af';
+                select.style.background = themeColors.surface50;
+                select.style.color = themeColors.infoDark;
                 break;
             case 'chargeback':
-                select.style.background = '#fce7f3';
-                select.style.color = '#9f1239';
+                select.style.background = themeColors.surface50;
+                select.style.color = themeColors.dangerDark;
                 break;
         }
     }
@@ -1117,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="modal fade" id="manualSaleModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                 <h5 class="modal-title fw-semibold">
                     <i class="mdi mdi-pencil-plus me-2"></i>Create Manual Sale Entry
                 </h5>
@@ -1125,7 +1125,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <form action="{{ route('sales.storeManual') }}" method="POST">
                 @csrf
-                <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
+ <div class="modal-body u-overflow-y-auto" style="max-height: 600px">
                     <div class="row">
                         <!-- Customer Information Section -->
                         <div class="col-12">

@@ -105,13 +105,13 @@
                         <table class="table table-striped table-bordered table-hover table-sm align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-center" style="min-width:100px;">Actions</th>
-                                    <th style="min-width:150px;">Client Name</th>
-                                    <th style="min-width:130px;">Phone</th>
-                                    <th style="min-width:110px;">Sale Date</th>
-                                    <th style="min-width:120px;">Carrier</th>
-                                    <th style="min-width:140px;">Disposition Status</th>
-                                    <th style="min-width:200px;">Reason</th>
+ <th class="text-center u-min-w-100" >Actions</th>
+ <th class="u-min-w-150" >Client Name</th>
+ <th class="u-min-w-130" >Phone</th>
+ <th class="u-min-w-110" >Sale Date</th>
+ <th class="u-min-w-120" >Carrier</th>
+ <th class="u-min-w-140" >Disposition Status</th>
+ <th class="u-min-w-200" >Reason</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -156,7 +156,7 @@
                                     <div class="modal fade" id="dispositionModal-{{ $lead->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered modal-lg">
                                             <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+ <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%)">
                                                     <h5 class="modal-title">
                                                         <i class="mdi mdi-clipboard-list me-2"></i>Set Disposition - {{ $lead->cn_name }}
                                                     </h5>
@@ -179,7 +179,7 @@
                                                         </div>
 
                                                         <!-- Conditional: Check Other Insurances -->
-                                                        <div class="check-other-insurances-container" id="checkContainer-{{ $lead->id }}" style="display: none;">
+ <div class="check-other-insurances-container d-none" id="checkContainer-{{ $lead->id }}" >
                                                             <div class="alert alert-info" role="alert">
                                                                 <i class="mdi mdi-information me-2"></i>
                                                                 <strong>Checking for other insurances...</strong>

@@ -7,7 +7,7 @@
 @section('css')
 <style>
     .bracket-row {
-        border-left: 3px solid #007bff;
+        border-left: 3px solid var(--bs-primary);
         padding-left: 15px;
         margin-bottom: 10px;
         background-color: var(--bs-surface-bg-light);

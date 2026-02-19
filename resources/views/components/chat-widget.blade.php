@@ -4,7 +4,7 @@
 <!-- Chat Toggle Button -->
 <button id="chat-toggle-btn" onclick="toggleChatWidget()">
     <i class="bx bx-message-rounded-dots"></i>
-    <span class="chat-unread-badge" id="chat-unread-count" style="display: none;">0</span>
+ <span class="chat-unread-badge d-none" id="chat-unread-count" >0</span>
 </button>
 
 <!-- Chat Widget -->

@@ -13,11 +13,11 @@
         font-size: 0.8rem;
         font-weight: 500;
     }
-    .status-open { background-color: #cfe2ff; color: #084298; }
-    .status-in-progress { background-color: #d1ecf1; color: #055160; }
-    .status-on-hold { background-color: #fff3cd; color: #664d03; }
-    .status-resolved { background-color: #d1e7dd; color: #0f5132; }
-    .status-closed { background-color: #e2e3e5; color: #41464b; }
+    .status-open { background-color: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+    .status-in-progress { background-color: var(--bs-surface-100); color: var(--bs-ui-info-dark); }
+    .status-on-hold { background-color: var(--bs-surface-50); color: var(--bs-gold-dark); }
+    .status-resolved { background-color: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
+    .status-closed { background-color: var(--bs-surface-200); color: var(--bs-surface-600); }
 
     .priority-high { color: var(--bs-status-absent); font-weight: 600; }
     .priority-medium { color: var(--bs-status-late); font-weight: 600; }
@@ -26,7 +26,7 @@
     .comments-section {
         max-height: 500px;
         overflow-y: auto;
-        border: 1px solid #dee2e6;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 0.375rem;
         padding: 1rem;
         background-color: var(--bs-surface-bg-light);
@@ -36,8 +36,8 @@
     .comment-item {
         padding: 0.75rem;
         margin-bottom: 0.75rem;
-        border-left: 3px solid #0d6efd;
-        background-color: white;
+        border-left: 3px solid var(--bs-primary);
+        background-color: var(--bs-card-bg);
         border-radius: 0.25rem;
     }
 

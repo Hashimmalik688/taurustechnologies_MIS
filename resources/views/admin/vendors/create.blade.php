@@ -112,7 +112,7 @@
         }
 
         .invalid-feedback {
-            color: #fca5a5;
+            color: var(--bs-ui-danger);
             font-size: 0.875rem;
             margin-top: 0.25rem;
         }

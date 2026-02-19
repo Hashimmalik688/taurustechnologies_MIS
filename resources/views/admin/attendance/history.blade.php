@@ -253,7 +253,7 @@
                                                     <div>
                                                         <h6 class="mb-0">{{ $attendance->user->name }}
                                                             @if($attendance->user->trashed())
-                                                                <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 10px;">Terminated</span>
+                                                                <span class="badge bg-danger-subtle text-danger ms-1 u-fs-10">Terminated</span>
                                                             @endif
                                                         </h6>
                                                         <p class="text-muted mb-0 fs-13">{{ $attendance->user->email }}

@@ -110,7 +110,7 @@
                 </div>
                 @else
                 <div class="text-center py-4">
-                    <i class="mdi mdi-information-outline" style="font-size: 48px; color: #ccc;"></i>
+                    <i class="mdi mdi-information-outline text-surface-300" style="font-size: 48px"></i>
                     <p class="text-muted mt-2">No dock records found for this employee.</p>
                 </div>
                 @endif

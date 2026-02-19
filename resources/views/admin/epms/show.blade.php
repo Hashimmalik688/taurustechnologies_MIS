@@ -53,7 +53,7 @@
 
         /* Stat Cards */
         .stat-card {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             border-radius: 16px;
             padding: 25px;
             position: relative;
@@ -90,9 +90,9 @@
         }
 
         .stat-icon.purple { background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%); }
-        .stat-icon.blue { background: linear-gradient(135deg, var(--bs-ui-info) 0%, #2563eb 100%); }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); }
         .stat-icon.green { background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%); }
-        .stat-icon.orange { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); }
+        .stat-icon.orange { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-warning) 100%); }
         .stat-icon.red { background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); }
 
         .stat-label {
@@ -104,7 +104,7 @@
         }
 
         .stat-value {
-            color: #fff;
+            color: var(--bs-white, #fff);
             font-size: 2.5rem;
             font-weight: 700;
             margin: 10px 0;
@@ -113,7 +113,7 @@
 
         /* Modern Tabs */
         .modern-tabs {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             border-radius: 16px;
             padding: 8px;
             margin-bottom: 30px;
@@ -138,12 +138,12 @@
         }
 
         .modern-tab:hover {
-            color: #fff;
+            color: var(--bs-white, #fff);
             background: rgba(139, 92, 246, 0.1);
         }
 
         .modern-tab.active {
-            color: #fff;
+            color: var(--bs-white, #fff);
             background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
         }
@@ -171,7 +171,7 @@
         }
 
         .kanban-column {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             border-radius: 12px;
             padding: 20px;
             min-height: 500px;
@@ -212,7 +212,7 @@
 
         /* Gantt Container */
         .gantt-container {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             padding: 30px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -231,7 +231,7 @@
         }
 
         .risk-cell {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -243,12 +243,12 @@
 
         .risk-cell.header {
             background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
-            color: #fff;
+            color: var(--bs-white, #fff);
         }
 
         .risk-cell.data {
             font-size: 1.5rem;
-            color: #fff;
+            color: var(--bs-white, #fff);
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -338,7 +338,7 @@
 
         .raci-table th {
             background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
-            color: #fff;
+            color: var(--bs-white, #fff);
             padding: 12px;
             font-weight: 600;
             text-align: left;
@@ -359,10 +359,10 @@
             margin: 2px;
         }
 
-        .raci-r { background: var(--bs-ui-info); color: #fff; }
-        .raci-a { background: var(--bs-ui-success); color: #fff; }
-        .raci-c { background: var(--bs-ui-warning); color: #fff; }
-        .raci-i { background: var(--bs-surface-600); color: #fff; }
+        .raci-r { background: var(--bs-ui-info); color: var(--bs-white, #fff); }
+        .raci-a { background: var(--bs-ui-success); color: var(--bs-white, #fff); }
+        .raci-c { background: var(--bs-ui-warning); color: var(--bs-white, #fff); }
+        .raci-i { background: var(--bs-surface-600); color: var(--bs-white, #fff); }
 
         /* Health Indicator */
         .health-indicator {
@@ -395,9 +395,9 @@
 
         /* Modal Dark Theme */
         .modal-content {
-            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-600) 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            color: var(--bs-white, #fff);
         }
 
         .modal-header {
@@ -411,7 +411,7 @@
         .form-control, .form-select, .form-control:focus, .form-select:focus {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            color: var(--bs-white, #fff);
         }
 
         .form-label {
@@ -428,10 +428,10 @@
             text-transform: uppercase;
         }
 
-        .priority-urgent { background: var(--bs-ui-danger); color: #fff; }
-        .priority-high { background: var(--bs-ui-warning); color: #fff; }
-        .priority-medium { background: var(--bs-ui-info); color: #fff; }
-        .priority-low { background: var(--bs-ui-success); color: #fff; }
+        .priority-urgent { background: var(--bs-ui-danger); color: var(--bs-white, #fff); }
+        .priority-high { background: var(--bs-ui-warning); color: var(--bs-white, #fff); }
+        .priority-medium { background: var(--bs-ui-info); color: var(--bs-white, #fff); }
+        .priority-low { background: var(--bs-ui-success); color: var(--bs-white, #fff); }
 
         /* Methodology Badge */
         .method-badge {
@@ -441,10 +441,10 @@
             font-weight: 600;
         }
 
-        .method-agile { background: #ede9fe; color: #7c3aed; }
-        .method-waterfall { background: #e0f2fe; color: #0284c7; }
-        .method-hybrid { background: #fce7f3; color: #db2777; }
-        .method-kanban { background: #ecfdf5; color: var(--bs-ui-success-dark); }
+        .method-agile { background: var(--bs-surface-50); color: var(--bs-ui-purple); }
+        .method-waterfall { background: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
+        .method-hybrid { background: var(--bs-surface-50); color: var(--bs-ui-danger); }
+        .method-kanban { background: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
 
         /* Text Colors */
         .text-muted-dark {
@@ -475,18 +475,18 @@
     <div class="project-header">
         <div class="row align-items-center position-relative">
             <div class="col-md-8">
-                <h2 class="mb-2 text-white position-relative" style="z-index: 1;">
+                <h2 class="mb-2 text-white position-relative u-z-1">
                     <i class="bx bx-briefcase me-3"></i>{{ $project->name }}
                 </h2>
-                <p class="mb-3 text-white-50 position-relative" style="z-index: 1;">{{ $project->description }}</p>
-                <div class="d-flex gap-4 flex-wrap position-relative" style="z-index: 1;">
+                <p class="mb-3 text-white-50 position-relative u-z-1">{{ $project->description }}</p>
+                <div class="d-flex gap-4 flex-wrap position-relative u-z-1">
                     <span class="text-white"><i class="bx bx-building me-2"></i>{{ $project->client_name }}</span>
                     <span class="text-white"><i class="bx bx-calendar me-2"></i>{{ $project->start_date->format('M d, Y') }} - {{ $project->deadline->format('M d, Y') }}</span>
                     <span class="method-badge method-{{ $project->methodology }}">{{ ucfirst($project->methodology) }}</span>
                     <span class="priority-badge priority-{{ $project->priority }}">{{ ucfirst($project->priority) }}</span>
                 </div>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0 position-relative" style="z-index: 1;">
+            <div class="col-md-4 text-md-end mt-3 mt-md-0 position-relative u-z-1">
                 <div class="btn-group" role="group">
                     <a href="{{ route('epms.edit', $project) }}" class="btn btn-light">
                         <i class="bx bx-edit me-1"></i> Edit
@@ -524,7 +524,7 @@
                     <i class="bx bx-heart text-white"></i>
                 </div>
                 <div class="stat-label">Health Score</div>
-                <div class="stat-value" style="font-size: 1.5rem;">
+                <div class="stat-value u-fs-150">
                     <span class="health-indicator health-{{ $project->health_score }}"></span>
                     @if($project->health_score === 'green') On Track
                     @elseif($project->health_score === 'yellow') At Risk
@@ -624,7 +624,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="text-white mb-1">
-                                        <i class="bx bx-flag me-2" style="color: var(--bs-ui-warning);"></i>{{ $milestone->name }}
+ <i class="bx bx-flag me-2 text-ui-warning" ></i>{{ $milestone->name }}
                                     </h6>
                                     <small class="text-muted-dark">Due: {{ $milestone->due_date->format('M d, Y') }}</small>
                                 </div>
@@ -638,7 +638,7 @@
                             @if($milestoneTasks->count() > 0)
                                 <div class="ms-4">
                                     @foreach($milestoneTasks->take(3) as $task)
-                                        <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: rgba(15,23,42,0.6); border-radius: 8px;">
+ <div class="d-flex justify-content-between align-items-center mb-2 p-2 u-rounded-8" style="background: rgba(15,23,42,0.6)">
                                             <span class="text-white small">{{ $task->name }}</span>
                                             <span class="badge bg-{{ $task->status === Statuses::EPMS_COMPLETED ? 'success' : 'secondary' }}">
                                                 {{ $task->progress }}%
@@ -805,7 +805,7 @@
                     @include('admin.epms.partials.wbs-item', ['item' => $wbsItem, 'level' => 0])
                 @empty
                     <div class="text-center py-5">
-                        <i class="bx bx-sitemap text-muted-dark" style="font-size: 4rem;"></i>
+ <i class="bx bx-sitemap text-muted-dark u-fs-4" ></i>
                         <p class="text-muted-dark mt-3">No WBS items yet. Start building your work breakdown structure.</p>
                     </div>
                 @endforelse
@@ -826,7 +826,7 @@
                     </div>
 
                     @forelse($project->risks->sortByDesc('severity_score') as $risk)
-                        <div class="mb-3 p-3" style="background: rgba(15,23,42,0.6); border-radius: 12px; border-left: 4px solid {{ $risk->severity_level === 'critical' ? 'var(--bs-ui-danger)' : ($risk->severity_level === 'high' ? 'var(--bs-ui-warning)' : 'var(--bs-ui-info)') }};">
+ <div class="mb-3 p-3 u-rounded-12" style="background: rgba(15,23,42,0.6); border-left: 4px solid {{ $risk->severity_level === 'critical' ? 'var(--bs-ui-danger)' : ($risk->severity_level === 'high' ? 'var(--bs-ui-warning)' : 'var(--bs-ui-info)') }}">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="flex-grow-1">
                                     <h6 class="text-white mb-1">{{ $risk->title }}</h6>
@@ -846,14 +846,14 @@
                                 </div>
                             </div>
                             @if($risk->mitigation_plan)
-                                <div class="mt-3 p-2" style="background: rgba(139,92,246,0.1); border-radius: 8px;">
+ <div class="mt-3 p-2 u-rounded-8" style="background: rgba(139,92,246,0.1)">
                                     <small class="text-muted-dark"><strong>Mitigation:</strong> {{ $risk->mitigation_plan }}</small>
                                 </div>
                             @endif
                         </div>
                     @empty
                         <div class="text-center py-5">
-                            <i class="bx bx-shield text-muted-dark" style="font-size: 4rem;"></i>
+ <i class="bx bx-shield text-muted-dark u-fs-4" ></i>
                             <p class="text-muted-dark mt-3">No risks identified yet</p>
                         </div>
                     @endforelse
@@ -988,7 +988,7 @@
             @forelse($project->documents as $doc)
                 <div class="document-item">
                     <div class="d-flex align-items-center">
-                        <i class="bx bx-file text-primary me-3" style="font-size: 2rem;"></i>
+ <i class="bx bx-file text-primary me-3 u-fs-2" ></i>
                         <div>
                             <h6 class="text-white mb-0">{{ $doc->name }}</h6>
                             <small class="text-muted-dark">
@@ -1002,7 +1002,7 @@
                 </div>
             @empty
                 <div class="text-center py-5">
-                    <i class="bx bx-file text-muted-dark" style="font-size: 4rem;"></i>
+ <i class="bx bx-file text-muted-dark u-fs-4" ></i>
                     <p class="text-muted-dark mt-3">No documents uploaded yet</p>
                 </div>
             @endforelse
@@ -1420,7 +1420,7 @@
                             <i class="bx bx-check-circle me-2"></i>
                             <span class="text-white">AI plan generated successfully! Review and apply to project.</span>
                         </div>
-                        <div id="aiPlanData" style="max-height: 400px; overflow-y: auto; background: rgba(15,23,42,0.6); padding: 20px; border-radius: 12px;">
+ <div class="u-overflow-y-auto u-rounded-12 u-max-h-400 p-4" id="aiPlanData" style="background: rgba(15,23,42,0.6)">
                             <pre class="text-white mb-0" style="white-space: pre-wrap;"></pre>
                         </div>
                     </div>
@@ -1598,13 +1598,13 @@
                     datasets: [{
                         label: 'Ideal Burndown',
                         data: @json(array_column(array_values($burndownData), 'ideal')),
-                        borderColor: '#94a3b8',
+                        borderColor: themeColors.surface400,
                         borderDash: [5, 5],
                         tension: 0.1
                     }, {
                         label: 'Actual Progress',
                         data: @json(array_column(array_values($burndownData), 'actual')),
-                        borderColor: '#8b5cf6',
+                        borderColor: themeColors.purple,
                         backgroundColor: 'rgba(139, 92, 246, 0.1)',
                         fill: true,
                         tension: 0.1
@@ -1619,11 +1619,11 @@
                     },
                     scales: {
                         x: { 
-                            ticks: { color: '#94a3b8' },
+                            ticks: { color: themeColors.surface400 },
                             grid: { color: 'rgba(255,255,255,0.1)' }
                         },
                         y: { 
-                            ticks: { color: '#94a3b8' },
+                            ticks: { color: themeColors.surface400 },
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             beginAtZero: true
                         }
@@ -1748,7 +1748,7 @@
         /* Gantt Dark Theme Styles */
         .gantt .bar-milestone {
             fill: var(--bs-ui-warning) !important;
-            stroke: #d97706 !important;
+            stroke: var(--bs-ui-warning) !important;
         }
         .gantt .bar-completed {
             fill: var(--bs-ui-success) !important;
@@ -1756,13 +1756,13 @@
         }
         .gantt .bar {
             fill: var(--bs-ui-purple) !important;
-            stroke: #7c3aed !important;
+            stroke: var(--bs-ui-purple) !important;
         }
         .gantt .bar-progress {
             fill: var(--bs-ui-indigo) !important;
         }
         .gantt .bar-label {
-            fill: #fff !important;
+            fill: var(--bs-white, #fff) !important;
             font-weight: 600;
         }
         .gantt .grid-header {

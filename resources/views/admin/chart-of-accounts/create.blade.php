@@ -248,7 +248,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" 
                                            {{ old('is_active', true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_active" style="color: var(--bs-surface-300);">
+                                    <label class="form-check-label text-surface-300" for="is_active">
                                         Account is Active
                                     </label>
                                 </div>

@@ -8,7 +8,7 @@
         </div>
         @auth
             @if(Auth::user()->hasRole([Roles::SUPER_ADMIN, Roles::COORDINATOR]))
-                <button type="button" class="btn btn-sm btn-outline-light announcement-edit-btn" style="display: none;">
+ <button type="button" class="btn btn-sm btn-outline-light announcement-edit-btn d-none" >
                     <i class="bx bx-pencil"></i> Edit
                 </button>
             @endif
@@ -18,7 +18,7 @@
 </div>
 
 <!-- Announcement Restore Button - Shows when announcement is hidden -->
-<div id="announcement-restore-btn" class="announcement-restore-btn" style="display: none; z-index: 9998;">
+<div id="announcement-restore-btn" class="announcement-restore-btn d-none" style="z-index: 9998">
     <button type="button" class="btn btn-sm btn-info announcement-restore-btn-toggle" title="Show announcement again">
         <i class="bx bx-up-arrow-circle"></i> Show Announcement
     </button>
@@ -128,38 +128,38 @@
         border-radius: 0;
         animation: slideDown 0.5s ease-out;
         width: 100%;
-        background-color: #0d6efd !important;
-        color: white !important;
+        background-color: var(--bs-primary) !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar.announce-bg-red {
         background-color: var(--bs-status-absent) !important;
-        color: white !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar.announce-bg-yellow {
         background-color: var(--bs-status-leave) !important;
-        color: #000 !important;
+        color: var(--bs-surface-900) !important;
     }
 
     .announcement-bar.announce-bg-blue {
-        background-color: #0d6efd !important;
-        color: white !important;
+        background-color: var(--bs-primary) !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar.announce-bg-green {
-        background-color: #198754 !important;
-        color: white !important;
+        background-color: var(--bs-ui-success) !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar.announce-bg-purple {
-        background-color: #6f42c1 !important;
-        color: white !important;
+        background-color: var(--bs-ui-purple) !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar.announce-bg-orange {
         background-color: var(--bs-status-late) !important;
-        color: white !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-bar:hover .announcement-edit-btn {
@@ -216,7 +216,7 @@
         flex-shrink: 0;
         background: rgba(255, 255, 255, 0.2) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        color: white !important;
+        color: var(--bs-white) !important;
     }
 
     .announcement-edit-btn:hover {

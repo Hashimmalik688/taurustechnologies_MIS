@@ -370,7 +370,7 @@
     <style>
         .card-header {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .btn-primary {
@@ -379,7 +379,7 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-purple) 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -418,7 +418,7 @@
 
         .bg-orange {
             background-color: var(--bs-status-late);
-            color: white;
+            color: var(--bs-white);
         }
 
         .table-hover tbody tr:hover {
@@ -427,7 +427,7 @@
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%) !important;
-            color: white !important;
+            color: var(--bs-white) !important;
             border: none !important;
         }
 

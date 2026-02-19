@@ -9,7 +9,7 @@
     }
 
     .stat-card {
-        background: white;
+        background: var(--bs-card-bg);
         border-radius: 12px;
         padding: 20px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -24,10 +24,10 @@
     }
 
     .stat-card.blue { border-left-color: var(--bs-gradient-start); }
-    .stat-card.green { border-left-color: #38ef7d; }
+    .stat-card.green { border-left-color: var(--bs-ui-success); }
     .stat-card.orange { border-left-color: #f5576c; }
     .stat-card.purple { border-left-color: #00f2fe; }
-    .stat-card.gold { border-left-color: #f5af19; }
+    .stat-card.gold { border-left-color: var(--bs-ui-warning); }
     .stat-card.indigo { border-left-color: var(--bs-gradient-end); }
 
     .stat-value {
@@ -45,7 +45,7 @@
     }
 
     .table-card {
-        background: white;
+        background: var(--bs-card-bg);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         overflow: hidden;
@@ -53,7 +53,7 @@
 
     .table-header {
         padding: 20px;
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid var(--bs-surface-200);
     }
 
     .table {
@@ -61,9 +61,9 @@
     }
 
     .table thead th {
-        border-bottom: 2px solid #e9ecef;
+        border-bottom: 2px solid var(--bs-surface-200);
         font-weight: 600;
-        color: #495057;
+        color: var(--bs-surface-600);
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.5px;
@@ -109,7 +109,7 @@
     .state-pill {
         display: inline-block;
         background: var(--bs-gradient-start);
-        color: white;
+        color: var(--bs-white);
         padding: 4px 10px;
         border-radius: 15px;
         font-size: 0.75rem;
@@ -120,7 +120,7 @@
         font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 20px;
-        color: #212529;
+        color: var(--bs-surface-800);
     }
 </style>
 @endsection

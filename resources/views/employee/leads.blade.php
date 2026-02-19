@@ -97,29 +97,29 @@
     <div class="modal fade" id="callDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);">
+ <div class="modal-header bg-gradient-gold" >
                     <h5 class="modal-title text-white"><i class="fas fa-phone-alt me-2"></i><span id="callModalStatus">Call Connected</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="callModalBody">
 
                     <!-- PHASE 1: CALL CONNECTED -->
-                    <div id="phase1" style="display: none;">
+ <div class="d-none" id="phase1" >
                         <div class="text-center py-5">
                             <div class="mb-4">
-                                <i class="fas fa-phone-alt text-success" style="font-size: 4rem;"></i>
+ <i class="fas fa-phone-alt text-success u-fs-4" ></i>
                             </div>
-                            <h3 class="mb-3" style="color: var(--bs-gold);" id="callerName">Connecting...</h3>
+ <h3 class="mb-3 text-gold" id="callerName">Connecting...</h3>
                             <p class="lead mb-2" id="callerPhone"></p>
                             <p class="text-muted">Call in progress</p>
-                            <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" onclick="goToPhase2()">
+ <button type="button" class="btn btn-lg mt-4 bg-gradient-gold text-white" onclick="goToPhase2()">
                                 Start Call Info <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
-                    <div id="phase2" style="display: none;">
+ <div class="d-none" id="phase2" >
                         <div class="alert alert-info mb-3">
                             <i class="fas fa-info-circle me-2"></i> Fill all required fields to unlock detailed information
                         </div>
@@ -220,14 +220,14 @@
                             <button type="button" class="btn btn-secondary" onclick="goToPhase1()">
                                 <i class="fas fa-arrow-left me-2"></i> Back
                             </button>
-                            <button type="button" class="btn btn-lg" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" id="showMoreBtn" disabled onclick="goToPhase3()">
+ <button type="button" class="btn btn-lg bg-gradient-gold text-white" id="showMoreBtn" disabled onclick="goToPhase3()">
                                 <i class="fas fa-unlock me-2"></i> Show More Details
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 3: FULL DETAILS WITH CHANGE TRACKING -->
-                    <div id="phase3" style="display: none;">
+ <div class="d-none" id="phase3" >
                         <div class="alert alert-success mb-3">
                             <i class="fas fa-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
                         </div>
@@ -235,7 +235,7 @@
                         <div class="row g-3">
                             <!-- Personal Information Section -->
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Personal Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Personal Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -308,7 +308,7 @@
 
                             <!-- Medical Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Medical Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Medical Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -337,7 +337,7 @@
 
                             <!-- Policy Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Policy Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Policy Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -384,7 +384,7 @@
 
                             <!-- Banking Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Banking Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Banking Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -429,7 +429,7 @@
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Additional Information</h5>
+ <h5 class="border-bottom pb-2 mb-3 text-gold" >Additional Information</h5>
                             </div>
 
                             <div class="col-md-6">

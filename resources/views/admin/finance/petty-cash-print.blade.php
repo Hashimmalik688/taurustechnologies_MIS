@@ -13,7 +13,7 @@
         
         body {
             font-family: Arial, sans-serif;
-            color: #333;
+            color: var(--bs-surface-700);
             background: white;
             padding: 20px;
         }
@@ -21,14 +21,14 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid #333;
+            border-bottom: 3px solid var(--bs-surface-700);
             padding-bottom: 15px;
         }
         
         .company-name {
             font-size: 28px;
             font-weight: bold;
-            color: #333;
+            color: var(--bs-surface-700);
             margin-bottom: 10px;
             letter-spacing: 1px;
         }
@@ -36,7 +36,7 @@
         .report-title {
             font-size: 24px;
             font-weight: bold;
-            color: #555;
+            color: var(--bs-surface-500);
             margin-bottom: 20px;
         }
         
@@ -46,7 +46,7 @@
             gap: 20px;
             font-size: 13px;
             margin-bottom: 20px;
-            background: #f5f5f5;
+            background: var(--bs-surface-50);
             padding: 15px;
             border-radius: 4px;
         }
@@ -73,23 +73,23 @@
         }
         
         thead th {
-            background: #e8e8e8;
-            border: 1px solid #999;
+            background: var(--bs-surface-200);
+            border: 1px solid var(--bs-surface-muted);
             padding: 12px;
             text-align: left;
             font-weight: bold;
             font-size: 12px;
-            color: #333;
+            color: var(--bs-surface-700);
         }
         
         tbody td {
-            border: 1px solid #ddd;
+            border: 1px solid var(--bs-surface-200);
             padding: 10px 12px;
             font-size: 12px;
         }
         
         tbody tr:nth-child(even) {
-            background: #f9f9f9;
+            background: var(--bs-surface-50);
         }
         
         tbody tr:hover {
@@ -130,13 +130,13 @@
         }
         
         .totals-row {
-            background: #e8e8e8 !important;
+            background: var(--bs-surface-200) !important;
             font-weight: bold;
         }
         
         .totals-row td {
-            border-top: 2px solid #333;
-            border-bottom: 2px solid #333;
+            border-top: 2px solid var(--bs-surface-700);
+            border-bottom: 2px solid var(--bs-surface-700);
             padding: 12px;
         }
         
@@ -144,8 +144,8 @@
             margin-top: 30px;
             text-align: center;
             font-size: 11px;
-            color: #666;
-            border-top: 1px solid #ddd;
+            color: var(--bs-surface-500);
+            border-top: 1px solid var(--bs-surface-200);
             padding-top: 15px;
         }
         
@@ -174,7 +174,7 @@
         .print-buttons a {
             padding: 8px 15px;
             margin-left: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--bs-surface-200);
             background: white;
             cursor: pointer;
             font-size: 14px;
@@ -246,7 +246,7 @@
         <thead>
             <tr>
                 <th class="gl-no">G/L No.</th>
-                <th style="width: 100px;">Date</th>
+                <th class="u-w-100">Date</th>
                 <th>Head</th>
                 <th>Description</th>
                 <th class="amount">Debit</th>
@@ -279,13 +279,13 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 20px;">No entries found</td>
+                    <td colspan="7" class="text-center p-4">No entries found</td>
                 </tr>
             @endforelse
             
             @if($entries->count() > 0)
                 <tr class="totals-row">
-                    <td colspan="4" style="text-align: right;">TOTALS</td>
+ <td class="text-end" colspan="4" >TOTALS</td>
                     <td class="amount">{{ number_format($entries->sum('debit'), 2) }}</td>
                     <td class="amount">{{ number_format($entries->sum('credit'), 2) }}</td>
                     <td class="balance">

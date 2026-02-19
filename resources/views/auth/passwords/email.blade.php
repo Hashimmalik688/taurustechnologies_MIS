@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold-bright: #ffd54a;
-  --on-gold: #111;
+  --gold-bright: var(--bs-gold-bright);
+  --on-gold: var(--bs-surface-700);
   --dark-bg: var(--bs-surface-900);
   --card-bg: rgba(17, 24, 39, 0.90);
 }
@@ -105,7 +105,7 @@ h1.auth-title {
 }
 
 .tagline {
-  color: #cfd6e4;
+  color: var(--bs-surface-300);
   opacity: 0.95;
   margin-bottom: 0;
   font-size: 0.95rem;
@@ -114,7 +114,7 @@ h1.auth-title {
 
 .form-label {
   margin-bottom: 0.5rem;
-  color: #cfd6e4;
+  color: var(--bs-surface-300);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -122,20 +122,20 @@ h1.auth-title {
 .form-control {
   height: 48px;
   font-size: 0.95rem;
-  background: #0f1625;
+  background: var(--bs-surface-900);
   color: var(--bs-surface-50);
-  border: 1px solid #2f3a4d;
+  border: 1px solid var(--bs-surface-700);
   border-radius: 10px;
   transition: all 0.2s ease;
 }
 
 .form-control::placeholder {
-  color: #9aa3ae;
+  color: var(--bs-surface-muted);
 }
 
 .form-control:focus {
-  background: #0b1220;
-  border-color: var(--gold);
+  background: var(--bs-surface-900);
+  border-color: var(--bs-gold);
   box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.20);
   color: var(--bs-surface-50);
   outline: none;
@@ -150,8 +150,8 @@ h1.auth-title {
 }
 
 .btn-gold {
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
-  color: var(--on-gold);
+  background: linear-gradient(90deg, var(--bs-gold), var(--bs-gold-bright));
+  color: var(--bs-surface-900);
   font-weight: 700;
   border: none;
   height: 48px;
@@ -164,7 +164,7 @@ h1.auth-title {
   filter: brightness(1.1);
   box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
   transform: translateY(-1px);
-  color: var(--on-gold);
+  color: var(--bs-surface-900);
 }
 
 .btn-gold:active {
@@ -172,14 +172,14 @@ h1.auth-title {
 }
 
 a.link-gold {
-  color: var(--gold);
+  color: var(--bs-gold);
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
 a.link-gold:hover {
   text-decoration: underline;
-  color: var(--gold-bright);
+  color: var(--bs-gold-bright);
 }
 
 .alert {
@@ -190,18 +190,18 @@ a.link-gold:hover {
 .alert-success {
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #86efac;
+  color: var(--bs-ui-success);
 }
 
 .alert-danger {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  color: var(--bs-ui-danger);
 }
 
 .invalid-feedback {
   display: block;
-  color: #fca5a5;
+  color: var(--bs-ui-danger);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -247,7 +247,7 @@ a.link-gold:hover {
              onerror="this.style.display='none'">
         
         <div class="icon-circle">
-          <i class="bx bx-lock-alt" style="font-size:32px; color:var(--gold);"></i>
+          <i class="bx bx-lock-alt u-fs-32 text-gold"></i>
         </div>
         
         <h1 class="auth-title">Forgot Password?</h1>

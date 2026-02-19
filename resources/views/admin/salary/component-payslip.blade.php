@@ -13,7 +13,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: var(--bs-surface-700);
         }
         .container {
             max-width: 900px;
@@ -35,7 +35,7 @@
         .document-title {
             font-size: 20px;
             font-weight: 600;
-            color: #333;
+            color: var(--bs-surface-700);
             margin: 15px 0 5px 0;
         }
         .employee-info {
@@ -44,7 +44,7 @@
             gap: 20px;
             margin-bottom: 30px;
             padding: 20px;
-            background: #f9f9f9;
+            background: var(--bs-surface-50);
             border-radius: 8px;
         }
         .info-group {
@@ -52,7 +52,7 @@
         }
         .info-label {
             font-size: 11px;
-            color: #666;
+            color: var(--bs-surface-500);
             font-weight: 600;
             text-transform: uppercase;
             margin-bottom: 3px;
@@ -60,11 +60,11 @@
         .info-value {
             font-size: 13px;
             font-weight: 600;
-            color: #333;
+            color: var(--bs-surface-700);
         }
         .salary-period {
             font-size: 14px;
-            color: #666;
+            color: var(--bs-surface-500);
             margin: 10px 0;
         }
         .component-type {
@@ -76,12 +76,12 @@
             margin: 10px 0;
         }
         .component-type.basic {
-            background: #dbeafe;
-            color: #0d47a1;
+            background: var(--bs-surface-50);
+            color: var(--bs-ui-info-dark);
         }
         .component-type.bonus {
-            background: #dbeafe;
-            color: #1b5e20;
+            background: var(--bs-surface-50);
+            color: var(--bs-ui-success-dark);
         }
         .table {
             width: 100%;
@@ -96,11 +96,11 @@
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 2px solid var(--bs-gold);
-            color: #333;
+            color: var(--bs-surface-700);
         }
         .table td {
             padding: 10px 12px;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--bs-surface-200);
             font-size: 12px;
         }
         .table tr:last-child td {
@@ -114,7 +114,7 @@
             min-width: 80px;
         }
         .deduction {
-            color: #d32f2f;
+            color: var(--bs-ui-danger-dark);
         }
         .subtotal-row td {
             border-top: 2px solid var(--bs-gold);
@@ -123,21 +123,21 @@
             font-weight: 600;
         }
         .total-row td {
-            background: #e8e8e8;
+            background: var(--bs-surface-200);
             padding: 14px 12px;
             font-size: 14px;
             font-weight: 700;
-            border: 2px solid #333;
+            border: 2px solid var(--bs-surface-700);
         }
         .net-amount {
-            color: #1b5e20;
+            color: var(--bs-ui-success-dark);
             font-size: 16px;
         }
         .section-title {
             font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
-            color: #333;
+            color: var(--bs-surface-700);
             margin: 20px 0 10px 0;
             border-left: 4px solid var(--bs-gold);
             padding-left: 10px;
@@ -145,10 +145,10 @@
         .footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid var(--bs-surface-200);
             text-align: center;
             font-size: 10px;
-            color: #999;
+            color: var(--bs-surface-muted);
         }
         .signature-section {
             margin-top: 30px;
@@ -160,7 +160,7 @@
             text-align: center;
         }
         .signature-line {
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--bs-surface-700);
             padding-top: 5px;
             margin-top: 30px;
             font-size: 11px;
@@ -169,7 +169,7 @@
         .payment-method {
             margin: 20px 0;
             padding: 15px;
-            background: #fffbf0;
+            background: var(--bs-gold-light);
             border-left: 4px solid var(--bs-gold);
             font-size: 12px;
         }
@@ -178,7 +178,7 @@
             margin-bottom: 5px;
         }
         .highlight-row td {
-            background: #fffbf0;
+            background: var(--bs-gold-light);
         }
     </style>
 </head>
@@ -240,7 +240,7 @@
                 @if($component->attendance_bonus > 0)
                 <tr class="highlight-row">
                     <td>Attendance / Punctuality Bonus</td>
-                    <td class="text-right amount" style="color: #1b5e20;">+ Rs {{ number_format($component->attendance_bonus, 2) }}</td>
+                    <td class="text-right amount text-ui-success-dark">+ Rs {{ number_format($component->attendance_bonus, 2) }}</td>
                 </tr>
                 @endif
             </table>
@@ -329,12 +329,12 @@
                 </tr>
                 <tr class="highlight-row">
                     <td><strong>Bonus Amount</strong></td>
-                    <td class="text-right amount" style="color: #1b5e20;"><strong>Rs {{ number_format($component->calculated_amount, 2) }}</strong></td>
+                    <td class="text-right amount text-ui-success-dark"><strong>Rs {{ number_format($component->calculated_amount, 2) }}</strong></td>
                 </tr>
                 @else
-                <tr class="highlight-row" style="background: #ffebee;">
+                <tr class="highlight-row" style="background: var(--bs-surface-50);">
                     <td><strong>Status</strong></td>
-                    <td class="text-right"><strong style="color: #d32f2f;">Below Target - No Bonus</strong></td>
+                    <td class="text-right"><strong style="color: var(--bs-ui-danger-dark);">Below Target - No Bonus</strong></td>
                 </tr>
                 @endif
             </table>

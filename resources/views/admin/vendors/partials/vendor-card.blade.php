@@ -90,7 +90,7 @@
         border-radius: 4px;
         font-size: 0.7rem;
         font-weight: 600;
-        color: white;
+        color: var(--bs-white);
     }
 
     .badge-us-agent-sm {
@@ -98,11 +98,11 @@
     }
 
     .badge-vendor-sm {
-        background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+        background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-purple) 100%);
     }
 
     .badge-supplier-sm {
-        background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+        background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-ui-danger-dark) 100%);
     }
 
     .badge-active-sm {
@@ -114,7 +114,7 @@
     }
 
     .badge-suspended-sm {
-        background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+        background: linear-gradient(135deg, var(--bs-ui-warning) 0%, var(--bs-gold-dark) 100%);
     }
 
     .vendor-card-actions {
@@ -136,21 +136,21 @@
 
     .btn-view {
         background: rgba(59, 130, 246, 0.2);
-        color: #60a5fa;
+        color: var(--bs-ui-info);
     }
 
     .btn-view:hover {
         background: rgba(59, 130, 246, 0.3);
-        color: #60a5fa;
+        color: var(--bs-ui-info);
     }
 
     .btn-edit {
         background: rgba(34, 197, 94, 0.2);
-        color: #4ade80;
+        color: var(--bs-ui-success);
     }
 
     .btn-edit:hover {
         background: rgba(34, 197, 94, 0.3);
-        color: #4ade80;
+        color: var(--bs-ui-success);
     }
 </style>

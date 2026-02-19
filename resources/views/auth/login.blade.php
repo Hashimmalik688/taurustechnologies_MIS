@@ -6,8 +6,8 @@
 @section('css')
 <style>
 :root {
-  --gold-bright: #ffd54a;
-  --on-gold: #111;
+  --gold-bright: var(--bs-gold-bright);
+  --on-gold: var(--bs-surface-700);
   --dark-bg: var(--bs-surface-900);
   --card-bg: rgba(17, 24, 39, 0.90);
 }
@@ -117,7 +117,7 @@ body.auth-body-bg {
   right: 20px;
   z-index: 1000;
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  color: var(--bs-white);
   border: none;
   padding: 10px 20px;
   border-radius: 10px;
@@ -134,7 +134,7 @@ body.auth-body-bg {
 .partner-login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
-  color: white;
+  color: var(--bs-white);
 }
 
 .partner-login-btn i {
@@ -193,7 +193,7 @@ h1.auth-title {
 }
 
 .tagline {
-  color: #e6e9ef;
+  color: var(--bs-surface-200);
   opacity: 0.9;
   margin-bottom: 0;
   font-size: 0.95rem;
@@ -202,7 +202,7 @@ h1.auth-title {
 /* Form Elements */
 .form-label {
   margin-bottom: 0.5rem;
-  color: #cfd6e4;
+  color: var(--bs-surface-300);
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -210,18 +210,18 @@ h1.auth-title {
 .form-control {
   height: 48px;
   font-size: 0.95rem;
-  background: #0f1625;
+  background: var(--bs-surface-900);
   color: var(--bs-surface-50);
-  border: 1px solid #2f3a4d;
+  border: 1px solid var(--bs-surface-700);
   border-radius: 10px;
 }
 
 .form-control::placeholder {
-  color: #9aa3ae;
+  color: var(--bs-surface-muted);
 }
 
 .form-control:focus {
-  background: #0b1220;
+  background: var(--bs-surface-900);
   border-color: var(--bs-gold);
   box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.20);
   color: var(--bs-surface-50);
@@ -240,8 +240,8 @@ h1.auth-title {
 .form-check-input {
   width: 1.1rem;
   height: 1.1rem;
-  border: 1px solid #2f3a4d;
-  background-color: #0f1625;
+  border: 1px solid var(--bs-surface-700);
+  background-color: var(--bs-surface-900);
   cursor: pointer;
 }
 
@@ -256,15 +256,15 @@ h1.auth-title {
 }
 
 .form-check-label {
-  color: #cfd6e4;
+  color: var(--bs-surface-300);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 /* Button */
 .btn-gold {
-  background: linear-gradient(90deg, var(--bs-gold), var(--gold-bright));
-  color: var(--on-gold);
+  background: linear-gradient(90deg, var(--bs-gold), var(--bs-gold-bright));
+  color: var(--bs-surface-900);
   font-weight: 700;
   border: none;
   height: 48px;
@@ -275,7 +275,7 @@ h1.auth-title {
 
 .btn-gold:hover {
   filter: brightness(1.1);
-  color: var(--on-gold);
+  color: var(--bs-surface-900);
 }
 
 /* Links */
@@ -297,7 +297,7 @@ a.link-gold:hover {
 .alert-danger {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  color: var(--bs-ui-danger);
 }
 
 .alert ul {
@@ -308,7 +308,7 @@ a.link-gold:hover {
 /* Feedback */
 .invalid-feedback {
   display: block;
-  color: #fca5a5;
+  color: var(--bs-ui-danger);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -433,8 +433,8 @@ a.link-gold:hover {
                    class="form-control @error('password') is-invalid @enderror"
                    placeholder="••••••••" 
                    required>
-            <button type="button" class="btn btn-link position-absolute" 
-                    style="right: 10px; top: 50%; transform: translateY(-50%); padding: 0; z-index: 10;"
+            <button type="button" class="btn btn-link position-absolute p-0 u-z-10" 
+                    style="right: 10px; top: 50%; transform: translateY(-50%)"
                     onclick="togglePasswordVisibility()"
                     title="Show/Hide Password">
               <i id="password-toggle-icon" class="mdi mdi-eye-off"></i>

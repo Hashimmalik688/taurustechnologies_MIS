@@ -1096,15 +1096,15 @@
         }
 
         .select2-selection {
-            border: 1px solid #ced4da !important;
+            border: 1px solid var(--bs-surface-200) !important;
             border-radius: 0.375rem !important;
             min-height: 38px !important;
         }
 
         .select2-selection--multiple .select2-selection__choice {
-            background-color: #0d6efd !important;
-            border: 1px solid #0d6efd !important;
-            color: white !important;
+            background-color: var(--bs-primary) !important;
+            border: 1px solid var(--bs-primary) !important;
+            color: var(--bs-white) !important;
             border-radius: 0.25rem !important;
         }
 
@@ -1126,7 +1126,7 @@
 
         .card-header {
             background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: white;
+            color: var(--bs-white);
         }
 
         .text-primary {
@@ -1139,7 +1139,7 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-purple) 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }

@@ -140,7 +140,7 @@
                     <div class="text-center py-5">
                         <div class="avatar-lg mx-auto mb-3">
                             <div class="avatar-title bg-soft-success text-success rounded-circle">
-                                <i class="bx bx-check-circle" style="font-size: 32px;"></i>
+                                <i class="bx bx-check-circle u-fs-32"></i>
                             </div>
                         </div>
                         <h5 class="text-success">Great Job!</h5>
