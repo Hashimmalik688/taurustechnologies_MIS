@@ -6,16 +6,15 @@
 @section('css')
 <style>
 :root {
-  --gold: #d4af37;
   --gold-bright: #ffd54a;
   --on-gold: #111;
-  --dark-bg: #0f172a;
+  --dark-bg: var(--bs-surface-900);
   --card-bg: rgba(17, 24, 39, 0.90);
 }
 
 body.auth-body-bg {
   background: var(--dark-bg) !important;
-  color: #e5e7eb;
+  color: var(--bs-surface-200);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -32,7 +31,7 @@ body.auth-body-bg {
   background:
     linear-gradient(rgba(212, 175, 55, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(212, 175, 55, 0.06) 1px, transparent 1px),
-    linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    linear-gradient(135deg, var(--bs-surface-900) 0%, var(--bs-surface-800) 50%, var(--bs-surface-900) 100%);
   background-size: 60px 60px, 60px 60px, 100% 100%;
   background-position: 0 0, 0 0, 0 0;
   overflow: hidden;
@@ -190,7 +189,7 @@ h1.auth-title {
   font-weight: 700;
   line-height: 1.25;
   margin-bottom: 0.5rem;
-  color: #f9fafb;
+  color: var(--bs-surface-50);
 }
 
 .tagline {
@@ -212,7 +211,7 @@ h1.auth-title {
   height: 48px;
   font-size: 0.95rem;
   background: #0f1625;
-  color: #f9fafb;
+  color: var(--bs-surface-50);
   border: 1px solid #2f3a4d;
   border-radius: 10px;
 }
@@ -223,14 +222,14 @@ h1.auth-title {
 
 .form-control:focus {
   background: #0b1220;
-  border-color: var(--gold);
+  border-color: var(--bs-gold);
   box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.20);
-  color: #f9fafb;
+  color: var(--bs-surface-50);
   outline: none;
 }
 
 .form-control.is-invalid {
-  border-color: #ef4444;
+  border-color: var(--bs-ui-danger);
 }
 
 .form-control.is-invalid:focus {
@@ -247,12 +246,12 @@ h1.auth-title {
 }
 
 .form-check-input:checked {
-  background-color: var(--gold);
-  border-color: var(--gold);
+  background-color: var(--bs-gold);
+  border-color: var(--bs-gold);
 }
 
 .form-check-input:focus {
-  border-color: var(--gold);
+  border-color: var(--bs-gold);
   box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.20);
 }
 
@@ -264,7 +263,7 @@ h1.auth-title {
 
 /* Button */
 .btn-gold {
-  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  background: linear-gradient(90deg, var(--bs-gold), var(--gold-bright));
   color: var(--on-gold);
   font-weight: 700;
   border: none;
@@ -281,7 +280,7 @@ h1.auth-title {
 
 /* Links */
 a.link-gold {
-  color: var(--gold);
+  color: var(--bs-gold);
   text-decoration: none;
 }
 
@@ -318,7 +317,7 @@ a.link-gold:hover {
 .auth-footer {
   padding: 1.25rem 1.5rem;
   text-align: center;
-  color: #9ca3af;
+  color: var(--bs-surface-muted);
   font-size: 0.85rem;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
 }

@@ -11,12 +11,12 @@
             border-radius: 8px;
         }
         .permission-row {
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid var(--bs-print-bg-alt);
             padding: 12px 0;
             transition: background 0.2s;
         }
         .permission-row:hover {
-            background: #f8f9fa;
+            background: var(--bs-surface-bg-light);
         }
         .module-name {
             font-weight: 500;
@@ -24,11 +24,11 @@
         }
         .module-description {
             font-size: 0.875rem;
-            color: #6c757d;
+            color: var(--bs-status-default);
         }
         .category-header {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--bs-gold);
             padding: 12px 16px;
             margin: 20px 0 10px 0;
             border-radius: 4px;
@@ -59,14 +59,14 @@
             border-radius: 50%;
             margin-right: 6px;
         }
-        .badge-inherit { background: #6c757d; }
-        .badge-view { background: #ffc107; }
+        .badge-inherit { background: var(--bs-status-default); }
+        .badge-view { background: var(--bs-status-leave); }
         .badge-edit { background: #0dcaf0; }
         .badge-full { background: #198754; }
-        .badge-none { background: #dc3545; }
+        .badge-none { background: var(--bs-status-absent); }
         .inherited-badge {
             background: #e9ecef;
-            color: #6c757d;
+            color: var(--bs-status-default);
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 0.75rem;
@@ -120,7 +120,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
                                 <h4 class="card-title mb-1">
-                                    <i class="bx bx-user me-2" style="color: #d4af37;"></i>
+                                    <i class="bx bx-user me-2" style="color: var(--bs-gold);"></i>
                                     {{ $user->name }} - Permission Overrides
                                 </h4>
                                 <p class="text-muted mb-0">

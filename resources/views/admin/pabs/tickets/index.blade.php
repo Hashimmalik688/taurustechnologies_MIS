@@ -7,8 +7,8 @@
     .border-left-primary { border-left: 4px solid #0d6efd; }
     .border-left-info { border-left: 4px solid #0dcaf0; }
     .border-left-success { border-left: 4px solid #198754; }
-    .border-left-danger { border-left: 4px solid #dc3545; }
-    .border-left-warning { border-left: 4px solid #ffc107; }
+    .border-left-danger { border-left: 4px solid var(--bs-status-absent); }
+    .border-left-warning { border-left: 4px solid var(--bs-status-leave); }
 
     .card {
         box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
@@ -50,18 +50,18 @@
 
     .kpi-icon.text-danger,
     .kpi-icon.text-danger i {
-        color: #dc3545 !important;
+        color: var(--bs-status-absent) !important;
     }
 
     .kpi-icon.text-warning,
     .kpi-icon.text-warning i {
-        color: #ffc107 !important;
+        color: var(--bs-status-leave) !important;
     }
 
     .kpi-label {
         font-size: 0.85rem;
         font-weight: 600;
-        color: #6c757d;
+        color: var(--bs-status-default);
         margin-bottom: 8px;
         text-align: center;
     }
@@ -85,16 +85,16 @@
     .status-resolved { background-color: #d1e7dd; color: #0f5132; }
     .status-closed { background-color: #e2e3e5; color: #41464b; }
 
-    .priority-high { color: #dc3545; font-weight: 600; }
-    .priority-medium { color: #fd7e14; font-weight: 600; }
-    .priority-low { color: #28a745; font-weight: 600; }
+    .priority-high { color: var(--bs-status-absent); font-weight: 600; }
+    .priority-medium { color: var(--bs-status-late); font-weight: 600; }
+    .priority-low { color: var(--bs-status-present); font-weight: 600; }
 
     .section-badge {
         display: inline-block;
         padding: 0.25rem 0.5rem;
         border-radius: 0.2rem;
         font-size: 0.75rem;
-        background-color: #f0f0f0;
+        background-color: var(--bs-print-bg-alt);
         color: #333;
     }
 </style>

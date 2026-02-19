@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Arr;
+use App\Support\Statuses;
 
 class EPMSProjectController extends Controller
 {
@@ -37,16 +38,16 @@ class EPMSProjectController extends Controller
         // Dashboard stats
         $stats = [
             'total' => $projects->count(),
-            'active' => $projects->where('status', 'in-progress')->count(),
+            'active' => $projects->where('status', Statuses::EPMS_IN_PROGRESS)->count(),
             'planning' => $projects->where('status', 'planning')->count(),
-            'completed' => $projects->where('status', 'completed')->count(),
+            'completed' => $projects->where('status', Statuses::EPMS_COMPLETED)->count(),
             'on_hold' => $projects->where('status', 'on-hold')->count(),
             'total_budget' => $projects->sum('budget'),
             'total_spent' => $projects->sum('budget_spent'),
             'total_tasks' => $projects->sum('total_tasks'),
             'completed_tasks' => $projects->sum('completed_tasks'),
             'critical_risks' => $projects->sum(function ($p) {
-                return $p->risks->where('severity_score', '>=', 20)->whereNotIn('status', ['resolved'])->count();
+                return $p->risks->where('severity_score', '>=', 20)->whereNotIn('status', [Statuses::EPMS_RISK_RESOLVED])->count();
             }),
         ];
 
@@ -134,7 +135,7 @@ class EPMSProjectController extends Controller
                             'description' => $ms['description'] ?? null,
                             'due_date' => $ms['due_date'],
                             'order' => $order++,
-                            'status' => 'pending',
+                            'status' => Statuses::EPMS_PENDING,
                         ]);
                     }
                 }
@@ -184,7 +185,7 @@ class EPMSProjectController extends Controller
                 'start' => $task->start_date->format('Y-m-d'),
                 'end' => $task->end_date->format('Y-m-d'),
                 'progress' => $task->progress,
-                'custom_class' => $task->status === 'completed' ? 'bar-completed' : ($task->priority === 'urgent' ? 'bar-urgent' : ''),
+                'custom_class' => $task->status === Statuses::EPMS_COMPLETED ? 'bar-completed' : ($task->priority === 'urgent' ? 'bar-urgent' : ''),
                 'dependencies' => $task->dependencies->map(fn($d) => 'task-' . $d->depends_on_task_id)->implode(', '),
             ];
         })->toArray();
@@ -195,7 +196,7 @@ class EPMSProjectController extends Controller
                 'name' => '◆ ' . $milestone->name,
                 'start' => $milestone->due_date->format('Y-m-d'),
                 'end' => $milestone->due_date->format('Y-m-d'),
-                'progress' => $milestone->status === 'completed' ? 100 : 0,
+                'progress' => $milestone->status === Statuses::EPMS_COMPLETED ? 100 : 0,
                 'custom_class' => 'bar-milestone',
             ];
         })->toArray();
@@ -222,7 +223,7 @@ class EPMSProjectController extends Controller
 
         // Burndown data (for active sprint)
         $burndownData = [];
-        $activeSprint = $project->sprints->where('status', 'active')->first();
+        $activeSprint = $project->sprints->where('status', Statuses::EPMS_ACTIVE)->first();
         if ($activeSprint) {
             $burndownData = $activeSprint->getBurndownData();
         }
@@ -378,7 +379,7 @@ class EPMSProjectController extends Controller
 
         $task->update($validated);
 
-        if ($validated['status'] === 'completed') {
+        if ($validated['status'] === Statuses::EPMS_COMPLETED) {
             $task->completed_at = now();
             $task->progress = 100;
             $task->kanban_column = 'done';
@@ -435,17 +436,17 @@ class EPMSProjectController extends Controller
         $statusMap = [
             'backlog' => 'todo',
             'todo' => 'todo',
-            'in-progress' => 'in-progress',
+            'in-progress' => Statuses::EPMS_IN_PROGRESS,
             'review' => 'review',
             'testing' => 'review',
-            'done' => 'completed',
+            'done' => Statuses::EPMS_COMPLETED,
         ];
 
         $task->kanban_column = $validated['kanban_column'];
         $task->kanban_order = $validated['kanban_order'];
         $task->status = $statusMap[$validated['kanban_column']];
 
-        if ($task->status === 'completed') {
+        if ($task->status === Statuses::EPMS_COMPLETED) {
             $task->progress = 100;
             $task->completed_at = now();
         }
@@ -534,10 +535,10 @@ class EPMSProjectController extends Controller
         $project = EPMSProject::findOrFail($id);
 
         // End any active sprint
-        $project->sprints()->where('status', 'active')->update(['status' => 'completed']);
+        $project->sprints()->where('status', Statuses::EPMS_ACTIVE)->update(['status' => Statuses::EPMS_COMPLETED]);
 
         $sprint = EPMSSprint::where('project_id', $project->id)->findOrFail($sprintId);
-        $sprint->update(['status' => 'active']);
+        $sprint->update(['status' => Statuses::EPMS_ACTIVE]);
 
         return response()->json(['success' => true, 'message' => 'Sprint started!']);
     }
@@ -548,7 +549,7 @@ class EPMSProjectController extends Controller
         $sprint = EPMSSprint::where('project_id', $project->id)->findOrFail($sprintId);
 
         $sprint->update([
-            'status' => 'completed',
+            'status' => Statuses::EPMS_COMPLETED,
             'retrospective_notes' => $request->input('retrospective_notes'),
         ]);
 
@@ -589,7 +590,7 @@ class EPMSProjectController extends Controller
         ]);
 
         $risk->update($validated);
-        if ($validated['status'] === 'resolved') {
+        if ($validated['status'] === Statuses::EPMS_RISK_RESOLVED) {
             $risk->update(['resolved_date' => now()]);
         }
 
@@ -993,12 +994,12 @@ class EPMSProjectController extends Controller
         foreach ($members as $member) {
             $assignedTasks = $project->tasks()
                 ->where('assigned_to', $member->user_id)
-                ->whereNotIn('status', ['completed'])
+                ->whereNotIn('status', [Statuses::EPMS_COMPLETED])
                 ->count();
 
             $totalHours = $project->tasks()
                 ->where('assigned_to', $member->user_id)
-                ->whereNotIn('status', ['completed'])
+                ->whereNotIn('status', [Statuses::EPMS_COMPLETED])
                 ->sum('estimated_hours');
 
             $workload[] = [

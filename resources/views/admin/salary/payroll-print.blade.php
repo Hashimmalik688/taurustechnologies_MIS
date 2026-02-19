@@ -18,14 +18,14 @@
     .header {
         text-align: center;
         margin-bottom: 30px;
-        border-bottom: 2px solid #d4af37;
+        border-bottom: 2px solid var(--bs-gold);
         padding-bottom: 20px;
     }
     
     .company-name {
         font-size: 24px;
         font-weight: bold;
-        color: #d4af37;
+        color: var(--bs-gold);
         margin-bottom: 5px;
     }
     
@@ -42,7 +42,7 @@
         gap: 15px;
         margin-bottom: 25px;
         padding: 15px;
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
         border-radius: 5px;
     }
     
@@ -75,7 +75,7 @@
     }
     
     th {
-        background-color: #d4af37;
+        background-color: var(--bs-gold);
         color: white;
         font-weight: bold;
         text-align: center;
@@ -104,7 +104,7 @@
         text-align: right;
         font-family: 'Courier New', monospace;
         width: 100px;
-        color: #dc3545;
+        color: var(--bs-status-absent);
     }
     
     .net-amount {
@@ -112,7 +112,7 @@
         font-weight: bold;
         font-family: 'Courier New', monospace;
         width: 100px;
-        color: #28a745;
+        color: var(--bs-status-present);
     }
     
     .totals-row {
@@ -184,7 +184,7 @@
     
     .print-buttons button:hover,
     .print-buttons a:hover {
-        background: #f0f0f0;
+        background: var(--bs-print-bg-alt);
     }
 </style>
 </head>

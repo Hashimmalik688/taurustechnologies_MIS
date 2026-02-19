@@ -4,17 +4,78 @@
 // custom-variables
 //
 
-// Taurus Brand Colors
+// ═══════════════════════════════════════════════════════════════════
+//  Taurus Brand Colors
+//  Override these variables to create a new theme.
+// ═══════════════════════════════════════════════════════════════════
+
 $taurus-gold:                                         #d4af37;
 $taurus-gold-dark:                                    #b8941f;
+$taurus-gold-light:                                   #f5ecd0;
+$taurus-gold-bright:                                  #e6c84d;
 $taurus-navy:                                         #0f172a;
 
-// Attendance Status Colors
+// ═══════════════════════════════════════════════════════════════════
+//  Semantic UI Colors
+//  Used across cards, badges, stats, dashboards, and charts.
+// ═══════════════════════════════════════════════════════════════════
+
+// --- Contextual / Feedback colors (extend Bootstrap's palette) ---
+$ui-success:                                          #10b981;
+$ui-success-dark:                                     #059669;
+$ui-danger:                                           #ef4444;
+$ui-danger-dark:                                      #dc2626;
+$ui-warning:                                          #f59e0b;
+$ui-info:                                             #3b82f6;
+$ui-info-dark:                                        #1d4ed8;
+$ui-purple:                                           #8b5cf6;
+$ui-indigo:                                           #6366f1;
+
+// --- Gradient pair (used across dashboard cards, headers) ---
+$gradient-start:                                      #667eea;
+$gradient-end:                                        #764ba2;
+
+// --- Surface / Text / Border (neutral palette) ---
+$surface-50:                                          #f9fafb;
+$surface-100:                                         #f3f4f6;
+$surface-200:                                         #e5e7eb;
+$surface-300:                                         #cbd5e1;
+$surface-400:                                         #94a3b8;
+$surface-500:                                         #6b7280;
+$surface-600:                                         #64748b;
+$surface-700:                                         #111827;
+$surface-800:                                         #1e293b;
+$surface-900:                                         #0f172a;
+$surface-muted:                                       #9ca3af;
+$surface-bg-light:                                    #f8f9fa;
+
+// --- Print / Payroll / Formal document colors ---
+$print-header-bg:                                     #2d2d2d;
+$print-body-dark:                                     #1a1a1a;
+$print-border:                                        #e5e5e5;
+$print-bg-alt:                                        #f0f0f0;
+
+// ═══════════════════════════════════════════════════════════════════
+//  Attendance Status Colors
+// ═══════════════════════════════════════════════════════════════════
+
 $status-present:                                      #28a745;
 $status-absent:                                       #dc3545;
 $status-leave:                                        #ffc107;
 $status-late:                                         #fd7e14;
 $status-default:                                      #6c757d;
+
+// ═══════════════════════════════════════════════════════════════════
+//  Chart Colors (used by ApexCharts, Chart.js, ECharts)
+//  Swap these for a different chart palette across all dashboards.
+// ═══════════════════════════════════════════════════════════════════
+
+$chart-primary:                                       #556ee6;
+$chart-success:                                       #34c38f;
+$chart-warning:                                       #f1b44c;
+$chart-danger:                                        #f46a6a;
+$chart-info:                                          #50a5f1;
+$chart-muted:                                         #8791af;
 
 // Vertical Sidebar  Light
 $sidebar-bg:                                          #ffffff;

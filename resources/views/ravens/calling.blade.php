@@ -13,8 +13,8 @@
             min-width: 150px;
         }
         .auto-dial-btn.active {
-            background: #f46a6a !important;
-            border-color: #f46a6a !important;
+            background: var(--bs-chart-danger) !important;
+            border-color: var(--bs-chart-danger) !important;
         }
         .dial-btn {
             transition: all 0.2s;
@@ -24,7 +24,7 @@
         }
         .lead-row.calling {
             background-color: rgba(52, 195, 143, 0.1) !important;
-            border-left: 3px solid #34c38f;
+            border-left: 3px solid var(--bs-chart-success);
         }
         .lead-row.dialed {
             opacity: 0.6;
@@ -159,7 +159,7 @@
 
                 <div class="card-body">
                     <!-- Dial Tracking Legend -->
-                    <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded" style="background: #f8f9fa; font-size: 0.85rem;">
+                    <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded" style="background: var(--bs-surface-bg-light); font-size: 0.85rem;">
                         <strong><i class="bx bx-info-circle me-1"></i> Dial Tracking:</strong>
                         <span><span class="dial-badge is-mine" style="background-color: #4e73df; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">ME</span> = You dialed</span>
                         <span><span class="dial-badge" style="background-color: #e74a3b; width: 20px; height: 20px; font-size: 0.55rem; display: inline-flex;">AB</span> = Another closer dialed</span>
@@ -254,7 +254,7 @@
     <div class="modal fade" id="callDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);">
                     <h5 class="modal-title text-white"><i class="fas fa-phone-alt me-2"></i><span id="callModalStatus">Call Connected</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -266,10 +266,10 @@
                             <div class="mb-4">
                                 <i class="fas fa-phone-alt text-success" style="font-size: 4rem;"></i>
                             </div>
-                            <h3 class="mb-3" style="color: #d4af37;" id="callerName">Connecting...</h3>
+                            <h3 class="mb-3" style="color: var(--bs-gold);" id="callerName">Connecting...</h3>
                             <p class="lead mb-2" id="callerPhone"></p>
                             <p class="text-muted">Call in progress</p>
-                            <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white;" onclick="goToPhase2()">
+                            <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" onclick="goToPhase2()">
                                 Start Call Info <i class="fas fa-arrow-right ms-2"></i>
                             </button>
                         </div>
@@ -393,7 +393,7 @@
                             <button type="button" class="btn btn-light btn-lg px-4 me-2" onclick="goToPhase1()">
                                 <i class="fas fa-arrow-left me-2"></i> Back
                             </button>
-                            <button type="button" class="btn btn-lg px-4" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white;" id="showMoreBtn" onclick="goToPhase3()">
+                            <button type="button" class="btn btn-lg px-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" id="showMoreBtn" onclick="goToPhase3()">
                                 <i class="fas fa-arrow-right me-2"></i> Continue
                             </button>
                         </div>
@@ -408,7 +408,7 @@
                         <div class="row g-3">
                             <!-- Personal Information Section -->
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Personal Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Personal Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -565,7 +565,7 @@
 
                             <!-- Medical Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Medical Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Medical Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -615,7 +615,7 @@
 
                             <!-- Policy Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Policy Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Policy Information</h5>
                             </div>
 
                             <!-- Beneficiaries Section -->
@@ -703,7 +703,7 @@
 
                             <!-- Banking Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Banking Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Banking Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -775,7 +775,7 @@
 
                             <!-- Card Information Section -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-credit-card me-2"></i>Card Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-credit-card me-2"></i>Card Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -807,7 +807,7 @@
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;">Additional Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);">Additional Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -824,7 +824,7 @@
 
                             <!-- Sale Assignment Section (moved from Phase 2) -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-user-tag me-2"></i>Sale Assignment</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-user-tag me-2"></i>Sale Assignment</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -851,7 +851,7 @@
                             </div>
 
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Assigned Partner:</label>
@@ -861,7 +861,7 @@
 
                             <!-- Follow Up Schedule -->
                             <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3" style="color: #d4af37;"><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
+                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-gold);"><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Follow Up Required:</label>

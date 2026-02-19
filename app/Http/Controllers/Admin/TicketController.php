@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PabsTicket;
 use App\Models\PabsTicketComment;
 use App\Support\Roles;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -18,11 +19,11 @@ class TicketController extends Controller
         // Calculate KPI metrics - exclude closed tickets from priority counts
         $kpis = [
             'total_tickets' => PabsTicket::count(),
-            'open_tickets' => PabsTicket::where('status', 'OPEN')->count(),
-            'closed_tickets' => PabsTicket::where('status', 'CLOSED')->count(),
-            'high_priority' => PabsTicket::whereNot('status', 'CLOSED')->where('priority', 'HIGH')->count(),
-            'medium_priority' => PabsTicket::whereNot('status', 'CLOSED')->where('priority', 'MEDIUM')->count(),
-            'low_priority' => PabsTicket::whereNot('status', 'CLOSED')->where('priority', 'LOW')->count(),
+            'open_tickets' => PabsTicket::where('status', Statuses::TICKET_OPEN)->count(),
+            'closed_tickets' => PabsTicket::where('status', Statuses::TICKET_CLOSED)->count(),
+            'high_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_HIGH)->count(),
+            'medium_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_MEDIUM)->count(),
+            'low_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_LOW)->count(),
         ];
         
         $query = PabsTicket::with('creator', 'assignee');
@@ -94,8 +95,8 @@ class TicketController extends Controller
             'total_cost' => $request->total_cost,
             'quote_amount' => $request->quote_amount,
             'created_by' => auth()->id(),
-            'status' => 'OPEN',
-            'approval_status' => 'PENDING',
+            'status' => Statuses::TICKET_OPEN,
+            'approval_status' => Statuses::APPROVAL_PENDING,
         ]);
         
         return redirect()->route('pabs.tickets.show', $ticket)->with('success', 'Ticket created successfully.');
@@ -131,18 +132,18 @@ class TicketController extends Controller
         $updateData = $request->only('subject', 'description', 'priority', 'status', 'assigned_to', 'total_cost', 'quote_amount');
         
         // If resolving, add resolution timestamp
-        if ($request->status === 'RESOLVED' && $ticket->status !== 'RESOLVED') {
+        if ($request->status === Statuses::TICKET_RESOLVED && $ticket->status !== Statuses::TICKET_RESOLVED) {
             $updateData['resolved_at'] = now();
         }
         
         // If status changes from RESOLVED to something else, clear resolved_at
-        if ($ticket->status === 'RESOLVED' && $request->status !== 'RESOLVED') {
+        if ($ticket->status === Statuses::TICKET_RESOLVED && $request->status !== Statuses::TICKET_RESOLVED) {
             $updateData['resolved_at'] = null;
         }
         
         // Reset approval status if assigning to new user
         if ($request->filled('assigned_to') && $request->assigned_to !== $ticket->assigned_to) {
-            $updateData['approval_status'] = 'PENDING';
+            $updateData['approval_status'] = Statuses::APPROVAL_PENDING;
             $updateData['approved_at'] = null;
         }
         
@@ -179,7 +180,7 @@ class TicketController extends Controller
         ]);
         
         $ticket->update([
-            'status' => 'RESOLVED',
+            'status' => Statuses::TICKET_RESOLVED,
             'resolution_notes' => $request->resolution_notes,
             'resolved_at' => now(),
         ]);
@@ -192,7 +193,7 @@ class TicketController extends Controller
      */
     public function close(Request $request, PabsTicket $ticket)
     {
-        $ticket->update(['status' => 'CLOSED']);
+        $ticket->update(['status' => Statuses::TICKET_CLOSED]);
         
         return redirect()->back()->with('success', 'Ticket closed.');
     }
@@ -212,10 +213,10 @@ class TicketController extends Controller
         ]);
 
         $ticket->update([
-            'approval_status' => 'APPROVED',
+            'approval_status' => Statuses::APPROVAL_APPROVED,
             'approved_at' => now(),
             'approval_notes' => $request->approval_notes,
-            'status' => 'CLOSED',
+            'status' => Statuses::TICKET_CLOSED,
         ]);
 
         // Add system comment for approval
@@ -243,9 +244,9 @@ class TicketController extends Controller
         ]);
 
         $ticket->update([
-            'approval_status' => 'REJECTED',
+            'approval_status' => Statuses::APPROVAL_REJECTED,
             'approval_notes' => $request->approval_notes,
-            'status' => 'CLOSED',
+            'status' => Statuses::TICKET_CLOSED,
             'assigned_to' => null,
         ]);
 

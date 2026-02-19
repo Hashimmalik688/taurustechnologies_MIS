@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -220,7 +221,7 @@ class Lead extends Model
 
         // Automatically set chargeback_marked_date when status changes to chargeback
         static::updating(function ($lead) {
-            if ($lead->isDirty('status') && $lead->status === 'chargeback') {
+            if ($lead->isDirty('status') && $lead->status === Statuses::LEAD_CHARGEBACK) {
                 if (empty($lead->chargeback_marked_date)) {
                     $lead->chargeback_marked_date = now();
                 }
@@ -229,14 +230,14 @@ class Lead extends Model
 
         // Auto-assign QA status when lead comes to sales (status = accepted)
         static::creating(function ($lead) {
-            if ($lead->status === 'accepted') {
-                $lead->qa_status = 'In Review';
+            if ($lead->status === Statuses::LEAD_ACCEPTED) {
+                $lead->qa_status = Statuses::QA_IN_REVIEW;
             }
         });
 
         static::updating(function ($lead) {
-            if ($lead->isDirty('status') && $lead->status === 'accepted' && empty($lead->qa_status)) {
-                $lead->qa_status = 'In Review';
+            if ($lead->isDirty('status') && $lead->status === Statuses::LEAD_ACCEPTED && empty($lead->qa_status)) {
+                $lead->qa_status = Statuses::QA_IN_REVIEW;
             }
         });
     }

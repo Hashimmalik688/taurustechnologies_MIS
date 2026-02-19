@@ -1,0 +1,96 @@
+//
+// Theme Utility Classes
+//
+// Use these classes instead of inline style= attributes with hardcoded colors.
+// All colors reference CSS custom properties so they adapt to theme changes.
+//
+
+// ═══════════════════════════════════════════════════════════════════
+//  Brand / Gold utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.text-gold            { color: var(--#{$prefix}gold) !important; }
+.text-gold-dark       { color: var(--#{$prefix}gold-dark) !important; }
+.bg-gold              { background-color: var(--#{$prefix}gold) !important; }
+.bg-gold-light        { background-color: var(--#{$prefix}gold-light) !important; }
+.bg-gold-gradient     { background: var(--#{$prefix}gold-gradient) !important; }
+.border-gold          { border-color: var(--#{$prefix}gold) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Semantic UI color utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.text-ui-success      { color: var(--#{$prefix}ui-success) !important; }
+.text-ui-danger       { color: var(--#{$prefix}ui-danger) !important; }
+.text-ui-warning      { color: var(--#{$prefix}ui-warning) !important; }
+.text-ui-info         { color: var(--#{$prefix}ui-info) !important; }
+.text-ui-purple       { color: var(--#{$prefix}ui-purple) !important; }
+.text-ui-indigo       { color: var(--#{$prefix}ui-indigo) !important; }
+.text-surface-muted   { color: var(--#{$prefix}surface-muted) !important; }
+.text-surface-500     { color: var(--#{$prefix}surface-500) !important; }
+
+.bg-ui-success        { background-color: var(--#{$prefix}ui-success) !important; }
+.bg-ui-danger         { background-color: var(--#{$prefix}ui-danger) !important; }
+.bg-ui-warning        { background-color: var(--#{$prefix}ui-warning) !important; }
+.bg-ui-info           { background-color: var(--#{$prefix}ui-info) !important; }
+.bg-ui-purple         { background-color: var(--#{$prefix}ui-purple) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Surface / Neutral utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.bg-surface-50        { background-color: var(--#{$prefix}surface-50) !important; }
+.bg-surface-100       { background-color: var(--#{$prefix}surface-100) !important; }
+.bg-surface-200       { background-color: var(--#{$prefix}surface-200) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Gradient utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.bg-gradient-primary  { background: var(--#{$prefix}gradient-primary) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Dashboard stat card pattern
+//  (replaces the most common inline style pattern in views)
+// ═══════════════════════════════════════════════════════════════════
+
+.stat-card {
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &--gold      { background: var(--#{$prefix}gold-gradient); }
+  &--success   { background: linear-gradient(135deg, var(--#{$prefix}ui-success) 0%, var(--#{$prefix}ui-success-dark) 100%); }
+  &--danger    { background: linear-gradient(135deg, var(--#{$prefix}ui-danger) 0%, var(--#{$prefix}ui-danger-dark) 100%); }
+  &--info      { background: linear-gradient(135deg, var(--#{$prefix}ui-info) 0%, var(--#{$prefix}ui-info-dark) 100%); }
+  &--warning   { background: linear-gradient(135deg, var(--#{$prefix}ui-warning) 0%, #d97706 100%); }
+  &--purple    { background: linear-gradient(135deg, var(--#{$prefix}gradient-start) 0%, var(--#{$prefix}gradient-end) 100%); }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Attendance status utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.text-status-present  { color: var(--#{$prefix}status-present) !important; }
+.text-status-absent   { color: var(--#{$prefix}status-absent) !important; }
+.text-status-leave    { color: var(--#{$prefix}status-leave) !important; }
+.text-status-late     { color: var(--#{$prefix}status-late) !important; }
+
+.bg-status-present    { background-color: var(--#{$prefix}status-present) !important; }
+.bg-status-absent     { background-color: var(--#{$prefix}status-absent) !important; }
+.bg-status-leave      { background-color: var(--#{$prefix}status-leave) !important; }
+.bg-status-late       { background-color: var(--#{$prefix}status-late) !important; }
+
+// ═══════════════════════════════════════════════════════════════════
+//  Print / Formal document utilities
+// ═══════════════════════════════════════════════════════════════════
+
+.bg-print-header      { background-color: var(--#{$prefix}print-header-bg) !important; }
+.bg-print-alt         { background-color: var(--#{$prefix}print-bg-alt) !important; }
+.border-print         { border-color: var(--#{$prefix}print-border) !important; }

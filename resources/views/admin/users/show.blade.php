@@ -20,7 +20,7 @@
 
     .info-label {
         font-size: 12px;
-        color: #6c757d;
+        color: var(--bs-status-default);
         font-weight: 600;
         text-transform: uppercase;
         margin-bottom: 4px;
@@ -37,15 +37,15 @@
         font-weight: 600;
         margin-bottom: 20px;
         padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
-        color: #556ee6;
+        border-bottom: 2px solid var(--bs-print-bg-alt);
+        color: var(--bs-chart-primary);
     }
 
     .user-avatar {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -60,7 +60,7 @@
         text-align: center;
         padding: 20px;
         border-radius: 8px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
         color: white;
         margin-bottom: 15px;
     }
@@ -95,7 +95,7 @@
     }
 
     .badge-active {
-        background-color: #34c38f;
+        background-color: var(--bs-chart-success);
         color: white;
         padding: 5px 10px;
         border-radius: 12px;
@@ -103,7 +103,7 @@
     }
 
     .badge-inactive {
-        background-color: #f46a6a;
+        background-color: var(--bs-chart-danger);
         color: white;
         padding: 5px 10px;
         border-radius: 12px;

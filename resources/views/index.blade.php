@@ -25,7 +25,7 @@
 
 .page-subtitle {
     font-size: 0.8rem;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 .time-display {
@@ -42,7 +42,7 @@
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 .time-box .time {
@@ -81,19 +81,19 @@
 }
 
 .status-box.compact.bordered.blue {
-    border-color: #3b82f6;
+    border-color: var(--bs-ui-info);
 }
 
 .status-box.compact.bordered.green {
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
 }
 
 .status-box.compact.bordered.yellow {
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
 }
 
 .status-box.compact.bordered.red {
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
 }
 
 .status-box.compact .status-number {
@@ -124,14 +124,14 @@
 }
 
 .compact-card.bordered {
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--bs-surface-200);
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
 .compact-header {
     padding: 0.5rem 0.75rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--bs-surface-bg-light);
+    border-bottom: 1px solid var(--bs-surface-200);
 }
 
 .compact-header h6 {
@@ -153,7 +153,7 @@
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
-    background: #f8f9fa;
+    background: var(--bs-surface-bg-light);
 }
 
 /* Mini Stat Values */
@@ -166,7 +166,7 @@
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
 }
 
 /* Team Item Compact */
@@ -176,7 +176,7 @@
     align-items: center;
     padding: 0.4rem;
     margin-bottom: 0.35rem;
-    background: #f8f9fa;
+    background: var(--bs-surface-bg-light);
     border-radius: 6px;
     border-left: 2px solid var(--gold);
 }
@@ -223,17 +223,17 @@
 }
 
 .retention-block.cb {
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
     background: rgba(239, 68, 68, 0.05);
 }
 
 .retention-block.retained {
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
     background: rgba(16, 185, 129, 0.05);
 }
 
 .retention-block.pending {
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
     background: rgba(245, 158, 11, 0.05);
 }
 
@@ -244,22 +244,22 @@
 }
 
 .retention-block.cb .ret-number {
-    color: #ef4444;
+    color: var(--bs-ui-danger);
 }
 
 .retention-block.retained .ret-number {
-    color: #10b981;
+    color: var(--bs-ui-success);
 }
 
 .retention-block.pending .ret-number {
-    color: #f59e0b;
+    color: var(--bs-ui-warning);
 }
 
 .ret-label {
     font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin-top: 0.25rem;
 }
 
@@ -267,7 +267,7 @@
 .cb-count {
     font-size: 2rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--bs-ui-danger);
     line-height: 1;
 }
 
@@ -275,14 +275,14 @@
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin: 0.25rem 0;
 }
 
 .cb-amount {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #ef4444;
+    color: var(--bs-ui-danger);
 }
 
 /* Button Gold */
@@ -293,7 +293,7 @@
 }
 
 .btn-gold:hover {
-    background: #b8941f;
+    background: var(--bs-gold-dark);
     color: white;
 }
 
@@ -530,12 +530,12 @@
                     <div class="card-body compact-body">
                         <!-- Summary Counts - Compact Capsules -->
                         <div class="d-flex gap-2 justify-content-center mb-2">
-                            <div class="px-3 py-1" style="background: rgba(16, 185, 129, 0.15); border-radius: 20px; border: 1px solid #10b981; display: inline-flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 1.1rem; font-weight: 700; color: #10b981;" id="presentCount">{{ $present_count }}</span>
+                            <div class="px-3 py-1" style="background: rgba(16, 185, 129, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-success); display: inline-flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 1.1rem; font-weight: 700; color: var(--bs-ui-success);" id="presentCount">{{ $present_count }}</span>
                                 <span style="font-size: 0.7rem; font-weight: 600; color: #065f46;">P</span>
                             </div>
-                            <div class="px-3 py-1" style="background: rgba(239, 68, 68, 0.15); border-radius: 20px; border: 1px solid #ef4444; display: inline-flex; align-items: center; gap: 6px;">
-                                <span style="font-size: 1.1rem; font-weight: 700; color: #ef4444;" id="absentCount">{{ $absent_count }}</span>
+                            <div class="px-3 py-1" style="background: rgba(239, 68, 68, 0.15); border-radius: 20px; border: 1px solid var(--bs-ui-danger); display: inline-flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 1.1rem; font-weight: 700; color: var(--bs-ui-danger);" id="absentCount">{{ $absent_count }}</span>
                                 <span style="font-size: 0.7rem; font-weight: 600; color: #991b1b;">A</span>
                             </div>
                         </div>

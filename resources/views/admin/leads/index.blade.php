@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -38,7 +39,7 @@
         .leads-table thead th {
             position: sticky !important;
             top: 0 !important;
-            background-color: #f8f9fa !important;
+            background-color: var(--bs-surface-bg-light) !important;
             z-index: 10 !important;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
             border-bottom: 2px solid #dee2e6 !important;
@@ -53,7 +54,7 @@
         
         .top-scrollbar-wrapper::-webkit-scrollbar-track,
         .leads-table-wrapper::-webkit-scrollbar-track {
-            background: #e5e5e5;
+            background: var(--bs-print-border);
             border-radius: 6px;
         }
         
@@ -251,13 +252,13 @@
                                         <td>{{ $lead->expiry_date ?? 'N/A' }}</td>
                                     @endhasrole
                                     <td>
-                                        @if ($lead->status == 'pending')
+                                        @if ($lead->status == Statuses::LEAD_PENDING)
                                             <span class="badge bg-warning">Pending</span>
-                                        @elseif ($lead->status == 'accepted')
+                                        @elseif ($lead->status == Statuses::LEAD_ACCEPTED)
                                             <span class="badge bg-success">Approved</span>
-                                        @elseif ($lead->status == 'rejected')
+                                        @elseif ($lead->status == Statuses::LEAD_REJECTED)
                                             <span class="badge bg-danger">Rejected</span>
-                                        @elseif ($lead->status == 'forwarded')
+                                        @elseif ($lead->status == Statuses::LEAD_FORWARDED)
                                             <span class="badge bg-info">Forwarded</span>
                                         @else
                                             <span class="badge bg-secondary">Unknown</span>
@@ -311,7 +312,7 @@
                         aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-xl">
                             <div class="modal-content">
-                                <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);">
+                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);">
                                     <h5 class="modal-title text-white" id="callDetailsModalLabel">
                                         <i class="fas fa-phone-alt me-2"></i> <span id="callModalStatus">Call Connected</span>
                                     </h5>
@@ -330,10 +331,10 @@
                                                 <div class="mb-4">
                                                     <i class="fas fa-phone-alt text-success" style="font-size: 4rem;"></i>
                                                 </div>
-                                                <h3 class="mb-3" style="color: #d4af37;" id="callerName">Connecting...</h3>
+                                                <h3 class="mb-3" style="color: var(--bs-gold);" id="callerName">Connecting...</h3>
                                                 <p class="lead mb-2" id="callerPhone"></p>
                                                 <p class="text-muted">Call in progress</p>
-                                                <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white;" onclick="goToPhase2()">
+                                                <button type="button" class="btn btn-lg mt-4" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" onclick="goToPhase2()">
                                                     Start Call Info <i class="fas fa-arrow-right ms-2"></i>
                                                 </button>
                                             </div>
@@ -342,16 +343,16 @@
                                         <!-- PHASE 2: ESSENTIAL FIELDS -->
                                         <div id="phase2" style="display: none;">
                                             <!-- Caller Info Header -->
-                                            <div class="card mb-4" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+                                            <div class="card mb-4" style="background: linear-gradient(135deg, var(--bs-surface-100) 0%, var(--bs-surface-200) 100%);">
                                                 <div class="card-body py-3">
                                                     <div class="row">
                                                         <div class="col-md-6 text-center border-end">
                                                             <small class="text-muted d-block">CALLER NAME</small>
-                                                            <h5 class="mb-0" style="color: #d4af37;" id="displayName">-</h5>
+                                                            <h5 class="mb-0" style="color: var(--bs-gold);" id="displayName">-</h5>
                                                         </div>
                                                         <div class="col-md-6 text-center">
                                                             <small class="text-muted d-block">PHONE NUMBER</small>
-                                                            <h5 class="mb-0" style="color: #d4af37;" id="displayPhone">-</h5>
+                                                            <h5 class="mb-0" style="color: var(--bs-gold);" id="displayPhone">-</h5>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -361,7 +362,7 @@
                                                 <i class="fas fa-clipboard-list me-2"></i> <strong>Step 1:</strong> Fill all required fields below to continue
                                             </div>
 
-                                            <h5 class="mb-3" style="color: #6366f1;"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                                            <h5 class="mb-3" style="color: var(--bs-ui-indigo);"><i class="fas fa-user me-2"></i>Personal Information</h5>
                                             <div class="row g-3 mb-4">
 
                                                 <!-- DOB -->
@@ -383,7 +384,7 @@
                                                 </div>
                                             </div>
 
-                                            <h5 class="mb-3 mt-4" style="color: #10b981;"><i class="fas fa-shield-alt me-2"></i>Policy Details</h5>
+                                            <h5 class="mb-3 mt-4" style="color: var(--bs-ui-success);"><i class="fas fa-shield-alt me-2"></i>Policy Details</h5>
                                             <div class="row g-3 mb-4">
                                                 <!-- Carrier -->
                                                 <div class="col-md-4">
@@ -456,7 +457,7 @@
                                                 <button type="button" class="btn btn-secondary" onclick="goToPhase1()">
                                                     <i class="fas fa-arrow-left me-2"></i> Back
                                                 </button>
-                                                <button type="button" class="btn btn-lg" style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); color: white;" id="showMoreBtn" disabled onclick="goToPhase3()">
+                                                <button type="button" class="btn btn-lg" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white;" id="showMoreBtn" disabled onclick="goToPhase3()">
                                                     <i class="fas fa-unlock me-2"></i> Show More Details
                                                 </button>
                                             </div>
@@ -473,32 +474,32 @@
 
                                                 <!-- Personal Information Section -->
                                                 <div class="col-12">
-                                                    <h5 class="border-bottom pb-2 mb-3" style="color: #6366f1;">
+                                                    <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-indigo);">
                                                         <i class="fas fa-user me-2"></i>Personal Information
                                                     </h5>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">👤 Name:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_name">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_name">-</div>
                                                     <input type="text" class="form-control" name="cn_name" id="change_name" placeholder="Confirm or update if different">
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📞 Phone Number:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_phone">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_phone">-</div>
                                                     <input type="text" class="form-control" name="phone_number" id="change_phone" placeholder="Confirm or update if different">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📅 Date of Birth:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_dob">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_dob">-</div>
                                                     <input type="date" class="form-control" name="date_of_birth" id="change_dob">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">⚧ Gender:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_gender">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_gender">-</div>
                                                     <select class="form-select" name="gender" id="change_gender">
                                                         <option value="">Select</option>
                                                         <option value="Male">Male</option>
@@ -509,19 +510,19 @@
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🌍 Birth Place:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_birthplace">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_birthplace">-</div>
                                                     <input type="text" class="form-control" name="birth_place" id="change_birthplace" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🔢 SSN:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_ssn">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_ssn">-</div>
                                                     <input type="text" class="form-control" name="ssn" id="change_ssn" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🚬 Smoker:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_smoker">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_smoker">-</div>
                                                     <select class="form-select" name="smoker" id="change_smoker">
                                                         <option value="0">No</option>
                                                         <option value="1">Yes</option>
@@ -530,118 +531,118 @@
 
                                                 <div class="col-md-2">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📏 Height:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_height">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_height">-</div>
                                                     <input type="text" class="form-control" name="height" id="change_height" placeholder="e.g., 5'10&quot;">
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">⚖️ Weight:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_weight">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_weight">-</div>
                                                     <input type="text" class="form-control" name="weight" id="change_weight" placeholder="e.g., 180">
                                                 </div>
 
                                                 <div class="col-md-12">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🏠 Address:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_address">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_address">-</div>
                                                     <input type="text" class="form-control" name="address" id="change_address" placeholder="Confirm or update">
                                                 </div>
 
                                                 <!-- Medical Information Section -->
                                                 <div class="col-12 mt-4">
-                                                    <h5 class="border-bottom pb-2 mb-3" style="color: #ef4444;">
+                                                    <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-danger);">
                                                         <i class="fas fa-heartbeat me-2"></i>Medical Information
                                                     </h5>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🏥 Medical Issue:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_medical_issue">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_medical_issue">-</div>
                                                     <textarea class="form-control" name="medical_issue" id="change_medical_issue" rows="2" placeholder="Confirm or update"></textarea>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">💊 Medications:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_medications">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_medications">-</div>
                                                     <textarea class="form-control" name="medications" id="change_medications" rows="2" placeholder="Confirm or update"></textarea>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">👨‍⚕️ Doctor Name:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_doctor">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_doctor">-</div>
                                                     <input type="text" class="form-control" name="doctor_name" id="change_doctor" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📍 Doctor Address:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_doctor_address">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_doctor_address">-</div>
                                                     <input type="text" class="form-control" name="doctor_address" id="change_doctor_address" placeholder="Confirm or update">
                                                 </div>
 
                                                 <!-- Policy Information Section -->
                                                 <div class="col-12 mt-4">
-                                                    <h5 class="border-bottom pb-2 mb-3" style="color: #10b981;">
+                                                    <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-success);">
                                                         <i class="fas fa-shield-alt me-2"></i>Policy Information
                                                     </h5>
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">👤 Beneficiary:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_beneficiary">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_beneficiary">-</div>
                                                     <input type="text" class="form-control" name="beneficiary" id="change_beneficiary" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📅 Beneficiary DOB:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_beneficiary_dob">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_beneficiary_dob">-</div>
                                                     <input type="date" class="form-control" name="beneficiary_dob" id="change_beneficiary_dob">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📋 Policy Type:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_policy_type">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_policy_type">-</div>
                                                     <input type="text" class="form-control" name="policy_type" id="change_policy_type" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🏢 Carrier:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_carrier">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_carrier">-</div>
                                                     <input type="text" class="form-control" name="carrier_name" id="change_carrier" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">💰 Coverage Amount:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_coverage">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_coverage">-</div>
                                                     <input type="number" class="form-control" name="coverage_amount" id="change_coverage" step="0.01" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">💳 Monthly Premium:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_premium">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_premium">-</div>
                                                     <input type="number" class="form-control" name="monthly_premium" id="change_premium" step="0.01" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📅 Initial Draft Date:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_draft_date">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_draft_date">-</div>
                                                     <input type="date" class="form-control" name="initial_draft_date" id="change_draft_date">
                                                 </div>
 
                                                 <!-- Banking Information Section -->
                                                 <div class="col-12 mt-4">
-                                                    <h5 class="border-bottom pb-2 mb-3" style="color: #3b82f6;">
+                                                    <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-info);">
                                                         <i class="fas fa-university me-2"></i>Banking Information
                                                     </h5>
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🏦 Bank Name:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_bank_name">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_bank_name">-</div>
                                                     <input type="text" class="form-control" name="bank_name" id="change_bank_name" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">💼 Account Type:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_account_type">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_account_type">-</div>
                                                     <select class="form-select" name="account_type" id="change_account_type">
                                                         <option value="">Select</option>
                                                         <option value="Checking">Checking</option>
@@ -651,57 +652,57 @@
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🔢 Routing Number:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_routing">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_routing">-</div>
                                                     <input type="text" class="form-control" name="routing_number" id="change_routing" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🔢 Account Number:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_account">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_account">-</div>
                                                     <input type="text" class="form-control" name="account_number" id="change_account" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">🔐 Password:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_password">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_password">-</div>
                                                     <input type="text" class="form-control" name="password" id="change_password" placeholder="Enter password">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">✓ Verified By:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_verified_by">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_verified_by">-</div>
                                                     <input type="text" class="form-control" name="verified_by" id="change_verified_by" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">💵 Bank Balance:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_balance">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_balance">-</div>
                                                     <input type="number" class="form-control" name="bank_balance" id="change_balance" step="0.01" placeholder="Confirm or update">
                                                 </div>
 
                                                 <!-- Additional Information -->
                                                 <div class="col-12 mt-4">
-                                                    <h5 class="border-bottom pb-2 mb-3" style="color: #8b5cf6;">
+                                                    <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-purple);">
                                                         <i class="fas fa-info-circle me-2"></i>Additional Information
                                                     </h5>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📍 Source:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_source">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_source">-</div>
                                                     <input type="text" class="form-control" name="source" id="change_source" placeholder="Confirm or update">
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">👔 Closer Name:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_closer">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_closer">-</div>
                                                     <input type="text" class="form-control" name="closer_name" id="change_closer" placeholder="Confirm or update">
                                                 </div>
                                             </div>
 
                                             <!-- QA Details Section -->
                                             <div class="col-12 mt-4">
-                                                <h5 class="border-bottom pb-2 mb-3" style="color: #f59e0b;">
+                                                <h5 class="border-bottom pb-2 mb-3" style="color: var(--bs-ui-warning);">
                                                     <i class="fas fa-check-circle me-2"></i>QA Details
                                                 </h5>
                                             </div>
@@ -709,7 +710,7 @@
                                             <div class="row g-3">
                                                 <div class="col-md-4">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">✅ QA Status:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_qa_status">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_qa_status">-</div>
                                                     <select class="form-select" name="qa_status" id="change_qa_status">
                                                         <option value="">Not Set</option>
                                                         <option value="Pending">⏳ Pending</option>
@@ -721,7 +722,7 @@
 
                                                 <div class="col-md-8">
                                                     <label class="form-label fw-bold" style="font-size: 0.95rem;">📝 QA Reason/Notes:</label>
-                                                    <div class="p-2 mb-2" style="background: #f3f4f6; border-left: 3px solid #d4af37; border-radius: 4px; font-weight: 500;" id="orig_qa_reason">-</div>
+                                                    <div class="p-2 mb-2" style="background: var(--bs-surface-100); border-left: 3px solid var(--bs-gold); border-radius: 4px; font-weight: 500;" id="orig_qa_reason">-</div>
                                                     <textarea class="form-control" name="qa_reason" id="change_qa_reason" rows="3" placeholder="Enter QA comments or reasons"></textarea>
                                                 </div>
                                             </div>

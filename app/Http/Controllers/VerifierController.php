@@ -5,21 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
+use App\Support\Teams;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class VerifierController extends Controller
 {
-    public function create(string $team = 'peregrine')
+    public function create(string $team = Teams::PEREGRINE)
     {
         $team = strtolower($team);
-        if (!in_array($team, ['ravens', 'peregrine'])) {
+        if (!in_array($team, Teams::ALL)) {
             abort(404);
         }
 
         // Fetch Peregrine closers (by role or department)
         $closers = User::role(Roles::PEREGRINE_CLOSER)
-            ->orWhere('department', 'peregrine')
+            ->orWhere('department', Teams::PEREGRINE)
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -29,10 +31,10 @@ class VerifierController extends Controller
         ]);
     }
 
-    public function store(Request $request, string $team = 'peregrine')
+    public function store(Request $request, string $team = Teams::PEREGRINE)
     {
         $team = strtolower($team);
-        if (!in_array($team, ['ravens', 'peregrine'])) {
+        if (!in_array($team, Teams::ALL)) {
             abort(404);
         }
 
@@ -68,12 +70,12 @@ class VerifierController extends Controller
             'address' => $validated['address'],
             'state' => $validated['state'],
             'zip_code' => $validated['zip_code'],
-            'status' => 'transferred',
+            'status' => Statuses::LEAD_TRANSFERRED,
             'team' => $team,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
             'transferred_at' => now(),
-            'source_type' => 'peregrine', // Mark as peregrine lead
+            'source_type' => Teams::PEREGRINE, // Mark as peregrine lead
         ]);
 
         return redirect()->route('verifier.create', ['team' => $team])
@@ -140,11 +142,11 @@ class VerifierController extends Controller
 
         return [
             'total_verified' => $leads->count(),
-            'transferred' => $leads->where('status', 'transferred')->count(),
-            'closed' => $leads->where('status', 'closed')->count(),
-            'sales' => $leads->where('status', 'sale')->count(),
-            'pending' => $leads->where('status', 'pending')->count(),
-            'declined' => $leads->where('status', 'declined')->count(),
+            'transferred' => $leads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
+            'closed' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
+            'sales' => $leads->where('status', Statuses::LEAD_SALE)->count(),
+            'pending' => $leads->where('status', Statuses::LEAD_PENDING)->count(),
+            'declined' => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
         ];
     }
 

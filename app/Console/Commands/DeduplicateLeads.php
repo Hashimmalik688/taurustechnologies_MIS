@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Lead;
+use App\Support\Teams;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +22,7 @@ class DeduplicateLeads extends Command
             ->whereNotNull('phone_number')
             ->where('phone_number', '!=', '')
             ->where(function($q) {
-                $q->where('team', '!=', 'peregrine')
+                $q->where('team', '!=', Teams::PEREGRINE)
                   ->orWhereNull('team');
             });
         
@@ -38,7 +39,7 @@ class DeduplicateLeads extends Command
             // ALWAYS exclude peregrine team from deduplication
             $leads = Lead::where('phone_number', $dupePhone->phone_number)
                 ->where(function($q) {
-                    $q->where('team', '!=', 'peregrine')
+                    $q->where('team', '!=', Teams::PEREGRINE)
                       ->orWhereNull('team');
                 })
                 ->orderBy('id', 'asc')

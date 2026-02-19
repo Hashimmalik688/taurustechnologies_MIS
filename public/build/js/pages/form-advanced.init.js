@@ -26,9 +26,10 @@ File: Form Advanced Js File
         });
 
 
+        // Note: Replace this URL with your own API endpoint for production use
         $('.select2-ajax').select2({
             ajax: {
-                url: "https://api.github.com/search/repositories",
+                url: "/api/search/demo",
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {

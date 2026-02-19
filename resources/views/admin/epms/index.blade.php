@@ -7,7 +7,7 @@
 @section('css')
     <style>
         .epms-hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             border-radius: 20px; padding: 40px; margin-bottom: 30px;
             position: relative; overflow: hidden;
         }
@@ -20,7 +20,7 @@
 
         .stat-card-epms {
             background: #fff; border-radius: 16px; padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--bs-print-bg-alt);
             transition: all 0.3s ease; height: 100%;
         }
         .stat-card-epms:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
@@ -29,7 +29,7 @@
             align-items: center; justify-content: center; font-size: 24px; color: #fff; margin-bottom: 15px;
         }
         .stat-card-epms .stat-value { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
-        .stat-card-epms .stat-label { color: #6c757d; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; }
+        .stat-card-epms .stat-label { color: var(--bs-status-default); font-size: 0.85rem; font-weight: 500; text-transform: uppercase; }
 
         .project-card-v2 {
             background: #fff; border-radius: 16px; border: 1px solid #eef0f3;
@@ -39,10 +39,10 @@
         .project-card-v2 .card-header-strip { height: 6px; }
         .project-card-v2 .card-body { padding: 25px; }
         .project-card-v2 .project-name { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; text-decoration: none; }
-        .project-card-v2 .project-name:hover { color: #667eea; }
+        .project-card-v2 .project-name:hover { color: var(--bs-gradient-start); }
 
         .priority-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .priority-critical { background: #fee2e2; color: #dc2626; }
+        .priority-critical { background: #fee2e2; color: var(--bs-ui-danger-dark); }
         .priority-high { background: #fef3c7; color: #d97706; }
         .priority-medium { background: #dbeafe; color: #2563eb; }
         .priority-low { background: #dcfce7; color: #16a34a; }
@@ -51,24 +51,24 @@
         .method-agile { background: #ede9fe; color: #7c3aed; }
         .method-waterfall { background: #e0f2fe; color: #0284c7; }
         .method-hybrid { background: #fce7f3; color: #db2777; }
-        .method-kanban { background: #ecfdf5; color: #059669; }
+        .method-kanban { background: #ecfdf5; color: var(--bs-ui-success-dark); }
 
         .health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        .health-dot.green { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
-        .health-dot.yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
-        .health-dot.red { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+        .health-dot.green { background: var(--bs-ui-success); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+        .health-dot.yellow { background: var(--bs-ui-warning); box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+        .health-dot.red { background: var(--bs-ui-danger); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
 
-        .progress-bar-modern { height: 6px; border-radius: 3px; background: #f0f0f0; }
-        .progress-bar-modern .progress-bar { border-radius: 3px; background: linear-gradient(90deg, #667eea, #764ba2); }
+        .progress-bar-modern { height: 6px; border-radius: 3px; background: var(--bs-print-bg-alt); }
+        .progress-bar-modern .progress-bar { border-radius: 3px; background: linear-gradient(90deg, var(--bs-gradient-start), var(--bs-gradient-end)); }
 
         .ai-banner {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, var(--bs-surface-900) 0%, var(--bs-surface-800) 100%);
             border-radius: 16px; padding: 30px; color: #fff;
             position: relative; overflow: hidden;
         }
         .ai-banner::before { content: '🤖'; position: absolute; right: 30px; top: 50%; transform: translateY(-50%); font-size: 80px; opacity: 0.15; }
         .ai-banner h5 { color: #a78bfa; font-weight: 700; }
-        .ai-banner p { color: #94a3b8; }
+        .ai-banner p { color: var(--bs-surface-400); }
     </style>
 @endsection
 
@@ -104,42 +104,42 @@
     <div class="row mb-4">
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);"><i class="bx bx-briefcase-alt-2"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));"><i class="bx bx-briefcase-alt-2"></i></div>
                 <div class="stat-value">{{ $stats['total'] }}</div>
                 <div class="stat-label">Total Projects</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i class="bx bx-play-circle"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-success), var(--bs-ui-success-dark));"><i class="bx bx-play-circle"></i></div>
                 <div class="stat-value">{{ $stats['active'] }}</div>
                 <div class="stat-label">Active</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="bx bx-edit-alt"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-info), #2563eb);"><i class="bx bx-edit-alt"></i></div>
                 <div class="stat-value">{{ $stats['planning'] }}</div>
                 <div class="stat-label">Planning</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="bx bx-check-circle"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-warning), #d97706);"><i class="bx bx-check-circle"></i></div>
                 <div class="stat-value">{{ $stats['completed'] }}</div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="bx bx-task"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-purple), #7c3aed);"><i class="bx bx-task"></i></div>
                 <div class="stat-value">{{ $stats['total_tasks'] }}</div>
                 <div class="stat-label">Total Tasks</div>
             </div>
         </div>
         <div class="col-xl-2 col-md-4 col-6 mb-3">
             <div class="stat-card-epms">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="bx bx-error-circle"></i></div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bs-ui-danger), var(--bs-ui-danger-dark));"><i class="bx bx-error-circle"></i></div>
                 <div class="stat-value">{{ $stats['critical_risks'] }}</div>
                 <div class="stat-label">Critical Risks</div>
             </div>
@@ -167,9 +167,9 @@
             <div class="col-xl-4 col-md-6 mb-4">
                 <div class="project-card-v2">
                     <div class="card-header-strip" style="background: linear-gradient(90deg,
-                        {{ $project->priority === 'critical' ? '#ef4444, #dc2626' :
-                           ($project->priority === 'high' ? '#f59e0b, #d97706' :
-                           ($project->priority === 'medium' ? '#3b82f6, #2563eb' : '#10b981, #059669')) }});"></div>
+                        {{ $project->priority === 'critical' ? 'var(--bs-ui-danger), var(--bs-ui-danger-dark)' :
+                           ($project->priority === 'high' ? 'var(--bs-ui-warning), #d97706' :
+                           ($project->priority === 'medium' ? 'var(--bs-ui-info), #2563eb' : 'var(--bs-ui-success), var(--bs-ui-success-dark)')) }});"></div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <a href="{{ route('epms.show', $project) }}" class="project-name">{{ $project->name }}</a>

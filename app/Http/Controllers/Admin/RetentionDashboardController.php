@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\Attendance;
 use App\Models\PublicHoliday;
 use App\Models\Setting;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,8 +74,8 @@ class RetentionDashboardController extends Controller
             $att = $attendanceRecords->get($cursor->format('Y-m-d'));
             
             if ($att) {
-                if ($att->status === 'present') $present++;
-                if ($att->status === 'late') $late++;
+                if ($att->status === Statuses::ATTENDANCE_PRESENT) $present++;
+                if ($att->status === Statuses::ATTENDANCE_LATE) $late++;
                 $totalHours += $att->working_hours ?? 0;
             } else {
                 $absent++;

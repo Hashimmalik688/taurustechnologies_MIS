@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -123,7 +124,7 @@ class EPMSTask extends Model
      */
     public function getIsOverdueAttribute()
     {
-        return $this->status !== 'completed' && $this->end_date->isPast();
+        return $this->status !== Statuses::EPMS_COMPLETED && $this->end_date->isPast();
     }
 
     /**

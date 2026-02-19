@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 {{-- File: resources/views/salary/records.blade.php --}}
 
 @extends('layouts.master')
@@ -89,16 +90,16 @@
                                                     <select name="status" class="form-select">
                                                         <option value="">All Status</option>
                                                         <option value="draft"
-                                                            {{ request('status') == 'draft' ? 'selected' : '' }}>Draft
+                                                            {{ request('status') == Statuses::SALARY_DRAFT ? 'selected' : '' }}>Draft
                                                         </option>
                                                         <option value="calculated"
-                                                            {{ request('status') == 'calculated' ? 'selected' : '' }}>
+                                                            {{ request('status') == Statuses::SALARY_CALCULATED ? 'selected' : '' }}>
                                                             Calculated</option>
                                                         <option value="approved"
-                                                            {{ request('status') == 'approved' ? 'selected' : '' }}>
+                                                            {{ request('status') == Statuses::SALARY_APPROVED ? 'selected' : '' }}>
                                                             Approved</option>
                                                         <option value="paid"
-                                                            {{ request('status') == 'paid' ? 'selected' : '' }}>Paid
+                                                            {{ request('status') == Statuses::SALARY_PAID ? 'selected' : '' }}>Paid
                                                         </option>
                                                     </select>
                                                 </div>
@@ -255,13 +256,13 @@
                                             </td>
                                             <td>
                                                 <span
-                                                    class="badge bg-{{ $record->status == 'paid' ? 'success' : ($record->status == 'approved' ? 'info' : ($record->status == 'calculated' ? 'warning' : 'secondary')) }}">
+                                                    class="badge bg-{{ $record->status == Statuses::SALARY_PAID ? 'success' : ($record->status == Statuses::SALARY_APPROVED ? 'info' : ($record->status == Statuses::SALARY_CALCULATED ? 'warning' : 'secondary')) }}">
                                                     {{ ucfirst($record->status) }}
                                                 </span>
-                                                @if ($record->status == 'paid' && $record->paid_at)
+                                                @if ($record->status == Statuses::SALARY_PAID && $record->paid_at)
                                                     <br><small
                                                         class="text-muted">{{ $record->paid_at->format('M d') }}</small>
-                                                @elseif($record->status == 'approved' && $record->approved_at)
+                                                @elseif($record->status == Statuses::SALARY_APPROVED && $record->approved_at)
                                                     <br><small
                                                         class="text-muted">{{ $record->approved_at->format('M d') }}</small>
                                                 @endif
@@ -285,7 +286,7 @@
                                                                 <i class="fas fa-minus me-2"></i>Add Deduction
                                                             </button>
                                                         </li>
-                                                        @if ($record->status == 'calculated')
+                                                        @if ($record->status == Statuses::SALARY_CALCULATED)
                                                             <li>
                                                                 <hr class="dropdown-divider">
                                                             </li>
@@ -296,7 +297,7 @@
                                                                 </button>
                                                             </li>
                                                         @endif
-                                                        @if ($record->status == 'approved')
+                                                        @if ($record->status == Statuses::SALARY_APPROVED)
                                                             <li>
                                                                 <hr class="dropdown-divider">
                                                             </li>

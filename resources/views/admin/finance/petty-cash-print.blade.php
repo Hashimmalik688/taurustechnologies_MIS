@@ -93,7 +93,7 @@
         }
         
         tbody tr:hover {
-            background: #f0f0f0;
+            background: var(--bs-print-bg-alt);
         }
         
         .text-center {
@@ -126,7 +126,7 @@
             font-weight: bold;
             font-family: 'Courier New', monospace;
             width: 120px;
-            background: #f0f0f0;
+            background: var(--bs-print-bg-alt);
         }
         
         .totals-row {
@@ -184,7 +184,7 @@
         
         .print-buttons button:hover,
         .print-buttons a:hover {
-            background: #f0f0f0;
+            background: var(--bs-print-bg-alt);
         }
     </style>
 </head>

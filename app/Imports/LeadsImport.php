@@ -6,6 +6,7 @@ use App\Models\Lead;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Support\ImportSanitizer;
+use App\Support\Statuses;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -245,7 +246,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'assigned_partner' => $this->getValueFromRow($lowercaseRow, ['assigned partner', 'partner']),
                         'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line', 'preset']),
                         'comments' => $this->getValueFromRow($lowercaseRow, ['comments', 'notes']),
-                        'status' => 'closed', // Mark imported leads as closed so they appear in All Leads
+                        'status' => Statuses::LEAD_CLOSED, // Mark imported leads as closed so they appear in All Leads
                     ]);
 
                     // Create carrier for new lead

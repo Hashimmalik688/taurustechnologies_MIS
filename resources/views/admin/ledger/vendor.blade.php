@@ -27,23 +27,23 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .vendor-info h3 {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
 
         .vendor-info p {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             margin-bottom: 0;
         }
 
@@ -52,7 +52,7 @@
         }
 
         .balance-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
         }
@@ -60,7 +60,7 @@
         .balance-amount {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #10b981;
+            color: var(--bs-ui-success);
         }
 
         .stats-row {
@@ -85,21 +85,21 @@
         }
 
         .stat-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
         }
 
-        .stat-credit { color: #10b981; }
-        .stat-debit { color: #ef4444; }
-        .stat-count { color: #3b82f6; }
+        .stat-credit { color: var(--bs-ui-success); }
+        .stat-debit { color: var(--bs-ui-danger); }
+        .stat-count { color: var(--bs-ui-info); }
 
         .table-dark-custom {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .table-dark-custom thead th {
             background: rgba(15, 23, 42, 0.8);
-            color: #d4af37;
+            color: var(--bs-gold);
             border-color: rgba(212, 175, 55, 0.2);
             font-weight: 600;
         }
@@ -113,7 +113,7 @@
         }
 
         .badge-credit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -122,7 +122,7 @@
         }
 
         .badge-debit {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -133,7 +133,7 @@
         .export-btn {
             background: rgba(100, 116, 139, 0.3);
             border: 1px solid rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -151,14 +151,14 @@
         .form-control, .form-select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 8px;
         }
 
         .form-control:focus, .form-select:focus {
             background: rgba(15, 23, 42, 0.95);
-            border-color: #d4af37;
-            color: #cbd5e1;
+            border-color: var(--bs-gold);
+            color: var(--bs-surface-300);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
         }
     </style>
@@ -184,8 +184,8 @@
                             <div class="vendor-info">
                                 <h3>John Smith</h3>
                                 <p>Smith Insurance Co.</p>
-                                <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;">US Agent</span>
-                                <span class="badge ms-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">Active</span>
+                                <span class="badge" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); color: white;">US Agent</span>
+                                <span class="badge ms-2" style="background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%); color: white;">Active</span>
                             </div>
                         </div>
                         <div class="balance-display">
@@ -214,15 +214,15 @@
                     <div class="filter-section">
                         <form class="row g-3 align-items-end">
                             <div class="col-md-3">
-                                <label class="form-label" style="color: #cbd5e1; font-size: 0.875rem;">From Date</label>
+                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">From Date</label>
                                 <input type="text" class="form-control" id="date_from" placeholder="Select date">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label" style="color: #cbd5e1; font-size: 0.875rem;">To Date</label>
+                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">To Date</label>
                                 <input type="text" class="form-control" id="date_to" placeholder="Select date">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label" style="color: #cbd5e1; font-size: 0.875rem;">Type</label>
+                                <label class="form-label" style="color: var(--bs-surface-300); font-size: 0.875rem;">Type</label>
                                 <select class="form-select">
                                     <option value="">All Types</option>
                                     <option value="credit">Credit</option>
@@ -230,7 +230,7 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; font-weight: 600;">
+                                <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); color: white; font-weight: 600;">
                                     <i class="mdi mdi-filter me-2"></i>Filter
                                 </button>
                             </div>
@@ -263,8 +263,8 @@
                                     <td>Commission</td>
                                     <td>INV-001234</td>
                                     <td>Policy sale commission</td>
-                                    <td style="color: #10b981; font-weight: 600;">+$1,250.00</td>
-                                    <td style="color: #d4af37; font-weight: 600;">$12,450.00</td>
+                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$1,250.00</td>
+                                    <td style="color: var(--bs-gold); font-weight: 600;">$12,450.00</td>
                                     <td>
                                         <a href="{{ route('ledger.show', 1) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
                                             <i class="mdi mdi-eye"></i>
@@ -277,8 +277,8 @@
                                     <td>Payment</td>
                                     <td>PAY-005678</td>
                                     <td>Monthly payment</td>
-                                    <td style="color: #ef4444; font-weight: 600;">-$500.00</td>
-                                    <td style="color: #d4af37; font-weight: 600;">$11,200.00</td>
+                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$500.00</td>
+                                    <td style="color: var(--bs-gold); font-weight: 600;">$11,200.00</td>
                                     <td>
                                         <a href="{{ route('ledger.show', 2) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
                                             <i class="mdi mdi-eye"></i>
@@ -291,8 +291,8 @@
                                     <td>Commission</td>
                                     <td>INV-001200</td>
                                     <td>Large policy sale</td>
-                                    <td style="color: #10b981; font-weight: 600;">+$2,100.00</td>
-                                    <td style="color: #d4af37; font-weight: 600;">$11,700.00</td>
+                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$2,100.00</td>
+                                    <td style="color: var(--bs-gold); font-weight: 600;">$11,700.00</td>
                                     <td>
                                         <a href="{{ route('ledger.show', 3) }}" class="btn btn-sm" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa;">
                                             <i class="mdi mdi-eye"></i>

@@ -161,13 +161,13 @@
         border: 2px solid #e9ecef;
         padding: 20px;
         border-radius: 8px;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         margin-bottom: 20px;
         transition: all 0.3s ease;
     }
 
     .carrier-state-section:hover {
-        border-color: #667eea;
+        border-color: var(--bs-gradient-start);
         box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
     }
 </style>

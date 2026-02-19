@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 class BankVerificationController extends Controller
@@ -13,10 +14,10 @@ class BankVerificationController extends Controller
     public function index(Request $request)
     {
         // Get all approved sales that are also issued
-        $query = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
+        $query = Lead::where('status', Statuses::LEAD_ACCEPTED)
+            ->where('manager_status', Statuses::MGR_APPROVED)
             ->whereNotNull('issuance_status')
-            ->where('issuance_status', 'Issued')
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->with('insuranceCarrier');
 
         // Search functionality
@@ -46,9 +47,9 @@ class BankVerificationController extends Controller
         $leads = $query->orderBy('issuance_date', 'desc')->paginate(50);
         
         // Single query for all bank verification status counts (instead of 4 separate COUNTs)
-        $bvAgg = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
+        $bvAgg = Lead::where('status', Statuses::LEAD_ACCEPTED)
+            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->selectRaw("
                 SUM(CASE WHEN bank_verification_status = 'Good' THEN 1 ELSE 0 END) as good_count,
                 SUM(CASE WHEN bank_verification_status = 'Average' THEN 1 ELSE 0 END) as average_count,

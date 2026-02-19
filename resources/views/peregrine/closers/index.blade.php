@@ -1,3 +1,4 @@
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -11,15 +12,15 @@
         padding: 4px 12px;
         border-radius: 12px;
     }
-    .status-pending { background: #ffc107; color: #000; }
+    .status-pending { background: var(--bs-status-leave); color: #000; }
     .status-transferred { background: #17a2b8; color: white; }
-    .status-sent { background: #28a745; color: white; }
+    .status-sent { background: var(--bs-status-present); color: white; }
     .status-sale { background: #007bff; color: white; }
-    .status-failed { background: #dc3545; color: white; }
+    .status-failed { background: var(--bs-status-absent); color: white; }
     .status-returned { background: #17a2b8; color: white; }
     .modal-header-custom {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-        color: #d4af37;
+        background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);
+        color: var(--bs-gold);
     }
     .modal-dialog-scrollable .modal-body {
         max-height: calc(100vh - 200px);
@@ -32,7 +33,7 @@
         cursor: pointer;
     }
     .clickable-row:hover {
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
     }
     .table td, .table th {
         color: #212529;
@@ -280,15 +281,15 @@
                                         <td>{{ $lead->date ?? 'N/A' }}</td>
                                         <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
                                         <td>
-                                            @if($lead->status == 'returned')
+                                            @if($lead->status == Statuses::LEAD_RETURNED)
                                                 <span class="status-badge bg-info text-white">Returned</span>
                                             @elseif($lead->pending_reason)
                                                 <span class="status-badge status-pending">{{ $lead->pending_reason }}</span>
                                             @else
                                                 @php
                                                     $statusMap = [
-                                                        'pending' => ['label' => 'Pending', 'class' => 'status-pending'],
-                                                        'transferred' => ['label' => 'Pending', 'class' => 'status-pending'],
+                                                        Statuses::LEAD_PENDING => ['label' => 'Pending', 'class' => 'status-pending'],
+                                                        Statuses::LEAD_TRANSFERRED => ['label' => 'Pending', 'class' => 'status-pending'],
                                                     ];
                                                     $status = $statusMap[$lead->status] ?? ['label' => 'Pending', 'class' => 'status-pending'];
                                                 @endphp
@@ -613,7 +614,7 @@
                                         <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
                                         <td>
                                             <span class="status-badge status-failed">
-                                                @if($lead->status == 'declined')
+                                                @if($lead->status == Statuses::LEAD_DECLINED)
                                                     {{ $lead->manager_reason ?? $lead->decline_reason ?? 'Declined by Manager' }}
                                                 @else
                                                     {{ $lead->decline_reason ?? 'Failed' }}

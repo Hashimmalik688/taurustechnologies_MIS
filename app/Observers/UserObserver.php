@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\User;
 use App\Models\Employee;
+use App\Support\Statuses;
 
 class UserObserver
 {
@@ -22,8 +23,8 @@ class UserObserver
                 'cnic' => '',
                 'position' => '',
                 'area_of_residence' => '',
-                'status' => $user->status ?? 'Active',
-                'mis' => 'Yes',
+                'status' => $user->status ?? Statuses::USER_ACTIVE,
+                'mis' => Statuses::MIS_YES,
                 'passport_image' => null,
                 'account_password' => null,
             ]);

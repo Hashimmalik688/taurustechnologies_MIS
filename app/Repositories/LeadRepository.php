@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Models\Lead;
 use App\Repositories\Contracts\LeadRepositoryInterface;
 use App\Support\Roles;
+use App\Support\Statuses;
+use App\Support\Teams;
 
 class LeadRepository implements LeadRepositoryInterface
 {
@@ -45,7 +47,7 @@ class LeadRepository implements LeadRepositoryInterface
         if (!isset($leadData['source_type']) && auth()->check()) {
             $user = auth()->user();
             if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-                $leadData['source_type'] = 'peregrine';
+                $leadData['source_type'] = Teams::PEREGRINE;
             }
         }
 
@@ -100,7 +102,7 @@ class LeadRepository implements LeadRepositoryInterface
             // Include leads that are not sold yet
             $query->where(function($q) {
                 $q->whereNull('sale_at')
-                  ->orWhere('status', '!=', 'accepted');
+                  ->orWhere('status', '!=', Statuses::LEAD_ACCEPTED);
             })
             // OR include leads sold by current user (so they can see their own sales)
             ->orWhere('closer_name', $userName);

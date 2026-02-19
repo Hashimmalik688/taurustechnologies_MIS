@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -115,17 +116,17 @@ class PabsProject extends Model
 
     public function scopePending($query)
     {
-        return $query->where('status', 'PENDING APPROVAL');
+        return $query->where('status', Statuses::PABS_PENDING_APPROVAL);
     }
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['SCOPING', 'QUOTING', 'PENDING APPROVAL', 'BUDGET ALLOCATED', 'IN PROGRESS']);
+        return $query->whereIn('status', Statuses::PABS_ACTIVE_STATUSES);
     }
 
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'COMPLETED');
+        return $query->where('status', Statuses::PABS_COMPLETED);
     }
 
     // Helpers

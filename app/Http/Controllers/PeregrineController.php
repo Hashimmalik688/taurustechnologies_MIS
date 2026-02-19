@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
+use App\Support\Teams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -32,9 +34,9 @@ class PeregrineController extends Controller
         
         // Get pending/transferred leads assigned to this closer (including returned from validator)
         // Apply date filter only if NOT showing all pending
-        $pendingQuery = Lead::where('team', 'peregrine')
+        $pendingQuery = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', $userId)
-            ->whereIn('status', ['pending', 'transferred', 'returned'])
+            ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->with(['assignedValidator']);
         
         if (!$showAllPending) {
@@ -44,24 +46,24 @@ class PeregrineController extends Controller
         $pendingLeads = $pendingQuery->orderBy('created_at', 'desc')->get();
 
         // Get completed/sent leads (closed, sale, or forwarded) - filtered by date
-        $completedLeads = Lead::where('team', 'peregrine')
+        $completedLeads = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', $userId)
-            ->whereIn('status', ['closed', 'sale', 'forwarded'])
+            ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_FORWARDED])
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->with(['assignedValidator'])
             ->orderBy('updated_at', 'desc')
             ->get();
 
         // Get failed leads (includes both closer failures and validator declines) - filtered by date
-        $failedLeads = Lead::where('team', 'peregrine')
+        $failedLeads = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', $userId)
-            ->where('status', 'declined')
+            ->where('status', Statuses::LEAD_DECLINED)
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->orderBy('updated_at', 'desc')
             ->get();
 
         // Calculate filtered total for conversion rate
-        $filteredTotal = Lead::where('team', 'peregrine')
+        $filteredTotal = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', $userId)
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
@@ -87,7 +89,7 @@ class PeregrineController extends Controller
      */
     public function closerEdit($id)
     {
-        $lead = Lead::where('team', 'peregrine')
+        $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', Auth::id())
             ->findOrFail($id);
 
@@ -104,9 +106,9 @@ class PeregrineController extends Controller
      */
     public function closerUpdate(Request $request, $id)
     {
-        $lead = Lead::where('team', 'peregrine')
+        $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', Auth::id())
-            ->whereIn('status', ['pending', 'transferred', 'returned'])
+            ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
 
         $validated = $request->validate([
@@ -162,7 +164,7 @@ class PeregrineController extends Controller
         }
 
         // Update lead with closer's information and mark as closed (sent to validator)
-        $validated['status'] = 'closed';
+        $validated['status'] = Statuses::LEAD_CLOSED;
         $validated['closed_at'] = now();
         
         // Maintain backward compatibility: store first beneficiary in old fields
@@ -183,9 +185,9 @@ class PeregrineController extends Controller
      */
     public function closerMarkFailed(Request $request, $id)
     {
-        $lead = Lead::where('team', 'peregrine')
+        $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', Auth::id())
-            ->whereIn('status', ['pending', 'transferred', 'returned'])
+            ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
 
         $validated = $request->validate([
@@ -193,7 +195,7 @@ class PeregrineController extends Controller
         ]);
 
         $lead->update([
-            'status' => 'declined',
+            'status' => Statuses::LEAD_DECLINED,
             'decline_reason' => $validated['failure_reason'],
             'declined_at' => now(),
         ]);
@@ -219,9 +221,9 @@ class PeregrineController extends Controller
      */
     public function closerMarkPending(Request $request, $id)
     {
-        $lead = Lead::where('team', 'peregrine')
+        $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', Auth::id())
-            ->whereIn('status', ['pending', 'transferred', 'returned'])
+            ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
 
         $validated = $request->validate([
@@ -255,7 +257,7 @@ class PeregrineController extends Controller
             }
         }
         
-        $data['status'] = 'pending';
+        $data['status'] = Statuses::LEAD_PENDING;
         $data['pending_reason'] = $validated['pending_reason'];
         
         $lead->update($data);
@@ -269,18 +271,18 @@ class PeregrineController extends Controller
      */
     private function getDailyStats($closerId, $startDate, $endDate)
     {
-        $leads = Lead::where('team', 'peregrine')
+        $leads = Lead::where('team', Teams::PEREGRINE)
             ->where('managed_by', $closerId)
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->get();
 
         return [
             'total_assigned' => $leads->count(),
-            'transferred' => $leads->where('status', 'transferred')->count(),
-            'closed' => $leads->where('status', 'closed')->count(),
-            'sales' => $leads->where('status', 'sale')->count(),
-            'returned' => $leads->where('status', 'returned')->count(),
-            'declined' => $leads->where('status', 'declined')->count(),
+            'transferred' => $leads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
+            'closed' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
+            'sales' => $leads->where('status', Statuses::LEAD_SALE)->count(),
+            'returned' => $leads->where('status', Statuses::LEAD_RETURNED)->count(),
+            'declined' => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
         ];
     }
 

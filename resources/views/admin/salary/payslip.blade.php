@@ -57,7 +57,7 @@
             text-align: center;
             font-size: 18px;
             font-weight: bold;
-            background: #f8f9fa;
+            background: var(--bs-surface-bg-light);
             padding: 12px;
             border: 1px solid #dee2e6;
             margin: 20px 0;
@@ -81,7 +81,7 @@
 
         .employee-info .label {
             font-weight: bold;
-            background: #f8f9fa;
+            background: var(--bs-surface-bg-light);
             width: 30%;
         }
 
@@ -125,7 +125,7 @@
 
         .net-salary {
             background: #d4edda;
-            border: 2px solid #28a745;
+            border: 2px solid var(--bs-status-present);
             padding: 20px;
             text-align: center;
             margin: 25px 0;
@@ -148,7 +148,7 @@
         .summary-grid {
             display: table;
             width: 100%;
-            background: #f8f9fa;
+            background: var(--bs-surface-bg-light);
             padding: 15px;
             border: 1px solid #dee2e6;
             margin: 20px 0;
@@ -191,11 +191,11 @@
         }
 
         .text-success {
-            color: #28a745;
+            color: var(--bs-status-present);
         }
 
         .text-danger {
-            color: #dc3545;
+            color: var(--bs-status-absent);
         }
 
         .text-info {
@@ -203,7 +203,7 @@
         }
 
         .text-warning {
-            color: #ffc107;
+            color: var(--bs-status-leave);
         }
 
         .footer {
@@ -418,7 +418,7 @@
                 @endif
 
                 {{-- Gross Salary --}}
-                <tr style="background: #f8f9fa;">
+                <tr style="background: var(--bs-surface-bg-light);">
                     <td><strong>GROSS SALARY</strong></td>
                     <td class="description">Basic + Bonuses + Adjustments</td>
                     <td class="amount"><strong>{{ number_format($salaryRecord->gross_salary, 2) }}</strong></td>
@@ -443,7 +443,7 @@
                             <td class="amount text-danger">-{{ number_format($deduction->calculated_amount, 2) }}</td>
                         </tr>
                     @endforeach
-                    <tr style="background: #f8f9fa;">
+                    <tr style="background: var(--bs-surface-bg-light);">
                         <td><strong>TOTAL DEDUCTIONS</strong></td>
                         <td></td>
                         <td class="amount text-danger">
@@ -485,7 +485,7 @@
                             padding: 2px 6px; 
                             border-radius: 3px; 
                             font-size: 10px; 
-                            background: {{ $attendance->status == 'present' ? '#28a745' : ($attendance->status == 'leave' ? '#dc3545' : '#ffc107') }}; 
+                            background: {{ $attendance->status == 'present' ? 'var(--bs-status-present)' : ($attendance->status == 'leave' ? 'var(--bs-status-absent)' : 'var(--bs-status-leave)') }}; 
                             color: white;
                         ">
                                     {{ strtoupper($attendance->status) }}
@@ -531,13 +531,13 @@
                             </td>
                             <td class="text-center">
                                 <span
-                                    style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; font-size: 10px;">
+                                    style="background: var(--bs-status-present); color: white; padding: 2px 8px; border-radius: 3px; font-size: 10px;">
                                     CLOSED
                                 </span>
                             </td>
                         </tr>
                     @endforeach
-                    <tr style="background: #f8f9fa;">
+                    <tr style="background: var(--bs-surface-bg-light);">
                         <td colspan="2"><strong>TOTAL SALES VALUE</strong></td>
                         <td class="amount"><strong>Rs{{ number_format($salesDetails->sum('deal_amount'), 2) }}</strong>
                         </td>

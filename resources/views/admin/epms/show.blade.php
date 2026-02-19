@@ -1,3 +1,4 @@
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -25,7 +26,7 @@
 
         /* Project Header */
         .project-header {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+            background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 50%, var(--bs-ui-info) 100%);
             border-radius: 20px;
             padding: 40px;
             margin-bottom: 30px;
@@ -52,7 +53,7 @@
 
         /* Stat Cards */
         .stat-card {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             border-radius: 16px;
             padding: 25px;
             position: relative;
@@ -69,7 +70,7 @@
             left: 0;
             width: 4px;
             height: 100%;
-            background: linear-gradient(180deg, #8b5cf6 0%, #6366f1 100%);
+            background: linear-gradient(180deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
         }
 
         .stat-card:hover {
@@ -88,14 +89,14 @@
             font-size: 24px;
         }
 
-        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
-        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-        .stat-icon.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .stat-icon.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .stat-icon.red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .stat-icon.purple { background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%); }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--bs-ui-info) 0%, #2563eb 100%); }
+        .stat-icon.green { background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%); }
+        .stat-icon.orange { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); }
+        .stat-icon.red { background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); }
 
         .stat-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             font-weight: 500;
             text-transform: uppercase;
@@ -112,7 +113,7 @@
 
         /* Modern Tabs */
         .modern-tabs {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             border-radius: 16px;
             padding: 8px;
             margin-bottom: 30px;
@@ -129,7 +130,7 @@
             background: transparent;
             border: none;
             border-radius: 12px;
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -143,7 +144,7 @@
 
         .modern-tab.active {
             color: #fff;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
             box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
         }
 
@@ -170,7 +171,7 @@
         }
 
         .kanban-column {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             border-radius: 12px;
             padding: 20px;
             min-height: 500px;
@@ -211,7 +212,7 @@
 
         /* Gantt Container */
         .gantt-container {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             padding: 30px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -230,18 +231,18 @@
         }
 
         .risk-cell {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             border-radius: 4px;
         }
 
         .risk-cell.header {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
             color: #fff;
         }
 
@@ -269,7 +270,7 @@
 
         .wbs-item {
             background: rgba(15, 23, 42, 0.6);
-            border-left: 3px solid #8b5cf6;
+            border-left: 3px solid var(--bs-ui-purple);
             padding: 15px;
             margin: 10px 0;
             border-radius: 8px;
@@ -325,7 +326,7 @@
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
-            border-left: 3px solid #6366f1;
+            border-left: 3px solid var(--bs-ui-indigo);
         }
 
         /* RACI Matrix */
@@ -336,7 +337,7 @@
         }
 
         .raci-table th {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            background: linear-gradient(135deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
             color: #fff;
             padding: 12px;
             font-weight: 600;
@@ -345,7 +346,7 @@
 
         .raci-table td {
             background: rgba(15, 23, 42, 0.6);
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             padding: 12px;
         }
 
@@ -358,10 +359,10 @@
             margin: 2px;
         }
 
-        .raci-r { background: #3b82f6; color: #fff; }
-        .raci-a { background: #10b981; color: #fff; }
-        .raci-c { background: #f59e0b; color: #fff; }
-        .raci-i { background: #64748b; color: #fff; }
+        .raci-r { background: var(--bs-ui-info); color: #fff; }
+        .raci-a { background: var(--bs-ui-success); color: #fff; }
+        .raci-c { background: var(--bs-ui-warning); color: #fff; }
+        .raci-i { background: var(--bs-surface-600); color: #fff; }
 
         /* Health Indicator */
         .health-indicator {
@@ -373,9 +374,9 @@
             box-shadow: 0 0 10px currentColor;
         }
 
-        .health-green { background: #10b981; color: #10b981; }
-        .health-yellow { background: #f59e0b; color: #f59e0b; }
-        .health-red { background: #ef4444; color: #ef4444; }
+        .health-green { background: var(--bs-ui-success); color: var(--bs-ui-success); }
+        .health-yellow { background: var(--bs-ui-warning); color: var(--bs-ui-warning); }
+        .health-red { background: var(--bs-ui-danger); color: var(--bs-ui-danger); }
 
         /* Progress Bar */
         .progress-modern {
@@ -387,14 +388,14 @@
 
         .progress-bar-modern {
             height: 100%;
-            background: linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%);
+            background: linear-gradient(90deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%);
             border-radius: 4px;
             transition: width 0.5s ease;
         }
 
         /* Modal Dark Theme */
         .modal-content {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, #334155 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
         }
@@ -414,7 +415,7 @@
         }
 
         .form-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-weight: 500;
         }
 
@@ -427,10 +428,10 @@
             text-transform: uppercase;
         }
 
-        .priority-urgent { background: #ef4444; color: #fff; }
-        .priority-high { background: #f59e0b; color: #fff; }
-        .priority-medium { background: #3b82f6; color: #fff; }
-        .priority-low { background: #10b981; color: #fff; }
+        .priority-urgent { background: var(--bs-ui-danger); color: #fff; }
+        .priority-high { background: var(--bs-ui-warning); color: #fff; }
+        .priority-medium { background: var(--bs-ui-info); color: #fff; }
+        .priority-low { background: var(--bs-ui-success); color: #fff; }
 
         /* Methodology Badge */
         .method-badge {
@@ -443,11 +444,11 @@
         .method-agile { background: #ede9fe; color: #7c3aed; }
         .method-waterfall { background: #e0f2fe; color: #0284c7; }
         .method-hybrid { background: #fce7f3; color: #db2777; }
-        .method-kanban { background: #ecfdf5; color: #059669; }
+        .method-kanban { background: #ecfdf5; color: var(--bs-ui-success-dark); }
 
         /* Text Colors */
         .text-muted-dark {
-            color: #94a3b8 !important;
+            color: var(--bs-surface-400) !important;
         }
     </style>
 @endsection
@@ -623,11 +624,11 @@
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="text-white mb-1">
-                                        <i class="bx bx-flag me-2" style="color: #f59e0b;"></i>{{ $milestone->name }}
+                                        <i class="bx bx-flag me-2" style="color: var(--bs-ui-warning);"></i>{{ $milestone->name }}
                                     </h6>
                                     <small class="text-muted-dark">Due: {{ $milestone->due_date->format('M d, Y') }}</small>
                                 </div>
-                                <span class="badge bg-{{ $milestone->status === 'completed' ? 'success' : ($milestone->status === 'missed' ? 'danger' : 'warning') }}">
+                                <span class="badge bg-{{ $milestone->status === Statuses::EPMS_COMPLETED ? 'success' : ($milestone->status === Statuses::EPMS_MILESTONE_MISSED ? 'danger' : 'warning') }}">
                                     {{ ucfirst($milestone->status) }}
                                 </span>
                             </div>
@@ -639,7 +640,7 @@
                                     @foreach($milestoneTasks->take(3) as $task)
                                         <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: rgba(15,23,42,0.6); border-radius: 8px;">
                                             <span class="text-white small">{{ $task->name }}</span>
-                                            <span class="badge bg-{{ $task->status === 'completed' ? 'success' : 'secondary' }}">
+                                            <span class="badge bg-{{ $task->status === Statuses::EPMS_COMPLETED ? 'success' : 'secondary' }}">
                                                 {{ $task->progress }}%
                                             </span>
                                         </div>
@@ -691,7 +692,7 @@
                             <span class="text-danger fw-bold">{{ $project->currency }} {{ number_format($project->budget_spent, 2) }}</span>
                         </div>
                         <div class="progress-modern">
-                            <div class="progress-bar-modern" style="width: {{ $project->budget_utilization }}%; background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);"></div>
+                            <div class="progress-bar-modern" style="width: {{ $project->budget_utilization }}%; background: linear-gradient(90deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);"></div>
                         </div>
                         <small class="text-muted-dark mt-2 d-block">{{ number_format($project->budget_utilization, 1) }}% utilized</small>
                     </div>
@@ -825,13 +826,13 @@
                     </div>
 
                     @forelse($project->risks->sortByDesc('severity_score') as $risk)
-                        <div class="mb-3 p-3" style="background: rgba(15,23,42,0.6); border-radius: 12px; border-left: 4px solid {{ $risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6') }};">
+                        <div class="mb-3 p-3" style="background: rgba(15,23,42,0.6); border-radius: 12px; border-left: 4px solid {{ $risk->severity_level === 'critical' ? 'var(--bs-ui-danger)' : ($risk->severity_level === 'high' ? 'var(--bs-ui-warning)' : 'var(--bs-ui-info)') }};">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="flex-grow-1">
                                     <h6 class="text-white mb-1">{{ $risk->title }}</h6>
                                     <p class="text-muted-dark mb-2 small">{{ $risk->description }}</p>
                                     <div class="d-flex gap-2 flex-wrap">
-                                        <span class="badge" style="background: {{ $risk->severity_level === 'critical' ? '#ef4444' : ($risk->severity_level === 'high' ? '#f59e0b' : '#3b82f6') }};">
+                                        <span class="badge" style="background: {{ $risk->severity_level === 'critical' ? 'var(--bs-ui-danger)' : ($risk->severity_level === 'high' ? 'var(--bs-ui-warning)' : 'var(--bs-ui-info)') }};">
                                             {{ ucfirst($risk->severity_level) }} (Score: {{ $risk->severity_score }})
                                         </span>
                                         <span class="badge bg-secondary">{{ ucfirst($risk->category) }}</span>
@@ -962,7 +963,7 @@
                                 </span>
                             </div>
                             <div class="progress-modern">
-                                <div class="progress-bar-modern" style="width: {{ $resource['utilization'] }}%; background: {{ $resource['utilization'] > 80 ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(90deg, #8b5cf6 0%, #6366f1 100%)' }};"></div>
+                                <div class="progress-bar-modern" style="width: {{ $resource['utilization'] }}%; background: {{ $resource['utilization'] > 80 ? 'linear-gradient(90deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%)' : 'linear-gradient(90deg, var(--bs-ui-purple) 0%, var(--bs-ui-indigo) 100%)' }};"></div>
                             </div>
                             <small class="text-muted-dark mt-1 d-block">{{ $resource['tasks'] }} tasks, {{ $resource['hours'] }}h estimated</small>
                         </div>
@@ -1746,19 +1747,19 @@
     <style>
         /* Gantt Dark Theme Styles */
         .gantt .bar-milestone {
-            fill: #f59e0b !important;
+            fill: var(--bs-ui-warning) !important;
             stroke: #d97706 !important;
         }
         .gantt .bar-completed {
-            fill: #10b981 !important;
-            stroke: #059669 !important;
+            fill: var(--bs-ui-success) !important;
+            stroke: var(--bs-ui-success-dark) !important;
         }
         .gantt .bar {
-            fill: #8b5cf6 !important;
+            fill: var(--bs-ui-purple) !important;
             stroke: #7c3aed !important;
         }
         .gantt .bar-progress {
-            fill: #6366f1 !important;
+            fill: var(--bs-ui-indigo) !important;
         }
         .gantt .bar-label {
             fill: #fff !important;
@@ -1777,7 +1778,7 @@
             stroke: rgba(255, 255, 255, 0.1) !important;
         }
         .gantt .lower-text, .gantt .upper-text {
-            fill: #94a3b8 !important;
+            fill: var(--bs-surface-400) !important;
             font-weight: 500;
         }
         .gantt .today-highlight {

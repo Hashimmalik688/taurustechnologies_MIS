@@ -35,13 +35,13 @@
                 margin-bottom: 24px;
             }
             .lead-form-card .card-header {
-                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);
                 border-radius: 10px 10px 0 0;
                 padding: 16px 24px;
                 border: none;
             }
             .lead-form-card .card-title {
-                color: #d4af37;
+                color: var(--bs-gold);
                 font-weight: 600;
                 font-size: 1.1rem;
                 margin: 0;
@@ -50,23 +50,23 @@
                 padding: 28px;
             }
             .form-section-title {
-                color: #1a1a1a;
+                color: var(--bs-print-body-dark);
                 font-size: 0.95rem;
                 font-weight: 600;
                 margin-bottom: 20px;
                 padding-bottom: 8px;
-                border-bottom: 2px solid #d4af37;
+                border-bottom: 2px solid var(--bs-gold);
                 display: inline-block;
             }
             .form-label {
                 font-weight: 500;
-                color: #2d2d2d;
+                color: var(--bs-print-header-bg);
                 font-size: 0.875rem;
                 margin-bottom: 6px;
             }
             .form-label.required:after {
                 content: '*';
-                color: #dc3545;
+                color: var(--bs-status-absent);
                 margin-left: 4px;
             }
             .form-control:disabled, .form-select:disabled {
@@ -74,7 +74,7 @@
                 opacity: 1;
             }
             .readonly-value {
-                background-color: #f8f9fa;
+                background-color: var(--bs-surface-bg-light);
                 padding: 10px 14px;
                 border-radius: 6px;
                 border: 1px solid #e0e0e0;

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -122,7 +123,7 @@ class EPMSProject extends Model
 
     public function activeSprint()
     {
-        return $this->hasOne(EPMSSprint::class, 'project_id')->where('status', 'active');
+        return $this->hasOne(EPMSSprint::class, 'project_id')->where('status', Statuses::EPMS_ACTIVE);
     }
 
     public function comments()
@@ -188,7 +189,7 @@ class EPMSProject extends Model
      */
     public function getActiveRisksCountAttribute(): int
     {
-        return $this->risks()->whereNotIn('status', ['resolved', 'accepted'])->count();
+        return $this->risks()->whereNotIn('status', [Statuses::EPMS_RISK_RESOLVED, Statuses::EPMS_RISK_ACCEPTED])->count();
     }
 
     /**
@@ -196,7 +197,7 @@ class EPMSProject extends Model
      */
     public function getCriticalRisksCountAttribute(): int
     {
-        return $this->risks()->where('severity_score', '>=', 20)->whereNotIn('status', ['resolved'])->count();
+        return $this->risks()->where('severity_score', '>=', 20)->whereNotIn('status', [Statuses::EPMS_RISK_RESOLVED])->count();
     }
 
     /**
@@ -230,7 +231,7 @@ class EPMSProject extends Model
     {
         // Count tasks
         $this->total_tasks = $this->tasks()->count();
-        $this->completed_tasks = $this->tasks()->where('status', 'completed')->count();
+        $this->completed_tasks = $this->tasks()->where('status', Statuses::EPMS_COMPLETED)->count();
         $this->revision_tasks = $this->tasks()->where('task_type', 'revision')->count();
 
         // Calculate velocity (tasks per day)
@@ -274,7 +275,7 @@ class EPMSProject extends Model
         $timeElapsedPercentage = ($this->time_elapsed_days / max($this->start_date->diffInDays($this->deadline), 1)) * 100;
 
         // Check if any milestone is missed
-        if ($this->milestones()->where('status', 'missed')->exists()) {
+        if ($this->milestones()->where('status', Statuses::EPMS_MILESTONE_MISSED)->exists()) {
             return 'red';
         }
 

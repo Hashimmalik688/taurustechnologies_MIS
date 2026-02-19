@@ -369,12 +369,12 @@
 
     <style>
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             color: white;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             border: none;
         }
 
@@ -417,7 +417,7 @@
         }
 
         .bg-orange {
-            background-color: #fd7e14;
+            background-color: var(--bs-status-late);
             color: white;
         }
 
@@ -426,7 +426,7 @@
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%) !important;
             color: white !important;
             border: none !important;
         }
@@ -434,7 +434,7 @@
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
             background: rgba(102, 126, 234, 0.1) !important;
             border: 1px solid rgba(102, 126, 234, 0.3) !important;
-            color: #667eea !important;
+            color: var(--bs-gradient-start) !important;
         }
 
         .dt-buttons .btn {
@@ -443,12 +443,12 @@
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #667eea;
+            border-color: var(--bs-gradient-start);
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
 
         .table thead th {
-            background-color: #f8f9fa;
+            background-color: var(--bs-surface-bg-light);
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.75rem;

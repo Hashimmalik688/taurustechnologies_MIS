@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PabsProject;
 use App\Services\ProjectAuthorizationService;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -188,10 +189,10 @@ class ProjectController extends Controller
             'approval_notes' => 'nullable|string',
         ]);
         
-        if ($request->approval_status === 'APPROVED') {
+        if ($request->approval_status === Statuses::APPROVAL_APPROVED) {
             $this->projectService->approveProject($project, auth()->id(), $request->all());
             $message = 'Project approved successfully.';
-        } elseif ($request->approval_status === 'REJECTED') {
+        } elseif ($request->approval_status === Statuses::APPROVAL_REJECTED) {
             $this->projectService->rejectProject($project, auth()->id(), $request->approval_notes);
             $message = 'Project rejected.';
         } else {

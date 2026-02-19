@@ -133,12 +133,12 @@
     }
 
     .announcement-bar.announce-bg-red {
-        background-color: #dc3545 !important;
+        background-color: var(--bs-status-absent) !important;
         color: white !important;
     }
 
     .announcement-bar.announce-bg-yellow {
-        background-color: #ffc107 !important;
+        background-color: var(--bs-status-leave) !important;
         color: #000 !important;
     }
 
@@ -158,7 +158,7 @@
     }
 
     .announcement-bar.announce-bg-orange {
-        background-color: #fd7e14 !important;
+        background-color: var(--bs-status-late) !important;
         color: white !important;
     }
 

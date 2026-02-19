@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -71,11 +72,11 @@ class PabsTicket extends Model
 
     public function scopeOpen($query)
     {
-        return $query->whereIn('status', ['OPEN', 'IN PROGRESS', 'ON HOLD']);
+        return $query->whereIn('status', Statuses::TICKET_OPEN_STATUSES);
     }
 
     public function scopeClosed($query)
     {
-        return $query->whereIn('status', ['RESOLVED', 'CLOSED']);
+        return $query->whereIn('status', Statuses::TICKET_CLOSED_STATUSES);
     }
 }

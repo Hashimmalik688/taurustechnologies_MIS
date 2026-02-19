@@ -10,7 +10,7 @@
         border-left: 3px solid #007bff;
         padding-left: 15px;
         margin-bottom: 10px;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         padding: 10px;
         border-radius: 5px;
     }

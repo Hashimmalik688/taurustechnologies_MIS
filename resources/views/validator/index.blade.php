@@ -11,10 +11,10 @@
         padding: 4px 12px;
         border-radius: 12px;
     }
-    .status-pending { background: #ffc107; color: #000; }
+    .status-pending { background: var(--bs-status-leave); color: #000; }
     .status-closed { background: #17a2b8; color: white; }
-    .status-sale { background: #28a745; color: white; }
-    .status-failed { background: #dc3545; color: white; }
+    .status-sale { background: var(--bs-status-present); color: white; }
+    .status-failed { background: var(--bs-status-absent); color: white; }
 </style>
 @endsection
 

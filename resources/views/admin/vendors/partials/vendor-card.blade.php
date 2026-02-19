@@ -58,30 +58,30 @@
         width: 60px;
         height: 60px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+        background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
         font-weight: 700;
-        color: #0f172a;
+        color: var(--bs-surface-900);
     }
 
     .vendor-card-name {
-        color: #d4af37;
+        color: var(--bs-gold);
         font-weight: 600;
         font-size: 1.1rem;
     }
 
     .vendor-card-company {
-        color: #cbd5e1;
+        color: var(--bs-surface-300);
         font-size: 0.9rem;
     }
 
     .vendor-card-balance {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #10b981;
+        color: var(--bs-ui-success);
     }
 
     .badge-us-agent-sm, .badge-vendor-sm, .badge-supplier-sm,
@@ -94,7 +94,7 @@
     }
 
     .badge-us-agent-sm {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
     }
 
     .badge-vendor-sm {
@@ -106,11 +106,11 @@
     }
 
     .badge-active-sm {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
     }
 
     .badge-inactive-sm {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
     }
 
     .badge-suspended-sm {

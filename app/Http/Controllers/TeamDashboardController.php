@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Teams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -25,7 +26,7 @@ class TeamDashboardController extends Controller
         $today = Carbon::today();
 
         // Get peregrine team members
-        $peregrineTeam = User::where('department', 'peregrine')
+        $peregrineTeam = User::where('department', Teams::PEREGRINE)
             ->orWhereHas('roles', function($q) {
                 $q->whereIn('name', [Roles::VERIFIER]);
             })
@@ -33,17 +34,17 @@ class TeamDashboardController extends Controller
 
         $stats = [
             'month_data' => Lead::whereMonth('created_at', Carbon::now()->month)
-                                ->where('team', 'peregrine')
+                                ->where('team', Teams::PEREGRINE)
                                 ->count(),
             'total_calls' => DB::table('call_logs')
                                ->whereIn('agent_id', $peregrineTeam->pluck('id'))
                                ->whereDate('call_start_time', '>=', $startOfMonth)
                                ->count(),
-            'closed_sales' => Lead::where('team', 'peregrine')
+            'closed_sales' => Lead::where('team', Teams::PEREGRINE)
                                   ->where('status', 'sale')
                                   ->whereMonth('created_at', Carbon::now()->month)
                                   ->count(),
-            'total_transfers' => Lead::where('team', 'peregrine')
+            'total_transfers' => Lead::where('team', Teams::PEREGRINE)
                                      ->where('status', 'transferred')
                                      ->whereMonth('created_at', Carbon::now()->month)
                                      ->count(),
@@ -54,11 +55,11 @@ class TeamDashboardController extends Controller
             ->withCount([
                 'leadsManaged as total_sales' => function ($query) use ($startOfMonth) {
                     $query->where('created_at', '>=', $startOfMonth)
-                          ->where('team', 'peregrine');
+                          ->where('team', Teams::PEREGRINE);
                 },
                 'leadsManaged as sales_today' => function ($query) use ($today) {
                     $query->whereDate('created_at', $today)
-                          ->where('team', 'peregrine');
+                          ->where('team', Teams::PEREGRINE);
                 }
             ])
             ->get();
@@ -74,18 +75,18 @@ class TeamDashboardController extends Controller
         $startOfMonth = Carbon::now()->startOfMonth();
         $today = Carbon::today();
 
-        $ravensTeam = User::where('department', 'ravens')
+        $ravensTeam = User::where('department', Teams::RAVENS)
             ->orWhereHas('roles', function($q) {
                 $q->whereIn('name', [Roles::EMPLOYEE]);
             })
             ->get();
 
         $stats = [
-            'sales_mtd' => Lead::where('team', 'ravens')
+            'sales_mtd' => Lead::where('team', Teams::RAVENS)
                                ->where('status', 'accepted')
                                ->where('created_at', '>=', $startOfMonth)
                                ->count(),
-            'sales_today' => Lead::where('team', 'ravens')
+            'sales_today' => Lead::where('team', Teams::RAVENS)
                                   ->where('status', 'accepted')
                                   ->whereDate('created_at', $today)
                                   ->count(),
@@ -93,15 +94,15 @@ class TeamDashboardController extends Controller
                                ->where('category', 'chargeback')
                                ->whereMonth('transaction_date', Carbon::now()->month)
                                ->count(),
-            'approved' => Lead::where('team', 'ravens')
+            'approved' => Lead::where('team', Teams::RAVENS)
                               ->where('status', 'accepted')
                               ->whereMonth('created_at', Carbon::now()->month)
                               ->count(),
-            'declined' => Lead::where('team', 'ravens')
+            'declined' => Lead::where('team', Teams::RAVENS)
                               ->where('status', 'rejected')
                               ->whereMonth('created_at', Carbon::now()->month)
                               ->count(),
-            'underwriting' => Lead::where('team', 'ravens')
+            'underwriting' => Lead::where('team', Teams::RAVENS)
                                    ->where('status', 'underwritten')
                                    ->whereMonth('created_at', Carbon::now()->month)
                                    ->count(),

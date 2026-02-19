@@ -22,7 +22,7 @@
     top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
     color: white;
     z-index: 9998;
     padding: 0;
@@ -175,11 +175,11 @@
 }
 
 .community-announcements-banner.priority-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%);
 }
 
 .community-announcements-banner.priority-info {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
 }
 
 @keyframes slideIn {

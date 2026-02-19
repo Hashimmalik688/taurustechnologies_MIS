@@ -8,22 +8,20 @@
 @section('css')
     <style>
         :root {
-            --gold: #d4af37;
-            --gold-light: #f5e6c8;
-            --gold-dark: #b8941f;
-        }
+--gold-light: #f5e6c8;
+}
 
         .lead-header {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border-radius: 12px;
             padding: 1.5rem 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3);
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
         }
 
         .lead-header h2 {
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
@@ -39,7 +37,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: #2d2d2d;
+            color: var(--bs-print-header-bg);
         }
 
         .lead-header .lead-actions {
@@ -50,7 +48,7 @@
         }
 
         .btn-call {
-            background: #28a745;
+            background: var(--bs-status-present);
             border: none;
             color: white;
             padding: 0.6rem 1.2rem;
@@ -68,7 +66,7 @@
         .btn-back {
             background: rgba(0, 0, 0, 0.2);
             border: none;
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
             font-weight: 600;
@@ -84,13 +82,13 @@
 
         .card-header-gold {
             background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
-            border-bottom: 2px solid var(--gold);
+            border-bottom: 2px solid var(--bs-gold);
             padding: 1rem 1.25rem;
             border-radius: 10px 10px 0 0;
         }
 
         .card-header-gold h5 {
-            color: var(--gold-dark);
+            color: var(--bs-gold-dark);
             font-weight: 700;
             font-size: 1rem;
             margin: 0;
@@ -113,7 +111,7 @@
 
         .info-label {
             font-size: 0.7rem;
-            color: #6c757d;
+            color: var(--bs-status-default);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -133,8 +131,8 @@
         }
 
         .badge-gold {
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-            color: #1a1a1a;
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
+            color: var(--bs-print-body-dark);
             font-weight: 600;
             padding: 0.3rem 0.65rem;
             border-radius: 5px;
@@ -183,12 +181,12 @@
         }
 
         .checklist-item.completed {
-            border-left-color: var(--gold);
+            border-left-color: var(--bs-gold);
             background: rgba(212, 175, 55, 0.05);
         }
 
         .checklist-item.current {
-            border-left-color: #28a745;
+            border-left-color: var(--bs-status-present);
             background: rgba(40, 167, 69, 0.05);
             box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
         }
@@ -207,13 +205,13 @@
         }
 
         .checklist-item.completed .checklist-checkbox {
-            background: var(--gold);
-            border-color: var(--gold);
+            background: var(--bs-gold);
+            border-color: var(--bs-gold);
         }
 
         .checklist-item.current .checklist-checkbox {
-            background: #28a745;
-            border-color: #28a745;
+            background: var(--bs-status-present);
+            border-color: var(--bs-status-present);
             animation: pulse 2s infinite;
         }
 
@@ -225,15 +223,15 @@
         .checklist-label {
             font-size: 0.9rem;
             font-weight: 500;
-            color: #6c757d;
+            color: var(--bs-status-default);
         }
 
         .checklist-item.completed .checklist-label {
-            color: var(--gold-dark);
+            color: var(--bs-gold-dark);
         }
 
         .checklist-item.current .checklist-label {
-            color: #28a745;
+            color: var(--bs-status-present);
             font-weight: 600;
         }
 

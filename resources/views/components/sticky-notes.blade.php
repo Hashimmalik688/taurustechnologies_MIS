@@ -108,12 +108,12 @@
 }
 
 #sticky-notes-container::-webkit-scrollbar-thumb {
-    background: #d4af37;
+    background: var(--bs-gold);
     border-radius: 10px;
 }
 
 #sticky-notes-container::-webkit-scrollbar-thumb:hover {
-    background: #b8941f;
+    background: var(--bs-gold-dark);
 }
 
 /* Prevent selection and scrolling during drag */

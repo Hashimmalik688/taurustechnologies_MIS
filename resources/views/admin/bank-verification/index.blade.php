@@ -17,17 +17,17 @@
 
     .text-warning i[class*="mdi"],
     i[class*="mdi"].text-warning {
-        color: #ffc107 !important;
+        color: var(--bs-status-leave) !important;
     }
 
     .text-danger i[class*="mdi"],
     i[class*="mdi"].text-danger {
-        color: #dc3545 !important;
+        color: var(--bs-status-absent) !important;
     }
 
     .text-secondary i[class*="mdi"],
     i[class*="mdi"].text-secondary {
-        color: #6c757d !important;
+        color: var(--bs-status-default) !important;
     }
 </style>
 @endsection
@@ -72,7 +72,7 @@
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
+                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
                     <i class="mdi mdi-alert-circle mb-2" style="font-size: 4rem; color: white;"></i>
                     <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">AVERAGE</p>
                     <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $average_count }}</h1>
@@ -81,7 +81,7 @@
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);">
+                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);">
                     <i class="mdi mdi-close-circle mb-2" style="font-size: 4rem; color: white;"></i>
                     <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">BAD</p>
                     <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $bad_count }}</h1>
@@ -90,7 +90,7 @@
         </div>
         <div class="col-md-3 col-sm-6 mb-3">
             <div class="d-flex flex-column align-items-center">
-                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
+                <div class="mb-3 d-flex flex-column align-items-center justify-content-center" style="width: 180px; height: 180px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-purple) 0%, #7c3aed 100%); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
                     <i class="mdi mdi-help-circle mb-2" style="font-size: 4rem; color: white;"></i>
                     <p class="text-uppercase fw-semibold mb-1 text-white" style="letter-spacing: 1.5px; font-size: 0.75rem;">UNVERIFIED</p>
                     <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">{{ $unverified_count }}</h1>
@@ -210,7 +210,7 @@
                                     <div class="modal fade" id="verificationModal-{{ $lead->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
+                                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
                                                     <h5 class="modal-title fw-semibold">
                                                         <i class="mdi mdi-bank me-2"></i>Update Status - {{ $lead->cn_name }}
                                                     </h5>

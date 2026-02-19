@@ -5,7 +5,7 @@
 @section('css')
 <style>
     body {
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
     }
 
     .stat-card {
@@ -23,12 +23,12 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .stat-card.blue { border-left-color: #667eea; }
+    .stat-card.blue { border-left-color: var(--bs-gradient-start); }
     .stat-card.green { border-left-color: #38ef7d; }
     .stat-card.orange { border-left-color: #f5576c; }
     .stat-card.purple { border-left-color: #00f2fe; }
     .stat-card.gold { border-left-color: #f5af19; }
-    .stat-card.indigo { border-left-color: #764ba2; }
+    .stat-card.indigo { border-left-color: var(--bs-gradient-end); }
 
     .stat-value {
         font-size: 2rem;
@@ -37,7 +37,7 @@
     }
 
     .stat-label {
-        color: #6c757d;
+        color: var(--bs-status-default);
         font-size: 0.875rem;
         font-weight: 500;
         text-transform: uppercase;
@@ -76,12 +76,12 @@
     }
 
     .table tbody tr {
-        border-bottom: 1px solid #f8f9fa;
+        border-bottom: 1px solid var(--bs-surface-bg-light);
         transition: background-color 0.2s;
     }
 
     .table tbody tr:hover {
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
     }
 
     .badge-status {
@@ -95,7 +95,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
         padding: 15px 20px;
         border-radius: 10px;
         margin-bottom: 10px;
@@ -108,7 +108,7 @@
 
     .state-pill {
         display: inline-block;
-        background: #667eea;
+        background: var(--bs-gradient-start);
         color: white;
         padding: 4px 10px;
         border-radius: 15px;

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 class RevenueAnalyticsController extends Controller
@@ -13,27 +14,27 @@ class RevenueAnalyticsController extends Controller
     public function index(Request $request)
     {
         // Get all issued and verified sales
-        $issued_sales = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
+        $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
+            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->get();
 
         // Calculate revenue by verification status using agent_revenue (calculated commission)
         // Fallback to monthly_premium if agent_revenue is not calculated yet
         $good_revenue = $issued_sales
-            ->where('bank_verification_status', 'Good')
+            ->where('bank_verification_status', Statuses::BANK_GOOD)
             ->sum(function($lead) {
                 return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
             });
 
         $average_revenue = $issued_sales
-            ->where('bank_verification_status', 'Average')
+            ->where('bank_verification_status', Statuses::BANK_AVERAGE)
             ->sum(function($lead) {
                 return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
             });
 
         $bad_revenue = $issued_sales
-            ->where('bank_verification_status', 'Bad')
+            ->where('bank_verification_status', Statuses::BANK_BAD)
             ->sum(function($lead) {
                 return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
             });
@@ -47,9 +48,9 @@ class RevenueAnalyticsController extends Controller
         $total_revenue = $good_revenue + $average_revenue + $bad_revenue + $unverified_revenue;
 
         // Calculate counts
-        $good_count = $issued_sales->where('bank_verification_status', 'Good')->count();
-        $average_count = $issued_sales->where('bank_verification_status', 'Average')->count();
-        $bad_count = $issued_sales->where('bank_verification_status', 'Bad')->count();
+        $good_count = $issued_sales->where('bank_verification_status', Statuses::BANK_GOOD)->count();
+        $average_count = $issued_sales->where('bank_verification_status', Statuses::BANK_AVERAGE)->count();
+        $bad_count = $issued_sales->where('bank_verification_status', Statuses::BANK_BAD)->count();
         $unverified_count = $issued_sales->whereNull('bank_verification_status')->count();
         $total_count = $good_count + $average_count + $bad_count + $unverified_count;
 
@@ -76,13 +77,13 @@ class RevenueAnalyticsController extends Controller
             })
             ->map(function($group) {
                 return [
-                    'good' => $group->where('bank_verification_status', 'Good')->sum(function($lead) {
+                    'good' => $group->where('bank_verification_status', Statuses::BANK_GOOD)->sum(function($lead) {
                         return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
                     }),
-                    'average' => $group->where('bank_verification_status', 'Average')->sum(function($lead) {
+                    'average' => $group->where('bank_verification_status', Statuses::BANK_AVERAGE)->sum(function($lead) {
                         return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
                     }),
-                    'bad' => $group->where('bank_verification_status', 'Bad')->sum(function($lead) {
+                    'bad' => $group->where('bank_verification_status', Statuses::BANK_BAD)->sum(function($lead) {
                         return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
                     }),
                     'unverified' => $group->whereNull('bank_verification_status')->sum(function($lead) {
@@ -107,10 +108,10 @@ class RevenueAnalyticsController extends Controller
             $total_submitted = $verifier_leads->count();
             $pending_callbacks = $verifier_leads->where('bank_verification_status', null)->count();
             $declined_calls = $verifier_leads->where('decline_reason', '!=', null)->count();
-            $marked_as_sale = $verifier_leads->where('status', 'accepted')->count();
+            $marked_as_sale = $verifier_leads->where('status', Statuses::LEAD_ACCEPTED)->count();
             
             // Calculate transfer rate
-            $transferred = $verifier_leads->where('status', 'accepted')->count();
+            $transferred = $verifier_leads->where('status', Statuses::LEAD_ACCEPTED)->count();
             $transfer_rate = $total_submitted > 0 ? ($transferred / $total_submitted) * 100 : 0;
             
             $verifier_stats[] = [

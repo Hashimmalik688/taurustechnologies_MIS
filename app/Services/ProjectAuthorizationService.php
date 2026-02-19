@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\PabsProject;
 use App\Models\PabsProjectApproval;
 use App\Models\PabsProjectComment;
+use App\Support\Statuses;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -65,7 +66,7 @@ class ProjectAuthorizationService
                 'project_name' => $data['project_name'],
                 'description' => $data['description'],
                 'section_id' => $data['section_id'],
-                'status' => 'DRAFT',
+                'status' => Statuses::PABS_DRAFT,
                 'created_by' => $userId,
                 'total_budget' => $data['total_budget'] ?? null,
             ]);
@@ -79,7 +80,7 @@ class ProjectAuthorizationService
      */
     public function moveToScoping($project)
     {
-        return $project->update(['status' => 'SCOPING']);
+        return $project->update(['status' => Statuses::PABS_SCOPING]);
     }
 
     /**
@@ -92,7 +93,7 @@ class ProjectAuthorizationService
                 'scoping_document_path' => $scopingDocumentPath,
                 'scoping_completed_at' => now(),
                 'scoping_lead_id' => $userId,
-                'status' => 'QUOTING',
+                'status' => Statuses::PABS_QUOTING,
             ]);
             
             return $project;
@@ -129,7 +130,7 @@ class ProjectAuthorizationService
      */
     public function moveToPendingApproval($project)
     {
-        return $project->update(['status' => 'PENDING APPROVAL']);
+        return $project->update(['status' => Statuses::PABS_PENDING_APPROVAL]);
     }
 
     /**
@@ -142,11 +143,11 @@ class ProjectAuthorizationService
             PabsProjectApproval::create([
                 'project_id' => $project->id,
                 'approved_by' => $approverId,
-                'action' => $approvalData['approval_status'] ?? 'APPROVED',
+                'action' => $approvalData['approval_status'] ?? Statuses::APPROVAL_APPROVED,
                 'comments' => $approvalData['approval_notes'] ?? null,
                 'approved_budget' => $approvalData['approved_budget'] ?? null,
                 'target_deadline' => $approvalData['target_deadline'] ?? null,
-                'priority' => $approvalData['priority'] ?? 'MEDIUM',
+                'priority' => $approvalData['priority'] ?? Statuses::PRIORITY_MEDIUM,
                 'approved_at' => now(),
             ]);
             
@@ -154,21 +155,21 @@ class ProjectAuthorizationService
             $updateData = [
                 'approved_by' => $approverId,
                 'approved_at' => now(),
-                'approval_status' => $approvalData['approval_status'] ?? 'APPROVED',
+                'approval_status' => $approvalData['approval_status'] ?? Statuses::APPROVAL_APPROVED,
                 'approval_notes' => $approvalData['approval_notes'] ?? null,
                 'approved_budget' => $approvalData['approved_budget'] ?? null,
                 'target_deadline' => $approvalData['target_deadline'] ?? null,
-                'priority' => $approvalData['priority'] ?? 'MEDIUM',
+                'priority' => $approvalData['priority'] ?? Statuses::PRIORITY_MEDIUM,
             ];
             
             // If approved, move to next status
-            if (($approvalData['approval_status'] ?? 'APPROVED') === 'APPROVED') {
-                $updateData['status'] = 'BUDGET ALLOCATED';
+            if (($approvalData['approval_status'] ?? Statuses::APPROVAL_APPROVED) === Statuses::APPROVAL_APPROVED) {
+                $updateData['status'] = Statuses::PABS_BUDGET_ALLOCATED;
                 $updateData['allocated_by'] = $approverId;
                 $updateData['allocated_at'] = now();
             } else {
                 // If not approved, keep in pending or set status appropriately
-                $updateData['status'] = 'PENDING APPROVAL';
+                $updateData['status'] = Statuses::PABS_PENDING_APPROVAL;
             }
             
             $project->update($updateData);
@@ -186,14 +187,14 @@ class ProjectAuthorizationService
             PabsProjectApproval::create([
                 'project_id' => $project->id,
                 'approved_by' => $rejectingUserId,
-                'action' => 'REJECTED',
+                'action' => Statuses::APPROVAL_REJECTED,
                 'comments' => $reason,
                 'approved_at' => now(),
             ]);
             
             $project->update([
-                'status' => 'DRAFT',
-                'approval_status' => 'REJECTED',
+                'status' => Statuses::PABS_DRAFT,
+                'approval_status' => Statuses::APPROVAL_REJECTED,
                 'approval_notes' => $reason,
             ]);
             
@@ -210,14 +211,14 @@ class ProjectAuthorizationService
             PabsProjectApproval::create([
                 'project_id' => $project->id,
                 'approved_by' => $userId,
-                'action' => 'CLARIFICATION NEEDED',
+                'action' => Statuses::APPROVAL_CLARIFICATION,
                 'comments' => $clarification,
                 'approved_at' => now(),
             ]);
             
             $project->update([
-                'status' => 'PENDING APPROVAL',
-                'approval_status' => 'CLARIFICATION NEEDED',
+                'status' => Statuses::PABS_PENDING_APPROVAL,
+                'approval_status' => Statuses::APPROVAL_CLARIFICATION,
                 'approval_notes' => $clarification,
             ]);
             
@@ -231,7 +232,7 @@ class ProjectAuthorizationService
     public function startExecution($project, $assignedToUserId)
     {
         return $project->update([
-            'status' => 'IN PROGRESS',
+            'status' => Statuses::PABS_IN_PROGRESS,
             'assigned_to' => $assignedToUserId,
             'started_at' => now(),
         ]);
@@ -268,7 +269,7 @@ class ProjectAuthorizationService
                 $project->update([
                     'variance_flagged' => true,
                     'variance_notes' => "Variance of {$variancePercentage}% detected. Actual: ${$actualCost}, Approved: ${$project->approved_budget}. {$finalNotes}",
-                    'status' => 'COMPLETED', // Flag will still be checked before archiving
+                    'status' => Statuses::PABS_COMPLETED, // Flag will still be checked before archiving
                 ]);
                 
                 return [
@@ -279,7 +280,7 @@ class ProjectAuthorizationService
                 ];
             }
             
-            $project->update(['status' => 'COMPLETED']);
+            $project->update(['status' => Statuses::PABS_COMPLETED]);
             
             return [
                 'success' => true,
@@ -293,7 +294,7 @@ class ProjectAuthorizationService
      */
     public function archiveProject($project)
     {
-        return $project->update(['status' => 'ARCHIVED']);
+        return $project->update(['status' => Statuses::PABS_ARCHIVED]);
     }
 
     /**

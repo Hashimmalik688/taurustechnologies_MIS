@@ -150,11 +150,11 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
                             <p class="text-muted mb-1">Running Balance</p>
-                            <h4 class="mb-0" style="color: {{ $currentBalance >= 0 ? '#28a745' : '#dc3545' }}">
+                            <h4 class="mb-0" style="color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }}">
                                 {{ number_format($currentBalance, 2) }}
                             </h4>
                         </div>
-                        <div style="font-size: 2rem; color: {{ $currentBalance >= 0 ? '#28a745' : '#dc3545' }};">
+                        <div style="font-size: 2rem; color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }};">
                             <i class="bx bx-wallet"></i>
                         </div>
                     </div>
@@ -429,7 +429,7 @@
             </div>
             <div class="modal-body">
                 <p class="text-center my-3">
-                    <i class="bx bx-question-mark" style="font-size: 2rem; color: #dc3545;"></i>
+                    <i class="bx bx-question-mark" style="font-size: 2rem; color: var(--bs-status-absent);"></i>
                 </p>
                 <p class="text-center">Are you sure you want to delete this entry?</p>
                 <p class="text-muted text-center"><small>This action cannot be undone.</small></p>
@@ -601,7 +601,7 @@
     }
     
     .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
     }
     
     .badge {

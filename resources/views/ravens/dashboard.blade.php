@@ -143,12 +143,12 @@
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="text-muted mb-2 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">MTD Sales</p>
-                            <h3 class="mb-0 fw-bold" style="color: var(--gold, #d4af37);">
+                            <h3 class="mb-0 fw-bold" style="color: var(--gold, var(--bs-gold));">
                                 <span class="counter-value" data-target="{{ $stats['mtd_sales'] ?? 0 }}">{{ $stats['mtd_sales'] ?? 0 }}</span>
                             </h3>
                         </div>
                         <div class="avatar-sm">
-                            <div class="avatar-title rounded-3" style="background: linear-gradient(135deg, #d4af37 0%, #f9d670 100%);">
+                            <div class="avatar-title rounded-3" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #f9d670 100%);">
                                 <i class="bx bx-trophy fs-4 text-white"></i>
                             </div>
                         </div>

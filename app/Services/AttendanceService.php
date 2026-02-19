@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Attendance;
 use App\Models\Setting;
 use App\Models\PublicHoliday;
+use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Request;
 
@@ -171,14 +172,14 @@ class AttendanceService
                     $attendanceDate = $currentTime->copy()->subDay()->toDateString();
                 }
                 // Late if after fixed late time (e.g., 7:15pm), but before 5am
-                $status = $currentTime->lessThanOrEqualTo($lateTime) ? 'present' : 'late';
+                $status = $currentTime->lessThanOrEqualTo($lateTime) ? Statuses::ATTENDANCE_PRESENT : Statuses::ATTENDANCE_LATE;
             } else {
                 // Outside attendance window
-                $status = 'absent';
+                $status = Statuses::ATTENDANCE_ABSENT;
             }
         } else {
             // Day shift logic (default)
-            $status = $currentTime->lessThanOrEqualTo($lateTime) ? 'present' : 'late';
+            $status = $currentTime->lessThanOrEqualTo($lateTime) ? Statuses::ATTENDANCE_PRESENT : Statuses::ATTENDANCE_LATE;
         }
 
         $attendance = Attendance::create([

@@ -1,3 +1,4 @@
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title', 'Salary Components - Basic & Bonus Sheets')
@@ -28,10 +29,10 @@
         font-weight: 600;
         font-size: 0.75rem;
     }
-    .status-calculated { background: #ffc107; color: black; }
+    .status-calculated { background: var(--bs-status-leave); color: black; }
     .status-approved { background: #17a2b8; color: white; }
-    .status-paid { background: #28a745; color: white; }
-    .status-draft { background: #6c757d; color: white; }
+    .status-paid { background: var(--bs-status-present); color: white; }
+    .status-draft { background: var(--bs-status-default); color: white; }
     .payment-date {
         background: #e7f3ff;
         padding: 0.25rem 0.6rem;
@@ -43,15 +44,15 @@
         display: flex;
         justify-content: space-between;
         padding: 0.5rem 0;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--bs-surface-200);
     }
     .amount-row .label {
         font-weight: 500;
-        color: #6b7280;
+        color: var(--bs-surface-500);
     }
     .amount-row .value {
         font-weight: 600;
-        color: #111827;
+        color: var(--bs-surface-700);
     }
 </style>
 @endsection
@@ -63,7 +64,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1" style="color: #d4af37;">
+                    <h1 class="h3 mb-1" style="color: var(--bs-gold);">
                         <i class="bx bx-wallet me-2"></i>
                         Salary Components (Basic & Bonus Sheets)
                     </h1>
@@ -134,12 +135,12 @@
     <!-- Components Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white border-bottom">
-            <h5 class="mb-0"><i class="bx bx-table me-2" style="color: #d4af37;"></i> Salary Components</h5>
+            <h5 class="mb-0"><i class="bx bx-table me-2" style="color: var(--bs-gold);"></i> Salary Components</h5>
         </div>
         <div class="card-body">
             @if($components->isEmpty())
                 <div class="text-center py-5" style="opacity: 0.6;">
-                    <i class="bx bx-inbox" style="font-size: 4rem; color: #d4af37;"></i>
+                    <i class="bx bx-inbox" style="font-size: 4rem; color: var(--bs-gold);"></i>
                     <h5 class="mt-3 text-muted">No Salary Components Found</h5>
                     <p class="text-muted">Calculate salaries to generate basic and bonus salary sheets</p>
                 </div>
@@ -201,7 +202,7 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <strong style="color: #10b981;">Rs{{ number_format($component->net_amount, 2) }}</strong>
+                                    <strong style="color: var(--bs-ui-success);">Rs{{ number_format($component->net_amount, 2) }}</strong>
                                 </td>
                                 <td>
                                     <span class="status-badge status-{{ $component->status }}">
@@ -217,7 +218,7 @@
                                             <i class="bx bx-eye"></i>
                                         </a>
                                         
-                                        @if($component->status === 'calculated')
+                                        @if($component->status === Statuses::SALARY_CALCULATED)
                                             <form action="{{ route('salary.component.approve', $component->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-success" title="Approve" onclick="return confirm('Approve this salary component?')">
@@ -226,7 +227,7 @@
                                             </form>
                                         @endif
                                         
-                                        @if($component->status === 'approved')
+                                        @if($component->status === Statuses::SALARY_APPROVED)
                                             <form action="{{ route('salary.component.mark-paid', $component->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-primary" title="Mark as Paid" onclick="return confirm('Mark this salary component as paid?')">

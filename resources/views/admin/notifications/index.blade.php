@@ -12,13 +12,13 @@
         }
 
         .notification-item:hover {
-            background-color: #f8f9fa;
+            background-color: var(--bs-surface-bg-light);
             text-decoration: none;
         }
 
         .notification-item.unread {
             background-color: #f8f9fb;
-            border-left-color: #556ee6;
+            border-left-color: var(--bs-chart-primary);
         }
 
         .notification-item.unread .notification-title {
@@ -35,7 +35,7 @@
         }
 
         .date-group-header {
-            background: linear-gradient(45deg, #556ee6, #74788d);
+            background: linear-gradient(45deg, var(--bs-chart-primary), #74788d);
             background-size: 100% 2px;
             background-repeat: no-repeat;
             background-position: bottom;
@@ -44,7 +44,7 @@
         }
 
         .notification-stats {
-            background: linear-gradient(135deg, #556ee6 0%, #74788d 100%);
+            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, #74788d 100%);
             color: white;
             border-radius: 10px;
         }
@@ -58,7 +58,7 @@
         }
 
         .filter-tabs .nav-link.active {
-            background-color: #556ee6;
+            background-color: var(--bs-chart-primary);
             color: white;
         }
 

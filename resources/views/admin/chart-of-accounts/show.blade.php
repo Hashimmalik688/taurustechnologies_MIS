@@ -15,7 +15,7 @@
         }
 
         .detail-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-weight: 600;
             font-size: 0.875rem;
             text-transform: uppercase;
@@ -24,7 +24,7 @@
         }
 
         .detail-value {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-size: 1.1rem;
             font-weight: 500;
             margin-bottom: 1.5rem;
@@ -33,11 +33,11 @@
         .balance-display {
             font-size: 2rem;
             font-weight: 700;
-            color: #d4af37;
+            color: var(--bs-gold);
         }
 
         .section-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
@@ -49,9 +49,9 @@
         }
 
         .gold-gradient-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border: none;
-            color: #0f172a;
+            color: var(--bs-surface-900);
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
@@ -62,20 +62,20 @@
         .gold-gradient-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .btn-secondary-custom {
             background: rgba(100, 116, 139, 0.3);
             border: 1px solid rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;
@@ -92,12 +92,12 @@
         }
 
         .status-active {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
         }
 
         .status-inactive {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
         }
     </style>
@@ -156,7 +156,7 @@
                             <div class="detail-label">Parent Account</div>
                             <div class="detail-value">
                                 @if($account->parentAccount)
-                                    <a href="{{ route('chart-of-accounts.show', $account->parentAccount->id) }}" style="color: #d4af37;">
+                                    <a href="{{ route('chart-of-accounts.show', $account->parentAccount->id) }}" style="color: var(--bs-gold);">
                                         {{ $account->parentAccount->account_code }} - {{ $account->parentAccount->account_name }}
                                     </a>
                                 @else

@@ -43,7 +43,7 @@
         }
         .announcement-popup-header {
             padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--bs-surface-200);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -59,14 +59,14 @@
             right: 12px;
             background: none;
             border: none;
-            color: #9ca3af;
+            color: var(--bs-surface-muted);
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
             transition: all 0.2s;
         }
         .announcement-popup-close:hover {
-            background: #f3f4f6;
+            background: var(--bs-surface-100);
             color: #374151;
         }
         .announcement-popup-progress {
@@ -74,7 +74,7 @@
             bottom: 0;
             left: 0;
             height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, var(--bs-gradient-start), var(--bs-gradient-end));
             animation: progressBar 20s linear forwards;
         }
         @keyframes progressBar {
@@ -90,7 +90,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
             color: white;
             border: none;
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
@@ -114,7 +114,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background: #ef4444;
+            background: var(--bs-ui-danger);
             color: white;
             border-radius: 50%;
             width: 24px;
@@ -136,8 +136,8 @@
             background: #0f0f0f !important;
         }
         [data-theme="dark"] .message-item.message-receiver .message-text {
-            background: #2d2d2d !important;
-            color: #e5e5e5 !important;
+            background: var(--bs-print-header-bg) !important;
+            color: var(--bs-print-border) !important;
             box-shadow: none !important;
         }
         [data-theme="dark"] .message-item.message-sender .message-text {
@@ -148,7 +148,7 @@
             color: #b0b0b0 !important;
         }
         [data-theme="dark"] .message-text {
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] .chat-header,
         [data-theme="dark"] .chat-main-header {
@@ -162,9 +162,9 @@
             border-top: 1px solid #333 !important;
         }
         [data-theme="dark"] #messageInput {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
             border: 1px solid #333 !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] #messageInput::placeholder {
             color: #737373 !important;
@@ -177,15 +177,15 @@
         [data-theme="dark"] .conversation-list-item {
             background: #1f1f1f !important;
             border-bottom: 1px solid #333 !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] .conversation-item:hover,
         [data-theme="dark"] .conversation-list-item:hover {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
         }
         [data-theme="dark"] .conversation-item.active,
         [data-theme="dark"] .conversation-list-item.active {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
         }
         [data-theme="dark"] .no-messages {
             color: #b0b0b0 !important;
@@ -194,13 +194,13 @@
         [data-theme="dark"] #searchConversations,
         [data-theme="dark"] #searchCommunities,
         [data-theme="dark"] #searchPeople {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
             border: 1px solid #333 !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] .announcement-item {
             background: #1f1f1f !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
             box-shadow: none !important;
         }
         [data-theme="dark"] .announcement-messages,
@@ -213,21 +213,21 @@
         }
         [data-theme="dark"] .announcement-input-area textarea,
         [data-theme="dark"] #announcementInput {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
             border-color: #333 !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] .mention-highlight {
             background: rgba(212, 175, 55, 0.2) !important;
-            color: #d4af37 !important;
+            color: var(--bs-gold) !important;
         }
         [data-theme="dark"] .file-attachment {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
             border-color: #333 !important;
-            color: #e5e5e5 !important;
+            color: var(--bs-print-border) !important;
         }
         [data-theme="dark"] .message-attachment a {
-            background: #2d2d2d !important;
+            background: var(--bs-print-header-bg) !important;
             color: #b0b0b0 !important;
         }
     </style>
@@ -383,7 +383,7 @@
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title">Create Group</h5>
-                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Create a group chat</p>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--bs-surface-500);">Create a group chat</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -391,25 +391,25 @@
                     <!-- Group Chat Section -->
                     <div id="groupChatSection">
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px;">Group Name</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px;">Group Name</label>
                             <input type="text" id="groupName" class="form-control" placeholder="Enter group name..." style="border-radius: 8px;">
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Picture</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Group Picture</label>
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <div id="groupAvatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 32px; overflow: hidden;">
+                                <div id="groupAvatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-ui-info), var(--bs-ui-info-dark)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 32px; overflow: hidden;">
                                     <i class="bx bx-group" style="font-size: 36px;"></i>
                                 </div>
                                 <div style="flex: 1;">
                                     <input type="file" class="form-control" id="groupAvatar" accept="image/*" style="border-radius: 8px;">
-                                    <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Optional: Upload a profile picture for your group</small>
+                                    <small style="display: block; margin-top: 6px; color: var(--bs-surface-500); font-size: 12px;">Optional: Upload a profile picture for your group</small>
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-bottom: 16px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px;">Add Members</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px;">Add Members</label>
                             <input type="text" id="searchGroupUsers" class="form-control" placeholder="Search and select members..." style="border-radius: 8px;">
                         </div>
 
@@ -420,16 +420,16 @@
                         </div>
 
                         <div id="selectedMembers">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 12px;">Selected Members <span id="memberCount" style="color: #9ca3af;">(0)</span></label>
-                            <div id="membersList" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; padding: 8px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 12px;">Selected Members <span id="memberCount" style="color: var(--bs-surface-muted);">(0)</span></label>
+                            <div id="membersList" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; padding: 8px; background: var(--bs-surface-50); border-radius: 8px; border: 1px solid var(--bs-surface-200);">
                                 <!-- Selected members will appear here -->
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                <div class="modal-footer" style="background: var(--bs-surface-50); border-top: 1px solid var(--bs-surface-200);">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151;">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="createChatBtn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">Create Group</button>
+                    <button type="button" class="btn btn-primary" id="createChatBtn" style="background: linear-gradient(135deg, #2563eb, var(--bs-ui-info-dark)); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">Create Group</button>
                 </div>
             </div>
         </div>
@@ -442,66 +442,66 @@
         <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h5 class="modal-title" style="font-weight: 700; color: #111827;">Manage Group</h5>
-                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Edit group settings and members</p>
+                    <h5 class="modal-title" style="font-weight: 700; color: var(--bs-surface-700);">Manage Group</h5>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--bs-surface-500);">Edit group settings and members</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <!-- Group Information Section -->
                 <div style="margin-bottom: 32px;">
-                    <h6 style="font-weight: 700; color: #111827; margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;">Group Information</h6>
+                    <h6 style="font-weight: 700; color: var(--bs-surface-700); margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--bs-surface-500);">Group Information</h6>
                     
                     <div style="margin-bottom: 16px;">
-                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Picture</label>
+                        <label style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Group Picture</label>
                         <div style="display: flex; align-items: center; gap: 16px;">
                             <div id="groupAvatarPreview" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #d4a574, #b8860b); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 20px; overflow: hidden;">
                                 <i class="bx bx-group" style="font-size: 24px;"></i>
                             </div>
                             <div style="flex: 1;">
                                 <input type="file" class="form-control" id="groupAvatar" accept="image/*" style="border-radius: 8px; font-size: 13px;">
-                                <small style="display: block; margin-top: 4px; color: #6b7280; font-size: 11px;">Upload a profile picture</small>
+                                <small style="display: block; margin-top: 4px; color: var(--bs-surface-500); font-size: 11px;">Upload a profile picture</small>
                             </div>
-                            <button type="button" class="btn" onclick="updateGroupAvatar()" style="padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">Save Picture</button>
+                            <button type="button" class="btn" onclick="updateGroupAvatar()" style="padding: 10px 16px; background: var(--bs-ui-success); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">Save Picture</button>
                         </div>
                     </div>
                     
                     <div style="margin-bottom: 16px;">
-                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Group Name</label>
+                        <label style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Group Name</label>
                         <input type="text" id="groupNameEdit" class="form-control" placeholder="Enter group name" style="border-radius: 8px;">
                     </div>
                     <div style="margin-bottom: 16px;">
-                        <label style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Created By</label>
-                        <p id="groupCreator" style="background: #f9fafb; padding: 10px 12px; border-radius: 8px; margin: 0; color: #6b7280; font-size: 14px;">-</p>
+                        <label style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Created By</label>
+                        <p id="groupCreator" style="background: var(--bs-surface-50); padding: 10px 12px; border-radius: 8px; margin: 0; color: var(--bs-surface-500); font-size: 14px;">-</p>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button type="button" class="btn" onclick="updateGroupName()" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Update Name</button>
-                        <button type="button" class="btn btn-outline-danger" onclick="deleteGroup()" id="deleteGroupBtn" style="flex: 1; padding: 10px 16px; border: 1px solid #f87171; color: #dc2626; background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer;">Delete Group</button>
+                        <button type="button" class="btn" onclick="updateGroupName()" style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #2563eb, var(--bs-ui-info-dark)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">Update Name</button>
+                        <button type="button" class="btn btn-outline-danger" onclick="deleteGroup()" id="deleteGroupBtn" style="flex: 1; padding: 10px 16px; border: 1px solid #f87171; color: var(--bs-ui-danger-dark); background: transparent; border-radius: 8px; font-weight: 600; cursor: pointer;">Delete Group</button>
                     </div>
                 </div>
 
                 <!-- Members Management Section -->
                 <div>
-                    <h6 style="font-weight: 700; color: #111827; margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;">Members</h6>
+                    <h6 style="font-weight: 700; color: var(--bs-surface-700); margin-bottom: 16px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--bs-surface-500);">Members</h6>
                     
                     <!-- Current Members -->
                     <div style="margin-bottom: 24px;">
-                        <label style="font-weight: 600; color: #111827; margin-bottom: 12px; display: block;">Current Members</label>
+                        <label style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 12px; display: block;">Current Members</label>
                         <div id="currentMembersList" class="members-list" style="display: flex; flex-direction: column; gap: 8px;">
                             <!-- Members will be loaded here -->
                         </div>
                     </div>
                     
                     <!-- Add New Members -->
-                    <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
-                        <label style="font-weight: 600; color: #111827; margin-bottom: 12px; display: block;">Add Members</label>
+                    <div style="border-top: 1px solid var(--bs-surface-200); padding-top: 16px;">
+                        <label style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 12px; display: block;">Add Members</label>
                         <div id="availableUsersList" class="users-list" style="max-height: 200px; overflow-y: auto;">
                             <!-- Available users will be loaded here -->
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+            <div class="modal-footer" style="background: var(--bs-surface-50); border-top: 1px solid var(--bs-surface-200);">
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Close</button>
             </div>
         </div>
@@ -521,7 +521,7 @@
             <div class="modal-body" style="padding: 24px; background: var(--bs-body-bg);">
                 <!-- Search Input -->
                 <div style="margin-bottom: 20px;">
-                    <input type="text" id="gifSearchInput" class="form-control" placeholder="Search GIFs (e.g., happy, dance, celebrate)..." style="border-radius: 8px; border: 2px solid #e5e7eb; padding: 12px 16px;">
+                    <input type="text" id="gifSearchInput" class="form-control" placeholder="Search GIFs (e.g., happy, dance, celebrate)..." style="border-radius: 8px; border: 2px solid var(--bs-surface-200); padding: 12px 16px;">
                 </div>
                 
                 <!-- GIF Grid -->
@@ -654,8 +654,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <h5 class="modal-title" style="font-weight: 700; color: #111827;">Create Community</h5>
-                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Organize groups and channels</p>
+                        <h5 class="modal-title" style="font-weight: 700; color: var(--bs-surface-700);">Create Community</h5>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--bs-surface-500);">Organize groups and channels</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -663,36 +663,36 @@
                     <form id="createCommunityForm">
                         @csrf
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Community Name</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Community Name</label>
                             <input type="text" class="form-control" id="communityName" name="name" placeholder="e.g., Product Team" required style="border-radius: 8px;">
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Description</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Description</label>
                             <textarea class="form-control" id="communityDescription" name="description" placeholder="What's this community about?" rows="2" style="border-radius: 8px;"></textarea>
-                            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Optional: Help members understand the purpose</small>
+                            <small style="display: block; margin-top: 6px; color: var(--bs-surface-500); font-size: 12px;">Optional: Help members understand the purpose</small>
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Community Color</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Community Color</label>
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <div id="communityColorPreview" style="width: 60px; height: 60px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                <div id="communityColorPreview" style="width: 60px; height: 60px; border-radius: 50%; background: var(--bs-gradient-start); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                                     <i class="bx bx-bullhorn" style="font-size: 28px;"></i>
                                 </div>
                                 <div style="flex: 1;">
                                     <input type="color" class="form-control form-control-color" id="communityColor" name="color" value="#667eea" style="width: 100%; height: 50px; border-radius: 8px; cursor: pointer;">
-                                    <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Pick a color to represent this community</small>
+                                    <small style="display: block; margin-top: 6px; color: var(--bs-surface-500); font-size: 12px;">Pick a color to represent this community</small>
                                 </div>
                             </div>
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Add Members (Optional)</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Add Members (Optional)</label>
                             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                                 <select class="form-select" id="communityMemberSelect" style="border-radius: 8px;">
                                     <option value="">Select a member to add...</option>
                                 </select>
-                                <button type="button" id="addMemberToCommunityBtn" style="padding: 10px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;">
+                                <button type="button" id="addMemberToCommunityBtn" style="padding: 10px 16px; background: var(--bs-ui-info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap;">
                                     Add
                                 </button>
                             </div>
@@ -705,9 +705,9 @@
                         <input type="hidden" id="communityMemberIds" name="member_ids" value="[]">
                     </form>
                 </div>
-                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                <div class="modal-footer" style="background: var(--bs-surface-50); border-top: 1px solid var(--bs-surface-200);">
                     <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="createCommunityBtn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">Create Community</button>
+                    <button type="button" class="btn btn-primary" id="createCommunityBtn" style="background: linear-gradient(135deg, #2563eb, var(--bs-ui-info-dark)); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">Create Community</button>
                 </div>
             </div>
         </div>
@@ -719,12 +719,12 @@
             <i class="bx bx-x" style="font-size: 20px;"></i>
         </button>
         <div class="announcement-popup-header">
-            <div id="popupCommunityIcon" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #667eea; color: white; font-size: 20px;">
+            <div id="popupCommunityIcon" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bs-gradient-start); color: white; font-size: 20px;">
                 <i class="bx bx-bullhorn"></i>
             </div>
             <div style="flex: 1;">
-                <div id="popupCommunityName" style="font-weight: 700; color: #111827; font-size: 16px;">Community</div>
-                <div style="font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px;">
+                <div id="popupCommunityName" style="font-weight: 700; color: var(--bs-surface-700); font-size: 16px;">Community</div>
+                <div style="font-size: 12px; color: var(--bs-surface-500); display: flex; align-items: center; gap: 4px;">
                     <i class="bx bx-bullhorn" style="font-size: 13px;"></i>
                     <span>New Announcement</span>
                 </div>
@@ -735,9 +735,9 @@
                 <i class="bx bx-info-circle"></i>
                 <span>Normal</span>
             </div>
-            <div id="popupAnnouncementTitle" style="font-weight: 700; color: #111827; font-size: 18px; margin-bottom: 8px;"></div>
+            <div id="popupAnnouncementTitle" style="font-weight: 700; color: var(--bs-surface-700); font-size: 18px; margin-bottom: 8px;"></div>
             <div id="popupAnnouncementMessage" style="color: #374151; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
-            <div id="popupAnnouncementTime" style="font-size: 12px; color: #9ca3af; margin-top: 12px;"></div>
+            <div id="popupAnnouncementTime" style="font-size: 12px; color: var(--bs-surface-muted); margin-top: 12px;"></div>
         </div>
         <div class="announcement-popup-progress"></div>
     </div>
@@ -754,8 +754,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div>
-                        <h5 class="modal-title" style="font-weight: 700; color: #111827;">Edit Announcement</h5>
-                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #6b7280;">Update your announcement details</p>
+                        <h5 class="modal-title" style="font-weight: 700; color: var(--bs-surface-700);">Edit Announcement</h5>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--bs-surface-500);">Update your announcement details</p>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -763,30 +763,30 @@
                     <form id="editAnnouncementForm">
                         @csrf
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Title (Optional)</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Title (Optional)</label>
                             <input type="text" class="form-control" id="editAnnouncementTitle" placeholder="Announcement title" style="border-radius: 8px;">
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Message</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Message</label>
                             <textarea class="form-control" id="editAnnouncementMessage" placeholder="Type your announcement message..." rows="4" required style="border-radius: 8px; resize: vertical;"></textarea>
                         </div>
 
                         <div style="margin-bottom: 20px;">
-                            <label class="form-label" style="font-weight: 600; color: #111827; margin-bottom: 8px; display: block;">Priority</label>
+                            <label class="form-label" style="font-weight: 600; color: var(--bs-surface-700); margin-bottom: 8px; display: block;">Priority</label>
                             <select class="form-select" id="editAnnouncementPriority" style="border-radius: 8px;">
                                 <option value="info">Info</option>
                                 <option value="normal" selected>Normal</option>
                                 <option value="warning">Warning</option>
                                 <option value="urgent">Urgent</option>
                             </select>
-                            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">Set the priority level for this announcement</small>
+                            <small style="display: block; margin-top: 6px; color: var(--bs-surface-500); font-size: 12px;">Set the priority level for this announcement</small>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #e5e7eb;">
+                <div class="modal-footer" style="background: var(--bs-surface-50); border-top: 1px solid var(--bs-surface-200);">
                     <button type="button" class="btn" data-bs-dismiss="modal" style="background: #ffffff; border: 1px solid #d1d5db; color: #374151; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="updateAnnouncementBtn" onclick="updateAnnouncement()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">
+                    <button type="button" class="btn btn-primary" id="updateAnnouncementBtn" onclick="updateAnnouncement()" style="background: linear-gradient(135deg, #2563eb, var(--bs-ui-info-dark)); border: none; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px; font-weight: 600;">
                         <i class="bx bx-save"></i> Update Announcement
                     </button>
                 </div>
@@ -3862,8 +3862,6 @@ if (!document.getElementById('chatInputStyles')) {
         // Hide suggestions
         document.getElementById('mentionSuggestions').style.display = 'none';
     }
-
-
 
     function updateActiveSuggestion(items) {
         items.forEach((item, i) => {

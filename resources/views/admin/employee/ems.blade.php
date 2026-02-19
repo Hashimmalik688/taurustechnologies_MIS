@@ -12,7 +12,7 @@
         height: 50px;
         object-fit: cover;
         border-radius: 8px;
-        border: 2px solid #e5e7eb;
+        border: 2px solid var(--bs-surface-200);
         transition: transform 0.2s;
     }
     .employee-avatar:hover {
@@ -24,7 +24,7 @@
     .no-avatar {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
         color: white;
         display: flex;
         align-items: center;
@@ -34,7 +34,7 @@
         font-size: 18px;
     }
     .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
         color: white;
         border-radius: 12px;
         padding: 1.5rem;
@@ -45,8 +45,8 @@
         opacity: 0.8;
     }
     .import-zone {
-        background: #f8f9fa;
-        border: 2px dashed #d4af37;
+        background: var(--bs-surface-bg-light);
+        border: 2px dashed var(--bs-gold);
         border-radius: 12px;
         padding: 2rem;
         text-align: center;
@@ -62,18 +62,18 @@
         font-weight: 600;
         font-size: 0.75rem;
     }
-    .badge-active { background: #10b981; color: white; }
-    .badge-inactive { background: #ef4444; color: white; }
-    .badge-pending { background: #f59e0b; color: white; }
+    .badge-active { background: var(--bs-ui-success); color: white; }
+    .badge-inactive { background: var(--bs-ui-danger); color: white; }
+    .badge-pending { background: var(--bs-ui-warning); color: white; }
     .nav-tabs .nav-link {
-        color: #6c757d;
+        color: var(--bs-status-default);
         font-weight: 600;
         border: none;
         padding: 0.75rem 1.25rem;
     }
     .nav-tabs .nav-link.active {
-        color: #d4af37;
-        border-bottom: 3px solid #d4af37;
+        color: var(--bs-gold);
+        border-bottom: 3px solid var(--bs-gold);
         background: transparent;
     }
     .nav-tabs .nav-link:hover:not(.active) {
@@ -81,7 +81,7 @@
         border-bottom: 3px solid #ddd;
     }
     .terminated-count {
-        background: #ef4444;
+        background: var(--bs-ui-danger);
         color: white;
         border-radius: 50%;
         padding: 0.15rem 0.5rem;
@@ -98,7 +98,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-1" style="color: #d4af37;">
+                    <h1 class="h3 mb-1" style="color: var(--bs-gold);">
                         <i class="bx bx-id-card me-2"></i>
                         Employee Management Sheet
                     </h1>
@@ -348,7 +348,7 @@
                         <tr>
                             <td colspan="14" class="text-center py-5">
                                 <div style="opacity: 0.5;">
-                                    <i class="bx bx-inbox" style="font-size: 4rem; color: #d4af37;"></i>
+                                    <i class="bx bx-inbox" style="font-size: 4rem; color: var(--bs-gold);"></i>
                                     <h5 class="mt-3 text-muted">No Active Employees</h5>
                                     <p class="text-muted">Click "Add Employee" button above to create your first employee record</p>
                                 </div>
@@ -428,7 +428,7 @@
                                 <tr>
                                     <td colspan="10" class="text-center py-5">
                                         <div style="opacity: 0.5;">
-                                            <i class="bx bx-check-circle" style="font-size: 4rem; color: #10b981;"></i>
+                                            <i class="bx bx-check-circle" style="font-size: 4rem; color: var(--bs-ui-success);"></i>
                                             <h5 class="mt-3 text-muted">No Terminated Employees</h5>
                                             <p class="text-muted">All employees are currently active</p>
                                         </div>

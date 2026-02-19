@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Lead;
 use App\Support\Roles;
+use App\Support\Statuses;
+use App\Support\Teams;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -53,7 +55,7 @@ class AnalyticsService
                 ->count(),
             'pending_validation' => Lead::whereNotNull('verified_by')
                 ->whereNull('validated_by')
-                ->where('manager_status', '!=', 'declined')
+                ->where('manager_status', '!=', Statuses::MGR_DECLINED)
                 ->count(),
             'total_verifiers' => Lead::whereNotNull('verified_by')
                 ->distinct('verified_by')
@@ -77,38 +79,38 @@ class AnalyticsService
         return [
             // Pending - sales awaiting QA review (no date filter for current state)
             'pending' => Lead::where(function($query) {
-                    $query->where('qa_status', 'Pending')
+                    $query->where('qa_status', Statuses::QA_PENDING)
                           ->orWhere(function($q) {
                               $q->whereNull('qa_status')
                                 ->whereNotNull('sale_at');
                           });
                 })->whereNotNull('sale_at')->count(),
-            'good' => Lead::where('qa_status', 'Good')
+            'good' => Lead::where('qa_status', Statuses::QA_GOOD)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count(),
-            'avg' => Lead::where('qa_status', 'Avg')
+            'avg' => Lead::where('qa_status', Statuses::QA_AVG)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count(),
-            'bad' => Lead::where('qa_status', 'Bad')
+            'bad' => Lead::where('qa_status', Statuses::QA_BAD)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count(),
             'reviewed_today' => Lead::whereBetween('sale_at', [$start, $end])
                 ->whereNotNull('qa_status')
                 ->whereNotNull('sale_at')
-                ->where('qa_status', '!=', 'Pending')
+                ->where('qa_status', '!=', Statuses::QA_PENDING)
                 ->count(),
             'reviewed_range' => Lead::whereBetween('sale_at', [$start, $end])
                 ->whereNotNull('qa_status')
                 ->whereNotNull('sale_at')
-                ->where('qa_status', '!=', 'Pending')
+                ->where('qa_status', '!=', Statuses::QA_PENDING)
                 ->count(),
             'reviewed_mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])
                 ->whereNotNull('qa_status')
                 ->whereNotNull('sale_at')
-                ->where('qa_status', '!=', 'Pending')
+                ->where('qa_status', '!=', Statuses::QA_PENDING)
                 ->count(),
         ];
     }
@@ -127,8 +129,8 @@ class AnalyticsService
         $monthStart = Carbon::now()->startOfMonth();
 
         return [
-            'pending' => Lead::where('team', 'peregrine')
-                ->where('status', 'closed')
+            'pending' => Lead::where('team', Teams::PEREGRINE)
+                ->where('status', Statuses::LEAD_CLOSED)
                 ->whereNotNull('assigned_validator_id')
                 ->count(),
             'submitted_today' => Lead::whereBetween('updated_at', [$start, $end])
@@ -140,7 +142,7 @@ class AnalyticsService
             'submitted_mtd' => Lead::whereBetween('updated_at', [$monthStart, now()])
                 ->whereNotNull('validated_by')
                 ->count(),
-            'declined' => Lead::where('manager_status', 'declined')
+            'declined' => Lead::where('manager_status', Statuses::MGR_DECLINED)
                 ->whereNotNull('validated_by')
                 ->count(),
         ];
@@ -161,37 +163,37 @@ class AnalyticsService
 
         // Total Assigned - all leads assigned to validators (matching validator dashboard)
         // Uses closed_at to track when closer sent to validator
-        $totalAssigned = Lead::where('team', 'peregrine')
+        $totalAssigned = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
-            ->whereIn('status', ['closed', 'sale', 'declined', 'returned'])
+            ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_DECLINED, Statuses::LEAD_RETURNED])
             ->whereBetween('closed_at', [$start, $end])
             ->count();
 
         // Approved - leads marked as sale
-        $approved = Lead::where('team', 'peregrine')
+        $approved = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
-            ->where('status', 'sale')
+            ->where('status', Statuses::LEAD_SALE)
             ->whereBetween('validated_at', [$start, $end])
             ->count();
 
         // Returned - leads returned to closers
-        $returned = Lead::where('team', 'peregrine')
+        $returned = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
-            ->where('status', 'returned')
+            ->where('status', Statuses::LEAD_RETURNED)
             ->whereBetween('validated_at', [$start, $end])
             ->count();
 
         // Declined - leads marked as declined
-        $declined = Lead::where('team', 'peregrine')
+        $declined = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
-            ->where('status', 'declined')
+            ->where('status', Statuses::LEAD_DECLINED)
             ->whereBetween('validated_at', [$start, $end])
             ->count();
 
         // Pending - leads waiting for validation (status = closed) in date range
-        $pending = Lead::where('team', 'peregrine')
+        $pending = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
-            ->where('status', 'closed')
+            ->where('status', Statuses::LEAD_CLOSED)
             ->whereBetween('closed_at', [$start, $end])
             ->count();
 
@@ -223,7 +225,7 @@ class AnalyticsService
             ->get();
 
         // Also get users who are currently assigned as validators in leads
-        $assignedValidatorIds = Lead::where('team', 'peregrine')
+        $assignedValidatorIds = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('assigned_validator_id')
             ->distinct()
             ->pluck('assigned_validator_id')
@@ -241,42 +243,42 @@ class AnalyticsService
 
         foreach ($validators as $validator) {
             // Total Assigned to this validator - uses closed_at when closer sent to validator
-            $totalAssigned = Lead::where('team', 'peregrine')
+            $totalAssigned = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
-                ->whereIn('status', ['closed', 'sale', 'declined', 'returned'])
+                ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_DECLINED, Statuses::LEAD_RETURNED])
                 ->whereBetween('closed_at', [$start, $end])
                 ->count();
 
             // Pending validation (status = closed) in date range
-            $pending = Lead::where('team', 'peregrine')
+            $pending = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
-                ->where('status', 'closed')
+                ->where('status', Statuses::LEAD_CLOSED)
                 ->whereBetween('closed_at', [$start, $end])
                 ->count();
 
             // Approved by this validator
-            $approved = Lead::where('team', 'peregrine')
+            $approved = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
-                ->where('status', 'sale')
+                ->where('status', Statuses::LEAD_SALE)
                 ->whereBetween('validated_at', [$start, $end])
                 ->count();
 
             // Returned by this validator
-            $returned = Lead::where('team', 'peregrine')
+            $returned = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
-                ->where('status', 'returned')
+                ->where('status', Statuses::LEAD_RETURNED)
                 ->whereBetween('validated_at', [$start, $end])
                 ->count();
 
             // Declined by this validator
-            $declined = Lead::where('team', 'peregrine')
+            $declined = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
-                ->where('status', 'declined')
+                ->where('status', Statuses::LEAD_DECLINED)
                 ->whereBetween('validated_at', [$start, $end])
                 ->count();
             
             // Submitted to Sales Management (with date filter on sale_at)
-            $submitted = Lead::where('team', 'peregrine')
+            $submitted = Lead::where('team', Teams::PEREGRINE)
                 ->where('assigned_validator_id', $validator->id)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
@@ -336,26 +338,26 @@ class AnalyticsService
 
             // Transferred (leads moved forward to closed/transferred status)
             $transferred = Lead::where('verified_by', $verifier->id)
-                ->whereIn('status', ['closed', 'transferred'])
+                ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_TRANSFERRED])
                 ->whereNotNull('transferred_at')
                 ->whereBetween('verified_at', [$start, $end])
                 ->count();
 
             // Pending callbacks (leads awaiting follow-up) in date range
             $pendingCallbacks = Lead::where('verified_by', $verifier->id)
-                ->where('status', 'pending')
+                ->where('status', Statuses::LEAD_PENDING)
                 ->whereBetween('verified_at', [$start, $end])
                 ->count();
 
             // Declined calls (leads declined)
             $declinedCalls = Lead::where('verified_by', $verifier->id)
-                ->where('status', 'declined')
+                ->where('status', Statuses::LEAD_DECLINED)
                 ->whereBetween('verified_at', [$start, $end])
                 ->count();
 
             // Marked as sale (leads with sale status approved)
             $markedAsSale = Lead::where('verified_by', $verifier->id)
-                ->whereIn('status', ['sale', 'approved'])
+                ->whereIn('status', [Statuses::LEAD_SALE, Statuses::LEAD_ACCEPTED])
                 ->whereBetween('verified_at', [$start, $end])
                 ->count();
 
@@ -387,7 +389,7 @@ class AnalyticsService
         $end = $endDate ?: Carbon::now();
 
         // Get Peregrine closers who have leads assigned
-        $closerIds = Lead::where('team', 'peregrine')
+        $closerIds = Lead::where('team', Teams::PEREGRINE)
             ->whereNotNull('managed_by')
             ->distinct()
             ->pluck('managed_by')
@@ -405,43 +407,43 @@ class AnalyticsService
 
         foreach ($closers as $closer) {
             // Total assigned leads (in date range based on transferred_at - when closer received work)
-            $totalAssigned = Lead::where('team', 'peregrine')
+            $totalAssigned = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
                 ->whereBetween('transferred_at', [$start, $end])
                 ->count();
 
             // Pending (in progress) in date range
-            $pending = Lead::where('team', 'peregrine')
+            $pending = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
-                ->whereIn('status', ['pending', 'transferred'])
+                ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED])
                 ->whereBetween('transferred_at', [$start, $end])
                 ->count();
 
             // Completed/Closed (sent to validator)
-            $closed = Lead::where('team', 'peregrine')
+            $closed = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
-                ->where('status', 'closed')
+                ->where('status', Statuses::LEAD_CLOSED)
                 ->whereBetween('closed_at', [$start, $end])
                 ->count();
 
             // Sales (validator approved as sale)
-            $sales = Lead::where('team', 'peregrine')
+            $sales = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
-                ->where('status', 'sale')
+                ->where('status', Statuses::LEAD_SALE)
                 ->whereBetween('validated_at', [$start, $end])
                 ->count();
 
             // Returned (sent back by validator)
-            $returned = Lead::where('team', 'peregrine')
+            $returned = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
-                ->where('status', 'returned')
+                ->where('status', Statuses::LEAD_RETURNED)
                 ->whereBetween('returned_at', [$start, $end])
                 ->count();
 
             // Declined (rejected by validator or closer)
-            $declined = Lead::where('team', 'peregrine')
+            $declined = Lead::where('team', Teams::PEREGRINE)
                 ->where('managed_by', $closer->id)
-                ->where('status', 'declined')
+                ->where('status', Statuses::LEAD_DECLINED)
                 ->whereBetween('declined_at', [$start, $end])
                 ->count();
 
@@ -506,20 +508,20 @@ class AnalyticsService
 
             // Pending (current state, no date filter) - sales awaiting QA review
             $pending = Lead::where('qa_user_id', $reviewer->id)
-                ->where('qa_status', 'Pending')
+                ->where('qa_status', Statuses::QA_PENDING)
                 ->whereNotNull('sale_at')
                 ->count();
 
             // Good reviews - filter by sale_at
             $good = Lead::where('qa_user_id', $reviewer->id)
-                ->where('qa_status', 'Good')
+                ->where('qa_status', Statuses::QA_GOOD)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count();
 
             // Issues (Bad + Avg combined as "issues") - filter by sale_at
             $issues = Lead::where('qa_user_id', $reviewer->id)
-                ->whereIn('qa_status', ['Bad', 'Avg'])
+                ->whereIn('qa_status', [Statuses::QA_BAD, Statuses::QA_AVG])
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count();
@@ -527,7 +529,7 @@ class AnalyticsService
             // Total reviewed (all except pending) - filter by sale_at
             $totalReviewed = Lead::where('qa_user_id', $reviewer->id)
                 ->whereNotNull('qa_status')
-                ->where('qa_status', '!=', 'Pending')
+                ->where('qa_status', '!=', Statuses::QA_PENDING)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count();
@@ -559,7 +561,7 @@ class AnalyticsService
         $start = $startDate ? Carbon::parse($startDate)->startOfDay() : Carbon::today();
         $end = $endDate ? Carbon::parse($endDate)->endOfDay() : now();
 
-        $leads = Lead::where('team', 'peregrine')
+        $leads = Lead::where('team', Teams::PEREGRINE)
             ->where(function($query) use ($validatorId) {
                 $query->where('validated_by', $validatorId)
                       ->orWhere('assigned_validator_id', $validatorId);
@@ -592,15 +594,15 @@ class AnalyticsService
             'mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])->count(),
             'ytd' => Lead::whereYear('sale_at', now()->year)->count(),
             'revenue_range' => Lead::whereBetween('sale_at', [$start, $end])
-                ->where('manager_status', 'approved')
-                ->where('issuance_status', 'Issued')
+                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
                 ->sum('monthly_premium'),
             'revenue_mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])
-                ->where('manager_status', 'approved')
-                ->where('issuance_status', 'Issued')
+                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
                 ->sum('monthly_premium'),
             'pending_approval' => Lead::whereNotNull('sale_at')
-                ->where('manager_status', 'pending')
+                ->where('manager_status', Statuses::MGR_PENDING)
                 ->count(),
         ];
     }
@@ -619,17 +621,17 @@ class AnalyticsService
         $monthStart = Carbon::now()->startOfMonth();
 
         return [
-            'pending' => Lead::where('manager_status', 'pending')->count(),
-            'approved' => Lead::where('manager_status', 'approved')->count(),
-            'declined' => Lead::where('manager_status', 'declined')->count(),
+            'pending' => Lead::where('manager_status', Statuses::MGR_PENDING)->count(),
+            'approved' => Lead::where('manager_status', Statuses::MGR_APPROVED)->count(),
+            'declined' => Lead::where('manager_status', Statuses::MGR_DECLINED)->count(),
             'approved_today' => Lead::whereBetween('updated_at', [$start, $end])
-                ->where('manager_status', 'approved')
+                ->where('manager_status', Statuses::MGR_APPROVED)
                 ->count(),
             'approved_range' => Lead::whereBetween('updated_at', [$start, $end])
-                ->where('manager_status', 'approved')
+                ->where('manager_status', Statuses::MGR_APPROVED)
                 ->count(),
             'approved_mtd' => Lead::whereBetween('updated_at', [$monthStart, now()])
-                ->where('manager_status', 'approved')
+                ->where('manager_status', Statuses::MGR_APPROVED)
                 ->count(),
         ];
     }
@@ -673,7 +675,7 @@ class AnalyticsService
                 $qaReviewData[] = Lead::whereDate('sale_at', $date)
                     ->whereNotNull('qa_status')
                     ->whereNotNull('sale_at')
-                    ->where('qa_status', '!=', 'Pending')
+                    ->where('qa_status', '!=', Statuses::QA_PENDING)
                     ->count();
 
                 // Validator submissions for each day
@@ -699,7 +701,7 @@ class AnalyticsService
                 $qaReviewData[] = Lead::whereDate('sale_at', $date)
                     ->whereNotNull('qa_status')
                     ->whereNotNull('sale_at')
-                    ->where('qa_status', '!=', 'Pending')
+                    ->where('qa_status', '!=', Statuses::QA_PENDING)
                     ->count();
 
                 // Validator submissions for each day
@@ -744,8 +746,8 @@ class AnalyticsService
                     ->get(['id', 'cn_name', 'verified_by', 'created_at', 'phone_number']);
 
             case 'verifier_pending':
-                return $query->where('team', 'peregrine')
-                    ->where('status', 'closed')
+                return $query->where('team', Teams::PEREGRINE)
+                    ->where('status', Statuses::LEAD_CLOSED)
                     ->whereNotNull('assigned_validator_id')
                     ->orderByDesc('created_at')
                     ->limit($limit)
@@ -753,7 +755,7 @@ class AnalyticsService
 
             case 'qa_pending':
                 return $query->where(function($q) {
-                        $q->where('qa_status', 'Pending')
+                        $q->where('qa_status', Statuses::QA_PENDING)
                           ->orWhere(function($subq) {
                               $subq->whereNull('qa_status')
                                    ->whereNotNull('sale_at');
@@ -764,7 +766,7 @@ class AnalyticsService
                     ->get(['id', 'cn_name', 'qa_status', 'created_at', 'phone_number', 'sale_at']);
 
             case 'qa_good':
-                return $query->where('qa_status', 'Good')
+                return $query->where('qa_status', Statuses::QA_GOOD)
                     ->whereNotNull('sale_at')
                     ->whereBetween('sale_at', [$start, $end])
                     ->orderByDesc('sale_at')
@@ -772,7 +774,7 @@ class AnalyticsService
                     ->get(['id', 'cn_name', 'qa_user_id', 'qa_status', 'sale_at', 'updated_at']);
 
             case 'qa_bad':
-                return $query->where('qa_status', 'Bad')
+                return $query->where('qa_status', Statuses::QA_BAD)
                     ->whereNotNull('sale_at')
                     ->whereBetween('sale_at', [$start, $end])
                     ->orderByDesc('sale_at')
@@ -783,8 +785,8 @@ class AnalyticsService
             case 'validator_total_assigned':
                 // Return validator summary with lead counts (only actual validators, not verifiers)
                 $validatorIds = Lead::whereNotNull('validated_by')->distinct()->pluck('validated_by')->toArray();
-                return Lead::where('leads.team', 'peregrine')
-                    ->where('leads.status', 'closed')
+                return Lead::where('leads.team', Teams::PEREGRINE)
+                    ->where('leads.status', Statuses::LEAD_CLOSED)
                     ->whereNotNull('leads.assigned_validator_id')
                     ->whereIn('leads.assigned_validator_id', $validatorIds) // Filter to only actual validators
                     ->whereBetween('leads.created_at', [$start, $end])
@@ -803,9 +805,9 @@ class AnalyticsService
 
             case 'validator_approved':
                 // Return validator summary with lead counts
-                return Lead::where('leads.team', 'peregrine')
+                return Lead::where('leads.team', Teams::PEREGRINE)
                     ->whereNotNull('leads.validated_by')
-                    ->where('leads.status', 'sale')
+                    ->where('leads.status', Statuses::LEAD_SALE)
                     ->whereBetween('leads.updated_at', [$start, $end])
                     ->join('users', 'leads.validated_by', '=', 'users.id')
                     ->select('users.id as validator_id', 'users.name as validator_name', DB::raw('COUNT(leads.id) as lead_count'))
@@ -815,9 +817,9 @@ class AnalyticsService
 
             case 'validator_returned':
                 // Return validator summary with lead counts
-                return Lead::where('leads.team', 'peregrine')
+                return Lead::where('leads.team', Teams::PEREGRINE)
                     ->whereNotNull('leads.validated_by')
-                    ->where('leads.status', 'returned')
+                    ->where('leads.status', Statuses::LEAD_RETURNED)
                     ->whereBetween('leads.updated_at', [$start, $end])
                     ->join('users', 'leads.validated_by', '=', 'users.id')
                     ->select('users.id as validator_id', 'users.name as validator_name', DB::raw('COUNT(leads.id) as lead_count'))
@@ -827,9 +829,9 @@ class AnalyticsService
 
             case 'validator_declined':
                 // Return validator summary with lead counts
-                return Lead::where('leads.team', 'peregrine')
+                return Lead::where('leads.team', Teams::PEREGRINE)
                     ->whereNotNull('leads.validated_by')
-                    ->where('leads.status', 'declined')
+                    ->where('leads.status', Statuses::LEAD_DECLINED)
                     ->whereBetween('leads.updated_at', [$start, $end])
                     ->join('users', 'leads.validated_by', '=', 'users.id')
                     ->select('users.id as validator_id', 'users.name as validator_name', DB::raw('COUNT(leads.id) as lead_count'))
@@ -845,7 +847,7 @@ class AnalyticsService
                     ->get(['id', 'cn_name', 'closer_name', 'sale_at', 'monthly_premium', 'manager_status']);
 
             case 'manager_pending':
-                return $query->where('manager_status', 'pending')
+                return $query->where('manager_status', Statuses::MGR_PENDING)
                     ->whereNotNull('sale_at')
                     ->orderByDesc('sale_at')
                     ->limit($limit)
@@ -853,7 +855,7 @@ class AnalyticsService
 
             case 'manager_approved':
                 return $query->whereBetween('updated_at', [$start, $end])
-                    ->where('manager_status', 'approved')
+                    ->where('manager_status', Statuses::MGR_APPROVED)
                     ->orderByDesc('updated_at')
                     ->limit($limit)
                     ->get(['id', 'cn_name', 'manager_user_id', 'updated_at', 'monthly_premium']);

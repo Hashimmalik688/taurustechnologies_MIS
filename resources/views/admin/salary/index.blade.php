@@ -11,16 +11,16 @@
     .salary-card:hover {
         box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
     }
-    .gold-border { border-left: 4px solid #d4af37 !important; }
+    .gold-border { border-left: 4px solid var(--bs-gold) !important; }
     .employee-row {
         transition: all 0.2s ease;
     }
     .employee-row:hover {
-        background-color: #f8f9fa !important;
+        background-color: var(--bs-surface-bg-light) !important;
     }
     .badge-gold {
-        background-color: #d4af37;
-        color: #1a1a1a;
+        background-color: var(--bs-gold);
+        color: var(--bs-print-body-dark);
     }
     .stat-card {
         border-radius: 8px;
@@ -28,15 +28,15 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     .table-salary thead th {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-        color: #d4af37;
+        background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);
+        color: var(--bs-gold);
         font-weight: 600;
         border: none;
         padding: 12px 8px;
         font-size: 0.875rem;
     }
     .table-salary tbody tr {
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid var(--bs-print-bg-alt);
     }
     .table-salary tbody td {
         padding: 12px 8px;
@@ -52,8 +52,8 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h4 class="mb-1" style="color: #1a1a1a; font-weight: 600;">
-                            <i class="bx bx-calculator me-2" style="color: #d4af37;"></i>
+                        <h4 class="mb-1" style="color: var(--bs-print-body-dark); font-weight: 600;">
+                            <i class="bx bx-calculator me-2" style="color: var(--bs-gold);"></i>
                             Calculate Monthly Salaries
                         </h4>
                         <p class="text-muted mb-0">Process salary calculations for {{ \Carbon\Carbon::create()->month($currentMonth)->format('F') }} {{ $currentYear }}</p>
@@ -82,8 +82,8 @@
                 <div class="col-md-4">
                     <div class="card salary-card gold-border">
                         <div class="card-body">
-                            <h6 class="card-title mb-3" style="color: #1a1a1a; font-weight: 600;">
-                                <i class="bx bx-calendar me-2" style="color: #d4af37;"></i>
+                            <h6 class="card-title mb-3" style="color: var(--bs-print-body-dark); font-weight: 600;">
+                                <i class="bx bx-calendar me-2" style="color: var(--bs-gold);"></i>
                                 Calculation Period
                             </h6>
                             <div class="row g-2">
@@ -119,7 +119,7 @@
                             <div class="card stat-card">
                                 <div class="card-body p-3 text-center">
                                     <div class="text-muted small mb-1">Total Employees</div>
-                                    <h5 class="mb-0" style="color: #1a1a1a; font-weight: 700;">{{ $employees->count() }}</h5>
+                                    <h5 class="mb-0" style="color: var(--bs-print-body-dark); font-weight: 700;">{{ $employees->count() }}</h5>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +135,7 @@
                             <div class="card stat-card">
                                 <div class="card-body p-3 text-center">
                                     <div class="text-muted small mb-1">Total Basic</div>
-                                    <h6 class="mb-0" style="color: #d4af37; font-weight: 700;">Rs{{ number_format($employees->sum('basic_salary'), 0) }}</h6>
+                                    <h6 class="mb-0" style="color: var(--bs-gold); font-weight: 700;">Rs{{ number_format($employees->sum('basic_salary'), 0) }}</h6>
                                 </div>
                             </div>
                         </div>
@@ -219,12 +219,12 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-xs me-2">
-                                                    <span class="avatar-title rounded-circle" style="background-color: #d4af37; color: #1a1a1a; font-weight: 600;">
+                                                    <span class="avatar-title rounded-circle" style="background-color: var(--bs-gold); color: var(--bs-print-body-dark); font-weight: 600;">
                                                         {{ substr($employee->name, 0, 1) }}
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <div style="font-weight: 600; color: #1a1a1a; font-size: 0.875rem;">{{ $employee->name }}</div>
+                                                    <div style="font-weight: 600; color: var(--bs-print-body-dark); font-size: 0.875rem;">{{ $employee->name }}</div>
                                                     <small class="text-muted">{{ $employee->email }}</small>
                                                     @if ($employee->roles->isNotEmpty())
                                                         <div class="mt-1">
@@ -243,7 +243,7 @@
                                         </td>
                                         <td>
                                             @if($employee->basic_salary && $employee->basic_salary > 0)
-                                                <span style="font-weight: 600; color: #1a1a1a;">
+                                                <span style="font-weight: 600; color: var(--bs-print-body-dark);">
                                                     Rs{{ number_format($employee->basic_salary ?? 0, 0) }}
                                                 </span>
                                             @else
@@ -275,7 +275,7 @@
                                         </td>
                                         <td>
                                             @if($employee->is_sales_employee)
-                                                <span style="color: #059669; font-weight: 600;">
+                                                <span style="color: var(--bs-ui-success-dark); font-weight: 600;">
                                                     Rs{{ number_format($employee->bonus_per_extra_sale ?? 0, 0) }}
                                                 </span>
                                             @else
@@ -284,7 +284,7 @@
                                         </td>
                                         <td>
                                             @if ($totalBonus > 0)
-                                                <span style="color: #059669; font-weight: 600;">
+                                                <span style="color: var(--bs-ui-success-dark); font-weight: 600;">
                                                     Rs{{ number_format($totalBonus, 0) }}
                                                 </span>
                                             @else
@@ -292,7 +292,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span style="font-weight: 700; color: #1a1a1a; font-size: 0.95rem;">
+                                            <span style="font-weight: 700; color: var(--bs-print-body-dark); font-size: 0.95rem;">
                                                 Rs{{ number_format($grossSalary, 0) }}
                                             </span>
                                         </td>
@@ -341,8 +341,8 @@
         <div class="modal fade" id="salarySettingsModal" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
-                        <h5 class="modal-title" style="color: #d4af37;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);">
+                        <h5 class="modal-title" style="color: var(--bs-gold);">
                             <i class="bx bx-cog me-2"></i>
                             Salary Settings - <span id="settingsEmployeeName"></span>
                         </h5>
@@ -367,7 +367,7 @@
                             <!-- Basic Salary -->
                             <div class="row mb-3">
                                 <div class="col-12">
-                                    <h6 class="border-bottom pb-2 mb-3" style="color: #1a1a1a;">💰 Base Salary</h6>
+                                    <h6 class="border-bottom pb-2 mb-3" style="color: var(--bs-print-body-dark);">💰 Base Salary</h6>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Basic Salary (Rs) *</label>
@@ -380,7 +380,7 @@
                             <div id="settings_sales_section">
                                 <div class="row mb-3">
                                     <div class="col-12">
-                                        <h6 class="border-bottom pb-2 mb-3" style="color: #1a1a1a;">📊 Sales & Bonus</h6>
+                                        <h6 class="border-bottom pb-2 mb-3" style="color: var(--bs-print-body-dark);">📊 Sales & Bonus</h6>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Target Sales</label>
@@ -398,7 +398,7 @@
                             <!-- Punctuality & Fines -->
                             <div class="row mb-3">
                                 <div class="col-12">
-                                    <h6 class="border-bottom pb-2 mb-3" style="color: #1a1a1a;">⏰ Punctuality & Fines (Dock)</h6>
+                                    <h6 class="border-bottom pb-2 mb-3" style="color: var(--bs-print-body-dark);">⏰ Punctuality & Fines (Dock)</h6>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Punctuality Bonus (Rs)</label>
@@ -420,7 +420,7 @@
                             <!-- Salary Period -->
                             <div class="row mb-3">
                                 <div class="col-12">
-                                    <h6 class="border-bottom pb-2 mb-3" style="color: #1a1a1a;">📅 Salary Period</h6>
+                                    <h6 class="border-bottom pb-2 mb-3" style="color: var(--bs-print-body-dark);">📅 Salary Period</h6>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Start Date</label>

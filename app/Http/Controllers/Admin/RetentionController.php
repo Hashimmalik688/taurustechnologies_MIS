@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,10 +42,10 @@ class RetentionController extends Controller
         };
 
         // 1. YET TO RETAIN - Active chargebacks that need retention (pending or null status)
-        $yet_to_retain_query = Lead::where('status', 'chargeback')
+        $yet_to_retain_query = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->where(function($q) {
                 $q->whereNull('retention_status')
-                  ->orWhere('retention_status', 'pending');
+                  ->orWhere('retention_status', Statuses::RETENTION_PENDING);
             })
             ->with(['insuranceCarrier', 'retentionOfficer', 'managedBy']);
         
@@ -61,14 +62,14 @@ class RetentionController extends Controller
         }
 
         // 2. RETAINED - Successfully retained sales (regardless of current status)
-        $retained_query = Lead::where('retention_status', 'retained')
+        $retained_query = Lead::where('retention_status', Statuses::RETENTION_RETAINED)
             ->with(['insuranceCarrier', 'retentionOfficer', 'managedBy']);
         
         $retained_query = $applyFilters($retained_query);
         $retained_leads = $retained_query->latest('retained_at')->paginate(50, ['*'], 'retained_page');
 
         // 3. REWRITE - Chargebacks older than 30 days (from all chargebacks including pending)
-        $rewrite_query = Lead::where('status', 'chargeback')
+        $rewrite_query = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->where('is_rewrite', true)
             ->with(['insuranceCarrier', 'retentionOfficer', 'managedBy']);
         
@@ -79,7 +80,7 @@ class RetentionController extends Controller
         $disposition_query = Lead::with('insuranceCarrier')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', 'approved')
+            ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', 'Incomplete');
         
         $disposition_query = $applyFilters($disposition_query);
@@ -105,7 +106,7 @@ class RetentionController extends Controller
         // Query 2: Disposition count (different base conditions)
         $disposition_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', 'approved')
+            ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', 'Incomplete')
             ->count();
 
@@ -144,7 +145,7 @@ class RetentionController extends Controller
         $lead->retention_status = $request->status;
 
         // Update based on retention status
-        if ($request->status == 'retained') {
+        if ($request->status == Statuses::RETENTION_RETAINED) {
             // When a chargeback is retained (< 30 days), create a NEW sale
             // Retention officer successfully re-sold the policy
             
@@ -153,24 +154,24 @@ class RetentionController extends Controller
             $newSale->closer_name = $retentionOfficer; // Retention officer becomes the closer
             $newSale->sale_at = now();
             $newSale->sale_date = now()->format('Y-m-d');
-            $newSale->status = 'pending'; // New sale goes through approval process
+            $newSale->status = Statuses::LEAD_PENDING; // New sale goes through approval process
             $newSale->retention_status = null; // Clear retention status for new sale
             $newSale->is_rewrite = false;
             $newSale->chargeback_marked_date = null; // Not a chargeback anymore
-            $newSale->qa_status = 'Pending'; // Reset QA status
+            $newSale->qa_status = Statuses::QA_PENDING; // Reset QA status
             $newSale->qa_reason = null;
             $newSale->qa_user_id = null;
-            $newSale->manager_status = 'pending'; // Reset manager status
+            $newSale->manager_status = Statuses::MGR_PENDING; // Reset manager status
             $newSale->manager_reason = null;
             $newSale->manager_user_id = null;
             $newSale->comments = 'Retained from chargeback by ' . $retentionOfficer;
             $newSale->save();
             
             // Mark the original chargeback as retained
-            $lead->status = 'accepted';
+            $lead->status = Statuses::LEAD_ACCEPTED;
             $lead->retained_at = now();
             $lead->retention_officer_id = auth()->id();
-        } elseif ($request->status == 'rewrite') {
+        } elseif ($request->status == Statuses::RETENTION_REWRITE) {
             // When marked as rewrite (>= 30 days), create a NEW sale
             // This is essentially a new policy since it's been too long
             
@@ -179,14 +180,14 @@ class RetentionController extends Controller
             $newSale->closer_name = $retentionOfficer; // Retention officer becomes the closer
             $newSale->sale_at = now();
             $newSale->sale_date = now()->format('Y-m-d');
-            $newSale->status = 'pending'; // New sale goes through approval process
+            $newSale->status = Statuses::LEAD_PENDING; // New sale goes through approval process
             $newSale->retention_status = null; // Clear retention status for new sale
             $newSale->is_rewrite = false; // This is a fresh sale now
             $newSale->chargeback_marked_date = null; // Not a chargeback anymore
-            $newSale->qa_status = 'Pending'; // Reset QA status
+            $newSale->qa_status = Statuses::QA_PENDING; // Reset QA status
             $newSale->qa_reason = null;
             $newSale->qa_user_id = null;
-            $newSale->manager_status = 'pending'; // Reset manager status
+            $newSale->manager_status = Statuses::MGR_PENDING; // Reset manager status
             $newSale->manager_reason = null;
             $newSale->manager_user_id = null;
             $newSale->comments = 'Rewritten from chargeback by ' . $retentionOfficer;
@@ -196,7 +197,7 @@ class RetentionController extends Controller
             $lead->is_rewrite = true;
             $lead->retained_at = null;
             $lead->retention_officer_id = auth()->id();
-        } elseif ($request->status == 'pending') {
+        } elseif ($request->status == Statuses::RETENTION_PENDING) {
             // When marked as pending/yet to retain, clear flags
             $lead->is_rewrite = false;
             $lead->retained_at = null;
@@ -220,7 +221,7 @@ class RetentionController extends Controller
         $query = Lead::with('insuranceCarrier')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', 'approved')
+            ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', 'Incomplete');
         
         // Search functionality
@@ -334,9 +335,9 @@ class RetentionController extends Controller
                 ->where('carrier_name', $lead->carrier_name)
                 ->where('id', '!=', $id)
                 ->where(function($q) {
-                    $q->where('status', 'accepted')
+                    $q->where('status', Statuses::LEAD_ACCEPTED)
                       ->orWhere('status', 'verified')
-                      ->orWhere('status', 'closed');
+                      ->orWhere('status', Statuses::LEAD_CLOSED);
                 })
                 ->select('id', 'cn_name', 'carrier_name', 'policy_type', 'sale_date', 'policy_number')
                 ->get();
@@ -345,9 +346,9 @@ class RetentionController extends Controller
             $otherInsurances = Lead::where('account_number', $lead->account_number)
                 ->where('id', '!=', $id)
                 ->where(function($q) {
-                    $q->where('status', 'accepted')
+                    $q->where('status', Statuses::LEAD_ACCEPTED)
                       ->orWhere('status', 'verified')
-                      ->orWhere('status', 'closed');
+                      ->orWhere('status', Statuses::LEAD_CLOSED);
                 })
                 ->select('id', 'cn_name', 'carrier_name', 'policy_type', 'sale_date', 'policy_number', 'bank_name')
                 ->get();
@@ -369,18 +370,18 @@ class RetentionController extends Controller
                 ->where('carrier_name', $lead->carrier_name)
                 ->where('id', '!=', $lead->id)
                 ->where(function($q) {
-                    $q->where('status', 'accepted')
+                    $q->where('status', Statuses::LEAD_ACCEPTED)
                       ->orWhere('status', 'verified')
-                      ->orWhere('status', 'closed');
+                      ->orWhere('status', Statuses::LEAD_CLOSED);
                 })
                 ->count();
         } elseif ($disposition === 'By Bank') {
             return Lead::where('account_number', $lead->account_number)
                 ->where('id', '!=', $lead->id)
                 ->where(function($q) {
-                    $q->where('status', 'accepted')
+                    $q->where('status', Statuses::LEAD_ACCEPTED)
                       ->orWhere('status', 'verified')
-                      ->orWhere('status', 'closed');
+                      ->orWhere('status', Statuses::LEAD_CLOSED);
                 })
                 ->count();
         }

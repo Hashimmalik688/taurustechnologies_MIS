@@ -11,6 +11,7 @@ use App\Services\NotificationService;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Teams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,7 @@ class RavensDashboardController extends Controller
         // Get all leads for Ravens employees to call
         // Exclude leads that have been marked as sold (status = 'accepted' and sale_at is not null)
         // UNLESS the current user is the one who closed it
-        // Also exclude leads submitted by Peregrine closers (team = 'peregrine')
+        // Also exclude leads submitted by Peregrine closers (team = Teams::PEREGRINE)
         $currentUser = Auth::user();
         
         $leads = Lead::select([
@@ -65,7 +66,7 @@ class RavensDashboardController extends Controller
         })
         // Exclude Peregrine team leads
         ->where(function($query) {
-            $query->where('team', '!=', 'peregrine')
+            $query->where('team', '!=', Teams::PEREGRINE)
                   ->orWhereNull('team');
         })
         // MUST have valid phone number for calling system
@@ -662,7 +663,7 @@ class RavensDashboardController extends Controller
             $updateData['status'] = 'pending'; // Sale status - pending QA review
             $updateData['sale_at'] = now();
             $updateData['sale_date'] = now()->format('Y-m-d');
-            $updateData['team'] = 'ravens'; // Mark as Ravens team sale
+            $updateData['team'] = Teams::RAVENS; // Mark as Ravens team sale
 
             $lead->update($updateData);
 
