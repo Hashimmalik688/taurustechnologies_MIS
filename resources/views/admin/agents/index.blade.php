@@ -9,14 +9,8 @@
     <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
-        :root {
-            --gold: #d4af37;
-            --gold-light: #f4e4b4;
-            --gold-dark: #b8941f;
-        }
-
         .agents-header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(135deg, var(--bs-surface-800) 0%, var(--bs-surface-900) 100%);
             padding: 2rem;
             border-radius: 20px;
             margin-bottom: 2rem;
@@ -35,7 +29,7 @@
         }
 
         .agents-header .subtitle {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.95rem;
             margin-top: 0.5rem;
         }
@@ -151,7 +145,7 @@
 
         .agent-info-email {
             font-size: 0.85rem;
-            color: #94a3b8;
+            color: var(--bs-surface-400);
         }
 
         .status-indicator {
@@ -181,7 +175,7 @@
         .badge-carrier {
             background: rgba(16, 185, 129, 0.2);
             color: #34d399;
-            border: 1px solid #10b981;
+            border: 1px solid var(--bs-ui-success);
             font-weight: 700;
             padding: 0.4rem 0.8rem;
             border-radius: 8px;
@@ -193,7 +187,7 @@
         .badge-state {
             background: rgba(245, 158, 11, 0.2);
             color: #fbbf24;
-            border: 1px solid #f59e0b;
+            border: 1px solid var(--bs-ui-warning);
             font-weight: 700;
             padding: 0.4rem 0.8rem;
             border-radius: 8px;
@@ -207,7 +201,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .address-cell:hover {
@@ -270,19 +264,19 @@
 
         .alert-success {
             background: rgba(16, 185, 129, 0.1);
-            border-left-color: #10b981;
+            border-left-color: var(--bs-ui-success);
             color: #34d399;
         }
 
         .alert-danger {
             background: rgba(239, 68, 68, 0.1);
-            border-left-color: #ef4444;
+            border-left-color: var(--bs-ui-danger);
             color: #f87171;
         }
 
         .alert-warning {
             background: rgba(245, 158, 11, 0.1);
-            border-left-color: #f59e0b;
+            border-left-color: var(--bs-ui-warning);
             color: #fbbf24;
         }
 
@@ -307,7 +301,7 @@
         }
 
         .dataTables_wrapper .dataTables_info {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
         }
     </style>
 @endsection
@@ -405,7 +399,7 @@
                                                     {{ $agent->userDetail->phone }}
                                                 </span>
                                             @else
-                                                <span style="color: #64748b;">-</span>
+                                                <span style="color: var(--bs-surface-600);">-</span>
                                             @endif
                                         </td>
 
@@ -415,7 +409,7 @@
                                                     ***-**-{{ $agent->userDetail->ssn_last4 }}
                                                 </span>
                                             @else
-                                                <span style="color: #64748b;">-</span>
+                                                <span style="color: var(--bs-surface-600);">-</span>
                                             @endif
                                         </td>
 
@@ -425,7 +419,7 @@
                                                     {{ $agent->userDetail->dob->format('m/d/Y') }}
                                                 </span>
                                             @else
-                                                <span style="color: #64748b;">-</span>
+                                                <span style="color: var(--bs-surface-600);">-</span>
                                             @endif
                                         </td>
 
@@ -436,7 +430,7 @@
                                                     {{ $agent->userDetail->state }}
                                                 </span>
                                             @else
-                                                <span style="color: #64748b;">Not specified</span>
+                                                <span style="color: var(--bs-surface-600);">Not specified</span>
                                             @endif
                                         </td>
 
@@ -450,7 +444,7 @@
                                                         </span>
                                                     @endforeach
                                                 @else
-                                                    <span style="color: #64748b;">
+                                                    <span style="color: var(--bs-surface-600);">
                                                         <i class="bx bx-car me-1"></i>
                                                         No carriers
                                                     </span>
@@ -470,17 +464,17 @@
                                                         </span>
                                                     @endforeach
                                                     @if ($uniqueStates->count() > 5)
-                                                        <span class="badge-state" style="background-color: #64748b;">
+                                                        <span class="badge-state" style="background-color: var(--bs-surface-600);">
                                                             +{{ $uniqueStates->count() - 5 }}
                                                         </span>
                                                     @endif
                                                     <div class="mt-2">
-                                                        <small style="color: #94a3b8; font-weight: 600;">
+                                                        <small style="color: var(--bs-surface-400); font-weight: 600;">
                                                             {{ $uniqueStates->count() }} state(s)
                                                         </small>
                                                     </div>
                                                 @else
-                                                    <span style="color: #64748b;">
+                                                    <span style="color: var(--bs-surface-600);">
                                                         <i class="bx bx-map-alt me-1"></i>
                                                         No active states
                                                     </span>
@@ -529,7 +523,7 @@
                                                         <li>
                                                             <button class="dropdown-item" style="color: #f87171;"
                                                                 onclick="confirmDelete({{ $agent->id }})">
-                                                                <i class="bx bx-trash me-2" style="color: #ef4444;"></i>Delete Agent
+                                                                <i class="bx bx-trash me-2" style="color: var(--bs-ui-danger);"></i>Delete Agent
                                                             </button>
                                                         </li>
                                                     @endhasanyrole
@@ -596,7 +590,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: invert(1);"></button>
                 </div>
                 <div class="modal-body">
-                    <p style="color: #cbd5e1;">Are you sure you want to delete this agent? This action cannot be undone.</p>
+                    <p style="color: var(--bs-surface-300);">Are you sure you want to delete this agent? This action cannot be undone.</p>
                     <div class="alert alert-warning">
                         <i class="bx bx-error me-2"></i>
                         <strong>Warning:</strong> All associated data will be permanently removed.
@@ -607,7 +601,7 @@
                     <form id="deleteForm" method="POST" style="display: inline;">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn" style="background: #ef4444; color: white; font-weight: 700; border-radius: 8px; padding: 0.5rem 1rem;">
+                        <button type="submit" class="btn" style="background: var(--bs-ui-danger); color: white; font-weight: 700; border-radius: 8px; padding: 0.5rem 1rem;">
                             <i class="bx bx-trash me-1"></i>
                             Delete Agent
                         </button>

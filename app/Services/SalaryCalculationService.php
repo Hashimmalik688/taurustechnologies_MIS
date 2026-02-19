@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\SalaryDeduction;
 use App\Models\SalaryRecord;
 use App\Models\User;
+use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +29,7 @@ class SalaryCalculationService
             SalaryRecord::where('user_id', $user->id)
                 ->where('salary_year', $year)
                 ->where('salary_month', $month)
-                ->where('status', 'draft')
+                ->where('status', Statuses::SALARY_DRAFT)
                 ->delete();
 
             // Get attendance data
@@ -85,7 +86,7 @@ class SalaryCalculationService
                 'daily_salary' => $dailySalary,
                 'attendance_bonus' => $punctualityBonus,
                 'attendance_deduction' => -$attendanceDeduction, // Store as negative
-                'status' => 'calculated',
+                'status' => Statuses::SALARY_CALCULATED,
                 'calculated_at' => now(),
             ]);
             
@@ -149,15 +150,15 @@ class SalaryCalculationService
         $lateThreshold = Carbon::parse('07:15:00');
         
         foreach ($attendances as $attendance) {
-            if ($attendance->status === 'present') {
+            if ($attendance->status === Statuses::ATTENDANCE_PRESENT) {
                 $presentDays++;
-            } elseif ($attendance->status === 'late') {
+            } elseif ($attendance->status === Statuses::ATTENDANCE_LATE) {
                 $lateDays++;
                 $presentDays++; // Late still counts as present
             } elseif ($attendance->status === 'half_day') {
                 $halfDays++;
                 $presentDays += 0.5;
-            } elseif (in_array($attendance->status, ['leave', 'absent'])) {
+            } elseif (in_array($attendance->status, [Statuses::ATTENDANCE_LEAVE, Statuses::ATTENDANCE_ABSENT])) {
                 $leaveDays++;
             }
         }
@@ -183,7 +184,7 @@ class SalaryCalculationService
         // Count leads where this user is the closer (made the sale)
         // Status should be 'accepted' or similar to indicate a successful sale
         $totalSales = Lead::where('closer_name', $user->name)
-            ->where('status', 'accepted')
+            ->where('status', Statuses::LEAD_ACCEPTED)
             ->whereBetween('sale_date', [$startDate, $endDate])
             ->count();
         
@@ -192,7 +193,7 @@ class SalaryCalculationService
         if ($totalSales === 0) {
             // Fallback to managed_by if closer_name doesn't match
             $totalSales = Lead::where('managed_by', $user->id)
-                ->where('status', 'accepted')
+                ->where('status', Statuses::LEAD_ACCEPTED)
                 ->whereBetween('sale_date', [$startDate, $endDate])
                 ->count();
         }
@@ -279,12 +280,12 @@ class SalaryCalculationService
      */
     public function approveSalary(SalaryRecord $salaryRecord): SalaryRecord
     {
-        if ($salaryRecord->status === 'paid') {
+        if ($salaryRecord->status === Statuses::SALARY_PAID) {
             throw new \Exception('Cannot approve a salary that has already been paid.');
         }
         
         $salaryRecord->update([
-            'status' => 'approved',
+            'status' => Statuses::SALARY_APPROVED,
             'approved_at' => now(),
         ]);
         
@@ -296,12 +297,12 @@ class SalaryCalculationService
      */
     public function markAsPaid(SalaryRecord $salaryRecord): SalaryRecord
     {
-        if ($salaryRecord->status !== 'approved') {
+        if ($salaryRecord->status !== Statuses::SALARY_APPROVED) {
             throw new \Exception('Salary must be approved before marking as paid.');
         }
         
         $salaryRecord->update([
-            'status' => 'paid',
+            'status' => Statuses::SALARY_PAID,
             'paid_at' => now(),
         ]);
         
@@ -313,7 +314,7 @@ class SalaryCalculationService
      */
     public function recalculateSalary(SalaryRecord $salaryRecord): SalaryRecord
     {
-        if ($salaryRecord->status === 'paid') {
+        if ($salaryRecord->status === Statuses::SALARY_PAID) {
             throw new \Exception('Cannot recalculate a salary that has already been paid.');
         }
         
@@ -340,9 +341,9 @@ class SalaryCalculationService
             'total_deductions' => $salaries->sum('total_deductions'),
             'total_net_salary' => $salaries->sum('net_salary'),
             'total_bonus' => $salaries->sum('total_bonus'),
-            'approved_count' => $salaries->where('status', 'approved')->count(),
-            'paid_count' => $salaries->where('status', 'paid')->count(),
-            'pending_count' => $salaries->whereIn('status', ['draft', 'calculated'])->count(),
+            'approved_count' => $salaries->where('status', Statuses::SALARY_APPROVED)->count(),
+            'paid_count' => $salaries->where('status', Statuses::SALARY_PAID)->count(),
+            'pending_count' => $salaries->whereIn('status', [Statuses::SALARY_DRAFT, Statuses::SALARY_CALCULATED])->count(),
         ];
     }
 }

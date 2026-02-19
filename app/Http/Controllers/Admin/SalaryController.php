@@ -16,6 +16,7 @@ use App\Models\PayrollSetting;
 use App\Services\AttendanceService;
 use App\Services\RevenueCalculationService;
 use App\Services\SalaryService;
+use App\Support\Statuses;
 use App\Traits\PayrollMonthCalculation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -221,7 +222,7 @@ class SalaryController extends Controller
 
         // Get ACTIVE employees only (who get paid) - EXCLUDE Shawn
         $query = User::with(['roles', 'userDetail'])
-            ->where('status', 'Active')  // Only active employees
+            ->where('status', Statuses::USER_ACTIVE)  // Only active employees
             ->where('name', '!=', 'Shawn')  // Exclude Shawn
             ->orderBy('name');
 
@@ -435,7 +436,7 @@ class SalaryController extends Controller
         $component = SalaryComponent::findOrFail($componentId);
 
         $component->update([
-            'status' => 'approved',
+            'status' => Statuses::SALARY_APPROVED,
             'approved_at' => now(),
             'approved_amount' => $component->net_amount,
         ]);
@@ -452,13 +453,13 @@ class SalaryController extends Controller
         $component = SalaryComponent::findOrFail($componentId);
 
         // Only allow marking paid if approved
-        if ($component->status !== 'approved') {
+        if ($component->status !== Statuses::SALARY_APPROVED) {
             return redirect()->back()
                 ->with('error', 'Component must be approved before marking as paid');
         }
 
         $component->update([
-            'status' => 'paid',
+            'status' => Statuses::SALARY_PAID,
             'paid_at' => now(),
         ]);
 
@@ -606,7 +607,7 @@ class SalaryController extends Controller
                 'gross_salary' => $grossSalary,
                 'total_deductions' => $totalDeductions,
                 'net_salary' => $netSalary,
-                'status' => 'calculated',
+                'status' => Statuses::SALARY_CALCULATED,
                 'calculated_at' => now(),
                 'notes' => implode(' | ', array_filter($notesArray)),
             ]
@@ -922,12 +923,12 @@ class SalaryController extends Controller
 
     public function approve(SalaryRecord $salaryRecord)
     {
-        if ($salaryRecord->status !== 'calculated') {
+        if ($salaryRecord->status !== Statuses::SALARY_CALCULATED) {
             return response()->json(['success' => false, 'message' => 'Only calculated salaries can be approved.']);
         }
 
         $salaryRecord->update([
-            'status' => 'approved',
+            'status' => Statuses::SALARY_APPROVED,
             'approved_at' => now(),
         ]);
 
@@ -936,12 +937,12 @@ class SalaryController extends Controller
 
     public function markPaid(SalaryRecord $salaryRecord)
     {
-        if ($salaryRecord->status !== 'approved') {
+        if ($salaryRecord->status !== Statuses::SALARY_APPROVED) {
             return response()->json(['success' => false, 'message' => 'Only approved salaries can be marked as paid.']);
         }
 
         $salaryRecord->update([
-            'status' => 'paid',
+            'status' => Statuses::SALARY_PAID,
             'paid_at' => now(),
         ]);
 
@@ -1162,7 +1163,7 @@ class SalaryController extends Controller
 
             // Get ACTIVE employees only - EXCLUDE Shawn
             $employees = User::with(['roles', 'userDetail'])
-                ->where('status', 'Active')
+                ->where('status', Statuses::USER_ACTIVE)
                 ->where('name', '!=', 'Shawn')
                 ->orderBy('name')
                 ->get();

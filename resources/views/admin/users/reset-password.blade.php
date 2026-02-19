@@ -139,7 +139,7 @@
 @section('styles')
 <style>
     .card-header {
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         border-bottom: 1px solid #dee2e6;
     }
     .card-header h5 {

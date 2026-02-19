@@ -33,14 +33,14 @@
     font-weight: 600;
     font-size: 0.85rem;
     padding: 0.5rem;
-    color: #6b7280;
-    background: #f3f4f6;
+    color: var(--bs-surface-500);
+    background: var(--bs-surface-100);
     border-radius: 4px;
 }
 
 .calendar-day {
     aspect-ratio: 1;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--bs-surface-200);
     border-radius: 8px;
     padding: 0.5rem;
     text-align: center;
@@ -60,28 +60,28 @@
 }
 
 .calendar-day.today {
-    border-color: #d4af37;
+    border-color: var(--bs-gold);
     border-width: 3px;
 }
 
 .calendar-day.present {
     background: #d1fae5;
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
 }
 
 .calendar-day.late {
     background: #fed7aa;
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
 }
 
 .calendar-day.absent {
     background: #fee2e2;
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
 }
 
 .calendar-day.half_day {
     background: #dbeafe;
-    border-color: #3b82f6;
+    border-color: var(--bs-ui-info);
 }
 
 .calendar-day.paid_leave {
@@ -91,7 +91,7 @@
 
 .calendar-day.holiday {
     background: #e0e7ff;
-    border-color: #6366f1;
+    border-color: var(--bs-ui-indigo);
 }
 
 .day-number {
@@ -108,7 +108,7 @@
 
 .day-time {
     font-size: 0.6rem;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin-top: 0.25rem;
 }
 
@@ -121,29 +121,29 @@
 
 .stat-box {
     background: white;
-    border: 2px solid #e5e7eb;
+    border: 2px solid var(--bs-surface-200);
     border-radius: 8px;
     padding: 1rem;
     text-align: center;
 }
 
 .stat-box.present {
-    border-color: #10b981;
+    border-color: var(--bs-ui-success);
     background: #d1fae5;
 }
 
 .stat-box.absent {
-    border-color: #ef4444;
+    border-color: var(--bs-ui-danger);
     background: #fee2e2;
 }
 
 .stat-box.late {
-    border-color: #f59e0b;
+    border-color: var(--bs-ui-warning);
     background: #fed7aa;
 }
 
 .stat-box.half_day {
-    border-color: #3b82f6;
+    border-color: var(--bs-ui-info);
     background: #dbeafe;
 }
 
@@ -162,13 +162,13 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 600;
-    color: #6b7280;
+    color: var(--bs-surface-500);
     margin-top: 0.5rem;
 }
 
 .checkin-widget {
     background: white;
-    border: 2px solid #d4af37;
+    border: 2px solid var(--bs-gold);
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
@@ -176,7 +176,7 @@
 }
 
 .btn-checkin {
-    background: #d4af37;
+    background: var(--bs-gold);
     color: white;
     border: none;
     padding: 0.75rem 2rem;
@@ -188,13 +188,13 @@
 }
 
 .btn-checkin:hover {
-    background: #b8941f;
+    background: var(--bs-gold-dark);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
 }
 
 .btn-checkout {
-    background: #6b7280;
+    background: var(--bs-surface-500);
     color: white;
 }
 
@@ -353,7 +353,7 @@
                             <div class="{{ implode(' ', $classes) }}" title="{{ $title }}">
                                 <div class="day-number">{{ $day['date']->format('j') }}</div>
                                 @if($day['holiday'])
-                                    <div class="day-status" style="color: #6366f1;">
+                                    <div class="day-status" style="color: var(--bs-ui-indigo);">
                                         <i class="bx bx-calendar-star"></i> HOLIDAY
                                     </div>
                                     <div class="day-time" style="font-size: 0.55rem;">

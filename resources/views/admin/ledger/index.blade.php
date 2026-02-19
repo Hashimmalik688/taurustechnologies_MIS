@@ -23,9 +23,9 @@
         }
 
         .gold-gradient-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border: none;
-            color: #0f172a;
+            color: var(--bs-surface-900);
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
@@ -36,7 +36,7 @@
         .gold-gradient-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .filter-panel {
@@ -48,7 +48,7 @@
         }
 
         .form-label {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
@@ -57,21 +57,21 @@
         .form-control, .form-select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 8px;
             padding: 0.6rem 0.75rem;
         }
 
         .form-control:focus, .form-select:focus {
             background: rgba(15, 23, 42, 0.95);
-            border-color: #d4af37;
-            color: #cbd5e1;
+            border-color: var(--bs-gold);
+            color: var(--bs-surface-300);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
         }
 
         .form-select option {
-            background: #0f172a;
-            color: #cbd5e1;
+            background: var(--bs-surface-900);
+            color: var(--bs-surface-300);
         }
 
         .balance-summary {
@@ -102,44 +102,44 @@
         }
 
         .balance-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .balance-credit {
-            color: #10b981;
+            color: var(--bs-ui-success);
         }
 
         .balance-debit {
-            color: #ef4444;
+            color: var(--bs-ui-danger);
         }
 
         .balance-net {
-            color: #d4af37;
+            color: var(--bs-gold);
         }
 
         .dataTables_wrapper {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .dataTables_wrapper .dataTables_filter input,
         .dataTables_wrapper .dataTables_length select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 6px;
             padding: 0.5rem;
         }
 
         .table-dark-custom {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .table-dark-custom thead th {
             background: rgba(15, 23, 42, 0.8);
-            color: #d4af37;
+            color: var(--bs-gold);
             border-color: rgba(212, 175, 55, 0.2);
             font-weight: 600;
             text-transform: uppercase;
@@ -157,7 +157,7 @@
         }
 
         .badge-debit {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -166,7 +166,7 @@
         }
 
         .badge-credit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -182,11 +182,11 @@
             color: white;
         }
 
-        .category-commission { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
-        .category-payment { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
-        .category-refund { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-        .category-expense { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-        .category-other { background: linear-gradient(135deg, #64748b 0%, #475569 100%); }
+        .category-commission { background: linear-gradient(135deg, var(--bs-ui-purple) 0%, #6d28d9 100%); }
+        .category-payment { background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%); }
+        .category-refund { background: linear-gradient(135deg, var(--bs-ui-warning) 0%, #d97706 100%); }
+        .category-expense { background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%); }
+        .category-other { background: linear-gradient(135deg, var(--bs-surface-600) 0%, #475569 100%); }
 
         .action-btn {
             padding: 0.4rem 0.8rem;
@@ -217,7 +217,7 @@
         .export-btn {
             background: rgba(100, 116, 139, 0.3);
             border: 1px solid rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -227,11 +227,11 @@
 
         .export-btn:hover {
             background: rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;
@@ -241,7 +241,7 @@
         }
 
         .btn-filter {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             border: none;
             color: white;
             font-weight: 600;
@@ -257,7 +257,7 @@
         .btn-reset {
             background: rgba(100, 116, 139, 0.3);
             border: 1px solid rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             padding: 0.6rem 1.5rem;
             border-radius: 8px;
@@ -265,7 +265,7 @@
 
         .btn-reset:hover {
             background: rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
     </style>
 @endsection
@@ -281,7 +281,7 @@
     @endcomponent
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7;">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: rgba(16, 185, 129, 0.2); border: 1px solid var(--bs-ui-success); color: #6ee7b7;">
             <i class="mdi mdi-check-circle me-2"></i>
             <strong>Success!</strong> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -363,8 +363,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h5 class="card-title" style="color: #d4af37; margin: 0;">All Ledger Entries</h5>
-                            <p class="text-muted mb-0" style="color: #94a3b8;">Manage all financial transactions</p>
+                            <h5 class="card-title" style="color: var(--bs-gold); margin: 0;">All Ledger Entries</h5>
+                            <p class="text-muted mb-0" style="color: var(--bs-surface-400);">Manage all financial transactions</p>
                         </div>
                         <div>
                             <button class="export-btn">
@@ -401,7 +401,7 @@
                                     <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
-                                    <td style="color: #10b981; font-weight: 600;">+$1,250.00</td>
+                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$1,250.00</td>
                                     <td>INV-001234</td>
                                     <td>Policy sale commission</td>
                                     <td>
@@ -419,7 +419,7 @@
                                     <td>Sarah Johnson</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-payment">Payment</span></td>
-                                    <td style="color: #ef4444; font-weight: 600;">-$500.00</td>
+                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$500.00</td>
                                     <td>PAY-005678</td>
                                     <td>Monthly payment to vendor</td>
                                     <td>
@@ -437,7 +437,7 @@
                                     <td>John Smith</td>
                                     <td><span class="badge-credit">Credit</span></td>
                                     <td><span class="badge-category category-commission">Commission</span></td>
-                                    <td style="color: #10b981; font-weight: 600;">+$2,100.00</td>
+                                    <td style="color: var(--bs-ui-success); font-weight: 600;">+$2,100.00</td>
                                     <td>INV-001200</td>
                                     <td>Large policy sale</td>
                                     <td>
@@ -455,7 +455,7 @@
                                     <td>Michael Brown</td>
                                     <td><span class="badge-debit">Debit</span></td>
                                     <td><span class="badge-category category-expense">Expense</span></td>
-                                    <td style="color: #ef4444; font-weight: 600;">-$350.00</td>
+                                    <td style="color: var(--bs-ui-danger); font-weight: 600;">-$350.00</td>
                                     <td>EXP-000891</td>
                                     <td>Office supplies</td>
                                     <td>

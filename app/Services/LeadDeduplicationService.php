@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Lead;
+use App\Support\Teams;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -28,7 +29,7 @@ class LeadDeduplicationService
             ->whereNotNull('phone_number')
             ->where('phone_number', '!=', '')
             ->where(function($query) {
-                $query->where('team', '!=', 'peregrine')
+                $query->where('team', '!=', Teams::PEREGRINE)
                       ->orWhereNull('team');
             })
             ->groupBy('phone_number')
@@ -41,7 +42,7 @@ class LeadDeduplicationService
             // Get all leads with this phone number (ALWAYS exclude Peregrine leads)
             $leads = Lead::where('phone_number', $phoneNumber)
                 ->where(function($query) {
-                    $query->where('team', '!=', 'peregrine')
+                    $query->where('team', '!=', Teams::PEREGRINE)
                           ->orWhereNull('team');
                 })
                 ->orderBy('id', 'asc')

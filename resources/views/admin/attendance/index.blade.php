@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -29,7 +30,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .dataTables_wrapper .dataTables_filter input:focus {
-            border-color: #556ee6;
+            border-color: var(--bs-chart-primary);
             box-shadow: 0 0 0 0.2rem rgba(85,110,230,0.15);
             outline: none;
         }
@@ -51,7 +52,7 @@
             transition: all 0.3s ease;
         }
         .dataTables_wrapper .dataTables_length select:focus {
-            border-color: #556ee6;
+            border-color: var(--bs-chart-primary);
             outline: none;
         }
         .dataTables_wrapper .dataTables_info {
@@ -72,15 +73,15 @@
             transition: all 0.2s ease;
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: linear-gradient(135deg, #556ee6 0%, #4d63d4 100%);
+            background: linear-gradient(135deg, var(--bs-chart-primary) 0%, #4d63d4 100%);
             color: white !important;
-            border-color: #556ee6;
+            border-color: var(--bs-chart-primary);
             box-shadow: 0 2px 6px rgba(85,110,230,0.3);
         }
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
             background: #f8f9fc;
-            border-color: #556ee6;
-            color: #556ee6 !important;
+            border-color: var(--bs-chart-primary);
+            color: var(--bs-chart-primary) !important;
         }
         .dataTables_wrapper .row {
             margin-bottom: 1rem;
@@ -91,7 +92,7 @@
             border-spacing: 0;
         }
         #attendance-table thead th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             color: white;
             font-weight: 600;
             text-transform: uppercase;
@@ -115,21 +116,21 @@
         .btn-soft-primary {
             background-color: rgba(85, 110, 230, 0.1);
             border-color: rgba(85, 110, 230, 0.2);
-            color: #556ee6;
+            color: var(--bs-chart-primary);
         }
         .btn-soft-primary:hover {
-            background-color: #556ee6;
-            border-color: #556ee6;
+            background-color: var(--bs-chart-primary);
+            border-color: var(--bs-chart-primary);
             color: white;
         }
         .btn-soft-danger {
             background-color: rgba(244, 106, 106, 0.1);
             border-color: rgba(244, 106, 106, 0.2);
-            color: #f46a6a;
+            color: var(--bs-chart-danger);
         }
         .btn-soft-danger:hover {
-            background-color: #f46a6a;
-            border-color: #f46a6a;
+            background-color: var(--bs-chart-danger);
+            border-color: var(--bs-chart-danger);
             color: white;
         }
     </style>
@@ -185,9 +186,9 @@
                         <label class="form-label">Status</label>
                         <select class="form-select" name="status">
                             <option value="">All</option>
-                            <option value="present" {{ ($searchStatus ?? '') == 'present' ? 'selected' : '' }}>Present</option>
-                            <option value="late" {{ ($searchStatus ?? '') == 'late' ? 'selected' : '' }}>Late</option>
-                            <option value="absent" {{ ($searchStatus ?? '') == 'absent' ? 'selected' : '' }}>Absent</option>
+                            <option value="present" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_PRESENT ? 'selected' : '' }}>Present</option>
+                            <option value="late" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_LATE ? 'selected' : '' }}>Late</option>
+                            <option value="absent" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_ABSENT ? 'selected' : '' }}>Absent</option>
                             <option value="half_day" {{ ($searchStatus ?? '') == 'half_day' ? 'selected' : '' }}>Half Day</option>
                             <option value="paid_leave" {{ ($searchStatus ?? '') == 'paid_leave' ? 'selected' : '' }}>Paid Leave</option>
                         </select>
@@ -380,11 +381,11 @@
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($attendance->status === 'present')
+                                            @if ($attendance->status === Statuses::ATTENDANCE_PRESENT)
                                                 <span class="badge badge-soft-success">On Time</span>
-                                            @elseif($attendance->status === 'late')
+                                            @elseif($attendance->status === Statuses::ATTENDANCE_LATE)
                                                 <span class="badge badge-soft-warning">Late</span>
-                                            @elseif($attendance->status === 'absent')
+                                            @elseif($attendance->status === Statuses::ATTENDANCE_ABSENT)
                                                 <span class="badge badge-soft-danger">Absent</span>
                                             @elseif($attendance->status === 'half_day')
                                                 <span class="badge badge-soft-info">Half Day</span>

@@ -15,7 +15,7 @@
         /* ===== Modern Color Palette ===== */
         :root {
             --gradient-gold: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
-            --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-purple: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             --gradient-blue: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
             --gradient-green: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             --gradient-red: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
@@ -52,7 +52,7 @@
         body::after {
             width: 400px;
             height: 400px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
             bottom: -200px;
             left: -200px;
             animation-delay: 10s;
@@ -162,7 +162,7 @@
         }
 
         .stat-card p {
-            color: #6c757d;
+            color: var(--bs-status-default);
             margin: 0;
             font-size: 0.8rem;
             text-transform: uppercase;
@@ -185,7 +185,7 @@
         .stat-card-company h2 { color: #13547a; }
 
         .stat-card-issued::before { background: var(--gradient-purple); }
-        .stat-card-issued h2 { color: #667eea; }
+        .stat-card-issued h2 { color: var(--bs-gradient-start); }
 
         @keyframes fadeInUp {
             from {
@@ -306,7 +306,7 @@
         }
 
         .bg-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end)) !important;
         }
 
         /* Alerts */
@@ -362,7 +362,7 @@
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #495057);
+            background: linear-gradient(135deg, var(--bs-status-default), #495057);
         }
 
         .btn-secondary:hover {
@@ -463,7 +463,7 @@
         <!-- Issued Applications Section -->
         @if($issuedLeads->count() > 0)
         <div class="table-wrapper mb-4">
-            <h5 class="mb-3" style="color: #d4af37; font-weight: 600;">
+            <h5 class="mb-3" style="color: var(--bs-gold); font-weight: 600;">
                 <i class="bx bx-check-circle me-2"></i>Issued Applications - Revenue Tracking
             </h5>
             
@@ -536,7 +536,7 @@
 
         <!-- Table -->
         <div class="table-wrapper">
-            <h5 class="mb-3" style="color: #6c757d; font-weight: 600;">
+            <h5 class="mb-3" style="color: var(--bs-status-default); font-weight: 600;">
                 <i class="bx bx-list-ul me-2"></i>All My Sales
             </h5>
             <div class="filter-bar">

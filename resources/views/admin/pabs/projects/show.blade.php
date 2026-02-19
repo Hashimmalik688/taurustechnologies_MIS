@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title', $project->project_code . ' - ' . $project->project_name)
@@ -12,7 +13,7 @@
         padding: 1rem;
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
     }
 
     .workflow-step.active {
@@ -47,7 +48,7 @@
     }
 
     .workflow-step .workflow-step-icon {
-        background-color: #6c757d;
+        background-color: var(--bs-status-default);
     }
 
     .workflow-step-content {
@@ -65,12 +66,12 @@
         padding: 1rem;
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
     }
 
     .budget-item-label {
         font-size: 0.875rem;
-        color: #6c757d;
+        color: var(--bs-status-default);
         font-weight: 500;
         margin-bottom: 0.5rem;
     }
@@ -98,7 +99,7 @@
     }
 
     .quote-card.lowest {
-        border: 2px solid #28a745;
+        border: 2px solid var(--bs-status-present);
         background-color: #f1f9f6;
     }
 
@@ -108,7 +109,7 @@
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
         padding: 1rem;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         margin-bottom: 1rem;
     }
 
@@ -122,7 +123,7 @@
 
     .comment-meta {
         font-size: 0.75rem;
-        color: #6c757d;
+        color: var(--bs-status-default);
         margin-bottom: 0.25rem;
     }
 </style>
@@ -180,21 +181,21 @@
                 <div class="card-body">
                     <h6 class="card-title">Actions</h6>
                     <div class="d-grid gap-2">
-                        @if($project->status === 'DRAFT')
+                        @if($project->status === Statuses::PABS_DRAFT)
                             <form action="{{ route('pabs.projects.moveToScoping', $project) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-outline-primary w-100">Move to Scoping</button>
                             </form>
                             <a href="{{ route('pabs.projects.edit', $project) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-                        @elseif($project->status === 'QUOTING')
+                        @elseif($project->status === Statuses::PABS_QUOTING)
                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#quotesModal">Add Vendor Quotes</button>
-                        @elseif($project->status === 'PENDING APPROVAL' && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
+                        @elseif($project->status === Statuses::PABS_PENDING_APPROVAL && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
                             <a href="{{ route('pabs.projects.approval', $project) }}" class="btn btn-sm btn-outline-warning">Review for Approval</a>
-                        @elseif($project->status === 'BUDGET ALLOCATED')
+                        @elseif($project->status === Statuses::PABS_BUDGET_ALLOCATED)
                             <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#executionModal">Start Execution</button>
-                        @elseif($project->status === 'IN PROGRESS')
+                        @elseif($project->status === Statuses::PABS_IN_PROGRESS)
                             <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#completeModal">Mark Complete</button>
-                        @elseif($project->status === 'COMPLETED' && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
+                        @elseif($project->status === Statuses::PABS_COMPLETED && auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN]))
                             <form action="{{ route('pabs.projects.archive', $project) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-outline-secondary w-100">Archive Project</button>
@@ -225,7 +226,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Step 1: Initiation -->
-                    <div class="workflow-step {{ $project->status !== 'DRAFT' ? 'completed' : 'active' }}">
+                    <div class="workflow-step {{ $project->status !== Statuses::PABS_DRAFT ? 'completed' : 'active' }}">
                         <div class="workflow-step-icon">1</div>
                         <div class="workflow-step-content">
                             <strong>Step 1: Initiation (DRAFT)</strong>
@@ -235,7 +236,7 @@
                     </div>
 
                     <!-- Step 2: Scoping -->
-                    <div class="workflow-step {{ in_array($project->status, ['QUOTING', 'PENDING APPROVAL', 'BUDGET ALLOCATED', 'IN PROGRESS', 'COMPLETED']) ? 'completed' : (in_array($project->status, ['SCOPING']) ? 'active' : '') }}">
+                    <div class="workflow-step {{ in_array($project->status, [Statuses::PABS_QUOTING, Statuses::PABS_PENDING_APPROVAL, Statuses::PABS_BUDGET_ALLOCATED, Statuses::PABS_IN_PROGRESS, Statuses::PABS_COMPLETED]) ? 'completed' : (in_array($project->status, [Statuses::PABS_SCOPING]) ? 'active' : '') }}">
                         <div class="workflow-step-icon">2</div>
                         <div class="workflow-step-content">
                             <strong>Step 2: Scoping</strong>
@@ -249,7 +250,7 @@
                                 @endif
                             @endif
                         </div>
-                        @if($project->status === 'SCOPING')
+                        @if($project->status === Statuses::PABS_SCOPING)
                             <form action="{{ route('pabs.projects.completeScopingAndQuote', $project) }}" method="POST" enctype="multipart/form-data" class="ms-auto">
                                 @csrf
                                 <div class="input-group input-group-sm">
@@ -261,7 +262,7 @@
                     </div>
 
                     <!-- Step 3: Quoting -->
-                    <div class="workflow-step {{ in_array($project->status, ['PENDING APPROVAL', 'BUDGET ALLOCATED', 'IN PROGRESS', 'COMPLETED']) ? 'completed' : (in_array($project->status, ['QUOTING']) ? 'active' : '') }}">
+                    <div class="workflow-step {{ in_array($project->status, [Statuses::PABS_PENDING_APPROVAL, Statuses::PABS_BUDGET_ALLOCATED, Statuses::PABS_IN_PROGRESS, Statuses::PABS_COMPLETED]) ? 'completed' : (in_array($project->status, [Statuses::PABS_QUOTING]) ? 'active' : '') }}">
                         <div class="workflow-step-icon">3</div>
                         <div class="workflow-step-content">
                             <strong>Step 3: Quoting</strong>
@@ -276,7 +277,7 @@
                     </div>
 
                     <!-- Step 4: Approval -->
-                    <div class="workflow-step {{ in_array($project->status, ['BUDGET ALLOCATED', 'IN PROGRESS', 'COMPLETED']) ? 'completed' : (in_array($project->status, ['PENDING APPROVAL']) ? 'active' : '') }}">
+                    <div class="workflow-step {{ in_array($project->status, [Statuses::PABS_BUDGET_ALLOCATED, Statuses::PABS_IN_PROGRESS, Statuses::PABS_COMPLETED]) ? 'completed' : (in_array($project->status, [Statuses::PABS_PENDING_APPROVAL]) ? 'active' : '') }}">
                         <div class="workflow-step-icon">4</div>
                         <div class="workflow-step-content">
                             <strong>Step 4: Executive Review (CEO Approval)</strong>
@@ -288,7 +289,7 @@
                     </div>
 
                     <!-- Step 5: Allocation -->
-                    <div class="workflow-step {{ in_array($project->status, ['IN PROGRESS', 'COMPLETED']) ? 'completed' : (in_array($project->status, ['BUDGET ALLOCATED']) ? 'active' : '') }}">
+                    <div class="workflow-step {{ in_array($project->status, [Statuses::PABS_IN_PROGRESS, Statuses::PABS_COMPLETED]) ? 'completed' : (in_array($project->status, [Statuses::PABS_BUDGET_ALLOCATED]) ? 'active' : '') }}">
                         <div class="workflow-step-icon">5</div>
                         <div class="workflow-step-content">
                             <strong>Step 5: Allocation (Finance Lock)</strong>
@@ -300,7 +301,7 @@
                     </div>
 
                     <!-- Step 6: Execution -->
-                    <div class="workflow-step {{ $project->status === 'COMPLETED' ? 'completed' : (in_array($project->status, ['IN PROGRESS']) ? 'active' : '') }}">
+                    <div class="workflow-step {{ $project->status === Statuses::PABS_COMPLETED ? 'completed' : (in_array($project->status, [Statuses::PABS_IN_PROGRESS]) ? 'active' : '') }}">
                         <div class="workflow-step-icon">6</div>
                         <div class="workflow-step-content">
                             <strong>Step 6: Execution (The Work)</strong>
@@ -312,7 +313,7 @@
                     </div>
 
                     <!-- Step 7: Completion -->
-                    <div class="workflow-step {{ $project->status === 'COMPLETED' || $project->status === 'ARCHIVED' ? 'completed' : '' }}">
+                    <div class="workflow-step {{ $project->status === Statuses::PABS_COMPLETED || $project->status === Statuses::PABS_ARCHIVED ? 'completed' : '' }}">
                         <div class="workflow-step-icon">7</div>
                         <div class="workflow-step-content">
                             <strong>Step 7: Verification & Closure</strong>
@@ -326,13 +327,13 @@
             </div>
 
             <!-- Vendor Quotes Section -->
-            @if($project->status !== 'DRAFT' && $project->status !== 'SCOPING')
+            @if($project->status !== Statuses::PABS_DRAFT && $project->status !== Statuses::PABS_SCOPING)
                 <div class="card mb-4">
                     <div class="card-header">
                         <h6 class="card-title mb-0">Vendor Quotes</h6>
                     </div>
                     <div class="card-body">
-                        @if($project->status === 'QUOTING')
+                        @if($project->status === Statuses::PABS_QUOTING)
                             @if($project->vendor_a_quote || $project->vendor_b_quote || $project->vendor_c_quote)
                                 <p class="mb-3">
                                     <strong>Lowest Quote:</strong> ${{ number_format($project->getLowestQuote(), 2) }} |
@@ -383,7 +384,7 @@
                                         <tr>
                                             <td><small><strong>{{ $ticket->ticket_code }}</strong></small></td>
                                             <td><small>{{ Str::limit($ticket->subject, 25) }}</small></td>
-                                            <td><small><span class="badge bg-{{ $ticket->status == 'OPEN' ? 'primary' : ($ticket->status == 'IN PROGRESS' ? 'info' : ($ticket->status == 'RESOLVED' ? 'success' : 'warning')) }}">{{ $ticket->status }}</span></small></td>
+                                            <td><small><span class="badge bg-{{ $ticket->status == Statuses::TICKET_OPEN ? 'primary' : ($ticket->status == 'IN PROGRESS' ? 'info' : ($ticket->status == Statuses::TICKET_RESOLVED ? 'success' : 'warning')) }}">{{ $ticket->status }}</span></small></td>
                                             <td>
                                                 <a href="{{ route('pabs.tickets.show', $ticket) }}" class="btn btn-xs btn-outline-primary">View</a>
                                             </td>
@@ -417,7 +418,7 @@
                         @endforelse
                     </div>
 
-                    @if(in_array($project->status, ['IN PROGRESS']))
+                    @if(in_array($project->status, [Statuses::PABS_IN_PROGRESS]))
                         <form action="{{ route('pabs.projects.addComment', $project) }}" method="POST">
                             @csrf
                             <div class="input-group">

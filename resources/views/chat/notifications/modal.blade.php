@@ -95,7 +95,7 @@
         position: absolute;
         top: -5px;
         right: -5px;
-        background-color: #dc3545;
+        background-color: var(--bs-status-absent);
         color: white;
         border-radius: 50%;
         width: 20px;

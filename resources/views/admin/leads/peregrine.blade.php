@@ -40,7 +40,7 @@
     .locked-table tbody td:nth-child(4) { left: 270px; }
 
     .locked-table thead th {
-        background: #f8f9fa !important;
+        background: var(--bs-surface-bg-light) !important;
         white-space: nowrap;
         font-weight: 600;
         font-size: 0.95rem;

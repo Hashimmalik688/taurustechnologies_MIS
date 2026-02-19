@@ -5,13 +5,13 @@
 @section('css')
 <style>
     .detail-card {
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--bs-surface-200);
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
     }
     .detail-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
         color: white;
         padding: 2rem;
         border-radius: 12px;
@@ -24,12 +24,12 @@
         margin-bottom: 1.5rem;
     }
     .detail-field {
-        border-left: 4px solid #d4af37;
+        border-left: 4px solid var(--bs-gold);
         padding-left: 1rem;
     }
     .detail-field-label {
         font-size: 0.85rem;
-        color: #6b7280;
+        color: var(--bs-surface-500);
         font-weight: 600;
         text-transform: uppercase;
         margin-bottom: 0.5rem;
@@ -37,10 +37,10 @@
     .detail-field-value {
         font-size: 1.25rem;
         font-weight: 700;
-        color: #111827;
+        color: var(--bs-surface-700);
     }
     .breakdown-table {
-        background: #f9fafb;
+        background: var(--bs-surface-50);
         border-radius: 8px;
         padding: 1.5rem;
         margin-top: 1rem;
@@ -49,18 +49,18 @@
         display: flex;
         justify-content: space-between;
         padding: 0.75rem 0;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--bs-surface-200);
     }
     .breakdown-row:last-child {
         border-bottom: none;
     }
     .breakdown-label {
-        color: #6b7280;
+        color: var(--bs-surface-500);
         font-weight: 500;
     }
     .breakdown-value {
         font-weight: 600;
-        color: #111827;
+        color: var(--bs-surface-700);
     }
     .status-badge {
         display: inline-block;
@@ -69,9 +69,9 @@
         font-weight: 600;
         font-size: 0.9rem;
     }
-    .status-calculated { background: #ffc107; color: black; }
+    .status-calculated { background: var(--bs-status-leave); color: black; }
     .status-approved { background: #17a2b8; color: white; }
-    .status-paid { background: #28a745; color: white; }
+    .status-paid { background: var(--bs-status-present); color: white; }
 </style>
 @endsection
 
@@ -134,7 +134,7 @@
 
             <!-- Financial Breakdown -->
             <div class="detail-card">
-                <h5 class="mb-4" style="color: #d4af37;">
+                <h5 class="mb-4" style="color: var(--bs-gold);">
                     <i class="bx bx-calculator me-2"></i>Financial Summary
                 </h5>
 
@@ -149,7 +149,7 @@
                         @if($component->attendance_bonus > 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Attendance/Punctuality Bonus</span>
-                            <span class="breakdown-value" style="color: #10b981;">+ Rs {{ number_format($component->attendance_bonus, 2) }}</span>
+                            <span class="breakdown-value" style="color: var(--bs-ui-success);">+ Rs {{ number_format($component->attendance_bonus, 2) }}</span>
                         </div>
                         @endif
                         
@@ -157,12 +157,12 @@
                         
                         <div class="breakdown-row" style="font-size: 1.1rem;">
                             <span class="breakdown-label" style="font-weight: 700;">Calculated Amount</span>
-                            <span class="breakdown-value" style="color: #667eea; font-size: 1.25rem;">Rs {{ number_format($component->calculated_amount, 2) }}</span>
+                            <span class="breakdown-value" style="color: var(--bs-gradient-start); font-size: 1.25rem;">Rs {{ number_format($component->calculated_amount, 2) }}</span>
                         </div>
                     </div>
 
                     <!-- Attendance Details -->
-                    <h6 class="mt-4 mb-3" style="color: #6b7280;">Attendance Information</h6>
+                    <h6 class="mt-4 mb-3" style="color: var(--bs-surface-500);">Attendance Information</h6>
                     <div class="breakdown-table">
                         <div class="breakdown-row">
                             <span class="breakdown-label">Working Days</span>
@@ -192,14 +192,14 @@
                         @if($component->attendance_bonus > 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Punctuality Bonus Earned</span>
-                            <span class="breakdown-value" style="color: #10b981;">Rs {{ number_format($component->attendance_bonus, 2) }}</span>
+                            <span class="breakdown-value" style="color: var(--bs-ui-success);">Rs {{ number_format($component->attendance_bonus, 2) }}</span>
                         </div>
                         @endif
                         
                         @if($component->attendance_deduction < 0)
                         <div class="breakdown-row">
                             <span class="breakdown-label">Attendance Deduction</span>
-                            <span class="breakdown-value" style="color: #ef4444;">Rs {{ number_format(abs($component->attendance_deduction), 2) }}</span>
+                            <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format(abs($component->attendance_deduction), 2) }}</span>
                         </div>
                         @endif
                     </div>
@@ -236,12 +236,12 @@
                         </div>
                         <div class="breakdown-row">
                             <span class="breakdown-label">Sales Bonus</span>
-                            <span class="breakdown-value" style="color: #10b981;">Rs {{ number_format($component->calculated_amount, 2) }}</span>
+                            <span class="breakdown-value" style="color: var(--bs-ui-success);">Rs {{ number_format($component->calculated_amount, 2) }}</span>
                         </div>
                         @else
                         <div class="breakdown-row">
                             <span class="breakdown-label">Status</span>
-                            <span class="breakdown-value" style="color: #ef4444;">Below Target - No Bonus</span>
+                            <span class="breakdown-value" style="color: var(--bs-ui-danger);">Below Target - No Bonus</span>
                         </div>
                         @endif
                         
@@ -257,19 +257,19 @@
 
                 <!-- Deductions -->
                 @if($component->deductions > 0)
-                <h6 class="mt-4 mb-3" style="color: #6b7280;">Deductions</h6>
+                <h6 class="mt-4 mb-3" style="color: var(--bs-surface-500);">Deductions</h6>
                 <div class="breakdown-table">
                     @if($component->dock_deductions > 0)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Dock Deductions</span>
-                        <span class="breakdown-value" style="color: #ef4444;">Rs {{ number_format($component->dock_deductions, 2) }}</span>
+                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->dock_deductions, 2) }}</span>
                     </div>
                     @endif
                     
                     @if($component->manual_deductions > 0)
                     <div class="breakdown-row">
                         <span class="breakdown-label">Manual Deductions</span>
-                        <span class="breakdown-value" style="color: #ef4444;">Rs {{ number_format($component->manual_deductions, 2) }}</span>
+                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->manual_deductions, 2) }}</span>
                     </div>
                     @endif
                     
@@ -277,13 +277,13 @@
                     
                     <div class="breakdown-row">
                         <span class="breakdown-label" style="font-weight: 700;">Total Deductions</span>
-                        <span class="breakdown-value" style="color: #ef4444;">Rs {{ number_format($component->deductions, 2) }}</span>
+                        <span class="breakdown-value" style="color: var(--bs-ui-danger);">Rs {{ number_format($component->deductions, 2) }}</span>
                     </div>
                 </div>
                 @endif
 
                 <!-- Final Amount -->
-                <div class="detail-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; margin-top: 2rem;">
+                <div class="detail-card" style="background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); color: white; border: none; margin-top: 2rem;">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="detail-field-label" style="color: rgba(255,255,255,0.8);">Calculated Amount</div>
@@ -300,7 +300,7 @@
             <!-- Notes -->
             @if($component->notes)
             <div class="detail-card">
-                <h6 class="mb-3" style="color: #6b7280;">
+                <h6 class="mb-3" style="color: var(--bs-surface-500);">
                     <i class="bx bx-note me-2"></i>Notes
                 </h6>
                 <p class="text-muted mb-0">{{ $component->notes }}</p>
@@ -312,7 +312,7 @@
         <div class="col-lg-4">
             <!-- Status & Approval Info -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: #d4af37;">
+                <h6 class="mb-3" style="color: var(--bs-gold);">
                     <i class="bx bx-info-circle me-2"></i>Workflow Status
                 </h6>
                 
@@ -351,7 +351,7 @@
 
             <!-- Actions -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: #d4af37;">
+                <h6 class="mb-3" style="color: var(--bs-gold);">
                     <i class="bx bx-cog me-2"></i>Actions
                 </h6>
                 
@@ -386,7 +386,7 @@
 
             <!-- Timeline -->
             <div class="detail-card">
-                <h6 class="mb-3" style="color: #d4af37;">
+                <h6 class="mb-3" style="color: var(--bs-gold);">
                     <i class="bx bx-time me-2"></i>Timeline
                 </h6>
                 
@@ -396,7 +396,7 @@
                             <div style="
                                 width: 24px;
                                 height: 24px;
-                                background: #d4af37;
+                                background: var(--bs-gold);
                                 border-radius: 50%;
                                 display: flex;
                                 align-items: center;
@@ -409,7 +409,7 @@
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: #111827;">Calculated</div>
+                                <div style="font-weight: 600; color: var(--bs-surface-700);">Calculated</div>
                                 <small class="text-muted">{{ $component->calculated_at ? $component->calculated_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>
@@ -420,7 +420,7 @@
                             <div style="
                                 width: 24px;
                                 height: 24px;
-                                background: {{ $component->approved_at ? '#10b981' : '#d1d5db' }};
+                                background: {{ $component->approved_at ? 'var(--bs-ui-success)' : '#d1d5db' }};
                                 border-radius: 50%;
                                 display: flex;
                                 align-items: center;
@@ -433,7 +433,7 @@
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: #111827;">Approved</div>
+                                <div style="font-weight: 600; color: var(--bs-surface-700);">Approved</div>
                                 <small class="text-muted">{{ $component->approved_at ? $component->approved_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>
@@ -457,7 +457,7 @@
                                 ✓
                             </div>
                             <div>
-                                <div style="font-weight: 600; color: #111827;">Paid</div>
+                                <div style="font-weight: 600; color: var(--bs-surface-700);">Paid</div>
                                 <small class="text-muted">{{ $component->paid_at ? $component->paid_at->format('d M Y, h:i A') : 'Pending' }}</small>
                             </div>
                         </div>

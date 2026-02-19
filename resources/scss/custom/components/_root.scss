@@ -7,8 +7,46 @@
     // Taurus Brand
     --#{$prefix}gold:                                   #{$taurus-gold};
     --#{$prefix}gold-dark:                              #{$taurus-gold-dark};
+    --#{$prefix}gold-light:                             #{$taurus-gold-light};
+    --#{$prefix}gold-bright:                            #{$taurus-gold-bright};
     --#{$prefix}gold-gradient:                          linear-gradient(135deg, #{$taurus-gold} 0%, #{$taurus-gold-dark} 100%);
     --#{$prefix}navy:                                   #{$taurus-navy};
+
+    // Semantic UI Colors
+    --#{$prefix}ui-success:                             #{$ui-success};
+    --#{$prefix}ui-success-dark:                        #{$ui-success-dark};
+    --#{$prefix}ui-danger:                              #{$ui-danger};
+    --#{$prefix}ui-danger-dark:                         #{$ui-danger-dark};
+    --#{$prefix}ui-warning:                             #{$ui-warning};
+    --#{$prefix}ui-info:                                #{$ui-info};
+    --#{$prefix}ui-info-dark:                           #{$ui-info-dark};
+    --#{$prefix}ui-purple:                              #{$ui-purple};
+    --#{$prefix}ui-indigo:                              #{$ui-indigo};
+
+    // Gradient pair (dashboard cards, headers)
+    --#{$prefix}gradient-start:                         #{$gradient-start};
+    --#{$prefix}gradient-end:                           #{$gradient-end};
+    --#{$prefix}gradient-primary:                       linear-gradient(135deg, #{$gradient-start} 0%, #{$gradient-end} 100%);
+
+    // Surface / Neutral scale
+    --#{$prefix}surface-50:                             #{$surface-50};
+    --#{$prefix}surface-100:                            #{$surface-100};
+    --#{$prefix}surface-200:                            #{$surface-200};
+    --#{$prefix}surface-300:                            #{$surface-300};
+    --#{$prefix}surface-400:                            #{$surface-400};
+    --#{$prefix}surface-500:                            #{$surface-500};
+    --#{$prefix}surface-600:                            #{$surface-600};
+    --#{$prefix}surface-700:                            #{$surface-700};
+    --#{$prefix}surface-800:                            #{$surface-800};
+    --#{$prefix}surface-900:                            #{$surface-900};
+    --#{$prefix}surface-muted:                          #{$surface-muted};
+    --#{$prefix}surface-bg-light:                       #{$surface-bg-light};
+
+    // Print / Formal document
+    --#{$prefix}print-header-bg:                        #{$print-header-bg};
+    --#{$prefix}print-body-dark:                        #{$print-body-dark};
+    --#{$prefix}print-border:                           #{$print-border};
+    --#{$prefix}print-bg-alt:                           #{$print-bg-alt};
 
     // Attendance Status Colors
     --#{$prefix}status-present:                         #{$status-present};
@@ -16,6 +54,14 @@
     --#{$prefix}status-leave:                           #{$status-leave};
     --#{$prefix}status-late:                            #{$status-late};
     --#{$prefix}status-default:                         #{$status-default};
+
+    // Chart Colors
+    --#{$prefix}chart-primary:                          #{$chart-primary};
+    --#{$prefix}chart-success:                          #{$chart-success};
+    --#{$prefix}chart-warning:                          #{$chart-warning};
+    --#{$prefix}chart-danger:                           #{$chart-danger};
+    --#{$prefix}chart-info:                             #{$chart-info};
+    --#{$prefix}chart-muted:                            #{$chart-muted};
 
     // Topbar - Default Light
     --#{$prefix}header-bg:                              #{$header-bg}; 

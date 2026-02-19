@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DockRecord;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
 use App\Traits\PayrollMonthCalculation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class DockController extends Controller
         $dockRecords = $query->orderBy('dock_date', 'desc')->paginate(20);
 
         // Get all employees for dropdown - exclude CEO users
-        $employees = User::where('status', '!=', 'inactive')
+        $employees = User::where('status', '!=', Statuses::USER_INACTIVE)
             ->get()
             ->filter(function ($user) {
                 return $user && method_exists($user, 'hasRole') && !$user->hasRole(Roles::CEO);
@@ -46,14 +47,14 @@ class DockController extends Controller
         $stats = [
             'total_docked' => DockRecord::where('dock_month', $month)
                 ->where('dock_year', $year)
-                ->where('status', 'active')
+                ->where('status', Statuses::DOCK_ACTIVE)
                 ->sum('amount'),
             'total_records' => DockRecord::where('dock_month', $month)
                 ->where('dock_year', $year)
                 ->count(),
             'active_records' => DockRecord::where('dock_month', $month)
                 ->where('dock_year', $year)
-                ->where('status', 'active')
+                ->where('status', Statuses::DOCK_ACTIVE)
                 ->count(),
         ];
 
@@ -93,7 +94,7 @@ class DockController extends Controller
             'dock_date' => $dockDate,
             'dock_month' => $payrollMonthYear['month'],
             'dock_year' => $payrollMonthYear['year'],
-            'status' => 'active',
+            'status' => Statuses::DOCK_ACTIVE,
             'notes' => $validated['notes'] ?? null,
         ]);
 
@@ -168,7 +169,7 @@ class DockController extends Controller
             ->paginate(50);
 
         $totalDocked = DockRecord::where('user_id', $userId)
-            ->where('status', 'active')
+            ->where('status', Statuses::DOCK_ACTIVE)
             ->sum('amount');
 
         return view('admin.dock.history', compact('user', 'dockRecords', 'totalDocked'));
@@ -187,7 +188,7 @@ class DockController extends Controller
             ->paginate(20);
 
         $totalDocked = DockRecord::where('user_id', $user->id)
-            ->where('status', 'active')
+            ->where('status', Statuses::DOCK_ACTIVE)
             ->sum('amount');
 
         return view('employee.dock-records', compact('user', 'dockRecords', 'totalDocked'));

@@ -15,7 +15,7 @@
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;
@@ -36,14 +36,14 @@
             margin-bottom: 1rem;
         }
 
-        .amount-credit { color: #10b981; }
-        .amount-debit { color: #ef4444; }
+        .amount-credit { color: var(--bs-ui-success); }
+        .amount-debit { color: var(--bs-ui-danger); }
 
         .transaction-meta {
             display: flex;
             justify-content: center;
             gap: 2rem;
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
         }
 
@@ -62,7 +62,7 @@
         }
 
         .info-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
             text-transform: uppercase;
@@ -70,7 +70,7 @@
         }
 
         .info-value {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-size: 1.1rem;
             font-weight: 600;
         }
@@ -87,7 +87,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, #d4af37 0%, rgba(212, 175, 55, 0.2) 100%);
+            background: linear-gradient(to bottom, var(--bs-gold) 0%, rgba(212, 175, 55, 0.2) 100%);
         }
 
         .timeline-item {
@@ -102,29 +102,29 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #d4af37;
-            border: 3px solid #1e293b;
+            background: var(--bs-gold);
+            border: 3px solid var(--bs-surface-800);
         }
 
         .timeline-content {
             background: rgba(15, 23, 42, 0.4);
             padding: 1rem;
             border-radius: 8px;
-            border-left: 3px solid #d4af37;
+            border-left: 3px solid var(--bs-gold);
         }
 
         .timeline-time {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
         }
 
         .timeline-text {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .badge-credit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 8px;
@@ -133,7 +133,7 @@
         }
 
         .badge-debit {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
             padding: 0.5rem 1rem;
             border-radius: 8px;
@@ -156,7 +156,7 @@
         }
 
         .btn-delete {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
         }
     </style>
@@ -217,7 +217,7 @@
                     <div class="info-item">
                         <div class="info-label">Related Lead</div>
                         <div class="info-value">
-                            <a href="#" style="color: #d4af37;">Lead #1234 - John Doe</a>
+                            <a href="#" style="color: var(--bs-gold);">Lead #1234 - John Doe</a>
                         </div>
                     </div>
                     <div class="info-item">
@@ -240,7 +240,7 @@
         <div class="col-lg-4">
             <div class="glassmorphism-card">
                 <div class="card-body">
-                    <h5 style="color: #d4af37; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
+                    <h5 style="color: var(--bs-gold); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(212, 175, 55, 0.3);">
                         <i class="mdi mdi-timeline-clock me-2"></i>Transaction Timeline
                     </h5>
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lead;
 use App\Models\User;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,7 @@ class AgentDashboardController extends Controller
         
         // Get issued leads assigned to this agent
         $issuedLeads = Lead::where('assigned_agent_id', $agent->id)
-            ->where('issuance_status', 'Issued')
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->with(['insuranceCarrier', 'assignedAgent'])
             ->get();
         
@@ -40,10 +41,10 @@ class AgentDashboardController extends Controller
         // Calculate statistics - include both closed sales and issued apps
         $stats = [
             'total_sales' => $totalSalesCount,
-            'approved' => $allLeads->where('status', 'accepted')->count() + $issuedLeads->where('manager_status', 'approved')->count(),
-            'declined' => $allLeads->where('status', 'rejected')->count(),
-            'revenue' => $allLeads->where('status', 'accepted')->sum('monthly_premium') + $issuedLeads->sum('monthly_premium'),
-            'company_share' => ($allLeads->where('status', 'accepted')->sum('monthly_premium') + $issuedLeads->sum('monthly_premium')) * 0.3, // 30% company share
+            'approved' => $allLeads->where('status', Statuses::LEAD_ACCEPTED)->count() + $issuedLeads->where('manager_status', Statuses::MGR_APPROVED)->count(),
+            'declined' => $allLeads->where('status', Statuses::LEAD_REJECTED)->count(),
+            'revenue' => $allLeads->where('status', Statuses::LEAD_ACCEPTED)->sum('monthly_premium') + $issuedLeads->sum('monthly_premium'),
+            'company_share' => ($allLeads->where('status', Statuses::LEAD_ACCEPTED)->sum('monthly_premium') + $issuedLeads->sum('monthly_premium')) * 0.3, // 30% company share
             'issued_count' => $issuedLeads->count(),
             'issued_revenue' => $issuedLeads->sum('monthly_premium'),
             'issued_coverage' => $issuedLeads->sum('coverage_amount'),

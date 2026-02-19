@@ -7,16 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --gold: #d4af37;
   --gold-bright: #ffd54a;
   --on-gold: #111;
-  --dark-bg: #0f172a;
+  --dark-bg: var(--bs-surface-900);
   --card-bg: rgba(17, 24, 39, 0.90);
 }
 
 body.auth-body-bg {
   background: var(--dark-bg) !important;
-  color: #e5e7eb;
+  color: var(--bs-surface-200);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -83,7 +82,7 @@ body.auth-body-bg {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #111827;
+  background: var(--bs-surface-700);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,7 +95,7 @@ h1.auth-title {
   font-weight: 700;
   line-height: 1.25;
   margin-bottom: 0.5rem;
-  color: #f9fafb;
+  color: var(--bs-surface-50);
 }
 
 .tagline {
@@ -118,7 +117,7 @@ h1.auth-title {
   height: 48px;
   font-size: 0.95rem;
   background: #0f1625;
-  color: #f9fafb;
+  color: var(--bs-surface-50);
   border: 1px solid #2f3a4d;
   border-radius: 10px;
   transition: all 0.2s ease;
@@ -132,12 +131,12 @@ h1.auth-title {
   background: #0b1220;
   border-color: var(--gold);
   box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.20);
-  color: #f9fafb;
+  color: var(--bs-surface-50);
   outline: none;
 }
 
 .form-control.is-invalid {
-  border-color: #ef4444;
+  border-color: var(--bs-ui-danger);
 }
 
 .form-control.is-invalid:focus {
@@ -222,7 +221,7 @@ a.link-gold:hover {
 .auth-footer {
   padding: 1.25rem 1.5rem;
   text-align: center;
-  color: #9ca3af;
+  color: var(--bs-surface-muted);
   font-size: 0.85rem;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
 }

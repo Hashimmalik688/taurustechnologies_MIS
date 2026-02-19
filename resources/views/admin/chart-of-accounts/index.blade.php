@@ -22,9 +22,9 @@
         }
 
         .gold-gradient-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border: none;
-            color: #0f172a;
+            color: var(--bs-surface-900);
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
@@ -35,7 +35,7 @@
         .gold-gradient-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .filter-panel {
@@ -47,7 +47,7 @@
         }
 
         .form-label {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
@@ -56,43 +56,43 @@
         .form-control, .form-select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 8px;
             padding: 0.6rem 0.75rem;
         }
 
         .form-control:focus, .form-select:focus {
             background: rgba(15, 23, 42, 0.95);
-            border-color: #d4af37;
-            color: #cbd5e1;
+            border-color: var(--bs-gold);
+            color: var(--bs-surface-300);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
         }
 
         .form-select option {
-            background: #0f172a;
-            color: #cbd5e1;
+            background: var(--bs-surface-900);
+            color: var(--bs-surface-300);
         }
 
         .dataTables_wrapper {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .dataTables_wrapper .dataTables_filter input,
         .dataTables_wrapper .dataTables_length select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 6px;
             padding: 0.5rem;
         }
 
         .table-dark-custom {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .table-dark-custom thead th {
             background: rgba(15, 23, 42, 0.8);
-            color: #d4af37;
+            color: var(--bs-gold);
             border-color: rgba(212, 175, 55, 0.2);
             font-weight: 600;
             text-transform: uppercase;
@@ -141,14 +141,14 @@
 
         .page-title-box {
             background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--bs-gold);
             padding: 1.5rem;
             border-radius: 12px;
             margin-bottom: 1.5rem;
         }
 
         .page-title {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-size: 1.75rem;
             font-weight: 700;
             margin: 0;
@@ -163,10 +163,10 @@
             <div class="col-12">
                 <div class="page-title-box">
                     <div class="page-title-right">
-                        <ol class="breadcrumb m-0" style="color: #94a3b8;">
-                            <li class="breadcrumb-item"><a href="{{ route('root') }}" style="color: #cbd5e1;">Dashboard</a></li>
-                            <li class="breadcrumb-item" style="color: #d4af37;">Finance and Accounts</li>
-                            <li class="breadcrumb-item active" style="color: #d4af37;">Chart of Accounts</li>
+                        <ol class="breadcrumb m-0" style="color: var(--bs-surface-400);">
+                            <li class="breadcrumb-item"><a href="{{ route('root') }}" style="color: var(--bs-surface-300);">Dashboard</a></li>
+                            <li class="breadcrumb-item" style="color: var(--bs-gold);">Finance and Accounts</li>
+                            <li class="breadcrumb-item active" style="color: var(--bs-gold);">Chart of Accounts</li>
                         </ol>
                     </div>
                     <h4 class="page-title">Chart of Accounts</h4>
@@ -213,7 +213,7 @@
                 <div class="card glassmorphism-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title" style="color: #d4af37; margin: 0;">Chart of Accounts</h5>
+                            <h5 class="card-title" style="color: var(--bs-gold); margin: 0;">Chart of Accounts</h5>
                             <div class="d-flex gap-2">
                                 <a href="{{ route('chart-of-accounts.create') }}" class="gold-gradient-btn">
                                     <i class="bx bx-plus-circle"></i> Add Account

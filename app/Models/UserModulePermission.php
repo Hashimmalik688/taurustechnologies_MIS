@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PermissionLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,7 +42,7 @@ class UserModulePermission extends Model
      */
     public function canView(): bool
     {
-        return in_array($this->permission_level, ['view', 'edit', 'full']);
+        return in_array($this->permission_level, [PermissionLevel::VIEW, PermissionLevel::EDIT, PermissionLevel::FULL]);
     }
 
     /**
@@ -49,7 +50,7 @@ class UserModulePermission extends Model
      */
     public function canEdit(): bool
     {
-        return in_array($this->permission_level, ['edit', 'full']);
+        return in_array($this->permission_level, [PermissionLevel::EDIT, PermissionLevel::FULL]);
     }
 
     /**
@@ -57,23 +58,15 @@ class UserModulePermission extends Model
      */
     public function canDelete(): bool
     {
-        return $this->permission_level === 'full';
+        return $this->permission_level === PermissionLevel::FULL;
     }
 
     /**
      * Get numeric permission level for comparison
-     * none = 0, view = 1, edit = 2, full = 3
      */
     public function getNumericLevel(): int
     {
-        $levels = [
-            'none' => 0,
-            'view' => 1,
-            'edit' => 2,
-            'full' => 3,
-        ];
-
-        return $levels[$this->permission_level] ?? 0;
+        return PermissionLevel::numeric($this->permission_level);
     }
 
     /**

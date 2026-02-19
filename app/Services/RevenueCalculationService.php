@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Lead;
+use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -22,13 +23,13 @@ class RevenueCalculationService
         $endDate = $startDate->copy()->endOfMonth();
 
         // Get all approved sales
-        $approvedSales = Lead::where('status', 'accepted')
+        $approvedSales = Lead::where('status', Statuses::LEAD_ACCEPTED)
             ->whereNotNull('sale_date')
             ->whereBetween('sale_date', [$startDate, $endDate])
             ->get();
 
         // Get all chargebacks
-        $chargebacks = Lead::where('status', 'chargeback')
+        $chargebacks = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->whereNotNull('chargeback_marked_date')
             ->whereBetween('chargeback_marked_date', [$startDate, $endDate])
             ->get();
@@ -192,7 +193,7 @@ class RevenueCalculationService
             DB::raw('COUNT(*) as sales_count'),
             DB::raw('SUM(monthly_premium) as total_premium')
         )
-        ->where('status', 'accepted')
+        ->where('status', Statuses::LEAD_ACCEPTED)
         ->whereNotNull('sale_date')
         ->whereBetween('sale_date', [$startDate, $endDate])
         ->whereNotNull('managed_by')

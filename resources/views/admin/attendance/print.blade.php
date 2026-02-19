@@ -179,7 +179,7 @@
         }
 
         .status-weekend {
-            background-color: #dc3545 !important;
+            background-color: var(--bs-status-absent) !important;
             color: #fff;
             font-weight: 600;
         }
@@ -197,7 +197,7 @@
         }
 
         .weekend-header {
-            background-color: #dc3545 !important;
+            background-color: var(--bs-status-absent) !important;
             color: #fff !important;
         }
 
@@ -209,7 +209,7 @@
         .legend {
             margin: 12px 0;
             padding: 8px;
-            background-color: #f8f9fa;
+            background-color: var(--bs-surface-bg-light);
             border: 1px solid #dee2e6;
             border-radius: 4px;
         }
@@ -260,7 +260,7 @@
                 print-color-adjust: exact;
             }
             .weekend-header {
-                background-color: #dc3545 !important;
+                background-color: var(--bs-status-absent) !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }

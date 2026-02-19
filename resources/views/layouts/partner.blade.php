@@ -20,12 +20,12 @@
     
     <style>
         body {
-            background: #f8f9fa;
+            background: var(--bs-surface-bg-light);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         .partner-navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             padding: 1rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -74,7 +74,7 @@
         }
         
         .partner-info strong {
-            color: #764ba2;
+            color: var(--bs-gradient-end);
         }
     </style>
     

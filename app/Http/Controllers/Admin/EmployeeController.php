@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Employee;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -52,15 +53,15 @@ class EmployeeController extends Controller
                         'cnic' => '',
                         'position' => '',
                         'area_of_residence' => '',
-                        'status' => $user->status ?? 'Active',
-                        'mis' => 'Yes',
+                        'status' => $user->status ?? Statuses::USER_ACTIVE,
+                        'mis' => Statuses::MIS_YES,
                         'passport_image' => null,
                         'account_password' => null,
                     ]);
                 } else {
                     $emp = Employee::where('email', $email)->first();
-                    if ($emp->mis !== 'Yes') {
-                        $emp->mis = 'Yes';
+                    if ($emp->mis !== Statuses::MIS_YES) {
+                        $emp->mis = Statuses::MIS_YES;
                         $emp->save();
                     }
                 }
@@ -70,15 +71,15 @@ class EmployeeController extends Controller
             $deletedUserEmails = \App\Models\User::onlyTrashed()->pluck('email')->toArray();
             if (!empty($deletedUserEmails)) {
                 Employee::whereIn('email', $deletedUserEmails)
-                    ->where('mis', '=', 'Yes')
-                    ->update(['mis' => 'No']);
+                    ->where('mis', '=', Statuses::MIS_YES)
+                    ->update(['mis' => Statuses::MIS_NO]);
             }
 
             // Update MIS to 'No' for employees without any corresponding user (not in active or deleted users)
             $allUserEmails = \App\Models\User::withTrashed()->pluck('email')->toArray();
             Employee::whereNotIn('email', $allUserEmails)
-                ->where('mis', '=', 'Yes')
-                ->update(['mis' => 'No']);
+                ->where('mis', '=', Statuses::MIS_YES)
+                ->update(['mis' => Statuses::MIS_NO]);
             
             \Log::debug('EMS index: employees sync complete');
             
@@ -141,10 +142,10 @@ class EmployeeController extends Controller
         $saveData['area_of_residence'] = $request->filled('area_of_residence') ? trim($request->area_of_residence) : '';
         
         // Auto-set status and MIS
-        $status = $request->filled('status') ? trim($request->status) : 'Active';
+        $status = $request->filled('status') ? trim($request->status) : Statuses::USER_ACTIVE;
         $saveData['status'] = $status;
         // MIS is automatically "Yes" for Active/Not Active, "No" for Terminated
-        $saveData['mis'] = ($status === 'Terminated') ? 'No' : 'Yes';
+        $saveData['mis'] = ($status === Statuses::USER_TERMINATED) ? Statuses::MIS_NO : Statuses::MIS_YES;
 
         // Handle date_of_termination
         if ($request->filled('date_of_termination')) {
@@ -220,10 +221,10 @@ class EmployeeController extends Controller
             $status = trim($request->status);
             $updateData['status'] = $status;
             // MIS is automatically "Yes" for Active/Not Active, "No" for Terminated
-            $updateData['mis'] = ($status === 'Terminated') ? 'No' : 'Yes';
+            $updateData['mis'] = ($status === Statuses::USER_TERMINATED) ? Statuses::MIS_NO : Statuses::MIS_YES;
             
             // Track if status is being changed to Terminated
-            if ($status === 'Terminated' && $employee->status !== 'Terminated') {
+            if ($status === Statuses::USER_TERMINATED && $employee->status !== Statuses::USER_TERMINATED) {
                 $statusChangedToTerminated = true;
             }
         }
@@ -269,8 +270,8 @@ class EmployeeController extends Controller
             
             // Update employee status to Terminated and MIS to No
             $employee->update([
-                'status' => 'Terminated',
-                'mis' => 'No',
+                'status' => Statuses::USER_TERMINATED,
+                'mis' => Statuses::MIS_NO,
             ]);
             
             // Find the user by email and soft-delete it (preserves all historical data)
@@ -355,8 +356,8 @@ class EmployeeController extends Controller
             
             // Update employee status back to Active and MIS to Yes
             $employee->update([
-                'status' => 'Active',
-                'mis' => 'Yes',
+                'status' => Statuses::USER_ACTIVE,
+                'mis' => Statuses::MIS_YES,
             ]);
             
             // Restore the soft-deleted user if exists

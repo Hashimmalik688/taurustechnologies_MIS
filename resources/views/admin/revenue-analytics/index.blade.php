@@ -17,17 +17,17 @@
 
     .text-warning i[class*="mdi"],
     i[class*="mdi"].text-warning {
-        color: #ffc107 !important;
+        color: var(--bs-status-leave) !important;
     }
 
     .text-danger i[class*="mdi"],
     i[class*="mdi"].text-danger {
-        color: #dc3545 !important;
+        color: var(--bs-status-absent) !important;
     }
 
     .text-secondary i[class*="mdi"],
     i[class*="mdi"].text-secondary {
-        color: #6c757d !important;
+        color: var(--bs-status-default) !important;
     }
 </style>
 @endsection
@@ -118,7 +118,7 @@
     <!-- Total Revenue Card -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow-sm" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
+            <div class="card shadow-sm" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>

@@ -1,3 +1,4 @@
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -157,7 +158,7 @@
                                         <td>
                                             @php
                                                 $badgeClass = match($lead->issuance_status) {
-                                                    'Issued' => 'bg-success',
+                                                    Statuses::ISSUANCE_ISSUED => 'bg-success',
                                                     'Incomplete' => 'bg-warning',
                                                     default => 'bg-secondary'
                                                 };
@@ -179,9 +180,9 @@
                                         </td>
                                         <td>
                                             @php
-                                                $followupBadge = $lead->followup_status === 'Yes' ? 'bg-success' : 'bg-danger';
+                                                $followupBadge = $lead->followup_status === Statuses::MIS_YES ? 'bg-success' : 'bg-danger';
                                             @endphp
-                                            <span class="badge {{ $followupBadge }}">{{ $lead->followup_status === 'Yes' ? '✅ Yes' : '❌ No' }}</span>
+                                            <span class="badge {{ $followupBadge }}">{{ $lead->followup_status === Statuses::MIS_YES ? '✅ Yes' : '❌ No' }}</span>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
@@ -199,7 +200,7 @@
                                     <div class="modal fade" id="statusModal-{{ $lead->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
-                                                <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
+                                                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
                                                     <h5 class="modal-title fw-semibold">
                                                         <i class="mdi mdi-check-circle me-2"></i>Update Status - {{ $lead->cn_name }}
                                                     </h5>

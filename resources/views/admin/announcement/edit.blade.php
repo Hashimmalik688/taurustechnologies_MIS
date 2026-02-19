@@ -216,7 +216,7 @@
     }
 
     .form-control, .form-select {
-        border-color: #e5e7eb;
+        border-color: var(--bs-surface-200);
     }
 
     .form-control:focus, .form-select:focus {

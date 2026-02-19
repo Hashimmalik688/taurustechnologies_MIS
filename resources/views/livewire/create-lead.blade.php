@@ -7,13 +7,13 @@
             margin-bottom: 24px;
         }
         .lead-form-card .card-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            background: linear-gradient(135deg, var(--bs-print-body-dark) 0%, var(--bs-print-header-bg) 100%);
             border-radius: 10px 10px 0 0;
             padding: 16px 24px;
             border: none;
         }
         .lead-form-card .card-title {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 600;
             font-size: 1.1rem;
             margin: 0;
@@ -22,23 +22,23 @@
             padding: 28px;
         }
         .form-section-title {
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
             font-size: 0.95rem;
             font-weight: 600;
             margin-bottom: 20px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #d4af37;
+            border-bottom: 2px solid var(--bs-gold);
             display: inline-block;
         }
         .form-label {
             font-weight: 500;
-            color: #2d2d2d;
+            color: var(--bs-print-header-bg);
             font-size: 0.875rem;
             margin-bottom: 6px;
         }
         .form-label.required:after {
             content: '*';
-            color: #dc3545;
+            color: var(--bs-status-absent);
             margin-left: 4px;
         }
         .form-control, .form-select {
@@ -49,16 +49,16 @@
             transition: all 0.2s ease;
         }
         .form-control:focus, .form-select:focus {
-            border-color: #d4af37;
+            border-color: var(--bs-gold);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15);
         }
         .row-spacing {
             margin-bottom: 20px;
         }
         .btn-submit {
-            background: linear-gradient(135deg, #d4af37 0%, #f4d77a 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, #f4d77a 100%);
             border: none;
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
             font-weight: 600;
             padding: 12px 40px;
             border-radius: 8px;
@@ -67,15 +67,15 @@
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
-            color: #1a1a1a;
+            color: var(--bs-print-body-dark);
         }
         .form-helper-text {
             font-size: 0.75rem;
-            color: #6c757d;
+            color: var(--bs-status-default);
             margin-top: 4px;
         }
         .section-icon {
-            color: #d4af37;
+            color: var(--bs-gold);
             margin-right: 8px;
         }
     </style>
@@ -338,7 +338,7 @@
 
                     <!-- Beneficiary Information -->
                     <h6 class="form-section-title mt-4">Beneficiary Information</h6>
-                    <div class="alert alert-info mb-3" style="background-color: #e8f4fd; border-color: #d4af37; color: #1a1a1a;">
+                    <div class="alert alert-info mb-3" style="background-color: #e8f4fd; border-color: var(--bs-gold); color: var(--bs-print-body-dark);">
                         <i class="bx bx-info-circle me-2"></i>
                         You can add multiple beneficiaries. Click "Add Another Beneficiary" to add more.
                     </div>
@@ -347,7 +347,7 @@
                     <div class="card mb-3" style="border: 1px solid #e0e0e0; border-radius: 8px;">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0" style="color: #d4af37; font-weight: 600;">
+                                <h6 class="mb-0" style="color: var(--bs-gold); font-weight: 600;">
                                     <i class="bx bx-user-circle"></i>
                                     Beneficiary {{ $index + 1 }}
                                 </h6>
@@ -493,7 +493,7 @@
 
                     <!-- Card Information (Optional & Encrypted) -->
                     <h6 class="form-section-title mt-4">Payment Card Information (Optional)</h6>
-                    <div class="alert alert-info" style="background-color: #f0f8ff; border-color: #d4af37; color: #1a1a1a;">
+                    <div class="alert alert-info" style="background-color: #f0f8ff; border-color: var(--bs-gold); color: var(--bs-print-body-dark);">
                         <i class="bx bx-lock-alt me-2"></i>
                         <strong>Secure:</strong> All payment card information is encrypted before storage.
                     </div>

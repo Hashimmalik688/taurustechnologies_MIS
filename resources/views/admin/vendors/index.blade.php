@@ -22,9 +22,9 @@
         }
 
         .gold-gradient-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border: none;
-            color: #0f172a;
+            color: var(--bs-surface-900);
             font-weight: 600;
             padding: 0.75rem 1.5rem;
             border-radius: 8px;
@@ -35,29 +35,29 @@
         .gold-gradient-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .dataTables_wrapper {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .dataTables_wrapper .dataTables_filter input,
         .dataTables_wrapper .dataTables_length select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 6px;
             padding: 0.5rem;
         }
 
         .table-dark-custom {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
         }
 
         .table-dark-custom thead th {
             background: rgba(15, 23, 42, 0.8);
-            color: #d4af37;
+            color: var(--bs-gold);
             border-color: rgba(212, 175, 55, 0.2);
             font-weight: 600;
             text-transform: uppercase;
@@ -79,7 +79,7 @@
         }
 
         .badge-us-agent {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -106,7 +106,7 @@
         }
 
         .badge-active {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -115,7 +115,7 @@
         }
 
         .badge-inactive {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
@@ -179,7 +179,7 @@
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;

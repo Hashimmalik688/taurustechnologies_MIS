@@ -12,9 +12,9 @@
         border-radius: 12px;
     }
     .status-transferred { background: #17a2b8; color: white; }
-    .status-xfer { background: #28a745; color: white; }
-    .status-failed { background: #dc3545; color: white; }
-    .status-pending { background: #ffc107; color: #000; }
+    .status-xfer { background: var(--bs-status-present); color: white; }
+    .status-failed { background: var(--bs-status-absent); color: white; }
+    .status-pending { background: var(--bs-status-leave); color: #000; }
 </style>
 @endsection
 

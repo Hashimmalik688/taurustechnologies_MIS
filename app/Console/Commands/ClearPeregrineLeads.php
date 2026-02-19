@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Lead;
+use App\Support\Teams;
 
 class ClearPeregrineLeads extends Command
 {
@@ -28,7 +29,7 @@ class ClearPeregrineLeads extends Command
     {
         $this->info('Checking for peregrine leads...');
         
-        $count = Lead::where('team', 'peregrine')->count();
+        $count = Lead::where('team', Teams::PEREGRINE)->count();
         
         if ($count === 0) {
             $this->info('No peregrine leads found.');
@@ -38,7 +39,7 @@ class ClearPeregrineLeads extends Command
         $this->info("Found {$count} peregrine leads.");
         
         if ($this->confirm('Do you want to delete all peregrine leads?', true)) {
-            Lead::where('team', 'peregrine')->delete();
+            Lead::where('team', Teams::PEREGRINE)->delete();
             $this->info("Successfully deleted {$count} peregrine leads.");
         } else {
             $this->info('Operation cancelled.');

@@ -159,7 +159,7 @@
 
         .avatar-title {
             align-items: center;
-            background-color: #556ee6;
+            background-color: var(--bs-chart-primary);
             color: #fff;
             display: flex;
             font-weight: 500;
@@ -173,7 +173,7 @@
         }
 
         .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: var(--bs-surface-bg-light);
         }
     </style>
 @endsection

@@ -83,7 +83,7 @@
                                         <div class="d-flex justify-content-between align-items-start mb-3">
                                             <div>
                                                 <h5 class="card-title mb-1">
-                                                    <i class="bx bx-shield-alt me-2" style="color: #d4af37;"></i>
+                                                    <i class="bx bx-shield-alt me-2" style="color: var(--bs-gold);"></i>
                                                     {{ $role->name }}
                                                 </h5>
                                                 <p class="text-muted small mb-0">
@@ -134,7 +134,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title mb-3">
-                        <i class="bx bx-user me-2" style="color: #d4af37;"></i>
+                        <i class="bx bx-user me-2" style="color: var(--bs-gold);"></i>
                         User Permission Overrides
                     </h5>
                     <p class="text-muted mb-3">

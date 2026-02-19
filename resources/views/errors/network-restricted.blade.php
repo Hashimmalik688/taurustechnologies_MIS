@@ -25,7 +25,7 @@
             width: 80px;
             height: 80px;
             margin: 0 auto 24px;
-            background: #dc3545;
+            background: var(--bs-status-absent);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -40,7 +40,7 @@
         }
         .message {
             font-size: 16px;
-            color: #9ca3af;
+            color: var(--bs-surface-muted);
             line-height: 1.6;
             margin-bottom: 24px;
         }
@@ -57,7 +57,7 @@
         }
         .help-text {
             font-size: 13px;
-            color: #6b7280;
+            color: var(--bs-surface-500);
             line-height: 1.5;
         }
         .btn-login {

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use App\Support\Statuses;
+use App\Support\Teams;
 
 class HomeController extends Controller
 {
@@ -88,9 +90,9 @@ class HomeController extends Controller
         
         // Calculate revenue from issued and verified sales (Revenue Analytics logic)
         // Revenue = Total partner commissions (Premium × 9 × Settlement %)
-        $issued_sales = Lead::where('status', 'accepted')
-            ->where('manager_status', 'approved')
-            ->where('issuance_status', 'Issued')
+        $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
+            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->get();
             
         // Revenue is the sum of all partner commissions
@@ -103,7 +105,7 @@ class HomeController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', 'approved')
+            ->where('manager_status', Statuses::MGR_APPROVED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -113,7 +115,7 @@ class HomeController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', 'underwriting')
+            ->where('manager_status', Statuses::MGR_UNDERWRITING)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -123,7 +125,7 @@ class HomeController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', 'declined')
+            ->where('manager_status', Statuses::MGR_DECLINED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -166,10 +168,10 @@ class HomeController extends Controller
                 'closer' => $closerName,
                 'today' => $todaySales,
                 'mtd' => $sales->count(),
-                'approvedMTD' => $sales->where('manager_status', 'approved')->count(),
-                'declinedMTD' => $sales->where('manager_status', 'declined')->count(),
-                'uwMTD' => $sales->where('manager_status', 'underwriting')->count(),
-                'team' => $sales->first()->team ?? 'ravens'
+                'approvedMTD' => $sales->where('manager_status', Statuses::MGR_APPROVED)->count(),
+                'declinedMTD' => $sales->where('manager_status', Statuses::MGR_DECLINED)->count(),
+                'uwMTD' => $sales->where('manager_status', Statuses::MGR_UNDERWRITING)->count(),
+                'team' => $sales->first()->team ?? Teams::RAVENS
             ];
         }
         
@@ -183,17 +185,17 @@ class HomeController extends Controller
         $lastMonthStart = now()->subMonth()->startOfMonth();
         $lastMonthEnd = now()->subMonth()->endOfMonth();
         
-        $cb_this_count = Lead::where('status', 'chargeback')
+        $cb_this_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->where('updated_at', '>=', $thisMonthStart)
             ->count();
-        $cb_this_amt = Lead::where('status', 'chargeback')
+        $cb_this_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->where('updated_at', '>=', $thisMonthStart)
             ->sum('monthly_premium') ?? 0;
         
-        $cb_last_count = Lead::where('status', 'chargeback')
+        $cb_last_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
             ->count();
-        $cb_last_amt = Lead::where('status', 'chargeback')
+        $cb_last_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
             ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
             ->sum('monthly_premium') ?? 0;
         
@@ -201,11 +203,11 @@ class HomeController extends Controller
         // CB = leads marked as chargeback status
         // Retained = leads that were sales (accepted/underwritten) in the last 30 days and NOT chargedback
         // Pending = leads that are accepted but less than 30 days old (pending retention period)
-        $retention_cb = Lead::where('status', 'chargeback')->count();
-        $retention_retained = Lead::whereIn('status', ['accepted', 'underwritten'])
+        $retention_cb = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
+        $retention_retained = Lead::whereIn('status', [Statuses::LEAD_ACCEPTED, Statuses::LEAD_UNDERWRITTEN])
             ->where('sale_at', '<', now()->subDays(30))
             ->count();
-        $retention_pending = Lead::whereIn('status', ['accepted', 'underwritten'])
+        $retention_pending = Lead::whereIn('status', [Statuses::LEAD_ACCEPTED, Statuses::LEAD_UNDERWRITTEN])
             ->where('sale_at', '>=', now()->subDays(30))
             ->count();
         
@@ -223,8 +225,8 @@ class HomeController extends Controller
         $per_agent = $bossData['perAgent'] ?? [];
         
         // Pending leads from local database
-        $pending_leads_count = Lead::where('status', 'pending')->count();
-        $pending_leads = Lead::where('status', 'pending')->latest()->take(10)->get();
+        $pending_leads_count = Lead::where('status', Statuses::LEAD_PENDING)->count();
+        $pending_leads = Lead::where('status', Statuses::LEAD_PENDING)->latest()->take(10)->get();
         
         return view('index', compact(
             'users_count',

@@ -42,7 +42,7 @@
         <div class="col-lg-4">
             <div class="glassmorphism-card mb-4">
                 <div class="card-body text-center">
-                    <div class="vendor-avatar mx-auto img-rounded-md d-flex align-items-center justify-content-center" style="width:100px;height:100px;border-radius:50%;font-size:2rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,#d4af37 0%,#b8941f 100%);color:#0f172a;">
+                    <div class="vendor-avatar mx-auto img-rounded-md d-flex align-items-center justify-content-center" style="width:100px;height:100px;border-radius:50%;font-size:2rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,var(--bs-gold) 0%,var(--bs-gold-dark) 100%);color:var(--bs-surface-900);">
                         {{ strtoupper(substr($vendor->name ?? 'JS', 0, 2)) }}
                     </div>
                     <h3 class="text-gold fw-semibold">{{ $vendor->name ?? 'John Smith' }}</h3>

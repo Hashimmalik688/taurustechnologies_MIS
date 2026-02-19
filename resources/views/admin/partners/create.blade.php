@@ -33,7 +33,7 @@
         .orb-1 {
             width: 400px;
             height: 400px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
             top: -200px;
             right: -200px;
         }
@@ -79,7 +79,7 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             color: white;
             border-radius: 16px 16px 0 0 !important;
             padding: 1.5rem;
@@ -105,17 +105,17 @@
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: #667eea;
+            border-color: var(--bs-gradient-start);
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
         }
 
         .form-check-input:checked {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: var(--bs-gradient-start);
+            border-color: var(--bs-gradient-start);
         }
 
         .btn-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
             border: none;
             color: white;
             font-weight: 600;
@@ -149,12 +149,12 @@
         }
 
         .select2-container--focus .select2-selection {
-            border-color: #667eea !important;
+            border-color: var(--bs-gradient-start) !important;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15) !important;
         }
 
         .select2-selection--multiple .select2-selection__choice {
-            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end)) !important;
             border: none !important;
             color: white !important;
             border-radius: 8px !important;
@@ -171,12 +171,12 @@
         }
 
         .carrier-state-section:hover {
-            border-color: #667eea;
+            border-color: var(--bs-gradient-start);
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
         }
 
         .carrier-state-section h6 {
-            color: #667eea;
+            color: var(--bs-gradient-start);
             font-weight: 700;
             margin-bottom: 1rem;
             font-size: 1.1rem;
@@ -192,7 +192,7 @@
         }
 
         .state-settlement-row:hover {
-            border-color: #667eea;
+            border-color: var(--bs-gradient-start);
             transform: translateX(5px);
         }
 

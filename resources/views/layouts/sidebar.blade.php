@@ -450,14 +450,14 @@
     .logo-text {
         font-size: 1.3rem;
         font-weight: 800;
-        color: var(--gold, #d4af37);
+        color: var(--gold, var(--bs-gold));
         letter-spacing: 0.8px;
         line-height: 1;
     }
 
     .logo-subtext {
         font-size: 0.68rem;
-        color: var(--text-muted, #9ca3af);
+        color: var(--text-muted, var(--bs-surface-muted));
         font-weight: 500;
         letter-spacing: 0.5px;
     }
@@ -483,7 +483,7 @@
         border-radius: 10px;
         font-size: 0.92rem;
         font-weight: 500;
-        color: var(--text-secondary, #6b7280) !important;
+        color: var(--text-secondary, var(--bs-surface-500)) !important;
         text-decoration: none;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -505,25 +505,25 @@
 
     .menu-item:hover {
         background: linear-gradient(90deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%) !important;
-        color: var(--gold, #d4af37) !important;
+        color: var(--gold, var(--bs-gold)) !important;
         transform: translateX(3px);
         box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
     }
 
     .menu-item:hover i {
         transform: scale(1.08);
-        color: var(--gold, #d4af37);
+        color: var(--gold, var(--bs-gold));
     }
 
     .menu-item.active {
         background: linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%) !important;
-        color: var(--gold, #d4af37) !important;
+        color: var(--gold, var(--bs-gold)) !important;
         font-weight: 600;
         box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
     }
 
     .menu-item.active i {
-        color: var(--gold, #d4af37);
+        color: var(--gold, var(--bs-gold));
     }
 
     .menu-item.active::before {
@@ -534,7 +534,7 @@
         transform: translateY(-50%);
         width: 4px;
         height: 60%;
-        background: var(--gold, #d4af37);
+        background: var(--gold, var(--bs-gold));
         border-radius: 0 4px 4px 0;
     }
 
@@ -588,7 +588,7 @@
         border-radius: 10px;
         font-size: 0.88rem !important;
         font-weight: 500;
-        color: var(--text-secondary, #6b7280) !important;
+        color: var(--text-secondary, var(--bs-surface-500)) !important;
         text-decoration: none;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -610,7 +610,7 @@
 
     .dropdown-item:hover {
         background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%) !important;
-        color: var(--gold-dark, #b8941f) !important;
+        color: var(--gold-dark, var(--bs-gold-dark)) !important;
         transform: translateX(3px);
         box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
     }
@@ -618,18 +618,18 @@
     .dropdown-item:hover i {
         opacity: 1;
         transform: scale(1.08);
-        color: var(--gold, #d4af37);
+        color: var(--gold, var(--bs-gold));
     }
 
     .dropdown-item.active {
         background: linear-gradient(90deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%) !important;
-        color: var(--gold-dark, #b8941f) !important;
+        color: var(--gold-dark, var(--bs-gold-dark)) !important;
         font-weight: 600;
         box-shadow: 0 2px 10px rgba(212, 175, 55, 0.25);
     }
 
     .dropdown-item.active i {
-        color: var(--gold, #d4af37);
+        color: var(--gold, var(--bs-gold));
         opacity: 1;
     }
 
@@ -641,7 +641,7 @@
         transform: translateY(-50%);
         width: 3px;
         height: 50%;
-        background: var(--gold, #d4af37);
+        background: var(--gold, var(--bs-gold));
         border-radius: 4px;
     }
 
@@ -652,7 +652,7 @@
         right: -13px;
         width: 26px;
         height: 26px;
-        background: linear-gradient(135deg, var(--gold, #d4af37), var(--gold-dark, #b8941f)) !important;
+        background: linear-gradient(135deg, var(--gold, var(--bs-gold)), var(--gold-dark, var(--bs-gold-dark))) !important;
         color: white !important;
         border: 2px solid white;
         border-radius: 50%;
@@ -668,7 +668,7 @@
     .sidebar-toggle:hover {
         transform: scale(1.18);
         box-shadow: 0 5px 16px rgba(212,175,55,0.45);
-        background: linear-gradient(135deg, var(--gold-dark, #b8941f), var(--gold, #d4af37)) !important;
+        background: linear-gradient(135deg, var(--gold-dark, var(--bs-gold-dark)), var(--gold, var(--bs-gold))) !important;
     }
 
     .sidebar-toggle i {

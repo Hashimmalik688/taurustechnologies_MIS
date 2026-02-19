@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title')
@@ -36,7 +37,7 @@
         <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: #6b7280; margin-bottom: 0.5rem;">
+                    <div style="font-size: 2rem; color: var(--bs-surface-500); margin-bottom: 0.5rem;">
                         <i class="bx bx-bar-chart-alt-2"></i>
                     </div>
                     <h6 class="text-muted mb-2">Total Sales</h6>
@@ -47,39 +48,39 @@
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #f59e0b !important;">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-warning) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;">
+                    <div style="font-size: 2rem; color: var(--bs-ui-warning); margin-bottom: 0.5rem;">
                         <i class="bx bx-time-five"></i>
                     </div>
                     <h6 class="text-muted mb-2">Pending</h6>
-                    <h3 class="fw-bold" style="color: #f59e0b;">{{ $qaAnalytics['pending'] }}</h3>
+                    <h3 class="fw-bold" style="color: var(--bs-ui-warning);">{{ $qaAnalytics['pending'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['pending_percent'] }}% awaiting review</small>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #10b981 !important;">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-success) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;">
+                    <div style="font-size: 2rem; color: var(--bs-ui-success); margin-bottom: 0.5rem;">
                         <i class="bx bx-check-circle"></i>
                     </div>
                     <h6 class="text-muted mb-2">Good</h6>
-                    <h3 class="fw-bold" style="color: #10b981;">{{ $qaAnalytics['good'] }}</h3>
+                    <h3 class="fw-bold" style="color: var(--bs-ui-success);">{{ $qaAnalytics['good'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['good_percent'] }}% passed</small>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid #ef4444 !important;">
+            <div class="card shadow-sm border-0 h-100" style="border-left: 4px solid var(--bs-ui-danger) !important;">
                 <div class="card-body text-center">
-                    <div style="font-size: 2rem; color: #ef4444; margin-bottom: 0.5rem;">
+                    <div style="font-size: 2rem; color: var(--bs-ui-danger); margin-bottom: 0.5rem;">
                         <i class="bx bx-x-circle"></i>
                     </div>
                     <h6 class="text-muted mb-2">Issues</h6>
-                    <h3 class="fw-bold" style="color: #ef4444;">{{ $qaAnalytics['avg'] + $qaAnalytics['bad'] }}</h3>
+                    <h3 class="fw-bold" style="color: var(--bs-ui-danger);">{{ $qaAnalytics['avg'] + $qaAnalytics['bad'] }}</h3>
                     <small class="text-muted">{{ $qaAnalytics['issues_percent'] }}% need attention</small>
                 </div>
             </div>
@@ -112,10 +113,10 @@
                             <div class="col-md-2">
                                 <select name="qa_status" class="form-select">
                                     <option value="">All QA Status</option>
-                                    <option value="Pending" {{ request('qa_status') == 'Pending' ? 'selected' : '' }}>⏳ Pending</option>
-                                    <option value="Good" {{ request('qa_status') == 'Good' ? 'selected' : '' }}>✅ Good</option>
-                                    <option value="Avg" {{ request('qa_status') == 'Avg' ? 'selected' : '' }}>⚠️ Avg</option>
-                                    <option value="Bad" {{ request('qa_status') == 'Bad' ? 'selected' : '' }}>❌ Bad</option>
+                                    <option value="Pending" {{ request('qa_status') == Statuses::QA_PENDING ? 'selected' : '' }}>⏳ Pending</option>
+                                    <option value="Good" {{ request('qa_status') == Statuses::QA_GOOD ? 'selected' : '' }}>✅ Good</option>
+                                    <option value="Avg" {{ request('qa_status') == Statuses::QA_AVG ? 'selected' : '' }}>⚠️ Avg</option>
+                                    <option value="Bad" {{ request('qa_status') == Statuses::QA_BAD ? 'selected' : '' }}>❌ Bad</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
@@ -177,18 +178,18 @@
                                         <td>
                                             <select class="form-select form-select-sm qa-status-dropdown" 
                                                     data-lead-id="{{ $lead->id }}" 
-                                                    data-current-status="{{ $lead->qa_status ?? 'Pending' }}"
+                                                    data-current-status="{{ $lead->qa_status ?? Statuses::QA_PENDING }}"
                                                     style="min-width: 130px;">
-                                                <option value="Pending" {{ ($lead->qa_status ?? 'Pending') == 'Pending' ? 'selected' : '' }}>
+                                                <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>
                                                     ⏳ Pending
                                                 </option>
-                                                <option value="Good" {{ ($lead->qa_status ?? '') == 'Good' ? 'selected' : '' }}>
+                                                <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>
                                                     ✅ Good
                                                 </option>
-                                                <option value="Avg" {{ ($lead->qa_status ?? '') == 'Avg' ? 'selected' : '' }}>
+                                                <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>
                                                     ⚠️ Avg
                                                 </option>
-                                                <option value="Bad" {{ ($lead->qa_status ?? '') == 'Bad' ? 'selected' : '' }}>
+                                                <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>
                                                     ❌ Bad
                                                 </option>
                                             </select>
@@ -202,7 +203,7 @@
                                             <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                 <i class="bx bx-save"></i> Save QA Review
                                             </button>
-                                            @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->qa_status !== 'Pending')
+                                            @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->qa_status !== Statuses::QA_PENDING)
                                                 <button class="btn btn-sm btn-warning mt-1 reset-qa-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
                                                     <i class="bx bx-undo"></i> Reset
                                                 </button>

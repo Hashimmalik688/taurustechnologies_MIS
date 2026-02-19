@@ -267,7 +267,7 @@
     <div class="modal fade" id="updateStatusModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
                     <h5 class="modal-title fw-semibold">
                         <i class="mdi mdi-bank me-2"></i>Update Status - {{ $lead->cn_name }}
                     </h5>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Support\PermissionLevel;
 use App\Support\Roles;
 use Spatie\Permission\Traits\HasRoles;
 use Carbon\Carbon;
@@ -282,7 +283,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // Get highest permission from all user's roles
         $roleIds = $this->roles->pluck('id')->toArray();
         if (empty($roleIds)) {
-            return 'none';
+            return PermissionLevel::NONE;
         }
 
         $rolePermission = RoleModulePermission::where('module_id', $module->id)
@@ -290,7 +291,7 @@ class User extends Authenticatable implements MustVerifyEmail
             ->orderByRaw("FIELD(permission_level, 'full', 'edit', 'view', 'none')")
             ->first();
 
-        return $rolePermission ? $rolePermission->permission_level : 'none';
+        return $rolePermission ? $rolePermission->permission_level : PermissionLevel::NONE;
     }
 
     /**
@@ -304,11 +305,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $userLevel = $this->getPermissionForModule($moduleSlug);
 
-        $levels = ['none' => 0, 'view' => 1, 'edit' => 2, 'full' => 3];
-        $userNumeric = $levels[$userLevel] ?? 0;
-        $requiredNumeric = $levels[$level] ?? 0;
-
-        return $userNumeric >= $requiredNumeric;
+        return PermissionLevel::numeric($userLevel) >= PermissionLevel::numeric($level);
     }
 
     /**
@@ -316,7 +313,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canViewModule($moduleSlug): bool
     {
-        return $this->hasModulePermission($moduleSlug, 'view');
+        return $this->hasModulePermission($moduleSlug, PermissionLevel::VIEW);
     }
 
     /**
@@ -324,7 +321,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canEditModule($moduleSlug): bool
     {
-        return $this->hasModulePermission($moduleSlug, 'edit');
+        return $this->hasModulePermission($moduleSlug, PermissionLevel::EDIT);
     }
 
     /**
@@ -332,7 +329,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canDeleteInModule($moduleSlug): bool
     {
-        return $this->hasModulePermission($moduleSlug, 'full');
+        return $this->hasModulePermission($moduleSlug, PermissionLevel::FULL);
     }
 
     /**

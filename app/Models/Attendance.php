@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -381,23 +382,27 @@ class Attendance extends Model
     }
 
     /**
-     * Attendance status color map — matches CSS vars: --bs-status-present, etc.
+     * Attendance status → CSS variable map for UI.
+     *
+     * Values are CSS custom-property names defined in _root.scss so they
+     * adapt automatically when the theme changes.  Views should render
+     * them as:  style="color: var({{ $color }})"
      */
     public const STATUS_COLORS = [
-        'present' => '#28a745', // var(--bs-status-present)
-        'absent'  => '#dc3545', // var(--bs-status-absent)
-        'leave'   => '#ffc107', // var(--bs-status-leave)
-        'late'    => '#fd7e14', // var(--bs-status-late)
+        Statuses::ATTENDANCE_PRESENT => '--bs-status-present',
+        Statuses::ATTENDANCE_ABSENT  => '--bs-status-absent',
+        Statuses::ATTENDANCE_LEAVE   => '--bs-status-leave',
+        Statuses::ATTENDANCE_LATE    => '--bs-status-late',
     ];
 
-    public const STATUS_COLOR_DEFAULT = '#6c757d'; // var(--bs-status-default)
+    public const STATUS_COLOR_DEFAULT = '--bs-status-default';
 
     // Get attendance status with color coding for UI
     public function getStatusWithColorAttribute()
     {
         $status = $this->status;
-        if ($status === 'present' && $this->isLate()) {
-            $status = 'late';
+        if ($status === Statuses::ATTENDANCE_PRESENT && $this->isLate()) {
+            $status = Statuses::ATTENDANCE_LATE;
         }
 
         return [

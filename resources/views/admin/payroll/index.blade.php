@@ -13,7 +13,7 @@
         padding: 1.5rem;
         margin-bottom: 1.5rem;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        border-left: 4px solid #667eea;
+        border-left: 4px solid var(--bs-gradient-start);
         transition: transform 0.2s, box-shadow 0.2s;
     }
     .payroll-card:hover {
@@ -28,38 +28,38 @@
     }
     .payroll-card .stat-label {
         font-size: 0.85rem;
-        color: #6b7280;
+        color: var(--bs-surface-500);
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.5px;
     }
     .payroll-card small {
-        color: #9ca3af;
+        color: var(--bs-surface-muted);
         font-size: 0.875rem;
     }
     .payroll-card.card-primary {
-        border-left-color: #667eea;
+        border-left-color: var(--bs-gradient-start);
     }
     .payroll-card.card-primary .stat-value {
-        color: #667eea;
+        color: var(--bs-gradient-start);
     }
     .payroll-card.card-success {
-        border-left-color: #10b981;
+        border-left-color: var(--bs-ui-success);
     }
     .payroll-card.card-success .stat-value {
-        color: #10b981;
+        color: var(--bs-ui-success);
     }
     .payroll-card.card-info {
-        border-left-color: #3b82f6;
+        border-left-color: var(--bs-ui-info);
     }
     .payroll-card.card-info .stat-value {
-        color: #3b82f6;
+        color: var(--bs-ui-info);
     }
     .payroll-card.card-warning {
-        border-left-color: #f59e0b;
+        border-left-color: var(--bs-ui-warning);
     }
     .payroll-card.card-warning .stat-value {
-        color: #f59e0b;
+        color: var(--bs-ui-warning);
     }
     .table-wrapper {
         background: white;
@@ -67,18 +67,18 @@
         overflow: hidden;
     }
     .table-header {
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
         padding: 1.5rem;
-        border-bottom: 2px solid #e5e7eb;
+        border-bottom: 2px solid var(--bs-surface-200);
     }
     .payroll-table {
         font-size: 0.95rem;
     }
     .payroll-table thead th {
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
         color: #333;
         font-weight: 600;
-        border-bottom: 2px solid #d4af37;
+        border-bottom: 2px solid var(--bs-gold);
         padding: 12px 8px;
         text-align: center;
         white-space: nowrap;
@@ -86,21 +86,21 @@
     .payroll-table tbody td {
         padding: 12px 8px;
         text-align: center;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid var(--bs-surface-200);
     }
     .payroll-table tbody td:first-child {
         text-align: left;
         font-weight: 500;
     }
     .payroll-table tbody tr:hover {
-        background: #f9fafb;
+        background: var(--bs-surface-50);
     }
     .amount {
         font-weight: 600;
-        color: #667eea;
+        color: var(--bs-gradient-start);
     }
     .badge-qualified {
-        background: #10b981;
+        background: var(--bs-ui-success);
         color: white;
         padding: 0.35rem 0.65rem;
         border-radius: 4px;
@@ -108,7 +108,7 @@
         font-weight: 600;
     }
     .badge-not-qualified {
-        background: #ef4444;
+        background: var(--bs-ui-danger);
         color: white;
         padding: 0.35rem 0.65rem;
         border-radius: 4px;
@@ -131,7 +131,7 @@
 
     /* Additional utility classes */
     .text-gold {
-        color: #d4af37 !important;
+        color: var(--bs-gold) !important;
     }
     .payroll-info-alert {
         background: #f0f9ff;
@@ -145,14 +145,14 @@
     }
     .payroll-working-days-input {
         font-size: 1.5rem;
-        color: #d4af37;
+        color: var(--bs-gold);
     }
     .payroll-breakdown-alert {
-        background: #f8f9fa;
-        border-color: #6c757d !important;
+        background: var(--bs-surface-bg-light);
+        border-color: var(--bs-status-default) !important;
     }
     .payroll-table-footer {
-        background: #f8f9fa;
+        background: var(--bs-surface-bg-light);
     }
     .alert-divider {
         border-color: rgba(59, 130, 246, 0.2);
@@ -167,7 +167,7 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7) !important;
     }
     [data-theme="dark"] .payroll-card .stat-value {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .payroll-card .stat-label {
         color: var(--text-secondary, #b0b0b0) !important;
@@ -179,26 +179,26 @@
         background: var(--bg-card, #1f1f1f) !important;
     }
     [data-theme="dark"] .table-header {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
         border-bottom-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .payroll-table thead th {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: var(--text-primary, #e5e5e5) !important;
-        border-bottom-color: #d4af37 !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
+        border-bottom-color: var(--bs-gold) !important;
     }
     [data-theme="dark"] .payroll-table tbody td {
         border-bottom-color: var(--border-color, #333333) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .payroll-table tbody tr {
         background: var(--bg-card, #1f1f1f) !important;
     }
     [data-theme="dark"] .payroll-table tbody tr:hover {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
     }
     [data-theme="dark"] .payroll-table tfoot {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
     }
     [data-theme="dark"] .filter-section {
         background: var(--bg-card, #1f1f1f) !important;
@@ -209,22 +209,22 @@
     }
     [data-theme="dark"] .card-body {
         background: var(--bg-card, #1f1f1f) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .card-header {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
         border-bottom-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .alert {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
         border-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .alert strong,
     [data-theme="dark"] .alert p,
     [data-theme="dark"] .alert h5 {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .alert code {
         background: rgba(59, 130, 246, 0.2) !important;
@@ -232,26 +232,26 @@
     }
     [data-theme="dark"] .modal-content {
         background: var(--bg-card, #1f1f1f) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .modal-header {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
         border-bottom-color: var(--border-color, #333333) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .modal-body {
         background: var(--bg-card, #1f1f1f) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .modal-footer {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
         border-top-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .modal-title {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .form-label {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .text-muted,
     [data-theme="dark"] small.text-muted {
@@ -259,41 +259,41 @@
     }
     [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3,
     [data-theme="dark"] h4, [data-theme="dark"] h5, [data-theme="dark"] h6 {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] p {
         color: var(--text-secondary, #b0b0b0) !important;
     }
     [data-theme="dark"] label {
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .payroll-info-alert {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .payroll-code {
         background: rgba(59, 130, 246, 0.2) !important;
         color: #60a5fa !important;
     }
     [data-theme="dark"] .payroll-working-days-input {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: #d4af37 !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--bs-gold) !important;
         border-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .payroll-breakdown-alert {
-        background: var(--bg-tertiary, #2d2d2d) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
         border-color: var(--border-color, #333333) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .payroll-table-footer {
-        background: var(--bg-tertiary, #2d2d2d) !important;
-        color: var(--text-primary, #e5e5e5) !important;
+        background: var(--bg-tertiary, var(--bs-print-header-bg)) !important;
+        color: var(--text-primary, var(--bs-print-border)) !important;
     }
     [data-theme="dark"] .alert-divider {
         border-color: var(--border-color, #333333) !important;
     }
     [data-theme="dark"] .text-gold {
-        color: #d4af37 !important;
+        color: var(--bs-gold) !important;
     }
 </style>
 @endsection
@@ -303,7 +303,7 @@
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <h1 class="h3 mb-1" style="color: #d4af37;">
+            <h1 class="h3 mb-1" style="color: var(--bs-gold);">
                 <i class="bx bx-receipt me-2"></i>Payroll
             </h1>
             <p class="text-muted">Monthly salary overview for all employees</p>
@@ -365,9 +365,9 @@
     </div>
 
     <!-- Important Info Alert -->
-    <div class="alert border-0 shadow-sm payroll-info-alert" style="border-left: 4px solid #3b82f6 !important;">
+    <div class="alert border-0 shadow-sm payroll-info-alert" style="border-left: 4px solid var(--bs-ui-info) !important;">
         <div class="d-flex align-items-start">
-            <i class="bx bx-info-circle" style="font-size: 2rem; margin-right: 1rem; color: #3b82f6;"></i>
+            <i class="bx bx-info-circle" style="font-size: 2rem; margin-right: 1rem; color: var(--bs-ui-info);"></i>
             <div>
                 <h5 class="alert-heading mb-2"><strong>📅 Payroll Period: {{ $periodDisplay }}</strong></h5>
                 <p class="mb-2"><strong>Current Selection:</strong> {{ Carbon\Carbon::create()->month((int) request('month', now()->month))->format('F') }} {{ request('year', now()->year) }} payroll covers <strong>{{ $startDate->format('M d, Y') }}</strong> to <strong>{{ $endDate->format('M d, Y') }}</strong></p>
@@ -411,7 +411,7 @@
     </div>
 
     <!-- Working Days Setting (Applies to All Employees) -->
-    <div class="card border-0 shadow-sm mb-3 payroll-working-days-card" style="border-left: 4px solid #d4af37 !important;">
+    <div class="card border-0 shadow-sm mb-3 payroll-working-days-card" style="border-left: 4px solid var(--bs-gold) !important;">
         <div class="card-body">
             <form method="POST" action="{{ route('payroll.working-days.update') }}" class="row align-items-end g-3">
                 @csrf
@@ -635,16 +635,16 @@
                             <td><span class="badge bg-warning text-dark" style="font-size: 0.9rem;">{{ $halfDays }}</span></td>
                             <td><span class="badge bg-info" style="font-size: 0.9rem;">{{ $lateDays }}</span></td>
                             <td>
-                                <span class="badge" style="background-color: {{ $isQualified ? '#10b981' : '#ef4444' }};">
+                                <span class="badge" style="background-color: {{ $isQualified ? 'var(--bs-ui-success)' : 'var(--bs-ui-danger)' }};">
                                     {{ $isQualified ? 'Yes' : 'No' }}
                                 </span>
                             </td>
-                            <td><span class="amount" style="color: #ef4444;">{{ number_format($dockAmount, 2) }}</span></td>
-                            <td><span class="amount" style="color: #ef4444;">{{ number_format($taxDeduction + $otherDeductions, 2) }}</span></td>
-                            <td><span class="amount" style="color: #667eea;">{{ number_format($netSalary, 2) }}</span></td>
+                            <td><span class="amount" style="color: var(--bs-ui-danger);">{{ number_format($dockAmount, 2) }}</span></td>
+                            <td><span class="amount" style="color: var(--bs-ui-danger);">{{ number_format($taxDeduction + $otherDeductions, 2) }}</span></td>
+                            <td><span class="amount" style="color: var(--bs-gradient-start);">{{ number_format($netSalary, 2) }}</span></td>
                             <td><span class="amount" style="color: #ff6b6b;">{{ number_format($advance, 2) }}</span></td>
                             <td>
-                                <strong style="color: #10b981; font-size: 1.1rem;">
+                                <strong style="color: var(--bs-ui-success); font-size: 1.1rem;">
                                     {{ number_format($payable, 2) }}
                                 </strong>
                             </td>
@@ -768,13 +768,13 @@
                                                                 <small><strong>Basic Salary:</strong> Rs {{ number_format($basicSalary, 2) }}</small><br>
                                                                 <small><strong>Punctuality Bonus:</strong> Rs {{ number_format($punctualityBonus, 2) }}</small><br>
                                                                 <small><strong>Sales Bonus:</strong> Rs {{ number_format($bonus, 2) }}</small><br>
-                                                                <small style="color: #10b981;"><strong>Other Allowances:</strong> Rs <span id="otherAllow{{ $employee->id }}">{{ number_format($otherAllowances, 2) }}</span></small>
+                                                                <small style="color: var(--bs-ui-success);"><strong>Other Allowances:</strong> Rs <span id="otherAllow{{ $employee->id }}">{{ number_format($otherAllowances, 2) }}</span></small>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <small style="color: #667eea;"><strong>Gross Salary:</strong> Rs {{ number_format($grossSalary, 2) }}</small><br>
-                                                                <small style="color: #ef4444;"><strong>Total Deductions:</strong> Rs <span id="totalDed{{ $employee->id }}">{{ number_format($totalDeductions, 2) }}</span></small><br>
+                                                                <small style="color: var(--bs-gradient-start);"><strong>Gross Salary:</strong> Rs {{ number_format($grossSalary, 2) }}</small><br>
+                                                                <small style="color: var(--bs-ui-danger);"><strong>Total Deductions:</strong> Rs <span id="totalDed{{ $employee->id }}">{{ number_format($totalDeductions, 2) }}</span></small><br>
                                                                 <small style="color: #ff6b6b;"><strong>Advance:</strong> Rs <span id="advanceAmt{{ $employee->id }}">{{ number_format($advance, 2) }}</span></small><br>
-                                                                <small style="color: #10b981; font-weight: bold; font-size: 1.1rem;"><strong>Final Payable:</strong> Rs <span id="finalPayable{{ $employee->id }}">{{ number_format($payable, 2) }}</span></small>
+                                                                <small style="color: var(--bs-ui-success); font-weight: bold; font-size: 1.1rem;"><strong>Final Payable:</strong> Rs <span id="finalPayable{{ $employee->id }}">{{ number_format($payable, 2) }}</span></small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -840,7 +840,7 @@
                             $totalAdvance += $salaryAdvance;
                             $totalPayable += $payable;
                         @endphp
-                        <tr style="background-color: #fff3cd; border-left: 3px solid #ffc107;">
+                        <tr style="background-color: #fff3cd; border-left: 3px solid var(--bs-status-leave);">
                             <td>{{ $employees->count() + $loop->iteration }}</td>
                             <td>
                                 {{ $entry->employee_name }}
@@ -861,11 +861,11 @@
                                     <span class="badge bg-danger">No</span>
                                 @endif
                             </td>
-                            <td style="color: #ef4444;">{{ number_format($dockAmount, 2) }}</td>
-                            <td style="color: #ef4444;">{{ number_format($otherDeductions, 2) }}</td>
-                            <td><strong style="color: #667eea;">{{ number_format($netSalary, 2) }}</strong></td>
+                            <td style="color: var(--bs-ui-danger);">{{ number_format($dockAmount, 2) }}</td>
+                            <td style="color: var(--bs-ui-danger);">{{ number_format($otherDeductions, 2) }}</td>
+                            <td><strong style="color: var(--bs-gradient-start);">{{ number_format($netSalary, 2) }}</strong></td>
                             <td style="color: #ff6b6b;">{{ number_format($salaryAdvance, 2) }}</td>
-                            <td><strong style="color: #10b981; font-size: 1.1rem;">{{ number_format($payable, 2) }}</strong></td>
+                            <td><strong style="color: var(--bs-ui-success); font-size: 1.1rem;">{{ number_format($payable, 2) }}</strong></td>
                             <td>
                                 @if(auth()->user()->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
                                 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editManualEntryModal{{ $entry->id }}" title="Edit Manual Entry">
@@ -981,11 +981,11 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td class="amount" style="color: #ef4444;">{{ number_format($totalDockAmount, 2) }}</td>
-                            <td class="amount" style="color: #ef4444;">{{ number_format($totalOtherDeductions, 2) }}</td>
-                            <td class="amount" style="color: #667eea;">{{ number_format($totalNetSalary, 2) }}</td>
+                            <td class="amount" style="color: var(--bs-ui-danger);">{{ number_format($totalDockAmount, 2) }}</td>
+                            <td class="amount" style="color: var(--bs-ui-danger);">{{ number_format($totalOtherDeductions, 2) }}</td>
+                            <td class="amount" style="color: var(--bs-gradient-start);">{{ number_format($totalNetSalary, 2) }}</td>
                             <td class="amount" style="color: #ff6b6b;">{{ number_format($totalAdvance, 2) }}</td>
-                            <td class="amount" style="color: #10b981;">{{ number_format($totalPayable, 2) }}</td>
+                            <td class="amount" style="color: var(--bs-ui-success);">{{ number_format($totalPayable, 2) }}</td>
                             <td></td>
                         </tr>
                     </tfoot>

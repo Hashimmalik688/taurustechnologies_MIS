@@ -6,6 +6,7 @@ use App\Models\SalaryComponent;
 use App\Models\Lead;
 use App\Models\DockRecord;
 use App\Models\User;
+use App\Support\Statuses;
 use Carbon\Carbon;
 
 class SalaryService
@@ -67,7 +68,7 @@ class SalaryService
         $dockDeductions = DockRecord::where('user_id', $user->id)
             ->where('dock_month', $month)
             ->where('dock_year', $year)
-            ->where('status', 'active')
+            ->where('status', Statuses::DOCK_ACTIVE)
             ->sum('amount') ?? 0;
 
         // Calculate total deductions
@@ -104,7 +105,7 @@ class SalaryService
                 // Deduction breakdown
                 'dock_deductions' => $dockDeductions,
                 
-                'status' => 'calculated',
+                'status' => Statuses::SALARY_CALCULATED,
                 'calculated_at' => now(),
                 'notes' => $attendanceData['notes'],
             ]
@@ -155,7 +156,7 @@ class SalaryService
                 'extra_sales' => $salesData['extra_sales'],
                 'bonus_per_extra_sale' => $user->bonus_per_extra_sale ?? 0,
                 
-                'status' => 'calculated',
+                'status' => Statuses::SALARY_CALCULATED,
                 'calculated_at' => now(),
                 'notes' => $salesData['notes'],
             ]
@@ -224,7 +225,7 @@ class SalaryService
                 $query->where('managed_by', $user->id)
                       ->orWhere('closer_name', $user->name);
             })
-            ->where('status', 'accepted')
+            ->where('status', Statuses::LEAD_ACCEPTED)
             ->whereNotNull('sale_date')
             ->whereMonth('sale_date', $month)
             ->whereYear('sale_date', $year)
@@ -235,7 +236,7 @@ class SalaryService
                 $query->where('managed_by', $user->id)
                       ->orWhere('closer_name', $user->name);
             })
-            ->where('status', 'chargeback')
+            ->where('status', Statuses::LEAD_CHARGEBACK)
             ->whereMonth('chargeback_marked_date', $month)
             ->whereYear('chargeback_marked_date', $year)
             ->count();

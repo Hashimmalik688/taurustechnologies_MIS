@@ -1,6 +1,6 @@
 <style>
     .readonly-value {
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         padding: 10px 14px;
         border-radius: 6px;
         border: 1px solid #e0e0e0;
@@ -8,22 +8,22 @@
     }
     .form-label {
         font-weight: 500;
-        color: #2d2d2d;
+        color: var(--bs-print-header-bg);
         font-size: 0.875rem;
         margin-bottom: 6px;
     }
     .form-label.required:after {
         content: '*';
-        color: #dc3545;
+        color: var(--bs-status-absent);
         margin-left: 4px;
     }
     .form-section-title {
-        color: #1a1a1a;
+        color: var(--bs-print-body-dark);
         font-size: 0.95rem;
         font-weight: 600;
         margin-bottom: 15px;
         padding-bottom: 8px;
-        border-bottom: 2px solid #d4af37;
+        border-bottom: 2px solid var(--bs-gold);
     }
 </style>
 

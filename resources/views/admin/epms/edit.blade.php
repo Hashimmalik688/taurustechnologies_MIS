@@ -5,8 +5,8 @@
 @section('css')
 <style>
     .form-section { background: #fff; border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border: 1px solid #eef0f3; }
-    .form-section h5 { color: #1a1a2e; font-weight: 700; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
-    .form-section h5 i { color: #667eea; margin-right: 8px; }
+    .form-section h5 { color: #1a1a2e; font-weight: 700; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--bs-print-bg-alt); }
+    .form-section h5 i { color: var(--bs-gradient-start); margin-right: 8px; }
 </style>
 @endsection
 

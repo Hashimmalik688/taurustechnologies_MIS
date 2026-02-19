@@ -17,7 +17,7 @@
         }
 
         .section-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 600;
             font-size: 1.1rem;
             margin-bottom: 1.5rem;
@@ -29,40 +29,40 @@
         }
 
         .form-label {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             margin-bottom: 0.5rem;
         }
 
         .form-label.required::after {
             content: " *";
-            color: #ef4444;
+            color: var(--bs-ui-danger);
         }
 
         .form-control, .form-select, textarea {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 8px;
             padding: 0.75rem;
         }
 
         .form-control:focus, .form-select:focus, textarea:focus {
             background: rgba(15, 23, 42, 0.95);
-            border-color: #d4af37;
-            color: #cbd5e1;
+            border-color: var(--bs-gold);
+            color: var(--bs-surface-300);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
         }
 
         .form-select option {
-            background: #0f172a;
-            color: #cbd5e1;
+            background: var(--bs-surface-900);
+            color: var(--bs-surface-300);
         }
 
         .gold-gradient-btn {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             border: none;
-            color: #0f172a;
+            color: var(--bs-surface-900);
             font-weight: 600;
             padding: 0.75rem 2rem;
             border-radius: 8px;
@@ -73,20 +73,20 @@
         .gold-gradient-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: #0f172a;
+            color: var(--bs-surface-900);
         }
 
         .btn-secondary-custom {
             background: rgba(100, 116, 139, 0.3);
             border: 1px solid rgba(100, 116, 139, 0.5);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             padding: 0.75rem 2rem;
             border-radius: 8px;
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;
@@ -116,18 +116,18 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 600;
         }
 
         .type-radio input[type="radio"]:checked + label {
-            border-color: #d4af37;
+            border-color: var(--bs-gold);
             background: rgba(212, 175, 55, 0.1);
-            color: #d4af37;
+            color: var(--bs-gold);
         }
 
         .type-radio label:hover {
-            border-color: #d4af37;
+            border-color: var(--bs-gold);
             background: rgba(212, 175, 55, 0.05);
         }
 
@@ -141,7 +141,7 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 600;
             pointer-events: none;
         }
@@ -153,13 +153,13 @@
         .select2-container--default .select2-selection--single {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             height: 45px;
             padding: 0.5rem;
         }
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             line-height: 30px;
         }
     </style>
@@ -237,14 +237,14 @@
                                         <div class="type-radio">
                                             <input type="radio" id="type_debit" name="type" value="debit" required>
                                             <label for="type_debit">
-                                                <i class="mdi mdi-minus-circle me-2" style="color: #ef4444;"></i>
+                                                <i class="mdi mdi-minus-circle me-2" style="color: var(--bs-ui-danger);"></i>
                                                 Debit
                                             </label>
                                         </div>
                                         <div class="type-radio">
                                             <input type="radio" id="type_credit" name="type" value="credit" checked required>
                                             <label for="type_credit">
-                                                <i class="mdi mdi-plus-circle me-2" style="color: #10b981;"></i>
+                                                <i class="mdi mdi-plus-circle me-2" style="color: var(--bs-ui-success);"></i>
                                                 Credit
                                             </label>
                                         </div>

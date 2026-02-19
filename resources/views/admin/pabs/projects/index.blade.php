@@ -25,17 +25,17 @@
         padding: 0.25rem 0.5rem;
         border-radius: 0.2rem;
         font-size: 0.75rem;
-        background-color: #f0f0f0;
+        background-color: var(--bs-print-bg-alt);
         color: #333;
     }
 
-    .priority-high { color: #dc3545; font-weight: 600; }
-    .priority-medium { color: #fd7e14; font-weight: 600; }
-    .priority-low { color: #28a745; font-weight: 600; }
+    .priority-high { color: var(--bs-status-absent); font-weight: 600; }
+    .priority-medium { color: var(--bs-status-late); font-weight: 600; }
+    .priority-low { color: var(--bs-status-present); font-weight: 600; }
 
     .variance-flag {
         display: inline-block;
-        background-color: #dc3545;
+        background-color: var(--bs-status-absent);
         color: white;
         padding: 0.25rem 0.5rem;
         border-radius: 0.2rem;

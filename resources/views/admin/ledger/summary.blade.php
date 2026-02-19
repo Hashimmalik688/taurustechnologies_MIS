@@ -16,7 +16,7 @@
         }
 
         .page-header {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.75rem;
             margin-bottom: 1.5rem;
@@ -58,22 +58,22 @@
         }
 
         .stat-icon-credit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--bs-ui-success) 0%, var(--bs-ui-success-dark) 100%);
             color: white;
         }
 
         .stat-icon-debit {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: linear-gradient(135deg, var(--bs-ui-danger) 0%, var(--bs-ui-danger-dark) 100%);
             color: white;
         }
 
         .stat-icon-balance {
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-            color: #0f172a;
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
+            color: var(--bs-surface-900);
         }
 
         .stat-icon-count {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             color: white;
         }
 
@@ -83,20 +83,20 @@
             margin-bottom: 0.5rem;
         }
 
-        .stat-credit { color: #10b981; }
-        .stat-debit { color: #ef4444; }
-        .stat-balance { color: #d4af37; }
-        .stat-count { color: #3b82f6; }
+        .stat-credit { color: var(--bs-ui-success); }
+        .stat-debit { color: var(--bs-ui-danger); }
+        .stat-balance { color: var(--bs-gold); }
+        .stat-count { color: var(--bs-ui-info); }
 
         .stat-label {
-            color: #94a3b8;
+            color: var(--bs-surface-400);
             font-size: 0.875rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .section-title {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-size: 1.25rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
@@ -125,12 +125,12 @@
         }
 
         .category-name {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 600;
         }
 
         .category-amount {
-            color: #d4af37;
+            color: var(--bs-gold);
             font-weight: 700;
             font-size: 1.25rem;
         }
@@ -144,7 +144,7 @@
 
         .category-bar-fill {
             height: 100%;
-            background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
             transition: width 0.3s ease;
         }
 
@@ -163,12 +163,12 @@
         }
 
         .vendor-name {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 600;
         }
 
         .vendor-amount {
-            color: #10b981;
+            color: var(--bs-ui-success);
             font-weight: 700;
         }
 
@@ -181,7 +181,7 @@
         }
 
         .form-label {
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             font-weight: 500;
             margin-bottom: 0.5rem;
             font-size: 0.875rem;
@@ -190,20 +190,20 @@
         .form-control, .form-select {
             background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            color: #cbd5e1;
+            color: var(--bs-surface-300);
             border-radius: 8px;
             padding: 0.6rem 0.75rem;
         }
 
         .form-control:focus, .form-select:focus {
             background: rgba(15, 23, 42, 0.95);
-            border-color: #d4af37;
-            color: #cbd5e1;
+            border-color: var(--bs-gold);
+            color: var(--bs-surface-300);
             box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
         }
 
         .btn-filter {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-info-dark) 100%);
             border: none;
             color: white;
             font-weight: 600;
@@ -314,7 +314,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 85%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">54% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">54% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -325,7 +325,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 65%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">27% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">27% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -336,7 +336,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 35%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">12% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">12% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -347,7 +347,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 25%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">5% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">5% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -358,7 +358,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 15%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">2% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">2% of total</small>
                                 </div>
 
                                 <div class="category-item">
@@ -369,7 +369,7 @@
                                     <div class="category-bar">
                                         <div class="category-bar-fill" style="width: 10%;"></div>
                                     </div>
-                                    <small style="color: #94a3b8; font-size: 0.75rem;">0.4% of total</small>
+                                    <small style="color: var(--bs-surface-400); font-size: 0.75rem;">0.4% of total</small>
                                 </div>
                             </div>
                         </div>
@@ -390,7 +390,7 @@
                                     <span class="vendor-name">John Smith</span>
                                     <span class="vendor-amount">$12,450</span>
                                 </div>
-                                <small style="color: #94a3b8;">156 transactions</small>
+                                <small style="color: var(--bs-surface-400);">156 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -398,7 +398,7 @@
                                     <span class="vendor-name">Sarah Johnson</span>
                                     <span class="vendor-amount">$8,230</span>
                                 </div>
-                                <small style="color: #94a3b8;">92 transactions</small>
+                                <small style="color: var(--bs-surface-400);">92 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -406,7 +406,7 @@
                                     <span class="vendor-name">Michael Brown</span>
                                     <span class="vendor-amount">$6,890</span>
                                 </div>
-                                <small style="color: #94a3b8;">78 transactions</small>
+                                <small style="color: var(--bs-surface-400);">78 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -414,7 +414,7 @@
                                     <span class="vendor-name">Emily Davis</span>
                                     <span class="vendor-amount">$4,120</span>
                                 </div>
-                                <small style="color: #94a3b8;">45 transactions</small>
+                                <small style="color: var(--bs-surface-400);">45 transactions</small>
                             </div>
 
                             <div class="vendor-breakdown-item">
@@ -422,11 +422,11 @@
                                     <span class="vendor-name">Robert Wilson</span>
                                     <span class="vendor-amount">$3,540</span>
                                 </div>
-                                <small style="color: #94a3b8;">38 transactions</small>
+                                <small style="color: var(--bs-surface-400);">38 transactions</small>
                             </div>
 
                             <div class="text-center mt-3">
-                                <a href="{{ route('ledger.index') }}" style="color: #d4af37; font-weight: 600; text-decoration: none;">
+                                <a href="{{ route('ledger.index') }}" style="color: var(--bs-gold); font-weight: 600; text-decoration: none;">
                                     View All Vendors <i class="mdi mdi-arrow-right"></i>
                                 </a>
                             </div>
@@ -445,9 +445,9 @@
                                 Monthly Trends
                             </h5>
 
-                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: var(--bs-surface-400);">
                                 <div class="text-center">
-                                    <i class="mdi mdi-chart-areaspline" style="font-size: 4rem; color: #d4af37; opacity: 0.5;"></i>
+                                    <i class="mdi mdi-chart-areaspline" style="font-size: 4rem; color: var(--bs-gold); opacity: 0.5;"></i>
                                     <p class="mt-3">Chart visualization would be displayed here<br>
                                     <small>Integrate with Chart.js or similar library</small></p>
                                 </div>

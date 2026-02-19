@@ -18,7 +18,7 @@
             font-weight: bold;
         }
         .badge-upcoming {
-            background-color: #556ee6;
+            background-color: var(--bs-chart-primary);
         }
         .badge-past {
             background-color: #74788d;

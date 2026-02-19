@@ -11,7 +11,7 @@
     </div>
 
     @foreach($insuranceCarriers as $carrier)
-    <div class="carrier-state-section mb-4 d-none" id="carrier-state-section-{{ $carrier->id }}" style="border: 1px solid #e9ecef; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
+    <div class="carrier-state-section mb-4 d-none" id="carrier-state-section-{{ $carrier->id }}" style="border: 1px solid #e9ecef; padding: 15px; border-radius: 5px; background-color: var(--bs-surface-bg-light);">
         <h6 class="mb-3">
             <i class="mdi mdi-map-marker-multiple me-1"></i>
             {{ $carrier->name }} - State-Specific Settlements

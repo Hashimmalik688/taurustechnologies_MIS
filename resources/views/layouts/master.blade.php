@@ -59,7 +59,7 @@
         }
         .ann-popup-progress {
             height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, var(--bs-gradient-start), var(--bs-gradient-end));
             transition: width 0.5s linear;
             width: 100%;
         }
@@ -71,7 +71,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
             color: white;
             border: none;
             cursor: pointer;
@@ -97,7 +97,7 @@
             position: absolute;
             top: -4px;
             right: -4px;
-            background: #ef4444;
+            background: var(--bs-ui-danger);
             color: white;
             border-radius: 50%;
             width: 22px;
@@ -126,7 +126,7 @@
                     <i class="bx bx-menu"></i>
                 </button>
                 <div class="company-branding d-none d-lg-block">
-                    <span style="color: #d4af37; font-weight: 800; font-size: 1.5rem; letter-spacing: 2px;">
+                    <span style="color: var(--bs-gold); font-weight: 800; font-size: 1.5rem; letter-spacing: 2px;">
                         TAURUS TECHNOLOGIES
                     </span>
                 </div>
@@ -134,7 +134,7 @@
 
             <div class="user-menu">
                 <!-- USA Timer Display -->
-                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white; font-weight: 600; font-size: 0.9rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); border-radius: 8px; color: white; font-weight: 600; font-size: 0.9rem;">
                     <i class="bx bx-time-five"></i>
                     <span style="font-size: 0.8rem; opacity: 0.9;">USA</span>
                     <span id="usaTimerDisplay">--:-- --</span>
@@ -150,7 +150,7 @@
                     <a href="{{ route('chat.index') }}" class="notification-btn" title="Team Chat" style="text-decoration: none; display: flex; align-items: center; gap: 6px;">
                         <i class="bx bx-message-square-dots" style="font-size: 1.5rem;"></i>
                         <span style="font-weight: 600; font-size: 0.95rem;">Chat</span>
-                        <span class="chat-badge notification-badge" style="background: #10b981; display: none; font-size: 0.85rem; padding: 4px 8px; min-width: 24px; text-align: center; font-weight: 700;">0</span>
+                        <span class="chat-badge notification-badge" style="background: var(--bs-ui-success); display: none; font-size: 0.85rem; padding: 4px 8px; min-width: 24px; text-align: center; font-weight: 700;">0</span>
                     </a>
                 </div>
 
@@ -172,12 +172,12 @@
                         </div>
                         <div id="notificationList">
                             <!-- Notifications will be loaded via AJAX -->
-                            <div style="text-align: center; padding: 2rem; color: #94a3b8;">
+                            <div style="text-align: center; padding: 2rem; color: var(--bs-surface-400);">
                                 <i class="bx bx-loader-alt bx-spin" style="font-size: 2rem;"></i>
                                 <div style="margin-top: 0.5rem;">Loading notifications...</div>
                             </div>
                         </div>
-                        <div style="padding: 1rem; text-align: center; border-top: 1px solid #e5e7eb;">
+                        <div style="padding: 1rem; text-align: center; border-top: 1px solid var(--bs-surface-200);">
                             <a href="{{ route('notifications.index') }}" style="color: var(--gold); font-weight: 600; text-decoration: none;">
                                 View all notifications
                             </a>
@@ -186,7 +186,7 @@
                 </div>
 
                 <!-- User Profile -->
-                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #f3f4f6; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('profileSettingsModal').querySelector('.modal').classList.add('show'); document.getElementById('profileSettingsModal').querySelector('.modal').style.display='block';" data-bs-toggle="modal" data-bs-target="#profileSettingsModal">
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--bs-surface-100); border-radius: 8px; cursor: pointer;" onclick="document.getElementById('profileSettingsModal').querySelector('.modal').classList.add('show'); document.getElementById('profileSettingsModal').querySelector('.modal').style.display='block';" data-bs-toggle="modal" data-bs-target="#profileSettingsModal">
                     @if(Auth::user()->avatar)
                         <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="user-avatar">
                     @else
@@ -196,7 +196,7 @@
                     @endif
                     <div style="text-align: left;">
                         <div style="font-weight: 600; font-size: 0.875rem;">{{ Auth::user()->name }}</div>
-                        <div style="font-size: 0.75rem; color: #6b7280;">{{ Auth::user()->email }}</div>
+                        <div style="font-size: 0.75rem; color: var(--bs-surface-500);">{{ Auth::user()->email }}</div>
                     </div>
                 </div>
 
@@ -1022,15 +1022,15 @@
 
     <!-- Announcement Pop-up -->
     <div id="annPopup" class="ann-popup">
-        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #e5e7eb;">
+        <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--bs-surface-200);">
             <div id="annIcon" style="width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0;">
                 <i class="bx bx-bullhorn" style="font-size:18px;"></i>
             </div>
             <div style="flex:1; min-width:0;">
-                <div style="font-size:12px; color:#9ca3af; font-weight:500;">New Announcement</div>
+                <div style="font-size:12px; color:var(--bs-surface-muted); font-weight:500;">New Announcement</div>
                 <div id="annCommunity" style="font-weight:700; font-size:15px; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
             </div>
-            <button onclick="closeAnnPopup()" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:22px; padding:0; line-height:1;">
+            <button onclick="closeAnnPopup()" style="background:none; border:none; color:var(--bs-surface-muted); cursor:pointer; font-size:22px; padding:0; line-height:1;">
                 <i class="bx bx-x"></i>
             </button>
         </div>
@@ -1039,11 +1039,11 @@
             <h6 id="annTitle" style="font-weight:700; font-size:15px; color:#111; margin:8px 0 6px;"></h6>
             <p id="annMsg" style="font-size:13px; color:#4b5563; line-height:1.6; margin:0; max-height:120px; overflow-y:auto;"></p>
         </div>
-        <div style="padding:10px 16px; background:#f9fafb; border-top:1px solid #e5e7eb;">
+        <div style="padding:10px 16px; background:var(--bs-surface-50); border-top:1px solid var(--bs-surface-200);">
             <div id="annProgress" class="ann-popup-progress"></div>
             <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
-                <span style="font-size:12px; color:#9ca3af;">Just now</span>
-                <a id="annLink" href="/chat" style="color:#667eea; font-weight:600; font-size:13px; text-decoration:none;">View in Community →</a>
+                <span style="font-size:12px; color:var(--bs-surface-muted);">Just now</span>
+                <a id="annLink" href="/chat" style="color:var(--bs-gradient-start); font-weight:600; font-size:13px; text-decoration:none;">View in Community →</a>
             </div>
         </div>
     </div>

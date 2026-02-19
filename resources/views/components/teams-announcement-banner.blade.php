@@ -30,7 +30,7 @@
     top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
     color: white;
     z-index: 9999;
     padding: 0.75rem 1rem;

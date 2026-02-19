@@ -32,7 +32,7 @@
                         </div>
                         <div class="flex-shrink-0 text-end">
                             <div class="avatar-sm rounded-circle align-self-center" style="background: rgba(244, 106, 106, 0.18);">
-                                <span class="avatar-title rounded-circle fs-3" style="background: #f46a6a; color: white;">
+                                <span class="avatar-title rounded-circle fs-3" style="background: var(--bs-chart-danger); color: white;">
                                     <i class="bx bx-error"></i>
                                 </span>
                             </div>

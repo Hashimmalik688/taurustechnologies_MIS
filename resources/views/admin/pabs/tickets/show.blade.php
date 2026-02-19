@@ -1,4 +1,5 @@
 @use('App\Support\Roles')
+@use('App\Support\Statuses')
 @extends('layouts.master')
 
 @section('title', $ticket->ticket_code . ' - ' . $ticket->subject)
@@ -18,9 +19,9 @@
     .status-resolved { background-color: #d1e7dd; color: #0f5132; }
     .status-closed { background-color: #e2e3e5; color: #41464b; }
 
-    .priority-high { color: #dc3545; font-weight: 600; }
-    .priority-medium { color: #fd7e14; font-weight: 600; }
-    .priority-low { color: #28a745; font-weight: 600; }
+    .priority-high { color: var(--bs-status-absent); font-weight: 600; }
+    .priority-medium { color: var(--bs-status-late); font-weight: 600; }
+    .priority-low { color: var(--bs-status-present); font-weight: 600; }
 
     .comments-section {
         max-height: 500px;
@@ -28,7 +29,7 @@
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
         padding: 1rem;
-        background-color: #f8f9fa;
+        background-color: var(--bs-surface-bg-light);
         margin-bottom: 1rem;
     }
 
@@ -42,7 +43,7 @@
 
     .comment-meta {
         font-size: 0.75rem;
-        color: #6c757d;
+        color: var(--bs-status-default);
         margin-bottom: 0.25rem;
     }
 </style>
@@ -100,12 +101,12 @@
                         @endif
                         
                         <!-- Assigned User Actions -->
-                        @if($ticket->assigned_to === auth()->id() && $ticket->approval_status === 'PENDING')
+                        @if($ticket->assigned_to === auth()->id() && $ticket->approval_status === Statuses::APPROVAL_PENDING)
                             <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">Accept Ticket</button>
                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#rejectModal">Reject Ticket</button>
                         @endif
                         
-                        @if($ticket->status !== 'CLOSED')
+                        @if($ticket->status !== Statuses::TICKET_CLOSED)
                             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#closeModal">Close Ticket</button>
                         @endif
                         
@@ -158,7 +159,7 @@
                         @endforelse
                     </div>
 
-                    @if(!in_array($ticket->status, ['CLOSED']) && ($ticket->assigned_to === auth()->id() || $ticket->created_by === auth()->id()))
+                    @if(!in_array($ticket->status, [Statuses::TICKET_CLOSED]) && ($ticket->assigned_to === auth()->id() || $ticket->created_by === auth()->id()))
                         <form action="{{ route('pabs.tickets.addComment', $ticket) }}" method="POST">
                             @csrf
                             <div class="input-group">
@@ -166,7 +167,7 @@
                                 <button type="submit" class="btn btn-sm btn-primary">Post</button>
                             </div>
                         </form>
-                    @elseif(!in_array($ticket->status, ['CLOSED']) && $ticket->assigned_to === null && $ticket->created_by === auth()->id())
+                    @elseif(!in_array($ticket->status, [Statuses::TICKET_CLOSED]) && $ticket->assigned_to === null && $ticket->created_by === auth()->id())
                         <form action="{{ route('pabs.tickets.addComment', $ticket) }}" method="POST">
                             @csrf
                             <div class="input-group">
@@ -174,7 +175,7 @@
                                 <button type="submit" class="btn btn-sm btn-primary">Post</button>
                             </div>
                         </form>
-                    @elseif(in_array($ticket->status, ['CLOSED']))
+                    @elseif(in_array($ticket->status, [Statuses::TICKET_CLOSED]))
                         <div class="alert alert-info alert-sm mb-0">
                             <small>Comments are closed for this ticket.</small>
                         </div>
@@ -222,7 +223,7 @@
                     <div class="row mb-2">
                         <div class="col-5 text-muted">Approval:</div>
                         <div class="col-7">
-                            <span class="badge bg-{{ $ticket->approval_status === 'APPROVED' ? 'success' : ($ticket->approval_status === 'REJECTED' ? 'danger' : 'warning') }}">
+                            <span class="badge bg-{{ $ticket->approval_status === Statuses::APPROVAL_APPROVED ? 'success' : ($ticket->approval_status === Statuses::APPROVAL_REJECTED ? 'danger' : 'warning') }}">
                                 {{ $ticket->approval_status }}
                             </span>
                         </div>
@@ -310,9 +311,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Priority <span class="text-danger">*</span></label>
                                 <select name="priority" class="form-select" required>
-                                    <option value="HIGH" {{ $ticket->priority == 'HIGH' ? 'selected' : '' }}>High</option>
-                                    <option value="MEDIUM" {{ $ticket->priority == 'MEDIUM' ? 'selected' : '' }}>Medium</option>
-                                    <option value="LOW" {{ $ticket->priority == 'LOW' ? 'selected' : '' }}>Low</option>
+                                    <option value="HIGH" {{ $ticket->priority == Statuses::PRIORITY_HIGH ? 'selected' : '' }}>High</option>
+                                    <option value="MEDIUM" {{ $ticket->priority == Statuses::PRIORITY_MEDIUM ? 'selected' : '' }}>Medium</option>
+                                    <option value="LOW" {{ $ticket->priority == Statuses::PRIORITY_LOW ? 'selected' : '' }}>Low</option>
                                 </select>
                             </div>
                         </div>
@@ -320,11 +321,11 @@
                             <div class="mb-3">
                                 <label class="form-label">Status <span class="text-danger">*</span></label>
                                 <select name="status" class="form-select" required>
-                                    <option value="OPEN" {{ $ticket->status == 'OPEN' ? 'selected' : '' }}>Open</option>
-                                    <option value="IN PROGRESS" {{ $ticket->status == 'IN PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="ON HOLD" {{ $ticket->status == 'ON HOLD' ? 'selected' : '' }}>On Hold</option>
-                                    <option value="RESOLVED" {{ $ticket->status == 'RESOLVED' ? 'selected' : '' }}>Resolved</option>
-                                    <option value="CLOSED" {{ $ticket->status == 'CLOSED' ? 'selected' : '' }}>Closed</option>
+                                    <option value="OPEN" {{ $ticket->status == Statuses::TICKET_OPEN ? 'selected' : '' }}>Open</option>
+                                    <option value="IN PROGRESS" {{ $ticket->status == Statuses::TICKET_IN_PROGRESS ? 'selected' : '' }}>In Progress</option>
+                                    <option value="ON HOLD" {{ $ticket->status == Statuses::TICKET_ON_HOLD ? 'selected' : '' }}>On Hold</option>
+                                    <option value="RESOLVED" {{ $ticket->status == Statuses::TICKET_RESOLVED ? 'selected' : '' }}>Resolved</option>
+                                    <option value="CLOSED" {{ $ticket->status == Statuses::TICKET_CLOSED ? 'selected' : '' }}>Closed</option>
                                 </select>
                             </div>
                         </div>

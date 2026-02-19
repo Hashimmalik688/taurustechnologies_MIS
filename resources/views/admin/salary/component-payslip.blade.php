@@ -23,13 +23,13 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 3px solid #d4af37;
+            border-bottom: 3px solid var(--bs-gold);
             padding-bottom: 20px;
         }
         .company-name {
             font-size: 28px;
             font-weight: bold;
-            color: #d4af37;
+            color: var(--bs-gold);
             margin-bottom: 5px;
         }
         .document-title {
@@ -89,13 +89,13 @@
             margin-bottom: 20px;
         }
         .table th {
-            background: #f0f0f0;
+            background: var(--bs-print-bg-alt);
             padding: 12px;
             text-align: left;
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            border-bottom: 2px solid #d4af37;
+            border-bottom: 2px solid var(--bs-gold);
             color: #333;
         }
         .table td {
@@ -117,8 +117,8 @@
             color: #d32f2f;
         }
         .subtotal-row td {
-            border-top: 2px solid #d4af37;
-            border-bottom: 2px solid #d4af37;
+            border-top: 2px solid var(--bs-gold);
+            border-bottom: 2px solid var(--bs-gold);
             padding: 12px;
             font-weight: 600;
         }
@@ -139,7 +139,7 @@
             text-transform: uppercase;
             color: #333;
             margin: 20px 0 10px 0;
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--bs-gold);
             padding-left: 10px;
         }
         .footer {
@@ -170,7 +170,7 @@
             margin: 20px 0;
             padding: 15px;
             background: #fffbf0;
-            border-left: 4px solid #d4af37;
+            border-left: 4px solid var(--bs-gold);
             font-size: 12px;
         }
         .payment-method strong {

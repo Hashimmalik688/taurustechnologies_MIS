@@ -177,7 +177,7 @@
                     <!-- Preview Section -->
                     <div class="mb-4">
                         <label class="fw-bold mb-2">Preview</label>
-                        <div id="previewAnnouncement" class="p-3 rounded" style="background-color: #f3f4f6;">
+                        <div id="previewAnnouncement" class="p-3 rounded" style="background-color: var(--bs-surface-100);">
                             <div class="d-flex align-items-center gap-2" style="color: #666;">
                                 <i class="bx bx-bell"></i>
                                 <div>
@@ -225,7 +225,7 @@
     }
 
     .form-control, .form-select {
-        border-color: #e5e7eb;
+        border-color: var(--bs-surface-200);
     }
 
     .form-control:focus, .form-select:focus {

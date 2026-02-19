@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
+use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 class FollowupController extends Controller
@@ -19,7 +20,7 @@ class FollowupController extends Controller
         $query = Lead::with(['insuranceCarrier', 'assignedAgent', 'followupPerson'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', 'approved');
+            ->where('manager_status', Statuses::MGR_APPROVED);
         
         // Search functionality
         if ($request->filled('search')) {
@@ -119,7 +120,7 @@ class FollowupController extends Controller
         // Get leads assigned to this user for bank verification
         $bvQuery = Lead::with(['insuranceCarrier', 'assignedAgent', 'bankVerifier'])
             ->where('assigned_bank_verifier', $userId)
-            ->where('issuance_status', 'Issued')
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->whereNotNull('sale_at');
         
         // Bank verification search functionality

@@ -1,12 +1,12 @@
-@use('App\Support\Roles')
-@use('App\Support\Statuses')
-@extends('layouts.master')
+<?php use \App\Support\Roles; ?>
+<?php use \App\Support\Statuses; ?>
 
-@section('title')
+
+<?php $__env->startSection('title'); ?>
     Sales Management
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
     /* Fixed Table Container - Scrollable */
     .top-scrollbar-wrapper {
@@ -27,7 +27,7 @@
         overflow-y: hidden;
         border: 1px solid #dee2e6;
         border-bottom: none;
-        background: var(--bs-surface-bg-light);
+        background: #f8f9fa;
     }
     
     .table-header-fixed table {
@@ -36,7 +36,7 @@
     }
     
     .table-header-fixed thead th {
-        background: var(--bs-surface-bg-light) !important;
+        background: #f8f9fa !important;
         font-weight: 600;
         border-bottom: 2px solid #dee2e6 !important;
         white-space: nowrap;
@@ -91,13 +91,13 @@
     
     .top-scrollbar-wrapper::-webkit-scrollbar-thumb,
     .table-responsive::-webkit-scrollbar-thumb {
-        background: var(--bs-gold);
+        background: #d4af37;
         border-radius: 6px;
     }
     
     .top-scrollbar-wrapper::-webkit-scrollbar-thumb:hover,
     .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: var(--bs-gold-dark);
+        background: #b8941f;
     }
     
     /* Peregrine badge style */
@@ -106,25 +106,26 @@
         color: #fff !important;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
+<?php $__env->startSection('content'); ?>
+    <?php $__env->startComponent('components.breadcrumb'); ?>
+        <?php $__env->slot('li_1'); ?>
             Sales
-        @endslot
-        @slot('title')
+        <?php $__env->endSlot(); ?>
+        <?php $__env->slot('title'); ?>
             Management
-        @endslot
-    @endcomponent
+        <?php $__env->endSlot(); ?>
+    <?php echo $__env->renderComponent(); ?>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show alert-soft-success" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
+            <strong>Success!</strong> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="row mb-3">
         <div class="col-12">
@@ -136,22 +137,22 @@
 
     <!-- KPI Status Cards -->
     <div class="row mb-4">
-        @foreach($statusCounts as $status => $count)
-            @php
-                $config = $statusColors[$status] ?? ['label' => ucfirst($status), 'gradient' => 'linear-gradient(135deg, var(--bs-status-default) 0%, #5a6268 100%)', 'icon' => 'mdi-information'];
-            @endphp
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $statusCounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
+                $config = $statusColors[$status] ?? ['label' => ucfirst($status), 'gradient' => 'linear-gradient(135deg, #6c757d 0%, #5a6268 100%)', 'icon' => 'mdi-information'];
+            ?>
             <div class="col-md col-sm-6 mb-3">
-                <div class="card border-0 shadow" style="background: {{ $config['gradient'] }} !important; min-height: 180px;">
+                <div class="card border-0 shadow" style="background: <?php echo e($config['gradient']); ?> !important; min-height: 180px;">
                     <div class="card-body text-center p-4">
                         <div class="d-flex justify-content-center align-items-center mb-3">
-                            <i class="mdi {{ $config['icon'] }}" style="font-size: 2.5rem !important; color: #fff !important;"></i>
+                            <i class="mdi <?php echo e($config['icon']); ?>" style="font-size: 2.5rem !important; color: #fff !important;"></i>
                         </div>
-                        <h6 class="mb-2 fw-semibold text-uppercase" style="letter-spacing: 0.5px; color: #fff !important;">{{ $config['label'] }}</h6>
-                        <h1 class="mb-0 fw-bold" style="color: #fff !important; font-size: 2.5rem;">{{ number_format($count) }}</h1>
+                        <h6 class="mb-2 fw-semibold text-uppercase" style="letter-spacing: 0.5px; color: #fff !important;"><?php echo e($config['label']); ?></h6>
+                        <h1 class="mb-0 fw-bold" style="color: #fff !important; font-size: 2.5rem;"><?php echo e(number_format($count)); ?></h1>
                     </div>
                 </div>
             </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
     <div class="row">
@@ -166,60 +167,60 @@
                         <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#manualSaleModal">
                             <i class="bx bx-plus-circle me-1"></i> Manual Entry
                         </button>
-                        @if(!auth()->user()->hasRole(Roles::QA))
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!auth()->user()->hasRole(Roles::QA)): ?>
                             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importOldDataModal">
                                 <i class="bx bx-upload me-1"></i> Import Data
                             </button>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                 </div>
                 <div class="card-body">
                     <!-- Search and Filter Form -->
-                    <form method="GET" action="{{ route('sales.index') }}" class="mb-4">
+                    <form method="GET" action="<?php echo e(route('sales.index')); ?>" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, carrier..." value="{{ request('search') }}">
+                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, carrier..." value="<?php echo e(request('search')); ?>">
                             </div>
                             <div class="col-md-2">
                                 <select name="carrier" class="form-select">
                                     <option value="">All Carriers</option>
-                                    @foreach($carriers as $carrier)
-                                        <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($carrier); ?>" <?php echo e(request('carrier') == $carrier ? 'selected' : ''); ?>><?php echo e($carrier); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             <div class="col-md-2">
                                 <select name="status" class="form-select">
                                     <option value="">All Status</option>
-                                    <option value="pending" {{ request('status') == Statuses::LEAD_PENDING ? 'selected' : '' }}>Pending</option>
-                                    <option value="accepted" {{ request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : '' }}>Approved</option>
-                                    <option value="rejected" {{ request('status') == Statuses::LEAD_REJECTED ? 'selected' : '' }}>Declined</option>
-                                    <option value="underwritten" {{ request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : '' }}>Underwriting</option>
+                                    <option value="pending" <?php echo e(request('status') == Statuses::LEAD_PENDING ? 'selected' : ''); ?>>Pending</option>
+                                    <option value="accepted" <?php echo e(request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : ''); ?>>Approved</option>
+                                    <option value="rejected" <?php echo e(request('status') == Statuses::LEAD_REJECTED ? 'selected' : ''); ?>>Declined</option>
+                                    <option value="underwritten" <?php echo e(request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : ''); ?>>Underwriting</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
                                 <select name="policy_type" class="form-select">
                                     <option value="">Policy Type</option>
-                                    <option value="G.I" {{ request('policy_type') == 'G.I' ? 'selected' : '' }}>G.I</option>
-                                    <option value="Graded" {{ request('policy_type') == 'Graded' ? 'selected' : '' }}>Graded</option>
-                                    <option value="Level" {{ request('policy_type') == 'Level' ? 'selected' : '' }}>Level</option>
-                                    <option value="Modified" {{ request('policy_type') == 'Modified' ? 'selected' : '' }}>Modified</option>
+                                    <option value="G.I" <?php echo e(request('policy_type') == 'G.I' ? 'selected' : ''); ?>>G.I</option>
+                                    <option value="Graded" <?php echo e(request('policy_type') == 'Graded' ? 'selected' : ''); ?>>Graded</option>
+                                    <option value="Level" <?php echo e(request('policy_type') == 'Level' ? 'selected' : ''); ?>>Level</option>
+                                    <option value="Modified" <?php echo e(request('policy_type') == 'Modified' ? 'selected' : ''); ?>>Modified</option>
                                 </select>
                             </div>
                             <div class="col-md-1">
                                 <select name="month" class="form-select">
                                     <option value="">Month</option>
-                                    @for($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ date('M', mktime(0, 0, 0, $m, 1)) }}</option>
-                                    @endfor
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($m = 1; $m <= 12; $m++): ?>
+                                        <option value="<?php echo e($m); ?>" <?php echo e(request('month') == $m ? 'selected' : ''); ?>><?php echo e(date('M', mktime(0, 0, 0, $m, 1))); ?></option>
+                                    <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             <div class="col-md-1">
                                 <select name="year" class="form-select">
                                     <option value="">Year</option>
-                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endfor
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                        <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?></option>
+                                    <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -237,7 +238,7 @@
                     <div class="table-header-fixed" id="tableHeader">
                         <table class="table table-bordered table-sm mb-0" style="table-layout: fixed;">
                             <colgroup>
-                                @if(auth()->user()->hasRole(Roles::QA))
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole(Roles::QA)): ?>
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
                                     <col style="min-width:160px; width:160px;">
@@ -245,7 +246,7 @@
                                     <col style="min-width:140px; width:140px;">
                                     <col style="min-width:160px; width:160px;">
                                     <col style="min-width:220px; width:220px;">
-                                @else
+                                <?php else: ?>
                                     <col style="min-width:220px; width:220px;">
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
@@ -265,12 +266,12 @@
                                     <col style="min-width:220px; width:220px;">
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:200px; width:200px;">
-                                @endif
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </colgroup>
                             <thead class="table-light">
                                 <tr>
-                                    @if(auth()->user()->hasRole(Roles::QA))
-                                        {{-- QA View: Limited columns --}}
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole(Roles::QA)): ?>
+                                        
                                         <th>Client Name</th>
                                         <th>Phone</th>
                                         <th>Closer</th>
@@ -278,8 +279,8 @@
                                         <th>Sale Date</th>
                                         <th>QA Status</th>
                                         <th>QA Reason</th>
-                                    @else
-                                        {{-- Full View for other roles --}}
+                                    <?php else: ?>
+                                        
                                         <th class="text-center">Actions</th>
                                         <th>Client Name</th>
                                         <th>Phone</th>
@@ -299,7 +300,7 @@
                                         <th>Manager Reason</th>
                                         <th>Follow Up Required</th>
                                         <th>Follow Up Scheduled</th>
-                                    @endif
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </tr>
                             </thead>
                         </table>
@@ -309,7 +310,7 @@
                     <div class="table-responsive" id="tableWrapper">
                         <table class="table table-striped table-bordered table-hover table-sm align-middle" id="salesTable" style="table-layout: fixed;">
                             <colgroup>
-                                @if(auth()->user()->hasRole(Roles::QA))
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole(Roles::QA)): ?>
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
                                     <col style="min-width:160px; width:160px;">
@@ -317,7 +318,7 @@
                                     <col style="min-width:140px; width:140px;">
                                     <col style="min-width:160px; width:160px;">
                                     <col style="min-width:220px; width:220px;">
-                                @else
+                                <?php else: ?>
                                     <col style="min-width:220px; width:220px;">
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:150px; width:150px;">
@@ -337,119 +338,119 @@
                                     <col style="min-width:220px; width:220px;">
                                     <col style="min-width:180px; width:180px;">
                                     <col style="min-width:200px; width:200px;">
-                                @endif
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </colgroup>
                             <tbody>
-                                @forelse($leads as $lead)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <tr>
-                                        @if(auth()->user()->hasRole(Roles::QA))
-                                            {{-- QA View: Limited data --}}
-                                            <td><strong>{{ $lead->cn_name }}</strong></td>
-                                            <td>{{ $lead->phone_number }}</td>
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole(Roles::QA)): ?>
+                                            
+                                            <td><strong><?php echo e($lead->cn_name); ?></strong></td>
+                                            <td><?php echo e($lead->phone_number); ?></td>
                                             <td>
-                                                @if($lead->closer_name)
-                                                    <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
+                                                    <span class="badge bg-info"><?php echo e($lead->closer_name); ?></span>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)): ?>
                                                         <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
-                                                    @endif
-                                                @else
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                @if($lead->assigned_partner)
-                                                    <span class="badge bg-primary">{{ $lead->assigned_partner }}</span>
-                                                @else
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->assigned_partner): ?>
+                                                    <span class="badge bg-primary"><?php echo e($lead->assigned_partner); ?></span>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                            <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
+                                            <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A')); ?></td>
                                             <td>
-                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" style="min-width: 130px;">
-                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>
+                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="<?php echo e($lead->id); ?>" data-current-status="<?php echo e($lead->qa_status ?? 'Pending'); ?>" style="min-width: 130px;">
+                                                    <option value="Pending" <?php echo e(($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : ''); ?>>
                                                         ⏳ Pending
                                                     </option>
-                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>
+                                                    <option value="Good" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : ''); ?>>
                                                         ✅ Good
                                                     </option>
-                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>
+                                                    <option value="Avg" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : ''); ?>>
                                                         ⚠️ Avg
                                                     </option>
-                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>
+                                                    <option value="Bad" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : ''); ?>>
                                                         ❌ Bad
                                                     </option>
                                                 </select>
                                             </td>
                                             <td>
                                                 <textarea class="form-control form-control-sm qa-reason-input" 
-                                                          data-lead-id="{{ $lead->id }}" 
+                                                          data-lead-id="<?php echo e($lead->id); ?>" 
                                                           placeholder="Enter QA reason/comment..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->qa_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
+                                                          style="min-width: 180px;"><?php echo e($lead->qa_reason ?? ''); ?></textarea>
+                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="<?php echo e($lead->id); ?>">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                             </td>
-                                        @else
-                                            {{-- Full View for other roles --}}
+                                        <?php else: ?>
+                                            
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1" role="group">
-                                                    @php
+                                                    <?php
                                                         $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
                                                         $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
-                                                    @endphp
-                                                    <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                                                    ?>
+                                                    <a href="<?php echo e(route('sales.prettyPrint', $lead->id)); ?>" class="btn btn-success btn-sm" title="Pretty Print" target="_blank" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
                                                         <i class="fas fa-print"></i>
                                                     </a>
-                                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm" title="Call" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                                                    <button onclick="window.location.href='<?php echo e($callUrl); ?>'" class="btn btn-warning btn-sm" title="Call" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
                                                         <i class="fas fa-phone-alt"></i>
                                                     </button>
-                                                    <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white" title="View" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                                                    <a href="<?php echo e(route('sales.show', $lead->id)); ?>" class="btn btn-info btn-sm text-white" title="View" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm" title="Edit" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                                                    <a href="<?php echo e(route('sales.edit', $lead->id)); ?>" class="btn btn-primary btn-sm" title="Edit" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-<?php echo e($lead->id); ?>" title="Delete" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
                                             </td>
-                                            <td><strong>{{ $lead->cn_name }}</strong></td>
-                                            <td>{{ $lead->phone_number }}</td>
+                                            <td><strong><?php echo e($lead->cn_name); ?></strong></td>
+                                            <td><?php echo e($lead->phone_number); ?></td>
                                             <td>
-                                                @if($lead->closer_name)
-                                                    <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
+                                                    <span class="badge bg-info"><?php echo e($lead->closer_name); ?></span>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)): ?>
                                                         <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
-                                                    @endif
-                                                @else
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                @if($lead->assigned_partner)
-                                                    <span class="badge bg-primary">{{ $lead->assigned_partner }}</span>
-                                                @else
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->assigned_partner): ?>
+                                                    <span class="badge bg-primary"><?php echo e($lead->assigned_partner); ?></span>
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                            <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
+                                            <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A')); ?></td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
-                                                    @if($lead->carrier_name)
-                                                        <small class="text-muted fw-semibold">Current: {{ $lead->carrier_name }}</small>
-                                                    @else
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->carrier_name): ?>
+                                                        <small class="text-muted fw-semibold">Current: <?php echo e($lead->carrier_name); ?></small>
+                                                    <?php else: ?>
                                                         <small class="text-danger">Not set</small>
-                                                    @endif
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <select class="form-select form-select-sm editable-carrier" data-lead-id="{{ $lead->id }}" style="min-width: 120px;">
+                                                        <select class="form-select form-select-sm editable-carrier" data-lead-id="<?php echo e($lead->id); ?>" style="min-width: 120px;">
                                                             <option value="">-- None --</option>
-                                                            @foreach($insuranceCarriers as $carrier)
-                                                                <option value="{{ $carrier }}" {{ $lead->carrier_name == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                                                            @endforeach
+                                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $insuranceCarriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <option value="<?php echo e($carrier); ?>" <?php echo e($lead->carrier_name == $carrier ? 'selected' : ''); ?>><?php echo e($carrier); ?></option>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                         </select>
-                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="carrier" title="Save">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="carrier" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
                                                     </div>
@@ -457,20 +458,20 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
-                                                    @if($lead->policy_type)
-                                                        <small class="text-muted fw-semibold">Current: {{ $lead->policy_type }}</small>
-                                                    @else
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->policy_type): ?>
+                                                        <small class="text-muted fw-semibold">Current: <?php echo e($lead->policy_type); ?></small>
+                                                    <?php else: ?>
                                                         <small class="text-danger">Not set</small>
-                                                    @endif
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="{{ $lead->id }}" style="min-width: 110px;">
+                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="<?php echo e($lead->id); ?>" style="min-width: 110px;">
                                                             <option value="">-- None --</option>
-                                                            <option value="G.I" {{ $lead->policy_type == 'G.I' ? 'selected' : '' }}>G.I</option>
-                                                            <option value="Graded" {{ $lead->policy_type == 'Graded' ? 'selected' : '' }}>Graded</option>
-                                                            <option value="Level" {{ $lead->policy_type == 'Level' ? 'selected' : '' }}>Level</option>
-                                                            <option value="Modified" {{ $lead->policy_type == 'Modified' ? 'selected' : '' }}>Modified</option>
+                                                            <option value="G.I" <?php echo e($lead->policy_type == 'G.I' ? 'selected' : ''); ?>>G.I</option>
+                                                            <option value="Graded" <?php echo e($lead->policy_type == 'Graded' ? 'selected' : ''); ?>>Graded</option>
+                                                            <option value="Level" <?php echo e($lead->policy_type == 'Level' ? 'selected' : ''); ?>>Level</option>
+                                                            <option value="Modified" <?php echo e($lead->policy_type == 'Modified' ? 'selected' : ''); ?>>Modified</option>
                                                         </select>
-                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="policy_type" title="Save">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="policy_type" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
                                                     </div>
@@ -478,14 +479,14 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
-                                                    @if($lead->coverage_amount)
-                                                        <small class="text-muted fw-semibold">Current: ${{ number_format($lead->coverage_amount, 2) }}</small>
-                                                    @else
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->coverage_amount): ?>
+                                                        <small class="text-muted fw-semibold">Current: $<?php echo e(number_format($lead->coverage_amount, 2)); ?></small>
+                                                    <?php else: ?>
                                                         <small class="text-danger">Not set</small>
-                                                    @endif
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-coverage" data-lead-id="{{ $lead->id }}" value="{{ $lead->coverage_amount ?? '' }}" placeholder="0.00" style="min-width: 100px;">
-                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="coverage" title="Save">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-coverage" data-lead-id="<?php echo e($lead->id); ?>" value="<?php echo e($lead->coverage_amount ?? ''); ?>" placeholder="0.00" style="min-width: 100px;">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="coverage" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
                                                     </div>
@@ -493,95 +494,97 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex flex-column gap-1">
-                                                    @if($lead->monthly_premium)
-                                                        <small class="text-muted fw-semibold">Current: ${{ number_format($lead->monthly_premium, 2) }}</small>
-                                                    @else
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->monthly_premium): ?>
+                                                        <small class="text-muted fw-semibold">Current: $<?php echo e(number_format($lead->monthly_premium, 2)); ?></small>
+                                                    <?php else: ?>
                                                         <small class="text-danger">Not set</small>
-                                                    @endif
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <div class="d-flex align-items-center gap-1">
-                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-premium" data-lead-id="{{ $lead->id }}" value="{{ $lead->monthly_premium ?? '' }}" placeholder="0.00" style="min-width: 90px;">
-                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="premium" title="Save">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-premium" data-lead-id="<?php echo e($lead->id); ?>" value="<?php echo e($lead->monthly_premium ?? ''); ?>" placeholder="0.00" style="min-width: 90px;">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="premium" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                @if($lead->settlement_type)
-                                                    <span class="badge bg-{{ $lead->settlement_type == 'level' ? 'primary' : ($lead->settlement_type == 'graded' ? 'info' : ($lead->settlement_type == 'gi' ? 'warning' : 'secondary')) }}">
-                                                        {{ ucfirst($lead->settlement_type) }}
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->settlement_type): ?>
+                                                    <span class="badge bg-<?php echo e($lead->settlement_type == 'level' ? 'primary' : ($lead->settlement_type == 'graded' ? 'info' : ($lead->settlement_type == 'gi' ? 'warning' : 'secondary'))); ?>">
+                                                        <?php echo e(ucfirst($lead->settlement_type)); ?>
+
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                            <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
-                                            <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
+                                            <td><?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A'); ?></td>
+                                            <td><?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A'); ?></td>
                                             <td>
-                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" style="min-width: 130px;">
-                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>⏳ Pending</option>
-                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>✅ Good</option>
-                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>⚠️ Avg</option>
-                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>❌ Bad</option>
+                                                <select class="form-select form-select-sm qa-status-dropdown" data-lead-id="<?php echo e($lead->id); ?>" data-current-status="<?php echo e($lead->qa_status ?? 'Pending'); ?>" style="min-width: 130px;">
+                                                    <option value="Pending" <?php echo e(($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : ''); ?>>⏳ Pending</option>
+                                                    <option value="Good" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : ''); ?>>✅ Good</option>
+                                                    <option value="Avg" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : ''); ?>>⚠️ Avg</option>
+                                                    <option value="Bad" <?php echo e(($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : ''); ?>>❌ Bad</option>
                                                 </select>
                                             </td>
                                             <td>
                                                 <textarea class="form-control form-control-sm qa-reason-input" 
-                                                          data-lead-id="{{ $lead->id }}" 
+                                                          data-lead-id="<?php echo e($lead->id); ?>" 
                                                           placeholder="QA comments..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->qa_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
+                                                          style="min-width: 180px;"><?php echo e($lead->qa_reason ?? ''); ?></textarea>
+                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="<?php echo e($lead->id); ?>">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                             </td>
                                             <td>
-                                                <select class="form-select form-select-sm manager-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}" style="min-width: 130px;">
-                                                    <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>⏳ Pending</option>
-                                                    <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>✅ Approved</option>
-                                                    <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>❌ Declined</option>
-                                                    <option value="underwriting" {{ ($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : '' }}>📋 Underwriting</option>
-                                                    <option value="chargeback" {{ ($lead->manager_status ?? '') == Statuses::MGR_CHARGEBACK ? 'selected' : '' }}>💳 Chargeback</option>
+                                                <select class="form-select form-select-sm manager-status-dropdown" data-lead-id="<?php echo e($lead->id); ?>" data-current-status="<?php echo e($lead->manager_status ?? 'pending'); ?>" style="min-width: 130px;">
+                                                    <option value="pending" <?php echo e(($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : ''); ?>>⏳ Pending</option>
+                                                    <option value="approved" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : ''); ?>>✅ Approved</option>
+                                                    <option value="declined" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : ''); ?>>❌ Declined</option>
+                                                    <option value="underwriting" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : ''); ?>>📋 Underwriting</option>
+                                                    <option value="chargeback" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_CHARGEBACK ? 'selected' : ''); ?>>💳 Chargeback</option>
                                                 </select>
                                             </td>
                                             <td>
                                                 <textarea class="form-control form-control-sm manager-reason-input" 
-                                                          data-lead-id="{{ $lead->id }}" 
+                                                          data-lead-id="<?php echo e($lead->id); ?>" 
                                                           placeholder="Manager comments..." 
                                                           rows="2" 
-                                                          style="min-width: 180px;">{{ $lead->manager_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-success mt-1 save-manager-reason" data-lead-id="{{ $lead->id }}">
+                                                          style="min-width: 180px;"><?php echo e($lead->manager_reason ?? ''); ?></textarea>
+                                                <button class="btn btn-sm btn-success mt-1 save-manager-reason" data-lead-id="<?php echo e($lead->id); ?>">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
-                                                @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->manager_status !== Statuses::MGR_PENDING)
-                                                    <button class="btn btn-sm btn-warning mt-1 reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
+                                                <?php if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->manager_status !== Statuses::MGR_PENDING): ?>
+                                                    <button class="btn btn-sm btn-warning mt-1 reset-manager-status" data-lead-id="<?php echo e($lead->id); ?>" title="Reset to Pending (Super Admin only)">
                                                         <i class="bx bx-undo"></i> Reset
                                                     </button>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                @if($lead->followup_required)
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required): ?>
                                                     <span class="badge bg-success">Yes</span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="badge bg-secondary">No</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                @if($lead->followup_required && $lead->followup_scheduled_at)
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required && $lead->followup_scheduled_at): ?>
                                                     <span class="text-primary">
                                                         <i class="bx bx-calendar me-1"></i>
-                                                        {{ \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A') }}
+                                                        <?php echo e(\Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A')); ?>
+
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="text-muted">—</span>
-                                                @endif
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                        @endif
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </tr>
 
-                                    @if(!auth()->user()->hasRole(Roles::QA))
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!auth()->user()->hasRole(Roles::QA)): ?>
                                         <!-- Delete Modal -->
-                                        <div class="modal fade" id="delete-{{ $lead->id }}" tabindex="-1">
+                                        <div class="modal fade" id="delete-<?php echo e($lead->id); ?>" tabindex="-1">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
@@ -589,35 +592,36 @@
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        Are you sure you want to delete <strong>{{ $lead->cn_name }}</strong>?
+                                                        Are you sure you want to delete <strong><?php echo e($lead->cn_name); ?></strong>?
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                                                        <form action="{{ route('sales.delete', $lead->id) }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            @method('DELETE')
+                                                        <form action="<?php echo e(route('sales.delete', $lead->id)); ?>" method="POST" style="display: inline;">
+                                                            <?php echo csrf_field(); ?>
+                                                            <?php echo method_field('DELETE'); ?>
                                                             <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                                                         </form>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
-                                @empty
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <tr>
-                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '6' : '15' }}" class="text-center py-5 text-muted">
+                                        <td colspan="<?php echo e(auth()->user()->hasRole(Roles::QA) ? '6' : '15'); ?>" class="text-center py-5 text-muted">
                                             <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
                                             <p class="mb-0">No sales data available</p>
                                         </td>
                                     </tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
                     
                     <!-- Pagination -->
                     <div class="mt-3">
-                        {{ $leads->appends(request()->query())->links() }}
+                        <?php echo e($leads->appends(request()->query())->links()); ?>
+
                     </div>
                 </div>
             </div>
@@ -628,8 +632,8 @@
     <div class="modal fade" id="importOldDataModal" tabindex="-1" aria-labelledby="importOldDataModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
+                <form action="<?php echo e(route('leads.import')); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header">
                         <h5 class="modal-title" id="importOldDataModalLabel">
                             <i class="bx bx-upload"></i> Import Old Data from Google Sheets
@@ -653,15 +657,15 @@
                             <div class="form-text">Accepted formats: .xlsx, .xls, .csv</div>
                         </div>
 
-                        @if ($errors->any())
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -673,9 +677,9 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 $(document).ready(function() {
     // Dual Scrollbar Synchronization
@@ -797,7 +801,7 @@ $(document).ready(function() {
             data: {
                 field: fieldType,
                 value: value,
-                _token: '{{ csrf_token() }}'
+                _token: '<?php echo e(csrf_token()); ?>'
             },
             success: function(response) {
                 if (response.success) {
@@ -847,7 +851,7 @@ $(document).ready(function() {
             method: 'POST',
             data: {
                 status: newStatus,
-                _token: '{{ csrf_token() }}'
+                _token: '<?php echo e(csrf_token()); ?>'
             },
             success: function(response) {
                 if (response.success) {
@@ -926,7 +930,7 @@ $(document).ready(function() {
                 url: `/sales/${leadId}/manager-status/reset`,
                 method: 'POST',
                 data: {
-                    _token: '{{ csrf_token() }}'
+                    _token: '<?php echo e(csrf_token()); ?>'
                 },
                 success: function(response) {
                     if (response.success) {
@@ -971,7 +975,7 @@ $(document).ready(function() {
             data: {
                 qa_status: qaStatus,
                 qa_reason: qaReason,
-                _token: '{{ csrf_token() }}'
+                _token: '<?php echo e(csrf_token()); ?>'
             },
             success: function(response) {
                 if (response.success) {
@@ -1019,7 +1023,7 @@ $(document).ready(function() {
             data: {
                 manager_status: managerStatus,
                 manager_reason: managerReason,
-                _token: '{{ csrf_token() }}'
+                _token: '<?php echo e(csrf_token()); ?>'
             },
             success: function(response) {
                 if (response.success) {
@@ -1117,14 +1121,14 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="modal fade" id="manualSaleModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, #b8a000 100%); color: white;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #d4af37 0%, #b8a000 100%); color: white;">
                 <h5 class="modal-title fw-semibold">
                     <i class="mdi mdi-pencil-plus me-2"></i>Create Manual Sale Entry
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('sales.storeManual') }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('sales.storeManual')); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
                     <div class="row">
                         <!-- Customer Information Section -->
@@ -1252,4 +1256,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/sales/index.blade.php ENDPATH**/ ?>

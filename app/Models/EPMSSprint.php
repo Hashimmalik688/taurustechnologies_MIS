@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Statuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -62,7 +63,7 @@ class EPMSSprint extends Model
 
         while ($current->lte($end)) {
             $completedByDate = $this->tasks()
-                ->where('status', 'completed')
+                ->where('status', Statuses::EPMS_COMPLETED)
                 ->whereDate('completed_at', '<=', $current)
                 ->sum('story_points');
 

@@ -11,6 +11,8 @@ use App\Events\LeadCreated;
 use App\Events\SaleCreated;
 use App\Services\CommissionCalculationService;
 use App\Support\Roles;
+use App\Support\Statuses;
+use App\Support\Teams;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -53,7 +55,7 @@ class LeadController extends Controller
         $query = Lead::query();
         
         // Only show closed and accepted leads
-        $query->whereIn('status', ['closed', 'accepted']);
+        $query->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED]);
         
         // Exclude leads where BOTH cn_name AND phone_number are N/A/empty (verifier-submitted forms)
         $query->where(function($q) {
@@ -77,7 +79,7 @@ class LeadController extends Controller
         $query->whereIn('id', function($subquery) {
             $subquery->selectRaw('MAX(id)')
                 ->from('leads')
-                ->whereIn('status', ['closed', 'accepted'])
+                ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED])
                 ->whereNotNull('phone_number')
                 ->where('phone_number', '!=', '')
                 ->where('phone_number', '!=', 'N/A')
@@ -113,11 +115,11 @@ class LeadController extends Controller
         // Show leads from Peregrine team (verifier, peregrine closer, peregrine validator)
         $query = Lead::query();
         
-        // Filter for Peregrine leads - those WITH verified_by, validated_by, or source_type = 'peregrine'
+        // Filter for Peregrine leads - those WITH verified_by, validated_by, or source_type = Teams::PEREGRINE
         $query->where(function($q) {
             $q->whereNotNull('verified_by')
               ->orWhereNotNull('validated_by')
-              ->orWhere('source_type', 'peregrine');
+              ->orWhere('source_type', Teams::PEREGRINE);
         });
         
         // Search functionality
@@ -183,8 +185,8 @@ class LeadController extends Controller
         // Filter by status
         // Note: 'pending' filter includes both 'pending' and 'sale' status
         if ($request->filled('status')) {
-            if ($request->status == 'pending') {
-                $query->whereIn('status', ['pending', 'sale']);
+            if ($request->status == Statuses::LEAD_PENDING) {
+                $query->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_SALE]);
             } else {
                 $query->where('status', $request->status);
             }
@@ -272,7 +274,7 @@ class LeadController extends Controller
             $user = Auth::user();
             $sourceType = null;
             if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-                $sourceType = 'peregrine';
+                $sourceType = Teams::PEREGRINE;
             }
 
             // Convert smoker to 'yes'/'no' for ENUM
@@ -283,7 +285,7 @@ class LeadController extends Controller
             $lead = Lead::create([
                 ...$validated,
                 'sale_at' => $validated['sale_date'],
-                'status' => $validated['status'] ?? 'accepted',
+                'status' => $validated['status'] ?? Statuses::LEAD_ACCEPTED,
                 'source_type' => $sourceType,
             ]);
 
@@ -315,14 +317,14 @@ class LeadController extends Controller
         // Remove carrier fields from lead data to avoid issues
         unset($leadData['carrier_name']);
 
-        // Mark lead as 'peregrine' if created by a peregrine team member
+        // Mark lead as Teams::PEREGRINE if created by a peregrine team member
         $user = Auth::user();
         if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-            $leadData['source_type'] = 'peregrine';
+            $leadData['source_type'] = Teams::PEREGRINE;
         }
 
         // Set proper status and closer name for manually created leads
-        $leadData['status'] = 'closed';
+        $leadData['status'] = Statuses::LEAD_CLOSED;
         $leadData['closer_name'] = $user->name;
         $leadData['verified_by'] = null;
 
@@ -374,14 +376,14 @@ class LeadController extends Controller
             $lead->beneficiary = $request->input('beneficiary');
             $smokerValue = $request->input('smoker');
             $lead->smoker = $smokerValue ? 'yes' : 'no';
-            $lead->status = 'pending';
+            $lead->status = Statuses::LEAD_PENDING;
             $lead->updated_at = now();
 
             if ($request->input('action') === 'forward') {
-                $lead->status = 'forwarded';
+                $lead->status = Statuses::LEAD_FORWARDED;
                 $lead->forwarded_by = auth()->id();
             } else {
-                $lead->status = 'active';
+                $lead->status = Statuses::LEAD_ACTIVE;
             }
 
             // Save the lead
@@ -462,7 +464,7 @@ class LeadController extends Controller
             // Logic for forwarding lead
             // This could involve assigning to another agent, changing status, etc.
             // For example:
-            $lead->status = 'forwarded';  // Or another status that makes sense in your workflow
+            $lead->status = Statuses::LEAD_FORWARDED;  // Or another status that makes sense in your workflow
             $lead->forwarded_at = now();
             $lead->forwarded_by = auth()->id();
             $lead->save();
@@ -650,7 +652,7 @@ class LeadController extends Controller
         }
 
         // Ensure the lead is in a state that allows status updates
-        if (! in_array($lead->status, ['pending', 'forwarded', 'active'])) {
+        if (! in_array($lead->status, [Statuses::LEAD_PENDING, Statuses::LEAD_FORWARDED, Statuses::LEAD_ACTIVE])) {
             return response()->json(['error' => 'Cannot update carrier status for this lead at its current state.'], 403);
         }
 
@@ -787,18 +789,18 @@ class LeadController extends Controller
         
         // When manager marks as chargeback, update the main status too
         // This ensures it appears in Chargebacks page and Retention "Yet to Retain"
-        if ($request->manager_status === 'chargeback') {
-            $lead->status = 'chargeback';
+        if ($request->manager_status === Statuses::MGR_CHARGEBACK) {
+            $lead->status = Statuses::LEAD_CHARGEBACK;
             $lead->chargeback_marked_date = now();
             // Set retention_status to pending so it appears in "Yet to Retain"
-            $lead->retention_status = 'pending';
+            $lead->retention_status = Statuses::RETENTION_PENDING;
         }
         // When manager approves, update status to accepted/underwritten
-        elseif ($request->manager_status === 'approved') {
-            $lead->status = 'accepted';
+        elseif ($request->manager_status === Statuses::MGR_APPROVED) {
+            $lead->status = Statuses::LEAD_ACCEPTED;
         }
-        elseif ($request->manager_status === 'underwriting') {
-            $lead->status = 'underwritten';
+        elseif ($request->manager_status === Statuses::MGR_UNDERWRITING) {
+            $lead->status = Statuses::LEAD_UNDERWRITTEN;
         }
         // When manager declines, update main status so it moves to Failed Leads section
         elseif ($request->manager_status === 'declined') {
@@ -823,7 +825,7 @@ class LeadController extends Controller
         $query = Lead::with(['insuranceCarrier', 'partner'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', 'approved');
+            ->where('manager_status', Statuses::MGR_APPROVED);
         
         // Search functionality
         if ($request->filled('search')) {
@@ -891,7 +893,7 @@ class LeadController extends Controller
         
         // Check if status has already been set (edit-once logic) - only Super Admin can change
         // Allow Pending status to bypass this check (for unassigning partner)
-        if (!empty($lead->issuance_date) && !auth()->user()->hasRole(Roles::SUPER_ADMIN) && $request->issuance_status !== 'Pending') {
+        if (!empty($lead->issuance_date) && !auth()->user()->hasRole(Roles::SUPER_ADMIN) && $request->issuance_status !== Statuses::ISSUANCE_PENDING) {
             return back()->with('error', 'Issuance status has already been set and can only be changed by Super Admin.');
         }
         
@@ -901,7 +903,7 @@ class LeadController extends Controller
         }
         
         // Validate partner_id only if status is not Pending
-        $partnerValidation = $request->issuance_status === 'Pending' 
+        $partnerValidation = $request->issuance_status === Statuses::ISSUANCE_PENDING 
             ? 'nullable' 
             : 'required|integer|exists:partners,id';
         
@@ -940,7 +942,7 @@ class LeadController extends Controller
         }
         
         // Handle Pending status - unassign partner
-        if ($request->issuance_status === 'Pending') {
+        if ($request->issuance_status === Statuses::ISSUANCE_PENDING) {
             $lead->partner_id = null;
             $lead->partner_set_at = null;
             $lead->issuance_date = null; // Clear the issued date when marking as Pending
@@ -952,7 +954,7 @@ class LeadController extends Controller
             }
         }
         
-        if ($request->issuance_status === 'Issued') {
+        if ($request->issuance_status === Statuses::ISSUANCE_ISSUED) {
             $lead->issuance_date = now();
             
             // Calculate commission when status is Issued and partner is assigned
@@ -1115,7 +1117,7 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         
         // Verify it's a chargeback
-        if ($lead->status !== 'chargeback') {
+        if ($lead->status !== Statuses::LEAD_CHARGEBACK) {
             return response()->json([
                 'success' => false,
                 'message' => 'This lead is not a chargeback.'
@@ -1135,25 +1137,25 @@ class LeadController extends Controller
         $newSale->closer_name = $retentionOfficer;
         $newSale->sale_at = $saleDate;
         $newSale->sale_date = $saleDate->format('Y-m-d');
-        $newSale->status = 'pending';
+        $newSale->status = Statuses::LEAD_PENDING;
         $newSale->retention_status = null;
         $newSale->is_rewrite = !$isRetained; // If not retained, it's a rewrite
         $newSale->chargeback_marked_date = null;
-        $newSale->qa_status = 'Pending';
+        $newSale->qa_status = Statuses::QA_PENDING;
         $newSale->qa_reason = null;
         $newSale->qa_user_id = null;
-        $newSale->manager_status = 'pending';
+        $newSale->manager_status = Statuses::MGR_PENDING;
         $newSale->manager_reason = null;
         $newSale->manager_user_id = null;
         $newSale->comments = ($isRetained ? 'Retained' : 'Rewritten') . " from chargeback by {$retentionOfficer} ({$daysDifference} days after chargeback)";
         $newSale->save();
 
         // Update the original chargeback
-        $lead->retention_status = $isRetained ? 'retained' : 'rewrite';
+        $lead->retention_status = $isRetained ? Statuses::RETENTION_RETAINED : Statuses::RETENTION_REWRITE;
         $lead->retained_at = $isRetained ? now() : null;
         $lead->is_rewrite = !$isRetained;
         $lead->retention_officer_id = auth()->id();
-        $lead->status = $isRetained ? 'accepted' : 'chargeback';
+        $lead->status = $isRetained ? Statuses::LEAD_ACCEPTED : Statuses::LEAD_CHARGEBACK;
         $lead->save();
 
         // Dispatch event to notify managers and assigned person about the new sale
@@ -1219,7 +1221,7 @@ class LeadController extends Controller
 
         $lead = Lead::findOrFail($id);
         
-        $lead->qa_status = 'Pending';
+        $lead->qa_status = Statuses::QA_PENDING;
         $lead->qa_reason = null;
         $lead->qa_user_id = null;
         $lead->save();
@@ -1245,12 +1247,12 @@ class LeadController extends Controller
 
         $lead = Lead::findOrFail($id);
         
-        $lead->manager_status = 'pending';
+        $lead->manager_status = Statuses::MGR_PENDING;
         $lead->manager_reason = null;
         $lead->manager_user_id = null;
         // If it was marked as chargeback, revert those changes too
-        if ($lead->status === 'chargeback') {
-            $lead->status = 'pending';
+        if ($lead->status === Statuses::LEAD_CHARGEBACK) {
+            $lead->status = Statuses::LEAD_PENDING;
             $lead->chargeback_marked_date = null;
             $lead->retention_status = null;
         }
@@ -1347,7 +1349,7 @@ class LeadController extends Controller
         $lead = Lead::findOrFail($id);
         $commissionService = new CommissionCalculationService();
         
-        if ($lead->issuance_status === 'Issued' && $lead->partner_id && $lead->monthly_premium > 0) {
+        if ($lead->issuance_status === Statuses::ISSUANCE_ISSUED && $lead->partner_id && $lead->monthly_premium > 0) {
             // Get carrier ID - lookup by name if insurance_carrier_id is not set
             $carrierId = $lead->insurance_carrier_id;
             if (!$carrierId && $lead->carrier_name) {
@@ -1425,7 +1427,7 @@ class LeadController extends Controller
         $processed = 0;
         $failed = 0;
         
-        Lead::where('issuance_status', 'Issued')
+        Lead::where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->whereNotNull('assigned_agent_id')
             ->where('monthly_premium', '>', 0)
             ->chunk(100, function ($leads) use ($commissionService, $carrierMap, &$processed, &$failed) {

@@ -150,7 +150,7 @@
                             @if(!empty($beneficiaries))
                                 <div style="max-width: 300px; font-size: 0.85rem;">
                                     @foreach($beneficiaries as $index => $beneficiary)
-                                        <div class="mb-2 p-1 border-start border-2" style="border-color: #d4af37;">
+                                        <div class="mb-2 p-1 border-start border-2" style="border-color: var(--bs-gold);">
                                             <div><strong>{{ $index + 1 }}. {{ $beneficiary['name'] ?? '—' }}</strong></div>
                                             @if(!empty($beneficiary['relation']))
                                                 <div><small class="text-muted">Rel: {{ $beneficiary['relation'] }}</small></div>
