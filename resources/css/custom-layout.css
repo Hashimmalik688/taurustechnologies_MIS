@@ -4,8 +4,8 @@
     --gold: #d4af37;
     --gold-light: #f4e4b4;
     --gold-dark: #b8941f;
-    --sidebar-width: 250px;
-    --sidebar-collapsed: 70px;
+    --sidebar-width: 260px;
+    --sidebar-collapsed: 62px;
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
     --text-primary: #1f2937;
@@ -26,8 +26,9 @@
     z-index: 1000;
     overflow-x: hidden;
     overflow-y: hidden;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+    box-shadow: 1px 0 3px rgba(0,0,0,0.04);
     border-right: 1px solid var(--border-color);
+    transition: width 0.2s ease;
 }
 
 #sidebar.collapsed {
@@ -35,27 +36,29 @@
 }
 
 #sidebar::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
 }
 
 #sidebar::-webkit-scrollbar-thumb {
     background: var(--gold);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 /* Profile Section (replaces old logo) */
 .sidebar-profile {
-    padding: 1.25rem 1rem;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 10px;
     position: relative;
+    height: 58px;
+    box-sizing: border-box;
 }
 
 #sidebar.collapsed .sidebar-profile {
     justify-content: center;
-    padding: 1rem 0.5rem;
+    padding: 12px 8px;
 }
 
 #sidebar.collapsed .sidebar-profile-info {
@@ -65,10 +68,10 @@
 /* Toggle Button */
 .sidebar-toggle {
     position: absolute;
-    top: 1.5rem;
-    right: -15px;
-    width: 30px;
-    height: 30px;
+    top: 28px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
     background: var(--gold);
     border: none;
     border-radius: 50%;
@@ -77,9 +80,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     z-index: 1001;
+    transition: all 0.2s ease;
 }
 
 .sidebar-toggle:hover {
@@ -93,18 +96,17 @@
 
 /* Menu Items */
 .sidebar-menu {
-    padding: 1rem 0;
+    padding: 8px 0;
 }
 
 .menu-label {
     color: #94a3b8;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.58rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 1rem 1.5rem 0.5rem;
+    letter-spacing: 0.8px;
+    padding: 12px 20px 4px;
     opacity: 1;
-    
 }
 
 #sidebar.collapsed .menu-label {
@@ -114,35 +116,38 @@
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.5rem;
+    gap: 10px;
+    padding: 8px 14px;
+    margin: 1px 8px;
+    border-radius: 8px;
     color: #cbd5e1;
     text-decoration: none;
-    
+    font-size: 0.8rem;
     position: relative;
 }
 
 .menu-item:hover {
-    background: rgba(212, 175, 55, 0.1);
+    background: rgba(212, 175, 55, 0.08);
     color: var(--gold);
 }
 
 .menu-item.active {
-    background: rgba(212, 175, 55, 0.15);
+    background: rgba(212, 175, 55, 0.12);
     color: var(--gold);
     border-left: 3px solid var(--gold);
 }
 
 .menu-item i {
-    font-size: 1.25rem;
-    min-width: 24px;
+    font-size: 18px;
+    min-width: 20px;
     text-align: center;
 }
 
 .menu-text {
     white-space: nowrap;
     opacity: 1;
-    
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #sidebar.collapsed .menu-text {

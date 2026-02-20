@@ -64,7 +64,59 @@
 [data-theme="dark"] #sidebar {
     background: var(--bg-primary) !important;
     border-right: 1px solid var(--border-color) !important;
-    box-shadow: var(--shadow-md) !important;
+    box-shadow: 1px 0 3px rgba(0,0,0,.15) !important;
+}
+
+[data-theme="dark"] .sidebar-profile {
+    border-bottom: 1px solid var(--border-color) !important;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.03), transparent) !important;
+}
+
+[data-theme="dark"] .sidebar-profile-name {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .sidebar-profile-role {
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .sidebar-profile-dropdown {
+    background: var(--bg-card, #1e293b) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-header {
+    background: rgba(212, 175, 55, 0.04) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-name {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-email {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-divider {
+    background: var(--border-color) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-item {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-item i {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-item:hover {
+    background: rgba(212, 175, 55, 0.08) !important;
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .profile-dropdown-item:hover i {
+    color: var(--gold, #d4af37) !important;
 }
 
 [data-theme="dark"] .sidebar-logo {
@@ -81,35 +133,94 @@
 }
 
 [data-theme="dark"] .sidebar-toggle {
-    background: var(--bg-tertiary) !important;
-    color: var(--text-primary) !important;
+    background: linear-gradient(135deg, var(--gold, #d4af37), #b8941f) !important;
+    color: #000 !important;
+    border-color: var(--bg-primary, #0f172a) !important;
 }
 
 [data-theme="dark"] .sidebar-toggle:hover {
-    background: var(--bg-card) !important;
+    box-shadow: 0 4px 14px rgba(212,175,55,.35) !important;
 }
 
 [data-theme="dark"] .menu-label {
     color: var(--text-muted) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    border-bottom: none !important;
 }
 
 [data-theme="dark"] .menu-item {
     color: var(--text-secondary) !important;
 }
 
+[data-theme="dark"] .menu-item i {
+    opacity: 0.6;
+}
+
 [data-theme="dark"] .menu-item:hover {
-    background: var(--bg-tertiary) !important;
-    color: var(--text-primary) !important;
+    background: rgba(212, 175, 55, 0.08) !important;
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .menu-item:hover i {
+    color: var(--gold, #d4af37) !important;
+    opacity: 1;
 }
 
 [data-theme="dark"] .menu-item.active {
-    background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%) !important;
-    color: #000 !important;
+    background: rgba(212, 175, 55, 0.12) !important;
+    color: var(--gold, #d4af37) !important;
 }
 
 [data-theme="dark"] .menu-item.active i {
-    color: #000 !important;
+    color: var(--gold, #d4af37) !important;
+    opacity: 1;
+}
+
+[data-theme="dark"] .menu-item.active::before {
+    background: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background: rgba(212, 175, 55, 0.08) !important;
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .dropdown-item.active {
+    background: rgba(212, 175, 55, 0.12) !important;
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .dropdown-item.active i {
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .dropdown-icon {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .sidebar-bottom {
+    border-top: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .sidebar-bottom-item {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .sidebar-bottom-item:hover {
+    background: rgba(212, 175, 55, 0.08) !important;
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .sidebar-bottom-item:hover i {
+    color: var(--gold, #d4af37) !important;
+}
+
+[data-theme="dark"] .sidebar-bottom-item.active {
+    background: rgba(212, 175, 55, 0.12) !important;
+    color: var(--gold, #d4af37) !important;
 }
 
 /* =================== TOP HEADER =================== */

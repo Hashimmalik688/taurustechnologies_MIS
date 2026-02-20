@@ -99,12 +99,46 @@ class LeadController extends Controller
             });
         }
         
+        // Carrier filter
+        if ($request->filled('carrier')) {
+            $query->where('carrier_name', $request->carrier);
+        }
+        
+        // State filter
+        if ($request->filled('state')) {
+            $query->where('state', $request->state);
+        }
+        
+        // Closer filter
+        if ($request->filled('closer')) {
+            $query->where('closer_name', $request->closer);
+        }
+        
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+        
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
         
         // Get Peregrine closer names for tagging
         $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
-        return view('admin.leads.index_simple', compact('leads', 'peregrineClosers'));
+        // Get filter options
+        $carriers = \App\Models\InsuranceCarrier::whereHas('agentStates')->orderBy('name')->pluck('name');
+        if ($carriers->isEmpty()) {
+            $carriers = \App\Models\InsuranceCarrier::orderBy('name')->pluck('name');
+        }
+        $states = Lead::whereNotNull('state')->where('state', '!=', '')->where('state', '!=', 'N/A')->distinct()->orderBy('state')->pluck('state');
+        $closerNames = Lead::whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED])
+            ->whereNull('verified_by')
+            ->whereNotNull('closer_name')->where('closer_name', '!=', '')
+            ->distinct()->orderBy('closer_name')->pluck('closer_name');
+        
+        return view('admin.leads.index_simple', compact('leads', 'peregrineClosers', 'carriers', 'states', 'closerNames'));
     }
 
     /**
@@ -139,12 +173,27 @@ class LeadController extends Controller
             $query->where('status', $request->status);
         }
         
-        // Month filter
-        if ($request->filled('month')) {
-            $query->whereMonth('created_at', $request->month);
+        // Carrier filter
+        if ($request->filled('carrier')) {
+            $query->where('carrier_name', $request->carrier);
         }
-        if ($request->filled('year')) {
-            $query->whereYear('created_at', $request->year);
+        
+        // Closer filter
+        if ($request->filled('closer')) {
+            $query->where('closer_name', $request->closer);
+        }
+        
+        // State filter
+        if ($request->filled('state')) {
+            $query->where('state', $request->state);
+        }
+        
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
         }
         
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
@@ -152,7 +201,25 @@ class LeadController extends Controller
         // Get Peregrine closer names for tagging
         $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
-        return view('admin.leads.peregrine', compact('leads', 'peregrineClosers'));
+        // Get filter options
+        $carriers = \App\Models\InsuranceCarrier::whereHas('agentStates')->orderBy('name')->pluck('name');
+        if ($carriers->isEmpty()) {
+            $carriers = \App\Models\InsuranceCarrier::orderBy('name')->pluck('name');
+        }
+        $closerNames = Lead::where(function($q) {
+                $q->whereNotNull('verified_by')
+                  ->orWhereNotNull('validated_by')
+                  ->orWhere('source_type', Teams::PEREGRINE);
+            })->whereNotNull('closer_name')->where('closer_name', '!=', '')
+            ->distinct()->orderBy('closer_name')->pluck('closer_name');
+        $states = Lead::where(function($q) {
+                $q->whereNotNull('verified_by')
+                  ->orWhereNotNull('validated_by')
+                  ->orWhere('source_type', Teams::PEREGRINE);
+            })->whereNotNull('state')->where('state', '!=', '')->where('state', '!=', 'N/A')
+            ->distinct()->orderBy('state')->pluck('state');
+        
+        return view('admin.leads.peregrine', compact('leads', 'peregrineClosers', 'carriers', 'closerNames', 'states'));
     }
 
     public function sales(Request $request)
@@ -197,12 +264,12 @@ class LeadController extends Controller
             $query->where('policy_type', $request->policy_type);
         }
         
-        // Month filter for sale_date
-        if ($request->filled('month')) {
-            $query->whereMonth('sale_date', $request->month);
+        // Date range filter for sale_date
+        if ($request->filled('date_from')) {
+            $query->whereDate('sale_date', '>=', $request->date_from);
         }
-        if ($request->filled('year')) {
-            $query->whereYear('sale_date', $request->year);
+        if ($request->filled('date_to')) {
+            $query->whereDate('sale_date', '<=', $request->date_to);
         }
         
         // Get insurance carriers that have partner assignments (from agent_carrier_states table)
@@ -858,12 +925,12 @@ class LeadController extends Controller
             $query->where('policy_type', $request->policy_type);
         }
         
-        // Month filter for sale_date
-        if ($request->filled('month')) {
-            $query->whereMonth('sale_date', $request->month);
+        // Date range filter for sale_date
+        if ($request->filled('date_from')) {
+            $query->whereDate('sale_date', '>=', $request->date_from);
         }
-        if ($request->filled('year')) {
-            $query->whereYear('sale_date', $request->year);
+        if ($request->filled('date_to')) {
+            $query->whereDate('sale_date', '<=', $request->date_to);
         }
         
         // Get unique carriers for filter dropdown from InsuranceCarrier model
@@ -1088,20 +1155,79 @@ class LeadController extends Controller
             $query->where('qa_status', $request->qa_status);
         }
         
-        // Month filter for sale_date
-        if ($request->filled('month')) {
-            $query->whereMonth('sale_date', $request->month);
-        }
-        if ($request->filled('year')) {
-            $query->whereYear('sale_date', $request->year);
+        // Filter by closer
+        if ($request->filled('closer')) {
+            $query->where('closer_name', $request->closer);
         }
         
-        // Get unique carriers for filter dropdown
-        $carriers = Lead::distinct()->pluck('carrier_name')->filter();
+        // Date range filter for sale_date
+        if ($request->filled('date_from')) {
+            $query->whereDate('sale_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('sale_date', '<=', $request->date_to);
+        }
         
+        // Get insurance carriers that have partner assignments (like Sales page)
+        $insuranceCarriers = \App\Models\InsuranceCarrier::whereHas('agentStates')
+            ->orderBy('name')
+            ->pluck('name');
+        if ($insuranceCarriers->isEmpty()) {
+            $insuranceCarriers = \App\Models\InsuranceCarrier::orderBy('name')->pluck('name');
+        }
+        $carriers = $insuranceCarriers;
+
+        // --- Chart data: QA status per closer (top 10) ---
+        $closerStats = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->select('closer_name')
+            ->selectRaw("COUNT(*) as total")
+            ->selectRaw("SUM(CASE WHEN qa_status = 'Good' THEN 1 ELSE 0 END) as good")
+            ->selectRaw("SUM(CASE WHEN qa_status = 'Pending' THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN qa_status IN ('Avg','Bad') THEN 1 ELSE 0 END) as issues")
+            ->groupBy('closer_name')
+            ->orderByDesc('total')
+            ->limit(10)
+            ->get();
+
+        // --- Chart data: QA status per carrier (top 8) ---
+        $carrierStats = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereNotNull('carrier_name')
+            ->where('carrier_name', '!=', '')
+            ->select('carrier_name')
+            ->selectRaw("COUNT(*) as total")
+            ->selectRaw("SUM(CASE WHEN qa_status = 'Good' THEN 1 ELSE 0 END) as good")
+            ->selectRaw("SUM(CASE WHEN qa_status = 'Pending' THEN 1 ELSE 0 END) as pending")
+            ->selectRaw("SUM(CASE WHEN qa_status IN ('Avg','Bad') THEN 1 ELSE 0 END) as issues")
+            ->groupBy('carrier_name')
+            ->orderByDesc('total')
+            ->limit(8)
+            ->get();
+
+        // --- Chart data: Daily trend (last 14 days) ---
+        $dailyTrend = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereNotNull('sale_date')
+            ->where('sale_date', '>=', now()->subDays(13)->toDateString())
+            ->selectRaw("DATE(sale_date) as day")
+            ->selectRaw("COUNT(*) as total")
+            ->selectRaw("SUM(CASE WHEN qa_status = 'Good' THEN 1 ELSE 0 END) as good")
+            ->selectRaw("SUM(CASE WHEN qa_status IN ('Avg','Bad') THEN 1 ELSE 0 END) as issues")
+            ->groupByRaw("DATE(sale_date)")
+            ->orderBy('day')
+            ->get();
+
+        // Get unique closer names for closer filter
+        $closers = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->distinct()
+            ->orderBy('closer_name')
+            ->pluck('closer_name');
+
         // Order by sale_date, then sale_at, then created_at (fallback)
         $leads = $query->orderByRaw('COALESCE(sale_date, sale_at, created_at) DESC')->paginate(50);
-        return view('admin.qa.review', compact('leads', 'carriers', 'qaAnalytics'));
+        return view('admin.qa.review', compact('leads', 'carriers', 'qaAnalytics', 'closerStats', 'carrierStats', 'dailyTrend', 'closers'));
     }
 
     /**

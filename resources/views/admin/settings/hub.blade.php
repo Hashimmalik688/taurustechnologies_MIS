@@ -46,6 +46,19 @@
 
         <div class="hub-section-label">Tools</div>
         <div class="hub-grid">
+            @hasanyrole('Super Admin|Manager|Co-ordinator|CEO')
+            <a href="{{ route('settings.reports.index') }}" class="hub-card">
+                <div class="hub-card-icon">
+                    <i class="bx bx-bar-chart-alt-2"></i>
+                </div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Reports</div>
+                    <p class="hub-card-desc">Generate sales, partner, agent, and manager reports with advanced filters and CSV export</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endhasanyrole
+
             @canViewModule('duplicate-checker')
             <a href="{{ route('admin.dupe-checker.index') }}" class="hub-card">
                 <div class="hub-card-icon">

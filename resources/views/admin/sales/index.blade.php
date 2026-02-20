@@ -8,116 +8,455 @@
 
 @section('css')
 <style>
-    /* Fixed Table Container - Scrollable */
-    .top-scrollbar-wrapper {
-        width: 100%;
-        overflow-x: auto;
-        overflow-y: hidden;
-        margin-bottom: 0;
-        height: 20px;
+    /* ── Sales Page Design System ── */
+
+    /* Top bar */
+    .sl-topbar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem;
     }
-    
-    .top-scrollbar-content {
-        height: 1px;
+    .sl-topbar-left { display: flex; align-items: center; gap: .75rem; }
+    .sl-page-title {
+        font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0;
+        display: flex; align-items: center; gap: .4rem;
     }
-    
-    /* Fixed Header Section  - Scrolls horizontally in sync with table */
-    .table-header-fixed {
-        overflow-x: auto;
-        overflow-y: hidden;
-        border: 1px solid var(--bs-surface-200);
-        border-bottom: none;
-        background: var(--bs-surface-bg-light);
+    .sl-page-title i { color: #d4af37; font-size: 1.2rem; }
+    .sl-topbar-right { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+
+    /* Search */
+    .sl-search-wrap {
+        position: relative; display: flex; align-items: center;
     }
-    
-    .table-header-fixed table {
-        margin-bottom: 0 !important;
-        border-bottom: none !important;
+    .sl-search-icon {
+        position: absolute; left: .6rem; color: #94a3b8; font-size: .9rem; pointer-events: none;
     }
-    
-    .table-header-fixed thead th {
-        background: var(--bs-surface-bg-light) !important;
-        font-weight: 600;
-        border-bottom: 2px solid var(--bs-surface-200) !important;
-        white-space: nowrap;
-        padding: 12px 8px;
+    .sl-search-input {
+        padding: .42rem .65rem .42rem 2rem;
+        font-size: .78rem; border: 1px solid rgba(0,0,0,.1);
+        border-radius: 8px; background: #fff; width: 220px;
+        outline: none; transition: border-color .15s;
     }
-    
-    /* Scrollable Table Body */
-    .table-responsive {
-        max-height: 450px;
+    .sl-search-input:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+
+    /* Action buttons */
+    .sl-btn {
+        display: inline-flex; align-items: center; gap: .35rem;
+        padding: .42rem .8rem; font-size: .75rem; font-weight: 700;
+        border-radius: 8px; border: none; cursor: pointer;
+        transition: all .15s; white-space: nowrap;
+    }
+    .sl-btn-add {
+        background: linear-gradient(135deg, #d4af37, #b8941f);
+        color: #0f172a;
+    }
+    .sl-btn-add:hover { background: linear-gradient(135deg, #e0c04c, #d4af37); transform: translateY(-1px); }
+    .sl-btn-import {
+        background: transparent; border: 1px solid rgba(0,0,0,.12); color: #475569;
+    }
+    .sl-btn-import:hover { border-color: #d4af37; color: #d4af37; }
+
+    /* KPI Row */
+    .sl-kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: .75rem;
+        margin-bottom: 1rem;
+    }
+    .sl-kpi {
+        background: rgba(255,255,255,.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: 10px;
+        padding: .85rem 1rem;
+        display: flex; align-items: center; gap: .75rem;
+        transition: transform .15s, box-shadow .15s;
+    }
+    .sl-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+    .sl-kpi-icon {
+        width: 38px; height: 38px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.15rem; color: #fff; flex-shrink: 0;
+    }
+    .sl-kpi-icon.pending { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .sl-kpi-icon.approved { background: linear-gradient(135deg, #10b981, #059669); }
+    .sl-kpi-icon.declined { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .sl-kpi-icon.uw { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    .sl-kpi-info { display: flex; flex-direction: column; }
+    .sl-kpi-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #64748b; }
+    .sl-kpi-val { font-size: 1.35rem; font-weight: 800; color: #1e293b; line-height: 1.1; }
+
+    /* Card */
+    .sl-card {
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Filter Pills */
+    .sl-filter-pills {
+        display: flex; align-items: center; gap: .4rem;
+        padding: .6rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+        background: rgba(248,250,252,.6);
+        flex-wrap: wrap;
+    }
+    .sl-pill-select {
+        font-size: .72rem; font-weight: 600;
+        padding: .3rem .5rem; border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.08);
+        background: #fff; color: #475569;
+        cursor: pointer; outline: none;
+        transition: border-color .15s;
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right .45rem center;
+        padding-right: 1.4rem;
+    }
+    .sl-pill-select:focus, .sl-pill-date:focus { border-color: #d4af37; }
+    .sl-pill-date {
+        font-size: .72rem; font-weight: 600;
+        padding: .3rem .5rem; border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.08);
+        background: #fff; color: #475569;
+        cursor: pointer; outline: none;
+        transition: border-color .15s;
+        min-width: 120px;
+        color-scheme: light;
+    }
+    .sl-pill-label {
+        font-size: .64rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; color: #94a3b8; margin-right: -2px;
+    }
+    .sl-pill-clear {
+        font-size: .68rem; font-weight: 600; color: #ef4444;
+        text-decoration: none; padding: .25rem .5rem;
+        border-radius: 20px; border: 1px solid rgba(239,68,68,.2);
+        display: inline-flex; align-items: center; gap: 2px;
+        transition: all .15s;
+    }
+    .sl-pill-clear:hover { background: rgba(239,68,68,.08); color: #dc2626; }
+
+    /* Table area */
+    .sl-tbl-wrap {
         overflow-x: auto;
         overflow-y: auto;
-        position: relative;
-        border: 1px solid var(--bs-surface-200);
+        max-height: 560px;
+        scrollbar-width: thin;
+        scrollbar-color: #d4af37 transparent;
     }
-    
-    .table-responsive table {
-        border-collapse: separate !important;
-        border-spacing: 0 !important;
-        margin-bottom: 0 !important;
+    .sl-tbl-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+    .sl-tbl-wrap::-webkit-scrollbar-track { background: transparent; }
+    .sl-tbl-wrap::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
+
+    .sl-tbl {
+        width: 100%; border-collapse: separate; border-spacing: 0;
+        font-size: .78rem;
     }
-    
-    .table-responsive table thead {
-        display: none; /* Hide original thead since we have fixed header */
-    }
-    
-    .table-responsive table td {
+    .sl-tbl thead th {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        font-size: .64rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; color: #64748b;
+        padding: .65rem .6rem;
+        border-bottom: 1px solid rgba(212,175,55,.18);
         white-space: nowrap;
-        padding: 12px 8px;
+        position: sticky; top: 0; z-index: 10;
     }
-    
-    /* Hide scrollbars on header (we have top scrollbar) */
-    .table-header-fixed::-webkit-scrollbar {
-        display: none;
+    .sl-tbl tbody td {
+        padding: .55rem .6rem;
+        border-bottom: 1px solid rgba(0,0,0,.04);
+        vertical-align: middle;
+        color: #334155;
+        transition: background .12s;
     }
-    .table-header-fixed {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .sl-tbl tbody tr { transition: background .12s; }
+    .sl-tbl tbody tr:hover td { background: rgba(212,175,55,.045); }
+    .sl-tbl tbody tr:nth-child(even) td { background: rgba(248,250,252,.45); }
+    .sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.045); }
+
+    /* Sticky columns */
+    .sl-sticky-col {
+        position: sticky;
+        z-index: 5;
+        background: #fff;
     }
-    
-    /* Gold scrollbar styling */
-    .top-scrollbar-wrapper::-webkit-scrollbar,
-    .table-responsive::-webkit-scrollbar {
-        height: 12px;
-        width: 12px;
+    .sl-tbl thead .sl-sticky-col { z-index: 15; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
+    .sl-col-1 { left: 0; }
+    .sl-col-2 { left: 160px; }
+    .sl-col-3 { left: 310px; border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-tbl thead .sl-col-3 { border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-tbl tbody tr:hover .sl-sticky-col { background: rgba(255,252,240,1); }
+    .sl-tbl tbody tr:nth-child(even) .sl-sticky-col { background: #fafbfc; }
+    .sl-tbl tbody tr:nth-child(even):hover .sl-sticky-col { background: rgba(255,252,240,1); }
+
+    /* Inline edit cells */
+    .sl-edit-cell { display: flex; flex-direction: column; gap: 3px; }
+    .sl-edit-cell small { font-size: .64rem; color: #94a3b8; font-weight: 500; }
+    .sl-edit-row { display: flex; align-items: center; gap: 4px; }
+    .sl-edit-row .form-control,
+    .sl-edit-row .form-select {
+        font-size: .74rem; padding: .28rem .45rem; border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.09); background: #fff;
+        transition: border-color .15s, box-shadow .15s;
     }
-    
-    .top-scrollbar-wrapper::-webkit-scrollbar-track,
-    .table-responsive::-webkit-scrollbar-track {
-        background: var(--bs-surface-50);
-        border-radius: 6px;
+    .sl-edit-row .form-control:focus,
+    .sl-edit-row .form-select:focus {
+        border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.1);
     }
-    
-    .top-scrollbar-wrapper::-webkit-scrollbar-thumb,
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: var(--bs-gold);
-        border-radius: 6px;
+    .sl-edit-row .btn {
+        padding: .22rem .4rem; font-size: .72rem; border-radius: 20px;
+        border: none; background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; transition: all .15s; flex-shrink: 0;
     }
-    
-    .top-scrollbar-wrapper::-webkit-scrollbar-thumb:hover,
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: var(--bs-gold-dark);
+    .sl-edit-row .btn:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(16,185,129,.25); }
+
+    /* Bubble dropdowns (QA / Manager status) */
+    .sl-bubble-select {
+        font-size: .73rem; font-weight: 600;
+        padding: .3rem .55rem; padding-right: 1.6rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.09);
+        background: #fff;
+        color: #334155;
+        cursor: pointer; outline: none;
+        transition: border-color .15s, box-shadow .15s;
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right .5rem center;
+        min-width: 110px;
     }
-    
-    /* Peregrine badge style */
-    .bg-purple {
-        background-color: var(--bs-ui-purple) !important;
-        color: var(--bs-white, #fff) !important;
+    .sl-bubble-select:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+
+    /* Bubble textarea */
+    .sl-bubble-textarea {
+        font-size: .73rem; padding: .3rem .55rem;
+        border-radius: 14px; border: 1px solid rgba(0,0,0,.09);
+        background: #fff; color: #334155; resize: vertical;
+        transition: border-color .15s, box-shadow .15s; outline: none;
+        min-height: 32px;
+    }
+    .sl-bubble-textarea:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+    .sl-bubble-textarea::placeholder { color: #b0b8c4; font-weight: 400; }
+
+    /* Save / action pill buttons */
+    .sl-save-btn {
+        display: inline-flex; align-items: center; gap: .25rem;
+        font-size: .68rem; font-weight: 600;
+        padding: .22rem .55rem; border-radius: 20px; border: none;
+        cursor: pointer; transition: all .15s; margin-top: 4px;
+        color: #fff;
+    }
+    .sl-save-btn.primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .sl-save-btn.primary:hover { box-shadow: 0 2px 8px rgba(59,130,246,.3); transform: translateY(-1px); }
+    .sl-save-btn.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .sl-save-btn.success:hover { box-shadow: 0 2px 8px rgba(16,185,129,.3); transform: translateY(-1px); }
+    .sl-save-btn.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .sl-save-btn.warning:hover { box-shadow: 0 2px 8px rgba(245,158,11,.3); transform: translateY(-1px); }
+
+    /* Action buttons in table */
+    .sl-act-group { display: flex; gap: 4px; justify-content: center; }
+    .sl-act-group .btn {
+        width: 28px; height: 28px; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; font-size: .68rem;
+        border: none; color: #fff; transition: all .15s;
+        box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+    .sl-act-group .btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+    .sl-act-group .btn-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .sl-act-group .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+    .sl-act-group .btn-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .sl-act-group .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .sl-act-group .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+    /* Badges */
+    .sl-tbl .badge {
+        font-size: .68rem; font-weight: 600;
+        padding: .25rem .55rem; border-radius: 20px;
+        letter-spacing: .2px;
+    }
+
+    /* Follow-up badge */
+    .sl-follow-badge {
+        display: inline-flex; align-items: center;
+        font-size: .68rem; font-weight: 600;
+        padding: .2rem .5rem; border-radius: 20px;
+    }
+    .sl-follow-badge.yes { background: rgba(16,185,129,.1); color: #059669; }
+    .sl-follow-badge.no { background: rgba(100,116,139,.08); color: #64748b; }
+
+    /* Pagination */
+    .sl-card .mt-3 { padding: 0 1rem .75rem; }
+
+    /* Peregrine badge */
+    .bg-purple { background-color: var(--bs-ui-purple, #6f42c1) !important; color: #fff !important; }
+
+    /* ── Custom Dropdown (pill-shaped panels) ── */
+    .sl-cdd { position: relative; display: inline-block; vertical-align: middle; }
+    .sl-cdd select { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; overflow: hidden; }
+    .sl-cdd-trigger {
+        display: inline-flex; align-items: center; gap: .3rem;
+        cursor: pointer; user-select: none; white-space: nowrap;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .sl-cdd-trigger .sl-cdd-chevron {
+        width: 10px; height: 6px; flex-shrink: 0; opacity: .45;
+        transition: transform .2s;
+    }
+    .sl-cdd.open .sl-cdd-trigger .sl-cdd-chevron { transform: rotate(180deg); }
+    .sl-cdd.open .sl-cdd-trigger { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+
+    /* Dropdown panel */
+    .sl-cdd-panel {
+        position: absolute; top: calc(100% + 5px); left: 0;
+        min-width: 100%; width: max-content;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,.08);
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+        z-index: 200;
+        overflow: hidden;
+        opacity: 0; transform: translateY(-4px); pointer-events: none;
+        transition: opacity .15s, transform .15s;
+        max-height: 240px; overflow-y: auto;
+        scrollbar-width: thin; scrollbar-color: #d4af37 transparent;
+    }
+    .sl-cdd-panel::-webkit-scrollbar { width: 4px; }
+    .sl-cdd-panel::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 2px; }
+    .sl-cdd.open .sl-cdd-panel {
+        opacity: 1; transform: translateY(0); pointer-events: auto;
+    }
+    .sl-cdd-option {
+        padding: .4rem .65rem; font-size: .73rem; font-weight: 600;
+        color: #475569; cursor: pointer;
+        transition: background .1s, color .1s;
+        white-space: nowrap;
+    }
+    .sl-cdd-option:hover { background: rgba(212,175,55,.08); color: #1e293b; }
+    .sl-cdd-option.active {
+        background: rgba(212,175,55,.14); color: #92710c;
+    }
+    .sl-cdd-option:first-child { padding-top: .5rem; }
+    .sl-cdd-option:last-child { padding-bottom: .5rem; }
+
+    /* Pill variant (filter bar) */
+    .sl-cdd.pill .sl-cdd-trigger {
+        font-size: .72rem; font-weight: 600;
+        padding: .3rem .5rem; padding-right: .35rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.08);
+        background: #fff; color: #475569;
+    }
+    /* Bubble variant (table inline) */
+    .sl-cdd.bubble .sl-cdd-trigger {
+        font-size: .73rem; font-weight: 600;
+        padding: .3rem .55rem; padding-right: .4rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.09);
+        background: #fff; color: #334155;
+        min-width: 100px;
+    }
+    /* Edit-row variant (inline edits inside table cells) */
+    .sl-cdd.edit .sl-cdd-trigger {
+        font-size: .74rem; font-weight: 500;
+        padding: .28rem .45rem; padding-right: .35rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,0,0,.09);
+        background: #fff; color: #334155;
+        width: 100%;
+    }
+    .sl-cdd.edit .sl-cdd-trigger .sl-cdd-label { flex: 1; }
+
+    /* ── Dark mode ── */
+    [data-theme="dark"] .sl-page-title { color: #f1f5f9; }
+    [data-theme="dark"] .sl-search-input {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0;
+    }
+    [data-theme="dark"] .sl-search-input:focus { border-color: #d4af37; }
+    [data-theme="dark"] .sl-btn-import { border-color: rgba(255,255,255,.1); color: #94a3b8; }
+    [data-theme="dark"] .sl-btn-import:hover { border-color: #d4af37; color: #d4af37; }
+    [data-theme="dark"] .sl-kpi {
+        background: rgba(30,41,59,.7); border-color: rgba(255,255,255,.06);
+    }
+    [data-theme="dark"] .sl-kpi-label { color: #94a3b8; }
+    [data-theme="dark"] .sl-kpi-val { color: #f1f5f9; }
+    [data-theme="dark"] .sl-card {
+        background: rgba(30,41,59,.65); border-color: rgba(255,255,255,.06);
+    }
+    [data-theme="dark"] .sl-filter-pills {
+        background: rgba(15,23,42,.4); border-color: rgba(255,255,255,.05);
+    }
+    [data-theme="dark"] .sl-pill-select {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #cbd5e1;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] .sl-pill-date {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #cbd5e1;
+        color-scheme: dark;
+    }
+    [data-theme="dark"] .sl-pill-clear { border-color: rgba(239,68,68,.3); }
+    [data-theme="dark"] .sl-tbl thead th {
+        background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.9));
+        color: #94a3b8; border-color: rgba(212,175,55,.12);
+    }
+    [data-theme="dark"] .sl-tbl tbody td {
+        color: #cbd5e1; border-color: rgba(255,255,255,.04);
+    }
+    [data-theme="dark"] .sl-tbl tbody tr:hover td { background: rgba(212,175,55,.06); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.06); }
+    [data-theme="dark"] .sl-sticky-col { background: #1e293b; }
+    [data-theme="dark"] .sl-tbl thead .sl-sticky-col { background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.9)); }
+    [data-theme="dark"] .sl-tbl tbody tr:hover .sl-sticky-col { background: rgba(30,41,59,.9); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even) .sl-sticky-col { background: #1a2536; }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even):hover .sl-sticky-col { background: rgba(30,41,59,.9); }
+    [data-theme="dark"] .sl-col-3 { border-right-color: rgba(212,175,55,.12); }
+    [data-theme="dark"] .sl-edit-cell small { color: #64748b; }
+    [data-theme="dark"] .sl-edit-row .form-control,
+    [data-theme="dark"] .sl-edit-row .form-select {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0;
+    }
+    [data-theme="dark"] .sl-bubble-select {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #cbd5e1;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] .sl-bubble-textarea {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0;
+    }
+    [data-theme="dark"] .sl-bubble-textarea::placeholder { color: #475569; }
+    [data-theme="dark"] .sl-follow-badge.no { background: rgba(100,116,139,.15); color: #94a3b8; }
+    [data-theme="dark"] .sl-follow-badge.yes { background: rgba(16,185,129,.15); color: #34d399; }
+
+    /* Dark mode: custom dropdown */
+    [data-theme="dark"] .sl-cdd.pill .sl-cdd-trigger,
+    [data-theme="dark"] .sl-cdd.bubble .sl-cdd-trigger,
+    [data-theme="dark"] .sl-cdd.edit .sl-cdd-trigger {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #cbd5e1;
+    }
+    [data-theme="dark"] .sl-cdd.open .sl-cdd-trigger { border-color: #d4af37; }
+    [data-theme="dark"] .sl-cdd-panel {
+        background: #1e293b; border-color: rgba(255,255,255,.08);
+        box-shadow: 0 8px 28px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.2);
+    }
+    [data-theme="dark"] .sl-cdd-option { color: #94a3b8; }
+    [data-theme="dark"] .sl-cdd-option:hover { background: rgba(212,175,55,.1); color: #e2e8f0; }
+    [data-theme="dark"] .sl-cdd-option.active { background: rgba(212,175,55,.18); color: #fbbf24; }
+    [data-theme="dark"] .sl-cdd-chevron path { fill: #64748b; }
+
+    /* Responsiveness */
+    @media (max-width: 768px) {
+        .sl-kpi-row { grid-template-columns: repeat(2, 1fr); }
+        .sl-topbar { flex-direction: column; align-items: flex-start; }
+        .sl-topbar-right { width: 100%; }
+        .sl-search-input { width: 100% !important; }
     }
 </style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Sales
-        @endslot
-        @slot('title')
-            Management
-        @endslot
-    @endcomponent
-
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show alert-soft-success" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
@@ -126,220 +465,117 @@
         </div>
     @endif
 
-    <div class="row mb-3">
-        <div class="col-12">
-            <h2 class="text-gold fw-bold">
-                <i class="mdi mdi-briefcase-outline me-2"></i>Sales Management
-            </h2>
-        </div>
-    </div>
-
-    <!-- KPI Status Cards -->
-    <div class="row mb-4">
+    <!-- KPI Cards -->
+    <div class="sl-kpi-row">
         @foreach($statusCounts as $status => $count)
             @php
-                $config = $statusColors[$status] ?? ['label' => ucfirst($status), 'gradient' => 'linear-gradient(135deg, var(--bs-status-default) 0%, #5a6268 100%)', 'icon' => 'mdi-information'];
+                $iconMap = ['pending' => 'pending', 'accepted' => 'approved', 'rejected' => 'declined', 'underwritten' => 'uw'];
+                $mdiMap = ['pending' => 'mdi-clock-outline', 'accepted' => 'mdi-check-circle', 'rejected' => 'mdi-close-circle', 'underwritten' => 'mdi-file-document-edit'];
+                $labelMap = ['pending' => 'Pending', 'accepted' => 'Approved', 'rejected' => 'Declined', 'underwritten' => 'Underwriting'];
             @endphp
-            <div class="col-md col-sm-6 mb-3">
-                <div class="card border-0 shadow" style="background: {{ $config['gradient'] }} !important; min-height: 180px;">
-                    <div class="card-body text-center p-4">
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <i class="mdi {{ $config['icon'] }} text-white" style="font-size: 2.5rem !important"></i>
-                        </div>
-                        <h6 class="mb-2 fw-semibold text-uppercase u-ls-05 text-white">{{ $config['label'] }}</h6>
-                        <h1 class="mb-0 fw-bold text-white u-fs-250">{{ number_format($count) }}</h1>
-                    </div>
+            <div class="sl-kpi">
+                <div class="sl-kpi-icon {{ $iconMap[$status] ?? 'pending' }}">
+                    <i class="mdi {{ $mdiMap[$status] ?? 'mdi-information' }}"></i>
+                </div>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">{{ $labelMap[$status] ?? ucfirst($status) }}</span>
+                    <span class="sl-kpi-val">{{ number_format($count) }}</span>
                 </div>
             </div>
         @endforeach
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0 text-gold fw-semibold">
-                        <i class="mdi mdi-table me-2"></i>Sales List
-                    </h5>
-                    <div class="d-flex gap-2 align-items-center">
-                        <input type="text" id="salesSearch" class="form-control form-control-sm" placeholder="Search by name, phone, carrier..." style="width: 250px;">
-                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#manualSaleModal">
-                            <i class="bx bx-plus-circle me-1"></i> Manual Entry
-                        </button>
-                        @if(!auth()->user()->hasRole(Roles::QA))
-                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importOldDataModal">
-                                <i class="bx bx-upload me-1"></i> Import Data
-                            </button>
+    <!-- Top bar: Title + Actions -->
+    <div class="sl-topbar">
+        <div class="sl-topbar-left">
+            <h5 class="sl-page-title"><i class="mdi mdi-briefcase-outline"></i> Sales</h5>
+        </div>
+        <div class="sl-topbar-right">
+            <div class="sl-search-wrap">
+                <i class="bx bx-search sl-search-icon"></i>
+                <input type="text" id="salesSearch" class="sl-search-input" placeholder="Search name, phone, carrier...">
+            </div>
+            <button type="button" class="sl-btn sl-btn-add" data-bs-toggle="modal" data-bs-target="#manualSaleModal">
+                <i class="bx bx-plus"></i> New Sale
+            </button>
+            @if(!auth()->user()->hasRole(Roles::QA))
+                <button type="button" class="sl-btn sl-btn-import" data-bs-toggle="modal" data-bs-target="#importOldDataModal">
+                    <i class="bx bx-upload"></i> Import
+                </button>
+            @endif
+        </div>
+    </div>
+
+    <!-- Sales Card -->
+    <div class="sl-card">
+        <!-- Filter Pills -->
+        <form method="GET" action="{{ route('sales.index') }}" id="salesFilterForm" class="sl-filter-pills">
+            <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">All Carriers</option>
+                @foreach($carriers as $carrier)
+                    <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('status') == Statuses::LEAD_PENDING ? 'selected' : '' }}>Pending</option>
+                <option value="accepted" {{ request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : '' }}>Approved</option>
+                <option value="rejected" {{ request('status') == Statuses::LEAD_REJECTED ? 'selected' : '' }}>Declined</option>
+                <option value="underwritten" {{ request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : '' }}>Underwriting</option>
+            </select>
+            <select name="policy_type" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">Policy Type</option>
+                <option value="G.I" {{ request('policy_type') == 'G.I' ? 'selected' : '' }}>G.I</option>
+                <option value="Graded" {{ request('policy_type') == 'Graded' ? 'selected' : '' }}>Graded</option>
+                <option value="Level" {{ request('policy_type') == 'Level' ? 'selected' : '' }}>Level</option>
+                <option value="Modified" {{ request('policy_type') == 'Modified' ? 'selected' : '' }}>Modified</option>
+            </select>
+            <span class="sl-pill-label">FROM</span>
+            <input type="date" name="date_from" class="sl-pill-date" value="{{ request('date_from') }}" onchange="this.form.submit()">
+            <span class="sl-pill-label">TO</span>
+            <input type="date" name="date_to" class="sl-pill-date" value="{{ request('date_to') }}" onchange="this.form.submit()">
+            @if(request()->hasAny(['carrier','status','policy_type','date_from','date_to']))
+                <a href="{{ route('sales.index') }}" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            @endif
+        </form>
+
+        <!-- Table -->
+        <div class="sl-tbl-wrap">
+            <table class="sl-tbl" id="salesTable">
+                <thead>
+                    <tr>
+                        @if(auth()->user()->hasRole(Roles::QA))
+                            <th>Client Name</th>
+                            <th>Phone</th>
+                            <th>Closer</th>
+                            <th>Assigned Partner</th>
+                            <th>Sale Date</th>
+                            <th>QA Status</th>
+                            <th style="min-width:200px">QA Reason</th>
+                        @else
+                            <th class="text-center sl-sticky-col sl-col-1" style="min-width:160px">Actions</th>
+                            <th class="sl-sticky-col sl-col-2" style="min-width:150px">Client Name</th>
+                            <th class="sl-sticky-col sl-col-3" style="min-width:120px">Phone</th>
+                            <th style="min-width:130px">Closer</th>
+                            <th style="min-width:140px">Partner</th>
+                            <th style="min-width:110px">Sale Date</th>
+                            <th style="min-width:160px">Carrier</th>
+                            <th style="min-width:160px">Policy Type</th>
+                            <th style="min-width:160px">Coverage</th>
+                            <th style="min-width:150px">Premium</th>
+                            <th style="min-width:110px">Settlement</th>
+                            <th style="min-width:110px">Initial Draft</th>
+                            <th style="min-width:110px">Future Draft</th>
+                            <th style="min-width:130px">QA Status</th>
+                            <th style="min-width:200px">QA Reason</th>
+                            <th style="min-width:140px">Mgr Status</th>
+                            <th style="min-width:200px">Mgr Reason</th>
+                            <th style="min-width:100px">Follow Up</th>
+                            <th style="min-width:160px">Scheduled</th>
                         @endif
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Search and Filter Form -->
-                    <form method="GET" action="{{ route('sales.index') }}" class="mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, carrier..." value="{{ request('search') }}">
-                            </div>
-                            <div class="col-md-2">
-                                <select name="carrier" class="form-select">
-                                    <option value="">All Carriers</option>
-                                    @foreach($carriers as $carrier)
-                                        <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <select name="status" class="form-select">
-                                    <option value="">All Status</option>
-                                    <option value="pending" {{ request('status') == Statuses::LEAD_PENDING ? 'selected' : '' }}>Pending</option>
-                                    <option value="accepted" {{ request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : '' }}>Approved</option>
-                                    <option value="rejected" {{ request('status') == Statuses::LEAD_REJECTED ? 'selected' : '' }}>Declined</option>
-                                    <option value="underwritten" {{ request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : '' }}>Underwriting</option>
-                                </select>
-                            </div>
-                            <div class="col-md-1">
-                                <select name="policy_type" class="form-select">
-                                    <option value="">Policy Type</option>
-                                    <option value="G.I" {{ request('policy_type') == 'G.I' ? 'selected' : '' }}>G.I</option>
-                                    <option value="Graded" {{ request('policy_type') == 'Graded' ? 'selected' : '' }}>Graded</option>
-                                    <option value="Level" {{ request('policy_type') == 'Level' ? 'selected' : '' }}>Level</option>
-                                    <option value="Modified" {{ request('policy_type') == 'Modified' ? 'selected' : '' }}>Modified</option>
-                                </select>
-                            </div>
-                            <div class="col-md-1">
-                                <select name="month" class="form-select">
-                                    <option value="">Month</option>
-                                    @for($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ date('M', mktime(0, 0, 0, $m, 1)) }}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-md-1">
-                                <select name="year" class="form-select">
-                                    <option value="">Year</option>
-                                    @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- Top Scrollbar -->
-                    <div class="top-scrollbar-wrapper" id="topScrollbar">
-                        <div class="top-scrollbar-content" id="topScrollbarContent"></div>
-                    </div>
-                    
-                    <!-- Fixed Table Headers (Outside scrollable area) -->
-                    <div class="table-header-fixed" id="tableHeader">
-                        <table class="table table-bordered table-sm mb-0" style="table-layout: fixed;">
-                            <colgroup>
-                                @if(auth()->user()->hasRole(Roles::QA))
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-150 u-w-150">
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-160 u-w-160" >
-                                    <col class="u-min-w-220 u-w-220">
-                                @else
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-150 u-w-150">
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-160 u-w-160" >
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-200" style="width:200px">
-                                @endif
-                            </colgroup>
-                            <thead class="table-light">
-                                <tr>
-                                    @if(auth()->user()->hasRole(Roles::QA))
-                                        {{-- QA View: Limited columns --}}
-                                        <th>Client Name</th>
-                                        <th>Phone</th>
-                                        <th>Closer</th>
-                                        <th>Assigned Partner</th>
-                                        <th>Sale Date</th>
-                                        <th>QA Status</th>
-                                        <th>QA Reason</th>
-                                    @else
-                                        {{-- Full View for other roles --}}
-                                        <th class="text-center">Actions</th>
-                                        <th>Client Name</th>
-                                        <th>Phone</th>
-                                        <th>Closer</th>
-                                        <th>Assigned Partner</th>
-                                        <th>Sale Date</th>
-                                        <th>Carrier</th>
-                                        <th>Policy Type</th>
-                                        <th>Coverage</th>
-                                        <th>Premium</th>
-                                        <th>Settlement Type</th>
-                                        <th>Initial Draft</th>
-                                        <th>Future Draft</th>
-                                        <th>QA Status</th>
-                                        <th>QA Reason</th>
-                                        <th>Manager Status</th>
-                                        <th>Manager Reason</th>
-                                        <th>Follow Up Required</th>
-                                        <th>Follow Up Scheduled</th>
-                                    @endif
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                    
-                    <!-- Scrollable Table Body -->
-                    <div class="table-responsive" id="tableWrapper">
-                        <table class="table table-striped table-bordered table-hover table-sm align-middle" id="salesTable" style="table-layout: fixed;">
-                            <colgroup>
-                                @if(auth()->user()->hasRole(Roles::QA))
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-150 u-w-150">
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-160 u-w-160" >
-                                    <col class="u-min-w-220 u-w-220">
-                                @else
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-150 u-w-150">
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-160 u-w-160" >
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-140 u-w-140">
- <col class="u-min-w-160 u-w-160" >
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
-                                    <col class="u-min-w-220 u-w-220">
- <col class="u-min-w-180 u-w-180" >
- <col class="u-min-w-200" style="width:200px">
-                                @endif
-                            </colgroup>
-                            <tbody>
+                    </tr>
+                </thead>
+                <tbody>
                                 @forelse($leads as $lead)
                                     <tr>
                                         @if(auth()->user()->hasRole(Roles::QA))
@@ -365,62 +601,54 @@
                                             </td>
                                             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
                                             <td>
- <select class="form-select form-select-sm qa-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" >
-                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>
-                                                        ⏳ Pending
-                                                    </option>
-                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>
-                                                        ✅ Good
-                                                    </option>
-                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>
-                                                        ⚠️ Avg
-                                                    </option>
-                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>
-                                                        ❌ Bad
-                                                    </option>
+                                                <select class="sl-bubble-select qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}">
+                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>Pending</option>
+                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>Good</option>
+                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>Avg</option>
+                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>Bad</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <textarea class="form-control form-control-sm qa-reason-input" 
+                                                <textarea class="sl-bubble-textarea qa-reason-input" 
                                                           data-lead-id="{{ $lead->id }}" 
-                                                          placeholder="Enter QA reason/comment..." 
-                                                          rows="2" 
- >{{ $lead->qa_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
+                                                          placeholder="QA comments..." 
+                                                          rows="1"
+>{{ $lead->qa_reason ?? '' }}</textarea>
+                                                <button class="sl-save-btn primary save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                             </td>
                                         @else
                                             {{-- Full View for other roles --}}
-                                            <td class="text-center">
-                                                <div class="d-flex justify-content-center gap-1" role="group">
+                                            <td class="text-center sl-sticky-col sl-col-1">
+                                                <div class="sl-act-group">
                                                     @php
                                                         $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
                                                         $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
                                                     @endphp
- <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm d-flex align-items-center justify-content-center u-rounded-6" title="Pretty Print" target="_blank" style="width: 36px; height: 36px">
+                                                    <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                     </a>
- <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm d-flex align-items-center justify-content-center u-rounded-6 u-w-36 u-h-36" title="Call">
+                                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm" title="Call">
                                                         <i class="fas fa-phone-alt"></i>
                                                     </button>
- <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white d-flex align-items-center justify-content-center u-rounded-6" title="View" style="width: 36px; height: 36px">
+                                                    <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     @canEditModule('sales')
- <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center u-rounded-6" title="Edit" style="width: 36px; height: 36px">
+                                                    <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     @endcanEditModule
                                                     @canDeleteInModule('sales')
- <button type="button" class="btn btn-danger btn-sm d-flex align-items-center justify-content-center u-rounded-6" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete" style="width: 36px; height: 36px">
+                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                     @endcanDeleteInModule
                                                 </div>
                                             </td>
-                                            <td><strong>{{ $lead->cn_name }}</strong></td>
-                                            <td>{{ $lead->phone_number }}</td>
+                                            <td class="sl-sticky-col sl-col-2"><strong>{{ $lead->cn_name }}</strong></td>
+                                            <td class="sl-sticky-col sl-col-3">{{ $lead->phone_number }}</td>
                                             <td>
                                                 @if($lead->closer_name)
                                                     <span class="badge bg-info">{{ $lead->closer_name }}</span>
@@ -440,14 +668,14 @@
                                             </td>
                                             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
                                             <td>
-                                                <div class="d-flex flex-column gap-1">
+                                                <div class="sl-edit-cell">
                                                     @if($lead->carrier_name)
                                                         <small class="text-muted fw-semibold">Current: {{ $lead->carrier_name }}</small>
                                                     @else
                                                         <small class="text-danger">Not set</small>
                                                     @endif
-                                                    <div class="d-flex align-items-center gap-1">
- <select class="form-select form-select-sm editable-carrier u-min-w-120" data-lead-id="{{ $lead->id }}" >
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-carrier" data-lead-id="{{ $lead->id }}">
                                                             <option value="">-- None --</option>
                                                             @foreach($insuranceCarriers as $carrier)
                                                                 <option value="{{ $carrier }}" {{ $lead->carrier_name == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
@@ -460,14 +688,14 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column gap-1">
+                                                <div class="sl-edit-cell">
                                                     @if($lead->policy_type)
                                                         <small class="text-muted fw-semibold">Current: {{ $lead->policy_type }}</small>
                                                     @else
                                                         <small class="text-danger">Not set</small>
                                                     @endif
-                                                    <div class="d-flex align-items-center gap-1">
- <select class="form-select form-select-sm editable-policy-type u-min-w-110" data-lead-id="{{ $lead->id }}" >
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="{{ $lead->id }}">
                                                             <option value="">-- None --</option>
                                                             <option value="G.I" {{ $lead->policy_type == 'G.I' ? 'selected' : '' }}>G.I</option>
                                                             <option value="Graded" {{ $lead->policy_type == 'Graded' ? 'selected' : '' }}>Graded</option>
@@ -481,14 +709,14 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column gap-1">
+                                                <div class="sl-edit-cell">
                                                     @if($lead->coverage_amount)
                                                         <small class="text-muted fw-semibold">Current: ${{ number_format($lead->coverage_amount, 2) }}</small>
                                                     @else
                                                         <small class="text-danger">Not set</small>
                                                     @endif
-                                                    <div class="d-flex align-items-center gap-1">
- <input type="number" step="0.01" class="form-control form-control-sm editable-coverage u-min-w-100" data-lead-id="{{ $lead->id }}" value="{{ $lead->coverage_amount ?? '' }}" placeholder="0.00" >
+                                                    <div class="sl-edit-row">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-coverage" data-lead-id="{{ $lead->id }}" value="{{ $lead->coverage_amount ?? '' }}" placeholder="0.00">
                                                         <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="coverage" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
@@ -496,14 +724,14 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column gap-1">
+                                                <div class="sl-edit-cell">
                                                     @if($lead->monthly_premium)
                                                         <small class="text-muted fw-semibold">Current: ${{ number_format($lead->monthly_premium, 2) }}</small>
                                                     @else
                                                         <small class="text-danger">Not set</small>
                                                     @endif
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-premium" data-lead-id="{{ $lead->id }}" value="{{ $lead->monthly_premium ?? '' }}" placeholder="0.00" style="min-width: 90px;">
+                                                    <div class="sl-edit-row">
+                                                        <input type="number" step="0.01" class="form-control form-control-sm editable-premium" data-lead-id="{{ $lead->id }}" value="{{ $lead->monthly_premium ?? '' }}" placeholder="0.00">
                                                         <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="premium" title="Save">
                                                             <i class="bx bx-check"></i>
                                                         </button>
@@ -522,52 +750,52 @@
                                             <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
                                             <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
                                             <td>
- <select class="form-select form-select-sm qa-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}" >
-                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>⏳ Pending</option>
-                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>✅ Good</option>
-                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>⚠️ Avg</option>
-                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>❌ Bad</option>
+                                                <select class="sl-bubble-select qa-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->qa_status ?? 'Pending' }}">
+                                                    <option value="Pending" {{ ($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : '' }}>Pending</option>
+                                                    <option value="Good" {{ ($lead->qa_status ?? '') == Statuses::QA_GOOD ? 'selected' : '' }}>Good</option>
+                                                    <option value="Avg" {{ ($lead->qa_status ?? '') == Statuses::QA_AVG ? 'selected' : '' }}>Avg</option>
+                                                    <option value="Bad" {{ ($lead->qa_status ?? '') == Statuses::QA_BAD ? 'selected' : '' }}>Bad</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <textarea class="form-control form-control-sm qa-reason-input" 
+                                                <textarea class="sl-bubble-textarea qa-reason-input" 
                                                           data-lead-id="{{ $lead->id }}" 
                                                           placeholder="QA comments..." 
-                                                          rows="2" 
- >{{ $lead->qa_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-primary mt-1 save-qa-reason" data-lead-id="{{ $lead->id }}">
+                                                          rows="1"
+>{{ $lead->qa_reason ?? '' }}</textarea>
+                                                <button class="sl-save-btn primary save-qa-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                             </td>
                                             <td>
- <select class="form-select form-select-sm manager-status-dropdown u-min-w-130" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}" >
-                                                    <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>⏳ Pending</option>
-                                                    <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>✅ Approved</option>
-                                                    <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>❌ Declined</option>
-                                                    <option value="underwriting" {{ ($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : '' }}>📋 Underwriting</option>
-                                                    <option value="chargeback" {{ ($lead->manager_status ?? '') == Statuses::MGR_CHARGEBACK ? 'selected' : '' }}>💳 Chargeback</option>
+                                                <select class="sl-bubble-select manager-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}">
+                                                    <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>Pending</option>
+                                                    <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>Approved</option>
+                                                    <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>Declined</option>
+                                                    <option value="underwriting" {{ ($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : '' }}>Underwriting</option>
+                                                    <option value="chargeback" {{ ($lead->manager_status ?? '') == Statuses::MGR_CHARGEBACK ? 'selected' : '' }}>Chargeback</option>
                                                 </select>
                                             </td>
                                             <td>
-                                                <textarea class="form-control form-control-sm manager-reason-input" 
+                                                <textarea class="sl-bubble-textarea manager-reason-input" 
                                                           data-lead-id="{{ $lead->id }}" 
                                                           placeholder="Manager comments..." 
-                                                          rows="2" 
- >{{ $lead->manager_reason ?? '' }}</textarea>
-                                                <button class="btn btn-sm btn-success mt-1 save-manager-reason" data-lead-id="{{ $lead->id }}">
+                                                          rows="1"
+>{{ $lead->manager_reason ?? '' }}</textarea>
+                                                <button class="sl-save-btn success save-manager-reason" data-lead-id="{{ $lead->id }}">
                                                     <i class="bx bx-save"></i> Save
                                                 </button>
                                                 @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->manager_status !== Statuses::MGR_PENDING)
-                                                    <button class="btn btn-sm btn-warning mt-1 reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
+                                                    <button class="sl-save-btn warning reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
                                                         <i class="bx bx-undo"></i> Reset
                                                     </button>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($lead->followup_required)
-                                                    <span class="badge bg-success">Yes</span>
+                                                    <span class="sl-follow-badge yes">Yes</span>
                                                 @else
-                                                    <span class="badge bg-secondary">No</span>
+                                                    <span class="sl-follow-badge no">No</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -609,23 +837,20 @@
                                     @endif
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '6' : '15' }}" class="text-center py-5 text-muted">
-                                            <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
-                                            <p class="mb-0">No sales data available</p>
+                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '7' : '19' }}" class="text-center" style="padding: 3rem 1rem; color: #94a3b8;">
+                                            <i class="bx bx-inbox" style="font-size:2rem; display:block; margin-bottom:.5rem; opacity:.5"></i>
+                                            No sales data available
                                         </td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination -->
                     <div class="mt-3">
                         {{ $leads->appends(request()->query())->links() }}
                     </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Import Old Data Modal -->
@@ -681,63 +906,103 @@
 
 @section('script')
 <script>
+/* ── Custom Dropdown Init ── */
+(function() {
+    const chevronSvg = '<svg class="sl-cdd-chevron" viewBox="0 0 10 6" xmlns="http://www.w3.org/2000/svg"><path d="M0 0l5 6 5-6z" fill="#94a3b8"/></svg>';
+
+    function initCustomSelect(sel) {
+        if (sel.closest('.sl-cdd')) return; // already initialized
+
+        // Determine variant
+        let variant = 'pill';
+        if (sel.classList.contains('sl-bubble-select') || sel.classList.contains('qa-status-dropdown') || sel.classList.contains('manager-status-dropdown')) variant = 'bubble';
+        else if (sel.closest('.sl-edit-row')) variant = 'edit';
+
+        // Wrapper
+        const wrap = document.createElement('div');
+        wrap.className = 'sl-cdd ' + variant;
+        sel.parentNode.insertBefore(wrap, sel);
+        wrap.appendChild(sel);
+
+        // Trigger
+        const trigger = document.createElement('div');
+        trigger.className = 'sl-cdd-trigger';
+        const label = document.createElement('span');
+        label.className = 'sl-cdd-label';
+        label.textContent = sel.options[sel.selectedIndex]?.text || '';
+        trigger.appendChild(label);
+        trigger.insertAdjacentHTML('beforeend', chevronSvg);
+        wrap.appendChild(trigger);
+
+        // Panel
+        const panel = document.createElement('div');
+        panel.className = 'sl-cdd-panel';
+        buildOptions(sel, panel);
+        wrap.appendChild(panel);
+
+        // Toggle
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeAll(wrap);
+            wrap.classList.toggle('open');
+        });
+
+        // Option click
+        panel.addEventListener('click', function(e) {
+            const opt = e.target.closest('.sl-cdd-option');
+            if (!opt) return;
+            const val = opt.dataset.value;
+            sel.value = val;
+            label.textContent = opt.textContent;
+            panel.querySelectorAll('.sl-cdd-option').forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            wrap.classList.remove('open');
+            // Fire both native change and jQuery change
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            $(sel).trigger('change');
+            // Handle onchange attribute (auto-submit filters)
+            if (sel.hasAttribute('onchange')) {
+                const fn = new Function(sel.getAttribute('onchange'));
+                fn.call(sel);
+            }
+        });
+    }
+
+    function buildOptions(sel, panel) {
+        panel.innerHTML = '';
+        Array.from(sel.options).forEach(function(opt) {
+            const div = document.createElement('div');
+            div.className = 'sl-cdd-option' + (opt.selected ? ' active' : '');
+            div.dataset.value = opt.value;
+            div.textContent = opt.text;
+            panel.appendChild(div);
+        });
+    }
+
+    function closeAll(except) {
+        document.querySelectorAll('.sl-cdd.open').forEach(function(w) {
+            if (w !== except) w.classList.remove('open');
+        });
+    }
+
+    // Close on outside click
+    document.addEventListener('click', function() { closeAll(); });
+
+    // Init on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.sl-pill-select, .sl-bubble-select, .sl-edit-row .form-select').forEach(initCustomSelect);
+    });
+
+    // Expose for dynamic content
+    window.initCustomSelect = initCustomSelect;
+})();
+</script>
+<script>
 $(document).ready(function() {
-    // Dual Scrollbar Synchronization
-    const topScrollbar = document.getElementById('topScrollbar');
-    const tableWrapper = document.getElementById('tableWrapper');
-    const topScrollbarContent = document.getElementById('topScrollbarContent');
-    const table = document.getElementById('salesTable');
-    
-    // Function to update top scrollbar width
-    function updateTopScrollbarWidth() {
-        if (table && topScrollbarContent) {
-            topScrollbarContent.style.width = table.offsetWidth + 'px';
-        }
-    }
-    
-    // Initial width setup
-    updateTopScrollbarWidth();
-    
-    // Update on window resize
-    window.addEventListener('resize', updateTopScrollbarWidth);
-    
-    // Get table header element
-    const tableHeader = document.getElementById('tableHeader');
-    
-    // Synchronize scrolling: top scrollbar -> table body + header
-    if (topScrollbar && tableWrapper) {
-        topScrollbar.addEventListener('scroll', function() {
-            if (!tableWrapper.scrollSyncing) {
-                topScrollbar.scrollSyncing = true;
-                tableWrapper.scrollLeft = topScrollbar.scrollLeft;
-                if (tableHeader) {
-                    tableHeader.scrollLeft = topScrollbar.scrollLeft;
-                }
-                setTimeout(() => {
-                    topScrollbar.scrollSyncing = false;
-                }, 50);
-            }
-        });
-        
-        // Synchronize scrolling: table body -> top scrollbar + header
-        tableWrapper.addEventListener('scroll', function() {
-            if (!topScrollbar.scrollSyncing) {
-                tableWrapper.scrollSyncing = true;
-                topScrollbar.scrollLeft = tableWrapper.scrollLeft;
-                if (tableHeader) {
-                    tableHeader.scrollLeft = tableWrapper.scrollLeft;
-                }
-                setTimeout(() => {
-                    tableWrapper.scrollSyncing = false;
-                }, 50);
-            }
-        });
-    }
-    
     // Realtime search functionality for sales table
     $('#salesSearch').on('keyup', function() {
         const searchValue = $(this).val().toLowerCase();
-        $('.table-striped tbody tr').each(function() {
+        $('.sl-tbl tbody tr').each(function() {
             const row = $(this);
             // Search across multiple columns: name, phone, carrier, closer, partner
             const clientName = row.find('td:nth-child(2)').text().toLowerCase() || row.find('td:nth-child(1)').text().toLowerCase();

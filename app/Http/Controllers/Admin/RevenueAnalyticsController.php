@@ -148,6 +148,7 @@ class RevenueAnalyticsController extends Controller
             'unverified_revenue_percentage',
             'monthly_data',
             'verifier_stats',
+            'issued_sales',
         ));
     }
 }

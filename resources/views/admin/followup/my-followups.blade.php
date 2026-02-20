@@ -1,280 +1,530 @@
 @extends('layouts.master')
 
 @section('title')
-    My Followup & Bank Verification
+    Submission & Followup
+@endsection
+
+@section('css')
+<style>
+/* ── SL Design System ── */
+.sl-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 20px;
+}
+.sl-topbar-left { display: flex; align-items: center; gap: 14px; }
+.sl-page-title {
+    font-size: 1.35rem; font-weight: 700; color: #1e293b;
+    display: flex; align-items: center; gap: 8px; margin: 0;
+}
+.sl-page-title i { color: #d4af37; font-size: 1.5rem; }
+.sl-page-subtitle { font-size: .78rem; color: #94a3b8; margin: 0; }
+
+/* Stat cards */
+.sl-stat-card {
+    background: #fff; border-radius: 16px; padding: 18px 20px;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    display: flex; align-items: center; gap: 14px;
+    transition: all .2s;
+}
+.sl-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+.sl-stat-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: #fff;
+}
+.sl-stat-icon.green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.sl-stat-icon.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.sl-stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.sl-stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.sl-stat-icon.gold { background: linear-gradient(135deg, #d4af37, #b8972e); }
+.sl-stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.sl-stat-value { font-size: 1.5rem; font-weight: 700; color: #1e293b; line-height: 1.1; }
+.sl-stat-label { font-size: .72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; }
+
+/* Tabs */
+.sl-tabs {
+    display: flex; gap: 4px; background: rgba(0,0,0,.04);
+    border-radius: 22px; padding: 4px; margin-bottom: 16px;
+    width: fit-content;
+}
+.sl-tab {
+    padding: 8px 20px; border-radius: 20px; font-size: .82rem;
+    font-weight: 600; cursor: pointer; color: #64748b;
+    transition: all .2s; border: none; background: transparent;
+}
+.sl-tab.active { background: #fff; color: #d4af37; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.sl-tab:hover:not(.active) { color: #1e293b; }
+.sl-tab-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; border-radius: 10px;
+    font-size: .68rem; font-weight: 700; margin-left: 6px; padding: 0 6px;
+}
+.sl-tab.active .sl-tab-badge { background: rgba(212,175,55,.15); color: #d4af37; }
+.sl-tab:not(.active) .sl-tab-badge { background: rgba(0,0,0,.06); color: #94a3b8; }
+
+/* Card */
+.sl-card {
+    background: #fff; border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,.04);
+    overflow: hidden;
+}
+.sl-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.sl-card-title {
+    font-size: .92rem; font-weight: 700; color: #1e293b;
+    display: flex; align-items: center; gap: 8px; margin: 0;
+}
+.sl-card-title i { color: #d4af37; }
+
+/* Filter pills */
+.sl-filter-pills {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,.04);
+}
+.sl-pill-select {
+    padding: 6px 28px 6px 12px; border-radius: 22px;
+    font-size: .78rem; border: 1px solid rgba(0,0,0,.12); color: #475569;
+    background: #fff; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+}
+.sl-pill-select:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,.15); }
+.sl-search-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 22px;
+    border: 1px solid rgba(0,0,0,.1); background: #fff;
+    font-size: .78rem; min-width: 200px;
+}
+.sl-search-pill i { color: #94a3b8; font-size: .9rem; }
+.sl-search-pill input {
+    border: none; outline: none; background: transparent;
+    font-size: .78rem; color: #334155; width: 100%;
+}
+.sl-pill-clear {
+    padding: 5px 12px; border-radius: 22px; font-size: .72rem;
+    background: rgba(239,68,68,.08); color: #ef4444;
+    text-decoration: none; font-weight: 600;
+    display: flex; align-items: center; gap: 4px;
+}
+.sl-pill-clear:hover { background: rgba(239,68,68,.15); color: #ef4444; }
+.sl-result-count { margin-left: auto; font-size: .75rem; color: #94a3b8; font-weight: 500; white-space: nowrap; }
+
+/* Table */
+.sl-tbl-wrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #d4af37 transparent; }
+.sl-tbl-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+.sl-tbl-wrap::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 10px; }
+.sl-tbl {
+    width: 100%; border-collapse: separate; border-spacing: 0; font-size: .78rem;
+}
+.sl-tbl thead th {
+    padding: .55rem .6rem; font-weight: 700; font-size: .7rem;
+    text-transform: uppercase; letter-spacing: .3px;
+    color: #64748b; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 2px solid rgba(212,175,55,.18); white-space: nowrap;
+}
+.sl-tbl tbody td {
+    padding: .45rem .6rem; border-bottom: 1px solid rgba(0,0,0,.04);
+    vertical-align: middle; color: #334155;
+}
+.sl-tbl tbody tr { transition: background .12s; }
+.sl-tbl tbody tr:hover td { background: rgba(212,175,55,.045); }
+.sl-tbl tbody tr:nth-child(even) td { background: rgba(248,250,252,.45); }
+.sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.045); }
+
+/* Badges */
+.sl-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: .7rem;
+    font-weight: 600; white-space: nowrap;
+}
+.sl-badge-info { background: rgba(6,182,212,.1); color: #0891b2; }
+.sl-badge-primary { background: rgba(59,130,246,.1); color: #2563eb; }
+.sl-badge-success { background: rgba(34,197,94,.1); color: #16a34a; }
+.sl-badge-warning { background: rgba(245,158,11,.1); color: #d97706; }
+.sl-badge-danger { background: rgba(239,68,68,.1); color: #dc2626; }
+.sl-badge-secondary { background: rgba(100,116,139,.1); color: #475569; }
+
+/* Status toggle */
+.sl-status-toggle {
+    display: flex; gap: 2px; background: rgba(0,0,0,.04);
+    border-radius: 16px; padding: 2px; width: fit-content;
+}
+.sl-status-option {
+    padding: 4px 12px; border-radius: 14px; font-size: .72rem;
+    font-weight: 600; cursor: pointer; border: none;
+    background: transparent; color: #94a3b8; transition: all .15s;
+}
+.sl-status-option.active-yes { background: #22c55e; color: #fff; }
+.sl-status-option.active-no { background: #ef4444; color: #fff; }
+
+/* Action buttons */
+.sl-act-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 20px; font-size: .72rem;
+    font-weight: 600; border: none; cursor: pointer; transition: all .15s;
+}
+.sl-act-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.12); }
+.sl-act-btn-view { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; }
+.sl-act-btn-save { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+
+/* BV form elements */
+.sl-bv-textarea {
+    border-radius: 12px; border: 1px solid rgba(0,0,0,.08);
+    font-size: .75rem; padding: 6px 10px; resize: vertical;
+    min-height: 38px; transition: border-color .15s;
+}
+.sl-bv-textarea:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 2px rgba(212,175,55,.1); }
+.sl-bv-status {
+    padding: 4px 24px 4px 10px; border-radius: 16px; font-size: .72rem;
+    border: 1px solid rgba(0,0,0,.08); font-weight: 600;
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+}
+
+/* Pagination */
+.sl-card .pagination { margin: 0; }
+.sl-card .pagination .page-link {
+    border-radius: 10px; margin: 0 2px; font-size: .75rem;
+    border: 1px solid rgba(0,0,0,.06); color: #64748b;
+}
+.sl-card .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #d4af37, #b8972e);
+    border-color: transparent; color: #fff;
+}
+.sl-card .pagination svg { max-width: 16px !important; max-height: 16px !important; }
+
+/* Empty state */
+.sl-empty { text-align: center; padding: 48px 20px; color: #94a3b8; }
+.sl-empty i { font-size: 2.5rem; margin-bottom: 8px; opacity: .5; }
+.sl-empty p { font-size: .85rem; margin: 0; }
+
+/* Toast */
+.sl-toast {
+    position: fixed; top: 20px; right: 20px; z-index: 9999;
+    padding: 12px 20px; border-radius: 14px; font-size: .82rem;
+    font-weight: 600; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.15);
+    animation: slToastIn .3s ease-out;
+    display: flex; align-items: center; gap: 8px;
+}
+.sl-toast-success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.sl-toast-error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+@keyframes slToastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Dark mode */
+[data-bs-theme=dark] .sl-page-title, [data-theme="dark"] .sl-page-title { color: #f1f5f9; }
+[data-bs-theme=dark] .sl-stat-card, [data-theme="dark"] .sl-stat-card { background: #1e293b; border-color: rgba(255,255,255,.06); }
+[data-bs-theme=dark] .sl-stat-value, [data-theme="dark"] .sl-stat-value { color: #f1f5f9; }
+[data-bs-theme=dark] .sl-card, [data-theme="dark"] .sl-card { background: #1e293b; border-color: rgba(255,255,255,.06); }
+[data-bs-theme=dark] .sl-card-title, [data-theme="dark"] .sl-card-title { color: #f1f5f9; }
+[data-bs-theme=dark] .sl-tbl thead th, [data-theme="dark"] .sl-tbl thead th { background: linear-gradient(180deg, #1e293b, #0f172a); color: #94a3b8; }
+[data-bs-theme=dark] .sl-tbl tbody td, [data-theme="dark"] .sl-tbl tbody td { color: #cbd5e1; border-bottom-color: rgba(255,255,255,.04); }
+[data-bs-theme=dark] .sl-tbl tbody tr:hover td, [data-theme="dark"] .sl-tbl tbody tr:hover td { background: rgba(212,175,55,.06); }
+[data-bs-theme=dark] .sl-tbl tbody tr:nth-child(even) td, [data-theme="dark"] .sl-tbl tbody tr:nth-child(even) td { background: rgba(15,23,42,.3); }
+[data-bs-theme=dark] .sl-pill-select, [data-theme="dark"] .sl-pill-select { background: #0f172a; border-color: rgba(255,255,255,.1); color: #cbd5e1; }
+[data-bs-theme=dark] .sl-search-pill, [data-theme="dark"] .sl-search-pill { background: #0f172a; border-color: rgba(255,255,255,.1); }
+[data-bs-theme=dark] .sl-search-pill input, [data-theme="dark"] .sl-search-pill input { color: #cbd5e1; }
+[data-bs-theme=dark] .sl-tabs, [data-theme="dark"] .sl-tabs { background: rgba(255,255,255,.04); }
+[data-bs-theme=dark] .sl-tab.active, [data-theme="dark"] .sl-tab.active { background: #334155; color: #d4af37; }
+[data-bs-theme=dark] .sl-bv-textarea, [data-theme="dark"] .sl-bv-textarea { background: #0f172a; border-color: rgba(255,255,255,.1); color: #cbd5e1; }
+[data-bs-theme=dark] .sl-bv-status, [data-theme="dark"] .sl-bv-status { background-color: #0f172a; border-color: rgba(255,255,255,.1); color: #cbd5e1; }
+
+@media (max-width: 768px) {
+    .sl-topbar { flex-direction: column; align-items: flex-start; }
+}
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Followup & Bank Verification
-        @endslot
-        @slot('title')
-            My Followup & Bank Verification
-        @endslot
-    @endcomponent
-
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show alert-soft-success" role="alert">
-            <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <div class="row mb-3">
-        <div class="col-12">
-            <h2 class="text-gold fw-bold">
-                <i class="bx bx-user-check me-2"></i>My Followup & Bank Verification
-            </h2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0 text-gold fw-semibold">
-                        <i class="mdi mdi-table me-2"></i>Leads Assigned to Me
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <!-- Search and Filter Form -->
-                    <form method="GET" action="{{ route('followup.my-followups') }}" class="mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <input type="text" name="search" class="form-control" placeholder="Search by name, phone, carrier..." value="{{ request('search') }}">
-                            </div>
-                            <div class="col-md-3">
-                                <select name="carrier" class="form-select">
-                                    <option value="">All Carriers</option>
-                                    @foreach($carriers as $carrier)
-                                        <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select name="followup_status" class="form-select">
-                                    <option value="">Followup Status</option>
-                                    <option value="Yes" {{ request('followup_status') == 'Yes' ? 'selected' : '' }}>✅ Yes</option>
-                                    <option value="No" {{ request('followup_status') == 'No' ? 'selected' : '' }}>❌ No</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-hover table-sm align-middle">
-                            <thead class="table-light">
-                                <tr>
- <th class="u-min-w-150" >Client Name</th>
- <th class="u-min-w-130" >Phone</th>
- <th class="u-min-w-130" >Closer</th>
- <th class="u-min-w-110" >Sale Date</th>
- <th class="u-min-w-120" >Carrier</th>
- <th class="u-min-w-120" >Policy Type</th>
- <th class="u-min-w-150" >Policy Number</th>
- <th class="u-min-w-120" >Coverage</th>
- <th class="u-min-w-110" >Premium</th>
- <th class="u-min-w-140" >Followup Status</th>
- <th class="u-min-w-120" >Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($leads as $lead)
-                                    <tr>
-                                        <td><strong>{{ $lead->cn_name }}</strong></td>
-                                        <td>{{ $lead->phone_number }}</td>
-                                        <td>
-                                            @if($lead->closer_name)
-                                                <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                            @else
-                                                <span class="text-muted">—</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
-                                        <td>{{ $lead->policy_type ?? 'N/A' }}</td>
-                                        <td>
-                                            @if($lead->issued_policy_number)
-                                                <span class="badge bg-primary">{{ $lead->issued_policy_number }}</span>
-                                            @else
-                                                <span class="text-muted">Not Set</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-gold fw-semibold">${{ number_format($lead->coverage_amount ?? 0, 2) }}</td>
-                                        <td class="text-gold fw-semibold">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                                        <td>
-                                            <select class="form-select form-select-sm followup-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->followup_status }}">
-                                                <option value="No" {{ $lead->followup_status === 'No' ? 'selected' : '' }}>❌ No</option>
-                                                <option value="Yes" {{ $lead->followup_status === 'Yes' ? 'selected' : '' }}>✅ Yes</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('issuance.show', $lead->id) }}" class="btn btn-sm btn-info" title="View All Details">
-                                                <i class="bx bx-show me-1"></i>View
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="11" class="text-center py-5 text-muted">
-                                            <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
-                                            <p class="mb-0">No followups assigned to you</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mt-3">
-                        {{ $leads->appends(request()->query())->links() }}
-                    </div>
-                </div>
+    <!-- Top Bar -->
+    <div class="sl-topbar">
+        <div class="sl-topbar-left">
+            <div>
+                <h1 class="sl-page-title"><i class="bx bx-file-find"></i>Submission & Followup</h1>
+                <p class="sl-page-subtitle">Track policy followups & bank verification assignments</p>
             </div>
         </div>
     </div>
 
-    <!-- Bank Verification Section -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="card-title mb-0 text-gold fw-semibold">
-                        <i class="mdi mdi-bank me-2"></i>Bank Verification Assignments
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <!-- Search and Filter Form -->
-                    <form method="GET" action="{{ route('followup.my-followups') }}" class="mb-4">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <input type="text" name="bv_search" class="form-control" placeholder="Search by name, phone, carrier..." value="{{ request('bv_search') }}">
-                            </div>
-                            <div class="col-md-3">
-                                <select name="bv_carrier" class="form-select">
-                                    <option value="">All Carriers</option>
-                                    @foreach($carriers as $carrier)
-                                        <option value="{{ $carrier }}" {{ request('bv_carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select name="bv_status" class="form-select">
-                                    <option value="">Verification Status</option>
-                                    <option value="Good" {{ request('bv_status') == 'Good' ? 'selected' : '' }}>Good</option>
-                                    <option value="Average" {{ request('bv_status') == 'Average' ? 'selected' : '' }}>Average</option>
-                                    <option value="Bad" {{ request('bv_status') == 'Bad' ? 'selected' : '' }}>Bad</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" class="btn btn-primary w-100"><i class="bx bx-search"></i> Filter</button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered table-hover table-sm align-middle">
-                            <thead class="table-light">
-                                <tr>
- <th class="u-min-w-150" >Client Name</th>
- <th class="u-min-w-130" >Phone</th>
- <th class="u-min-w-130" >Closer</th>
- <th class="u-min-w-110" >Sale Date</th>
- <th class="u-min-w-120" >Carrier</th>
- <th class="u-min-w-120" >Policy Type</th>
- <th class="u-min-w-150" >Policy Number</th>
- <th class="u-min-w-120" >Coverage</th>
- <th class="u-min-w-110" >Premium</th>
- <th class="u-min-w-150" >Assigned B.V</th>
- <th class="u-min-w-200" >Comment</th>
- <th class="u-min-w-140" >B.V Status</th>
- <th class="u-min-w-120" >Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($bankVerificationLeads as $lead)
-                                    <tr>
-                                        <td><strong>{{ $lead->cn_name }}</strong></td>
-                                        <td>{{ $lead->phone_number }}</td>
-                                        <td>
-                                            @if($lead->closer_name)
-                                                <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                            @else
-                                                <span class="text-muted">—</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
-                                        <td>{{ $lead->policy_type ?? 'N/A' }}</td>
-                                        <td>
-                                            @if($lead->issued_policy_number)
-                                                <span class="badge bg-primary">{{ $lead->issued_policy_number }}</span>
-                                            @else
-                                                <span class="text-muted">Not Set</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-gold fw-semibold">${{ number_format($lead->coverage_amount ?? 0, 2) }}</td>
-                                        <td class="text-gold fw-semibold">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                                        <td>
-                                            @if($lead->bankVerifier)
-                                                <span class="badge bg-success">{{ $lead->bankVerifier->name }}</span>
-                                            @else
-                                                <span class="text-muted">Unassigned</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <textarea class="form-control form-control-sm bv-comment-input" data-lead-id="{{ $lead->id }}" rows="2" placeholder="Enter comment...">{{ $lead->bank_verification_comment }}</textarea>
-                                        </td>
-                                        <td>
-                                            @if($lead->bank_verification_status)
-                                                @php
-                                                    $badgeClass = match($lead->bank_verification_status) {
-                                                        'Good' => 'bg-success',
-                                                        'Average' => 'bg-warning',
-                                                        'Bad' => 'bg-danger',
-                                                        default => 'bg-secondary'
-                                                    };
-                                                @endphp
-                                                <span class="badge {{ $badgeClass }} fs-6">{{ $lead->bank_verification_status }}</span>
-                                            @else
-                                                <select class="form-select form-select-sm bv-status-dropdown" data-lead-id="{{ $lead->id }}">
-                                                    <option value="">Select Status</option>
-                                                    <option value="Good">Good</option>
-                                                    <option value="Average">Average</option>
-                                                    <option value="Bad">Bad</option>
-                                                </select>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <button class="btn btn-sm btn-success update-bv-btn" data-lead-id="{{ $lead->id }}" title="Update B.V">
-                                                <i class="bx bx-save me-1"></i>Update
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="13" class="text-center py-5 text-muted">
-                                            <i class="bx bx-inbox fs-1 mb-3 d-block"></i>
-                                            <p class="mb-0">No bank verification assignments found</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mt-3">
-                        {{ $bankVerificationLeads->appends(request()->query())->links() }}
-                    </div>
-                </div>
+    @php
+        $followupYes = $leads->where('followup_status', 'Yes')->count();
+        $followupNo = $leads->where('followup_status', 'No')->count();
+        $followupTotal = $leads->total();
+        $bvTotal = $bankVerificationLeads->total();
+        $bvGood = $bankVerificationLeads->where('bank_verification_status', 'Good')->count();
+        $bvBad = $bankVerificationLeads->where('bank_verification_status', 'Bad')->count();
+    @endphp
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon gold"><i class="bx bx-list-check"></i></div>
+                <div><div class="sl-stat-value">{{ $followupTotal }}</div><div class="sl-stat-label">My Followups</div></div>
             </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon green"><i class="bx bx-check-circle"></i></div>
+                <div><div class="sl-stat-value">{{ $followupYes }}</div><div class="sl-stat-label">Completed</div></div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon red"><i class="bx bx-x-circle"></i></div>
+                <div><div class="sl-stat-value">{{ $followupNo }}</div><div class="sl-stat-label">Pending</div></div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon blue"><i class="bx bx-shield-quarter"></i></div>
+                <div><div class="sl-stat-value">{{ $bvTotal }}</div><div class="sl-stat-label">Bank Verifications</div></div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon green"><i class="bx bx-badge-check"></i></div>
+                <div><div class="sl-stat-value">{{ $bvGood }}</div><div class="sl-stat-label">BV Good</div></div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="sl-stat-card">
+                <div class="sl-stat-icon red"><i class="bx bx-error-alt"></i></div>
+                <div><div class="sl-stat-value">{{ $bvBad }}</div><div class="sl-stat-label">BV Bad</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="sl-tabs" id="sectionTabs">
+        <button class="sl-tab active" data-target="followupSection">
+            <i class="bx bx-list-check me-1"></i>Followups<span class="sl-tab-badge">{{ $followupTotal }}</span>
+        </button>
+        <button class="sl-tab" data-target="bvSection">
+            <i class="bx bx-shield-quarter me-1"></i>Bank Verification<span class="sl-tab-badge">{{ $bvTotal }}</span>
+        </button>
+    </div>
+
+    <!-- ═══ FOLLOWUP SECTION ═══ -->
+    <div id="followupSection">
+        <div class="sl-card">
+            <div class="sl-card-header">
+                <h5 class="sl-card-title"><i class="bx bx-user-check"></i>Leads Assigned to Me</h5>
+            </div>
+            <form method="GET" action="{{ route('followup.my-followups') }}" class="sl-filter-pills">
+                <div class="sl-search-pill">
+                    <i class="bx bx-search"></i>
+                    <input type="text" name="search" placeholder="Search name, phone, carrier..." value="{{ request('search') }}">
+                </div>
+                <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
+                    <option value="">All Carriers</option>
+                    @foreach($carriers as $carrier)
+                        <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
+                    @endforeach
+                </select>
+                <select name="followup_status" class="sl-pill-select" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Yes" {{ request('followup_status') == 'Yes' ? 'selected' : '' }}>Completed</option>
+                    <option value="No" {{ request('followup_status') == 'No' ? 'selected' : '' }}>Pending</option>
+                </select>
+                @if(request()->hasAny(['search','carrier','followup_status']))
+                    <a href="{{ route('followup.my-followups') }}" class="sl-pill-clear"><i class="bx bx-x"></i> Clear</a>
+                @endif
+                <span class="sl-result-count">{{ $leads->total() }} leads</span>
+            </form>
+            <div class="sl-tbl-wrap">
+                <table class="sl-tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:40px">#</th>
+                            <th style="min-width:140px">Client Name</th>
+                            <th style="min-width:120px">Phone</th>
+                            <th>Closer</th>
+                            <th>Sale Date</th>
+                            <th>Carrier</th>
+                            <th>Policy Type</th>
+                            <th>Policy #</th>
+                            <th>Coverage</th>
+                            <th>Premium</th>
+                            <th style="min-width:110px">Status</th>
+                            <th style="width:80px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($leads as $index => $lead)
+                            <tr>
+                                <td><strong>{{ $leads->firstItem() + $index }}</strong></td>
+                                <td><strong>{{ $lead->cn_name }}</strong></td>
+                                <td>{{ $lead->phone_number }}</td>
+                                <td>
+                                    @if($lead->closer_name)
+                                        <span class="sl-badge sl-badge-info">{{ $lead->closer_name }}</span>
+                                    @else
+                                        <span style="color:#94a3b8">—</span>
+                                    @endif
+                                </td>
+                                <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                <td>{{ $lead->policy_type ?? 'N/A' }}</td>
+                                <td>
+                                    @if($lead->issued_policy_number)
+                                        <span class="sl-badge sl-badge-primary">{{ $lead->issued_policy_number }}</span>
+                                    @else
+                                        <span style="color:#94a3b8">Not Set</span>
+                                    @endif
+                                </td>
+                                <td style="color:#d4af37;font-weight:600">${{ number_format($lead->coverage_amount ?? 0, 2) }}</td>
+                                <td style="color:#d4af37;font-weight:600">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
+                                <td>
+                                    <div class="sl-status-toggle">
+                                        <button type="button" class="sl-status-option {{ $lead->followup_status === 'No' ? 'active-no' : '' }}" data-lead-id="{{ $lead->id }}" data-value="No">No</button>
+                                        <button type="button" class="sl-status-option {{ $lead->followup_status === 'Yes' ? 'active-yes' : '' }}" data-lead-id="{{ $lead->id }}" data-value="Yes">Yes</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ route('issuance.show', $lead->id) }}" class="sl-act-btn sl-act-btn-view" title="View"><i class="bx bx-show"></i></a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="12">
+                                    <div class="sl-empty"><i class="bx bx-inbox d-block"></i><p>No followups assigned to you</p></div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if($leads->hasPages())
+                <div class="d-flex justify-content-center py-3">{{ $leads->appends(request()->query())->links() }}</div>
+            @endif
+        </div>
+    </div>
+
+    <!-- ═══ BANK VERIFICATION SECTION ═══ -->
+    <div id="bvSection" style="display:none">
+        <div class="sl-card">
+            <div class="sl-card-header">
+                <h5 class="sl-card-title"><i class="bx bx-shield-quarter"></i>Bank Verification Assignments</h5>
+            </div>
+            <form method="GET" action="{{ route('followup.my-followups') }}" class="sl-filter-pills">
+                <div class="sl-search-pill">
+                    <i class="bx bx-search"></i>
+                    <input type="text" name="bv_search" placeholder="Search name, phone, carrier..." value="{{ request('bv_search') }}">
+                </div>
+                <select name="bv_carrier" class="sl-pill-select" onchange="this.form.submit()">
+                    <option value="">All Carriers</option>
+                    @foreach($carriers as $carrier)
+                        <option value="{{ $carrier }}" {{ request('bv_carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
+                    @endforeach
+                </select>
+                <select name="bv_status" class="sl-pill-select" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    <option value="Good" {{ request('bv_status') == 'Good' ? 'selected' : '' }}>Good</option>
+                    <option value="Average" {{ request('bv_status') == 'Average' ? 'selected' : '' }}>Average</option>
+                    <option value="Bad" {{ request('bv_status') == 'Bad' ? 'selected' : '' }}>Bad</option>
+                </select>
+                @if(request()->hasAny(['bv_search','bv_carrier','bv_status']))
+                    <a href="{{ route('followup.my-followups') }}" class="sl-pill-clear"><i class="bx bx-x"></i> Clear</a>
+                @endif
+                <span class="sl-result-count">{{ $bankVerificationLeads->total() }} records</span>
+            </form>
+            <div class="sl-tbl-wrap">
+                <table class="sl-tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:40px">#</th>
+                            <th style="min-width:140px">Client Name</th>
+                            <th>Phone</th>
+                            <th>Closer</th>
+                            <th>Sale Date</th>
+                            <th>Carrier</th>
+                            <th>Policy Type</th>
+                            <th>Policy #</th>
+                            <th>Coverage</th>
+                            <th>Premium</th>
+                            <th>Assigned B.V</th>
+                            <th style="min-width:160px">Comment</th>
+                            <th style="min-width:100px">B.V Status</th>
+                            <th style="width:80px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($bankVerificationLeads as $index => $lead)
+                            <tr>
+                                <td><strong>{{ $bankVerificationLeads->firstItem() + $index }}</strong></td>
+                                <td><strong>{{ $lead->cn_name }}</strong></td>
+                                <td>{{ $lead->phone_number }}</td>
+                                <td>
+                                    @if($lead->closer_name)
+                                        <span class="sl-badge sl-badge-info">{{ $lead->closer_name }}</span>
+                                    @else
+                                        <span style="color:#94a3b8">—</span>
+                                    @endif
+                                </td>
+                                <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                <td>{{ $lead->policy_type ?? 'N/A' }}</td>
+                                <td>
+                                    @if($lead->issued_policy_number)
+                                        <span class="sl-badge sl-badge-primary">{{ $lead->issued_policy_number }}</span>
+                                    @else
+                                        <span style="color:#94a3b8">Not Set</span>
+                                    @endif
+                                </td>
+                                <td style="color:#d4af37;font-weight:600">${{ number_format($lead->coverage_amount ?? 0, 2) }}</td>
+                                <td style="color:#d4af37;font-weight:600">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
+                                <td>
+                                    @if($lead->bankVerifier)
+                                        <span class="sl-badge sl-badge-success">{{ $lead->bankVerifier->name }}</span>
+                                    @else
+                                        <span style="color:#94a3b8">Unassigned</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <textarea class="sl-bv-textarea form-control bv-comment-input" data-lead-id="{{ $lead->id }}" rows="1" placeholder="Add comment...">{{ $lead->bank_verification_comment }}</textarea>
+                                </td>
+                                <td>
+                                    @if($lead->bank_verification_status)
+                                        @php
+                                            $badgeCls = match($lead->bank_verification_status) {
+                                                'Good' => 'sl-badge-success',
+                                                'Average' => 'sl-badge-warning',
+                                                'Bad' => 'sl-badge-danger',
+                                                default => 'sl-badge-secondary'
+                                            };
+                                        @endphp
+                                        <span class="sl-badge {{ $badgeCls }}">{{ $lead->bank_verification_status }}</span>
+                                    @else
+                                        <select class="sl-bv-status bv-status-dropdown" data-lead-id="{{ $lead->id }}">
+                                            <option value="">Select</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Average">Average</option>
+                                            <option value="Bad">Bad</option>
+                                        </select>
+                                    @endif
+                                </td>
+                                <td>
+                                    <button class="sl-act-btn sl-act-btn-save update-bv-btn" data-lead-id="{{ $lead->id }}" title="Update"><i class="bx bx-save"></i></button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="14">
+                                    <div class="sl-empty"><i class="bx bx-inbox d-block"></i><p>No bank verification assignments found</p></div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if($bankVerificationLeads->hasPages())
+                <div class="d-flex justify-content-center py-3">{{ $bankVerificationLeads->appends(request()->query())->links() }}</div>
+            @endif
         </div>
     </div>
 @endsection
@@ -282,108 +532,89 @@
 @section('script')
 <script>
 $(document).ready(function() {
-    // Handle followup status dropdown changes
-    $('.followup-status-dropdown').change(function() {
-        const leadId = $(this).data('lead-id');
-        const followupStatus = $(this).val();
-        const dropdown = $(this);
-        
-        if (confirm('Are you sure you want to update the followup status?')) {
-            dropdown.prop('disabled', true);
-            
-            $.ajax({
-                url: `/followup/${leadId}/update-status`,
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    followup_status: followupStatus
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Show success message
-                        const alertHtml = `
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="mdi mdi-check me-2"></i>
-                                <strong>Success!</strong> ${response.message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        `;
-                        $('.card-body').prepend(alertHtml);
-                        
-                        // Update the current status data attribute
-                        dropdown.data('current-status', followupStatus);
-                        dropdown.prop('disabled', false);
-                        
-                        // Auto-remove alert after 3 seconds
-                        setTimeout(() => {
-                            $('.alert').fadeOut();
-                        }, 3000);
-                    }
-                },
-                error: function(xhr) {
-                    const response = xhr.responseJSON;
-                    alert(response.message || 'Failed to update followup status');
-                    dropdown.prop('disabled', false);
-                    // Revert to previous selection
-                    dropdown.val(dropdown.data('current-status'));
-                }
-            });
-        } else {
-            // Revert to previous selection
-            dropdown.val(dropdown.data('current-status'));
-        }
+    // Tab switching
+    $('#sectionTabs .sl-tab').click(function() {
+        $('#sectionTabs .sl-tab').removeClass('active');
+        $(this).addClass('active');
+        const target = $(this).data('target');
+        $('#followupSection, #bvSection').hide();
+        $('#' + target).show();
     });
 
-    // Handle bank verification update button
+    // Auto-activate BV tab if BV filters are active
+    @if(request()->hasAny(['bv_search','bv_carrier','bv_status']))
+        $('#sectionTabs .sl-tab').removeClass('active');
+        $('#sectionTabs .sl-tab[data-target="bvSection"]').addClass('active');
+        $('#followupSection').hide();
+        $('#bvSection').show();
+    @endif
+
+    // Toast helper
+    function showToast(type, msg) {
+        const t = $('<div class="sl-toast sl-toast-' + type + '"><i class="bx ' + (type==='success'?'bx-check-circle':'bx-error') + '"></i>' + msg + '</div>');
+        $('body').append(t);
+        setTimeout(() => t.fadeOut(300, () => t.remove()), 3000);
+    }
+
+    // Followup status toggle
+    $('.sl-status-option').click(function() {
+        const leadId = $(this).data('lead-id');
+        const value = $(this).data('value');
+        const toggle = $(this).closest('.sl-status-toggle');
+        toggle.find('.sl-status-option').removeClass('active-yes active-no');
+
+        $.ajax({
+            url: `/followup/${leadId}/update-status`,
+            method: 'POST',
+            data: { _token: '{{ csrf_token() }}', followup_status: value },
+            success: function(response) {
+                if (response.success) {
+                    toggle.find('[data-value="' + value + '"]').addClass(value === 'Yes' ? 'active-yes' : 'active-no');
+                    showToast('success', 'Status updated');
+                }
+            },
+            error: function(xhr) {
+                showToast('error', xhr.responseJSON?.message || 'Failed to update');
+                location.reload();
+            }
+        });
+    });
+
+    // Bank verification update
     $('.update-bv-btn').click(function() {
         const leadId = $(this).data('lead-id');
-        const button = $(this);
-        const row = button.closest('tr');
+        const btn = $(this);
+        const row = btn.closest('tr');
         const comment = row.find('.bv-comment-input').val();
         const statusDropdown = row.find('.bv-status-dropdown');
         const status = statusDropdown.length ? statusDropdown.val() : null;
-        
+
         if (!status && statusDropdown.length) {
-            alert('Please select a status (Good/Average/Bad) before updating.');
+            showToast('error', 'Please select a status first');
             return;
         }
-        
-        if (confirm('Are you sure you want to update bank verification details? Status can only be set once by you.')) {
-            button.prop('disabled', true).html('<i class="bx bx-loader bx-spin me-1"></i>Saving...');
-            
-            $.ajax({
-                url: `/followup/${leadId}/update-bank-verification`,
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    bank_verification_comment: comment,
-                    bank_verification_status: status
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Show success message and reload to show badge instead of dropdown
-                        const alertHtml = `
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="mdi mdi-check me-2"></i>
-                                <strong>Success!</strong> ${response.message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        `;
-                        $('.card-body').first().prepend(alertHtml);
-                        
-                        // Reload page after 1 second to show updated status badge
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1000);
-                    }
-                },
-                error: function(xhr) {
-                    const response = xhr.responseJSON;
-                    alert(response.message || 'Failed to update bank verification');
-                    button.prop('disabled', false).html('<i class="bx bx-save me-1"></i>Update');
+
+        btn.prop('disabled', true).html('<i class="bx bx-loader bx-spin"></i>');
+
+        $.ajax({
+            url: `/followup/${leadId}/update-bank-verification`,
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                bank_verification_comment: comment,
+                bank_verification_status: status
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast('success', response.message);
+                    setTimeout(() => location.reload(), 1000);
                 }
-            });
-        }
+            },
+            error: function(xhr) {
+                showToast('error', xhr.responseJSON?.message || 'Failed to update');
+                btn.prop('disabled', false).html('<i class="bx bx-save"></i>');
+            }
+        });
     });
 });
 </script>
