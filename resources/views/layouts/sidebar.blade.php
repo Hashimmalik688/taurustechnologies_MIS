@@ -388,16 +388,16 @@
 </div>
 
 <style>
-    /* ===== MODERN FLAT SIDEBAR DESIGN ===== */
+    /* ===== REFINED SIDEBAR DESIGN ===== */
 
     /* Sidebar Profile Section */
     .sidebar-profile {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-        background: linear-gradient(135deg, rgba(212, 175, 55, 0.05), transparent);
+        gap: 10px;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.04), transparent);
         position: relative;
         height: 58px;
         box-sizing: border-box;
@@ -410,13 +410,13 @@
     }
 
     .sidebar-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         border: 2px solid var(--gold, #d4af37);
         object-fit: cover;
-        transition: all 0.25s ease;
-        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
     }
 
     .sidebar-avatar-initial {
@@ -424,40 +424,41 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         background: linear-gradient(135deg, var(--gold, #d4af37), #b8922e);
         color: #fff;
     }
 
     .sidebar-avatar-wrapper:hover .sidebar-avatar {
-        transform: scale(1.05);
-        box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+        transform: scale(1.06);
+        box-shadow: 0 3px 12px rgba(212, 175, 55, 0.3);
         border-color: var(--gold-dark, #b8922e);
     }
 
     .sidebar-profile-info {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
         overflow: hidden;
         min-width: 0;
     }
 
     .sidebar-profile-name {
-        font-size: 0.92rem;
+        font-size: 0.82rem;
         font-weight: 700;
         color: var(--text-primary, var(--bs-surface-700));
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         line-height: 1.2;
+        letter-spacing: 0.1px;
     }
 
     .sidebar-profile-role {
-        font-size: 0.72rem;
+        font-size: 0.6rem;
         color: var(--gold, #d4af37);
-        font-weight: 600;
-        letter-spacing: 0.3px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
         white-space: nowrap;
         overflow: hidden;
@@ -470,7 +471,7 @@
 
     #sidebar.collapsed .sidebar-profile {
         justify-content: center;
-        padding: 14px 8px;
+        padding: 12px 8px;
     }
 
     /* Profile Dropdown */
@@ -478,11 +479,11 @@
         position: absolute;
         top: calc(100% + 6px);
         left: 12px;
-        width: 240px;
+        width: 230px;
         background: var(--bg-panel, #ffffff);
-        border-radius: 12px;
+        border-radius: 14px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.06);
-        border: 1px solid rgba(212, 175, 55, 0.15);
+        border: 1px solid rgba(212, 175, 55, 0.12);
         z-index: 2000;
         opacity: 0;
         visibility: hidden;
@@ -510,15 +511,15 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 14px 16px;
+        padding: 12px 14px;
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.06), transparent);
     }
 
     .profile-dropdown-avatar img,
     .profile-dropdown-avatar .avatar-initial {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         border: 2px solid var(--gold, #d4af37);
         object-fit: cover;
     }
@@ -528,7 +529,7 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         background: linear-gradient(135deg, var(--gold, #d4af37), #b8922e);
         color: #fff;
     }
@@ -541,7 +542,7 @@
     }
 
     .profile-dropdown-name {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         font-weight: 700;
         color: var(--text-primary, #111827);
         white-space: nowrap;
@@ -550,7 +551,7 @@
     }
 
     .profile-dropdown-email {
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         color: var(--text-muted, #6b7280);
         white-space: nowrap;
         overflow: hidden;
@@ -559,7 +560,7 @@
 
     .profile-dropdown-divider {
         height: 1px;
-        background: rgba(212, 175, 55, 0.1);
+        background: rgba(212, 175, 55, 0.08);
         margin: 0;
     }
 
@@ -567,19 +568,19 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 11px 16px;
-        font-size: 0.88rem;
+        padding: 9px 14px;
+        font-size: 0.82rem;
         font-weight: 500;
         color: var(--text-secondary, #374151) !important;
         text-decoration: none !important;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         cursor: pointer;
     }
 
     .profile-dropdown-item i {
-        font-size: 18px;
+        font-size: 17px;
         color: var(--text-muted, #6b7280);
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
     }
 
     .profile-dropdown-item:hover {
@@ -606,33 +607,45 @@
 
     /* Sidebar Menu */
     .sidebar-menu {
-        padding: 12px 0;
+        padding: 8px 0;
         overflow-y: auto;
         flex: 1;
         min-height: 0;
     }
 
-    /* Menu Items - Flat Design */
+    /* Section Label */
+    .menu-label {
+        color: #94a3b8;
+        font-size: 0.58rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 12px 20px 4px;
+    }
+
+    /* Menu Items */
     .menu-item {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 13px 18px;
-        margin: 3px 12px;
-        border-radius: 10px;
-        font-size: 0.92rem;
+        gap: 10px;
+        padding: 8px 14px;
+        margin: 1px 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 500;
         color: var(--text-secondary, var(--bs-surface-500)) !important;
         text-decoration: none;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.15s ease;
         position: relative;
         overflow: hidden;
+        letter-spacing: 0.1px;
     }
 
     .menu-item i {
-        font-size: 21px;
+        font-size: 18px;
         flex-shrink: 0;
-        transition: all 0.25s ease;
+        transition: all 0.15s ease;
+        opacity: 0.7;
     }
 
     .menu-item .menu-text {
@@ -640,29 +653,29 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        line-height: 1.3;
     }
 
     .menu-item:hover {
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.04) 100%) !important;
+        background: rgba(212, 175, 55, 0.08) !important;
         color: var(--gold, var(--bs-gold)) !important;
-        transform: translateX(3px);
-        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+        transform: translateX(2px);
     }
 
     .menu-item:hover i {
-        transform: scale(1.08);
         color: var(--gold, var(--bs-gold));
+        opacity: 1;
     }
 
     .menu-item.active {
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%) !important;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0.14) 0%, rgba(212, 175, 55, 0.04) 100%) !important;
         color: var(--gold, var(--bs-gold)) !important;
         font-weight: 600;
-        box-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
     }
 
     .menu-item.active i {
         color: var(--gold, var(--bs-gold));
+        opacity: 1;
     }
 
     .menu-item.active::before {
@@ -671,15 +684,16 @@
         left: 0;
         top: 50%;
         transform: translateY(-50%);
-        width: 4px;
-        height: 60%;
+        width: 3px;
+        height: 55%;
         background: var(--gold, var(--bs-gold));
-        border-radius: 0 4px 4px 0;
+        border-radius: 0 3px 3px 0;
     }
 
     #sidebar.collapsed .menu-item {
         justify-content: center;
-        padding: 13px;
+        padding: 10px;
+        margin: 1px 6px;
     }
 
     #sidebar.collapsed .menu-text {
@@ -693,20 +707,22 @@
 
     .dropdown-icon {
         margin-left: auto;
-        font-size: 17px;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 15px;
+        transition: transform 0.25s ease;
         flex-shrink: 0;
+        opacity: 0.4;
     }
 
     .dropdown-icon.rotated {
         transform: rotate(180deg);
+        opacity: 0.7;
     }
 
-    /* Modern Flat Dropdown Design - NO NESTING */
+    /* Dropdown Panel */
     .menu-dropdown {
         overflow: hidden;
         max-height: 0;
-        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: transparent;
         margin: 0;
         padding: 0;
@@ -717,27 +733,28 @@
         max-height: 800px;
     }
 
-    /* Dropdown Items - Flat Like Regular Items */
+    /* Dropdown Items */
     .dropdown-item {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 12px 18px 12px 48px !important;
-        margin: 2px 12px !important;
-        border-radius: 10px;
-        font-size: 0.88rem !important;
+        gap: 10px;
+        padding: 7px 14px 7px 42px !important;
+        margin: 1px 8px !important;
+        border-radius: 8px;
+        font-size: 0.78rem !important;
         font-weight: 500;
         color: var(--text-secondary, var(--bs-surface-500)) !important;
         text-decoration: none;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.15s ease;
         position: relative;
-        background: rgba(212, 175, 55, 0.02);
+        background: transparent;
+        letter-spacing: 0.1px;
     }
 
     .dropdown-item i {
-        font-size: 19px !important;
-        opacity: 0.8;
-        transition: all 0.25s ease;
+        font-size: 16px !important;
+        opacity: 0.55;
+        transition: all 0.15s ease;
     }
 
     .dropdown-item .menu-text {
@@ -748,23 +765,20 @@
     }
 
     .dropdown-item:hover {
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%) !important;
+        background: rgba(212, 175, 55, 0.08) !important;
         color: var(--gold-dark, var(--bs-gold-dark)) !important;
-        transform: translateX(3px);
-        box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+        transform: translateX(2px);
     }
 
     .dropdown-item:hover i {
         opacity: 1;
-        transform: scale(1.08);
         color: var(--gold, var(--bs-gold));
     }
 
     .dropdown-item.active {
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%) !important;
-        color: var(--gold-dark, var(--bs-gold-dark)) !important;
+        background: rgba(212, 175, 55, 0.12) !important;
+        color: var(--gold, var(--bs-gold)) !important;
         font-weight: 600;
-        box-shadow: 0 2px 10px rgba(212, 175, 55, 0.25);
     }
 
     .dropdown-item.active i {
@@ -775,22 +789,22 @@
     .dropdown-item.active::before {
         content: '';
         position: absolute;
-        left: 12px;
+        left: 16px;
         top: 50%;
         transform: translateY(-50%);
         width: 3px;
-        height: 50%;
+        height: 45%;
         background: var(--gold, var(--bs-gold));
-        border-radius: 4px;
+        border-radius: 3px;
     }
 
     /* Sidebar Toggle Button */
     .sidebar-toggle {
         position: absolute;
-        top: 30px;
-        right: -13px;
-        width: 26px;
-        height: 26px;
+        top: 28px;
+        right: -12px;
+        width: 24px;
+        height: 24px;
         background: linear-gradient(135deg, var(--gold, var(--bs-gold)), var(--gold-dark, var(--bs-gold-dark))) !important;
         color: var(--bs-white) !important;
         border: 2px solid white;
@@ -799,29 +813,28 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 3px 10px rgba(212,175,55,0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(212,175,55,0.25);
+        transition: all 0.2s ease;
         z-index: 1000;
     }
 
     .sidebar-toggle:hover {
-        transform: scale(1.18);
-        box-shadow: 0 5px 16px rgba(212,175,55,0.45);
-        background: linear-gradient(135deg, var(--gold-dark, var(--bs-gold-dark)), var(--gold, var(--bs-gold))) !important;
+        transform: scale(1.15);
+        box-shadow: 0 4px 14px rgba(212,175,55,0.4);
     }
 
     .sidebar-toggle i {
-        font-size: 17px;
-        transition: transform 0.3s ease;
+        font-size: 15px;
+        transition: transform 0.25s ease;
     }
 
     #sidebar.collapsed .sidebar-toggle i {
         transform: rotate(180deg);
     }
 
-    /* Scrollbar Styling */
+    /* Scrollbar */
     .sidebar-menu::-webkit-scrollbar {
-        width: 5px;
+        width: 3px;
     }
 
     .sidebar-menu::-webkit-scrollbar-track {
@@ -829,12 +842,12 @@
     }
 
     .sidebar-menu::-webkit-scrollbar-thumb {
-        background: rgba(212, 175, 55, 0.25);
+        background: rgba(212, 175, 55, 0.2);
         border-radius: 10px;
     }
 
     .sidebar-menu::-webkit-scrollbar-thumb:hover {
-        background: rgba(212, 175, 55, 0.4);
+        background: rgba(212, 175, 55, 0.35);
     }
 
     /* Collapsed State */
@@ -846,79 +859,77 @@
         display: none !important;
     }
 
-    /* Responsive Adjustments */
+    /* Responsive */
     @media (max-width: 768px) {
         .menu-item,
         .dropdown-item {
-            padding: 11px 14px;
-            font-size: 0.87rem;
+            padding: 8px 12px;
+            font-size: 0.79rem;
         }
 
         .dropdown-item {
-            padding-left: 42px !important;
+            padding-left: 38px !important;
         }
     }
 
-    /* Subtle Spacing Between Roles */
+    /* Spacing */
     .menu-item + .menu-item {
-        margin-top: 2px;
+        margin-top: 0;
     }
 
-    /* Add slight spacing between different role sections */
-    @@hasrole + @@hasrole .menu-item:first-child {
-        margin-top: 8px;
-    }
-
-    /* Sidebar Bottom - Pinned Settings */
+    /* Sidebar Bottom - Settings */
     .sidebar-bottom {
-        padding: 8px 12px;
-        border-top: 1px solid rgba(212, 175, 55, 0.1);
+        padding: 6px 8px;
+        border-top: 1px solid rgba(212, 175, 55, 0.08);
         flex-shrink: 0;
     }
 
     .sidebar-bottom-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-size: 0.9rem;
+        gap: 10px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 500;
         color: var(--text-secondary, var(--bs-surface-500)) !important;
         text-decoration: none !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.15s ease;
         cursor: pointer;
     }
 
     .sidebar-bottom-item i {
-        font-size: 21px;
+        font-size: 18px;
         flex-shrink: 0;
-        transition: all 0.3s ease;
+        opacity: 0.7;
+        transition: all 0.2s ease;
     }
 
     .sidebar-bottom-item:hover {
-        background: rgba(212, 175, 55, 0.1);
+        background: rgba(212, 175, 55, 0.08);
         color: var(--gold, var(--bs-gold)) !important;
     }
 
     .sidebar-bottom-item:hover i {
         color: var(--gold, var(--bs-gold));
-        transform: rotate(90deg);
+        opacity: 1;
+        transform: rotate(60deg);
     }
 
     .sidebar-bottom-item.active {
-        background: linear-gradient(90deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.06) 100%);
+        background: rgba(212, 175, 55, 0.12);
         color: var(--gold, var(--bs-gold)) !important;
         font-weight: 600;
     }
 
     .sidebar-bottom-item.active i {
         color: var(--gold, var(--bs-gold));
+        opacity: 1;
     }
 
     #sidebar.collapsed .sidebar-bottom-item {
         justify-content: center;
-        padding: 12px;
+        padding: 10px;
     }
 
     #sidebar.collapsed .sidebar-bottom-text {

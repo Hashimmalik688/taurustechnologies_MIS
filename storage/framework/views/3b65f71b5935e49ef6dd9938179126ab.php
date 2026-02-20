@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title'); ?> Bank Verification <?php $__env->stopSection(); ?>
 
-@section('title') Bank Verification @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ── SL Design System ── */
 .sl-topbar {
@@ -196,9 +194,9 @@
     .sl-filter-input, .sl-filter-select { width: 100%; }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <!-- ── Topbar ── -->
     <div class="sl-topbar">
         <div class="sl-topbar-left">
@@ -210,17 +208,18 @@
         <div class="sl-topbar-right">
             <span style="color:rgba(255,255,255,.45); font-size:.8rem;">
                 <i class="bx bx-data" style="color:#d4af37;"></i>
-                {{ $leads->total() }} total records
+                <?php echo e($leads->total()); ?> total records
             </span>
         </div>
     </div>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius:12px; border:none; background:rgba(34,197,94,.1); color:#16a34a;">
-            <i class="bx bx-check-circle me-2"></i><strong>Success!</strong> {{ session('success') }}
+            <i class="bx bx-check-circle me-2"></i><strong>Success!</strong> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- ── KPI Stat Cards ── -->
     <div class="row g-3 mb-4">
@@ -230,10 +229,10 @@
                     <i class="bx bx-check-circle"></i>
                 </div>
                 <p class="sl-stat-label">Good</p>
-                <h3 class="sl-stat-value" style="color:#16a34a;">{{ $good_count }}</h3>
-                @php $totalBv = $good_count + $average_count + $bad_count + $unverified_count; $goodPct = $totalBv > 0 ? round(($good_count / $totalBv) * 100, 1) : 0; @endphp
-                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:{{ $goodPct }}%; background:#22c55e;"></div></div>
-                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;">{{ $goodPct }}% of total</small>
+                <h3 class="sl-stat-value" style="color:#16a34a;"><?php echo e($good_count); ?></h3>
+                <?php $totalBv = $good_count + $average_count + $bad_count + $unverified_count; $goodPct = $totalBv > 0 ? round(($good_count / $totalBv) * 100, 1) : 0; ?>
+                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:<?php echo e($goodPct); ?>%; background:#22c55e;"></div></div>
+                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;"><?php echo e($goodPct); ?>% of total</small>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
@@ -242,10 +241,10 @@
                     <i class="bx bx-error-circle"></i>
                 </div>
                 <p class="sl-stat-label">Average</p>
-                <h3 class="sl-stat-value" style="color:#d97706;">{{ $average_count }}</h3>
-                @php $avgPct = $totalBv > 0 ? round(($average_count / $totalBv) * 100, 1) : 0; @endphp
-                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:{{ $avgPct }}%; background:#f59e0b;"></div></div>
-                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;">{{ $avgPct }}% of total</small>
+                <h3 class="sl-stat-value" style="color:#d97706;"><?php echo e($average_count); ?></h3>
+                <?php $avgPct = $totalBv > 0 ? round(($average_count / $totalBv) * 100, 1) : 0; ?>
+                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:<?php echo e($avgPct); ?>%; background:#f59e0b;"></div></div>
+                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;"><?php echo e($avgPct); ?>% of total</small>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
@@ -254,10 +253,10 @@
                     <i class="bx bx-x-circle"></i>
                 </div>
                 <p class="sl-stat-label">Bad</p>
-                <h3 class="sl-stat-value" style="color:#dc2626;">{{ $bad_count }}</h3>
-                @php $badPct = $totalBv > 0 ? round(($bad_count / $totalBv) * 100, 1) : 0; @endphp
-                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:{{ $badPct }}%; background:#ef4444;"></div></div>
-                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;">{{ $badPct }}% of total</small>
+                <h3 class="sl-stat-value" style="color:#dc2626;"><?php echo e($bad_count); ?></h3>
+                <?php $badPct = $totalBv > 0 ? round(($bad_count / $totalBv) * 100, 1) : 0; ?>
+                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:<?php echo e($badPct); ?>%; background:#ef4444;"></div></div>
+                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;"><?php echo e($badPct); ?>% of total</small>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
@@ -266,10 +265,10 @@
                     <i class="bx bx-help-circle"></i>
                 </div>
                 <p class="sl-stat-label">Unverified</p>
-                <h3 class="sl-stat-value" style="color:#7c3aed;">{{ $unverified_count }}</h3>
-                @php $unvPct = $totalBv > 0 ? round(($unverified_count / $totalBv) * 100, 1) : 0; @endphp
-                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:{{ $unvPct }}%; background:#8b5cf6;"></div></div>
-                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;">{{ $unvPct }}% of total</small>
+                <h3 class="sl-stat-value" style="color:#7c3aed;"><?php echo e($unverified_count); ?></h3>
+                <?php $unvPct = $totalBv > 0 ? round(($unverified_count / $totalBv) * 100, 1) : 0; ?>
+                <div class="sl-stat-bar"><div class="sl-stat-bar-fill" style="width:<?php echo e($unvPct); ?>%; background:#8b5cf6;"></div></div>
+                <small style="color:#64748b; font-size:.72rem; margin-top:4px; display:block;"><?php echo e($unvPct); ?>% of total</small>
             </div>
         </div>
     </div>
@@ -297,31 +296,31 @@
         </div>
         <div class="sl-card-body">
             <!-- Filters -->
-            <form method="GET" action="{{ route('bank-verification.index') }}">
+            <form method="GET" action="<?php echo e(route('bank-verification.index')); ?>">
                 <div class="sl-filter-row">
-                    <input type="text" name="search" class="sl-filter-input" style="min-width:220px;" placeholder="Search name, phone, policy..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="sl-filter-input" style="min-width:220px;" placeholder="Search name, phone, policy..." value="<?php echo e(request('search')); ?>">
                     <select name="verification_status" class="sl-filter-select">
                         <option value="">All Status</option>
-                        <option value="Good" {{ request('verification_status') == 'Good' ? 'selected' : '' }}>Good</option>
-                        <option value="Average" {{ request('verification_status') == 'Average' ? 'selected' : '' }}>Average</option>
-                        <option value="Bad" {{ request('verification_status') == 'Bad' ? 'selected' : '' }}>Bad</option>
+                        <option value="Good" <?php echo e(request('verification_status') == 'Good' ? 'selected' : ''); ?>>Good</option>
+                        <option value="Average" <?php echo e(request('verification_status') == 'Average' ? 'selected' : ''); ?>>Average</option>
+                        <option value="Bad" <?php echo e(request('verification_status') == 'Bad' ? 'selected' : ''); ?>>Bad</option>
                     </select>
                     <select name="month" class="sl-filter-select">
                         <option value="">Month</option>
-                        @for($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ date('M', mktime(0, 0, 0, $m, 1)) }}</option>
-                        @endfor
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($m = 1; $m <= 12; $m++): ?>
+                            <option value="<?php echo e($m); ?>" <?php echo e(request('month') == $m ? 'selected' : ''); ?>><?php echo e(date('M', mktime(0, 0, 0, $m, 1))); ?></option>
+                        <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
                     <select name="year" class="sl-filter-select">
                         <option value="">Year</option>
-                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                            <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                            <option value="<?php echo e($y); ?>" <?php echo e(request('year') == $y ? 'selected' : ''); ?>><?php echo e($y); ?></option>
+                        <?php endfor; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
                     <button type="submit" class="sl-btn-filter"><i class="bx bx-search me-1"></i>Filter</button>
-                    @if(request()->hasAny(['search','verification_status','month','year']))
-                        <a href="{{ route('bank-verification.index') }}" class="sl-btn-reset"><i class="bx bx-reset me-1"></i>Clear</a>
-                    @endif
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','verification_status','month','year'])): ?>
+                        <a href="<?php echo e(route('bank-verification.index')); ?>" class="sl-btn-reset"><i class="bx bx-reset me-1"></i>Clear</a>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </form>
 
@@ -344,41 +343,41 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($leads as $idx => $lead)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
-                                <td style="color:#94a3b8; font-size:.78rem;">{{ $leads->firstItem() + $idx }}</td>
-                                <td><strong>{{ $lead->cn_name }}</strong></td>
-                                <td>{{ $lead->phone_number }}</td>
-                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
-                                <td><code style="font-size:.78rem;">{{ $lead->issued_policy_number ?? 'N/A' }}</code></td>
-                                <td class="sl-premium">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                                <td style="white-space:nowrap;">{{ $lead->issuance_date ? \Carbon\Carbon::parse($lead->issuance_date)->format('M d, Y') : 'N/A' }}</td>
+                                <td style="color:#94a3b8; font-size:.78rem;"><?php echo e($leads->firstItem() + $idx); ?></td>
+                                <td><strong><?php echo e($lead->cn_name); ?></strong></td>
+                                <td><?php echo e($lead->phone_number); ?></td>
+                                <td><?php echo e($lead->carrier_name ?? 'N/A'); ?></td>
+                                <td><code style="font-size:.78rem;"><?php echo e($lead->issued_policy_number ?? 'N/A'); ?></code></td>
+                                <td class="sl-premium">$<?php echo e(number_format($lead->monthly_premium ?? 0, 2)); ?></td>
+                                <td style="white-space:nowrap;"><?php echo e($lead->issuance_date ? \Carbon\Carbon::parse($lead->issuance_date)->format('M d, Y') : 'N/A'); ?></td>
                                 <td>
-                                    <select class="form-select form-select-sm assigned-bv-dropdown" data-lead-id="{{ $lead->id }}">
+                                    <select class="form-select form-select-sm assigned-bv-dropdown" data-lead-id="<?php echo e($lead->id); ?>">
                                         <option value="">Unassigned</option>
-                                        @foreach($bankVerifiers as $verifier)
-                                            <option value="{{ $verifier->id }}" {{ $lead->assigned_bank_verifier == $verifier->id ? 'selected' : '' }}>{{ $verifier->name }}</option>
-                                        @endforeach
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $bankVerifiers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $verifier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($verifier->id); ?>" <?php echo e($lead->assigned_bank_verifier == $verifier->id ? 'selected' : ''); ?>><?php echo e($verifier->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </select>
                                 </td>
                                 <td>
-                                    <textarea class="form-control form-control-sm bv-comment-field" data-lead-id="{{ $lead->id }}" rows="1" placeholder="Add comment...">{{ $lead->bank_verification_comment }}</textarea>
+                                    <textarea class="form-control form-control-sm bv-comment-field" data-lead-id="<?php echo e($lead->id); ?>" rows="1" placeholder="Add comment..."><?php echo e($lead->bank_verification_comment); ?></textarea>
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm bv-status-select" data-lead-id="{{ $lead->id }}">
+                                    <select class="form-select form-select-sm bv-status-select" data-lead-id="<?php echo e($lead->id); ?>">
                                         <option value="">Not Set</option>
-                                        <option value="Good" {{ $lead->bank_verification_status === 'Good' ? 'selected' : '' }}>Good</option>
-                                        <option value="Average" {{ $lead->bank_verification_status === 'Average' ? 'selected' : '' }}>Average</option>
-                                        <option value="Bad" {{ $lead->bank_verification_status === 'Bad' ? 'selected' : '' }}>Bad</option>
+                                        <option value="Good" <?php echo e($lead->bank_verification_status === 'Good' ? 'selected' : ''); ?>>Good</option>
+                                        <option value="Average" <?php echo e($lead->bank_verification_status === 'Average' ? 'selected' : ''); ?>>Average</option>
+                                        <option value="Bad" <?php echo e($lead->bank_verification_status === 'Bad' ? 'selected' : ''); ?>>Bad</option>
                                     </select>
                                 </td>
-                                <td><small class="text-muted">{{ $lead->bank_verification_notes ?? '—' }}</small></td>
+                                <td><small class="text-muted"><?php echo e($lead->bank_verification_notes ?? '—'); ?></small></td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="{{ route('bank-verification.show', $lead->id) }}" class="sl-btn-view" title="View Details">
+                                        <a href="<?php echo e(route('bank-verification.show', $lead->id)); ?>" class="sl-btn-view" title="View Details">
                                             <i class="bx bx-show"></i>
                                         </a>
-                                        <button class="sl-btn-update" data-bs-toggle="modal" data-bs-target="#verificationModal-{{ $lead->id }}" title="Update Status">
+                                        <button class="sl-btn-update" data-bs-toggle="modal" data-bs-target="#verificationModal-<?php echo e($lead->id); ?>" title="Update Status">
                                             <i class="bx bx-edit-alt"></i>
                                         </button>
                                     </div>
@@ -386,17 +385,18 @@
                             </tr>
 
                             <!-- Verification Modal -->
-                            <div class="modal fade sl-modal" id="verificationModal-{{ $lead->id }}" tabindex="-1">
+                            <div class="modal fade sl-modal" id="verificationModal-<?php echo e($lead->id); ?>" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title">
-                                                <i class="bx bx-building-house me-2"></i>Update &mdash; {{ $lead->cn_name }}
+                                                <i class="bx bx-building-house me-2"></i>Update &mdash; <?php echo e($lead->cn_name); ?>
+
                                             </h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                         </div>
-                                        <form action="{{ route('bank-verification.update', $lead->id) }}" method="POST">
-                                            @csrf
+                                        <form action="<?php echo e(route('bank-verification.update', $lead->id)); ?>" method="POST">
+                                            <?php echo csrf_field(); ?>
                                             <div class="modal-body">
                                                 <label class="form-label fw-semibold mb-3" style="font-size:.85rem;">Select Verification Status</label>
                                                 <div class="d-grid gap-2 mb-4">
@@ -411,8 +411,8 @@
                                                     </button>
                                                 </div>
                                                 <div class="mb-2">
-                                                    <label for="notes-{{ $lead->id }}" class="form-label fw-semibold" style="font-size:.85rem;">Reason / Notes</label>
-                                                    <textarea class="form-control" id="notes-{{ $lead->id }}" name="bank_verification_notes" rows="3" placeholder="Add reason or notes...">{{ $lead->bank_verification_notes }}</textarea>
+                                                    <label for="notes-<?php echo e($lead->id); ?>" class="form-label fw-semibold" style="font-size:.85rem;">Reason / Notes</label>
+                                                    <textarea class="form-control" id="notes-<?php echo e($lead->id); ?>" name="bank_verification_notes" rows="3" placeholder="Add reason or notes..."><?php echo e($lead->bank_verification_notes); ?></textarea>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
@@ -422,29 +422,30 @@
                                     </div>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="12" class="text-center py-5">
                                     <i class="bx bx-inbox" style="font-size:2.5rem; color:#cbd5e1;"></i>
                                     <p class="text-muted mt-2 mb-0">No approved & issued sales found</p>
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
 
-            @if($leads->hasPages())
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($leads->hasPages()): ?>
                 <div class="d-flex justify-content-center mt-4">
-                    {{ $leads->appends(request()->query())->links() }}
+                    <?php echo e($leads->appends(request()->query())->links()); ?>
+
                 </div>
-            @endif
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-<script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/libs/apexcharts/apexcharts.min.js')); ?>"></script>
 <script>
 $(document).ready(function() {
     // ── ApexCharts ──
@@ -452,7 +453,7 @@ $(document).ready(function() {
     const txtColor = isDark ? '#94a3b8' : '#64748b';
 
     // Donut Chart
-    const donutData = [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}];
+    const donutData = [<?php echo e($good_count); ?>, <?php echo e($average_count); ?>, <?php echo e($bad_count); ?>, <?php echo e($unverified_count); ?>];
     if (donutData.some(v => v > 0)) {
         new ApexCharts(document.querySelector('#bvDonutChart'), {
             series: donutData,
@@ -464,7 +465,8 @@ $(document).ready(function() {
             dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 700 } },
             plotOptions: { pie: { donut: { size: '62%', labels: {
                 show: true, total: { show: true, label: 'Total', fontSize: '13px', color: txtColor,
-                    formatter: () => {{ $good_count + $average_count + $bad_count + $unverified_count }}
+                    formatter: () => <?php echo e($good_count + $average_count + $bad_count + $unverified_count); ?>
+
                 }
             } } } },
             tooltip: { theme: isDark ? 'dark' : 'light' }
@@ -473,7 +475,7 @@ $(document).ready(function() {
 
     // Bar Chart
     new ApexCharts(document.querySelector('#bvBarChart'), {
-        series: [{ name: 'Count', data: [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}] }],
+        series: [{ name: 'Count', data: [<?php echo e($good_count); ?>, <?php echo e($average_count); ?>, <?php echo e($bad_count); ?>, <?php echo e($unverified_count); ?>] }],
         chart: { type: 'bar', height: 260, fontFamily: 'inherit', toolbar: { show: false } },
         colors: ['#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
         plotOptions: { bar: { distributed: true, borderRadius: 8, columnWidth: '55%' } },
@@ -496,7 +498,7 @@ $(document).ready(function() {
             $.ajax({
                 url: `/bank-verification/${leadId}/assign-verifier`,
                 method: 'POST',
-                data: { _token: '{{ csrf_token() }}', assigned_bank_verifier: verifierId || null },
+                data: { _token: '<?php echo e(csrf_token()); ?>', assigned_bank_verifier: verifierId || null },
                 success: function(response) {
                     if (response.success) { slToast(response.message); }
                     dropdown.prop('disabled', false);
@@ -522,7 +524,7 @@ $(document).ready(function() {
             $.ajax({
                 url: `/bank-verification/${leadId}/update-assignment`,
                 method: 'POST',
-                data: { _token: '{{ csrf_token() }}', bank_verification_comment: comment, bank_verification_status: status || null },
+                data: { _token: '<?php echo e(csrf_token()); ?>', bank_verification_comment: comment, bank_verification_status: status || null },
                 success: function(response) { if (response.success) { slToast('Updated successfully'); } },
                 error: function(xhr) { alert(xhr.responseJSON?.message || 'Failed to update details'); }
             });
@@ -537,4 +539,6 @@ $(document).ready(function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/bank-verification/index.blade.php ENDPATH**/ ?>

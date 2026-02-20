@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Revenue Analytics'); ?>
 
-@section('title', 'Revenue Analytics')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    Revenue Analytics — Matching Company Overview Style
@@ -230,74 +228,74 @@
     .kpi-card .k-lbl { font-size: 0.52rem; }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- KPI Row 1 — Revenue Totals --}}
+
 <div class="kpi-row">
     <div class="kpi-card k-gold ex-card">
         <i class="bx bx-dollar-circle k-icon"></i>
-        <div class="k-val">${{ number_format($total_revenue, 0) }}</div>
+        <div class="k-val">$<?php echo e(number_format($total_revenue, 0)); ?></div>
         <div class="k-lbl">Total Revenue</div>
     </div>
     <div class="kpi-card k-blue ex-card">
         <i class="bx bx-receipt k-icon"></i>
-        <div class="k-val">{{ $total_count }}</div>
+        <div class="k-val"><?php echo e($total_count); ?></div>
         <div class="k-lbl">Total Sales</div>
     </div>
     <div class="kpi-card k-teal ex-card">
         <i class="bx bx-bar-chart-alt-2 k-icon"></i>
-        <div class="k-val">${{ number_format($total_count > 0 ? $total_revenue / $total_count : 0, 0) }}</div>
+        <div class="k-val">$<?php echo e(number_format($total_count > 0 ? $total_revenue / $total_count : 0, 0)); ?></div>
         <div class="k-lbl">Avg / Sale</div>
     </div>
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-check-circle k-icon"></i>
-        <div class="k-val">{{ number_format($good_percentage, 1) }}%</div>
+        <div class="k-val"><?php echo e(number_format($good_percentage, 1)); ?>%</div>
         <div class="k-lbl">Quality Ratio</div>
     </div>
     <div class="kpi-card k-red ex-card">
         <i class="bx bx-x-circle k-icon"></i>
-        <div class="k-val">{{ number_format($bad_percentage, 1) }}%</div>
+        <div class="k-val"><?php echo e(number_format($bad_percentage, 1)); ?>%</div>
         <div class="k-lbl">Bad Ratio</div>
     </div>
 </div>
 
-{{-- KPI Row 2 — Revenue by Status --}}
+
 <div class="kpi-row">
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-check-double k-icon"></i>
-        <div class="k-val">${{ number_format($good_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#1a8754;">{{ $good_count }} sales</div>
+        <div class="k-val">$<?php echo e(number_format($good_revenue, 0)); ?></div>
+        <div class="k-sub" style="color:#1a8754;"><?php echo e($good_count); ?> sales</div>
         <div class="k-lbl">Good Revenue</div>
     </div>
     <div class="kpi-card k-warn ex-card">
         <i class="bx bx-error-circle k-icon"></i>
-        <div class="k-val">${{ number_format($average_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#b87a14;">{{ $average_count }} sales</div>
+        <div class="k-val">$<?php echo e(number_format($average_revenue, 0)); ?></div>
+        <div class="k-sub" style="color:#b87a14;"><?php echo e($average_count); ?> sales</div>
         <div class="k-lbl">Average Revenue</div>
     </div>
     <div class="kpi-card k-red ex-card">
         <i class="bx bx-x-circle k-icon"></i>
-        <div class="k-val">${{ number_format($bad_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#c84646;">{{ $bad_count }} sales</div>
+        <div class="k-val">$<?php echo e(number_format($bad_revenue, 0)); ?></div>
+        <div class="k-sub" style="color:#c84646;"><?php echo e($bad_count); ?> sales</div>
         <div class="k-lbl">Bad Revenue</div>
     </div>
     <div class="kpi-card k-purple ex-card">
         <i class="bx bx-help-circle k-icon"></i>
-        <div class="k-val">${{ number_format($unverified_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#5b49c7;">{{ $unverified_count }} sales</div>
+        <div class="k-val">$<?php echo e(number_format($unverified_revenue, 0)); ?></div>
+        <div class="k-sub" style="color:#5b49c7;"><?php echo e($unverified_count); ?> sales</div>
         <div class="k-lbl">Unverified Revenue</div>
     </div>
 </div>
 
-{{-- Main Content Grid --}}
+
 <div class="row g-2">
 
-    {{-- LEFT: Charts + Sales Table --}}
+    
     <div class="col-xl-9 col-lg-8">
 
-        {{-- Revenue Charts --}}
+        
         <div class="row g-2 mb-2">
             <div class="col-md-5">
                 <div class="ex-card sec-card">
@@ -321,16 +319,16 @@
             </div>
         </div>
 
-        {{-- Bank Verification Sales Table --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-list-check"></i> Bank Verified Sales</h6>
                 <div class="filter-tabs">
-                    <button class="filter-tab-btn active" onclick="filterSales('all', this)">All ({{ $total_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('good', this)">Good ({{ $good_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('average', this)">Avg ({{ $average_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('bad', this)">Bad ({{ $bad_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('unverified', this)">Unverified ({{ $unverified_count }})</button>
+                    <button class="filter-tab-btn active" onclick="filterSales('all', this)">All (<?php echo e($total_count); ?>)</button>
+                    <button class="filter-tab-btn" onclick="filterSales('good', this)">Good (<?php echo e($good_count); ?>)</button>
+                    <button class="filter-tab-btn" onclick="filterSales('average', this)">Avg (<?php echo e($average_count); ?>)</button>
+                    <button class="filter-tab-btn" onclick="filterSales('bad', this)">Bad (<?php echo e($bad_count); ?>)</button>
+                    <button class="filter-tab-btn" onclick="filterSales('unverified', this)">Unverified (<?php echo e($unverified_count); ?>)</button>
                 </div>
             </div>
             <div class="scroll-tbl">
@@ -348,8 +346,8 @@
                         </tr>
                     </thead>
                     <tbody id="salesTable">
-                        @forelse($issued_sales->sortByDesc('issuance_date') as $i => $sale)
-                        @php
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $issued_sales->sortByDesc('issuance_date'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $sale): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
                             $bvStatus = $sale->bank_verification_status;
                             $statusClass = match($bvStatus) {
                                 \App\Support\Statuses::BANK_GOOD => 'bd-green',
@@ -370,32 +368,32 @@
                                 default => 'unverified',
                             };
                             $revenue = $sale->agent_revenue ?? $sale->monthly_premium ?? 0;
-                        @endphp
-                        <tr class="sale-row" data-status="{{ $filterTag }}">
-                            <td style="color:var(--bs-surface-400);">{{ $i + 1 }}</td>
-                            <td><strong>{{ $sale->cn_name ?? 'N/A' }}</strong></td>
-                            <td>{{ $sale->closer_name ?? '—' }}</td>
-                            <td>{{ $sale->carrier_name ?? '—' }}</td>
-                            <td class="text-center"><span class="bd-mini bd-blue">${{ number_format($sale->monthly_premium ?? 0, 0) }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-gold">${{ number_format($revenue, 0) }}</span></td>
-                            <td class="text-center"><span class="bd-mini {{ $statusClass }}">{{ $statusLabel }}</span></td>
-                            <td style="color:var(--bs-surface-500);font-size:0.68rem;">{{ $sale->issuance_date ? \Carbon\Carbon::parse($sale->issuance_date)->format('M d, Y') : '—' }}</td>
+                        ?>
+                        <tr class="sale-row" data-status="<?php echo e($filterTag); ?>">
+                            <td style="color:var(--bs-surface-400);"><?php echo e($i + 1); ?></td>
+                            <td><strong><?php echo e($sale->cn_name ?? 'N/A'); ?></strong></td>
+                            <td><?php echo e($sale->closer_name ?? '—'); ?></td>
+                            <td><?php echo e($sale->carrier_name ?? '—'); ?></td>
+                            <td class="text-center"><span class="bd-mini bd-blue">$<?php echo e(number_format($sale->monthly_premium ?? 0, 0)); ?></span></td>
+                            <td class="text-center"><span class="bd-mini bd-gold">$<?php echo e(number_format($revenue, 0)); ?></span></td>
+                            <td class="text-center"><span class="bd-mini <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
+                            <td style="color:var(--bs-surface-500);font-size:0.68rem;"><?php echo e($sale->issuance_date ? \Carbon\Carbon::parse($sale->issuance_date)->format('M d, Y') : '—'); ?></td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="8" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No issued sales found</td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    {{-- RIGHT: Side panels --}}
+    
     <div class="col-xl-3 col-lg-4">
 
-        {{-- Revenue Ratios --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-analyse"></i> Revenue Ratios</h6>
@@ -403,28 +401,28 @@
             <div class="sec-body">
                 <div class="ratio-row">
                     <div class="ratio-block r-green">
-                        <div class="r-val">{{ number_format($good_revenue_percentage, 1) }}%</div>
+                        <div class="r-val"><?php echo e(number_format($good_revenue_percentage, 1)); ?>%</div>
                         <div class="r-lbl">Good Rev</div>
                     </div>
                     <div class="ratio-block r-warn">
-                        <div class="r-val">{{ number_format($average_revenue_percentage, 1) }}%</div>
+                        <div class="r-val"><?php echo e(number_format($average_revenue_percentage, 1)); ?>%</div>
                         <div class="r-lbl">Avg Rev</div>
                     </div>
                 </div>
                 <div class="ratio-row mt-2">
                     <div class="ratio-block r-red">
-                        <div class="r-val">{{ number_format($bad_revenue_percentage, 1) }}%</div>
+                        <div class="r-val"><?php echo e(number_format($bad_revenue_percentage, 1)); ?>%</div>
                         <div class="r-lbl">Bad Rev</div>
                     </div>
                     <div class="ratio-block r-purple">
-                        <div class="r-val">{{ number_format($unverified_revenue_percentage, 1) }}%</div>
+                        <div class="r-val"><?php echo e(number_format($unverified_revenue_percentage, 1)); ?>%</div>
                         <div class="r-lbl">Unverified</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Sales Count Distribution --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-doughnut-chart"></i> Sales Distribution</h6>
@@ -434,7 +432,7 @@
             </div>
         </div>
 
-        {{-- Revenue vs Count --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-transfer"></i> Rev vs Count</h6>
@@ -447,10 +445,10 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-<script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/libs/apexcharts/apexcharts.min.js')); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark' || document.documentElement.getAttribute('data-theme') === 'dark';
@@ -459,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const bgCard = isDark ? '#1e293b' : '#fff';
 
     // ── Revenue Donut ──
-    const revenueVals = [{{ $good_revenue }}, {{ $average_revenue }}, {{ $bad_revenue }}, {{ $unverified_revenue }}];
+    const revenueVals = [<?php echo e($good_revenue); ?>, <?php echo e($average_revenue); ?>, <?php echo e($bad_revenue); ?>, <?php echo e($unverified_revenue); ?>];
     if (revenueVals.some(v => v > 0)) {
         new ApexCharts(document.querySelector('#revenueDonutChart'), {
             series: revenueVals,
@@ -471,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
             dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 700 }, formatter: (val) => val.toFixed(1) + '%' },
             plotOptions: { pie: { donut: { size: '58%', labels: {
                 show: true, total: { show: true, label: 'Total', fontSize: '10px', color: txtColor,
-                    formatter: () => '${{ number_format($total_revenue, 0) }}'
+                    formatter: () => '$<?php echo e(number_format($total_revenue, 0)); ?>'
                 }
             } } } },
             tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2}) } }
@@ -481,23 +479,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ── Monthly Revenue Stacked Bar ──
-    @php
+    <?php
         $sortedMonths = $monthly_data->sortKeys()->forget('Unknown');
         $monthLabels = $sortedMonths->keys()->map(function($m) { return \Carbon\Carbon::parse($m . '-01')->format('M Y'); })->values();
         $goodArr = $sortedMonths->pluck('good')->values();
         $avgArr = $sortedMonths->pluck('average')->values();
         $badArr = $sortedMonths->pluck('bad')->values();
         $unvArr = $sortedMonths->pluck('unverified')->values();
-    @endphp
+    ?>
 
-    const monthLabels = @json($monthLabels);
+    const monthLabels = <?php echo json_encode($monthLabels, 15, 512) ?>;
     if (monthLabels.length > 0) {
         new ApexCharts(document.querySelector('#monthlyRevenueChart'), {
             series: [
-                { name: 'Good', data: @json($goodArr) },
-                { name: 'Average', data: @json($avgArr) },
-                { name: 'Bad', data: @json($badArr) },
-                { name: 'Unverified', data: @json($unvArr) }
+                { name: 'Good', data: <?php echo json_encode($goodArr, 15, 512) ?> },
+                { name: 'Average', data: <?php echo json_encode($avgArr, 15, 512) ?> },
+                { name: 'Bad', data: <?php echo json_encode($badArr, 15, 512) ?> },
+                { name: 'Unverified', data: <?php echo json_encode($unvArr, 15, 512) ?> }
             ],
             chart: { type: 'bar', height: 220, stacked: true, fontFamily: 'inherit', toolbar: { show: false } },
             colors: ['#34c38f', '#f1b44c', '#f46a6a', '#7c69ef'],
@@ -513,7 +511,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ── Sales Count Radial Bar ──
-    const salesCounts = [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}];
+    const salesCounts = [<?php echo e($good_count); ?>, <?php echo e($average_count); ?>, <?php echo e($bad_count); ?>, <?php echo e($unverified_count); ?>];
     const salesTotal = salesCounts.reduce((a, b) => a + b, 0);
     if (salesTotal > 0) {
         const salesPcts = salesCounts.map(c => parseFloat(((c / salesTotal) * 100).toFixed(1)));
@@ -542,8 +540,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── Revenue vs Count Comparison ──
     new ApexCharts(document.querySelector('#comparisonChart'), {
         series: [
-            { name: 'Revenue', type: 'column', data: [{{ $good_revenue }}, {{ $average_revenue }}, {{ $bad_revenue }}, {{ $unverified_revenue }}] },
-            { name: 'Count', type: 'line', data: [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}] }
+            { name: 'Revenue', type: 'column', data: [<?php echo e($good_revenue); ?>, <?php echo e($average_revenue); ?>, <?php echo e($bad_revenue); ?>, <?php echo e($unverified_revenue); ?>] },
+            { name: 'Count', type: 'line', data: [<?php echo e($good_count); ?>, <?php echo e($average_count); ?>, <?php echo e($bad_count); ?>, <?php echo e($unverified_count); ?>] }
         ],
         chart: { height: 200, fontFamily: 'inherit', toolbar: { show: false } },
         colors: ['#d4af37', '#556ee6'],
@@ -570,4 +568,6 @@ function filterSales(status, btn) {
     });
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/revenue-analytics/index.blade.php ENDPATH**/ ?>

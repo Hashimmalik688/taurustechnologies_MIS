@@ -8,277 +8,262 @@
     <link href="{{ URL::asset('build/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="{{ URL::asset('build/libs/toastr/build/toastr.min.css') }}" />
     <style>
-        .auto-dial-btn {
-            position: relative;
-            min-width: 150px;
-        }
-        .auto-dial-btn.active {
-            background: var(--bs-chart-danger) !important;
-            border-color: var(--bs-chart-danger) !important;
-        }
-        .dial-btn {
-            transition: all 0.2s;
-        }
-        .dial-btn:hover {
-            transform: scale(1.1);
-        }
-        .lead-row.calling {
-            background-color: rgba(52, 195, 143, 0.1) !important;
-            border-left: 3px solid var(--bs-chart-success);
-        }
-        .lead-row.dialed {
-            opacity: 0.6;
-        }
-        
-        /* Per-user dial tracking badges */
-        .dial-badges {
-            display: flex;
-            gap: 3px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .dial-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--bs-white, #fff);
-            cursor: default;
-            position: relative;
-        }
-        .dial-badge.is-mine {
-            outline: 2px solid var(--bs-surface-900);
-            outline-offset: 1px;
-        }
-        .dial-badge .dial-time {
-            display: none;
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bs-surface-700);
-            color: var(--bs-white, #fff);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            z-index: 100;
-        }
-        .dial-badge:hover .dial-time {
-            display: block;
-        }
-        /* Row highlighting for dialed-by-me leads */
-        .lead-row.dialed-by-me {
-            background-color: rgba(78, 115, 223, 0.06) !important;
-            border-left: 3px solid var(--bs-primary);
-        }
-        /* Row highlighting for dialed-by-others */
-        .lead-row.dialed-by-others {
-            background-color: rgba(231, 74, 59, 0.04) !important;
-        }
-        
-        /* Peregrine badge style */
-        .bg-purple {
-            background-color: var(--bs-ui-purple) !important;
-            color: var(--bs-white, #fff) !important;
-        }
-        
-        /* Pagination - hide large icons and use text */
-        .pagination .page-link svg {
-            display: none !important;
-        }
-        .pagination .page-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-        }
-        /* Add text content for Previous/Next */
-        .pagination .page-item:first-child .page-link::before {
-            content: "‹ Previous";
-        }
-        .pagination .page-item:last-child .page-link::before {
-            content: "Next ›";
-        }
-        .pagination .page-item:first-child .page-link span,
-        .pagination .page-item:last-child .page-link span {
-            display: none;
-        }
+        /* ── sl-calling: Ravens Calling System ── */
+        .sl-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem}
+        .sl-topbar h1{font-size:1.25rem;font-weight:700;margin:0;color:var(--bs-heading-color,#323a46)}
+        .sl-topbar .sl-subtitle{font-size:.82rem;color:var(--bs-secondary-color,#6c757d);margin-left:.5rem;font-weight:400}
+        .sl-topbar .sl-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+        .sl-card{background:var(--bs-card-bg,#fff);border:1px solid var(--bs-border-color,#e9ecef);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+        .sl-card-header{padding:.875rem 1.25rem;border-bottom:1px solid var(--bs-border-color,#e9ecef);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+        .sl-card-header h2{font-size:1rem;font-weight:600;margin:0;color:var(--bs-heading-color)}
+        .sl-card-body{padding:1rem 1.25rem}
+
+        .sl-search{display:flex;gap:.35rem;align-items:center}
+        .sl-search input{border:1px solid var(--bs-border-color);border-radius:22px;padding:.35rem .85rem;font-size:.82rem;min-width:200px;background:var(--bs-input-bg,#fff);color:var(--bs-body-color)}
+        .sl-search input:focus{outline:none;border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.15)}
+        .sl-search button,.sl-search a{border:none;border-radius:22px;padding:.35rem .65rem;font-size:.82rem;cursor:pointer;display:inline-flex;align-items:center;gap:.25rem}
+
+        .sl-btn{border:none;border-radius:22px;padding:.4rem 1rem;font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;transition:all .2s}
+        .sl-btn-gold{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff}
+        .sl-btn-gold:hover{filter:brightness(1.08);color:#fff}
+        .sl-btn-success{background:var(--bs-success);color:#fff}
+        .sl-btn-success:hover{filter:brightness(1.08);color:#fff}
+        .sl-btn-success.active{background:var(--bs-danger)!important}
+        .sl-btn-outline{background:transparent;border:1px solid var(--bs-border-color);color:var(--bs-body-color)}
+        .sl-btn-outline:hover{border-color:#d4af37;color:#d4af37}
+        .sl-btn-danger{background:var(--bs-danger);color:#fff}
+        .sl-btn-danger:hover{filter:brightness(1.08);color:#fff}
+        .sl-btn-warning{background:var(--bs-warning);color:#212529}
+        .sl-btn-secondary{background:var(--bs-secondary-bg,#6c757d);color:#fff}
+
+        .sl-alert{border-radius:12px;padding:.65rem 1rem;font-size:.82rem;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
+        .sl-alert-warning{background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.25);color:var(--bs-warning-text,#856404)}
+        .sl-alert a.sl-btn{font-size:.78rem;padding:.3rem .75rem}
+
+        .sl-legend{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;border-radius:10px;background:var(--bs-tertiary-bg,#f8f9fa);font-size:.78rem;color:var(--bs-secondary-color);margin-bottom:.75rem;flex-wrap:wrap}
+        .sl-legend strong{color:var(--bs-heading-color)}
+
+        .sl-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.84rem}
+        .sl-table thead th{background:var(--bs-tertiary-bg,#f8f9fa);padding:.6rem .75rem;font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.3px;color:var(--bs-secondary-color);border-bottom:1px solid var(--bs-border-color);white-space:nowrap}
+        .sl-table thead th:first-child{border-radius:10px 0 0 0}
+        .sl-table thead th:last-child{border-radius:0 10px 0 0}
+        .sl-table tbody td{padding:.55rem .75rem;border-bottom:1px solid var(--bs-border-color);vertical-align:middle;color:var(--bs-body-color)}
+        .sl-table tbody tr:last-child td{border-bottom:none}
+        .sl-table tbody tr:hover{background:rgba(212,175,55,.04)}
+
+        .sl-table .callback-note-input{border:1px solid var(--bs-border-color);border-radius:22px;padding:.3rem .7rem;font-size:.8rem;width:100%;background:var(--bs-input-bg,#fff);color:var(--bs-body-color)}
+        .sl-table .callback-note-input:focus{outline:none;border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.12)}
+
+        /* Dial tracking badges */
+        .dial-badges{display:flex;gap:3px;flex-wrap:wrap;align-items:center;justify-content:center}
+        .dial-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:.65rem;font-weight:700;color:#fff;cursor:default;position:relative}
+        .dial-badge.is-mine{outline:2px solid var(--bs-surface-900);outline-offset:1px}
+        .dial-badge .dial-time{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bs-surface-700,#3b3b3b);color:#fff;padding:2px 8px;border-radius:8px;font-size:.7rem;white-space:nowrap;z-index:100}
+        .dial-badge:hover .dial-time{display:block}
+
+        /* Dial button */
+        .dial-btn{border:none;border-radius:22px;padding:.35rem .85rem;font-size:.8rem;font-weight:600;background:var(--bs-primary);color:#fff;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.3rem}
+        .dial-btn:hover{transform:scale(1.05);filter:brightness(1.08);color:#fff}
+
+        /* Row states */
+        .lead-row.calling{background-color:rgba(52,195,143,.08)!important;border-left:3px solid var(--bs-success)}
+        .lead-row.dialed{opacity:.55}
+        .lead-row.dialed-by-me{background-color:rgba(78,115,223,.05)!important;border-left:3px solid var(--bs-primary)}
+        .lead-row.dialed-by-others{background-color:rgba(231,74,59,.03)!important}
+
+        .bg-purple{background-color:var(--bs-ui-purple,#6f42c1)!important;color:#fff!important}
+
+        .sl-pagination{display:flex;justify-content:space-between;align-items:center;padding:.75rem 0;font-size:.82rem}
+        .sl-pagination .page-link{border-radius:8px!important}
+        .sl-result-count{font-size:.78rem;color:var(--bs-secondary-color)}
+
+        /* ── Modal overrides ── */
+        .sl-modal .modal-content{border-radius:16px;overflow:hidden;border:none;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+        .sl-modal .modal-header{background:linear-gradient(135deg,#d4af37,#c5a028);padding:.875rem 1.25rem}
+        .sl-modal .modal-header .modal-title{color:#fff;font-size:1rem;font-weight:600}
+        .sl-modal .modal-header .btn-close{filter:brightness(0) invert(1)}
+        .sl-modal .modal-body{padding:1.25rem}
+        .sl-modal .modal-footer{padding:.75rem 1.25rem;border-top:1px solid var(--bs-border-color);gap:.5rem}
+        .sl-modal .form-control,.sl-modal .form-select{border-radius:10px;font-size:.84rem;border-color:var(--bs-border-color)}
+        .sl-modal .form-control:focus,.sl-modal .form-select:focus{border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.15)}
+        .sl-modal .badge{border-radius:8px;font-size:.72rem;font-weight:600}
+        .sl-modal h5.text-gold{color:#d4af37!important;font-size:.95rem;font-weight:600}
+        .sl-modal .form-label{font-size:.8rem;margin-bottom:.25rem}
+        .sl-modal .alert{border-radius:10px;font-size:.84rem}
+        .sl-modal .btn{border-radius:10px}
+
+        /* Phase content */
+        .sl-phase-title{font-size:2.5rem;color:var(--bs-success)}
+
+        /* Auto-dial button states */
+        .auto-dial-btn{position:relative;min-width:150px}
+        .auto-dial-btn.active{background:var(--bs-danger)!important;border-color:var(--bs-danger)!important}
+
+        /* Dark mode tweaks */
+        [data-bs-theme=dark] .sl-card{background:var(--bs-card-bg);border-color:var(--bs-border-color)}
+        [data-bs-theme=dark] .sl-legend{background:var(--bs-tertiary-bg)}
+        [data-bs-theme=dark] .sl-table thead th{background:var(--bs-tertiary-bg)}
+        [data-bs-theme=dark] .sl-search input{background:var(--bs-input-bg);color:var(--bs-body-color);border-color:var(--bs-border-color)}
+        [data-bs-theme=dark] .sl-modal .modal-content{background:var(--bs-card-bg)}
     </style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Ravens
-        @endslot
-        @slot('title')
-            Ravens Calling System
-        @endslot
-    @endcomponent
+    @php
+        $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
+            ->where('expires_at', '>', now())
+            ->exists();
+    @endphp
 
-    <div class="row">
-        <div class="col-12">
-            @php
-                $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
-                    ->where('expires_at', '>', now())
-                    ->exists();
-            @endphp
-            @if(!$hasZoomToken)
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="bx bx-phone-off me-2"></i>
-                <strong>Zoom Phone Not Connected!</strong> You need to connect your Zoom Phone account to make calls.
-                <a href="/zoom/authorize" class="btn btn-sm btn-primary ms-3">
-                    <i class="bx bx-link-external me-1"></i> Connect Zoom Now
-                </a>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Topbar -->
+    <div class="sl-topbar">
+        <div>
+            <h1><i class="bx bx-phone-call me-2" style="color:#d4af37"></i>Ravens Calling System
+                <span class="sl-subtitle">{{ $leads->total() }} lead{{ $leads->total() !== 1 ? 's' : '' }}</span>
+            </h1>
+        </div>
+        <div class="sl-actions">
+            <form action="{{ route('ravens.calling') }}" method="GET" class="sl-search">
+                <input type="text" name="search" placeholder="Search name or phone…" value="{{ request('search') }}">
+                <button type="submit" class="sl-btn sl-btn-gold"><i class="bx bx-search"></i></button>
+                @if(request('search'))
+                    <a href="{{ route('ravens.calling') }}" class="sl-btn sl-btn-outline" title="Clear"><i class="bx bx-x"></i></a>
+                @endif
+            </form>
+            <button id="autoDialBtn" class="sl-btn sl-btn-success auto-dial-btn">
+                <i class="bx bx-play-circle"></i>
+                <span id="autoDialText">Start Auto-Dial</span>
+            </button>
+        </div>
+    </div>
+
+    @if(!$hasZoomToken)
+    <div class="sl-alert sl-alert-warning">
+        <i class="bx bx-phone-off" style="font-size:1.1rem"></i>
+        <span><strong>Zoom Phone Not Connected!</strong> Connect your account to make calls.</span>
+        <a href="/zoom/authorize" class="sl-btn sl-btn-gold" style="margin-left:auto"><i class="bx bx-link-external"></i> Connect Zoom</a>
+    </div>
+    @endif
+
+    <div class="sl-card">
+        <div class="sl-card-header">
+            <h2>Leads to Call</h2>
+            <div class="sl-legend" style="margin:0;padding:.35rem .65rem">
+                <strong><i class="bx bx-info-circle"></i> Dial Tracking:</strong>
+                <span><span class="dial-badge is-mine d-inline-flex" style="width:18px;height:18px;background:var(--bs-primary);font-size:.5rem">ME</span> You</span>
+                <span><span class="dial-badge d-inline-flex" style="width:18px;height:18px;background:var(--bs-danger);font-size:.5rem">AB</span> Others</span>
+                <span style="opacity:.6">Hover badge for details · Auto-refreshes every 30s</span>
+            </div>
+        </div>
+        <div class="sl-card-body" style="padding:.5rem .75rem">
+            <div class="table-responsive">
+                <table class="sl-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">#</th>
+                            <th>Customer Name</th>
+                            <th style="width:240px">Callback Note <span style="font-weight:400;opacity:.6">(3-day auto-clear)</span></th>
+                            <th style="width:90px;text-align:center">Dialed</th>
+                            <th style="width:100px;text-align:center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody">
+                        @forelse($leads as $index => $lead)
+                            <tr class="lead-row" data-lead-id="{{ $lead->id }}" data-phone="{{ $lead->phone_number }}" data-secondary-phone="{{ $lead->secondary_phone_number ?? '' }}">
+                                <td>{{ $leads->firstItem() + $index }}</td>
+                                <td>
+                                    <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
+                                    @if($lead->sale_at && $lead->closer_name)
+                                        <span class="badge bg-success ms-1" style="border-radius:8px;font-size:.68rem">Sale by {{ $lead->closer_name }} · {{ $lead->sale_at->format('M d, Y') }}</span>
+                                    @endif
+                                    @if(
+                                        ($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)) ||
+                                        (strtolower($lead->team ?? '') === 'peregrine') ||
+                                        (stripos($lead->assigned_partner ?? '', 'peregrine') !== false)
+                                    )
+                                        <span class="badge bg-purple ms-1" style="border-radius:8px;font-size:.68rem">Peregrine</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @php
+                                        $showNote = false;
+                                        $noteValue = '';
+                                        if ($lead->callback_note && $lead->callback_note_updated_at) {
+                                            $noteAge = $lead->callback_note_updated_at->diffInDays(now(), false);
+                                            if ($noteAge < 3) {
+                                                $showNote = true;
+                                                $noteValue = $lead->callback_note;
+                                            }
+                                        }
+                                    @endphp
+                                    <input type="text" class="callback-note-input" data-lead-id="{{ $lead->id }}"
+                                        value="{{ $noteValue }}" placeholder="e.g., callback 2pm"
+                                        onblur="saveCallbackNote({{ $lead->id }}, this.value)">
+                                    @if($showNote && $lead->callback_note_updated_at)
+                                        <small class="text-muted d-block mt-1" style="font-size:.72rem">
+                                            <i class="bx bx-time-five"></i> {{ $lead->callback_note_updated_at->diffForHumans() }}
+                                        </small>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <div class="dial-badges" id="dial-badges-{{ $lead->id }}"></div>
+                                </td>
+                                <td class="text-center">
+                                    <button class="dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)">
+                                        <i class="bx bx-phone-call"></i> Call
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-4" style="color:var(--bs-secondary-color)">
+                                    <i class="bx bx-info-circle" style="font-size:1.5rem;display:block;margin-bottom:.25rem"></i>
+                                    No leads available
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if($leads->hasPages())
+            <div class="sl-pagination">
+                <span class="sl-result-count">Showing {{ $leads->firstItem() }}–{{ $leads->lastItem() }} of {{ $leads->total() }}</span>
+                {{ $leads->appends(request()->query())->links() }}
             </div>
             @endif
-            
-            <div class="card bordered">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Leads to Call</h4>
-                    <div class="d-flex gap-2">
-                        <button id="autoDialBtn" class="btn btn-success auto-dial-btn">
-                            <i class="bx bx-play-circle me-1"></i>
-                            <span id="autoDialText">Start Auto-Dial</span>
-                        </button>
-                        <button onclick="testRavensFormOpen()" class="btn btn-info btn-sm">
-                            <i class="bx bx-test-tube me-1"></i> Test Form
-                        </button>
-                        <button onclick="testZoomProtocol()" class="btn btn-warning btn-sm">
-                            <i class="bx bx-test-tube me-1"></i> Test Zoom
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    <!-- Dial Tracking Legend -->
- <div class="d-flex align-items-center gap-3 mb-3 p-2 border rounded bg-surface-bg-light u-fs-085" >
-                        <strong><i class="bx bx-info-circle me-1"></i> Dial Tracking:</strong>
- <span><span class="dial-badge is-mine d-inline-flex u-w-20 u-h-20" style="background-color: var(--bs-primary); font-size: 0.55rem">ME</span> = You dialed</span>
- <span><span class="dial-badge d-inline-flex u-w-20 u-h-20" style="background-color: var(--bs-danger); font-size: 0.55rem">AB</span> = Another closer dialed</span>
-                        <span class="text-muted">| Hover badge to see name & time | Updates every 30s</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="60">#</th>
-                                    <th>Customer Name</th>
-                                    <th width="250">Callback Note <small class="text-muted">(auto-clears after 3 days)</small></th>
-                                    <th width="100" class="text-center">Dialed By</th>
-                                    <th width="120" class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leadsTableBody">
-                                @forelse($leads as $index => $lead)
-                                    <tr class="lead-row" data-lead-id="{{ $lead->id }}" data-phone="{{ $lead->phone_number }}" data-secondary-phone="{{ $lead->secondary_phone_number ?? '' }}">
-                                        <td>{{ $leads->firstItem() + $index }}</td>
-                                        <td>
-                                            <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
-                                            @if(
-                                                ($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)) ||
-                                                (strtolower($lead->team ?? '') === 'peregrine') ||
-                                                (stripos($lead->assigned_partner ?? '', 'peregrine') !== false)
-                                            )
-                                                <span class="badge bg-purple ms-1" title="Peregrine">Peregrine</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @php
-                                                // Auto-clear callback note if older than 3 days
-                                                $showNote = false;
-                                                $noteValue = '';
-                                                if ($lead->callback_note && $lead->callback_note_updated_at) {
-                                                    $noteAge = $lead->callback_note_updated_at->diffInDays(now(), false);
-                                                    if ($noteAge < 3) {
-                                                        $showNote = true;
-                                                        $noteValue = $lead->callback_note;
-                                                    }
-                                                }
-                                            @endphp
-                                            <input 
-                                                type="text" 
-                                                class="form-control form-control-sm callback-note-input" 
-                                                data-lead-id="{{ $lead->id }}"
-                                                value="{{ $noteValue }}"
-                                                placeholder="e.g., John's callback - 2pm"
-                                                onblur="saveCallbackNote({{ $lead->id }}, this.value)"
- >
-                                            @if($showNote && $lead->callback_note_updated_at)
-                                                <small class="text-muted d-block mt-1">
-                                                    <i class="bx bx-time-five"></i> {{ $lead->callback_note_updated_at->diffForHumans() }}
-                                                </small>
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="dial-badges" id="dial-badges-{{ $lead->id }}">
-                                                <!-- Populated by JS from server -->
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-primary btn-sm dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)">
-                                                <i class="bx bx-phone-call"></i> Call
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">
-                                            <i class="bx bx-info-circle fs-3"></i>
-                                            <p class="mb-0">No leads available</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    @if($leads->hasPages())
-                    <div class="d-flex justify-content-between align-items-center mt-3 px-2">
-                        <small class="text-muted">Showing {{ $leads->firstItem() }}–{{ $leads->lastItem() }} of {{ $leads->total() }} leads</small>
-                        {{ $leads->links() }}
-                    </div>
-                    @endif
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- PHASED CALL POPUP MODAL -->
-    <div class="modal fade" id="callDetailsModal" tabindex="-1">
+    <div class="modal fade sl-modal" id="callDetailsModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
- <div class="modal-header bg-gradient-gold" >
-                    <h5 class="modal-title text-white"><i class="fas fa-phone-alt me-2"></i><span id="callModalStatus">Call Connected</span></h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bx bx-phone-call me-2"></i><span id="callModalStatus">Call Connected</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="callModalBody">
 
                     <!-- PHASE 1: CALL CONNECTED -->
- <div class="d-none" id="phase1" >
+                    <div class="d-none" id="phase1">
                         <div class="text-center py-5">
                             <div class="mb-4">
- <i class="fas fa-phone-alt text-success u-fs-4" ></i>
+                                <i class="bx bx-phone-call sl-phase-title"></i>
                             </div>
- <h3 class="mb-3 text-gold" id="callerName">Connecting...</h3>
+                            <h3 class="mb-3" style="color:#d4af37" id="callerName">Connecting...</h3>
                             <p class="lead mb-2" id="callerPhone"></p>
                             <p class="text-muted">Call in progress</p>
- <button type="button" class="btn btn-lg mt-4 bg-gradient-gold text-white" onclick="goToPhase2()">
-                                Start Call Info <i class="fas fa-arrow-right ms-2"></i>
+                            <button type="button" class="sl-btn sl-btn-gold mt-4" style="padding:.55rem 1.5rem;font-size:.9rem" onclick="goToPhase2()">
+                                Start Call Info <i class="bx bx-right-arrow-alt ms-1"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
- <div class="d-none" id="phase2" >
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-info-circle me-2"></i> <strong>Review and update information as needed</strong>
+                    <div class="d-none" id="phase2">
+                        <div class="alert alert-info mb-3" style="border-radius:10px">
+                            <i class="bx bx-info-circle me-2"></i> <strong>Review and update information as needed</strong>
                         </div>
 
                         <div class="row g-3">
@@ -390,25 +375,25 @@
                         </div>
 
                         <div class="text-center mt-4">
-                            <button type="button" class="btn btn-light btn-lg px-4 me-2" onclick="goToPhase1()">
-                                <i class="fas fa-arrow-left me-2"></i> Back
+                            <button type="button" class="sl-btn sl-btn-outline me-2" onclick="goToPhase1()">
+                                <i class="bx bx-left-arrow-alt"></i> Back
                             </button>
- <button type="button" class="btn btn-lg px-4 bg-gradient-gold text-white" id="showMoreBtn" onclick="goToPhase3()">
-                                <i class="fas fa-arrow-right me-2"></i> Continue
+                            <button type="button" class="sl-btn sl-btn-gold" id="showMoreBtn" onclick="goToPhase3()">
+                                Continue <i class="bx bx-right-arrow-alt"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 3: FULL DETAILS WITH CHANGE TRACKING -->
- <div class="d-none" id="phase3" >
-                        <div class="alert alert-success mb-3">
-                            <i class="fas fa-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
+                    <div class="d-none" id="phase3">
+                        <div class="alert alert-success mb-3" style="border-radius:10px">
+                            <i class="bx bx-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
                         </div>
 
                         <div class="row g-3">
                             <!-- Personal Information Section -->
                             <div class="col-12">
- <h5 class="border-bottom pb-2 mb-3 text-gold" >Personal Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold">Personal Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -565,7 +550,7 @@
 
                             <!-- Medical Information Section -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" >Medical Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold">Medical Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -615,7 +600,7 @@
 
                             <!-- Policy Information Section -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" >Policy Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold">Policy Information</h5>
                             </div>
 
                             <!-- Beneficiaries Section -->
@@ -703,7 +688,7 @@
 
                             <!-- Banking Information Section -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" >Banking Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold">Banking Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -775,7 +760,7 @@
 
                             <!-- Card Information Section -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-credit-card me-2"></i>Card Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-credit-card me-2"></i>Card Information</h5>
                             </div>
 
                             <div class="col-md-4">
@@ -807,7 +792,7 @@
 
                             <!-- Additional Information -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" >Additional Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold">Additional Information</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -824,7 +809,7 @@
 
                             <!-- Sale Assignment Section (moved from Phase 2) -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-user-tag me-2"></i>Sale Assignment</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-user-check me-2"></i>Sale Assignment</h5>
                             </div>
 
                             <div class="col-md-6">
@@ -851,7 +836,7 @@
                             </div>
 
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-briefcase me-2"></i>Partner Information</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-briefcase me-2"></i>Partner Information</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Assigned Partner:</label>
@@ -861,7 +846,7 @@
 
                             <!-- Follow Up Schedule -->
                             <div class="col-12 mt-4">
- <h5 class="border-bottom pb-2 mb-3 text-gold" ><i class="fas fa-calendar-event me-2"></i>Follow Up Schedule</h5>
+                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-calendar me-2"></i>Follow Up Schedule</h5>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-bold">Follow Up Required:</label>
@@ -871,7 +856,7 @@
                                     <option value="0">No</option>
                                 </select>
                             </div>
- <div class="col-md-12 d-none" id="followup_datetime_field" >
+                            <div class="col-md-12 d-none" id="followup_datetime_field">
                                 <label class="form-label fw-bold">Follow Up Date & Time:</label>
                                 <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
                                 <small class="text-muted">When should the follow-up call be scheduled?</small>
@@ -948,8 +933,8 @@
                         </script>
 
                         <div class="text-center mt-4">
-                            <button type="button" class="btn btn-secondary" onclick="goToPhase2()">
-                                <i class="fas fa-arrow-left me-2"></i> Back to Essential Fields
+                            <button type="button" class="sl-btn sl-btn-secondary" onclick="goToPhase2()">
+                                <i class="bx bx-left-arrow-alt"></i> Back to Essential Fields
                             </button>
                         </div>
                     </div>
@@ -958,20 +943,20 @@
                 <div class="modal-footer">
                     <!-- Disposition Dropdown (on the left) -->
                     <div class="btn-group dropup me-auto">
-                        <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-ban me-1"></i> Dispose Lead
+                        <button type="button" class="sl-btn sl-btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bx bx-block"></i> Dispose Lead
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('no_answer'); return false;"><i class="fas fa-phone-slash me-2"></i> No Answer</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_number'); return false;"><i class="fas fa-phone-times me-2"></i> Wrong Number</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_details'); return false;"><i class="fas fa-exclamation-triangle me-2"></i> Wrong Details</a></li>
+                        <ul class="dropdown-menu" style="border-radius:10px">
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('no_answer'); return false;"><i class="bx bx-phone-off me-2"></i> No Answer</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_number'); return false;"><i class="bx bx-x-circle me-2"></i> Wrong Number</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_details'); return false;"><i class="bx bx-error me-2"></i> Wrong Details</a></li>
                         </ul>
                     </div>
                     
                     <!-- Action buttons (on the right) -->
-                    <button type="button" class="btn btn-secondary" onclick="closeCallModal()"><i class="fas fa-phone-slash me-1"></i> End Call</button>
-                    <button type="button" class="btn btn-warning" onclick="saveAndExit()"><i class="fas fa-save me-1"></i> Save & Exit</button>
-                    <button type="button" class="btn btn-success" onclick="submitSale()"><i class="fas fa-check-circle me-1"></i> Submit Sale</button>
+                    <button type="button" class="sl-btn sl-btn-secondary" onclick="closeCallModal()"><i class="bx bx-phone-off"></i> End Call</button>
+                    <button type="button" class="sl-btn sl-btn-warning" onclick="saveAndExit()"><i class="bx bx-save"></i> Save & Exit</button>
+                    <button type="button" class="sl-btn sl-btn-success" onclick="submitSale()"><i class="bx bx-check-circle"></i> Submit Sale</button>
                 </div>
             </div>
         </div>
@@ -2261,6 +2246,8 @@
                 }
                 return b.name;
             }).join(', ');
+        } else if (ld.beneficiary_raw) {
+            beneficiariesDisplay = ld.beneficiary_raw;
         }
         document.getElementById('orig_beneficiary').textContent = beneficiariesDisplay;
         // Note: orig_beneficiary_dob display has been removed in favor of showing all beneficiaries with DOBs
@@ -2420,6 +2407,8 @@
                 }
                 return b.name;
             }).join(', ');
+        } else if (leadData.beneficiary_raw) {
+            beneficiariesDisplay = leadData.beneficiary_raw;
         }
         safeSetText('displayBeneficiary', beneficiariesDisplay);
         

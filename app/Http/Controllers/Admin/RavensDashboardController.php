@@ -40,13 +40,14 @@ class RavensDashboardController extends Controller
         return view('ravens.dashboard', compact('stats', 'mySales'));
     }
 
-    public function calling()
+    public function calling(Request $request)
     {
         // Get all leads for Ravens employees to call
         // Exclude leads that have been marked as sold (status = 'accepted' and sale_at is not null)
         // UNLESS the current user is the one who closed it
         // Also exclude leads submitted by Peregrine closers (team = Teams::PEREGRINE)
         $currentUser = Auth::user();
+        $search = $request->input('search');
         
         $leads = Lead::select([
             'id', 'cn_name', 'phone_number', 'secondary_phone_number', 
@@ -84,6 +85,13 @@ class RavensDashboardController extends Controller
                 ->where('phone_number', '!=', '')
                 ->where('phone_number', '!=', 'N/A')
                 ->groupBy('phone_number');
+        })
+        // Apply search filter
+        ->when($search, function($query) use ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('cn_name', 'like', '%' . $search . '%')
+                  ->orWhere('phone_number', 'like', '%' . $search . '%');
+            });
         })
         ->orderBy('created_at', 'desc')
         ->paginate(100);
@@ -209,6 +217,10 @@ class RavensDashboardController extends Controller
             if (!is_array($beneficiaries)) {
                 $beneficiaries = [];
             }
+            // Fallback: if no structured beneficiaries, use the legacy text field
+            if (empty($beneficiaries) && $lead->beneficiary) {
+                $beneficiaries = [['name' => $lead->beneficiary, 'dob' => $lead->beneficiary_dob ? \Carbon\Carbon::parse($lead->beneficiary_dob)->format('Y-m-d') : null, 'relation' => '']];
+            }
 
             // Return full lead data for the form with properly formatted dates
             return response()->json([
@@ -222,6 +234,7 @@ class RavensDashboardController extends Controller
                 'state' => $lead->state,
                 'zip_code' => $lead->zip_code,
                 'beneficiaries' => $beneficiaries,
+                'beneficiary_raw' => $lead->beneficiary,
                 'carrier_name' => $lead->carrier_name,
                 'coverage_amount' => $lead->coverage_amount,
                 'monthly_premium' => $lead->monthly_premium,

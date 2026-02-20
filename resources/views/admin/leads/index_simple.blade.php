@@ -1,126 +1,250 @@
 @extends('layouts.master')
 
 @section('title')
-    Leads Management
+    Raven Leads
 @endsection
 
 @section('css')
-    <style>
-    .table-wrapper {
-        overflow-x: auto;
-        position: relative;
+<style>
+    /* ── Leads Page Design System (.sl-* namespace, matching Sales) ── */
+
+    /* Top bar */
+    .sl-topbar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; flex-wrap: wrap; gap: .75rem;
+    }
+    .sl-topbar-left { display: flex; align-items: center; gap: .75rem; }
+    .sl-page-title {
+        font-size: 1.1rem; font-weight: 800; color: #1e293b; margin: 0;
+        display: flex; align-items: center; gap: .4rem;
+    }
+    .sl-page-title i { color: #d4af37; font-size: 1.2rem; }
+    .sl-topbar-right { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+
+    /* Search */
+    .sl-search-wrap { position: relative; display: flex; align-items: center; }
+    .sl-search-icon { position: absolute; left: .6rem; color: #94a3b8; font-size: .9rem; pointer-events: none; }
+    .sl-search-input {
+        padding: .42rem .65rem .42rem 2rem;
+        font-size: .78rem; border: 1px solid rgba(0,0,0,.1);
+        border-radius: 22px; background: #fff; width: 220px;
+        outline: none; transition: border-color .15s;
+    }
+    .sl-search-input:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+
+    /* Action buttons */
+    .sl-btn {
+        display: inline-flex; align-items: center; gap: .35rem;
+        padding: .42rem .8rem; font-size: .75rem; font-weight: 700;
+        border-radius: 22px; border: none; cursor: pointer;
+        transition: all .15s; white-space: nowrap; text-decoration: none;
+    }
+    .sl-btn-add {
+        background: linear-gradient(135deg, #d4af37, #b8941f); color: #0f172a;
+    }
+    .sl-btn-add:hover { background: linear-gradient(135deg, #e0c04c, #d4af37); transform: translateY(-1px); color: #0f172a; }
+    .sl-btn-import {
+        background: transparent; border: 1px solid rgba(0,0,0,.12); color: #475569;
+    }
+    .sl-btn-import:hover { border-color: #d4af37; color: #d4af37; }
+
+    /* Card */
+    .sl-card {
+        background: rgba(255,255,255,.9);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(0,0,0,.06);
+        border-radius: 16px;
+        overflow: hidden;
     }
 
-    .locked-table {
-        border-collapse: separate;
-        border-spacing: 0;
+    /* Filter Pills */
+    .sl-filter-pills {
+        display: flex; align-items: center; gap: .4rem;
+        padding: .6rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,.05);
+        background: rgba(248,250,252,.6);
+        flex-wrap: wrap;
+    }
+    .sl-pill-date {
+        font-size: .72rem; font-weight: 600;
+        padding: .32rem .55rem; border-radius: 22px;
+        border: 1px solid rgba(0,0,0,.08);
+        background: #fff; color: #475569;
+        cursor: pointer; outline: none;
+        transition: border-color .15s;
+        min-width: 100px; max-width: 120px;
+        color-scheme: light;
+    }
+    .sl-pill-select {
+        font-size: .72rem; font-weight: 600;
+        padding: .32rem .55rem; border-radius: 22px;
+        border: 1px solid rgba(0,0,0,.08);
+        background: #fff; color: #475569;
+        cursor: pointer; outline: none;
+        transition: border-color .15s;
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right .5rem center;
+        padding-right: 1.5rem;
+        max-width: 180px;
+    }
+    .sl-pill-date:focus, .sl-pill-select:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+    .sl-pill-label {
+        font-size: .64rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; color: #94a3b8; margin-right: -2px;
+    }
+    .sl-pill-clear {
+        font-size: .68rem; font-weight: 600; color: #ef4444;
+        text-decoration: none; padding: .25rem .5rem;
+        border-radius: 22px; border: 1px solid rgba(239,68,68,.2);
+        display: inline-flex; align-items: center; gap: 2px;
+        transition: all .15s;
+    }
+    .sl-pill-clear:hover { background: rgba(239,68,68,.08); color: #dc2626; }
+    .sl-result-count {
+        font-size: .72rem; font-weight: 600; color: #94a3b8;
+        margin-left: auto;
     }
 
-    .locked-table thead th:nth-child(1),
-    .locked-table thead th:nth-child(2),
-    .locked-table thead th:nth-child(3),
-    .locked-table thead th:nth-child(4),
-    .locked-table tbody td:nth-child(1),
-    .locked-table tbody td:nth-child(2),
-    .locked-table tbody td:nth-child(3),
-    .locked-table tbody td:nth-child(4) {
-        position: sticky;
-        background: var(--bs-card-bg);
-        z-index: 10;
+    /* Table area */
+    .sl-tbl-wrap {
+        overflow-x: auto; overflow-y: auto;
+        max-height: 560px;
+        scrollbar-width: thin; scrollbar-color: #d4af37 transparent;
     }
+    .sl-tbl-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
+    .sl-tbl-wrap::-webkit-scrollbar-track { background: transparent; }
+    .sl-tbl-wrap::-webkit-scrollbar-thumb { background: #d4af37; border-radius: 3px; }
 
-    .locked-table thead th:nth-child(1) { left: 0; z-index: 11; width: 50px; }
-    .locked-table thead th:nth-child(2) { left: 50px; z-index: 11; width: 70px; }
-    .locked-table thead th:nth-child(3) { left: 120px; z-index: 11; min-width: 150px; }
-    .locked-table thead th:nth-child(4) { left: 270px; z-index: 11; min-width: 180px; }
-
-    .locked-table tbody td:nth-child(1) { left: 0; }
-    .locked-table tbody td:nth-child(2) { left: 50px; }
-    .locked-table tbody td:nth-child(3) { left: 120px; }
-    .locked-table tbody td:nth-child(4) { left: 270px; }
-
-    .locked-table thead th {
-        background: var(--bs-surface-bg-light) !important;
+    .sl-tbl {
+        width: 100%; border-collapse: separate; border-spacing: 0; font-size: .78rem;
+    }
+    .sl-tbl thead th {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        font-size: .64rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .5px; color: #64748b;
+        padding: .45rem .45rem;
+        border-bottom: 1px solid rgba(212,175,55,.18);
         white-space: nowrap;
-        font-weight: 600;
-        font-size: 0.95rem;
-        padding: 0.85rem 0.6rem;
+        position: sticky; top: 0; z-index: 10;
+    }
+    .sl-tbl tbody td {
+        padding: .35rem .45rem;
+        border-bottom: 1px solid rgba(0,0,0,.04);
+        vertical-align: middle; color: #334155;
+        transition: background .12s;
+    }
+    .sl-tbl tbody tr { transition: background .12s; }
+    .sl-tbl tbody tr:hover td { background: rgba(212,175,55,.045); }
+    .sl-tbl tbody tr:nth-child(even) td { background: rgba(248,250,252,.45); }
+    .sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.045); }
+
+    /* Sticky first 4 columns */
+    .sl-sticky-col { position: sticky; z-index: 5; background: #fff; }
+    .sl-tbl thead .sl-sticky-col { z-index: 15; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
+    .sl-col-1 { left: 0; }
+    .sl-col-2 { display:none !important; }
+    .sl-col-3 { left: 40px; }
+    .sl-col-4 { left: 180px; border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-tbl thead .sl-col-4 { border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-tbl tbody tr:hover .sl-sticky-col { background: rgba(255,252,240,1); }
+    .sl-tbl tbody tr:nth-child(even) .sl-sticky-col { background: #fafbfc; }
+    .sl-tbl tbody tr:nth-child(even):hover .sl-sticky-col { background: rgba(255,252,240,1); }
+
+    /* Action buttons */
+    .sl-act-group { display: flex; gap: 4px; justify-content: center; }
+    .sl-act-group .btn {
+        width: 28px; height: 28px; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; font-size: .68rem;
+        border: none; color: #fff; transition: all .15s;
+        box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+    .sl-act-group .btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+    .sl-act-group .btn-secondary { background: linear-gradient(135deg, #64748b, #475569); }
+    .sl-act-group .btn-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .sl-act-group .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .sl-act-group .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+    /* Editable comment */
+    .sl-editable-comment {
+        min-width: 150px; max-width: 300px;
+        padding: 4px 8px; border-radius: 16px;
+        border: 1px solid rgba(0,0,0,.06);
+        font-size: .74rem; color: #475569;
+        transition: border-color .15s, box-shadow .15s;
+        outline: none;
+    }
+    .sl-editable-comment:focus {
+        border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12);
     }
 
-    .locked-table tbody td {
-        font-size: 0.95rem;
-        padding: 0.55rem 0.6rem;
-        vertical-align: middle;
-    }
+    /* Badges */
+    .sl-tbl .badge { font-size: .68rem; font-weight: 600; padding: .25rem .55rem; border-radius: 22px; }
+    .bg-purple { background-color: var(--bs-ui-purple, #6f42c1) !important; color: #fff !important; }
 
-    .btn-group-actions {
-        display: flex;
-        gap: 0.25rem;
-        flex-wrap: nowrap;
-    }
+    /* Pagination */
+    .sl-card .mt-3 { padding: 0 1rem .75rem; }
+    .sl-card .pagination svg { max-width: 16px !important; max-height: 16px !important; }
 
-    .btn-group-actions .btn {
-        padding: 0.32rem 0.6rem;
-        font-size: 0.95rem;
+    /* ── Dark mode ── */
+    [data-theme="dark"] .sl-page-title { color: #f1f5f9; }
+    [data-theme="dark"] .sl-search-input {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #e2e8f0;
     }
+    [data-theme="dark"] .sl-search-input:focus { border-color: #d4af37; }
+    [data-theme="dark"] .sl-btn-import { border-color: rgba(255,255,255,.1); color: #94a3b8; }
+    [data-theme="dark"] .sl-btn-import:hover { border-color: #d4af37; color: #d4af37; }
+    [data-theme="dark"] .sl-card {
+        background: rgba(30,41,59,.65); border-color: rgba(255,255,255,.06);
+    }
+    [data-theme="dark"] .sl-filter-pills {
+        background: rgba(15,23,42,.4); border-color: rgba(255,255,255,.05);
+    }
+    [data-theme="dark"] .sl-pill-date,
+    [data-theme="dark"] .sl-pill-select {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.1); color: #cbd5e1;
+        color-scheme: dark;
+    }
+    [data-theme="dark"] .sl-pill-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] .sl-pill-clear { border-color: rgba(239,68,68,.3); }
+    [data-theme="dark"] .sl-result-count { color: #64748b; }
+    [data-theme="dark"] .sl-tbl thead th {
+        background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.9));
+        color: #94a3b8; border-color: rgba(212,175,55,.12);
+    }
+    [data-theme="dark"] .sl-tbl tbody td {
+        color: #cbd5e1; border-color: rgba(255,255,255,.04);
+    }
+    [data-theme="dark"] .sl-tbl tbody tr:hover td { background: rgba(212,175,55,.06); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.06); }
+    [data-theme="dark"] .sl-sticky-col { background: #1e293b; }
+    [data-theme="dark"] .sl-tbl thead .sl-sticky-col { background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.9)); }
+    [data-theme="dark"] .sl-tbl tbody tr:hover .sl-sticky-col { background: rgba(30,41,59,.9); }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even) .sl-sticky-col { background: #1a2536; }
+    [data-theme="dark"] .sl-tbl tbody tr:nth-child(even):hover .sl-sticky-col { background: rgba(30,41,59,.9); }
+    [data-theme="dark"] .sl-col-4 { border-right-color: rgba(212,175,55,.12); }
+    [data-theme="dark"] .sl-editable-comment {
+        background: rgba(30,41,59,.8); border-color: rgba(255,255,255,.08); color: #e2e8f0;
+    }
+    [data-theme="dark"] .sl-editable-comment:focus { border-color: #d4af37; }
 
-    /* Slightly nicer font and spacing for leads table */
-    .locked-table, .locked-table th, .locked-table td {
-        font-family: Inter, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    }
-
-    /* Hide any stuck loading overlays */
-    .page-content { opacity: 1 !important; }
-    body::after, .page-content::after { display: none !important; }
-    
-    /* Fix oversized pagination arrows */
-    svg {
-        max-width: 20px !important;
-        max-height: 20px !important;
-    }
-    
-    .pagination svg, .pagination-wrapper svg, nav svg, .page-link svg {
-        width: 16px !important;
-        height: 16px !important;
-        display: inline-block !important;
-        vertical-align: middle !important;
-    }
-    
-    /* Ensure pagination links display properly */
-    .pagination {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 0.25rem !important;
-    }
-    
-    .pagination .page-link {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-width: 38px !important;
-        height: 38px !important;
-    }
-    
-    /* Peregrine badge style */
-    .bg-purple {
-        background-color: var(--bs-ui-purple) !important;
-        color: var(--bs-white, #fff) !important;
+    /* Responsiveness */
+    @media (max-width: 768px) {
+        .sl-topbar { flex-direction: column; align-items: flex-start; }
+        .sl-topbar-right { width: 100%; }
+        .sl-search-input { width: 100% !important; }
     }
 </style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Leads
-        @endslot
-        @slot('title')
-            Management
-        @endslot
-    @endcomponent
-
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show alert-soft-success" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
             <strong>Success!</strong> {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -148,177 +272,191 @@
         </div>
     @endif
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="card-title mb-0">Raven Leads Database</h4>
-                        <small class="text-muted">Complete leads database for Ravens team</small>
-                    </div>
-                    <div>
-                        <a href="{{ route('leads.create') }}" class="btn btn-primary waves-effect waves-light">
-                            <i class="fas fa-plus me-1"></i> Add New Lead
-                        </a>
-                        <button class="btn btn-outline-secondary waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#importModal">
-                            <i class="fas fa-file-import me-1"></i> Import Leads
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card-body">
-                    <!-- Instant Search -->
-                    <div class="row mb-3">
-                        <div class="col-md-5">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bx bx-search"></i></span>
-                                <input type="text" id="instantSearch" class="form-control" placeholder="Search by name, phone, SSN, carrier, state, closer..." value="{{ request('search') }}" autofocus>
-                                <button id="clearSearch" class="btn btn-outline-secondary {{ request('search') ? '' : 'd-none' }}" type="button"><i class="bx bx-x"></i></button>
-                            </div>
-                        </div>
-                        <div class="col-md-3 d-flex align-items-center">
-                            <small class="text-muted" id="resultCount">Showing {{ $leads->total() }} leads</small>
-                        </div>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table class="table table-striped table-bordered table-hover table-sm align-middle locked-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>ID</th>
-                                    <th>Customer Name</th>
-                                    <th>Actions</th>
-                                    <th>Phone Number</th>
-                                    <th>DOB</th>
-                                    <th>Smoker</th>
-                                    <th>Driving License #</th>
-                                    <th>Height</th>
-                                    <th>Weight</th>
-                                    <th>Birth Place</th>
-                                    <th>Medical Issue</th>
-                                    <th>Medications</th>
-                                    <th>Doc Name</th>
-                                    <th>S.S.N #</th>
-                                    <th>Street Address</th>
-                                    <th>State</th>
-                                    <th>Zip Code</th>
-                                    <th>Carrier Name</th>
-                                    <th>Coverage Amount</th>
-                                    <th>Monthly Premium</th>
-                                    <th>Beneficiary</th>
-                                    <th>Emergency Contact</th>
-                                    <th>Initial Draft Date</th>
-                                    <th>Future Draft Date</th>
-                                    <th>Bank Name</th>
-                                    <th>Acc Type</th>
-                                    <th>Routing Number</th>
-                                    <th>Acc Number</th>
-                                    <th>Card Info</th>
-                                    <th>Policy Type</th>
-                                    <th>Source</th>
-                                    <th>Closer Name</th>
-                                    <th>Acc Verified By</th>
-                                    <th>Bank Balance / SS Amount</th>
-                                    <th>SS Date</th>
-                                    <th>Preset Line #</th>
-                                    <th>Comments</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($leads as $index => $lead)
-                                    <tr>
-                                        <td><strong>{{ $leads->firstItem() + $index }}</strong></td>
-                                        <td><strong>{{ $lead->id }}</strong></td>
-                                        <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
-                                        <td>
-                                            @php
-                                                $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
-                                                $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
-                                            @endphp
-                                            <div class="btn-group-actions">
-                                                <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-outline-secondary btn-sm" title="Call">
-                                                    <i class="fas fa-phone" aria-hidden="true"></i>
-                                                </button>
-                                                <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-outline-info btn-sm" title="View">
-                                                    <i class="fas fa-eye" aria-hidden="true"></i>
-                                                </a>
-                                                @canEditModule('leads')
-                                                <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-outline-primary btn-sm" title="Edit">
-                                                    <i class="fas fa-edit" aria-hidden="true"></i>
-                                                </a>
-                                                @endcanEditModule
-                                                @canDeleteInModule('leads')
- <form class="d-inline" action="{{ route('leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete {{ addslashes($lead->cn_name) }}?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
-                                                        <i class="fas fa-trash" aria-hidden="true"></i>
-                                                    </button>
-                                                </form>
-                                                @endcanDeleteInModule
-                                            </div>
-                                        </td>
-                                        <td>{{ $lead->phone_number ?? 'N/A' }}</td>
-                                        <td>{{ $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->smoker ? 'Yes' : 'No' }}</td>
-                                        <td>{{ $lead->driving_license_number ?? 'N/A' }}</td>
-                                        <td>{{ $lead->height ?? 'N/A' }}</td>
-                                        <td>{{ $lead->weight ?? 'N/A' }}</td>
-                                        <td>{{ $lead->birth_place ?? 'N/A' }}</td>
-                                        <td>{{ Str::limit($lead->medical_issue ?? 'N/A', 30) }}</td>
-                                        <td>{{ Str::limit($lead->medications ?? 'N/A', 30) }}</td>
-                                        <td>{{ $lead->doctor_name ?? 'N/A' }}</td>
-                                        <td>{{ $lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A' }}</td>
-                                        <td>{{ Str::limit($lead->address ?? 'N/A', 40) }}</td>
-                                        <td>{{ $lead->state ?? 'N/A' }}</td>
-                                        <td>{{ $lead->zip_code ?? 'N/A' }}</td>
-                                        <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
-                                        <td>${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
-                                        <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                                        <td>{{ $lead->beneficiary ?? 'N/A' }}</td>
-                                        <td>{{ $lead->emergency_contact ?? 'N/A' }}</td>
-                                        <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->bank_name ?? 'N/A' }}</td>
-                                        <td>{{ $lead->account_type ?? 'N/A' }}</td>
-                                        <td>{{ $lead->routing_number ?? 'N/A' }}</td>
-                                        <td>{{ $lead->acc_number ?? 'N/A' }}</td>
-                                        <td>{{ $lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A' }}</td>
-                                        <td>{{ $lead->policy_type ?? 'N/A' }}</td>
-                                        <td>{{ $lead->source ?? 'N/A' }}</td>
-                                        <td>
-                                            {{ $lead->closer_name ?? 'N/A' }}
-                                            @if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
-                                                <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
-                                        <td>{{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A') }}</td>
-                                        <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
-                                        <td>{{ $lead->preset_line ?? 'N/A' }}</td>
-                                        <td>
- <div contenteditable="true" class="editable-comment u-min-w-150 u-rounded-4 u-max-w-300 border-surface-200" data-lead-id="{{ $lead->id }}" style="padding: 4px">{{ $lead->comments ?? 'Click to add...' }}</div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="37" class="text-center py-4">
-                                            <i class="bx bx-user-plus fs-1 text-muted"></i>
-                                            <p class="mb-0 text-muted">No leads available. Add or import leads to get started.</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="mt-3">
-                        {{ $leads->appends(request()->query())->links() }}
-                    </div>
-                </div>
+    <!-- Top bar -->
+    <div class="sl-topbar">
+        <div class="sl-topbar-left">
+            <h5 class="sl-page-title"><i class="mdi mdi-database-outline"></i> Raven Leads</h5>
+        </div>
+        <div class="sl-topbar-right">
+            <div class="sl-search-wrap">
+                <i class="bx bx-search sl-search-icon"></i>
+                <input type="text" id="leadsSearch" class="sl-search-input" placeholder="Search name, phone, SSN, carrier, state..." value="{{ request('search') }}">
             </div>
+            <a href="{{ route('leads.create') }}" class="sl-btn sl-btn-add">
+                <i class="bx bx-plus"></i> New Lead
+            </a>
+            <button type="button" class="sl-btn sl-btn-import" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bx bx-upload"></i> Import
+            </button>
+        </div>
+    </div>
+
+    <!-- Leads Card -->
+    <div class="sl-card">
+        <!-- Filter Pills -->
+        <form method="GET" action="{{ route('leads.index') }}" id="leadsFilterForm" class="sl-filter-pills">
+            <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">All Carriers</option>
+                @foreach($carriers as $carrier)
+                    <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
+                @endforeach
+            </select>
+            <select name="closer" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">All Closers</option>
+                @foreach($closerNames as $closer)
+                    <option value="{{ $closer }}" {{ request('closer') == $closer ? 'selected' : '' }}>{{ $closer }}</option>
+                @endforeach
+            </select>
+            <select name="state" class="sl-pill-select" onchange="this.form.submit()">
+                <option value="">All States</option>
+                @foreach($states as $state)
+                    <option value="{{ $state }}" {{ request('state') == $state ? 'selected' : '' }}>{{ $state }}</option>
+                @endforeach
+            </select>
+            <span class="sl-pill-label">FROM</span>
+            <input type="date" name="date_from" class="sl-pill-date" value="{{ request('date_from') }}" onchange="this.form.submit()">
+            <span class="sl-pill-label">TO</span>
+            <input type="date" name="date_to" class="sl-pill-date" value="{{ request('date_to') }}" onchange="this.form.submit()">
+            @if(request()->hasAny(['carrier','closer','state','date_from','date_to','search']))
+                <a href="{{ route('leads.index') }}" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            @endif
+            <span class="sl-result-count">{{ $leads->total() }} leads</span>
+        </form>
+
+        <!-- Table -->
+        <div class="sl-tbl-wrap">
+            <table class="sl-tbl" id="leadsTable">
+                <thead>
+                    <tr>
+                        <th class="sl-sticky-col sl-col-1" style="width:40px">#</th>
+                        <th class="sl-sticky-col sl-col-3" style="min-width:140px">Customer Name</th>
+                        <th class="sl-sticky-col sl-col-4" style="min-width:120px">Actions</th>
+                        <th>Phone Number</th>
+                        <th>DOB</th>
+                        <th>Smoker</th>
+                        <th>DL #</th>
+                        <th>Height</th>
+                        <th>Weight</th>
+                        <th>Birth Place</th>
+                        <th>Medical Issue</th>
+                        <th>Medications</th>
+                        <th>Doc Name</th>
+                        <th>S.S.N #</th>
+                        <th>Street Address</th>
+                        <th>State</th>
+                        <th>Zip</th>
+                        <th>Carrier</th>
+                        <th>Coverage</th>
+                        <th>Monthly Premium</th>
+                        <th>Beneficiary</th>
+                        <th>Emergency Contact</th>
+                        <th>Initial Draft</th>
+                        <th>Future Draft</th>
+                        <th>Bank</th>
+                        <th>Acc Type</th>
+                        <th>Routing #</th>
+                        <th>Acc #</th>
+                        <th>Card Info</th>
+                        <th>Policy Type</th>
+                        <th>Source</th>
+                        <th>Closer</th>
+                        <th>Verified By</th>
+                        <th>Balance / SS</th>
+                        <th>SS Date</th>
+                        <th>Preset Line</th>
+                        <th style="min-width:180px">Comments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($leads as $index => $lead)
+                        <tr>
+                            <td class="sl-sticky-col sl-col-1"><strong>{{ $leads->firstItem() + $index }}</strong></td>
+                            <td class="sl-sticky-col sl-col-3"><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
+                            <td class="sl-sticky-col sl-col-4">
+                                @php
+                                    $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
+                                    $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
+                                @endphp
+                                <div class="sl-act-group">
+                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-secondary" title="Call">
+                                        <i class="fas fa-phone"></i>
+                                    </button>
+                                    <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @canEditModule('leads')
+                                    <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    @endcanEditModule
+                                    @canDeleteInModule('leads')
+                                    <form class="d-inline" action="{{ route('leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Delete {{ addslashes($lead->cn_name) }}?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    @endcanDeleteInModule
+                                </div>
+                            </td>
+                            <td>{{ $lead->phone_number ?? 'N/A' }}</td>
+                            <td>{{ $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $lead->smoker ? 'Yes' : 'No' }}</td>
+                            <td>{{ $lead->driving_license_number ?? 'N/A' }}</td>
+                            <td>{{ $lead->height ?? 'N/A' }}</td>
+                            <td>{{ $lead->weight ?? 'N/A' }}</td>
+                            <td>{{ $lead->birth_place ?? 'N/A' }}</td>
+                            <td>{{ Str::limit($lead->medical_issue ?? 'N/A', 30) }}</td>
+                            <td>{{ Str::limit($lead->medications ?? 'N/A', 30) }}</td>
+                            <td>{{ $lead->doctor_name ?? 'N/A' }}</td>
+                            <td>{{ $lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A' }}</td>
+                            <td>{{ Str::limit($lead->address ?? 'N/A', 40) }}</td>
+                            <td>{{ $lead->state ?? 'N/A' }}</td>
+                            <td>{{ $lead->zip_code ?? 'N/A' }}</td>
+                            <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                            <td>${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
+                            <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
+                            <td>{{ $lead->beneficiary ?? 'N/A' }}</td>
+                            <td>{{ $lead->emergency_contact ?? 'N/A' }}</td>
+                            <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $lead->bank_name ?? 'N/A' }}</td>
+                            <td>{{ $lead->account_type ?? 'N/A' }}</td>
+                            <td>{{ $lead->routing_number ?? 'N/A' }}</td>
+                            <td>{{ $lead->acc_number ?? 'N/A' }}</td>
+                            <td>{{ $lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A' }}</td>
+                            <td>{{ $lead->policy_type ?? 'N/A' }}</td>
+                            <td>{{ $lead->source ?? 'N/A' }}</td>
+                            <td>
+                                {{ $lead->closer_name ?? 'N/A' }}
+                                @if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                    <span class="badge bg-purple ms-1">Peregrine</span>
+                                @endif
+                            </td>
+                            <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
+                            <td>{{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A') }}</td>
+                            <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
+                            <td>{{ $lead->preset_line ?? 'N/A' }}</td>
+                            <td>
+                                <div contenteditable="true" class="sl-editable-comment" data-lead-id="{{ $lead->id }}">{{ $lead->comments ?? 'Click to add...' }}</div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="38" class="text-center py-4">
+                                <i class="bx bx-user-plus" style="font-size:2rem;color:#94a3b8"></i>
+                                <p class="mb-0 text-muted" style="font-size:.82rem">No leads found. Add or import leads to get started.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-3">
+            {{ $leads->appends(request()->query())->links() }}
         </div>
     </div>
 
@@ -338,28 +476,22 @@
                             <input type="file" class="form-control" name="import_file" accept=".xlsx,.xls,.csv" required id="importFileInput">
                             <small class="text-muted">Accepted formats: .xlsx, .xls, .csv (Max: <strong>100MB</strong>)</small>
                         </div>
-                        
                         <div id="importError" class="alert alert-danger mb-2 d-none">
                             <strong><i class="bx bx-error-circle"></i> Error:</strong>
                             <span id="importErrorMsg"></span>
                         </div>
-                        
                         <div class="alert alert-info mb-2">
                             <strong><i class="bx bx-info-circle"></i> Deduplication:</strong>
-                            <small>System automatically checks for duplicates using <strong>Phone Number</strong> only. Existing leads with the same phone will be updated with missing data.</small>
+                            <small>System checks for duplicates using <strong>Phone Number</strong>. Existing leads with the same phone will be updated with missing data.</small>
                         </div>
-                        
                         <div class="alert alert-success mb-0">
                             <strong><i class="bx bx-columns"></i> Flexible Column Names:</strong>
                             <small>
- <ul class="mb-0 u-fs-085" >
-                                    <li><strong>Phone:</strong> "Phone Number", "Phone", "Cell Phone", "Mobile", "Contact Number"</li>
+                                <ul class="mb-0" style="font-size:.85rem">
+                                    <li><strong>Phone:</strong> "Phone Number", "Phone", "Cell Phone", "Mobile"</li>
                                     <li><strong>Name:</strong> "Customer Name", "Name", "CN Name"</li>
                                     <li><strong>DOB:</strong> "Date of Birth", "DOB", "Birth Date"</li>
                                     <li><strong>SSN:</strong> "SSN", "S.S.N #", "Social Security Number"</li>
-                                    <li><strong>Address:</strong> "Street Address", "Address"</li>
-                                    <li><strong>Bank:</strong> "Bank Name", "Account Type", "Routing Number", "Account Number"</li>
-                                    <li><strong>Carrier:</strong> "Carrier Name", "Coverage Amount", "Monthly Premium"</li>
                                     <li>Plus 40+ more variations automatically recognized!</li>
                                 </ul>
                             </small>
@@ -367,9 +499,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-warning" id="importSubmitBtn">
-                            <i class="fas fa-upload me-1"></i> Import
-                        </button>
+                        <button type="submit" class="btn btn-warning" id="importSubmitBtn"><i class="fas fa-upload me-1"></i> Import</button>
                     </div>
                 </form>
             </div>
@@ -378,45 +508,30 @@
 @endsection
 
 @section('script')
+@include('partials.sl-filter-assets')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Instant search with debounce
-    const searchInput = document.getElementById('instantSearch');
-    const clearBtn = document.getElementById('clearSearch');
+    const searchInput = document.getElementById('leadsSearch');
     let debounceTimer;
-    
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(debounceTimer);
-            const val = this.value.trim();
-            clearBtn.classList.toggle('d-none', !val);
-            
             debounceTimer = setTimeout(() => {
-                const url = new URL(window.location.href);
-                url.searchParams.delete('page'); // Reset to page 1 on search
-                if (val) {
-                    url.searchParams.set('search', val);
-                } else {
-                    url.searchParams.delete('search');
+                const form = document.getElementById('leadsFilterForm');
+                let hidden = form.querySelector('input[name="search"]');
+                if (!hidden) {
+                    hidden = document.createElement('input');
+                    hidden.type = 'hidden'; hidden.name = 'search';
+                    form.appendChild(hidden);
                 }
-                window.location.href = url.toString();
-            }, 500); // 500ms debounce
+                hidden.value = this.value.trim();
+                form.submit();
+            }, 600);
         });
-        
-        // Focus cursor at end of input if there's a value
         if (searchInput.value) {
             searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
         }
-    }
-    
-    if (clearBtn) {
-        clearBtn.addEventListener('click', function() {
-            searchInput.value = '';
-            const url = new URL(window.location.href);
-            url.searchParams.delete('search');
-            url.searchParams.delete('page');
-            window.location.href = url.toString();
-        });
     }
 
     // Import form handling
@@ -425,53 +540,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const importFileInput = document.getElementById('importFileInput');
     const importError = document.getElementById('importError');
     const importErrorMsg = document.getElementById('importErrorMsg');
-    
     if (importForm) {
         importForm.addEventListener('submit', function(e) {
-            // Validate file is selected
             if (!importFileInput.files.length) {
                 e.preventDefault();
                 importError.classList.remove('d-none');
                 importErrorMsg.textContent = 'Please select a file to import.';
                 return;
             }
-            
-            // Validate file type
             const file = importFileInput.files[0];
             const allowedTypes = ['.csv', '.xlsx', '.xls'];
-            const fileName = file.name.toLowerCase();
-            const isValid = allowedTypes.some(ext => fileName.endsWith(ext));
-            
+            const isValid = allowedTypes.some(ext => file.name.toLowerCase().endsWith(ext));
             if (!isValid) {
                 e.preventDefault();
                 importError.classList.remove('d-none');
                 importErrorMsg.textContent = 'Invalid file type. Only .csv, .xlsx, .xls files are accepted.';
                 return;
             }
-            
-            // Validate file size (100MB max)
             if (file.size > 100 * 1024 * 1024) {
                 e.preventDefault();
                 importError.classList.remove('d-none');
                 importErrorMsg.textContent = 'File is too large. Maximum size is 100MB.';
                 return;
             }
-            
-            // Show loading state
             importError.classList.add('d-none');
             importBtn.disabled = true;
-            importBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Importing...';
+            importBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Importing...';
         });
     }
 
-    // Editable comments functionality
-    document.querySelectorAll('.editable-comment').forEach(comment => {
+    // Editable comments
+    document.querySelectorAll('.sl-editable-comment').forEach(comment => {
         comment.addEventListener('blur', function() {
             const leadId = this.dataset.leadId;
             const newComment = this.textContent.trim();
-            
             if (newComment === 'Click to add...') return;
-
             fetch(`/leads/${leadId}/update-comment`, {
                 method: 'POST',
                 headers: {
@@ -480,26 +583,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({ comments: newComment })
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    this.style.borderColor = themeColors.success;
-                    setTimeout(() => {
-                        this.style.borderColor = themeColors.surface200;
-                    }, 1000);
+                    this.style.borderColor = '#10b981';
+                    setTimeout(() => { this.style.borderColor = ''; }, 1000);
                 }
             })
-            .catch(error => {
-                console.error('Error updating comment:', error);
-                this.style.borderColor = themeColors.danger;
-            });
+            .catch(() => { this.style.borderColor = '#ef4444'; });
         });
-
         comment.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.blur();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.blur(); }
         });
     });
 });

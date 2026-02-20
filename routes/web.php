@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\RavensDashboardController;
 use App\Http\Controllers\Admin\RetentionDashboardController;
 use App\Http\Controllers\Admin\DupeCheckerController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamDashboardController;
 use App\Http\Controllers\AgentDashboardController;
@@ -566,6 +567,13 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
+});
+
+// Reports (Super Admin, Manager, Co-ordinator, CEO)
+Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]], function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('/generate', [ReportController::class, 'generate'])->name('generate');
+    Route::get('/export', [ReportController::class, 'export'])->name('export');
 });
 
 // Permission Management (Super Admin only)
