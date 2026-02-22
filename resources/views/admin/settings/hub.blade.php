@@ -84,6 +84,19 @@
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
             @endcanViewModule
+
+            @hasrole('Super Admin')
+            <a href="{{ route('settings.chat-shadow.index') }}" class="hub-card">
+                <div class="hub-card-icon">
+                    <i class="bx bx-show"></i>
+                </div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Chat Shadowing</div>
+                    <p class="hub-card-desc">Monitor and review conversations between users in read-only mode</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endhasrole
         </div>
     </div>
 @endsection

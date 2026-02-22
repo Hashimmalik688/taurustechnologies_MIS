@@ -136,17 +136,37 @@
     .sl-tbl tbody tr:nth-child(even) td { background: rgba(248,250,252,.45); }
     .sl-tbl tbody tr:nth-child(even):hover td { background: rgba(212,175,55,.045); }
 
-    /* Sticky first 4 columns */
-    .sl-sticky-col { position: sticky; z-index: 5; background: #fff; }
-    .sl-tbl thead .sl-sticky-col { z-index: 15; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
-    .sl-col-1 { left: 0; }
+    /* Sticky first 3 columns */
+    .sl-sticky-col { position: sticky; background: #fff; }
+    .sl-col-1 { left: 0; z-index: 5; }
     .sl-col-2 { display:none !important; }
-    .sl-col-3 { left: 40px; }
-    .sl-col-4 { left: 180px; border-right: 2px solid rgba(212,175,55,.15); }
-    .sl-tbl thead .sl-col-4 { border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-col-3 { left: 40px; z-index: 6; }
+    .sl-col-4 { left: 180px; z-index: 7; border-right: 2px solid rgba(212,175,55,.15); }
+    .sl-tbl thead .sl-sticky-col { background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); }
+    .sl-tbl thead .sl-col-1 { z-index: 15; }
+    .sl-tbl thead .sl-col-3 { z-index: 16; }
+    .sl-tbl thead .sl-col-4 { z-index: 17; border-right: 2px solid rgba(212,175,55,.15); }
     .sl-tbl tbody tr:hover .sl-sticky-col { background: rgba(255,252,240,1); }
     .sl-tbl tbody tr:nth-child(even) .sl-sticky-col { background: #fafbfc; }
     .sl-tbl tbody tr:nth-child(even):hover .sl-sticky-col { background: rgba(255,252,240,1); }
+
+    /* Pseudo-elements to cover inter-column gaps */
+    .sl-col-1::after,
+    .sl-col-3::after,
+    .sl-col-3::before,
+    .sl-col-4::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        width: 8px;
+        background: inherit;
+        pointer-events: none;
+    }
+    .sl-col-1::after { right: -8px; }
+    .sl-col-3::before { left: -8px; }
+    .sl-col-3::after { right: -8px; }
+    .sl-col-4::before { left: -8px; }
 
     /* Action buttons */
     .sl-act-group { display: flex; gap: 4px; justify-content: center; }

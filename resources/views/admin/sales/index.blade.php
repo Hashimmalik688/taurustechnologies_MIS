@@ -568,8 +568,10 @@
                             <th style="min-width:110px">Future Draft</th>
                             <th style="min-width:130px">QA Status</th>
                             <th style="min-width:200px">QA Reason</th>
+                            <th style="min-width:140px">QA By</th>
                             <th style="min-width:140px">Mgr Status</th>
                             <th style="min-width:200px">Mgr Reason</th>
+                            <th style="min-width:140px">Mgr By</th>
                             <th style="min-width:100px">Follow Up</th>
                             <th style="min-width:160px">Scheduled</th>
                         @endif
@@ -768,6 +770,18 @@
                                                 </button>
                                             </td>
                                             <td>
+                                                @if($lead->qaUser)
+                                                    <strong style="font-size:.75rem">{{ $lead->qaUser->name }}</strong>
+                                                    @if($lead->qa_reviewed_at)
+                                                        <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                            {{ \Carbon\Carbon::parse($lead->qa_reviewed_at)->format('M d, h:i A') }}
+                                                        </div>
+                                                    @endif
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                @endif
+                                            </td>
+                                            <td>
                                                 <select class="sl-bubble-select manager-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}">
                                                     <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>Pending</option>
                                                     <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>Approved</option>
@@ -789,6 +803,18 @@
                                                     <button class="sl-save-btn warning reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
                                                         <i class="bx bx-undo"></i> Reset
                                                     </button>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($lead->managerUser)
+                                                    <strong style="font-size:.75rem">{{ $lead->managerUser->name }}</strong>
+                                                    @if($lead->manager_reviewed_at)
+                                                        <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                            {{ \Carbon\Carbon::parse($lead->manager_reviewed_at)->format('M d, h:i A') }}
+                                                        </div>
+                                                    @endif
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
                                                 @endif
                                             </td>
                                             <td>

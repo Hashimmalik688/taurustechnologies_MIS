@@ -86,16 +86,13 @@ class Lead extends Model
         'qa_status',
         'qa_reason',
         'qa_user_id',
+        'qa_reviewed_at',
 
         // Manager fields
         'manager_status',
         'manager_reason',
         'manager_user_id',
-
-        // Manager fields
-        'manager_status',
-        'manager_reason',
-        'manager_user_id',
+        'manager_reviewed_at',
 
         // Sale tracking
         'sale_date',
@@ -115,12 +112,16 @@ class Lead extends Model
         
         // Followup fields
         'assigned_followup_person',
+        'followup_assigned_by',
+        'followup_assigned_at',
         'followup_status',
         'followup_required',
         'followup_scheduled_at',
         
         // Bank Verification assignment fields
         'assigned_bank_verifier',
+        'bank_verifier_assigned_by',
+        'bank_verifier_assigned_at',
         'bank_verification_comment',
         
         // Revenue and commission tracking
@@ -149,6 +150,7 @@ class Lead extends Model
         'bank_verification_status',
         'bank_verification_date',
         'bank_verification_notes',
+        'bank_verified_by',
 
         // Stage-specific timestamps
         'verified_at',
@@ -210,6 +212,10 @@ class Lead extends Model
         'returned_at' => 'datetime',
         'declined_at' => 'datetime',
         'callback_note_updated_at' => 'datetime',
+        'qa_reviewed_at' => 'datetime',
+        'manager_reviewed_at' => 'datetime',
+        'followup_assigned_at' => 'datetime',
+        'bank_verifier_assigned_at' => 'datetime',
     ];
 
     /**
@@ -360,6 +366,14 @@ class Lead extends Model
     }
 
     /**
+     * Get the user who issued this lead
+     */
+    public function issuedByUser()
+    {
+        return $this->belongsTo(User::class, 'issued_by');
+    }
+
+    /**
      * Get the agent assigned to this issued lead
      */
     public function assignedAgent()
@@ -384,10 +398,34 @@ class Lead extends Model
     }
 
     /**
+     * Get the user who assigned the followup person
+     */
+    public function followupAssignedByUser()
+    {
+        return $this->belongsTo(User::class, 'followup_assigned_by');
+    }
+
+    /**
      * Get the user assigned for bank verification
      */
     public function bankVerifier()
     {
         return $this->belongsTo(User::class, 'assigned_bank_verifier');
+    }
+
+    /**
+     * Get the user who assigned the bank verifier
+     */
+    public function bankVerifierAssignedByUser()
+    {
+        return $this->belongsTo(User::class, 'bank_verifier_assigned_by');
+    }
+
+    /**
+     * Get the user who performed the bank verification
+     */
+    public function bankVerifiedByUser()
+    {
+        return $this->belongsTo(User::class, 'bank_verified_by');
     }
 }

@@ -226,7 +226,7 @@ class LeadController extends Controller
     {
         // Sales section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
-        $query = Lead::with('insuranceCarrier')
+        $query = Lead::with(['insuranceCarrier', 'qaUser', 'managerUser'])
             ->whereNotNull('closer_name')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
@@ -830,6 +830,7 @@ class LeadController extends Controller
         $lead->qa_status = $request->qa_status;
         $lead->qa_reason = $request->qa_reason;
         $lead->qa_user_id = auth()->id();
+        $lead->qa_reviewed_at = now();
         $lead->save();
 
         return response()->json([
@@ -853,6 +854,7 @@ class LeadController extends Controller
         $lead->manager_status = $request->manager_status;
         $lead->manager_reason = $request->manager_reason;
         $lead->manager_user_id = auth()->id();
+        $lead->manager_reviewed_at = now();
         
         // When manager marks as chargeback, update the main status too
         // This ensures it appears in Chargebacks page and Retention "Yet to Retain"
@@ -889,7 +891,7 @@ class LeadController extends Controller
     {
         // Issuance section - show all sales that have been approved by manager
         // These are leads ready to be issued
-        $query = Lead::with(['insuranceCarrier', 'partner'])
+        $query = Lead::with(['insuranceCarrier', 'partner', 'issuedByUser', 'followupAssignedByUser'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
             ->where('manager_status', Statuses::MGR_APPROVED);
@@ -1078,7 +1080,7 @@ class LeadController extends Controller
     {
         // QA Review section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
-        $query = Lead::with('insuranceCarrier')
+        $query = Lead::with(['insuranceCarrier', 'qaUser'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at');
         
@@ -1350,6 +1352,7 @@ class LeadController extends Controller
         $lead->qa_status = Statuses::QA_PENDING;
         $lead->qa_reason = null;
         $lead->qa_user_id = null;
+        $lead->qa_reviewed_at = null;
         $lead->save();
 
         return response()->json([
@@ -1376,6 +1379,7 @@ class LeadController extends Controller
         $lead->manager_status = Statuses::MGR_PENDING;
         $lead->manager_reason = null;
         $lead->manager_user_id = null;
+        $lead->manager_reviewed_at = null;
         // If it was marked as chargeback, revert those changes too
         if ($lead->status === Statuses::LEAD_CHARGEBACK) {
             $lead->status = Statuses::LEAD_PENDING;

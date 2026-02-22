@@ -75,6 +75,8 @@ class FollowupController extends Controller
 
         $lead = Lead::findOrFail($id);
         $lead->assigned_followup_person = $request->assigned_followup_person;
+        $lead->followup_assigned_by = auth()->id();
+        $lead->followup_assigned_at = now();
         $lead->save();
 
         return response()->json([

@@ -37,22 +37,35 @@ class AnalyticsController extends Controller
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
 
         $metrics = $this->analyticsService->getLiveMetrics($startDate, $endDate);
-        $topPerformers = $this->analyticsService->getTopPerformers(5, $startDate, $endDate);
         
         // Get validator form metrics
         $validatorFormMetrics = $this->analyticsService->getValidatorFormMetrics($startDate, $endDate);
         $validatorBreakdown = $this->analyticsService->getValidatorBreakdown($startDate, $endDate);
         
-        // Get verifier form metrics
-        $verifierBreakdown = $this->analyticsService->getVerifierBreakdown($startDate, $endDate);
+        // Verifier pipeline (Peregrine only)
+        $verifierPipeline = $this->analyticsService->getVerifierPipelineBreakdown($startDate, $endDate);
+        $verifierSubmissions = $this->analyticsService->getVerifierSubmissionLog($startDate, $endDate);
         
-        // Get Peregrine Closer breakdown
+        // Closer breakdowns (separate)
         $peregrineCloserBreakdown = $this->analyticsService->getPeregrineCloserBreakdown($startDate, $endDate);
+        $ravensCloserBreakdown = $this->analyticsService->getRavensCloserBreakdown($startDate, $endDate);
         
-        // Get QA breakdown
-        $qaBreakdown = $this->analyticsService->getQABreakdown($startDate, $endDate);
+        // Manager breakdowns (per team)
+        $peregrineManagerBreakdown = $this->analyticsService->getManagerApprovalBreakdown($startDate, $endDate, 'peregrine');
+        $ravensManagerBreakdown = $this->analyticsService->getManagerApprovalBreakdown($startDate, $endDate, 'ravens');
         
-        return view('analytics.live', compact('metrics', 'topPerformers', 'filter', 'startDate', 'endDate', 'validatorFormMetrics', 'validatorBreakdown', 'verifierBreakdown', 'peregrineCloserBreakdown', 'qaBreakdown'));
+        // QA breakdowns (per team)
+        $peregrineQABreakdown = $this->analyticsService->getQABreakdown($startDate, $endDate, 'peregrine');
+        $ravensQABreakdown = $this->analyticsService->getQABreakdown($startDate, $endDate, 'ravens');
+        
+        return view('analytics.live', compact(
+            'metrics', 'filter', 'startDate', 'endDate',
+            'validatorFormMetrics', 'validatorBreakdown',
+            'verifierPipeline', 'verifierSubmissions',
+            'peregrineCloserBreakdown', 'ravensCloserBreakdown',
+            'peregrineManagerBreakdown', 'ravensManagerBreakdown',
+            'peregrineQABreakdown', 'ravensQABreakdown'
+        ));
     }
 
     /**
@@ -71,14 +84,30 @@ class AnalyticsController extends Controller
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
 
         $metrics = $this->analyticsService->getLiveMetrics($startDate, $endDate);
-        $topPerformers = $this->analyticsService->getTopPerformers(5, $startDate, $endDate);
         $validatorFormMetrics = $this->analyticsService->getValidatorFormMetrics($startDate, $endDate);
+        $validatorBreakdown = $this->analyticsService->getValidatorBreakdown($startDate, $endDate);
+        $verifierPipeline = $this->analyticsService->getVerifierPipelineBreakdown($startDate, $endDate);
+        $verifierSubmissions = $this->analyticsService->getVerifierSubmissionLog($startDate, $endDate);
+        $peregrineCloserBreakdown = $this->analyticsService->getPeregrineCloserBreakdown($startDate, $endDate);
+        $ravensCloserBreakdown = $this->analyticsService->getRavensCloserBreakdown($startDate, $endDate);
+        $peregrineManagerBreakdown = $this->analyticsService->getManagerApprovalBreakdown($startDate, $endDate, 'peregrine');
+        $ravensManagerBreakdown = $this->analyticsService->getManagerApprovalBreakdown($startDate, $endDate, 'ravens');
+        $peregrineQABreakdown = $this->analyticsService->getQABreakdown($startDate, $endDate, 'peregrine');
+        $ravensQABreakdown = $this->analyticsService->getQABreakdown($startDate, $endDate, 'ravens');
         
         return response()->json([
             'metrics' => $metrics,
-            'topPerformers' => $topPerformers,
             'validatorFormMetrics' => $validatorFormMetrics,
-            'timestamp' => now()->toDateTimeString(),
+            'validatorBreakdown' => $validatorBreakdown,
+            'verifierPipeline' => $verifierPipeline,
+            'verifierSubmissions' => $verifierSubmissions,
+            'peregrineCloserBreakdown' => $peregrineCloserBreakdown,
+            'ravensCloserBreakdown' => $ravensCloserBreakdown,
+            'peregrineManagerBreakdown' => $peregrineManagerBreakdown,
+            'ravensManagerBreakdown' => $ravensManagerBreakdown,
+            'peregrineQABreakdown' => $peregrineQABreakdown,
+            'ravensQABreakdown' => $ravensQABreakdown,
+            'timestamp' => now('America/Denver')->format('M d, Y h:i A') . ' MT',
             'filter' => $filter,
         ]);
     }
@@ -150,21 +179,23 @@ class AnalyticsController extends Controller
         
         switch ($filter) {
             case 'today':
-                // Today's business day: 7am MT to current time (or end of day if past midnight)
-                $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
+                // Today's business day: 7am MT to current time
+                // If before 7am MT, show previous business day (yesterday 7am to now)
                 $now = Carbon::now($timezone);
-                
-                // Use current time as end, not hardcoded 5pm
-                // This ensures all sales made today are included
-                $end = $now->setTimezone('UTC');
+                if ($now->hour < 7) {
+                    $start = Carbon::yesterday($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
+                } else {
+                    $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
+                }
+                $end = $now->copy()->setTimezone('UTC');
                 return [$start, $end];
             
             case 'custom':
                 if ($customStart && $customEnd) {
                     try {
-                        // Parse dates with Mountain timezone - use business hours (7am to 5pm)
-                        $start = Carbon::parse($customStart, $timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                        $end = Carbon::parse($customEnd, $timezone)->setTime(17, 0, 0)->setTimezone('UTC');
+                        // Parse dates with Mountain timezone - start at midnight, end at end of day
+                        $start = Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone('UTC');
+                        $end = Carbon::parse($customEnd, $timezone)->endOfDay()->setTimezone('UTC');
                         return [$start, $end];
                     } catch (\Exception $e) {
                         \Log::warning('Invalid custom date range provided', [

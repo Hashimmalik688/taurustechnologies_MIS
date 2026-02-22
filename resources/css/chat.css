@@ -742,6 +742,7 @@
     background: #fafaf8;
     padding: 8px;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .message-input-wrapper:focus-within {
@@ -827,6 +828,16 @@
     box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
 }
 
+/* Mention highlight */
+.mention-highlight {
+    background: rgba(212, 175, 55, 0.15);
+    color: #b8860b;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
 /* Mention suggestions */
 .mention-suggestions {
     position: absolute;
@@ -839,7 +850,7 @@
     overflow-y: auto;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    width: 200px;
+    width: 250px;
 }
 
 .suggestion-item {
@@ -864,6 +875,16 @@
     width: 24px;
     height: 24px;
     border-radius: 50%;
+}
+
+.suggestion-item .user-name {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.suggestion-item .user-role {
+    font-size: 11px;
+    color: #9ca3af;
 }
 
 /* Sidebar content tabs */

@@ -182,6 +182,13 @@
                 </a>
 
                 
+                <div class="position-relative" id="sticky-notes-topbar">
+                    <button class="th-action" id="sticky-notes-toggle" title="Sticky Notes">
+                        <i class="bx bx-note"></i>
+                    </button>
+                </div>
+
+                
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">
                         <i class="bx bx-bell"></i>

@@ -1,456 +1,467 @@
-<!-- Sticky Notes Floating Button & Modal -->
-<div id="sticky-notes-wrapper">
-    <!-- Floating Button -->
-    <button id="sticky-notes-btn" class="btn btn-warning rounded-circle shadow-lg position-fixed u-w-60 u-z-9999" 
- style="bottom: 30px; right: 30px; height: 60px">
-        <i class="bx bx-note" style="font-size: 24px;"></i>
-    </button>
-
-    <!-- Sticky Notes Container (Hidden by default) -->
- <div class="d-none u-overflow-y-auto u-rounded-10 position-fixed" id="sticky-notes-container" style="bottom: 100px; right: 30px; z-index: 9998; width: 350px; max-height: 500px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.2)">
-        <!-- Notes will be rendered here -->\n    </div>
-
-    <!-- Add Note Button (visible when container is shown) -->
-    <button id="add-sticky-note-btn" class="btn btn-sm btn-success position-fixed u-z-9999" 
- style="bottom: 100px; right: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.2)">
-        <i class="bx bx-plus"></i> New Note
-    </button>
-</div>
-
+<!-- Sticky Notes — floating draggable notes, triggered from top bar -->
 <style>
-.sticky-note {
-    background: var(--bs-gold);
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+/* ── Floating Sticky Note ──────────────────────── */
+.sn-note {
     position: fixed;
-    min-height: 120px;
-    width: 300px;
-    cursor: move;
-    user-select: none;
-    transition: opacity 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid rgba(0,0,0,0.1);
-    box-sizing: border-box;
+    width: 280px;
+    min-height: 160px;
+    border-radius: 4px 4px 12px 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
     z-index: 10000;
+    display: none;
+    flex-direction: column;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: box-shadow 0.2s ease;
+    overflow: hidden;
 }
-
-.sticky-note.dragging {
+.sn-note.visible { display: flex; }
+.sn-note:hover { box-shadow: 0 12px 36px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08); }
+.sn-note.dragging {
     z-index: 10001 !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    opacity: 0.92;
     transition: none !important;
-    opacity: 0.9;
 }
 
-.sticky-note:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+/* Top Color Strip */
+.sn-strip {
+    height: 6px;
+    flex-shrink: 0;
+    transition: background 0.2s;
 }
 
-.sticky-note-header {
+/* Header */
+.sn-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-    padding-bottom: 5px;
+    padding: 8px 12px 4px;
     cursor: move;
+    user-select: none;
 }
+.sn-date {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+.sn-btns {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.sn-note:hover .sn-btns { opacity: 1; }
+.sn-btns button {
+    background: none;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #64748b;
+    transition: all 0.15s;
+    padding: 0;
+}
+.sn-btns button:hover { background: rgba(0,0,0,0.06); }
+.sn-btns .sn-del:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
 
-.sticky-note-content {
-    min-height: 60px;
+/* Content */
+.sn-body {
+    flex: 1;
+    padding: 4px 12px 6px;
+}
+.sn-text {
+    width: 100%;
+    min-height: 70px;
     max-height: 200px;
     background: transparent;
     border: none;
-    width: 100%;
-    resize: vertical;
-    font-size: 14px;
-    font-family: 'Segoe Print', 'Comic Sans MS', cursive;
-    cursor: text;
+    resize: none;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: #334155;
     outline: none;
     overflow-y: auto;
-    line-height: 1.4;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    cursor: text;
 }
+.sn-text::placeholder { color: #b0b8c8; }
 
-.sticky-note-actions button {
-    padding: 2px 8px;
-    font-size: 12px;
-    margin-left: 5px;
-}
-
-.color-picker {
+/* Color Picker Row */
+.sn-palette {
     display: flex;
-    gap: 5px;
-    margin-top: 10px;
+    gap: 6px;
+    padding: 6px 12px 10px;
+    border-top: 1px solid rgba(0,0,0,0.04);
 }
-
-.color-option {
-    width: 25px;
-    height: 25px;
+.sn-dot {
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+.sn-dot:hover { transform: scale(1.25); }
+.sn-dot.active { border-color: #475569; box-shadow: 0 0 0 2px rgba(71,85,105,0.15); }
+
+/* ── Color Themes ──────────────────────────────── */
+.sn-note[data-color="#fffacd"] { background: #fffef5; }
+.sn-note[data-color="#fffacd"] .sn-strip { background: linear-gradient(90deg, #f0c800, #d4af37); }
+
+.sn-note[data-color="#ffd9e8"] { background: #fff5f9; }
+.sn-note[data-color="#ffd9e8"] .sn-strip { background: linear-gradient(90deg, #f472b6, #ec4899); }
+
+.sn-note[data-color="#d4e9f7"] { background: #f0f7ff; }
+.sn-note[data-color="#d4e9f7"] .sn-strip { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+
+.sn-note[data-color="#d4edda"] { background: #f0fdf4; }
+.sn-note[data-color="#d4edda"] .sn-strip { background: linear-gradient(90deg, #4ade80, #22c55e); }
+
+.sn-note[data-color="#ffe5cc"] { background: #fff8f0; }
+.sn-note[data-color="#ffe5cc"] .sn-strip { background: linear-gradient(90deg, #fb923c, #f97316); }
+
+.sn-note[data-color="#e8d4f0"] { background: #faf5ff; }
+.sn-note[data-color="#e8d4f0"] .sn-strip { background: linear-gradient(90deg, #c084fc, #a855f7); }
+
+/* ── New Note FAB ──────────────────────────────── */
+#snFab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 10002;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #d4af37, #c49b2c);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(212,175,55,0.35);
     transition: all 0.2s;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
-
-.color-option:hover {
-    transform: scale(1.2);
+#snFab.visible { display: inline-flex; }
+#snFab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(212,175,55,0.45);
 }
+#snFab i { font-size: 1rem; }
 
-.color-option.active {
-    border-color: var(--bs-surface-900);
-}
-
-#sticky-notes-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-#sticky-notes-container::-webkit-scrollbar-track {
-    background: var(--bs-surface-50);
-    border-radius: 10px;
-}
-
-#sticky-notes-container::-webkit-scrollbar-thumb {
-    background: var(--bs-gold);
-    border-radius: 10px;
-}
-
-#sticky-notes-container::-webkit-scrollbar-thumb:hover {
-    background: var(--bs-gold-dark);
-}
-
-/* Prevent selection and scrolling during drag */
-body.dragging {
-    overflow: hidden;
+/* ── Drag helpers ──────────────────────────────── */
+body.sn-dragging {
     user-select: none !important;
-}
-
-/* Hide scrollbars during drag */
-body.dragging #sticky-notes-container {
-    overflow: hidden;
-}
-
-/* Smooth transitions for notes */
-.sticky-note {
-    transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    cursor: move !important;
 }
 </style>
 
+<!-- New Note FAB button -->
+<button id="snFab"><i class="bx bx-plus"></i> New Note</button>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const stickyNotesBtn = document.getElementById('sticky-notes-btn');
-    const stickyNotesContainer = document.getElementById('sticky-notes-container');
-    const addStickyNoteBtn = document.getElementById('add-sticky-note-btn');
-    let notesVisible = false;
-    let notes = [];
+(function() {
+    'use strict';
 
-    const colors = [
-        { name: 'yellow', value: '#fffacd' },
-        { name: 'pink', value: '#ffd9e8' },
-        { name: 'blue', value: '#d4e9f7' },
-        { name: 'green', value: '#d4edda' },
-        { name: 'orange', value: '#ffe5cc' },
-        { name: 'purple', value: '#e8d4f0' }
-    ];
+    function initStickyNotes() {
+        var toggleBtn = document.getElementById('sticky-notes-toggle');
+        var fab       = document.getElementById('snFab');
 
-    // Toggle sticky notes visibility
-    stickyNotesBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        notesVisible = !notesVisible;
-        if (notesVisible) {
-            loadNotes();
-            addStickyNoteBtn.style.display = 'block';
-        } else {
-            addStickyNoteBtn.style.display = 'none';
-            // Hide all floating notes
-            document.querySelectorAll('.sticky-note').forEach(note => {
-                note.style.display = 'none';
-            });
+        if (!toggleBtn) {
+            console.warn('[StickyNotes] Toggle button not found in topbar');
+            return;
         }
-    });
-
-    // Close on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && notesVisible) {
-            notesVisible = false;
-            addStickyNoteBtn.style.display = 'none';
-            // Hide all floating notes
-            document.querySelectorAll('.sticky-note').forEach(note => {
-                note.style.display = 'none';
-            });
+        if (!fab) {
+            console.warn('[StickyNotes] FAB button not found');
+            return;
         }
-    });
 
-    // Add new note
-    addStickyNoteBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        createNote();
-    });
+        var notesVisible = false;
+        var notes = [];
+        var colors = [
+            { name: 'yellow', value: '#fffacd' },
+            { name: 'pink',   value: '#ffd9e8' },
+            { name: 'blue',   value: '#d4e9f7' },
+            { name: 'green',  value: '#d4edda' },
+            { name: 'orange', value: '#ffe5cc' },
+            { name: 'purple', value: '#e8d4f0' }
+        ];
 
-    // Drag and drop functionality
-    let draggedNote = null;
-    let offsetX = 0;
-    let offsetY = 0;
-    let isDragging = false;
+        var draggedNote = null, offsetX = 0, offsetY = 0, isDragging = false;
 
-    function enableDragging(noteEl) {
-        const header = noteEl.querySelector('.sticky-note-header');
-        
-        header.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.sticky-note-actions')) return; // Don't drag when clicking actions
-            
-            isDragging = true;
-            draggedNote = noteEl;
-            
-            // Use direct mouse position since all notes are fixed positioned
-            offsetX = e.clientX - parseInt(noteEl.style.left || '0');
-            offsetY = e.clientY - parseInt(noteEl.style.top || '0');
-            
-            noteEl.classList.add('dragging');
-            document.body.classList.add('dragging');
-            document.body.style.userSelect = 'none';
+        /* ── CSRF Token ─────────────────────────── */
+        function getToken() {
+            var el = document.querySelector('meta[name="csrf-token"]');
+            return el ? el.getAttribute('content') : '';
+        }
+
+        /* ── Toggle from top-bar ────────────────── */
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
             e.preventDefault();
-        });
-    }
+            notesVisible = !notesVisible;
 
-    document.addEventListener('mousemove', function(e) {
-        if (!draggedNote || !isDragging) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Calculate new position relative to viewport
-        let newX = e.clientX - offsetX;
-        let newY = e.clientY - offsetY;
-        
-        // Keep within viewport bounds with padding
-        const padding = 10;
-        newX = Math.max(padding, Math.min(window.innerWidth - 300 - padding, newX));
-        newY = Math.max(padding, Math.min(window.innerHeight - draggedNote.offsetHeight - padding, newY));
-        
-        // Update position
-        draggedNote.style.left = newX + 'px';
-        draggedNote.style.top = newY + 'px';
-    });
-
-    document.addEventListener('mouseup', function(e) {
-        if (!draggedNote || !isDragging) return;
-        
-        isDragging = false;
-        draggedNote.classList.remove('dragging');
-        document.body.classList.remove('dragging');
-        document.body.style.userSelect = '';
-        
-        // Save the position
-        const noteId = draggedNote.dataset.noteId;
-        if (noteId) {
-            localStorage.setItem(`sticky-note-pos-${noteId}`, JSON.stringify({
-                left: draggedNote.style.left,
-                top: draggedNote.style.top
-            }));
-        }
-        
-        draggedNote = null;
-    });
-
-    // Load notes from server
-    function loadNotes() {
-        fetch('/sticky-notes', {
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            notes = data;
-            renderNotes();
-        })
-        .catch(error => console.error('Error loading notes:', error));
-    }
-
-    // Create new note
-    function createNote() {
-        fetch('/sticky-notes', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                content: 'New note...',
-                color: '#fffacd'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                notes.push(data.note);
-                renderNotes();
-            }
-        })
-        .catch(error => console.error('Error creating note:', error));
-    }
-
-    // Update note
-    function updateNote(noteId, updates) {
-        fetch(`/sticky-notes/${noteId}`, {
-            method: 'PUT',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(updates)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const index = notes.findIndex(n => n.id === noteId);
-                if (index !== -1) {
-                    notes[index] = { ...notes[index], ...updates };
-                }
-            }
-        })
-        .catch(error => console.error('Error updating note:', error));
-    }
-
-    // Delete note
-    function deleteNote(noteId) {
-        if (!confirm('Delete this note?')) return;
-
-        fetch(`/sticky-notes/${noteId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                notes = notes.filter(n => n.id !== noteId);
-                renderNotes();
-            }
-        })
-        .catch(error => console.error('Error deleting note:', error));
-    }
-
-    // Render all notes
-    function renderNotes() {
-        // Remove existing notes
-        document.querySelectorAll('.sticky-note').forEach(note => note.remove());
-        
-        notes.forEach((note, index) => {
-            const noteEl = document.createElement('div');
-            noteEl.className = 'sticky-note';
-            noteEl.style.backgroundColor = note.color || '#fffacd';
-            noteEl.dataset.noteId = note.id;
-            
-            // Position notes in a cascade if no saved position
-            const savedPos = localStorage.getItem(`sticky-note-pos-${note.id}`);
-            if (savedPos) {
-                const pos = JSON.parse(savedPos);
-                noteEl.style.left = pos.left;
-                noteEl.style.top = pos.top;
+            if (notesVisible) {
+                toggleBtn.style.color = 'var(--gold, #d4af37)';
+                toggleBtn.style.background = 'rgba(212,175,55,0.1)';
+                fab.classList.add('visible');
+                loadNotes();
             } else {
-                // Smart default positioning - cascade from top-right
-                const baseX = window.innerWidth - 320;
-                const baseY = 100;
-                noteEl.style.left = (baseX - (index * 20)) + 'px';
-                noteEl.style.top = (baseY + (index * 20)) + 'px';
+                toggleBtn.style.color = '';
+                toggleBtn.style.background = '';
+                fab.classList.remove('visible');
+                hideAllNotes();
             }
-            
-            // Show/hide based on current visibility state
-            noteEl.style.display = notesVisible ? 'block' : 'none';
-
-            noteEl.innerHTML = `
-                <div class="sticky-note-header">
-                    <small class="text-muted">${new Date(note.created_at).toLocaleDateString()}</small>
-                    <div class="sticky-note-actions">
-                        <button class="btn btn-sm btn-danger delete-note" data-note-id="${note.id}">
-                            <i class="bx bx-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <textarea class="sticky-note-content" data-note-id="${note.id}">${note.content || ''}</textarea>
-                <div class="color-picker">
-                    ${colors.map(c => `
-                        <div class="color-option ${c.value === note.color ? 'active' : ''}" 
-                             style="background-color: ${c.value};" 
-                             data-note-id="${note.id}" 
-                             data-color="${c.value}"></div>
-                    `).join('')}
-                </div>
-            `;
-
-            // Append to body instead of container
-            document.body.appendChild(noteEl);
-            
-            // Enable dragging for this note
-            enableDragging(noteEl);
         });
 
-        // Attach event listeners
-        document.querySelectorAll('.sticky-note-content').forEach(textarea => {
-            // Prevent dragging when focusing on textarea
-            textarea.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-            
-            textarea.addEventListener('focus', function() {
-                this.style.cursor = 'text';
-                this.parentElement.style.cursor = 'default';
-            });
-            
-            textarea.addEventListener('blur', function() {
-                this.style.cursor = 'text';
-                this.parentElement.style.cursor = 'move';
-                const noteId = parseInt(this.dataset.noteId);
-                if (noteId) {
-                    updateNote(noteId, { content: this.value });
+        /* Escape to hide */
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && notesVisible) {
+                notesVisible = false;
+                toggleBtn.style.color = '';
+                toggleBtn.style.background = '';
+                fab.classList.remove('visible');
+                hideAllNotes();
+            }
+        });
+
+        /* FAB: new note */
+        fab.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            createNote();
+        };
+
+        /* ── Drag system ────────────────────────── */
+        document.addEventListener('mousemove', function(e) {
+            if (!draggedNote || !isDragging) return;
+            e.preventDefault();
+            var newX = e.clientX - offsetX;
+            var newY = e.clientY - offsetY;
+            newX = Math.max(5, Math.min(window.innerWidth - 290, newX));
+            newY = Math.max(5, Math.min(window.innerHeight - 80, newY));
+            draggedNote.style.left = newX + 'px';
+            draggedNote.style.top  = newY + 'px';
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (!draggedNote || !isDragging) return;
+            isDragging = false;
+            draggedNote.classList.remove('dragging');
+            document.body.classList.remove('sn-dragging');
+            var noteId = draggedNote.getAttribute('data-note-id');
+            if (noteId) {
+                try {
+                    localStorage.setItem('sn-pos-' + noteId, JSON.stringify({
+                        left: draggedNote.style.left,
+                        top: draggedNote.style.top
+                    }));
+                } catch(ex) {}
+            }
+            draggedNote = null;
+        });
+
+        /* ── AJAX helpers ───────────────────────── */
+        function apiRequest(url, method, body) {
+            var opts = {
+                method: method || 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': getToken(),
+                    'Accept': 'application/json'
                 }
+            };
+            if (body) {
+                opts.headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(body);
+            }
+            return fetch(url, opts).then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status + ' on ' + method + ' ' + url);
+                return r.json();
             });
-            
-            // Auto-resize textarea
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = this.scrollHeight + 'px';
-            });
-        });
+        }
 
-        document.querySelectorAll('.delete-note').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const noteId = parseInt(this.dataset.noteId);
-                if (noteId) {
-                    deleteNote(noteId);
+        function loadNotes() {
+            apiRequest('/sticky-notes', 'GET')
+            .then(function(data) {
+                notes = Array.isArray(data) ? data : [];
+                renderNotes();
+            })
+            .catch(function(err) { console.error('[StickyNotes] load:', err); });
+        }
+
+        function createNote() {
+            apiRequest('/sticky-notes', 'POST', { content: 'New note...', color: '#fffacd' })
+            .then(function(data) {
+                if (data && data.success && data.note) {
+                    notes.push(data.note);
+                    renderNotes();
                 }
-            });
-        });
+            })
+            .catch(function(err) { console.error('[StickyNotes] create:', err); });
+        }
 
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const noteId = parseInt(this.dataset.noteId);
-                const color = this.dataset.color;
-                if (noteId && color) {
-                    updateNote(noteId, { color: color });
-                    
-                    // Update UI immediately
-                    const noteEl = document.querySelector(`[data-note-id="${noteId}"].sticky-note`);
-                    if (noteEl) {
-                        noteEl.style.backgroundColor = color;
+        function updateNote(noteId, updates) {
+            apiRequest('/sticky-notes/' + noteId, 'PUT', updates)
+            .then(function(data) {
+                if (data && data.success) {
+                    for (var i = 0; i < notes.length; i++) {
+                        if (notes[i].id === noteId) {
+                            for (var k in updates) { notes[i][k] = updates[k]; }
+                            break;
+                        }
                     }
-                    
-                    // Update active state
-                    const parent = this.parentElement;
-                    parent.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
                 }
-            });
-        });
+            })
+            .catch(function(err) { console.error('[StickyNotes] update:', err); });
+        }
+
+        function deleteNote(noteId) {
+            if (!confirm('Delete this note?')) return;
+            apiRequest('/sticky-notes/' + noteId, 'DELETE')
+            .then(function(data) {
+                if (data && data.success) {
+                    notes = notes.filter(function(n) { return n.id !== noteId; });
+                    renderNotes();
+                }
+            })
+            .catch(function(err) { console.error('[StickyNotes] delete:', err); });
+        }
+
+        /* ── Hide all ───────────────────────────── */
+        function hideAllNotes() {
+            var els = document.querySelectorAll('.sn-note');
+            for (var i = 0; i < els.length; i++) els[i].parentNode.removeChild(els[i]);
+        }
+
+        /* ── Render ─────────────────────────────── */
+        function renderNotes() {
+            hideAllNotes();
+            var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+            for (var idx = 0; idx < notes.length; idx++) {
+                (function(note, index) {
+                    var el = document.createElement('div');
+                    el.className = 'sn-note' + (notesVisible ? ' visible' : '');
+                    el.setAttribute('data-note-id', note.id);
+                    el.setAttribute('data-color', note.color || '#fffacd');
+
+                    /* Position: saved or cascade */
+                    var savedRaw = null;
+                    try { savedRaw = localStorage.getItem('sn-pos-' + note.id); } catch(ex) {}
+                    if (savedRaw) {
+                        try {
+                            var pos = JSON.parse(savedRaw);
+                            el.style.left = pos.left;
+                            el.style.top  = pos.top;
+                        } catch(ex) {
+                            el.style.left = (Math.max(100, window.innerWidth - 340 - (index * 30))) + 'px';
+                            el.style.top  = (80 + (index * 25)) + 'px';
+                        }
+                    } else {
+                        el.style.left = (Math.max(100, window.innerWidth - 340 - (index * 30))) + 'px';
+                        el.style.top  = (80 + (index * 25)) + 'px';
+                    }
+
+                    var dateStr = '';
+                    try {
+                        var d = new Date(note.created_at);
+                        dateStr = months[d.getMonth()] + ' ' + d.getDate();
+                    } catch(ex) { dateStr = 'Just now'; }
+
+                    var dotHtml = '';
+                    for (var ci = 0; ci < colors.length; ci++) {
+                        var c = colors[ci];
+                        var act = (c.value === (note.color || '#fffacd')) ? ' active' : '';
+                        dotHtml += '<div class="sn-dot' + act + '" style="background:' + c.value + '" data-id="' + note.id + '" data-color="' + c.value + '"></div>';
+                    }
+
+                    el.innerHTML =
+                        '<div class="sn-strip"></div>' +
+                        '<div class="sn-head">' +
+                            '<span class="sn-date">' + dateStr + '</span>' +
+                            '<div class="sn-btns">' +
+                                '<button class="sn-del" data-id="' + note.id + '" title="Delete"><i class="bx bx-trash"></i></button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="sn-body">' +
+                            '<textarea class="sn-text" data-id="' + note.id + '" placeholder="Write something...">' + (note.content || '') + '</textarea>' +
+                        '</div>' +
+                        '<div class="sn-palette">' + dotHtml + '</div>';
+
+                    document.body.appendChild(el);
+
+                    /* Dragging */
+                    var head = el.querySelector('.sn-head');
+                    head.addEventListener('mousedown', function(e) {
+                        if (e.target.closest && e.target.closest('.sn-btns')) return;
+                        isDragging = true;
+                        draggedNote = el;
+                        offsetX = e.clientX - parseInt(el.style.left || '0');
+                        offsetY = e.clientY - parseInt(el.style.top  || '0');
+                        el.classList.add('dragging');
+                        document.body.classList.add('sn-dragging');
+                        e.preventDefault();
+                    });
+
+                    /* Textarea */
+                    var ta = el.querySelector('.sn-text');
+                    ta.style.height = 'auto';
+                    ta.style.height = Math.max(70, ta.scrollHeight) + 'px';
+                    ta.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+                    ta.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = this.scrollHeight + 'px';
+                    });
+                    ta.addEventListener('blur', function() {
+                        var nid = parseInt(this.getAttribute('data-id'));
+                        if (nid) updateNote(nid, { content: this.value });
+                    });
+
+                    /* Delete */
+                    var delBtn = el.querySelector('.sn-del');
+                    delBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var nid = parseInt(this.getAttribute('data-id'));
+                        if (nid) deleteNote(nid);
+                    });
+
+                    /* Color dots */
+                    var dots = el.querySelectorAll('.sn-dot');
+                    for (var di = 0; di < dots.length; di++) {
+                        dots[di].addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            var nid = parseInt(this.getAttribute('data-id'));
+                            var col = this.getAttribute('data-color');
+                            if (!nid || !col) return;
+                            updateNote(nid, { color: col });
+                            el.setAttribute('data-color', col);
+                            var siblings = this.parentElement.querySelectorAll('.sn-dot');
+                            for (var si = 0; si < siblings.length; si++) siblings[si].classList.remove('active');
+                            this.classList.add('active');
+                        });
+                    }
+                })(notes[idx], idx);
+            }
+        }
     }
-});
+
+    /* Run when DOM is ready */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStickyNotes);
+    } else {
+        initStickyNotes();
+    }
+})();
 </script>
 <?php /**PATH /var/www/taurus-crm/resources/views/components/sticky-notes.blade.php ENDPATH**/ ?>

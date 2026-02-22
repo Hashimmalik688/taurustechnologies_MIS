@@ -84,8 +84,8 @@ class VerifierController extends Controller
 
     public function dashboard(Request $request)
     {
-        // Check if user explicitly chose a filter, otherwise default to 'all'
-        $filter = $request->has('filter') ? $request->get('filter') : 'all';
+        // Check if user explicitly chose a filter, otherwise default to 'today'
+        $filter = $request->has('filter') ? $request->get('filter') : 'today';
         $customStart = $request->get('start_date');
         $customEnd = $request->get('end_date');
 
@@ -120,7 +120,10 @@ class VerifierController extends Controller
         // Daily stats within the selected date range (or all time if 'all')
         $todayStats = $this->getDailyStats(auth()->id(), auth()->user()->name, $startDate, $endDate, $filter);
 
-        return view('verifier.dashboard', compact('leads', 'todayStats', 'filter', 'startDate', 'endDate', 'filteredTotal'));
+        // Per-closer breakdown
+        $closerBreakdown = $this->getCloserBreakdown(auth()->id(), auth()->user()->name, $startDate, $endDate, $filter);
+
+        return view('verifier.dashboard', compact('leads', 'todayStats', 'filter', 'startDate', 'endDate', 'filteredTotal', 'closerBreakdown'));
     }
 
     /**
@@ -141,13 +144,56 @@ class VerifierController extends Controller
         $leads = $query->get();
 
         return [
-            'total_verified' => $leads->count(),
-            'transferred' => $leads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
-            'closed' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
-            'sales' => $leads->where('status', Statuses::LEAD_SALE)->count(),
-            'pending' => $leads->where('status', Statuses::LEAD_PENDING)->count(),
+            'total_submitted' => $leads->count(),
+            'with_closer' => $leads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
+            'with_validator' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
+            'sales' => $leads->whereIn('status', [Statuses::LEAD_SALE, Statuses::LEAD_ACCEPTED])->count(),
             'declined' => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
         ];
+    }
+
+    /**
+     * Get per-closer breakdown for this verifier's leads
+     */
+    private function getCloserBreakdown($verifierId, $verifierName, $startDate, $endDate, $filter = 'all')
+    {
+        $query = Lead::where(function($query) use ($verifierId, $verifierName) {
+                $query->where('verified_by', $verifierId)
+                      ->orWhere('account_verified_by', $verifierName);
+            })->whereNotNull('managed_by');
+        
+        if ($filter !== 'all') {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+        
+        $leads = $query->get();
+
+        // Group by closer (managed_by)
+        $closerIds = $leads->pluck('managed_by')->unique()->filter()->toArray();
+        if (empty($closerIds)) {
+            return collect([]);
+        }
+
+        $closers = User::withTrashed()->whereIn('id', $closerIds)->pluck('name', 'id');
+
+        $breakdown = [];
+        foreach ($closerIds as $closerId) {
+            $closerLeads = $leads->where('managed_by', $closerId);
+            $total = $closerLeads->count();
+            if ($total === 0) continue;
+
+            $breakdown[] = [
+                'name' => $closers[$closerId] ?? 'Unknown',
+                'total' => $total,
+                'with_closer' => $closerLeads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
+                'with_validator' => $closerLeads->where('status', Statuses::LEAD_CLOSED)->count(),
+                'pending' => $closerLeads->where('status', Statuses::LEAD_PENDING)->count(),
+                'sales' => $closerLeads->whereIn('status', [Statuses::LEAD_SALE, Statuses::LEAD_ACCEPTED])->count(),
+                'declined' => $closerLeads->where('status', Statuses::LEAD_DECLINED)->count(),
+            ];
+        }
+
+        return collect($breakdown)->sortByDesc('total')->values();
     }
 
     /**

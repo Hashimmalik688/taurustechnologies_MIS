@@ -431,8 +431,12 @@ class ChatController extends Controller
                 // Get all users in conversation
                 $notifyUsers = $conversation->users()->where('user_id', '!=', $userId)->get();
             } else {
-                // Get specific mentioned users
-                $notifyUsers = User::whereIn('name', $mentionedUsers)
+                // Get specific mentioned users (case-insensitive name match)
+                $notifyUsers = User::where(function ($query) use ($mentionedUsers) {
+                        foreach ($mentionedUsers as $name) {
+                            $query->orWhere('name', 'LIKE', $name);
+                        }
+                    })
                     ->whereHas('chatParticipants', function ($query) use ($request) {
                         $query->where('conversation_id', $request->conversation_id);
                     })
@@ -441,8 +445,24 @@ class ChatController extends Controller
             }
             
             // Create notifications for mentioned users
+            $sender = \App\Models\User::find($userId);
             foreach ($notifyUsers as $mentionedUser) {
-                $mentionedUser->notify(new \App\Notifications\MentionedInChatNotification($message));
+                \App\Models\Notification::createForUser(
+                    $mentionedUser->id,
+                    'Mentioned in ' . ($conversation->name ?? 'Chat'),
+                    ($sender->name ?? 'Someone') . ' mentioned you: ' . substr($request->message, 0, 80) . (strlen($request->message) > 80 ? '...' : ''),
+                    [
+                        'type' => 'mention',
+                        'icon' => 'bx bx-at',
+                        'color' => 'warning',
+                        'data' => [
+                            'conversation_id' => $conversation->id,
+                            'message_id' => $message->id,
+                            'sender_name' => $sender->name ?? 'Unknown',
+                            'sender_avatar' => $sender->avatar ?? null,
+                        ],
+                    ]
+                );
             }
         }
 

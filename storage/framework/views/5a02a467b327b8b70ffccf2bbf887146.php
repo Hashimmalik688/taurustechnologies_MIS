@@ -1,0 +1,437 @@
+<?php $__env->startSection('title', 'Salary Component Details'); ?>
+
+<?php $__env->startSection('css'); ?>
+<style>
+    .detail-card {
+        border: 1px solid var(--bs-surface-200);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .detail-header {
+        background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
+        color: var(--bs-white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    .detail-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .detail-field {
+        border-left: 4px solid var(--bs-gold);
+        padding-left: 1rem;
+    }
+    .detail-field-label {
+        font-size: 0.85rem;
+        color: var(--bs-surface-500);
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    .detail-field-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--bs-surface-700);
+    }
+    .breakdown-table {
+        background: var(--bs-surface-50);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--bs-surface-200);
+    }
+    .breakdown-row:last-child {
+        border-bottom: none;
+    }
+    .breakdown-label {
+        color: var(--bs-surface-500);
+        font-weight: 500;
+    }
+    .breakdown-value {
+        font-weight: 600;
+        color: var(--bs-surface-700);
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .status-calculated { background: var(--bs-status-leave); color: black; }
+    .status-approved { background: var(--bs-info); color: var(--bs-white); }
+    .status-paid { background: var(--bs-status-present); color: var(--bs-white); }
+</style>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="container-fluid">
+    <!-- Breadcrumb & Back Button -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="<?php echo e(route('salary.components')); ?>" class="btn btn-outline-secondary mb-3">
+                <i class="bx bx-arrow-back me-2"></i>Back to Components
+            </a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="mb-1"><?php echo e($component->user->name); ?></h1>
+                <p class="mb-0 opacity-75"><?php echo e($component->user->email); ?></p>
+            </div>
+            <div class="text-end">
+                <span class="status-badge status-<?php echo e($component->status); ?>">
+                    <?php echo e(ucfirst($component->status)); ?>
+
+                </span>
+                <p class="mb-0 mt-2 opacity-75">
+                    <i class="bx bx-calendar me-1"></i>
+                    <?php echo e($component->month_name); ?> <?php echo e($component->salary_year); ?>
+
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Details -->
+        <div class="col-lg-8">
+            <!-- Component Type & Payment Date -->
+            <div class="detail-card">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="detail-field">
+                            <div class="detail-field-label">Component Type</div>
+                            <div class="detail-field-value">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->component_type === 'basic'): ?>
+                                    <i class="bx bx-money me-2" style="color: var(--bs-primary);"></i>Basic Salary
+                                <?php else: ?>
+                                    <i class="bx bx-gift me-2 text-ui-success"></i>Bonus Salary
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-field">
+                            <div class="detail-field-label">Payment Date</div>
+                            <div class="detail-field-value"><?php echo e($component->payment_date->format('d M Y')); ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Breakdown -->
+            <div class="detail-card">
+ <h5 class="mb-4 text-gold" >
+                    <i class="bx bx-calculator me-2"></i>Financial Summary
+                </h5>
+
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->component_type === 'basic'): ?>
+                    <!-- BASIC SALARY BREAKDOWN -->
+                    <div class="breakdown-table">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Basic Salary</span>
+                            <span class="breakdown-value">Rs <?php echo e(number_format($component->basic_salary, 2)); ?></span>
+                        </div>
+                        
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->attendance_bonus > 0): ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Attendance/Punctuality Bonus</span>
+ <span class="breakdown-value text-ui-success" >+ Rs <?php echo e(number_format($component->attendance_bonus, 2)); ?></span>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="breakdown-row u-fs-110">
+ <span class="breakdown-label u-fw-700" >Calculated Amount</span>
+                            <span class="breakdown-value text-gradient-start" style="font-size: 1.25rem">Rs <?php echo e(number_format($component->calculated_amount, 2)); ?></span>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Details -->
+ <h6 class="mt-4 mb-3 text-surface-500" >Attendance Information</h6>
+                    <div class="breakdown-table">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Working Days</span>
+                            <span class="breakdown-value"><?php echo e($component->working_days ?? 22); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Present Days</span>
+                            <span class="breakdown-value"><?php echo e($component->present_days); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Leave Days (Full)</span>
+                            <span class="breakdown-value"><?php echo e($component->leave_days); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Half Days</span>
+                            <span class="breakdown-value"><?php echo e($component->half_days ?? 0); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Late Days</span>
+                            <span class="breakdown-value"><?php echo e($component->late_days ?? 0); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Daily Salary Rate</span>
+                            <span class="breakdown-value">Rs <?php echo e(number_format($component->daily_salary, 2)); ?></span>
+                        </div>
+                        
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->attendance_bonus > 0): ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Punctuality Bonus Earned</span>
+ <span class="breakdown-value text-ui-success" >Rs <?php echo e(number_format($component->attendance_bonus, 2)); ?></span>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->attendance_deduction < 0): ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Attendance Deduction</span>
+ <span class="breakdown-value text-ui-danger" >Rs <?php echo e(number_format(abs($component->attendance_deduction), 2)); ?></span>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+
+                <?php else: ?>
+                    <!-- BONUS SALARY BREAKDOWN -->
+                    <div class="breakdown-table">
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->actual_sales !== null): ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Target Sales</span>
+                            <span class="breakdown-value"><?php echo e($component->target_sales); ?> units</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Actual Sales</span>
+                            <span class="breakdown-value"><?php echo e($component->actual_sales); ?> units</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Chargebacks</span>
+                            <span class="breakdown-value"><?php echo e($component->chargeback_count); ?> units</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Net Approved Sales</span>
+                            <span class="breakdown-value"><?php echo e($component->net_approved_sales); ?> units</span>
+                        </div>
+                        
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->net_approved_sales >= $component->target_sales): ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Extra Sales (Above Target)</span>
+                            <span class="breakdown-value"><?php echo e($component->extra_sales); ?> units</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Bonus Per Extra Sale</span>
+                            <span class="breakdown-value">Rs <?php echo e(number_format($component->bonus_per_extra_sale, 2)); ?></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Sales Bonus</span>
+ <span class="breakdown-value text-ui-success" >Rs <?php echo e(number_format($component->calculated_amount, 2)); ?></span>
+                        </div>
+                        <?php else: ?>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Status</span>
+ <span class="breakdown-value text-ui-danger" >Below Target - No Bonus</span>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="breakdown-row u-fs-110">
+ <span class="breakdown-label u-fw-700" >Bonus Amount</span>
+                            <span class="breakdown-value text-ui-success" style="font-size: 1.25rem">Rs <?php echo e(number_format($component->calculated_amount, 2)); ?></span>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <!-- Deductions -->
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->deductions > 0): ?>
+ <h6 class="mt-4 mb-3 text-surface-500" >Deductions</h6>
+                <div class="breakdown-table">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->dock_deductions > 0): ?>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Dock Deductions</span>
+ <span class="breakdown-value text-ui-danger" >Rs <?php echo e(number_format($component->dock_deductions, 2)); ?></span>
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->manual_deductions > 0): ?>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Manual Deductions</span>
+ <span class="breakdown-value text-ui-danger" >Rs <?php echo e(number_format($component->manual_deductions, 2)); ?></span>
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="breakdown-row">
+ <span class="breakdown-label u-fw-700" >Total Deductions</span>
+ <span class="breakdown-value text-ui-danger" >Rs <?php echo e(number_format($component->deductions, 2)); ?></span>
+                    </div>
+                </div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <!-- Final Amount -->
+ <div class="detail-card text-white border-0" style="background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%); margin-top: 2rem">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="detail-field-label" style="color: rgba(255,255,255,0.8);">Calculated Amount</div>
+ <div class="u-fw-700 u-fs-150">Rs <?php echo e(number_format($component->calculated_amount, 2)); ?></div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="detail-field-label" style="color: rgba(255,255,255,0.8);">Net Amount</div>
+ <div class="u-fw-700 u-fs-150">Rs <?php echo e(number_format($component->net_amount, 2)); ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->notes): ?>
+            <div class="detail-card">
+ <h6 class="mb-3 text-surface-500" >
+                    <i class="bx bx-note me-2"></i>Notes
+                </h6>
+                <p class="text-muted mb-0"><?php echo e($component->notes); ?></p>
+            </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status & Approval Info -->
+            <div class="detail-card">
+ <h6 class="mb-3 text-gold" >
+                    <i class="bx bx-info-circle me-2"></i>Workflow Status
+                </h6>
+                
+                <div class="breakdown-table">
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Current Status</span>
+                        <span class="breakdown-value">
+                            <span class="status-badge status-<?php echo e($component->status); ?>">
+                                <?php echo e(ucfirst($component->status)); ?>
+
+                            </span>
+                        </span>
+                    </div>
+                    
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->calculated_at): ?>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Calculated On</span>
+                        <span class="breakdown-value u-fs-090"><?php echo e($component->calculated_at->format('d M Y, h:i A')); ?></span>
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->approved_at): ?>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Approved On</span>
+                        <span class="breakdown-value u-fs-090"><?php echo e($component->approved_at->format('d M Y, h:i A')); ?></span>
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->paid_at): ?>
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">Paid On</span>
+                        <span class="breakdown-value u-fs-090"><?php echo e($component->paid_at->format('d M Y, h:i A')); ?></span>
+                    </div>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="detail-card">
+ <h6 class="mb-3 text-gold" >
+                    <i class="bx bx-cog me-2"></i>Actions
+                </h6>
+                
+                <div class="d-grid gap-2">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->status === 'calculated'): ?>
+                        <form action="<?php echo e(route('salary.component.approve', $component->id)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <button type="submit" class="btn btn-success btn-sm w-100" onclick="return confirm('Approve this salary component?')">
+                                <i class="bx bx-check me-2"></i>Approve
+                            </button>
+                        </form>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($component->status === 'approved'): ?>
+                        <form action="<?php echo e(route('salary.component.mark-paid', $component->id)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <button type="submit" class="btn btn-primary btn-sm w-100" onclick="return confirm('Mark this salary component as paid?')">
+                                <i class="bx bx-money me-2"></i>Mark as Paid
+                            </button>
+                        </form>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    
+                    <a href="<?php echo e(route('salary.component.payslip', $component->id)); ?>" class="btn btn-warning btn-sm w-100">
+                        <i class="bx bx-download me-2"></i>Download Payslip
+                    </a>
+                    
+                    <a href="<?php echo e(route('salary.components')); ?>" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="bx bx-x me-2"></i>Close
+                    </a>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="detail-card">
+ <h6 class="mb-3 text-gold" >
+                    <i class="bx bx-time me-2"></i>Timeline
+                </h6>
+                
+                <div class="timeline">
+                    <div class="timeline-item" style="margin-bottom: 1.5rem;">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="bg-gold rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; margin-right: 1rem">
+                                ✓
+                            </div>
+                            <div>
+ <div class="u-fw-600 text-surface-700" >Calculated</div>
+                                <small class="text-muted"><?php echo e($component->calculated_at ? $component->calculated_at->format('d M Y, h:i A') : 'Pending'); ?></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item" style="margin-bottom: 1.5rem;">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; background: <?php echo e($component->approved_at ? 'var(--bs-ui-success)' : 'var(--bs-surface-300)'); ?>; margin-right: 1rem">
+                                ✓
+                            </div>
+                            <div>
+ <div class="u-fw-600 text-surface-700" >Approved</div>
+                                <small class="text-muted"><?php echo e($component->approved_at ? $component->approved_at->format('d M Y, h:i A') : 'Pending'); ?></small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+ <div class="d-flex" style="align-items: flex-start">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style="width: 24px; height: 24px; background: <?php echo e($component->paid_at ? 'var(--bs-primary)' : 'var(--bs-surface-300)'); ?>; margin-right: 1rem">
+                                ✓
+                            </div>
+                            <div>
+ <div class="u-fw-600 text-surface-700" >Paid</div>
+                                <small class="text-muted"><?php echo e($component->paid_at ? $component->paid_at->format('d M Y, h:i A') : 'Pending'); ?></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/salary/component-detail.blade.php ENDPATH**/ ?>
