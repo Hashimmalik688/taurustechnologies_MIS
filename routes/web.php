@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RetentionController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ChatShadowController;
 use App\Http\Controllers\Admin\HolidayController;
 use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
@@ -567,6 +568,12 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
+
+    // Chat Shadowing
+    Route::get('/chat-shadow', [ChatShadowController::class, 'index'])->name('chat-shadow.index');
+    Route::get('/chat-shadow/conversations', [ChatShadowController::class, 'getConversations'])->name('chat-shadow.conversations');
+    Route::get('/chat-shadow/conversations/{id}/messages', [ChatShadowController::class, 'getMessages'])->name('chat-shadow.messages');
+    Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes');
 });
 
 // Reports (Super Admin, Manager, Co-ordinator, CEO)

@@ -18,7 +18,7 @@ class BankVerificationController extends Controller
             ->where('manager_status', Statuses::MGR_APPROVED)
             ->whereNotNull('issuance_status')
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
-            ->with('insuranceCarrier');
+            ->with(['insuranceCarrier', 'bankVerifiedByUser', 'bankVerifierAssignedByUser']);
 
         // Search functionality
         if ($request->filled('search')) {
@@ -96,6 +96,7 @@ class BankVerificationController extends Controller
             'bank_verification_status' => $validated['bank_verification_status'],
             'bank_verification_date' => now(),
             'bank_verification_notes' => $validated['bank_verification_notes'],
+            'bank_verified_by' => auth()->id(),
         ]);
 
         return redirect()->back()->with('success', "Bank verification updated for {$lead->cn_name}");
@@ -109,6 +110,8 @@ class BankVerificationController extends Controller
 
         $lead = Lead::findOrFail($id);
         $lead->assigned_bank_verifier = $request->assigned_bank_verifier;
+        $lead->bank_verifier_assigned_by = auth()->id();
+        $lead->bank_verifier_assigned_at = now();
         $lead->save();
 
         return response()->json([
@@ -130,6 +133,7 @@ class BankVerificationController extends Controller
         if ($request->filled('bank_verification_status')) {
             $lead->bank_verification_status = $request->bank_verification_status;
             $lead->bank_verification_date = now();
+            $lead->bank_verified_by = auth()->id();
         }
         
         $lead->save();

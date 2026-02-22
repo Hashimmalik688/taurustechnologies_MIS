@@ -1,0 +1,1390 @@
+@use('App\Support\Roles')
+@extends('layouts.master')
+
+@section('title')
+    View Lead
+@endsection
+
+@section('css')
+<style>
+/* ═══════════════════════════════════════════════════════
+   Lead Detail — Modern CRM Profile Page
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Hero Header ── */
+.ld-hero {
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: .65rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    margin-bottom: .7rem;
+    overflow: hidden;
+    position: relative;
+}
+.ld-hero::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
+}
+.ld-hero-inner {
+    display: flex; align-items: center; gap: 1rem;
+    padding: .85rem 1.1rem .85rem 1.4rem;
+    flex-wrap: wrap;
+}
+.ld-avatar {
+    width: 48px; height: 48px; min-width: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; font-weight: 800; color: #fff;
+    letter-spacing: .5px;
+    box-shadow: 0 2px 8px rgba(212,175,55,.25);
+}
+.ld-identity { flex: 1; min-width: 200px; }
+.ld-name {
+    font-size: 1.15rem; font-weight: 800; margin: 0;
+    color: var(--bs-surface-800);
+    display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.ld-chip-row {
+    display: flex; gap: .45rem; flex-wrap: wrap;
+    margin-top: .3rem;
+}
+.ld-chip {
+    font-size: .68rem; font-weight: 500;
+    color: var(--bs-surface-500);
+    display: inline-flex; align-items: center; gap: .2rem;
+    background: rgba(var(--bs-surface-rgb, 128,128,128), .06);
+    padding: .15rem .45rem; border-radius: 20px;
+}
+.ld-chip i { font-size: .78rem; color: var(--bs-gold); }
+.ld-hero-actions {
+    display: flex; gap: .35rem; flex-wrap: wrap;
+    align-items: center;
+}
+.ld-btn {
+    font-size: .7rem; font-weight: 600;
+    padding: .38rem .75rem; border-radius: 22px;
+    border: 1px solid transparent;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: .25rem;
+    transition: all .18s ease;
+    white-space: nowrap;
+}
+.ld-btn-call {
+    background: linear-gradient(135deg, #34c38f 0%, #2ba77a 100%);
+    color: #fff; box-shadow: 0 2px 6px rgba(52,195,143,.3);
+}
+.ld-btn-call:hover { box-shadow: 0 4px 12px rgba(52,195,143,.4); color: #fff; transform: translateY(-1px); }
+.ld-btn-print {
+    background: rgba(85,110,230,.1); color: #556ee6;
+    border-color: rgba(85,110,230,.2);
+}
+.ld-btn-print:hover { background: rgba(85,110,230,.18); color: #556ee6; }
+.ld-btn-back {
+    background: rgba(var(--bs-surface-rgb, 128,128,128),.06); color: var(--bs-surface-500);
+    border-color: rgba(var(--bs-surface-rgb, 128,128,128),.1);
+}
+.ld-btn-back:hover { color: var(--bs-surface-700); }
+
+/* ── Status Badge ── */
+.ld-status {
+    font-size: .62rem; font-weight: 700;
+    padding: .2rem .55rem; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: .4px;
+    display: inline-flex; align-items: center; gap: .2rem;
+}
+.ld-s-accepted, .ld-s-sale { background: rgba(52,195,143,.12); color: #1a8754; }
+.ld-s-pending  { background: rgba(241,180,76,.12); color: #b87a14; }
+.ld-s-rejected, .ld-s-declined { background: rgba(244,106,106,.12); color: #c84646; }
+.ld-s-closed   { background: rgba(80,165,241,.12); color: #2b81c9; }
+.ld-s-chargeback { background: rgba(244,106,106,.12); color: #c84646; }
+.ld-s-underwritten { background: rgba(124,105,239,.12); color: #5b49c7; }
+.ld-s-transferred { background: rgba(80,165,241,.12); color: #2b81c9; }
+.ld-s-forwarded { background: rgba(85,110,230,.12); color: #556ee6; }
+
+/* ── Horizontal Pipeline Stepper ── */
+.ld-pipeline {
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: .65rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    margin-bottom: .7rem;
+    padding: .65rem 1rem;
+}
+.ld-pipe-title {
+    font-size: .62rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .6px;
+    color: var(--bs-gold-dark); margin-bottom: .55rem;
+    display: flex; align-items: center; gap: .3rem;
+}
+.ld-pipe-title i { font-size: .8rem; opacity: .6; }
+.ld-stepper {
+    display: flex; align-items: flex-start;
+    overflow-x: auto; gap: 0;
+    padding-bottom: .2rem;
+}
+.ld-st {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; min-width: 0; position: relative;
+    padding: 0 .15rem;
+}
+/* connector line between dots */
+.ld-st:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 11px; left: calc(50% + 12px); right: calc(-50% + 12px);
+    height: 2px;
+    background: var(--bs-surface-200);
+    z-index: 0;
+}
+.ld-st.s-done:not(:last-child)::after { background: var(--bs-gold); }
+.ld-st.s-done + .ld-st.s-current::before {
+    content: '';
+    position: absolute;
+    top: 11px; right: calc(50% + 12px); left: calc(-50% + 12px);
+    height: 2px;
+    background: var(--bs-gold);
+    z-index: 0;
+}
+.ld-st-dot {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    border: 2.5px solid var(--bs-surface-200);
+    background: var(--bs-card-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .55rem; color: transparent;
+    z-index: 1; position: relative;
+    transition: all .2s;
+}
+.ld-st.s-done .ld-st-dot {
+    background: var(--bs-gold); border-color: var(--bs-gold);
+    color: #fff; box-shadow: 0 1px 4px rgba(212,175,55,.3);
+}
+.ld-st.s-current .ld-st-dot {
+    background: #34c38f; border-color: #34c38f;
+    color: #fff; box-shadow: 0 0 0 3px rgba(52,195,143,.2);
+    animation: stPulse 2s infinite;
+}
+.ld-st-label {
+    font-size: .55rem; font-weight: 600;
+    color: var(--bs-surface-400);
+    text-align: center;
+    margin-top: .3rem; line-height: 1.2;
+    max-width: 72px;
+    word-wrap: break-word;
+}
+.ld-st.s-done .ld-st-label { color: var(--bs-gold-dark); font-weight: 700; }
+.ld-st.s-current .ld-st-label { color: #1a8754; font-weight: 700; }
+.ld-st-sub {
+    font-size: .48rem; color: var(--bs-surface-300);
+    text-align: center; margin-top: 1px;
+}
+.ld-st.s-done .ld-st-sub { color: rgba(184,151,48,.6); }
+.ld-st.s-current .ld-st-sub { color: rgba(26,135,84,.6); }
+
+@keyframes stPulse {
+    0%,100% { box-shadow: 0 0 0 3px rgba(52,195,143,.2); }
+    50% { box-shadow: 0 0 0 6px rgba(52,195,143,0); }
+}
+
+/* ── Info Cards ── */
+.ld-card {
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: .6rem;
+    box-shadow: 0 1px 5px rgba(0,0,0,.04);
+    margin-bottom: .55rem;
+    overflow: hidden;
+    transition: box-shadow .2s, transform .2s;
+}
+.ld-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.07);
+    transform: translateY(-1px);
+}
+.ld-card-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .5rem .85rem;
+    border-bottom: 1px solid rgba(212,175,55,.08);
+    background: linear-gradient(90deg, rgba(212,175,55,.04) 0%, transparent 60%);
+}
+.ld-card-hdr h5 {
+    margin: 0; font-size: .75rem; font-weight: 700;
+    color: var(--bs-gold-dark);
+    display: flex; align-items: center; gap: .35rem;
+}
+.ld-card-hdr h5 i { font-size: .9rem; opacity: .5; }
+.ld-card-body { padding: .6rem .85rem; }
+
+/* ── Field Layout (clean grid) ── */
+.ld-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .1rem .8rem;
+}
+.ld-fields.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.ld-fields.cols-1 { grid-template-columns: 1fr; }
+
+.ld-f {
+    padding: .4rem 0;
+    border-bottom: 1px solid rgba(var(--bs-surface-rgb, 128,128,128),.05);
+}
+.ld-f:last-child, .ld-fields .ld-f:nth-last-child(-n+2) {
+    border-bottom: none;
+}
+.ld-fl {
+    display: block;
+    font-size: .58rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--bs-surface-400);
+    margin-bottom: .1rem;
+}
+.ld-fv {
+    display: block;
+    font-size: .8rem; font-weight: 500;
+    color: var(--bs-surface-700);
+    word-wrap: break-word;
+}
+.ld-fv.empty {
+    color: var(--bs-surface-muted);
+    font-style: italic; font-size: .76rem;
+}
+.ld-f.full { grid-column: 1 / -1; }
+
+.ld-divider {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(var(--bs-surface-rgb, 128,128,128),.08);
+    margin: .3rem 0;
+}
+.ld-sub-hdr {
+    grid-column: 1 / -1;
+    font-size: .65rem; font-weight: 700;
+    color: var(--bs-surface-500);
+    padding: .25rem 0 .1rem;
+    display: flex; align-items: center; gap: .25rem;
+}
+.ld-sub-hdr i { font-size: .78rem; opacity: .5; }
+
+/* ── Responsive ── */
+@media (max-width: 991px) {
+    .ld-stepper { gap: .2rem; }
+    .ld-st-label { font-size: .5rem; max-width: 56px; }
+    .ld-fields { grid-template-columns: 1fr 1fr; }
+    .ld-fields.cols-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 575px) {
+    .ld-hero-inner { flex-direction: column; align-items: flex-start; }
+    .ld-fields { grid-template-columns: 1fr; }
+}
+</style>
+@endsection
+
+@section('content')
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="font-size:.82rem;">
+            <i class="mdi mdi-check-all me-1"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- ══ Top Bar: Header (left) + Pipeline Steps (right) ══ --}}
+    @php
+        // ── Pipeline step logic ──
+        $steps = [
+            ['key'=>'sale',     'label'=>'Sale Made',             'icon'=>'mdi-handshake',          'sub'=>''],
+            ['key'=>'submit',   'label'=>'Submitted to Carrier',  'icon'=>'mdi-file-upload',        'sub'=>''],
+            ['key'=>'issuance', 'label'=>'Policy Issuance',       'icon'=>'mdi-file-document-check','sub'=>''],
+            ['key'=>'followup', 'label'=>'Client Follow-up',      'icon'=>'mdi-phone-in-talk',      'sub'=>''],
+            ['key'=>'banking',  'label'=>'Banking Verification',  'icon'=>'mdi-bank-check',         'sub'=>''],
+            ['key'=>'draft',    'label'=>'Draft Confirmation',    'icon'=>'mdi-check-circle',       'sub'=>'Future module'],
+            ['key'=>'commission','label'=>'Commission Statement', 'icon'=>'mdi-currency-usd',       'sub'=>'Future module'],
+            ['key'=>'paid',     'label'=>'Paid',                  'icon'=>'mdi-cash-check',         'sub'=>'Future module'],
+            ['key'=>'recovery', 'label'=>'Advance Recovery',      'icon'=>'mdi-refresh',            'sub'=>'Future module'],
+        ];
+
+        $done = [];
+
+        // Step 1: Sale Made — status is 'sale' or 'accepted'
+        $isSale = in_array($insurance->status, ['sale','accepted']);
+        if ($isSale) { $done[] = 'sale'; }
+
+        // Step 2: Submitted to Carrier — status 'underwritten', or auto if approved/accepted
+        if ($insurance->status === 'underwritten' || $isSale) {
+            $done[] = 'sale'; $done[] = 'submit';
+        }
+
+        // Step 3: Policy Issuance — policy_number assigned AND partner assigned
+        $hasIssuance = ($insurance->policy_number || $insurance->issued_policy_number) && ($insurance->partner_id || $insurance->assigned_partner);
+        if ($hasIssuance) {
+            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance';
+        }
+
+        // Step 4: Client Follow-up — followup_status is Yes or No AND followup person assigned
+        $hasFollowup = in_array($insurance->followup_status, ['Yes','No','Completed','yes','no','completed']) && ($insurance->assigned_followup_person || $insurance->followup_assigned_by);
+        if ($hasFollowup) {
+            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance'; $done[] = 'followup';
+        }
+
+        // Step 5: Banking Verification — bank_verification_status is 'BV Verified' or 'verified'
+        $hasBV = in_array(strtolower($insurance->bank_verification_status ?? ''), ['bv verified','verified']);
+        if ($hasBV) {
+            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance'; $done[] = 'followup'; $done[] = 'banking';
+        }
+
+        $done = array_unique($done);
+
+        // Determine current step (first uncompleted)
+        $currentStep = null;
+        foreach ($steps as $s) {
+            if (!in_array($s['key'], $done)) { $currentStep = $s['key']; break; }
+        }
+    @endphp
+
+    <div class="ld-top">
+        {{-- Left: Lead Header --}}
+        <div class="ld-header-card">
+            <div class="ld-hdr-stripe">
+                <h2><i class="mdi mdi-account-circle"></i> {{ $insurance->cn_name ?? 'Unnamed Lead' }}</h2>
+            </div>
+            <div class="ld-meta-row">
+                <div class="ld-meta-item"><i class="mdi mdi-phone"></i> <strong>{{ $insurance->phone_number ?? 'No phone' }}</strong></div>
+                @if($insurance->secondary_phone_number)
+                <div class="ld-meta-item"><i class="mdi mdi-phone-plus"></i> {{ $insurance->secondary_phone_number }}</div>
+                @endif
+                <div class="ld-meta-item"><i class="mdi mdi-map-marker"></i> {{ $insurance->state ?? 'N/A' }} {{ $insurance->zip_code ?? '' }}</div>
+                <div class="ld-meta-item"><i class="mdi mdi-clock-outline"></i> Created: {{ $insurance->created_at ? $insurance->created_at->format('M d, Y') : 'N/A' }}</div>
+                @if($insurance->status)
+                <div class="ld-meta-item">
+                    <span class="ld-status ld-s-{{ strtolower($insurance->status) }}">{{ ucfirst($insurance->status) }}</span>
+                </div>
+                @endif
+            </div>
+            <div class="ld-actions">
+                <button onclick="makeZoomCall()" class="ld-btn ld-btn-call"><i class="mdi mdi-phone"></i> Call Now</button>
+                <a href="{{ route('sales.prettyPrint', $insurance->id) }}" class="ld-btn ld-btn-print" target="_blank"><i class="mdi mdi-printer"></i> Pretty Print</a>
+                <a href="{{ route('leads.index') }}" class="ld-btn ld-btn-back"><i class="mdi mdi-arrow-left"></i> Back to Leads</a>
+            </div>
+        </div>
+
+        {{-- Right: Pipeline Steps --}}
+        <div class="ld-pipeline-card">
+            <div class="ld-pipe-hdr"><i class="mdi mdi-timeline-check"></i> Live & Health Pipeline</div>
+            <div class="ld-pipe-body">
+                @foreach($steps as $idx => $step)
+                    @php
+                        $isDone = in_array($step['key'], $done);
+                        $isCurr = $step['key'] === $currentStep;
+                        $cls = $isDone ? 's-done' : ($isCurr ? 's-current' : '');
+                        // Dynamic sub-text
+                        $subText = $step['sub'];
+                        if ($isDone) { $subText = 'Completed'; }
+                        elseif ($isCurr) { $subText = 'In progress'; }
+                    @endphp
+                    <div class="ld-step {{ $cls }}">
+                        <div class="ld-step-check">
+                            @if($isDone) <i class="mdi mdi-check"></i>
+                            @elseif($isCurr) <i class="mdi mdi-dots-horizontal"></i>
+                            @endif
+                        </div>
+                        <div class="ld-step-info">
+                            <div class="ld-step-name"><i class="mdi {{ $step['icon'] }}"></i> {{ $step['label'] }}</div>
+                            @if($subText)<div class="ld-step-sub">{{ $subText }}</div>@endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-6">
+            <!-- Personal Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-account"></i>Personal Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value {{ $insurance->cn_name ? '' : 'empty' }}">
+                                {{ $insurance->cn_name ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value {{ $insurance->date_of_birth ? '' : 'empty' }}">
+                                {{ $insurance->date_of_birth ? \Carbon\Carbon::parse($insurance->date_of_birth)->format('M d, Y') : 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Age</div>
+                            <div class="info-value {{ $insurance->age ? '' : 'empty' }}">
+                                {{ $insurance->age ?? 'Not calculated' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Gender</div>
+                            <div class="info-value">
+                                @if($insurance->gender)
+                                    <span class="badge bg-info">{{ $insurance->gender }}</span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Birth Place</div>
+                            <div class="info-value {{ $insurance->birth_place ? '' : 'empty' }}">
+                                {{ $insurance->birth_place ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">SSN</div>
+                            <div class="info-value {{ $insurance->ssn ? '' : 'empty' }}">
+                                {{ $insurance->ssn ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-phone-in-talk"></i>Contact Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Primary Phone</div>
+                            <div class="info-value {{ $insurance->phone_number ? '' : 'empty' }}">
+                                {{ $insurance->phone_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Secondary Phone</div>
+                            <div class="info-value {{ $insurance->secondary_phone_number ? '' : 'empty' }}">
+                                {{ $insurance->secondary_phone_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Address</div>
+                            <div class="info-value {{ $insurance->address ? '' : 'empty' }}">
+                                {{ $insurance->address ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">State</div>
+                            <div class="info-value {{ $insurance->state ? '' : 'empty' }}">
+                                {{ $insurance->state ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Zip Code</div>
+                            <div class="info-value {{ $insurance->zip_code ? '' : 'empty' }}">
+                                {{ $insurance->zip_code ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Emergency Contact</div>
+                            <div class="info-value {{ $insurance->emergency_contact ? '' : 'empty' }}">
+                                {{ $insurance->emergency_contact ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-heart-pulse"></i>Health Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Nicotine User</div>
+                            <div class="info-value">
+                                @if($insurance->smoker !== null)
+                                    <span class="badge {{ $insurance->smoker ? 'bg-warning' : 'bg-success' }}">
+                                        {{ $insurance->smoker ? 'Yes' : 'Non' }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-row">
+                            <div class="info-label">Height</div>
+                            <div class="info-value {{ $insurance->height ? '' : 'empty' }}">
+                                {{ $insurance->height ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-row">
+                            <div class="info-label">Weight (lbs)</div>
+                            <div class="info-value {{ $insurance->weight ? '' : 'empty' }}">
+                                {{ $insurance->weight ? $insurance->weight . ' lbs' : 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-row">
+                            <div class="info-label">Driving License</div>
+                            <div class="info-value">
+                                @if($insurance->driving_license !== null)
+                                    <span class="badge bg-info">{{ $insurance->driving_license ? 'Yes' : 'No' }}</span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->driving_license_number)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Driving License Number</div>
+                            <div class="info-value">{{ $insurance->driving_license_number }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Medical Issues</div>
+                            <div class="info-value {{ $insurance->medical_issue ? '' : 'empty' }}">
+                                {{ $insurance->medical_issue ?? 'None reported' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Medications</div>
+                            <div class="info-value {{ $insurance->medications ? '' : 'empty' }}">
+                                {{ $insurance->medications ?? 'None reported' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <h6 class="text-muted mb-3"><i class="mdi mdi-doctor"></i> Primary Care Physician</h6>
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Doctor Name</div>
+                            <div class="info-value {{ $insurance->doctor_name ? '' : 'empty' }}">
+                                {{ $insurance->doctor_name ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Doctor Phone</div>
+                            <div class="info-value {{ $insurance->doctor_number ? '' : 'empty' }}">
+                                {{ $insurance->doctor_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Doctor Address</div>
+                            <div class="info-value {{ $insurance->doctor_address ? '' : 'empty' }}">
+                                {{ $insurance->doctor_address ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Policy Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-shield-check"></i>Policy Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Policy Type</div>
+                            <div class="info-value {{ $insurance->policy_type ? '' : 'empty' }}">
+                                {{ $insurance->policy_type ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Policy Number</div>
+                            <div class="info-value {{ $insurance->policy_number ? '' : 'empty' }}">
+                                {{ $insurance->policy_number ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Carrier Name</div>
+                            <div class="info-value {{ $insurance->carrier_name ? '' : 'empty' }}">
+                                @if($insurance->insuranceCarrier)
+                                    {{ $insurance->insuranceCarrier->name }}
+                                @else
+                                    {{ $insurance->carrier_name ?? 'Not provided' }}
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Coverage Amount</div>
+                            <div class="info-value">
+                                @if($insurance->coverage_amount)
+                                    <span class="badge bg-primary">
+                                        ${{ number_format($insurance->coverage_amount, 0) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Monthly Premium</div>
+                            <div class="info-value">
+                                @if($insurance->monthly_premium)
+                                    <span class="badge bg-success">
+                                        ${{ number_format($insurance->monthly_premium, 2) }}/mo
+                                    </span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Initial Draft Date</div>
+                            <div class="info-value {{ $insurance->initial_draft_date ? '' : 'empty' }}">
+                                {{ $insurance->initial_draft_date ? \Carbon\Carbon::parse($insurance->initial_draft_date)->format('M d, Y') : 'Not set' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Future Draft Date</div>
+                            <div class="info-value {{ $insurance->future_draft_date ? '' : 'empty' }}">
+                                {{ $insurance->future_draft_date ? \Carbon\Carbon::parse($insurance->future_draft_date)->format('M d, Y') : 'Not set' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beneficiary Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-account-heart"></i>Beneficiary Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    @php
+                        $beneficiaries = $insurance->beneficiaries ?? [];
+                        // Ensure beneficiaries is always an array (handle string/non-array values)
+                        if (is_string($beneficiaries)) {
+                            // Try JSON decode first
+                            $decoded = json_decode($beneficiaries, true);
+                            $beneficiaries = is_array($decoded) ? $decoded : [];
+                        }
+                        if (!is_array($beneficiaries)) {
+                            $beneficiaries = [];
+                        }
+                        if (empty($beneficiaries) && ($insurance->beneficiary || $insurance->beneficiary_dob)) {
+                            $beneficiaries = [[
+                                'name' => $insurance->beneficiary ?? '',
+                                'dob' => $insurance->beneficiary_dob ?? '',
+                                'relation' => ''
+                            ]];
+                        }
+                    @endphp
+                    @if(!empty($beneficiaries))
+                        @foreach($beneficiaries as $index => $beneficiary)
+                            <div class="row {{ $loop->last ? '' : 'mb-3 pb-3 border-bottom' }}">
+                                @if(count($beneficiaries) > 1)
+                                <div class="col-12 mb-2">
+                                    <strong class="text-primary">Beneficiary {{ $index + 1 }}</strong>
+                                </div>
+                                @endif
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Name</div>
+                                    <div class="info-value {{ !empty($beneficiary['name']) ? '' : 'empty' }}">
+                                        {{ $beneficiary['name'] ?? 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Relation</div>
+                                    <div class="info-value {{ !empty($beneficiary['relation']) ? '' : 'empty' }}">
+                                        {{ $beneficiary['relation'] ?? 'Not provided' }}
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-row">
+                                    <div class="info-label">Date of Birth</div>
+                                    <div class="info-value {{ !empty($beneficiary['dob']) ? '' : 'empty' }}">
+                                        {{ !empty($beneficiary['dob']) ? \Carbon\Carbon::parse($beneficiary['dob'])->format('M d, Y') : 'Not provided' }}
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="info-value empty">No beneficiaries added</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-6">
+            <!-- Status & Assignment -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-clipboard-check"></i>Status & Assignment</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Lead Status</div>
+                            <div class="info-value">
+                                @if($insurance->status)
+                                    <span class="ld-status ld-s-{{ strtolower($insurance->status) }}">
+                                        {{ ucfirst($insurance->status) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not set</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Team</div>
+                            <div class="info-value {{ $insurance->team ? '' : 'empty' }}">
+                                {{ $insurance->team ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Closer Name</div>
+                            <div class="info-value {{ $insurance->closer_name ? '' : 'empty' }}">
+                                {{ $insurance->closer_name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Managed By</div>
+                            <div class="info-value {{ $insurance->managedBy ? '' : 'empty' }}">
+                                {{ $insurance->managedBy->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Assigned Partner</div>
+                            <div class="info-value {{ $insurance->partner ? '' : 'empty' }}">
+                                {{ $insurance->partner->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Assigned Validator</div>
+                            <div class="info-value {{ $insurance->assignedValidator ? '' : 'empty' }}">
+                                {{ $insurance->assignedValidator->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->sale_date || $insurance->sale_at)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Sale Date</div>
+                            <div class="info-value">
+                                @if($insurance->sale_date)
+                                    {{ \Carbon\Carbon::parse($insurance->sale_date)->format('M d, Y') }}
+                                @elseif($insurance->sale_at)
+                                    {{ \Carbon\Carbon::parse($insurance->sale_at)->format('M d, Y') }}
+                                @else
+                                    <span class="empty">Not set</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->decline_reason || $insurance->pending_reason)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Status Reason</div>
+                            <div class="info-value">
+                                {{ $insurance->decline_reason ?? $insurance->pending_reason ?? 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    <div class="row">
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Source</div>
+                            <div class="info-value {{ $insurance->source ? '' : 'empty' }}">
+                                {{ $insurance->source ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Preset Line</div>
+                            <div class="info-value {{ $insurance->preset_line ? '' : 'empty' }}">
+                                {{ $insurance->preset_line ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Comments</div>
+                            <div class="info-value {{ $insurance->comments ? '' : 'empty' }}">
+                                {{ $insurance->comments ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Account Information -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-bank"></i>Bank Account Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Bank Name</div>
+                            <div class="info-value {{ $insurance->bank_name ? '' : 'empty' }}">
+                                {{ $insurance->bank_name ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Account Type</div>
+                            <div class="info-value {{ $insurance->account_type ? '' : 'empty' }}">
+                                {{ $insurance->account_type ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Account Title</div>
+                            <div class="info-value {{ $insurance->account_title ? '' : 'empty' }}">
+                                {{ $insurance->account_title ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Bank Balance</div>
+                            <div class="info-value">
+                                @if($insurance->bank_balance)
+                                    <span class="badge bg-info">
+                                        ${{ number_format($insurance->bank_balance, 2) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not provided</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Routing Number</div>
+                            <div class="info-value {{ $insurance->routing_number ? '' : 'empty' }}">
+                                {{ $insurance->routing_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Account Number</div>
+                            <div class="info-value {{ $insurance->acc_number ? '' : 'empty' }}">
+                                {{ $insurance->acc_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->account_verified_by)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Verified By</div>
+                            <div class="info-value">{{ $insurance->account_verified_by }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->ss_amount || $insurance->ss_date)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">SS Amount</div>
+                            <div class="info-value {{ $insurance->ss_amount ? '' : 'empty' }}">
+                                {{ $insurance->ss_amount ? '$' . number_format($insurance->ss_amount, 2) : 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">SS Date</div>
+                            <div class="info-value {{ $insurance->ss_date ? '' : 'empty' }}">
+                                {{ $insurance->ss_date ? \Carbon\Carbon::parse($insurance->ss_date)->format('M d, Y') : 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->bank_verification_status || $insurance->bank_verification_notes)
+                    <div class="section-divider"></div>
+                    <h6 class="text-muted mb-3">Bank Verification Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Verification Status</div>
+                            <div class="info-value">
+                                @if($insurance->bank_verification_status)
+                                    <span class="badge bg-{{ $insurance->bank_verification_status == 'verified' ? 'success' : 'warning' }}">
+                                        {{ ucfirst($insurance->bank_verification_status) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Pending</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Verified By</div>
+                            <div class="info-value {{ $insurance->bankVerifier ? '' : 'empty' }}">
+                                {{ $insurance->bankVerifier->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->bank_verification_notes)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Verification Notes</div>
+                            <div class="info-value">{{ $insurance->bank_verification_notes }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    @endif
+                </div>
+            </div>
+
+            <!-- Card Information (Super Admin/Manager Only) -->
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
+            @if($insurance->card_number || $insurance->cvv || $insurance->expiry_date)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-credit-card"></i>Card Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Card Number</div>
+                            <div class="info-value {{ $insurance->card_number ? '' : 'empty' }}">
+                                {{ $insurance->card_number ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">CVV</div>
+                            <div class="info-value {{ $insurance->cvv ? '' : 'empty' }}">
+                                {{ $insurance->cvv ?? 'Not provided' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Expiry Date</div>
+                            <div class="info-value {{ $insurance->expiry_date ? '' : 'empty' }}">
+                                {{ $insurance->expiry_date ?? 'Not provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+            @endhasanyrole
+
+            <!-- Follow-Up Schedule -->
+            @if($insurance->followup_required || $insurance->followup_scheduled_at)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-calendar-clock"></i>Follow-Up Schedule</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Follow-Up Required</div>
+                            <div class="info-value">
+                                @if($insurance->followup_required)
+                                    <span class="badge bg-warning">Yes</span>
+                                @else
+                                    <span class="badge bg-success">No</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Assigned To</div>
+                            <div class="info-value {{ $insurance->followupPerson ? '' : 'empty' }}">
+                                {{ $insurance->followupPerson->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->followup_scheduled_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Scheduled Date & Time</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->followup_scheduled_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Status</div>
+                            <div class="info-value {{ $insurance->followup_status ? '' : 'empty' }}">
+                                {{ $insurance->followup_status ?? 'Pending' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            <!-- QA Review -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-check-decagram"></i>QA Review</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">QA Status</div>
+                            <div class="info-value">
+                                @if($insurance->qa_status)
+                                    <span class="badge bg-{{ $insurance->qa_status == 'Approved' ? 'success' : ($insurance->qa_status == 'Rejected' ? 'danger' : 'warning') }}">
+                                        {{ $insurance->qa_status }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not reviewed</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Reviewed By</div>
+                            <div class="info-value {{ $insurance->qaUser ? '' : 'empty' }}">
+                                {{ $insurance->qaUser->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">QA Notes / Reason</div>
+                            <div class="info-value {{ $insurance->qa_reason ? '' : 'empty' }}">
+                                {{ $insurance->qa_reason ?? 'No notes provided' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retention Information (if applicable) -->
+            @if($insurance->retention_status || $insurance->retention_notes)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-account-reactivate"></i>Retention Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Retention Status</div>
+                            <div class="info-value">
+                                @if($insurance->retention_status)
+                                    <span class="badge bg-info">{{ $insurance->retention_status }}</span>
+                                @else
+                                    <span class="empty">N/A</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Retention Officer</div>
+                            <div class="info-value {{ $insurance->retentionOfficer ? '' : 'empty' }}">
+                                {{ $insurance->retentionOfficer->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->retained_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Retained Date</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->retained_at)->format('M d, Y') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Is Rewrite</div>
+                            <div class="info-value">
+                                <span class="badge bg-{{ $insurance->is_rewrite ? 'warning' : 'secondary' }}">
+                                    {{ $insurance->is_rewrite ? 'Yes' : 'No' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->retention_notes)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Retention Notes</div>
+                            <div class="info-value">{{ $insurance->retention_notes }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->chargeback_marked_date)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Chargeback Marked Date</div>
+                            <div class="info-value text-danger">
+                                {{ \Carbon\Carbon::parse($insurance->chargeback_marked_date)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            <!-- Issuance Information (if applicable) -->
+            @if($insurance->issuance_status || $insurance->assigned_agent_id)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-file-document-check"></i>Issuance Information</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Issuance Status</div>
+                            <div class="info-value">
+                                @if($insurance->issuance_status)
+                                    <span class="badge bg-{{ $insurance->issuance_status == 'issued' ? 'success' : 'warning' }}">
+                                        {{ ucfirst($insurance->issuance_status) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not set</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Assigned Agent</div>
+                            <div class="info-value {{ $insurance->assignedAgent ? '' : 'empty' }}">
+                                {{ $insurance->assignedAgent->name ?? 'Not assigned' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->issued_policy_number)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Issued Policy Number</div>
+                            <div class="info-value">{{ $insurance->issued_policy_number }}</div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Issuance Date</div>
+                            <div class="info-value {{ $insurance->issuance_date ? '' : 'empty' }}">
+                                {{ $insurance->issuance_date ? \Carbon\Carbon::parse($insurance->issuance_date)->format('M d, Y') : 'Not set' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->issuance_reason)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Issuance Reason/Notes</div>
+                            <div class="info-value">{{ $insurance->issuance_reason }}</div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            <!-- Revenue & Commission (Super Admin/Manager Only) -->
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
+            @if($insurance->agent_commission || $insurance->agent_revenue || $insurance->settlement_percentage)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-currency-usd"></i>Revenue & Commission</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Agent Commission</div>
+                            <div class="info-value">
+                                @if($insurance->agent_commission)
+                                    <span class="badge bg-success">
+                                        ${{ number_format($insurance->agent_commission, 2) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not set</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Agent Revenue</div>
+                            <div class="info-value">
+                                @if($insurance->agent_revenue)
+                                    <span class="badge bg-primary">
+                                        ${{ number_format($insurance->agent_revenue, 2) }}
+                                    </span>
+                                @else
+                                    <span class="empty">Not set</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-4 info-row">
+                            <div class="info-label">Settlement %</div>
+                            <div class="info-value {{ $insurance->settlement_percentage ? '' : 'empty' }}">
+                                {{ $insurance->settlement_percentage ? $insurance->settlement_percentage . '%' : 'Not set' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->commission_calculation_notes)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Commission Notes</div>
+                            <div class="info-value">{{ $insurance->commission_calculation_notes }}</div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->commission_calculated_at)
+                    <div class="row">
+                        <div class="col-md-12 info-row">
+                            <div class="info-label">Calculated At</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->commission_calculated_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+            @endhasanyrole
+
+            <!-- Notes (Super Admin/Manager Only) -->
+            @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
+            @if($insurance->staff_notes || $insurance->manager_notes)
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-note-text"></i>Notes</h5>
+                </div>
+                <div class="ld-card-body">
+                    @if($insurance->staff_notes)
+                    <div class="info-row">
+                        <div class="info-label">Staff Notes</div>
+                        <div class="info-value">{{ $insurance->staff_notes }}</div>
+                    </div>
+                    @endif
+                    @if($insurance->manager_notes)
+                    <div class="info-row">
+                        <div class="info-label">Manager Notes</div>
+                        <div class="info-value">{{ $insurance->manager_notes }}</div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+            @endhasanyrole
+
+            <!-- Timeline -->
+            <div class="ld-card">
+                <div class="ld-card-hdr">
+                    <h5><i class="mdi mdi-timeline-clock"></i>Timeline</h5>
+                </div>
+                <div class="ld-card-body">
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Created At</div>
+                            <div class="info-value">
+                                {{ $insurance->created_at ? $insurance->created_at->format('M d, Y h:i A') : 'N/A' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Last Updated</div>
+                            <div class="info-value">
+                                {{ $insurance->updated_at ? $insurance->updated_at->format('M d, Y h:i A') : 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                    @if($insurance->verified_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Verified At</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->verified_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Verified By</div>
+                            <div class="info-value {{ $insurance->verifier ? '' : 'empty' }}">
+                                {{ $insurance->verifier->name ?? 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->validated_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Validated At</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->validated_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Validated By</div>
+                            <div class="info-value {{ $insurance->validator ? '' : 'empty' }}">
+                                {{ $insurance->validator->name ?? 'N/A' }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->transferred_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Transferred At</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->transferred_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->closed_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Closed At</div>
+                            <div class="info-value">
+                                {{ \Carbon\Carbon::parse($insurance->closed_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                    @if($insurance->declined_at)
+                    <div class="row">
+                        <div class="col-md-6 info-row">
+                            <div class="info-label">Declined At</div>
+                            <div class="info-value text-danger">
+                                {{ \Carbon\Carbon::parse($insurance->declined_at)->format('M d, Y h:i A') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('script')
+    <script>
+        function makeZoomCall() {
+            const phoneNumber = '{{ $insurance->phone_number ?? '' }}';
+            const sanitizedZoomNumber = '{{ Auth::user()->sanitized_zoom_number ?? '' }}';
+
+            if (!phoneNumber) {
+                alert('No phone number available for this lead.');
+                return;
+            }
+
+            if (!sanitizedZoomNumber) {
+                alert('You do not have a Zoom phone number configured.');
+                return;
+            }
+
+            const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+            const zoomUrl = `zoomphonenumber://call?to=${cleanNumber}`;
+            window.location.href = zoomUrl;
+            console.log('Attempting to call:', cleanNumber);
+        }
+    </script>
+@endsection

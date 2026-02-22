@@ -427,6 +427,7 @@
                         <th style="min-width:100px">Premium</th>
                         <th style="min-width:130px">QA Status</th>
                         <th style="min-width:280px">QA Reason / Notes</th>
+                        <th style="min-width:150px">Reviewed By</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -495,10 +496,23 @@
                                     @endif
                                 </div>
                             </td>
+                            <td>
+                                @if($lead->qaUser)
+                                    <strong style="font-size:.78rem">{{ $lead->qaUser->name }}</strong>
+                                    @if($lead->qa_reviewed_at)
+                                        <div style="font-size:.65rem;color:#94a3b8;margin-top:2px">
+                                            {{ \Carbon\Carbon::parse($lead->qa_reviewed_at)->format('M d, Y') }}
+                                            <br>{{ \Carbon\Carbon::parse($lead->qa_reviewed_at)->format('h:i A') }}
+                                        </div>
+                                    @endif
+                                @else
+                                    <span style="color:#94a3b8;font-size:.75rem">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">
+                            <td colspan="9" class="text-center py-4">
                                 <i class="bx bx-inbox" style="font-size:2rem;color:#94a3b8"></i>
                                 <p class="mb-0 text-muted" style="font-size:.82rem">No sales data available for QA review</p>
                             </td>

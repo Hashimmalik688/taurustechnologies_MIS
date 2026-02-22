@@ -278,10 +278,9 @@ class PeregrineController extends Controller
 
         return [
             'total_assigned' => $leads->count(),
-            'transferred' => $leads->where('status', Statuses::LEAD_TRANSFERRED)->count(),
-            'closed' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
-            'sales' => $leads->where('status', Statuses::LEAD_SALE)->count(),
-            'returned' => $leads->where('status', Statuses::LEAD_RETURNED)->count(),
+            'with_closer' => $leads->whereIn('status', [Statuses::LEAD_TRANSFERRED, Statuses::LEAD_PENDING, Statuses::LEAD_RETURNED])->count(),
+            'sent_to_validator' => $leads->where('status', Statuses::LEAD_CLOSED)->count(),
+            'sales' => $leads->whereIn('status', [Statuses::LEAD_SALE, Statuses::LEAD_ACCEPTED])->count(),
             'declined' => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
         ];
     }

@@ -832,6 +832,88 @@ if (typeof window.contextMenuCommunityName === 'undefined') {
     window.contextMenuCommunityName = null;
 }
 
+// ===== MENTION SYSTEM - EVENT DELEGATION =====
+// Uses document-level event delegation so mention autocomplete works
+// regardless of when textarea elements are created/recreated by innerHTML
+(function initMentionDelegation() {
+    // Map of mention-enabled input IDs to their suggestion container IDs
+    const MENTION_INPUTS = {
+        'messageInput': 'mentionSuggestions',
+        'announcementInput': 'announcementMentionSuggestions'
+    };
+
+    // Handle input events for @ mention detection
+    document.addEventListener('input', function(e) {
+        const containerId = MENTION_INPUTS[e.target.id];
+        if (!containerId) return;
+
+        const text = e.target.value;
+        const cursorPos = e.target.selectionStart;
+        const beforeCursor = text.substring(0, cursorPos);
+        const lastAtPos = beforeCursor.lastIndexOf('@');
+
+        if (lastAtPos !== -1) {
+            const afterAt = beforeCursor.substring(lastAtPos + 1);
+            // Allow typing after @ (no space unless bracket format)
+            if (!afterAt.includes(' ') || afterAt.startsWith('[')) {
+                const query = afterAt.replace(/^\[/, '');
+                const suggestions = getMentionSuggestions(query);
+                showMentionSuggestions(suggestions, containerId, e.target.id);
+                window.currentMentionMatch = { start: lastAtPos, end: cursorPos };
+            } else {
+                const el = document.getElementById(containerId);
+                if (el) el.style.display = 'none';
+            }
+        } else {
+            const el = document.getElementById(containerId);
+            if (el) el.style.display = 'none';
+        }
+    });
+
+    // Handle keyboard navigation in mention suggestions
+    document.addEventListener('keydown', function(e) {
+        const containerId = MENTION_INPUTS[e.target.id];
+        if (!containerId) return;
+
+        const container = document.getElementById(containerId);
+        if (!container || container.style.display === 'none') return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const items = container.querySelectorAll('.suggestion-item');
+            if (items.length === 0) return;
+            window.selectedSuggestionIndex = (window.selectedSuggestionIndex + 1) % items.length;
+            updateActiveSuggestion(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const items = container.querySelectorAll('.suggestion-item');
+            if (items.length === 0) return;
+            window.selectedSuggestionIndex = (window.selectedSuggestionIndex - 1 + items.length) % items.length;
+            updateActiveSuggestion(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const activeItem = container.querySelector('.suggestion-item.active');
+            if (activeItem) {
+                selectMention(activeItem.dataset.mention, e.target.id);
+            }
+            container.style.display = 'none';
+        } else if (e.key === 'Escape') {
+            container.style.display = 'none';
+        }
+    });
+
+    // Close mention suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.mention-suggestions') && !e.target.closest('textarea')) {
+            document.querySelectorAll('.mention-suggestions').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    });
+
+    console.log('Mention delegation initialized');
+})();
+
 // ===== SIDEBAR TAB SWITCHING =====
 document.addEventListener('DOMContentLoaded', function() {
     const tabButtons = document.querySelectorAll('.chat-icon-btn');
@@ -1369,8 +1451,9 @@ async function selectCommunity(community, isCreator = false) {
             </div>
             ${canPostAnnouncement ? `
                 <div class="announcement-input-area" style="border-top: 2px solid ${themeColors.surface200}; background: var(--bs-card-bg); padding: 16px;">
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <textarea id="announcementInput" placeholder="Type your announcement..." rows="2" style="width: 100%; padding: 12px; border: 1px solid ${themeColors.surface300}; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 60px;"></textarea>
+                    <div style="display: flex; flex-direction: column; gap: 12px; position: relative;">
+                        <textarea id="announcementInput" placeholder="Type @ to mention someone, @everyone to mention all..." rows="2" style="width: 100%; padding: 12px; border: 1px solid ${themeColors.surface300}; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 60px;"></textarea>
+                        <div id="announcementMentionSuggestions" class="mention-suggestions" style="display: none;"></div>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; gap: 8px;">
                                 <button type="button" id="attachAnnouncementBtn" title="Attach file" style="padding: 8px 12px; background: ${themeColors.surface100}; border: 1px solid ${themeColors.surface300}; border-radius: 6px; cursor: pointer; color: ${themeColors.surface500};">
@@ -1398,7 +1481,7 @@ async function selectCommunity(community, isCreator = false) {
         
         // Setup file attachment handler and Enter key if user can post
         if (canPostAnnouncement) {
-            setTimeout(() => {
+            setTimeout(async () => {
                 const attachBtn = document.getElementById('attachAnnouncementBtn');
                 const fileInput = document.getElementById('announcementFileInput');
                 const textarea = document.getElementById('announcementInput');
@@ -1409,12 +1492,30 @@ async function selectCommunity(community, isCreator = false) {
                 
                 if (textarea) {
                     textarea.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        // Only prevent Enter if mention suggestions are not showing
+                        const mentionContainer = document.getElementById('announcementMentionSuggestions');
+                        if (e.key === 'Enter' && !e.shiftKey && (!mentionContainer || mentionContainer.style.display === 'none')) {
                             e.preventDefault();
                             sendAnnouncement();
                         }
                     });
                 }
+                
+                // Load community members for mention suggestions
+                try {
+                    const response = await apiCall(`/api/communities/${communityId}/members`);
+                    window.conversationUsers = (response.members || []).map(m => ({
+                        id: m.id,
+                        name: m.name,
+                        avatar: m.avatar,
+                        role: m.role || 'Member'
+                    }));
+                } catch (e) {
+                    console.warn('Failed to load community members for mentions:', e);
+                }
+                
+                // Mention autocomplete is handled by document-level event delegation
+                console.log('Announcement mention ready, users loaded:', (window.conversationUsers || []).length);
             }, 100);
         }
 
@@ -1495,7 +1596,7 @@ function renderAnnouncements(announcements, communityColor) {
                             ` : ''}
                         </div>
                         ${announcement.title ? `<div style="font-weight: 600; color: ${communityColor}; margin-bottom: 8px; font-size: 15px;">${escapeHtml(announcement.title)}</div>` : ''}
-                        <div style="color: ${themeColors.surface600}; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(announcement.message)}</div>
+                        <div style="color: ${themeColors.surface600}; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${formatMessageText(announcement.message)}</div>
                     </div>
                 </div>
             </div>
@@ -2118,6 +2219,9 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     document.getElementById('sendButton').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
+            // Don't send if mention suggestions are showing (Enter selects mention)
+            const mentionContainer = document.getElementById('mentionSuggestions');
+            if (mentionContainer && mentionContainer.style.display !== 'none') return;
             e.preventDefault();
             sendMessage();
         }
@@ -2141,8 +2245,8 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     // Add GIF button listener
     document.getElementById('gifBtn').addEventListener('click', showGifPicker);
 
-    // Initialize mention autocomplete
-    await initMentionAutocomplete();
+    // Load mention users (event delegation handles the actual autocomplete)
+    await loadMentionUsers();
 
     // Start auto-refresh for messages (5 seconds for near real-time updates)
     clearInterval(window.messagesRefreshInterval);
@@ -2173,7 +2277,10 @@ function formatMessageText(text) {
     // First escape HTML
     let escaped = escapeHtml(text);
     
-    // Then find and highlight mentions
+    // Highlight @[Full Name] mentions (multi-word names in brackets)
+    escaped = escaped.replace(/@\[([^\]]+)\]/g, '<span class="mention-highlight">@$1</span>');
+    
+    // Highlight @word mentions (single-word including @everyone)
     escaped = escaped.replace(/@(everyone|\w+)/g, '<span class="mention-highlight">@$1</span>');
     
     return escaped;
@@ -3695,83 +3802,78 @@ if (!document.getElementById('chatInputStyles')) {
 // MENTION AUTOCOMPLETE
 // ==========================================
 
-    // Get users in current conversation
+    // Get users in current conversation (or community members for community channels)
     async function loadConversationUsers() {
-        if (!window.currentConversationId) return;
+        if (!window.currentConversationId && !window.currentCommunityId) {
+            console.warn('No conversation or community ID set for mention loading');
+            return;
+        }
         
         try {
-            const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}`);
-            window.conversationUsers = response.users || [];
-            console.log('Loaded conversation users for mentions:', window.conversationUsers);
+            if (window.currentConversationId) {
+                // Try the dedicated users endpoint first
+                try {
+                    const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}/users`);
+                    console.log('Users endpoint response:', response);
+                    window.conversationUsers = response.users || [];
+                } catch (e1) {
+                    console.warn('Users endpoint failed, trying conversation details:', e1);
+                    // Fallback: get users from conversation details endpoint
+                    try {
+                        const response = await apiCall(`/api/chat/conversations/${window.currentConversationId}`);
+                        console.log('Conversation details response:', response);
+                        window.conversationUsers = response.users || [];
+                    } catch (e2) {
+                        console.warn('Conversation details also failed:', e2);
+                    }
+                }
+                
+                // Final fallback: if still empty, load all chat users
+                if (!window.conversationUsers || window.conversationUsers.length === 0) {
+                    console.warn('No users found from conversation endpoints, loading all chat users as fallback');
+                    try {
+                        const allUsersResponse = await apiCall('/api/chat/users');
+                        window.conversationUsers = (allUsersResponse.users || []).map(u => ({
+                            id: u.id,
+                            name: u.name,
+                            avatar: u.avatar,
+                            role: u.role || 'Member'
+                        }));
+                    } catch (e3) {
+                        console.error('All user loading methods failed:', e3);
+                    }
+                }
+            } else if (window.currentCommunityId) {
+                const response = await apiCall(`/api/communities/${window.currentCommunityId}/members`);
+                window.conversationUsers = (response.members || []).map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    avatar: m.avatar,
+                    role: m.role || 'Member'
+                }));
+            }
+            console.log('Final conversation users for mentions:', window.conversationUsers?.length, window.conversationUsers);
         } catch (e) {
-            console.warn('Failed to load conversation users:', e);
+            console.error('Failed to load conversation users:', e);
         }
     }
 
-    // Initialize mention autocomplete on message input
-    async function initMentionAutocomplete() {
-        const messageInput = document.getElementById('messageInput');
-        if (!messageInput) return;
-
-        // Load conversation users first
-        await loadConversationUsers();
-
-        messageInput.addEventListener('input', function() {
-            const text = this.value;
-            const cursorPos = this.selectionStart;
-            
-            // Check if @ exists before cursor
-            const beforeCursor = text.substring(0, cursorPos);
-            const lastAtPos = beforeCursor.lastIndexOf('@');
-            
-            if (lastAtPos !== -1) {
-                const afterAt = beforeCursor.substring(lastAtPos + 1);
-                // Check if there's a space after @
-                if (!afterAt.includes(' ')) {
-                    const query = afterAt;
-                    const suggestions = getMentionSuggestions(query);
-                    showMentionSuggestions(suggestions);
-                    window.currentMentionMatch = { start: lastAtPos, end: cursorPos };
-                } else {
-                    document.getElementById('mentionSuggestions').style.display = 'none';
-                }
-            } else {
-                document.getElementById('mentionSuggestions').style.display = 'none';
-            }
-        });
-
-        messageInput.addEventListener('keydown', function(e) {
-            const container = document.getElementById('mentionSuggestions');
-            if (container.style.display === 'none') return;
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                const items = container.querySelectorAll('.suggestion-item');
-                window.selectedSuggestionIndex = (window.selectedSuggestionIndex + 1) % items.length;
-                updateActiveSuggestion(items);
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                const items = container.querySelectorAll('.suggestion-item');
-                window.selectedSuggestionIndex = (window.selectedSuggestionIndex - 1 + items.length) % items.length;
-                updateActiveSuggestion(items);
-            } else if (e.key === 'Enter' && container.style.display !== 'none') {
-                e.preventDefault();
-                const activeItem = container.querySelector('.suggestion-item.active');
-                if (activeItem) {
-                    selectMention(activeItem.dataset.mention);
-                }
-            }
-        });
+    // Load users for mention autocomplete (event delegation handles the actual input/keydown)
+    async function loadMentionUsers() {
+        if (!window.conversationUsers || window.conversationUsers.length === 0) {
+            await loadConversationUsers();
+        } else {
+            console.log('Using existing conversation users for mentions:', window.conversationUsers.length);
+        }
     }
 
     // Get mention suggestions
     function getMentionSuggestions(query) {
-        if (!query || query.length < 1) return [];
-        
         const suggestions = [];
+        const lowerQuery = (query || '').toLowerCase();
         
-        // Add @everyone option
-        if ('everyone'.startsWith(query.toLowerCase())) {
+        // Add @everyone option (show always when query is empty, or when matches)
+        if (!lowerQuery || 'everyone'.startsWith(lowerQuery)) {
             suggestions.push({
                 name: 'everyone',
                 type: 'special',
@@ -3779,9 +3881,10 @@ if (!document.getElementById('chatInputStyles')) {
             });
         }
         
-        // Add users
-        window.conversationUsers.forEach(user => {
-            if (user.name.toLowerCase().startsWith(query.toLowerCase())) {
+        // Add users - match by contains (not just startsWith) for better findability
+        (window.conversationUsers || []).forEach(user => {
+            const userName = (user.name || '').toLowerCase();
+            if (!lowerQuery || userName.includes(lowerQuery)) {
                 suggestions.push({
                     name: user.name,
                     type: 'user',
@@ -3791,12 +3894,15 @@ if (!document.getElementById('chatInputStyles')) {
             }
         });
         
-        return suggestions;
+        return suggestions.slice(0, 10); // Limit to 10 suggestions
     }
 
     // Show mention suggestions
-    function showMentionSuggestions(suggestions) {
-        const container = document.getElementById('mentionSuggestions');
+    function showMentionSuggestions(suggestions, containerId, inputId) {
+        containerId = containerId || 'mentionSuggestions';
+        inputId = inputId || 'messageInput';
+        const container = document.getElementById(containerId);
+        if (!container) return;
         
         if (suggestions.length === 0) {
             container.style.display = 'none';
@@ -3821,13 +3927,14 @@ if (!document.getElementById('chatInputStyles')) {
         
         // Add click handlers
         container.querySelectorAll('.suggestion-item').forEach(item => {
-            item.addEventListener('click', () => selectMention(item.dataset.mention));
+            item.addEventListener('click', () => selectMention(item.dataset.mention, inputId));
         });
     }
 
     // Handle mention selection
-    function selectMention(name) {
-        const input = document.getElementById('messageInput');
+    function selectMention(name, inputId) {
+        const input = document.getElementById(inputId || 'messageInput');
+        if (!input) return;
         const text = input.value;
         const cursorPos = input.selectionStart;
         
@@ -3835,17 +3942,22 @@ if (!document.getElementById('chatInputStyles')) {
         let atPos = text.lastIndexOf('@', cursorPos - 1);
         if (atPos === -1) return;
         
+        // Use @[Name] format for multi-word names, @name for single words
+        const hasSpace = name.includes(' ');
+        const mentionText = hasSpace ? `@[${name}]` : `@${name}`;
+        
         // Replace from @ to cursor
         const before = text.substring(0, atPos);
         const after = text.substring(cursorPos);
-        const newText = before + '@' + name + ' ' + after;
+        const newText = before + mentionText + ' ' + after;
         
         input.value = newText;
         input.focus();
         input.setSelectionRange(newText.length - after.length, newText.length - after.length);
         
         // Hide suggestions
-        document.getElementById('mentionSuggestions').style.display = 'none';
+        const suggestionsEl = document.getElementById(inputId === 'announcementInput' ? 'announcementMentionSuggestions' : 'mentionSuggestions');
+        if (suggestionsEl) suggestionsEl.style.display = 'none';
     }
 
     function updateActiveSuggestion(items) {
@@ -4527,7 +4639,12 @@ function checkAndNotifyMentions(message) {
         const msg = message.message.toLowerCase();
         const currentUserNameLower = (currentUserName || '').toLowerCase();
         
-        if (msg.includes('@' + currentUserNameLower) || msg.includes('@everyone')) {
+        // Check for @[Full Name] format, @username format, or @everyone
+        const isMentioned = msg.includes('@everyone') ||
+            msg.includes('@' + currentUserNameLower) ||
+            msg.includes('@[' + currentUserNameLower + ']');
+        
+        if (isMentioned) {
             sendMentionNotification(
                 `New mention from ${message.user?.name || 'Someone'}`,
                 message.message.substring(0, 100) + (message.message.length > 100 ? '...' : '')

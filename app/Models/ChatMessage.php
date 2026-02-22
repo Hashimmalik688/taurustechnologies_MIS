@@ -51,14 +51,22 @@ class ChatMessage extends Model
     /**
      * Extract @mentions from message
      * Returns array of usernames mentioned in the message
+     * Supports both @[Full Name] (multi-word) and @word (single-word) formats
      */
     public function getMentionedUsers()
     {
         $mentions = [];
         
-        // Find @username patterns (including @everyone)
-        if (preg_match_all('/@(\w+)/', $this->message, $matches)) {
-            $mentions = $matches[1] ?? [];
+        // Find @[Full Name] patterns (multi-word mentions)
+        if (preg_match_all('/@\[([^\]]+)\]/', $this->message, $matches)) {
+            $mentions = array_merge($mentions, $matches[1] ?? []);
+        }
+        
+        // Find @word patterns (single-word mentions, including @everyone)
+        // Remove the bracketed mentions first to avoid double-matching
+        $cleaned = preg_replace('/@\[[^\]]+\]/', '', $this->message);
+        if (preg_match_all('/@(\w+)/', $cleaned, $matches)) {
+            $mentions = array_merge($mentions, $matches[1] ?? []);
         }
         
         return array_unique($mentions);
@@ -76,8 +84,12 @@ class ChatMessage extends Model
             return $this->conversation->users()->pluck('user_id')->toArray();
         }
         
-        // Get user IDs by username
-        return User::whereIn('name', $mentions)->pluck('id')->toArray();
+        // Get user IDs by name (case-insensitive match)
+        return User::where(function ($query) use ($mentions) {
+            foreach ($mentions as $mention) {
+                $query->orWhere('name', 'LIKE', $mention);
+            }
+        })->pluck('id')->toArray();
     }
 
     /**
@@ -91,7 +103,14 @@ class ChatMessage extends Model
             return true;
         }
         
-        return in_array($user->name, $mentions);
+        // Check both exact name match and case-insensitive match
+        foreach ($mentions as $mention) {
+            if (strcasecmp($mention, $user->name) === 0) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -101,7 +120,17 @@ class ChatMessage extends Model
     {
         $parsed = $this->message;
         
-        // Highlight @mentions
+        // Highlight @[Full Name] mentions first
+        $parsed = preg_replace_callback(
+            '/@\[([^\]]+)\]/',
+            function($matches) {
+                $mention = $matches[1];
+                return '<span class="mention-highlight">@' . htmlspecialchars($mention) . '</span>';
+            },
+            $parsed
+        );
+        
+        // Highlight @word mentions (including @everyone)
         $parsed = preg_replace_callback(
             '/@(\w+)/',
             function($matches) {

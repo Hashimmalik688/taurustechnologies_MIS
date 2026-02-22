@@ -181,6 +181,13 @@
                     <span class="th-action-badge th-badge-green chat-badge d-none">0</span>
                 </a>
 
+                {{-- Sticky Notes --}}
+                <div class="position-relative" id="sticky-notes-topbar">
+                    <button class="th-action" id="sticky-notes-toggle" title="Sticky Notes">
+                        <i class="bx bx-note"></i>
+                    </button>
+                </div>
+
                 {{-- Notifications --}}
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">

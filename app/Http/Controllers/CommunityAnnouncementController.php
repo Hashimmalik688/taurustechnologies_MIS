@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Community;
 use App\Models\CommunityAnnouncement;
 use App\Models\ChatConversation;
+use App\Models\User;
 use App\Support\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -205,6 +206,73 @@ class CommunityAnnouncementController extends Controller
     }
 
     /**
+     * Process @mentions in announcement and send notifications
+     */
+    private function processMentions(CommunityAnnouncement $announcement, Community $community, $sender): void
+    {
+        try {
+            $message = $announcement->message;
+            $mentions = [];
+
+            // Find @[Full Name] patterns (multi-word mentions)
+            if (preg_match_all('/@\[([^\]]+)\]/', $message, $matches)) {
+                $mentions = array_merge($mentions, $matches[1]);
+            }
+
+            // Find @word patterns (single-word mentions, including @everyone)
+            $cleaned = preg_replace('/@\[[^\]]+\]/', '', $message);
+            if (preg_match_all('/@(\w+)/', $cleaned, $matches)) {
+                $mentions = array_merge($mentions, $matches[1]);
+            }
+
+            $mentions = array_unique($mentions);
+
+            if (empty($mentions)) {
+                return;
+            }
+
+            if (in_array('everyone', $mentions)) {
+                // Notify all community members except sender
+                $notifyUsers = $community->members()
+                    ->where('user_id', '!=', $sender->id)
+                    ->get();
+            } else {
+                // Notify specific mentioned users who are community members
+                $notifyUsers = $community->members()
+                    ->where('user_id', '!=', $sender->id)
+                    ->where(function ($query) use ($mentions) {
+                        foreach ($mentions as $name) {
+                            $query->orWhere('name', 'LIKE', $name);
+                        }
+                    })
+                    ->get();
+            }
+
+            foreach ($notifyUsers as $user) {
+                \App\Models\Notification::createForUser(
+                    $user->id,
+                    'Mentioned in ' . $community->name,
+                    ($sender->name ?? 'Someone') . ' mentioned you in an announcement: ' . substr($announcement->message, 0, 80) . (strlen($announcement->message) > 80 ? '...' : ''),
+                    [
+                        'type' => 'announcement_mention',
+                        'icon' => 'bx bx-at',
+                        'color' => 'warning',
+                        'data' => [
+                            'community_id' => $community->id,
+                            'community_name' => $community->name,
+                            'announcement_id' => $announcement->id,
+                            'sender_name' => $sender->name ?? 'Unknown',
+                            'sender_avatar' => $sender->avatar ?? null,
+                        ],
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error processing announcement mentions: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Create announcement for a community
      * POST /api/communities/:id/announcements
      */
@@ -254,6 +322,9 @@ class CommunityAnnouncementController extends Controller
                 // Log broadcast error but don't fail the request
                 \Log::warning('Announcement broadcast failed: ' . $broadcastError->getMessage());
             }
+
+            // Process @mentions in announcements
+            $this->processMentions($announcement, $community, $user);
 
             return response()->json([
                 'success' => true,

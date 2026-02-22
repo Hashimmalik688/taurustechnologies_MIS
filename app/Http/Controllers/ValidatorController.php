@@ -379,12 +379,11 @@ class ValidatorController extends Controller
             ->count();
 
         return [
-            'total_processed' => $sales + $declined + $returned,
-            'submitted' => $submitted,
-            'sales' => $sales,
-            'declined' => $declined,
-            'returned' => $returned,
+            'total_assigned' => $submitted + $pending,
             'pending' => $pending,
+            'sales' => $sales,
+            'returned' => $returned,
+            'declined' => $declined,
         ];
     }
 
