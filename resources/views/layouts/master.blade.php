@@ -27,6 +27,9 @@
     @vite(['resources/css/custom-layout.css'])
     <!-- Admin UI overrides -->
     <link rel="stylesheet" href="{{ URL::asset('css/admin-ui.css') }}">
+
+    <!-- Page specific CSS - loads LAST to override theme CSS -->
+    @yield('css')
     
     <!-- Device Fingerprinting for Attendance Tracking -->
     <script src="{{ URL::asset('js/device-fingerprint.js') }}"></script>
@@ -667,37 +670,26 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => {
-                console.log('Chat unread count response status:', response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Chat unread count data:', data);
                 if (data.success) {
-                    // Use total_count which includes chat messages + announcements
                     const totalCount = data.total_count || data.unread_count || 0;
-                    console.log('Updating badge with count:', totalCount, '(messages:', data.unread_count, ', announcements:', data.announcement_count, ')');
                     updateChatBadge(totalCount);
-                } else {
-                    console.log('API returned success: false');
                 }
             })
             .catch(error => {
-                console.error('Error loading chat unread count:', error);
+                // Silent fail - don't spam console
             });
     }
 
     function updateChatBadge(unreadCount) {
         const badge = document.querySelector('.chat-badge');
-        console.log('Badge element found:', badge);
         if (badge) {
             if (unreadCount > 0) {
                 badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.style.display = 'inline';
-                console.log('Badge updated to:', unreadCount);
+                badge.classList.remove('d-none');
             } else {
-                badge.style.display = 'none';
-                console.log('Badge hidden (count is 0)');
+                badge.classList.add('d-none');
             }
         } else {
             console.log('Badge element not found');
