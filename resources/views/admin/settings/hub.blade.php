@@ -38,6 +38,15 @@
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
             @endhasrole
+
+            <a href="{{ route('settings.themes') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-palette"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Theme Settings</div>
+                    <p class="hub-card-desc">Switch between elegant CRM themes &mdash; glass, dark, blue &amp; more</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
         </div>
 
         <div class="hub-section-label">Tools</div>

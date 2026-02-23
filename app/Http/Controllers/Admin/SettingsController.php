@@ -19,6 +19,11 @@ class SettingsController extends Controller
         return view('admin.settings.hub');
     }
 
+    public function themes()
+    {
+        return view('admin.settings.themes');
+    }
+
     public function index()
     {
         $settings = Setting::orderBy('group')->orderBy('key')->get()->groupBy('group');

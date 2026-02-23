@@ -731,6 +731,46 @@
 .ns-empty i { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; opacity: .2; }
 .ns-empty p { font-size: 0.78rem; margin: 0; }
 .ns-empty small { font-size: 0.65rem; color: var(--bs-surface-500); }
+
+/* ── Deleted Note Styles ── */
+.ns-note.ns-deleted {
+    opacity: .7;
+    border: 1.5px dashed #e74c3c;
+    position: relative;
+}
+.ns-note.ns-deleted::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 10px,
+        rgba(231,76,60,.03) 10px,
+        rgba(231,76,60,.03) 20px
+    );
+    pointer-events: none;
+    border-radius: 0.5rem;
+}
+.ns-del-badge {
+    font-size: 0.5rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.2rem;
+    background: rgba(231,76,60,.1);
+    color: #e74c3c;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+.ns-del-info {
+    font-size: 0.52rem;
+    color: #e74c3c;
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-top: 2px;
+}
 </style>
 @endsection
 
@@ -880,6 +920,11 @@
             <div class="k-val" id="nkToday">&mdash;</div>
             <div class="k-lbl">Today</div>
         </div>
+        <div class="ex-card kpi-card k-red">
+            <i class="bx bx-trash k-icon"></i>
+            <div class="k-val" id="nkDeleted">&mdash;</div>
+            <div class="k-lbl">Deleted</div>
+        </div>
     </div>
 
     <!-- Note Filters -->
@@ -887,6 +932,11 @@
         <input type="text" class="form-control" id="nSearch" placeholder="Search note content..." autocomplete="off">
         <select class="form-select" id="nUserFilter">
             <option value="all">All Users</option>
+        </select>
+        <select class="form-select" id="nStatusFilter">
+            <option value="all">All Notes</option>
+            <option value="active">Active Only</option>
+            <option value="deleted">Deleted Only</option>
         </select>
     </div>
 
@@ -1275,6 +1325,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const nkTotal        = $('nkTotal');
     const nkUsers        = $('nkUsers');
     const nkToday        = $('nkToday');
+    const nkDeleted      = $('nkDeleted');
+    const nStatusFilter  = $('nStatusFilter');
     const notesTabCount  = $('notesTabCount');
     let nsTimer = null;
 
@@ -1283,6 +1335,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const p = new URLSearchParams({
             search: nSearch.value,
             user_id: nUserFilter.value,
+            status: nStatusFilter.value,
         });
         api(`{{ url('settings/chat-shadow/notes') }}?${p}`)
         .then(d => {
@@ -1301,6 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
             nkUsers.textContent = d.users.length;
+            nkDeleted.textContent = d.deleted_count || 0;
 
             // Count today's notes
             const todayStr = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
@@ -1333,20 +1387,32 @@ document.addEventListener('DOMContentLoaded', function() {
             const metaColor = isLightColor(bgColor) ? 'rgba(0,0,0,.4)' : 'rgba(255,255,255,.55)';
             const borderColor = isLightColor(bgColor) ? 'rgba(0,0,0,.06)' : 'rgba(255,255,255,.15)';
 
+            const deletedClass = note.is_deleted ? ' ns-deleted' : '';
+            const deletedBadge = note.is_deleted
+                ? `<span class="ns-del-badge"><i class="bx bx-trash"></i> Deleted</span>`
+                : '';
+            const deletedInfo = note.is_deleted && note.deleted_ago
+                ? `<div class="ns-del-info"><i class="bx bx-trash"></i> Deleted ${esc(note.deleted_ago)}</div>`
+                : '';
+
             html += `
-                <div class="ns-note" style="background:${escA(bgColor)};color:${textColor}">
+                <div class="ns-note${deletedClass}" style="background:${escA(bgColor)};color:${textColor}">
                     <div class="ns-note-hdr">
                         <div class="ns-user">
                             <div class="ns-user-av" style="background:hsl(${hue},50%,50%)">${ini}</div>
                             <span class="ns-user-name" style="color:${textColor}">${esc(note.user_name)}</span>
                         </div>
-                        <span class="ns-note-id" style="color:${metaColor}">#${note.id}</span>
+                        <div style="display:flex;align-items:center;gap:0.3rem">
+                            ${deletedBadge}
+                            <span class="ns-note-id" style="color:${metaColor}">#${note.id}</span>
+                        </div>
                     </div>
                     <div class="ns-content" style="color:${textColor}">${esc(note.content)}</div>
                     <div class="ns-footer" style="border-top-color:${borderColor}">
                         <div class="ns-time" style="color:${metaColor}">
                             <span><i class="bx bx-plus-circle"></i> ${esc(note.created_ago)}</span>
                             <span><i class="bx bx-edit"></i> ${esc(note.updated_ago)}</span>
+                            ${deletedInfo}
                         </div>
                         <div class="ns-color-dot" style="background:${escA(bgColor)}"></div>
                     </div>
@@ -1368,6 +1434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     nSearch.addEventListener('input', () => { clearTimeout(nsTimer); nsTimer = setTimeout(() => loadNotes(), 350); });
     nUserFilter.addEventListener('change', () => loadNotes());
+    nStatusFilter.addEventListener('change', () => loadNotes());
 
     // Polling for notes too
     setInterval(() => {

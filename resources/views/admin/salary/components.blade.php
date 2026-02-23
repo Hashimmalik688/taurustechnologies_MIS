@@ -29,7 +29,7 @@
         font-weight: 600;
         font-size: 0.75rem;
     }
-    .status-calculated { background: var(--bs-status-leave); color: black; }
+    .status-calculated { background: var(--bs-status-leave); color: var(--bs-body-color, black); }
     .status-approved { background: var(--bs-info); color: var(--bs-white); }
     .status-paid { background: var(--bs-status-present); color: var(--bs-white); }
     .status-draft { background: var(--bs-status-default); color: var(--bs-white); }
@@ -134,7 +134,7 @@
 
     <!-- Components Table -->
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom">
+        <div class="card-header border-bottom">
  <h5 class="mb-0 text-gold"><i class="bx bx-table me-2" ></i> Salary Components</h5>
         </div>
         <div class="card-body">

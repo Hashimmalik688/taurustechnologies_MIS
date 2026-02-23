@@ -69,7 +69,7 @@
         font-weight: 600;
         font-size: 0.9rem;
     }
-    .status-calculated { background: var(--bs-status-leave); color: black; }
+    .status-calculated { background: var(--bs-status-leave); color: var(--bs-body-color, black); }
     .status-approved { background: var(--bs-info); color: var(--bs-white); }
     .status-paid { background: var(--bs-status-present); color: var(--bs-white); }
 </style>

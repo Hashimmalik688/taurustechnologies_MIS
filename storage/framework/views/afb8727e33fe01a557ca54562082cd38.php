@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title'); ?> Partners Management <?php $__env->stopSection(); ?>
 
-@section('title') Partners Management @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ─── Partners Page ─── */
 .pt-page-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
@@ -62,43 +60,45 @@
 .pt-empty i { font-size:3rem; display:block; margin-bottom:.75rem; opacity:.15; }
 .pt-empty p { font-size:.78rem; margin:.25rem 0; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-@component('components.breadcrumb')
-    @slot('li_1') Admin @endslot
-    @slot('title') Partners @endslot
-@endcomponent
+<?php $__env->startSection('content'); ?>
+<?php $__env->startComponent('components.breadcrumb'); ?>
+    <?php $__env->slot('li_1'); ?> Admin <?php $__env->endSlot(); ?>
+    <?php $__env->slot('title'); ?> Partners <?php $__env->endSlot(); ?>
+<?php echo $__env->renderComponent(); ?>
 
 <div class="pt-page-hdr">
     <h5><i class="bx bx-group"></i> Partners Management <span class="pt-sub">External partner network</span></h5>
-    <a href="{{ route('admin.partners.create') }}" class="pt-add-btn"><i class="bx bx-plus"></i> Add Partner</a>
+    <a href="<?php echo e(route('admin.partners.create')); ?>" class="pt-add-btn"><i class="bx bx-plus"></i> Add Partner</a>
 </div>
 
-@if(session('success'))
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
 <div class="alert alert-success alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem;" role="alert">
-    <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem;"></button>
-</div>
-@endif
-@if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem;" role="alert">
-    <i class="bx bx-error me-1"></i> {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem;"></button>
-</div>
-@endif
+    <i class="bx bx-check-circle me-1"></i> <?php echo e(session('success')); ?>
 
-@php
+    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem;"></button>
+</div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
+<div class="alert alert-danger alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem;" role="alert">
+    <i class="bx bx-error me-1"></i> <?php echo e(session('error')); ?>
+
+    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem;"></button>
+</div>
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+<?php
     $activeCount = $partners->where('is_active', true)->count();
     $inactiveCount = $partners->where('is_active', false)->count();
     $totalCarrierAssignments = $partners->sum(fn($p) => $p->carrierStates->pluck('insurance_carrier_id')->unique()->count());
     $totalStatesCovered = $partners->sum(fn($p) => $p->carrierStates->pluck('state')->unique()->count());
-@endphp
+?>
 <div class="pt-kpi-row">
-    <div class="pt-kpi k-blue"><i class="bx bx-group k-icon"></i><div class="k-val">{{ $partners->count() }}</div><div class="k-lbl">Total Partners</div></div>
-    <div class="pt-kpi k-green"><i class="bx bx-check-shield k-icon"></i><div class="k-val">{{ $activeCount }}</div><div class="k-lbl">Active</div></div>
-    <div class="pt-kpi k-orange"><i class="bx bx-briefcase k-icon"></i><div class="k-val">{{ $totalCarrierAssignments }}</div><div class="k-lbl">Carrier Assignments</div></div>
-    <div class="pt-kpi k-purple"><i class="bx bx-map k-icon"></i><div class="k-val">{{ $totalStatesCovered }}</div><div class="k-lbl">States Covered</div></div>
+    <div class="pt-kpi k-blue"><i class="bx bx-group k-icon"></i><div class="k-val"><?php echo e($partners->count()); ?></div><div class="k-lbl">Total Partners</div></div>
+    <div class="pt-kpi k-green"><i class="bx bx-check-shield k-icon"></i><div class="k-val"><?php echo e($activeCount); ?></div><div class="k-lbl">Active</div></div>
+    <div class="pt-kpi k-orange"><i class="bx bx-briefcase k-icon"></i><div class="k-val"><?php echo e($totalCarrierAssignments); ?></div><div class="k-lbl">Carrier Assignments</div></div>
+    <div class="pt-kpi k-purple"><i class="bx bx-map k-icon"></i><div class="k-val"><?php echo e($totalStatesCovered); ?></div><div class="k-lbl">States Covered</div></div>
 </div>
 
 <div class="pt-card">
@@ -123,56 +123,56 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($partners as $partner)
-                @php
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $partners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $partner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     $uniqueCarriers = $partner->carrierStates->pluck('insurance_carrier_id')->unique();
                     $totalStatesP = $partner->carrierStates->pluck('state')->unique()->count();
                     $hue = crc32($partner->name) % 360;
                     $ini = strtoupper(collect(explode(' ', $partner->name))->map(fn($w) => substr($w,0,1))->take(2)->join(''));
-                @endphp
+                ?>
                 <tr>
                     <td>
                         <div class="pt-name-cell">
-                            <div class="pt-avatar" style="background:hsl({{ $hue }},55%,50%)">{{ $ini }}</div>
-                            <span class="pt-name">{{ $partner->name }}</span>
+                            <div class="pt-avatar" style="background:hsl(<?php echo e($hue); ?>,55%,50%)"><?php echo e($ini); ?></div>
+                            <span class="pt-name"><?php echo e($partner->name); ?></span>
                         </div>
                     </td>
-                    <td><span class="pt-code">{{ $partner->code }}</span></td>
-                    <td class="pt-email">{{ $partner->email ?? '—' }}</td>
-                    <td style="font-size:.68rem">{{ $partner->phone ?? '—' }}</td>
-                    <td><span class="pt-commission">{{ number_format($partner->our_commission_percentage ?? 0, 1) }}%</span></td>
+                    <td><span class="pt-code"><?php echo e($partner->code); ?></span></td>
+                    <td class="pt-email"><?php echo e($partner->email ?? '—'); ?></td>
+                    <td style="font-size:.68rem"><?php echo e($partner->phone ?? '—'); ?></td>
+                    <td><span class="pt-commission"><?php echo e(number_format($partner->our_commission_percentage ?? 0, 1)); ?>%</span></td>
                     <td>
-                        @foreach($uniqueCarriers as $cid)
-                            @php $cn = $partner->carrierStates->firstWhere('insurance_carrier_id', $cid)?->insuranceCarrier?->name; @endphp
-                            @if($cn)<span class="pt-carrier-badge">{{ $cn }}</span>@endif
-                        @endforeach
-                        @if($uniqueCarriers->isEmpty())<span style="color:var(--bs-surface-400);font-size:.65rem">None</span>@endif
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $uniqueCarriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cid): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php $cn = $partner->carrierStates->firstWhere('insurance_carrier_id', $cid)?->insuranceCarrier?->name; ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($cn): ?><span class="pt-carrier-badge"><?php echo e($cn); ?></span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($uniqueCarriers->isEmpty()): ?><span style="color:var(--bs-surface-400);font-size:.65rem">None</span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
-                    <td style="font-size:.72rem;font-weight:600">{{ $totalStatesP }}</td>
-                    <td><span class="pt-badge {{ $partner->is_active ? 'active' : 'inactive' }}">{{ $partner->is_active ? 'Active' : 'Inactive' }}</span></td>
+                    <td style="font-size:.72rem;font-weight:600"><?php echo e($totalStatesP); ?></td>
+                    <td><span class="pt-badge <?php echo e($partner->is_active ? 'active' : 'inactive'); ?>"><?php echo e($partner->is_active ? 'Active' : 'Inactive'); ?></span></td>
                     <td>
-                        @if($partner->password)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($partner->password): ?>
                             <span class="pt-badge active"><i class="bx bx-check" style="font-size:.55rem"></i> Set</span>
-                        @else
+                        <?php else: ?>
                             <span class="pt-badge inactive"><i class="bx bx-x" style="font-size:.55rem"></i> No</span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
                         <div class="pt-actions">
-                            <a href="{{ route('admin.partners.show', $partner->id) }}" class="pt-act-btn view" title="View"><i class="bx bx-show"></i></a>
-                            @canEditModule('partners')
-                            <a href="{{ route('admin.partners.edit', $partner->id) }}" class="pt-act-btn edit" title="Edit"><i class="bx bx-edit-alt"></i></a>
-                            @endcanEditModule
-                            @canDeleteInModule('partners')
-                            <form action="{{ route('admin.partners.destroy', $partner->id) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete {{ addslashes($partner->name) }}? This removes all carrier assignments.')">
-                                @csrf @method('DELETE')
+                            <a href="<?php echo e(route('admin.partners.show', $partner->id)); ?>" class="pt-act-btn view" title="View"><i class="bx bx-show"></i></a>
+                            <?php if(auth()->check() && auth()->user()->canEditModule('partners')): ?>
+                            <a href="<?php echo e(route('admin.partners.edit', $partner->id)); ?>" class="pt-act-btn edit" title="Edit"><i class="bx bx-edit-alt"></i></a>
+                            <?php endif; ?>
+                            <?php if(auth()->check() && auth()->user()->canDeleteInModule('partners')): ?>
+                            <form action="<?php echo e(route('admin.partners.destroy', $partner->id)); ?>" method="POST" style="display:inline" onsubmit="return confirm('Delete <?php echo e(addslashes($partner->name)); ?>? This removes all carrier assignments.')">
+                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                 <button type="submit" class="pt-act-btn delete" title="Delete"><i class="bx bx-trash"></i></button>
                             </form>
-                            @endcanDeleteInModule
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="10">
                         <div class="pt-empty">
@@ -182,14 +182,14 @@
                         </div>
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 document.getElementById('ptSearch')?.addEventListener('input', function() {
     const q = this.value.toLowerCase();
@@ -198,4 +198,6 @@ document.getElementById('ptSearch')?.addEventListener('input', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/partners/index.blade.php ENDPATH**/ ?>

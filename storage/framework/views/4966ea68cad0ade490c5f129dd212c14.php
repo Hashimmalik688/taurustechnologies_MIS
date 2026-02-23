@@ -1,12 +1,12 @@
-@use('App\Support\Roles')
-@extends('layouts.master')
+<?php use \App\Support\Roles; ?>
 
-@section('title')
+
+<?php $__env->startSection('title'); ?>
     Team Chat
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    @vite(['resources/css/chat.css'])
+<?php $__env->startSection('css'); ?>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/chat.css']); ?>
     <style>
         .chat-container * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         .message-text, .chat-search-input, #messageInput, input, textarea, .form-control { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
@@ -231,8 +231,8 @@
             color: var(--bs-surface-muted) !important;
         }
     </style>
-@endsection
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('content'); ?>
 
     <div class="chat-wrapper">
         <div class="chat-container">
@@ -306,11 +306,11 @@
                     <div class="chat-sidebar-header">
                         <h5>Communities</h5>
                         <div class="btn-group">
-                            @if(Auth::user()->hasRole([Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(Auth::user()->hasRole([Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR])): ?>
                                 <button class="btn" data-bs-toggle="modal" data-bs-target="#newCommunityModal" title="Create community">
                                     <i class="bx bx-plus"></i>
                                 </button>
-                            @endif
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
 
@@ -419,7 +419,7 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
 <!-- Group Management Modal - Redesigned -->
 <div class="modal fade" id="groupManagementModal" tabindex="-1" aria-hidden="true">
@@ -646,7 +646,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="createCommunityForm">
-                        @csrf
+                        <?php echo csrf_field(); ?>
  <div class="mb-4" >
  <label class="form-label label-value" >Community Name</label>
  <input type="text" class="form-control u-rounded-8" id="communityName" name="name" placeholder="e.g., Product Team" required >
@@ -746,7 +746,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editAnnouncementForm">
-                        @csrf
+                        <?php echo csrf_field(); ?>
  <div class="mb-4" >
  <label class="form-label label-value" >Title (Optional)</label>
  <input type="text" class="form-control u-rounded-8" id="editAnnouncementTitle" placeholder="Announcement title" >
@@ -779,20 +779,20 @@
         </div>
     </div>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 // Chat Application v3.0 - Taurus CRM
 
 // ===== GLOBAL VARIABLES (MUST BE DECLARED FIRST) =====
-window.currentUserId = {{ auth()->id() }};
+window.currentUserId = <?php echo e(auth()->id()); ?>;
 if (typeof window.currentUserName === 'undefined') {
-    window.currentUserName = '{{ auth()->user()->name }}';
+    window.currentUserName = '<?php echo e(auth()->user()->name); ?>';
 }
 if (typeof window.userRoles === 'undefined') {
-    window.userRoles = {!! json_encode(auth()->user()->roles->pluck('name')->toArray()) !!};
+    window.userRoles = <?php echo json_encode(auth()->user()->roles->pluck('name')->toArray()); ?>;
 }
 if (typeof window.isSuperAdmin === 'undefined') {
-    window.isSuperAdmin = window.userRoles.includes('{{ Roles::SUPER_ADMIN }}') || window.userRoles.includes('{{ Roles::CEO }}');
+    window.isSuperAdmin = window.userRoles.includes('<?php echo e(Roles::SUPER_ADMIN); ?>') || window.userRoles.includes('<?php echo e(Roles::CEO); ?>');
 }
 if (typeof window.currentConversationId === 'undefined') {
     window.currentConversationId = null;
@@ -803,9 +803,9 @@ if (typeof window.currentConversationName === 'undefined') {
 
 // Translation variables
 const translations = {
-    noAnnouncementsYet: '{{ __('chat.no_announcements_yet') }}',
-    beTheFirstToPost: '{{ __('chat.be_the_first_to_post') }}',
-    onlyAuthorizedUsers: '{{ __('chat.only_authorized_users') }}'
+    noAnnouncementsYet: '<?php echo e(__('chat.no_announcements_yet')); ?>',
+    beTheFirstToPost: '<?php echo e(__('chat.be_the_first_to_post')); ?>',
+    onlyAuthorizedUsers: '<?php echo e(__('chat.only_authorized_users')); ?>'
 };
 if (typeof window.messagesRefreshInterval === 'undefined') {
     window.messagesRefreshInterval = null;
@@ -2810,13 +2810,13 @@ window.addEventListener('beforeunload', () => {
 // Configuration from environment (100% local Reverb, no Pusher)
 // Use var to prevent "already declared" errors if script is loaded twice
 if (typeof echoConfig === 'undefined') {
-    var echoConfig = {!! json_encode([
+    var echoConfig = <?php echo json_encode([
         'key' => env('REVERB_APP_KEY', ''),
         'host' => env('REVERB_HOST', '127.0.0.1'),
         'port' => intval(env('REVERB_PORT', 8080)),
         'scheme' => env('REVERB_SCHEME', 'http'),
         'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
-    ]) !!};
+    ]); ?>;
 }
 
 // Prevent redeclaration if script loads multiple times
@@ -4672,6 +4672,8 @@ function showAlert(type, message) {
 </script>
 
 <!-- External Scripts -->
-<script src="{{ asset('js/emoji-picker.min.js') }}"></script>
+<script src="<?php echo e(asset('js/emoji-picker.min.js')); ?>"></script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/chat/index.blade.php ENDPATH**/ ?>
