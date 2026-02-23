@@ -222,45 +222,6 @@
             </div>
         </div>
 
-        {{-- DARK --}}
-        <div class="theme-card" data-theme-value="dark" onclick="applyTheme('dark')">
-            <div class="theme-check"><i class="bx bx-check"></i></div>
-            <div class="theme-preview" style="background:#0f0f0f">
-                <div class="theme-preview-sidebar" style="background:#1a1a1a;border-right:1px solid #333">
-                    <div class="dot active" style="background:#d4af37"></div>
-                    <div class="line" style="background:#b0b0b0;width:80%"></div>
-                    <div class="line" style="background:#b0b0b0;width:65%"></div>
-                    <div class="line" style="background:#d4af37;width:75%"></div>
-                    <div class="line" style="background:#b0b0b0;width:60%"></div>
-                </div>
-                <div class="theme-preview-main">
-                    <div class="theme-preview-header" style="background:#1a1a1a;border:1px solid #333">
-                        <div class="h-dot" style="background:#d4af37"></div>
-                        <div class="h-dot" style="background:#737373"></div>
-                    </div>
-                    <div class="theme-preview-cards">
-                        <div class="theme-preview-card" style="background:#1f1f1f;border:1px solid #333">
-                            <div class="bar w60" style="background:#e5e5e5"></div>
-                            <div class="bar w40" style="background:#d4af37"></div>
-                            <div class="bar w80" style="background:#333"></div>
-                        </div>
-                        <div class="theme-preview-card" style="background:#1f1f1f;border:1px solid #333">
-                            <div class="bar w80" style="background:#e5e5e5"></div>
-                            <div class="bar w60" style="background:#333"></div>
-                            <div class="bar w40" style="background:#d4af37"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="theme-info">
-                <div class="theme-info-left">
-                    <h6>Classic Dark</h6>
-                    <span>Gold accent on dark gray</span>
-                </div>
-                <button class="theme-apply-btn">Apply</button>
-            </div>
-        </div>
-
         {{-- EMERALD GLASS --}}
         <div class="theme-card" data-theme-value="emerald-glass" onclick="applyTheme('emerald-glass')">
             <div class="theme-check"><i class="bx bx-check"></i></div>
@@ -508,6 +469,12 @@
 <script>
     // List of all custom themes (non-light/dark)
     const customThemes = ['emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
+
+    // Migrate users who had old "dark" theme to midnight-black
+    if (localStorage.getItem('theme') === 'dark') {
+        localStorage.setItem('theme', 'midnight-black');
+        document.documentElement.setAttribute('data-theme', 'midnight-black');
+    }
 
     function applyTheme(themeName) {
         const html = document.documentElement;

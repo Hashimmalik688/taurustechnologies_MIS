@@ -1,481 +1,282 @@
 @extends('layouts.master')
 
-@section('title')
-    Add New Partner
-@endsection
+@section('title') Add New Partner @endsection
 
 @section('css')
-    <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   Add Partner — Executive Dashboard Theme
+   ═══════════════════════════════════════════════════ */
 
-    <style>
-        /* ===== Animated Background ===== */
-        .partners-animated-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--bs-gradient-start)10 0%, var(--bs-gradient-end)10 100%);
-        }
+/* Page Header */
+.ap-page-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:.75rem; flex-wrap:wrap; gap:.5rem; }
+.ap-page-hdr h5 { font-weight:800; font-size:1.05rem; color:var(--bs-surface-800); display:flex; align-items:center; gap:.5rem; margin:0; }
+.ap-back-btn { font-size:.68rem; font-weight:600; padding:.3rem .7rem; border-radius:.35rem; border:1px solid var(--bs-surface-200); background:var(--bs-card-bg); color:var(--bs-surface-500); text-decoration:none; display:inline-flex; align-items:center; gap:.25rem; transition:all .15s; }
+.ap-back-btn:hover { border-color:var(--bs-gradient-start); color:var(--bs-gradient-start); }
 
-        .gradient-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: float 15s infinite ease-in-out;
-        }
+/* Card System */
+.ap-card {
+    background:var(--bs-card-bg); border-radius:.6rem; overflow:hidden;
+    box-shadow:0 1px 4px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);
+    margin-bottom:.65rem;
+}
+.ap-card-hdr {
+    display:flex; align-items:center; gap:.4rem;
+    padding:.5rem .75rem; border-bottom:1px solid rgba(0,0,0,.05);
+}
+.ap-card-hdr h6 { font-weight:700; font-size:.78rem; color:var(--bs-surface-700); margin:0; }
+.ap-card-hdr i { color:#556ee6; font-size:.9rem; }
+.ap-card-body { padding:.75rem; }
 
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
-            top: -200px;
-            right: -200px;
-        }
+/* Form Elements */
+.ap-label { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--bs-surface-500); margin-bottom:.2rem; display:block; }
+.ap-label.required::after { content:' *'; color:#c84646; font-weight:700; }
+.ap-input {
+    font-size:.72rem; border:1px solid rgba(0,0,0,.08); border-radius:.35rem;
+    padding:.4rem .6rem; width:100%; background:var(--bs-card-bg); transition:all .2s;
+}
+.ap-input:focus { outline:none; border-color:#556ee6; box-shadow:0 0 0 2px rgba(85,110,230,.1); }
+.ap-hint { font-size:.55rem; color:var(--bs-surface-400); margin-top:.15rem; }
 
-        .orb-2 {
-            width: 350px;
-            height: 350px;
-            background: linear-gradient(135deg, var(--bs-ui-warning), var(--bs-ui-danger));
-            bottom: -175px;
-            left: -175px;
-            animation-delay: 7s;
-        }
+/* Switch */
+.ap-switch { display:flex; align-items:center; gap:.5rem; }
+.ap-switch label { font-size:.72rem; font-weight:600; color:var(--bs-surface-600); cursor:pointer; }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(30px, -30px); }
-        }
+/* Carrier section */
+.ap-carrier-sec {
+    border:1px solid rgba(0,0,0,.06); border-radius:.5rem; padding:.75rem;
+    margin-bottom:.5rem; background:rgba(0,0,0,.01); transition:all .2s;
+}
+.ap-carrier-sec:hover { border-color:rgba(85,110,230,.2); }
+.ap-carrier-sec h6 {
+    font-weight:700; font-size:.78rem; color:#556ee6;
+    display:flex; align-items:center; gap:.3rem; margin-bottom:.5rem;
+}
+.ap-carrier-sec h6 i { font-size:.85rem; }
 
-        .required::after {
-            content: " *";
-            color: var(--bs-ui-danger);
-            font-weight: bold;
-        }
+/* State settlement rows */
+.ap-settlement-row {
+    background:rgba(0,0,0,.015); border:1px solid rgba(0,0,0,.04);
+    border-radius:.35rem; padding:.5rem .6rem; margin-bottom:.3rem;
+}
+.ap-settlement-row h6 { font-size:.68rem; font-weight:700; color:var(--bs-surface-700); margin-bottom:.35rem; }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            animation: fadeIn 0.6s ease-out;
-        }
+/* Buttons */
+.ap-actions { display:flex; gap:.4rem; justify-content:flex-end; margin-top:.5rem; }
+.ap-btn {
+    font-size:.68rem; font-weight:600; padding:.4rem .9rem;
+    border-radius:.4rem; border:none; cursor:pointer;
+    display:inline-flex; align-items:center; gap:.25rem; transition:all .2s;
+}
+.ap-btn.primary {
+    background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end));
+    color:#fff; box-shadow:0 2px 8px rgba(102,126,234,.25);
+}
+.ap-btn.primary:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(102,126,234,.35); }
+.ap-btn.secondary { background:var(--bs-card-bg); border:1px solid var(--bs-surface-200); color:var(--bs-surface-600); text-decoration:none; }
+.ap-btn.secondary:hover { border-color:var(--bs-surface-400); color:var(--bs-surface-700); }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+/* Alert */
+.ap-alert {
+    border-radius:.4rem; padding:.5rem .75rem; font-size:.72rem; margin-bottom:.65rem;
+    border:none; border-left:3px solid;
+}
+.ap-alert.danger { background:rgba(244,106,106,.08); border-left-color:#f46a6a; color:#c84646; }
+.ap-alert.danger ul { margin:0; padding-left:1rem; }
+.ap-alert.danger li { font-size:.68rem; }
 
-        .card-header {
-            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: var(--bs-white);
-            border-radius: 16px 16px 0 0 !important;
-            padding: 1.5rem;
-            border: none;
-        }
-
-        .card-header h5 {
-            margin: 0;
-            font-weight: 700;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--bs-surface-600);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control, .form-select {
-            border: 2px solid var(--bs-surface-200);
-            border-radius: 10px;
-            padding: 0.625rem 0.875rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--bs-gradient-start);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
-        }
-
-        .form-check-input:checked {
-            background-color: var(--bs-gradient-start);
-            border-color: var(--bs-gradient-start);
-        }
-
-        .btn-gradient-primary {
-            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            border: none;
-            color: var(--bs-white);
-            font-weight: 600;
-            padding: 0.625rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .btn-gradient-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            color: var(--bs-white);
-        }
-
-        .btn-secondary {
-            border-radius: 12px;
-            padding: 0.625rem 1.5rem;
-            font-weight: 600;
-        }
-
-        .select2-container {
-            width: 100% !important;
-        }
-
-        .select2-selection {
-            border: 2px solid var(--bs-surface-200) !important;
-            border-radius: 10px !important;
-            min-height: 42px !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .select2-container--focus .select2-selection {
-            border-color: var(--bs-gradient-start) !important;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15) !important;
-        }
-
-        .select2-selection--multiple .select2-selection__choice {
-            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end)) !important;
-            border: none !important;
-            color: var(--bs-white) !important;
-            border-radius: 8px !important;
-            padding: 0.25rem 0.5rem !important;
-        }
-
-        .carrier-state-section {
-            border: 2px solid var(--bs-surface-200);
-            padding: 1.5rem;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .carrier-state-section:hover {
-            border-color: var(--bs-gradient-start);
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
-        }
-
-        .carrier-state-section h6 {
-            color: var(--bs-gradient-start);
-            font-weight: 700;
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .state-settlement-row {
-            background-color: var(--bs-card-bg);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 0.75rem;
-            border: 1px solid var(--bs-surface-200);
-            transition: all 0.2s ease;
-        }
-
-        .state-settlement-row:hover {
-            border-color: var(--bs-gradient-start);
-            transform: translateX(5px);
-        }
-
-        .alert {
-            border-radius: 12px;
-            border: none;
-            padding: 1rem 1.5rem;
-        }
-
-        .alert-success {
-            background: linear-gradient(135deg, rgba(17, 153, 142, 0.15), rgba(56, 239, 125, 0.15));
-            color: var(--bs-ui-success);
-            border-left: 4px solid var(--bs-ui-success);
-        }
-
-        .alert-danger {
-            background: linear-gradient(135deg, rgba(238, 9, 121, 0.15), rgba(255, 106, 0, 0.15));
-            color: var(--bs-ui-danger);
-            border-left: 4px solid var(--bs-ui-danger);
-        }
-    </style>
+/* Select2 overrides */
+.select2-container { width:100% !important; }
+.select2-selection { border:1px solid rgba(0,0,0,.08) !important; border-radius:.35rem !important; min-height:34px !important; font-size:.72rem !important; }
+.select2-selection--multiple .select2-selection__choice { background:linear-gradient(135deg,#556ee6,#764ba2) !important; border:none !important; color:#fff !important; border-radius:.25rem !important; font-size:.58rem !important; padding:.1rem .3rem !important; }
+.select2-container--focus .select2-selection { border-color:#556ee6 !important; box-shadow:0 0 0 2px rgba(85,110,230,.1) !important; }
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            <a href="{{ route('admin.partners.index') }}">Partners</a>
-        @endslot
-        @slot('title')
-            Add New Partner
-        @endslot
-    @endcomponent
 
-    <!-- Animated Background -->
-    <div class="partners-animated-bg">
-        <div class="gradient-orb orb-1"></div>
-        <div class="gradient-orb orb-2"></div>
+<!-- Page Header -->
+<div class="ap-page-hdr">
+    <h5><i class="bx bx-user-plus"></i> Add New Partner</h5>
+    <a href="{{ route('admin.partners.index') }}" class="ap-back-btn"><i class="bx bx-arrow-back"></i> Partners</a>
+</div>
+
+@if ($errors->any())
+    <div class="ap-alert danger">
+        <i class="bx bx-error-circle me-1"></i> <strong>Please fix the following errors:</strong>
+        <ul class="mt-1">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
+@endif
 
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-alert-circle me-2"></i>
-            <strong>Please fix the following errors:</strong>
-            <ul class="mb-0 mt-2">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+<form action="{{ route('admin.partners.store') }}" method="POST">
+    @csrf
 
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card glass-card">
-                <div class="card-header">
-                    <h5>
-                        <i class="mdi mdi-account-plus me-2"></i>
-                        Create New Partner
-                    </h5>
+    <!-- Basic Information -->
+    <div class="ap-card">
+        <div class="ap-card-hdr"><i class="bx bx-user"></i><h6>Basic Information</h6></div>
+        <div class="ap-card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="ap-label required">Partner Name</label>
+                    <input type="text" class="ap-input @error('name') is-invalid @enderror"
+                           name="name" value="{{ old('name') }}" required>
+                    @error('name')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
                 </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.partners.store') }}" method="POST">
-                        @csrf
-
-                        <!-- Basic Information -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label required">Partner Name</label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                           id="name" name="name" value="{{ old('name') }}" required>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="code" class="form-label required">Partner Code</label>
-                                    <input type="text" class="form-control @error('code') is-invalid @enderror"
-                                           id="code" name="code" value="{{ old('code') }}" maxlength="10" required>
-                                    @error('code')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="text-muted">Unique identifier for the partner (max 10 characters)</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                           id="email" name="email" value="{{ old('email') }}">
-                                    @error('email')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">Phone</label>
-                                    <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                           id="phone" name="phone" value="{{ old('phone') }}">
-                                    @error('phone')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="ssn_last4" class="form-label">Last 4 SSN</label>
-                                    <input type="text" class="form-control @error('ssn_last4') is-invalid @enderror"
-                                           id="ssn_last4" name="ssn_last4" value="{{ old('ssn_last4') }}" 
-                                           maxlength="4" pattern="[0-9]{4}">
-                                    @error('ssn_last4')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="text-muted">4 digits only</small>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="our_commission_percentage" class="form-label">
-                                        <i class="mdi mdi-percent me-1"></i>
-                                        Our Commission Percentage
-                                    </label>
-                                    <input type="number" class="form-control @error('our_commission_percentage') is-invalid @enderror"
-                                        id="our_commission_percentage" name="our_commission_percentage" 
-                                        value="{{ old('our_commission_percentage', 0) }}"
-                                        min="0" max="100" step="0.01" placeholder="e.g., 15.00">
-                                    @error('our_commission_percentage')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="text-muted">Percentage of total revenue that partner owes us</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="is_active" 
-                                           name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_active">
-                                        Active Status
-                                    </label>
-                                </div>
-                                <small class="text-muted">Inactive partners cannot be assigned to leads</small>
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <!-- Carrier & State Assignments -->
-                        <h5 class="mb-3">
-                            <i class="mdi mdi-briefcase-outline me-2"></i>
-                            Carrier & State Assignments
-                        </h5>
-                        <p class="text-muted mb-4">Assign insurance carriers and states to this partner</p>
-
-                        <div id="carrier-states-container">
-                            @foreach($insuranceCarriers as $carrier)
-                                <div class="carrier-state-section">
-                                    <h6>
-                                        <i class="mdi mdi-shield-check me-2"></i>
-                                        {{ $carrier->name }}
-                                    </h6>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Select States</label>
-                                        <select name="carrier_states[{{ $carrier->id }}][]" 
-                                                class="form-select state-select" 
-                                                multiple="multiple" 
-                                                data-carrier-id="{{ $carrier->id }}">
-                                            @foreach(config('app.us_states', [
-                                                'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-                                                'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-                                                'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-                                                'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-                                                'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-                                            ]) as $state)
-                                                <option value="{{ $state }}">{{ $state }}</option>
-                                            @endforeach
-                                        </select>
-                                        <small class="text-muted">Select multiple states where partner is licensed</small>
-                                    </div>
-
-                                    <!-- Settlement percentages will be added dynamically -->
-                                    <div class="settlement-inputs-container" data-carrier-id="{{ $carrier->id }}">
-                                        <!-- Dynamic inputs will appear here -->
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div class="mt-4 d-flex justify-content-end gap-2">
-                            <a href="{{ route('admin.partners.index') }}" class="btn btn-secondary">
-                                <i class="mdi mdi-arrow-left me-1"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-gradient-primary">
-                                <i class="mdi mdi-content-save me-1"></i>Create Partner
-                            </button>
-                        </div>
-                    </form>
+                <div class="col-md-6">
+                    <label class="ap-label required">Partner Code</label>
+                    <input type="text" class="ap-input @error('code') is-invalid @enderror"
+                           name="code" value="{{ old('code') }}" maxlength="10" required>
+                    @error('code')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                    <div class="ap-hint">Unique identifier (max 10 chars), e.g. E-1, Y-1, F-1</div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Contact & Commission -->
+    <div class="ap-card">
+        <div class="ap-card-hdr"><i class="bx bx-id-card"></i><h6>Contact & Commission</h6></div>
+        <div class="ap-card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="ap-label">Email</label>
+                    <input type="email" class="ap-input @error('email') is-invalid @enderror"
+                           name="email" value="{{ old('email') }}" placeholder="partner@example.com">
+                    @error('email')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-4">
+                    <label class="ap-label">Phone</label>
+                    <input type="text" class="ap-input @error('phone') is-invalid @enderror"
+                           name="phone" value="{{ old('phone') }}" placeholder="(555) 123-4567">
+                    @error('phone')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-4">
+                    <label class="ap-label">Last 4 SSN</label>
+                    <input type="text" class="ap-input @error('ssn_last4') is-invalid @enderror"
+                           name="ssn_last4" value="{{ old('ssn_last4') }}" maxlength="4" pattern="[0-9]{4}" placeholder="1234">
+                    @error('ssn_last4')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                    <div class="ap-hint">4 digits only</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ap-label">Our Commission %</label>
+                    <input type="number" class="ap-input @error('our_commission_percentage') is-invalid @enderror"
+                           name="our_commission_percentage" value="{{ old('our_commission_percentage', 0) }}"
+                           min="0" max="100" step="0.01" placeholder="0.00">
+                    @error('our_commission_percentage')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                    <div class="ap-hint">% of total revenue partner owes us</div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div>
+                        <div class="ap-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active"
+                                   name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
+                            <label for="is_active">Active Partner</label>
+                        </div>
+                        <div class="ap-hint">Inactive partners cannot be assigned to leads</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrier & State Assignments -->
+    <div class="ap-card">
+        <div class="ap-card-hdr"><i class="bx bx-briefcase"></i><h6>Carrier & State Assignments</h6></div>
+        <div class="ap-card-body">
+            <div style="font-size:.62rem;color:var(--bs-surface-500);padding:.35rem .5rem;background:rgba(85,110,230,.04);border-radius:.3rem;border-left:3px solid #556ee6;margin-bottom:.6rem;">
+                <i class="bx bx-info-circle me-1"></i> Assign insurance carriers and select states for this partner
+            </div>
+
+            <div id="carrier-states-container">
+                @foreach($insuranceCarriers as $carrier)
+                    <div class="ap-carrier-sec">
+                        <h6><i class="bx bx-shield-quarter"></i> {{ $carrier->name }}</h6>
+
+                        <div class="mb-2">
+                            <label class="ap-label">Select States</label>
+                            <select name="carrier_states[{{ $carrier->id }}][]"
+                                    class="form-select state-select"
+                                    multiple="multiple"
+                                    data-carrier-id="{{ $carrier->id }}">
+                                @foreach(config('app.us_states', [
+                                    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+                                    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+                                    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+                                    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+                                    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+                                ]) as $state)
+                                    <option value="{{ $state }}">{{ $state }}</option>
+                                @endforeach
+                            </select>
+                            <div class="ap-hint">Select multiple states where partner is licensed</div>
+                        </div>
+
+                        <div class="settlement-inputs-container" data-carrier-id="{{ $carrier->id }}"></div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="ap-actions">
+        <a href="{{ route('admin.partners.index') }}" class="ap-btn secondary"><i class="bx bx-x"></i> Cancel</a>
+        <button type="submit" class="ap-btn primary"><i class="bx bx-save"></i> Create Partner</button>
+    </div>
+</form>
 @endsection
 
 @section('script')
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- Select2 JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.state-select').select2({ theme:'bootstrap-5', placeholder:'Select states...', allowClear:true });
 
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2 for state selection
-            $('.state-select').select2({
-                theme: 'bootstrap-5',
-                placeholder: 'Select states...',
-                allowClear: true
-            });
+    $('.state-select').on('change', function() {
+        const carrierId = $(this).data('carrier-id');
+        const selectedStates = $(this).val() || [];
+        const container = $(`.settlement-inputs-container[data-carrier-id="${carrierId}"]`);
+        container.empty();
 
-            // When states are selected, create settlement input fields
-            $('.state-select').on('change', function() {
-                const carrierId = $(this).data('carrier-id');
-                const selectedStates = $(this).val() || [];
-                const container = $(`.settlement-inputs-container[data-carrier-id="${carrierId}"]`);
-                
-                // Clear existing inputs
-                container.empty();
-
-                if (selectedStates.length > 0) {
-                    selectedStates.forEach(state => {
-                        const stateRow = `
-                            <div class="state-settlement-row">
-                                <h6 class="mb-3"><strong>${state}</strong> - Settlement Percentages</h6>
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <label class="form-label">Level %</label>
-                                        <input type="number" step="0.01" min="0" max="100" 
-                                               class="form-control" 
-                                               name="settlement_level[${carrierId}][${state}]" 
-                                               placeholder="0.00">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Graded %</label>
-                                        <input type="number" step="0.01" min="0" max="100" 
-                                               class="form-control" 
-                                               name="settlement_graded[${carrierId}][${state}]" 
-                                               placeholder="0.00">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">GI %</label>
-                                        <input type="number" step="0.01" min="0" max="100" 
-                                               class="form-control" 
-                                               name="settlement_gi[${carrierId}][${state}]" 
-                                               placeholder="0.00">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Modified %</label>
-                                        <input type="number" step="0.01" min="0" max="100" 
-                                               class="form-control" 
-                                               name="settlement_modified[${carrierId}][${state}]" 
-                                               placeholder="0.00">
-                                    </div>
-                                </div>
+        if (selectedStates.length > 0) {
+            selectedStates.forEach(state => {
+                container.append(`
+                    <div class="ap-settlement-row">
+                        <h6>${state} — Settlement Percentages</h6>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <label class="ap-label">Level %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="ap-input"
+                                       name="settlement_level[${carrierId}][${state}]" placeholder="0.00">
                             </div>
-                        `;
-                        container.append(stateRow);
-                    });
-                }
+                            <div class="col-md-3">
+                                <label class="ap-label">Graded %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="ap-input"
+                                       name="settlement_graded[${carrierId}][${state}]" placeholder="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="ap-label">GI %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="ap-input"
+                                       name="settlement_gi[${carrierId}][${state}]" placeholder="0.00">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="ap-label">Modified %</label>
+                                <input type="number" step="0.01" min="0" max="100" class="ap-input"
+                                       name="settlement_modified[${carrierId}][${state}]" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>
+                `);
             });
-        });
-    </script>
+        }
+    });
+});
+</script>
 @endsection

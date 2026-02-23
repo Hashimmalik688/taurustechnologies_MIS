@@ -1,300 +1,151 @@
 @extends('layouts.master')
 
-@section('title')
-    Chart of Accounts
-@endsection
+@section('title', 'Chart of Accounts')
 
 @section('css')
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <style>
-        .glassmorphism-card {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
+<link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+@include('partials.pipeline-dashboard-styles')
+@include('partials.custom-select-datepicker-styles')
+<style>
+    .coa-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: .75rem; margin-bottom: .75rem;
+    }
+    .coa-hdr h4 { font-size: 1.1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: .45rem; }
+    .coa-hdr h4 i { color: #d4af37; font-size: 1.25rem; }
+    .coa-hdr p { margin: 2px 0 0; font-size: .72rem; color: var(--bs-surface-500); }
+    .coa-chart-wrap { min-height: 220px; }
 
-        .glassmorphism-card:hover {
-            border-color: rgba(212, 175, 55, 0.4);
-            box-shadow: 0 12px 48px rgba(212, 175, 55, 0.15);
-        }
-
-        .gold-gradient-btn {
-            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
-            border: none;
-            color: var(--bs-surface-900);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-
-        .gold-gradient-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: var(--bs-surface-900);
-        }
-
-        .filter-panel {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-
-        .form-label {
-            color: var(--bs-surface-300);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        .form-control, .form-select {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            border-radius: 8px;
-            padding: 0.6rem 0.75rem;
-        }
-
-        .form-control:focus, .form-select:focus {
-            background: rgba(15, 23, 42, 0.95);
-            border-color: var(--bs-gold);
-            color: var(--bs-surface-300);
-            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
-        }
-
-        .form-select option {
-            background: var(--bs-surface-900);
-            color: var(--bs-surface-300);
-        }
-
-        .dataTables_wrapper {
-            color: var(--bs-surface-300);
-        }
-
-        .dataTables_wrapper .dataTables_filter input,
-        .dataTables_wrapper .dataTables_length select {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            border-radius: 6px;
-            padding: 0.5rem;
-        }
-
-        .table-dark-custom {
-            color: var(--bs-surface-300);
-        }
-
-        .table-dark-custom thead th {
-            background: rgba(15, 23, 42, 0.8);
-            color: var(--bs-gold);
-            border-color: rgba(212, 175, 55, 0.2);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.875rem;
-            letter-spacing: 0.5px;
-        }
-
-        .table-dark-custom tbody td {
-            border-color: rgba(212, 175, 55, 0.1);
-            vertical-align: middle;
-        }
-
-        .table-dark-custom tbody tr:hover {
-            background: rgba(212, 175, 55, 0.05);
-        }
-
-        .action-btn {
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            border: none;
-            transition: all 0.2s ease;
-            margin: 0 0.2rem;
-        }
-
-        .action-btn-view {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--bs-ui-info);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-        }
-
-        .action-btn-view:hover {
-            background: rgba(59, 130, 246, 0.3);
-            color: var(--bs-ui-info);
-        }
-
-        .action-btn-edit {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--bs-ui-warning);
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .action-btn-edit:hover {
-            background: rgba(245, 158, 11, 0.3);
-            color: var(--bs-gold-bright);
-        }
-
-        .page-title-box {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
-            border-left: 4px solid var(--bs-gold);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-        }
-
-        .page-title {
-            color: var(--bs-gold);
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin: 0;
-        }
-    </style>
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid rgba(0,0,0,.08); border-radius: 22px;
+        padding: .3rem .65rem; font-size: .72rem; width: 200px;
+    }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); outline: none; }
+    .dataTables_wrapper .dataTables_length label { font-size: .72rem; font-weight: 600; }
+    .dataTables_wrapper .dataTables_length select { border: 1px solid rgba(0,0,0,.08); border-radius: .3rem; padding: .2rem 1.2rem .2rem .4rem; font-size: .72rem; }
+    .dataTables_wrapper .dataTables_info { font-size: .68rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { padding: .25rem .5rem; font-size: .68rem; border-radius: .3rem; border: 1px solid rgba(0,0,0,.06); margin: 0 1px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: linear-gradient(135deg, #d4af37, #e8c84a) !important; color: #fff !important; border-color: #d4af37 !important; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) { background: rgba(212,175,55,.08) !important; border-color: #d4af37 !important; color: #b89730 !important; }
+</style>
 @endsection
 
 @section('content')
-    <div class="container-fluid">
-        <!-- Page Title -->
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box">
-                    <div class="page-title-right">
- <ol class="breadcrumb m-0 text-surface-400" >
-                            <li class="breadcrumb-item"><a href="{{ route('root') }}" class="text-surface-300">Dashboard</a></li>
- <li class="breadcrumb-item text-gold" >Finance and Accounts</li>
- <li class="breadcrumb-item active text-gold" >Chart of Accounts</li>
-                        </ol>
-                    </div>
-                    <h4 class="page-title">Chart of Accounts</h4>
-                </div>
-            </div>
+<div class="container-fluid">
+    <div class="coa-hdr">
+        <div>
+            <h4><i class="bx bx-book-open"></i> Chart of Accounts</h4>
+            <p>Manage account codes, types, categories &amp; balances</p>
         </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @canEditModule('chart-of-accounts')
+            <a href="{{ route('chart-of-accounts.create') }}" class="act-btn a-primary"><i class="bx bx-plus"></i> Add Account</a>
+            @endcanEditModule
+        </div>
+    </div>
 
-        <!-- Main Content -->
-        <div class="row">
-            <div class="col-12">
-                <!-- Filter Panel -->
-                <div class="filter-panel">
-                    <form id="filterForm" method="GET">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label for="account_type" class="form-label">Account Type</label>
-                                <select name="account_type" id="account_type" class="form-select">
-                                    <option value="">All Types</option>
-                                    @foreach($accountTypes as $type)
-                                        <option value="{{ $type }}">{{ $type }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+    @php
+        $totalAccounts = $accounts->count() ?? 0;
+        $activeAccounts = is_countable($accounts) ? $accounts->where('is_active', true)->count() : 0;
+        $inactiveAccounts = is_countable($accounts) ? $accounts->where('is_active', false)->count() : 0;
+        $typeCounts = is_countable($accounts) ? $accounts->groupBy('account_type')->map->count() : collect();
+    @endphp
 
-                            <div class="col-md-4">
-                                <label for="is_active" class="form-label">Status</label>
-                                <select name="is_active" id="is_active" class="form-select">
-                                    <option value="">All Status</option>
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
-                            </div>
+    <div class="kpi-row">
+        <div class="kpi-card k-gold"><span class="k-icon"><i class="bx bx-book-open"></i></span><span class="k-val">{{ $totalAccounts }}</span><span class="k-lbl">Total Accounts</span></div>
+        <div class="kpi-card k-green"><span class="k-icon"><i class="bx bx-check-circle"></i></span><span class="k-val">{{ $activeAccounts }}</span><span class="k-lbl">Active</span></div>
+        <div class="kpi-card k-red"><span class="k-icon"><i class="bx bx-x-circle"></i></span><span class="k-val">{{ $inactiveAccounts }}</span><span class="k-lbl">Inactive</span></div>
+        @foreach($typeCounts->take(4) as $type => $count)
+        <div class="kpi-card k-{{ ['blue','teal','purple','warn'][$loop->index] ?? 'gray' }}"><span class="k-icon"><i class="bx bx-folder"></i></span><span class="k-val">{{ $count }}</span><span class="k-lbl">{{ Str::limit($type, 12) }}</span></div>
+        @endforeach
+    </div>
 
-                            <div class="col-md-4 d-flex align-items-end">
-                                <button type="button" id="filterBtn" class="btn gold-gradient-btn w-100">
-                                    <i class="bx bx-filter-alt"></i> Apply Filters
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+    <div class="grid-2 mb-3">
+        <div class="ex-card" style="padding: .75rem;">
+            <div class="sec-hdr" style="border: none; padding-bottom: .35rem;"><h6><i class="bx bx-pie-chart-alt-2"></i> Accounts by Type</h6></div>
+            <div id="accountTypeChart" class="coa-chart-wrap"></div>
+        </div>
+        <div class="ex-card" style="padding: .75rem;">
+            <div class="sec-hdr" style="border: none; padding-bottom: .35rem;"><h6><i class="bx bx-bar-chart-alt-2"></i> Active vs Inactive</h6></div>
+            <div id="accountStatusChart" class="coa-chart-wrap"></div>
+        </div>
+    </div>
 
-                <!-- Accounts Table Card -->
-                <div class="card glassmorphism-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
- <h5 class="card-title text-gold m-0">Chart of Accounts</h5>
-                            <div class="d-flex gap-2">
-                                <a href="{{ route('chart-of-accounts.create') }}" class="gold-gradient-btn">
-                                    <i class="bx bx-plus-circle"></i> Add Account
-                                </a>
-                            </div>
-                        </div>
+    <div class="ex-card pipe-filter-bar">
+        <span class="pipe-pill-lbl"><i class="bx bx-filter-alt"></i> Filters</span>
+        <select id="filterType" class="pipe-pill crm-select">
+            <option value="">All Types</option>
+            @foreach($accountTypes as $type)
+                <option value="{{ $type }}">{{ $type }}</option>
+            @endforeach
+        </select>
+        <select id="filterStatus" class="pipe-pill crm-select">
+            <option value="">All Status</option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+        </select>
+        <button id="applyFilters" class="pipe-pill-apply"><i class="bx bx-check"></i> Apply</button>
+    </div>
 
-                        <div class="table-responsive">
-                            <table id="accountsTable" class="table table-dark-custom table-bordered dt-responsive nowrap w-100">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Account Code</th>
-                                        <th>Account Name</th>
-                                        <th>Type</th>
-                                        <th>Category</th>
-                                        <th>Parent Account</th>
-                                        <th>Current Balance</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Data will be populated via DataTables -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+    <div class="ex-card sec-card">
+        <div class="sec-hdr"><h6><i class="bx bx-table"></i> All Accounts</h6></div>
+        <div class="sec-body">
+            <div class="table-responsive">
+                <table id="accountsTable" class="ex-tbl">
+                    <thead><tr><th>#</th><th>Code</th><th>Name</th><th>Type</th><th>Category</th><th>Parent</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 @endsection
 
 @section('script')
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    $('.crm-select').select2({minimumResultsForSearch:10,width:'style'});
+    var table = $('#accountsTable').DataTable({
+        processing: true, serverSide: true,
+        ajax: { url: "{{ route('chart-of-accounts.index') }}", data: function(d) { d.account_type = $('#filterType').val(); d.is_active = $('#filterStatus').val(); } },
+        columns: [
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+            { data: 'account_code', name: 'account_code' },
+            { data: 'account_name', name: 'account_name' },
+            { data: 'account_type', name: 'account_type' },
+            { data: 'account_category', name: 'account_category' },
+            { data: 'parent_account_name', name: 'parent_account_name' },
+            { data: 'balance_formatted', name: 'current_balance' },
+            { data: 'status', name: 'is_active' },
+            { data: 'action', name: 'action', orderable: false, searchable: false }
+        ],
+        order: [[1, 'asc']], pageLength: 25, responsive: false,
+        language: { search: "_INPUT_", searchPlaceholder: "Search accounts...", lengthMenu: "Show _MENU_ per page", info: "Showing _START_ to _END_ of _TOTAL_", infoEmpty: "No accounts", infoFiltered: "(filtered from _MAX_)", processing: '<div class="spinner-border spinner-border-sm text-warning"></div>', emptyTable: "No accounts found" }
+    });
+    $('#applyFilters').on('click', function() { table.draw(); });
+    $('#filterType, #filterStatus').on('change', function() { table.draw(); });
 
-    <script>
-        $(document).ready(function() {
-            // Initialize DataTable
-            var table = $('#accountsTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('chart-of-accounts.index') }}",
-                    data: function(d) {
-                        d.account_type = $('#account_type').val();
-                        d.is_active = $('#is_active').val();
-                    }
-                },
-                columns: [
-                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                    { data: 'account_code', name: 'account_code' },
-                    { data: 'account_name', name: 'account_name' },
-                    { data: 'account_type', name: 'account_type' },
-                    { data: 'account_category', name: 'account_category' },
-                    { data: 'parent_account_name', name: 'parent_account_name' },
-                    { data: 'balance_formatted', name: 'current_balance' },
-                    { data: 'status', name: 'is_active' },
-                    { data: 'action', name: 'action', orderable: false, searchable: false }
-                ],
-                order: [[1, 'asc']],
-                pageLength: 25,
-                language: {
-                    processing: '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>',
-                    emptyTable: "No accounts found",
-                    zeroRecords: "No matching accounts found"
-                }
-            });
+    @php $typeLabels = $typeCounts->keys()->toArray(); $typeValues = $typeCounts->values()->toArray(); @endphp
+    new ApexCharts(document.querySelector("#accountTypeChart"), {
+        series: @json($typeValues), labels: @json($typeLabels),
+        chart: { type: 'donut', height: 210, fontFamily: 'inherit' },
+        colors: ['#d4af37','#556ee6','#34c38f','#f46a6a','#50a5f1','#7c69ef','#f1b44c'],
+        plotOptions: { pie: { donut: { size: '62%', labels: { show: true, total: { show: true, label: 'Total', fontSize: '11px', fontWeight: 700, color: '#b89730' } } } } },
+        legend: { position: 'bottom', fontSize: '10px', markers: { width: 8, height: 8, radius: 2 } }, dataLabels: { enabled: false }, stroke: { width: 1 }
+    }).render();
 
-            // Filter button click
-            $('#filterBtn').on('click', function() {
-                table.draw();
-            });
-
-            // Reset filters on change
-            $('#account_type, #is_active').on('change', function() {
-                table.draw();
-            });
-        });
-    </script>
+    new ApexCharts(document.querySelector("#accountStatusChart"), {
+        series: [{{ $activeAccounts }}, {{ $inactiveAccounts }}], labels: ['Active', 'Inactive'],
+        chart: { type: 'donut', height: 210, fontFamily: 'inherit' },
+        colors: ['#34c38f','#f46a6a'],
+        plotOptions: { pie: { donut: { size: '62%', labels: { show: true, total: { show: true, label: 'Accounts', fontSize: '11px', fontWeight: 700, color: '#b89730' } } } } },
+        legend: { position: 'bottom', fontSize: '10px', markers: { width: 8, height: 8, radius: 2 } }, dataLabels: { enabled: false }, stroke: { width: 1 }
+    }).render();
+});
+</script>
 @endsection

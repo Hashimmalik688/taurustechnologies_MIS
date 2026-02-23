@@ -220,18 +220,59 @@ class SalaryController extends Controller
         // Format period for display
         $periodDisplay = $this->formatPayrollPeriod($month, $year);
 
-        // Get ACTIVE employees only (who get paid) - EXCLUDE Shawn
-        $query = User::with(['roles', 'userDetail'])
-            ->where('status', Statuses::USER_ACTIVE)  // Only active employees
-            ->where('name', '!=', 'Shawn')  // Exclude Shawn
-            ->orderBy('name');
-
-        $employees = $query->get();
+        // Get employees for this payroll period
+        // Include ACTIVE employees + TERMINATED employees who were still employed
+        // when this payroll period ended (deleted_at > endDate).
+        // Example: Jan payroll (ends Jan 25) — someone terminated Feb 5 → shows here.
+        //          Feb payroll (ends Feb 25) — same person → does NOT show.
+        $employees = User::with(['roles', 'userDetail'])
+            ->withTrashed()
+            ->where('name', '!=', 'Shawn')
+            ->where(function ($q) use ($endDate) {
+                // Active employees
+                $q->where(function ($q2) {
+                    $q2->where('status', Statuses::USER_ACTIVE)
+                       ->whereNull('deleted_at');
+                })
+                // OR terminated employees who were still active at end of this payroll period
+                ->orWhere(function ($q2) use ($endDate) {
+                    $q2->whereNotNull('deleted_at')
+                       ->where('deleted_at', '>', $endDate);
+                });
+            })
+            ->orderByRaw('deleted_at IS NOT NULL, name') // Active first, then terminated
+            ->get();
 
         // Calculate totals
         $totalBasicSalary = $employees->sum('basic_salary');
         $totalBonus = 0;
         $qualifiedForBonus = 0;
+
+        // ── Auto-calculate attendance from attendance records for each employee ──
+        // Statuses in DB: present, late, half_day, absent, holiday
+        // full_days = present + late (worked the full shift)
+        // half_days = half_day
+        // full_days = 'present' only, half_days = 'half_day', late_days = 'late'
+        // All three are additive: Full + Half + Late = total days worked
+        $attendanceSummaries = [];
+        $attendanceRecords = Attendance::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->whereIn('user_id', $employees->pluck('id'))
+            ->selectRaw("user_id,
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as full_days,
+                SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_days,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days")
+            ->groupBy('user_id')
+            ->get()
+            ->keyBy('user_id');
+
+        foreach ($employees as $employee) {
+            $rec = $attendanceRecords->get($employee->id);
+            $attendanceSummaries[$employee->id] = [
+                'full_days' => $rec ? (int) $rec->full_days : 0,
+                'half_days' => $rec ? (int) $rec->half_days : 0,
+                'late_days' => $rec ? (int) $rec->late_days : 0,
+            ];
+        }
 
         foreach ($employees as $employee) {
             if ($employee->is_sales_employee) {
@@ -267,7 +308,7 @@ class SalaryController extends Controller
         // Add manual entries' basic salary to total
         $totalBasicSalary += $manualEntries->sum('basic_salary');
 
-        return view('admin.payroll.index', compact('employees', 'totalBasicSalary', 'totalBonus', 'qualifiedForBonus', 'month', 'year', 'startDate', 'endDate', 'periodDisplay', 'totalWorkingDays', 'manualEntries'));
+        return view('admin.payroll.index', compact('employees', 'totalBasicSalary', 'totalBonus', 'qualifiedForBonus', 'month', 'year', 'startDate', 'endDate', 'periodDisplay', 'totalWorkingDays', 'manualEntries', 'attendanceSummaries'));
     }
 
     /**
@@ -635,8 +676,21 @@ class SalaryController extends Controller
         // Calculate per-day salary based on actual working days
         $dailySalary = $user->basic_salary / $totalWorkingDays;
         
-        // Get eligible days from manual fields (full_days + half_days, both count as 1.0)
-        $eligibleDays = ($user->full_days ?? 0) + ($user->half_days ?? 0);
+        // Auto-calculate attendance from records for this payroll period
+        $attRec = Attendance::where('user_id', $userId)
+            ->whereBetween('date', [$payrollPeriod['start']->format('Y-m-d'), $payrollPeriod['end']->format('Y-m-d')])
+            ->selectRaw("
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as full_days,
+                SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_days,
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days")
+            ->first();
+
+        $fullDays = $attRec ? (int) $attRec->full_days : 0;
+        $halfDays = $attRec ? (int) $attRec->half_days : 0;
+        $lateDays = $attRec ? (int) $attRec->late_days : 0;
+
+        // Get eligible days (full + half + late all count as worked days)
+        $eligibleDays = $fullDays + $halfDays + $lateDays;
         
         // Handle join date: cap eligible days or set to 0 if joined after period
         if ($user->joining_date) {
@@ -654,10 +708,6 @@ class SalaryController extends Controller
             // If joined before period start, use full eligible days
         }
 
-        // Use manual fields for attendance tracking
-        $fullDays = $user->full_days ?? 0;
-        $halfDays = $user->half_days ?? 0;
-        $lateDays = $user->late_days ?? 0;
         $leaveDays = 0; // Not directly tracked, but can be inferred if needed
         
         // Calculate basic salary earned based on eligible days worked
@@ -1161,11 +1211,21 @@ class SalaryController extends Controller
             // Format period for display
             $payrollPeriodFormatted = $this->formatPayrollPeriod($month, $year);
 
-            // Get ACTIVE employees only - EXCLUDE Shawn
+            // Get employees for this payroll period (active + terminated AFTER period ended)
             $employees = User::with(['roles', 'userDetail'])
-                ->where('status', Statuses::USER_ACTIVE)
+                ->withTrashed()
                 ->where('name', '!=', 'Shawn')
-                ->orderBy('name')
+                ->where(function ($q) use ($endDate) {
+                    $q->where(function ($q2) {
+                        $q2->where('status', Statuses::USER_ACTIVE)
+                           ->whereNull('deleted_at');
+                    })
+                    ->orWhere(function ($q2) use ($endDate) {
+                        $q2->whereNotNull('deleted_at')
+                           ->where('deleted_at', '>', $endDate);
+                    });
+                })
+                ->orderByRaw('deleted_at IS NOT NULL, name')
                 ->get();
 
             // Get total working days from settings
@@ -1190,6 +1250,18 @@ class SalaryController extends Controller
             $totalPayable = 0;
             $qualifiedForBonus = 0;
 
+            // ── Auto-calculate attendance from attendance records ──
+            // full = 'present', half = 'half_day', late = 'late' (all additive)
+            $attendanceRecords = Attendance::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                ->whereIn('user_id', $employees->pluck('id'))
+                ->selectRaw("user_id,
+                    SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as full_days,
+                    SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_days,
+                    SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days")
+                ->groupBy('user_id')
+                ->get()
+                ->keyBy('user_id');
+
             foreach ($employees as $employee) {
                 $basicSalary = $employee->basic_salary ?? 0;
                 $joinDate = $employee->userDetail && $employee->userDetail->join_date ? \Carbon\Carbon::parse($employee->userDetail->join_date)->format('d M Y') : 'N/A';
@@ -1198,11 +1270,12 @@ class SalaryController extends Controller
                 // Calculate per-day wage
                 $perDayWage = $basicSalary / max($totalWorkingDays, 1);
                 
-                // Get eligible days from user fields
-                $fullDays = $employee->full_days ?? 0;
-                $halfDays = $employee->half_days ?? 0;
-                $lateDays = $employee->late_days ?? 0;
-                $eligibleDays = $fullDays + $halfDays;
+                // Auto-calculate from attendance records
+                $attRec = $attendanceRecords->get($employee->id);
+                $fullDays = $attRec ? (int) $attRec->full_days : 0;
+                $halfDays = $attRec ? (int) $attRec->half_days : 0;
+                $lateDays = $attRec ? (int) $attRec->late_days : 0;
+                $eligibleDays = $fullDays + $halfDays + $lateDays;
                 
                 // Handle join date
                 if ($joiningDate) {
@@ -1277,6 +1350,7 @@ class SalaryController extends Controller
                 
                 $payrollData[] = [
                     'employee' => $employee,
+                    'isTerminated' => $employee->trashed(),
                     'joinDate' => $joinDate,
                     'basicSalary' => $basicSalary,
                     'perDayWage' => $perDayWage,
@@ -1315,7 +1389,7 @@ class SalaryController extends Controller
                 $fullDays = $entry->full_days ?? 0;
                 $halfDays = $entry->half_days ?? 0;
                 $lateDays = $entry->late_days ?? 0;
-                $eligibleDays = $fullDays + $halfDays;
+                $eligibleDays = $fullDays + $halfDays + $lateDays;
                 $earnedSalary = $eligibleDays * $perDayWage;
                 
                 $punctualityBonus = ($entry->is_qualified && $entry->punctuality_bonus) ? $entry->punctuality_bonus : 0;

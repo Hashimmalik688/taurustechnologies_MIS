@@ -1,332 +1,114 @@
 @extends('layouts.master')
-
-@section('title')
-    Add Ledger Entry
-@endsection
-
+@section('title', 'Add Ledger Entry')
 @section('css')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        .glassmorphism-card {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .section-header {
-            color: var(--bs-gold);
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-label {
-            color: var(--bs-surface-300);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-label.required::after {
-            content: " *";
-            color: var(--bs-ui-danger);
-        }
-
-        .form-control, .form-select, textarea {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            border-radius: 8px;
-            padding: 0.75rem;
-        }
-
-        .form-control:focus, .form-select:focus, textarea:focus {
-            background: rgba(15, 23, 42, 0.95);
-            border-color: var(--bs-gold);
-            color: var(--bs-surface-300);
-            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
-        }
-
-        .form-select option {
-            background: var(--bs-surface-900);
-            color: var(--bs-surface-300);
-        }
-
-        .gold-gradient-btn {
-            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
-            border: none;
-            color: var(--bs-surface-900);
-            font-weight: 600;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-
-        .gold-gradient-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: var(--bs-surface-900);
-        }
-
-        .btn-secondary-custom {
-            background: rgba(100, 116, 139, 0.3);
-            border: 1px solid rgba(100, 116, 139, 0.5);
-            color: var(--bs-surface-300);
-            font-weight: 500;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-        }
-
-        .page-header {
-            color: var(--bs-gold);
-            font-weight: 700;
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .type-selector {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .type-radio {
-            flex: 1;
-        }
-
-        .type-radio input[type="radio"] {
-            display: none;
-        }
-
-        .type-radio label {
-            display: block;
-            padding: 1rem;
-            text-align: center;
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--bs-surface-300);
-            font-weight: 600;
-        }
-
-        .type-radio input[type="radio"]:checked + label {
-            border-color: var(--bs-gold);
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--bs-gold);
-        }
-
-        .type-radio label:hover {
-            border-color: var(--bs-gold);
-            background: rgba(212, 175, 55, 0.05);
-        }
-
-        .currency-input-group {
-            position: relative;
-        }
-
-        .currency-input-group::before {
-            content: '$';
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--bs-gold);
-            font-weight: 600;
-            pointer-events: none;
-        }
-
-        .currency-input-group .form-control {
-            padding-left: 2rem;
-        }
-
-        .select2-container--default .select2-selection--single {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            height: 45px;
-            padding: 0.5rem;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: var(--bs-surface-300);
-            line-height: 30px;
-        }
-    </style>
+@include('partials.pipeline-dashboard-styles')
+@include('partials.custom-select-datepicker-styles')
+<style>
+    .form-page-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem}
+    .form-page-hdr h4{font-size:1.1rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.45rem}
+    .form-page-hdr h4 i{color:#d4af37;font-size:1.25rem}
+    .form-section-title{font-size:.82rem;font-weight:700;color:#b89730;display:flex;align-items:center;gap:.35rem;margin-bottom:.75rem;padding-bottom:.45rem;border-bottom:1px solid rgba(212,175,55,.15)}
+    .form-section-title i{font-size:1rem;opacity:.7}
+    .crm-label{font-size:.72rem;font-weight:600;color:var(--bs-surface-500);margin-bottom:.25rem}
+    .crm-label.required::after{content:" *";color:#c84646}
+    .crm-input{border:1px solid rgba(0,0,0,.08);border-radius:22px;padding:.38rem .75rem;font-size:.75rem;width:100%;background:var(--bs-card-bg);color:var(--bs-body-color);transition:border-color .15s}
+    .crm-input:focus{border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.12);outline:none}
+    select.crm-input{appearance:none;-webkit-appearance:none;border-radius:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b8860b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:1.8rem}
+    textarea.crm-input{border-radius:.6rem}
+    .type-sel{display:flex;gap:.65rem}
+    .type-sel input[type=radio]{display:none}
+    .type-sel label{flex:1;text-align:center;padding:.55rem;border:2px solid rgba(0,0,0,.06);border-radius:22px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;color:var(--bs-body-color)}
+    .type-sel input:checked+label.lbl-debit{border-color:#ef4444;background:rgba(239,68,68,.08);color:#ef4444}
+    .type-sel input:checked+label.lbl-credit{border-color:#10b981;background:rgba(16,185,129,.08);color:#10b981}
+    .currency-pfx{position:relative}.currency-pfx::before{content:'$';position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:#d4af37;font-weight:700;font-size:.75rem;pointer-events:none}.currency-pfx .crm-input{padding-left:1.6rem}
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Ledger
-        @endslot
-        @slot('title')
-            Add Entry
-        @endslot
-    @endcomponent
+<div class="container-fluid">
+    <div class="form-page-hdr">
+        <div>
+            <h4><i class="bx bx-book-add"></i> Add Ledger Entry</h4>
+        </div>
+        <a href="{{ route('ledger.index') }}" class="act-btn a-info"><i class="bx bx-arrow-back"></i> Back</a>
+    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <h2 class="page-header">
-                <i class="mdi mdi-book-plus"></i>
-                Add Ledger Entry
-            </h2>
-
-            <form action="{{ route('ledger.store') }}" method="POST">
-                @csrf
-
-                <div class="glassmorphism-card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-header">
-                            <i class="mdi mdi-information"></i>
-                            Transaction Details
-                        </h5>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="lead_id" class="form-label">Related Lead (Optional)</label>
-                                    <select class="form-select select2" id="lead_id" name="lead_id">
-                                        <option value="">Select Lead (if applicable)</option>
-                                        <option value="1">Lead #1 - John Doe</option>
-                                        <option value="2">Lead #2 - Jane Smith</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="transaction_date" class="form-label required">Transaction Date</label>
-                                    <input type="text" class="form-control" id="transaction_date" name="transaction_date"
-                                           placeholder="Select date" value="{{ old('transaction_date', date('Y-m-d')) }}" required>
-                                    @error('transaction_date')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label required">Transaction Type</label>
-                                    <div class="type-selector">
-                                        <div class="type-radio">
-                                            <input type="radio" id="type_debit" name="type" value="debit" required>
-                                            <label for="type_debit">
- <i class="mdi mdi-minus-circle me-2 text-ui-danger" ></i>
-                                                Debit
-                                            </label>
-                                        </div>
-                                        <div class="type-radio">
-                                            <input type="radio" id="type_credit" name="type" value="credit" checked required>
-                                            <label for="type_credit">
- <i class="mdi mdi-plus-circle me-2 text-ui-success" ></i>
-                                                Credit
-                                            </label>
-                                        </div>
-                                    </div>
-                                    @error('type')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="amount" class="form-label required">Amount</label>
-                                    <div class="currency-input-group">
-                                        <input type="number" step="0.01" min="0" class="form-control"
-                                               id="amount" name="amount" placeholder="0.00"
-                                               value="{{ old('amount') }}" required>
-                                    </div>
-                                    @error('amount')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="category" class="form-label required">Category</label>
-                                    <select class="form-select" id="category" name="category" required>
-                                        <option value="">Select Category</option>
-                                        <option value="commission">Commission</option>
-                                        <option value="payment">Payment</option>
-                                        <option value="refund">Refund</option>
-                                        <option value="expense">Expense</option>
-                                        <option value="bonus">Bonus</option>
-                                        <option value="adjustment">Adjustment</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                    @error('category')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="reference_number" class="form-label">Reference Number</label>
-                                    <input type="text" class="form-control" id="reference_number" name="reference_number"
-                                           placeholder="e.g., INV-001234, PAY-005678" value="{{ old('reference_number') }}">
-                                    @error('reference_number')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="4"
-                                              placeholder="Enter transaction description or notes...">{{ old('description') }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
+    <form action="{{ route('ledger.store') }}" method="POST">
+        @csrf
+        <div class="ex-card sec-card">
+            <div class="sec-body">
+                <div class="form-section-title"><i class="bx bx-transfer-alt"></i> Transaction Details</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="crm-label">Related Lead (Optional)</label>
+                        <select class="crm-input" id="lead_id" name="lead_id">
+                            <option value="">Select Lead</option>
+                            <option value="1">Lead #1 - John Doe</option>
+                            <option value="2">Lead #2 - Jane Smith</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Transaction Date</label>
+                        <input type="text" class="crm-input crm-date @error('transaction_date') is-invalid @enderror" id="transaction_date" name="transaction_date" placeholder="Select date" value="{{ old('transaction_date', date('Y-m-d')) }}" required autocomplete="off">
+                        @error('transaction_date')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Type</label>
+                        <div class="type-sel">
+                            <div style="flex:1"><input type="radio" id="type_debit" name="type" value="debit" required><label for="type_debit" class="lbl-debit"><i class="bx bx-minus-circle"></i> Debit</label></div>
+                            <div style="flex:1"><input type="radio" id="type_credit" name="type" value="credit" checked required><label for="type_credit" class="lbl-credit"><i class="bx bx-plus-circle"></i> Credit</label></div>
                         </div>
+                        @error('type')<div class="invalid-feedback d-block" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Amount</label>
+                        <div class="currency-pfx">
+                            <input type="number" step="0.01" min="0" class="crm-input @error('amount') is-invalid @enderror" name="amount" placeholder="0.00" value="{{ old('amount') }}" required>
+                        </div>
+                        @error('amount')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Category</label>
+                        <select class="crm-input @error('category') is-invalid @enderror" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="commission">Commission</option>
+                            <option value="payment">Payment</option>
+                            <option value="refund">Refund</option>
+                            <option value="expense">Expense</option>
+                            <option value="bonus">Bonus</option>
+                            <option value="adjustment">Adjustment</option>
+                            <option value="other">Other</option>
+                        </select>
+                        @error('category')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label">Reference Number</label>
+                        <input type="text" class="crm-input @error('reference_number') is-invalid @enderror" name="reference_number" placeholder="e.g., INV-001234" value="{{ old('reference_number') }}">
+                        @error('reference_number')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-12">
+                        <label class="crm-label">Description</label>
+                        <textarea class="crm-input @error('description') is-invalid @enderror" name="description" rows="3" placeholder="Enter description or notes...">{{ old('description') }}</textarea>
+                        @error('description')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
                     </div>
                 </div>
-
-                <div class="d-flex justify-content-end gap-3 mb-4">
-                    <a href="{{ route('ledger.index') }}" class="btn-secondary-custom">
-                        <i class="mdi mdi-arrow-left me-2"></i>Cancel
-                    </a>
-                    <button type="submit" class="gold-gradient-btn">
-                        <i class="mdi mdi-content-save me-2"></i>Create Entry
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+        <div class="d-flex justify-content-end gap-2 mt-2">
+            <a href="{{ route('ledger.index') }}" class="act-btn a-danger"><i class="bx bx-x"></i> Cancel</a>
+            <button type="submit" class="act-btn a-success"><i class="bx bx-save"></i> Create Entry</button>
+        </div>
+    </form>
+</div>
 @endsection
 
 @section('script')
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2
-            $('.select2').select2({
-                theme: 'default',
-                width: '100%'
-            });
-
-            // Initialize date picker
-            flatpickr("#transaction_date", {
-                dateFormat: "Y-m-d",
-                defaultDate: "today"
-            });
-        });
-    </script>
+<script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script>
+$(function(){
+    $('select.crm-input').select2({minimumResultsForSearch:10,width:'100%'});
+    $('.crm-date').datepicker({format:'yyyy-mm-dd',autoclose:true,todayHighlight:true,clearBtn:true});
+});
+</script>
 @endsection

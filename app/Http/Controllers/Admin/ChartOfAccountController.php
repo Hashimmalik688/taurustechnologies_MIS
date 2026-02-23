@@ -43,10 +43,10 @@ class ChartOfAccountController extends Controller
                 })
                 ->addColumn('action', function ($account) {
                     return '
-                        <a href="' . route('chart-of-accounts.show', $account->id) . '" class="action-btn action-btn-view">
+                        <a href="' . route('chart-of-accounts.show', $account->id) . '" class="act-btn a-info" style="padding:.18rem .55rem">
                             <i class="bx bx-show"></i>
                         </a>
-                        <a href="' . route('chart-of-accounts.edit', $account->id) . '" class="action-btn action-btn-edit">
+                        <a href="' . route('chart-of-accounts.edit', $account->id) . '" class="act-btn a-primary" style="padding:.18rem .55rem">
                             <i class="bx bx-edit"></i>
                         </a>
                     ';
@@ -56,8 +56,9 @@ class ChartOfAccountController extends Controller
         }
 
         $accountTypes = ['Asset', 'Liability', 'Equity', 'Revenue', 'Expense'];
+        $accounts = ChartOfAccount::all();
 
-        return view('admin.chart-of-accounts.index', compact('accountTypes'));
+        return view('admin.chart-of-accounts.index', compact('accountTypes', 'accounts'));
     }
 
     /**

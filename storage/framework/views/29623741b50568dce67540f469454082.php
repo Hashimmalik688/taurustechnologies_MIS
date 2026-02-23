@@ -17,8 +17,7 @@
     <!-- Modern White Theme - Complete Redesign -->
     <link rel="stylesheet" href="<?php echo e(URL::asset('css/modern-white-theme.css')); ?>">
 
-    <!-- Dark Theme Stylesheet - Comprehensive -->
-    <link rel="stylesheet" href="<?php echo e(URL::asset('css/dark-theme.css')); ?>?v=<?php echo e(time()); ?>" id="dark-theme-style">
+
 
     <!-- Custom Themes -->
     <link rel="stylesheet" href="<?php echo e(URL::asset('css/themes.css')); ?>?v=<?php echo e(time()); ?>">
@@ -27,6 +26,9 @@
     <?php echo app('Illuminate\Foundation\Vite')(['resources/css/custom-layout.css']); ?>
     <!-- Admin UI overrides -->
     <link rel="stylesheet" href="<?php echo e(URL::asset('css/admin-ui.css')); ?>">
+
+    <!-- Page specific CSS - loads LAST to override theme CSS -->
+    <?php echo $__env->yieldContent('css'); ?>
     
     <!-- Device Fingerprinting for Attendance Tracking -->
     <script src="<?php echo e(URL::asset('js/device-fingerprint.js')); ?>"></script>
@@ -480,7 +482,7 @@
         });
 
         // All available themes in cycle order
-        var _allThemes = ['light', 'dark', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
+        var _allThemes = ['light', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
 
         // Theme Toggle Function — cycles through all themes
         function toggleTheme() {
@@ -521,6 +523,8 @@
         // Load saved theme on page load
         function loadTheme() {
             var savedTheme = localStorage.getItem('theme') || 'light';
+            // Migrate old "dark" theme to midnight-black
+            if (savedTheme === 'dark') { savedTheme = 'midnight-black'; localStorage.setItem('theme', savedTheme); }
             var html = document.documentElement;
             var themeIcon = document.getElementById('themeIcon');
 
@@ -667,37 +671,26 @@
                     'Content-Type': 'application/json',
                 }
             })
-            .then(response => {
-                console.log('Chat unread count response status:', response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('Chat unread count data:', data);
                 if (data.success) {
-                    // Use total_count which includes chat messages + announcements
                     const totalCount = data.total_count || data.unread_count || 0;
-                    console.log('Updating badge with count:', totalCount, '(messages:', data.unread_count, ', announcements:', data.announcement_count, ')');
                     updateChatBadge(totalCount);
-                } else {
-                    console.log('API returned success: false');
                 }
             })
             .catch(error => {
-                console.error('Error loading chat unread count:', error);
+                // Silent fail - don't spam console
             });
     }
 
     function updateChatBadge(unreadCount) {
         const badge = document.querySelector('.chat-badge');
-        console.log('Badge element found:', badge);
         if (badge) {
             if (unreadCount > 0) {
                 badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.style.display = 'inline';
-                console.log('Badge updated to:', unreadCount);
+                badge.classList.remove('d-none');
             } else {
-                badge.style.display = 'none';
-                console.log('Badge hidden (count is 0)');
+                badge.classList.add('d-none');
             }
         } else {
             console.log('Badge element not found');

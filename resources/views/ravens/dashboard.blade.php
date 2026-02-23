@@ -100,7 +100,9 @@
                             <th class="text-end">Coverage</th>
                             <th class="text-end">Premium</th>
                             <th>Carrier</th>
+                            @if(!auth()->user()->hasRole('Ravens Closer'))
                             <th class="text-center">View</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -136,9 +138,11 @@
                                     @endif
                                 </td>
                                 <td>{{ $sale->carrier_name ?? 'N/A' }}</td>
+                                @if(!auth()->user()->hasRole('Ravens Closer'))
                                 <td class="text-center">
                                     <a href="{{ route('sales.index') }}?search={{ $sale->phone_number }}" class="act-btn a-primary" title="View in Sales"><i class="bx bx-show"></i></a>
                                 </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>

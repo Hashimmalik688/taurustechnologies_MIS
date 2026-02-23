@@ -45,26 +45,35 @@ class LedgerController extends Controller
                 })
                 ->addColumn('type_badge', function ($entry) {
                     $badges = [
-                        'debit' => '<span class="badge bg-danger">Debit</span>',
-                        'credit' => '<span class="badge bg-success">Credit</span>',
+                        'debit' => '<span class="s-pill s-closed">Debit</span>',
+                        'credit' => '<span class="s-pill s-active">Credit</span>',
                     ];
                     return $badges[$entry->type] ?? '';
                 })
                 ->addColumn('formatted_amount', function ($entry) {
                     $sign = $entry->type === 'debit' ? '-' : '+';
-                    return $sign . '$' . number_format($entry->amount, 2);
+                    $color = $entry->type === 'debit' ? '#ef4444' : '#10b981';
+                    return '<span style="color:'.$color.';font-weight:700">' . $sign . '$' . number_format($entry->amount, 2) . '</span>';
                 })
                 ->addColumn('formatted_date', function ($entry) {
                     return $entry->transaction_date->format('M d, Y');
                 })
-                ->addColumn('action', function ($entry) {
-                    return '<a href="' . route('ledger.show', $entry->id) . '" class="btn btn-sm btn-info">View</a>';
+                ->addColumn('category_badge', function ($entry) {
+                    $cat = strtolower($entry->category ?? 'other');
+                    return '<span class="cat-pill cat-'.$cat.'">'.ucfirst($entry->category ?? 'Other').'</span>';
                 })
-                ->rawColumns(['type_badge', 'action'])
+                ->addColumn('action', function ($entry) {
+                    return '<a href="' . route('ledger.show', $entry->id) . '" class="act-btn a-info" style="padding:.18rem .55rem"><i class="bx bx-show"></i></a>';
+                })
+                ->rawColumns(['type_badge', 'formatted_amount', 'category_badge', 'action'])
                 ->make(true);
         }
 
-        return view('admin.ledger.index');
+        $totalCredits = LedgerEntry::where('type', 'credit')->sum('amount');
+        $totalDebits = LedgerEntry::where('type', 'debit')->sum('amount');
+        $netBalance = $totalCredits - $totalDebits;
+
+        return view('admin.ledger.index', compact('totalCredits', 'totalDebits', 'netBalance'));
     }
 
     /**

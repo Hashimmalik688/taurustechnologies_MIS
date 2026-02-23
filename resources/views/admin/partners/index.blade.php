@@ -65,10 +65,6 @@
 @endsection
 
 @section('content')
-@component('components.breadcrumb')
-    @slot('li_1') Admin @endslot
-    @slot('title') Partners @endslot
-@endcomponent
 
 <div class="pt-page-hdr">
     <h5><i class="bx bx-group"></i> Partners Management <span class="pt-sub">External partner network</span></h5>

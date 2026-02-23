@@ -6,88 +6,129 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet">
 <style>
-/* ─── Edit Partner Page ─── */
-.ep-page-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
+/* ═══════════════════════════════════════════════════
+   Edit Partner — Executive Dashboard Theme
+   ═══════════════════════════════════════════════════ */
+
+/* Page Header */
+.ep-page-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:.75rem; flex-wrap:wrap; gap:.5rem; }
 .ep-page-hdr h5 { font-weight:800; font-size:1.05rem; color:var(--bs-surface-800); display:flex; align-items:center; gap:.5rem; margin:0; }
-.ep-back-btn { font-size:.72rem; color:var(--bs-surface-500); text-decoration:none; display:inline-flex; align-items:center; gap:.25rem; transition:all .15s; }
-.ep-back-btn:hover { color:var(--bs-gradient-start); }
+.ep-back-btn { font-size:.68rem; font-weight:600; padding:.3rem .7rem; border-radius:.35rem; border:1px solid var(--bs-surface-200); background:var(--bs-card-bg); color:var(--bs-surface-500); text-decoration:none; display:inline-flex; align-items:center; gap:.25rem; transition:all .15s; }
+.ep-back-btn:hover { border-color:#556ee6; color:#556ee6; }
 
-.ep-card { background:var(--bs-card-bg); border-radius:.75rem; box-shadow:0 1px 4px rgba(0,0,0,.04); overflow:hidden; margin-bottom:1rem; }
-.ep-card-hdr { padding:.65rem 1rem; border-bottom:1px solid var(--bs-surface-100); display:flex; align-items:center; gap:.5rem; }
+/* Card System */
+.ep-card {
+    background:var(--bs-card-bg); border-radius:.6rem; overflow:hidden;
+    box-shadow:0 1px 4px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);
+    margin-bottom:.65rem;
+}
+.ep-card-hdr {
+    display:flex; align-items:center; gap:.4rem;
+    padding:.5rem .75rem; border-bottom:1px solid rgba(0,0,0,.05);
+}
 .ep-card-hdr h6 { font-weight:700; font-size:.78rem; color:var(--bs-surface-700); margin:0; }
-.ep-card-hdr i { color:var(--bs-gradient-start); font-size:.9rem; }
-.ep-card-body { padding:1rem; }
+.ep-card-hdr i { color:#556ee6; font-size:.9rem; }
+.ep-card-body { padding:.75rem; }
 
-.ep-label { font-size:.68rem; font-weight:600; color:var(--bs-surface-600); margin-bottom:.3rem; display:block; }
-.ep-label.required::after { content:' *'; color:#f46a6a; }
-.ep-input { font-size:.72rem; border:1.5px solid var(--bs-surface-200); border-radius:.4rem; padding:.4rem .6rem; width:100%; transition:all .2s; background:var(--bs-card-bg); }
-.ep-input:focus { outline:none; border-color:var(--bs-gradient-start); box-shadow:0 0 0 2px rgba(102,126,234,.1); }
-.ep-hint { font-size:.6rem; color:var(--bs-surface-400); margin-top:.2rem; }
+/* Form Elements */
+.ep-label { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--bs-surface-500); margin-bottom:.2rem; display:block; }
+.ep-label.required::after { content:' *'; color:#c84646; font-weight:700; }
+.ep-input {
+    font-size:.72rem; border:1px solid rgba(0,0,0,.08); border-radius:.35rem;
+    padding:.4rem .6rem; width:100%; background:var(--bs-card-bg); transition:all .2s;
+}
+.ep-input:focus { outline:none; border-color:#556ee6; box-shadow:0 0 0 2px rgba(85,110,230,.1); }
+.ep-hint { font-size:.55rem; color:var(--bs-surface-400); margin-top:.15rem; }
 
-.ep-status-box { display:flex; align-items:center; gap:.5rem; padding:.4rem .6rem; border-radius:.4rem; font-size:.68rem; font-weight:600; }
-.ep-status-box.set { background:rgba(52,195,143,.08); color:#34c38f; }
-.ep-status-box.unset { background:rgba(244,106,106,.08); color:#f46a6a; }
-
-/* Carrier Section */
-.ep-carrier-sec { border:1.5px solid var(--bs-surface-200); border-radius:.6rem; padding:1rem; margin-bottom:.75rem; background:var(--bs-surface-bg-light); transition:all .2s; }
-.ep-carrier-sec:hover { border-color:var(--bs-gradient-start); }
-.ep-carrier-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; }
-.ep-carrier-name { font-weight:700; font-size:.78rem; color:var(--bs-gradient-start); display:flex; align-items:center; gap:.35rem; }
-.ep-carrier-remove { font-size:.62rem; color:#f46a6a; cursor:pointer; display:inline-flex; align-items:center; gap:.2rem; border:1px solid rgba(244,106,106,.2); padding:.15rem .4rem; border-radius:.3rem; background:rgba(244,106,106,.04); transition:all .15s; }
-.ep-carrier-remove:hover { background:rgba(244,106,106,.1); border-color:#f46a6a; }
-
-.ep-commission-card { background:var(--bs-card-bg); border:1px solid var(--bs-surface-200); border-radius:.5rem; padding:.75rem; margin-top:.5rem; }
-.ep-commission-card h6 { font-size:.68rem; font-weight:700; color:var(--bs-surface-600); margin-bottom:.5rem; }
-
-.ep-state-tags { display:flex; flex-wrap:wrap; gap:.25rem; margin-top:.4rem; }
-.ep-state-tag { font-size:.55rem; font-weight:600; padding:.1rem .35rem; border-radius:.2rem; background:rgba(102,126,234,.1); color:var(--bs-gradient-start); }
-
-/* Submit */
-.ep-submit-row { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
-.ep-btn { font-size:.72rem; font-weight:600; padding:.45rem 1.25rem; border-radius:.45rem; border:none; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:.3rem; }
-.ep-btn.primary { background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end)); color:#fff; box-shadow:0 2px 8px rgba(102,126,234,.25); }
-.ep-btn.primary:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(102,126,234,.35); }
-.ep-btn.secondary { background:var(--bs-surface-200); color:var(--bs-surface-600); text-decoration:none; }
-.ep-btn.secondary:hover { background:var(--bs-surface-300); color:var(--bs-surface-700); }
+/* Status box */
+.ep-status-box { display:flex; align-items:center; gap:.4rem; padding:.35rem .6rem; border-radius:.35rem; font-size:.65rem; font-weight:600; }
+.ep-status-box.set { background:rgba(52,195,143,.08); color:#1a8754; border:1px solid rgba(52,195,143,.12); }
+.ep-status-box.unset { background:rgba(244,106,106,.08); color:#c84646; border:1px solid rgba(244,106,106,.12); }
 
 /* Switch */
 .ep-switch { display:flex; align-items:center; gap:.5rem; }
 .ep-switch label { font-size:.72rem; font-weight:600; color:var(--bs-surface-600); cursor:pointer; }
 
+/* Carrier Section */
+.ep-carrier-sec {
+    border:1px solid rgba(0,0,0,.06); border-radius:.5rem; padding:.75rem;
+    margin-bottom:.5rem; background:rgba(0,0,0,.01); transition:all .2s;
+}
+.ep-carrier-sec:hover { border-color:rgba(85,110,230,.2); }
+.ep-carrier-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; }
+.ep-carrier-name { font-weight:700; font-size:.78rem; color:#556ee6; display:flex; align-items:center; gap:.35rem; }
+.ep-carrier-remove { font-size:.6rem; color:#f46a6a; cursor:pointer; display:inline-flex; align-items:center; gap:.2rem; border:1px solid rgba(244,106,106,.15); padding:.15rem .4rem; border-radius:.3rem; background:rgba(244,106,106,.04); transition:all .15s; }
+.ep-carrier-remove:hover { background:rgba(244,106,106,.1); border-color:#f46a6a; }
+
+.ep-commission-card { background:var(--bs-card-bg); border:1px solid rgba(0,0,0,.04); border-radius:.45rem; padding:.65rem; margin-top:.4rem; }
+.ep-commission-card h6 { font-size:.65rem; font-weight:700; color:var(--bs-surface-600); margin-bottom:.4rem; text-transform:uppercase; letter-spacing:.3px; }
+
+/* State tags — white-theme-safe */
+.ep-state-tags { display:flex; flex-wrap:wrap; gap:.25rem; margin-top:.4rem; }
+.ep-state-tag { font-size:.55rem; font-weight:700; padding:.1rem .35rem; border-radius:.2rem; background:rgba(85,110,230,.1); color:#556ee6; border:1px solid rgba(85,110,230,.12); }
+
+/* Info bar */
+.ep-info-bar {
+    font-size:.65rem; color:#556ee6; padding:.35rem .6rem; border-radius:.3rem;
+    background:rgba(85,110,230,.06); border:1px solid rgba(85,110,230,.08);
+    border-left:3px solid #556ee6; margin-bottom:.65rem;
+}
+.ep-info-bar i { font-size:.8rem; }
+
+/* Toolbar */
+.ep-toolbar-btns { display:flex; gap:.35rem; margin-left:auto; }
+.ep-toolbar-btn { font-size:.6rem; padding:.2rem .5rem; border-radius:.3rem; border:1px solid rgba(0,0,0,.06); background:var(--bs-card-bg); color:var(--bs-surface-500); cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:.2rem; }
+.ep-toolbar-btn:hover { border-color:#556ee6; color:#556ee6; }
+.ep-toolbar-btn.success { border-color:rgba(52,195,143,.2); color:#1a8754; }
+.ep-toolbar-btn.success:hover { background:rgba(52,195,143,.05); }
+
+/* Submit */
+.ep-actions { display:flex; justify-content:flex-end; gap:.4rem; margin-top:.75rem; }
+.ep-btn {
+    font-size:.68rem; font-weight:600; padding:.4rem .9rem;
+    border-radius:.4rem; border:none; cursor:pointer; transition:all .2s;
+    display:inline-flex; align-items:center; gap:.25rem;
+}
+.ep-btn.primary {
+    background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end));
+    color:#fff; box-shadow:0 2px 8px rgba(102,126,234,.25);
+}
+.ep-btn.primary:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(102,126,234,.35); }
+.ep-btn.secondary { background:var(--bs-card-bg); border:1px solid var(--bs-surface-200); color:var(--bs-surface-600); text-decoration:none; }
+.ep-btn.secondary:hover { border-color:var(--bs-surface-400); color:var(--bs-surface-700); }
+
+/* Alert */
+.ep-alert {
+    border-radius:.4rem; padding:.45rem .65rem; font-size:.72rem; margin-bottom:.65rem;
+    border:none; border-left:3px solid;
+}
+.ep-alert.success { background:rgba(52,195,143,.08); border-left-color:#1a8754; color:#1a8754; }
+.ep-alert.danger { background:rgba(244,106,106,.08); border-left-color:#f46a6a; color:#c84646; }
+
 /* Select2 overrides */
 .select2-container { width:100% !important; }
-.select2-selection { border:1.5px solid var(--bs-surface-200) !important; border-radius:.4rem !important; min-height:34px !important; font-size:.72rem !important; }
-.select2-selection--multiple .select2-selection__choice { background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end)) !important; border:none !important; color:#fff !important; border-radius:.25rem !important; font-size:.6rem !important; padding:.1rem .35rem !important; }
-.select2-container--focus .select2-selection { border-color:var(--bs-gradient-start) !important; box-shadow:0 0 0 2px rgba(102,126,234,.1) !important; }
-.ep-toolbar-btns { display:flex; gap:.4rem; }
-.ep-toolbar-btn { font-size:.65rem; padding:.25rem .6rem; border-radius:.35rem; border:1px solid var(--bs-surface-200); background:var(--bs-card-bg); color:var(--bs-surface-600); cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:.25rem; }
-.ep-toolbar-btn:hover { border-color:var(--bs-gradient-start); color:var(--bs-gradient-start); }
-.ep-toolbar-btn.success { border-color:#34c38f; color:#34c38f; }
-.ep-toolbar-btn.success:hover { background:rgba(52,195,143,.05); }
+.select2-selection { border:1px solid rgba(0,0,0,.08) !important; border-radius:.35rem !important; min-height:34px !important; font-size:.72rem !important; }
+.select2-selection--multiple .select2-selection__choice { background:linear-gradient(135deg,#556ee6,#764ba2) !important; border:none !important; color:#fff !important; border-radius:.25rem !important; font-size:.58rem !important; padding:.1rem .3rem !important; }
+.select2-container--focus .select2-selection { border-color:#556ee6 !important; box-shadow:0 0 0 2px rgba(85,110,230,.1) !important; }
 </style>
 @endsection
 
 @section('content')
-@component('components.breadcrumb')
-    @slot('li_1') <a href="{{ route('admin.partners.index') }}">Partners</a> @endslot
-    @slot('title') Edit Partner @endslot
-@endcomponent
 
+<!-- Page Header -->
 <div class="ep-page-hdr">
-    <h5><i class="bx bx-edit"></i> Edit Partner — {{ $partner->name }}</h5>
+    <h5><i class="bx bx-edit" style="color:#556ee6"></i> Edit Partner — {{ $partner->name }}</h5>
     <a href="{{ route('admin.partners.index') }}" class="ep-back-btn"><i class="bx bx-arrow-back"></i> Back to Partners</a>
 </div>
 
 @if(session('success'))
-<div class="alert alert-success alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem" role="alert">
+<div class="ep-alert success">
     <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem"></button>
 </div>
 @endif
 @if(session('error'))
-<div class="alert alert-danger alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem" role="alert">
+<div class="ep-alert danger">
     <i class="bx bx-error me-1"></i> {{ session('error') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem"></button>
 </div>
 @endif
 
@@ -151,7 +192,7 @@
                     <label class="ep-label">Current Status</label>
                     <div class="ep-status-box {{ $partner->password ? 'set' : 'unset' }}">
                         <i class="bx {{ $partner->password ? 'bx-check-circle' : 'bx-error-circle' }}"></i>
-                        {{ $partner->password ? 'Password is set — partner can login' : 'No password set — partner cannot login' }}
+                        {{ $partner->password ? 'Password set — partner can login' : 'No password — partner cannot login' }}
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -172,13 +213,13 @@
     <div class="ep-card">
         <div class="ep-card-hdr">
             <i class="bx bx-briefcase"></i><h6>Carriers & Licensed States</h6>
-            <div class="ms-auto ep-toolbar-btns">
-                <button type="button" class="ep-toolbar-btn" onclick="toggleAllCarriers()"><i class="bx bx-show"></i> Show/Hide All</button>
+            <div class="ep-toolbar-btns">
+                <button type="button" class="ep-toolbar-btn" onclick="toggleAllCarriers()"><i class="bx bx-show"></i> Show/Hide</button>
                 <button type="button" class="ep-toolbar-btn success" onclick="openCreateCarrierModal()"><i class="bx bx-plus"></i> New Carrier</button>
             </div>
         </div>
         <div class="ep-card-body">
-            <div style="font-size:.68rem;color:var(--bs-surface-500);margin-bottom:.75rem;padding:.4rem .6rem;background:rgba(102,126,234,.04);border-radius:.35rem;border-left:3px solid var(--bs-gradient-start);">
+            <div class="ep-info-bar">
                 <i class="bx bx-info-circle me-1"></i> Select states for each carrier. Commission rates apply to ALL selected states per carrier.
             </div>
 
@@ -189,8 +230,8 @@
         </div>
     </div>
 
-    <!-- Submit -->
-    <div class="ep-submit-row">
+    <!-- Actions -->
+    <div class="ep-actions">
         <a href="{{ route('admin.partners.index') }}" class="ep-btn secondary"><i class="bx bx-x"></i> Cancel</a>
         <button type="submit" class="ep-btn primary"><i class="bx bx-save"></i> Update Partner</button>
     </div>
@@ -215,13 +256,13 @@ function updateStateSettlementFields(carrierId) {
     const div = document.getElementById('selected-states-' + carrierId);
     const sec = document.getElementById('carrier-state-section-' + carrierId);
     if (div && states.length > 0) {
-        div.innerHTML = '<div class="ep-state-tags">' + states.map(s => '<span class="ep-state-tag">' + s + '</span>').join('') + '</div>';
+        div.innerHTML = '<div class="cs-state-tags">' + states.map(s => '<span class="cs-state-pill">' + s + '</span>').join('') + '</div>';
     } else if (div) { div.innerHTML = ''; }
     if (states.length > 0) { sec.classList.remove('d-none'); } else { sec.classList.add('d-none'); }
 }
 
 function toggleAllCarriers() {
-    document.querySelectorAll('.ep-carrier-sec').forEach(s => s.classList.toggle('d-none'));
+    document.querySelectorAll('.cs-carrier').forEach(s => s.classList.toggle('d-none'));
 }
 
 function removeCarrierSection(carrierId) {

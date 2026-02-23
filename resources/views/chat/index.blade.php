@@ -12,6 +12,8 @@
         .message-text, .chat-search-input, #messageInput, input, textarea, .form-control { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
         .chat-container img, .chat-container button { -webkit-user-drag: none; -moz-user-drag: none; user-drag: none; }
         body { overflow-x: hidden; }
+        /* Prevent FOUC — hide until CSS loads */
+        .chat-wrapper { visibility: visible; }
         
         /* Community Announcement Pop-up Notification */
         .announcement-popup {
@@ -74,7 +76,7 @@
             bottom: 0;
             left: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--bs-gradient-start), var(--bs-gradient-end));
+            background: linear-gradient(90deg, #d4af37, #e8c84a);
             animation: progressBar 20s linear forwards;
         }
         @keyframes progressBar {
@@ -90,10 +92,10 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--bs-gradient-start), var(--bs-gradient-end));
-            color: var(--bs-white);
+            background: linear-gradient(135deg, #d4af37, #c5a028);
+            color: #fff;
             border: none;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
             cursor: pointer;
             z-index: 999998;
             display: none;
@@ -114,8 +116,8 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background: var(--bs-ui-danger);
-            color: var(--bs-white);
+            background: #f46a6a;
+            color: #fff;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -131,201 +133,85 @@
             50% { transform: scale(1.05); }
         }
 
-        /* ===== DARK MODE CHAT OVERRIDES ===== */
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-messages {
-            background: var(--bs-surface-900) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-item.message-receiver .message-text {
-            background: var(--bs-print-header-bg) !important;
-            color: var(--bs-print-border) !important;
-            box-shadow: none !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-item.message-sender .message-text {
-            color: var(--bs-white, #fff) !important;
-            box-shadow: none !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-username {
-            color: var(--bs-surface-muted) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-text {
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-header,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-main-header {
-            background: var(--bs-surface-800) !important;
-            border-bottom: 1px solid var(--bs-surface-700) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-input-area,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-footer,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-input-container {
-            background: var(--bs-surface-800) !important;
-            border-top: 1px solid var(--bs-surface-700) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #messageInput {
-            background: var(--bs-print-header-bg) !important;
-            border: 1px solid var(--bs-surface-700) !important;
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #messageInput::placeholder {
-            color: var(--bs-surface-500) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-sidebar {
-            background: var(--bs-surface-800) !important;
-            border-right: 1px solid var(--bs-surface-700) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-item,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-list-item {
-            background: var(--bs-surface-800) !important;
-            border-bottom: 1px solid var(--bs-surface-700) !important;
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-item:hover,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-list-item:hover {
-            background: var(--bs-print-header-bg) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-item.active,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .conversation-list-item.active {
-            background: var(--bs-print-header-bg) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .no-messages {
-            color: var(--bs-surface-muted) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .chat-search-input,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #searchConversations,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #searchCommunities,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #searchPeople {
-            background: var(--bs-print-header-bg) !important;
-            border: 1px solid var(--bs-surface-700) !important;
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .announcement-item {
-            background: var(--bs-surface-800) !important;
-            color: var(--bs-print-border) !important;
-            box-shadow: none !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .announcement-messages,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #announcementMessages {
-            background: var(--bs-surface-900) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .announcement-input-area {
-            background: var(--bs-surface-800) !important;
-            border-top-color: var(--bs-surface-700) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .announcement-input-area textarea,
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) #announcementInput {
-            background: var(--bs-print-header-bg) !important;
-            border-color: var(--bs-surface-700) !important;
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .mention-highlight {
-            background: rgba(212, 175, 55, 0.2) !important;
-            color: var(--bs-gold) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .file-attachment {
-            background: var(--bs-print-header-bg) !important;
-            border-color: var(--bs-surface-700) !important;
-            color: var(--bs-print-border) !important;
-        }
-        :is(:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .message-attachment a {
-            background: var(--bs-print-header-bg) !important;
-            color: var(--bs-surface-muted) !important;
-        }
     </style>
 @endsection
 @section('content')
 
     <div class="chat-wrapper">
         <div class="chat-container">
-            <!-- LEFT SIDEBAR - ICONS -->
-            <div class="chat-icon-sidebar">
-                <button class="chat-logo-btn" title="Taurus CRM">T</button>
-
-                <div class="chat-icon-nav">
-                    <button class="chat-icon-btn active" data-tab="chats" title="Messages">
-                        <i class="bx bx-message-dots"></i>
-                    </button>
-                    <button class="chat-icon-btn" data-tab="groups" title="Groups">
-                        <i class="bx bx-group"></i>
-                    </button>
-                    <button class="chat-icon-btn" data-tab="communities" title="Communities">
-                        <i class="bx bx-buildings"></i>
-                    </button>
-                    <button class="chat-icon-btn" data-tab="people" title="People">
-                        <i class="bx bx-user"></i>
-                    </button>
-                </div>
-
-                <div class="chat-icon-bottom">
-                </div>
+            <!-- Pill Tab Bar — pipe-pill pattern (outside sidebar so it stays visible) -->
+            <div class="chat-tab-bar">
+                <button class="chat-tab-pill active" data-tab="chats"><i class="bx bx-message-dots"></i> Messages</button>
+                <button class="chat-tab-pill" data-tab="groups"><i class="bx bx-group"></i> Groups</button>
+                <button class="chat-tab-pill" data-tab="communities"><i class="bx bx-buildings"></i> Communities</button>
+                <button class="chat-tab-pill" data-tab="people"><i class="bx bx-user"></i> People</button>
             </div>
 
-            <!-- MAIN SIDEBAR - CONVERSATIONS & COMMUNITIES -->
+            <div class="chat-body">
+            <!-- LEFT PANEL — Conversations / Groups / Communities -->
             <div class="chat-sidebar">
+
                 <!-- Chats Tab -->
                 <div id="chats-tab" class="chat-sidebar-content active">
                     <div class="chat-sidebar-header">
-                        <h5>Messages</h5>
+                        <h5><i class="bx bx-message-dots"></i> Messages</h5>
                     </div>
 
                     <div class="chat-search-box">
                         <input type="text" id="searchConversations" placeholder="Search conversations..." class="chat-search-input">
                     </div>
 
- <div class="conversations-list u-overflow-y-auto" id="conversationsList" style="max-height: calc(100vh - 220px); overflow-x: hidden">
+                    <div class="conversations-list" id="conversationsList" style="flex:1; overflow-y:auto; overflow-x:hidden;">
                         <div class="loading-conversations">
                             <div class="spinner-border spinner-border-sm" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
- <p class="u-fs-085 mt-2" >Loading chats...</p>
+                            <p style="font-size:.78rem; margin-top:.5rem;">Loading chats...</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Groups Tab -->
- <div id="groups-tab" class="chat-sidebar-content" >
+                <div id="groups-tab" class="chat-sidebar-content">
                     <div class="chat-sidebar-header">
-                        <h5>Groups</h5>
-                        <div class="btn-group">
- <button class="btn btn-primary border-0 u-fs-13 u-fw-600 text-white" data-bs-toggle="modal" data-bs-target="#newChatModal" title="Create new group" style="background: linear-gradient(135deg, var(--bs-gold), var(--bs-gold-dark)); padding: 6px 12px">
-                                <i class="bx bx-plus" style="font-size: 16px;"></i> Create
-                            </button>
-                        </div>
+                        <h5><i class="bx bx-group"></i> Groups</h5>
+                        <button class="btn" data-bs-toggle="modal" data-bs-target="#newChatModal" title="Create new group">
+                            <i class="bx bx-plus"></i> Create
+                        </button>
                     </div>
 
                     <div class="chat-search-box">
                         <input type="text" id="searchGroups" placeholder="Search groups..." class="chat-search-input">
                     </div>
 
- <div class="group-conversations-list u-overflow-y-auto" id="groupConversationsList" style="max-height: calc(100vh - 220px); overflow-x: hidden">
+                    <div class="group-conversations-list" id="groupConversationsList" style="flex:1; overflow-y:auto; overflow-x:hidden;">
                         <!-- Group conversations will be loaded here -->
                     </div>
                 </div>
 
                 <!-- Communities Tab -->
- <div id="communities-tab" class="chat-sidebar-content" >
+                <div id="communities-tab" class="chat-sidebar-content">
                     <div class="chat-sidebar-header">
-                        <h5>Communities</h5>
-                        <div class="btn-group">
-                            @if(Auth::user()->hasRole([Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
-                                <button class="btn" data-bs-toggle="modal" data-bs-target="#newCommunityModal" title="Create community">
-                                    <i class="bx bx-plus"></i>
-                                </button>
-                            @endif
-                        </div>
+                        <h5><i class="bx bx-buildings"></i> Communities</h5>
+                        @if(Auth::user()->hasRole([Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR]))
+                            <button class="btn" data-bs-toggle="modal" data-bs-target="#newCommunityModal" title="Create community">
+                                <i class="bx bx-plus"></i> New
+                            </button>
+                        @endif
                     </div>
 
                     <div class="chat-search-box">
                         <input type="text" id="searchCommunities" placeholder="Search communities..." class="chat-search-input">
                     </div>
 
- <div class="communities-list u-overflow-y-auto" id="communitiesList" style="max-height: calc(100vh - 220px); overflow-x: hidden">
+                    <div class="communities-list" id="communitiesList" style="flex:1; overflow-y:auto; overflow-x:hidden;">
                         <!-- Communities will be loaded here -->
                     </div>
                 </div>
 
-                <!-- People Tab -->
- <div id="people-tab" class="chat-sidebar-content" >
-                    <!-- People tab now uses full container width when active -->
+                <!-- People Tab — hidden in sidebar, uses full page -->
+                <div id="people-tab" class="chat-sidebar-content">
+                    <!-- People tab uses full container width when active -->
                 </div>
             </div>
 
@@ -338,30 +224,29 @@
                 </div>
             </div>
 
-            <!-- PEOPLE FULL PAGE -->
- <div class="people-main w-100 p-4" id="peopleMain" style="display: none; background: var(--chat-bg-secondary)">
-                <div class="people-header" style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid var(--chat-border-color);">
- <div class="d-flex justify-content-between align-items-center mx-auto" style="max-width: 1200px">
+            <!-- PEOPLE FULL PAGE — hub-header + hub-grid pattern -->
+            <div class="people-main" id="peopleMain" style="display: none;">
+                <div class="people-header">
+                    <div class="d-flex justify-content-between align-items-center" style="padding: 0 .5rem;">
                         <div>
- <h2 class="u-fw-700 m-0" style="color: var(--chat-text-primary); font-size: 28px">Team Directory</h2>
-                            <p style="color: var(--chat-text-secondary); margin: 5px 0 0 0; font-size: 16px;">Connect with your colleagues</p>
+                            <h2><i class="bx bx-user"></i> Team Directory</h2>
+                            <p>Connect with your colleagues</p>
                         </div>
                         <div class="position-relative">
-                            <input type="text" id="searchPeopleCards" placeholder="Search people..." class="u-fs-14" style="padding: 12px 20px 12px 45px; border: 2px solid var(--chat-border-color); border-radius: 25px; width: 300px; transition: all 0.3s ease; outline: none; background: var(--chat-bg-body); color: var(--chat-text-primary)" onFocus="this.style.borderColor='#DAA520';" onBlur="this.style.borderColor='var(--chat-border-color)';">
-                            <i class="bx bx-search position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: var(--chat-text-secondary); font-size: 18px"></i>
+                            <i class="bx bx-search position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); font-size: .8rem; color: var(--bs-secondary-color, #6b7280); pointer-events: none;"></i>
+                            <input type="text" id="searchPeopleCards" placeholder="Search people..." class="people-search-input">
                         </div>
                     </div>
                 </div>
- <div class="people-content u-overflow-y-auto mx-auto" style="max-width: 1200px; max-height: calc(100vh - 280px); padding-right: 10px">
-                    <div id="peopleCards" class="people-cards-grid p-0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px">
+                <div style="flex:1; overflow-y:auto; padding: 0;">
+                    <div id="peopleCards" class="people-cards-grid">
                         <!-- People cards will be loaded here -->
                     </div>
                 </div>
             </div>
+            </div> <!-- /.chat-body -->
         </div>
     </div>
-
-    <!-- New Chat Modal - Redesigned -->
     <div class="modal fade" id="newChatModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -383,7 +268,7 @@
  <div class="mb-4" >
  <label class="form-label label-value" >Group Picture</label>
  <div class="d-flex align-items-center" style="gap: 16px">
- <div class="u-w-80 rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 overflow-hidden u-fs-32" id="groupAvatarPreview" style="height: 80px; background: linear-gradient(135deg, var(--bs-ui-info), var(--bs-ui-info-dark))">
+ <div class="u-w-80 rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 overflow-hidden u-fs-32" id="groupAvatarPreview" style="height: 80px; background: linear-gradient(135deg, #d4af37, #c5a028)">
                                     <i class="bx bx-group" style="font-size: 36px;"></i>
                                 </div>
  <div class="flex-grow-1" >
@@ -412,9 +297,9 @@
                         </div>
                     </div>
                 </div>
- <div class="modal-footer bg-surface-50 border-top-surface">
-                    <button type="button" class="btn btn-secondary bg-white border-surface-200 text-surface-600" data-bs-dismiss="modal">Cancel</button>
- <button type="button" class="btn btn-primary border-0" id="createChatBtn" style="background: linear-gradient(135deg, var(--bs-ui-info-dark), var(--bs-ui-info-dark)); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3)">Create Group</button>
+ <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+ <button type="button" class="btn btn-primary" id="createChatBtn">Create Group</button>
                 </div>
             </div>
         </div>
@@ -440,7 +325,7 @@
                     <div class="mb-3">
  <label class="label-value" >Group Picture</label>
  <div class="d-flex align-items-center" style="gap: 16px">
- <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 overflow-hidden u-w-60" id="groupAvatarPreview" style="height: 60px; background: linear-gradient(135deg, var(--bs-gold), var(--bs-gold-dark)); font-size: 20px">
+ <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 overflow-hidden u-w-60" id="groupAvatarPreview" style="height: 60px; background: linear-gradient(135deg, #d4af37, #c5a028); font-size: 20px">
                                 <i class="bx bx-group" style="font-size: 24px;"></i>
                             </div>
  <div class="flex-grow-1" >
@@ -460,7 +345,7 @@
  <p class="bg-surface-50 u-rounded-8 text-surface-500 u-fs-14 m-0" id="groupCreator" style="padding: 10px 12px">-</p>
                     </div>
  <div class="d-flex u-gap-8">
- <button type="button" class="btn flex-grow-1 text-white border-0 u-rounded-8 u-fw-600 u-cursor-pointer py-2 px-3" onclick="updateGroupName()" style="background: linear-gradient(135deg, var(--bs-ui-info-dark), var(--bs-ui-info-dark)); transition: all 0.3s ease">Update Name</button>
+ <button type="button" class="btn flex-grow-1 text-white border-0 u-rounded-8 u-fw-600 u-cursor-pointer py-2 px-3" onclick="updateGroupName()" style="background: linear-gradient(135deg, #d4af37, #c5a028); transition: all 0.3s ease">Update Name</button>
  <button type="button" class="btn btn-outline-danger flex-grow-1 text-ui-danger-dark u-rounded-8 u-fw-600 u-cursor-pointer py-2 px-3 bg-transparent" onclick="deleteGroup()" id="deleteGroupBtn" style="border: 1px solid var(--bs-ui-danger)">Delete Group</button>
                     </div>
                 </div>
@@ -486,8 +371,8 @@
                     </div>
                 </div>
             </div>
- <div class="modal-footer bg-surface-50 border-top-surface">
- <button type="button" class="btn u-rounded-8 u-fw-600 bg-white py-2 px-3 border-surface-200 text-surface-600" data-bs-dismiss="modal">Close</button>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -496,14 +381,14 @@
 <!-- GIF Picker Modal -->
 <div class="modal fade" id="gifPickerModal" tabindex="-1" aria-labelledby="gifPickerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
- <div class="modal-content overflow-hidden border-0" style="border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)">
-            <div class="modal-header" style="background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); border-bottom: none; padding: 20px 24px;">
- <h5 class="modal-title text-white u-fw-700 m-0" id="gifPickerModalLabel" style="font-size: 20px">
-                    <i class="bx bx-image" style="margin-right: 8px;"></i>Choose a GIF
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="gifPickerModalLabel">
+                    <i class="bx bx-image"></i> Choose a GIF
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="padding: 24px; background: var(--bs-body-bg);">
+            <div class="modal-body">
                 <!-- Search Input -->
  <div class="mb-4" >
  <input type="text" id="gifSearchInput" class="form-control u-rounded-8" placeholder="Search GIFs (e.g., happy, dance, celebrate)..." style="border: 2px solid var(--bs-surface-200); padding: 12px 16px">
@@ -661,7 +546,7 @@
  <div class="mb-4" >
  <label class="form-label label-value" >Community Color</label>
  <div class="d-flex align-items-center u-gap-12">
- <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 u-w-60" id="communityColorPreview" style="height: 60px; background: var(--bs-gradient-start); font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15)">
+ <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-fw-700 u-w-60" id="communityColorPreview" style="height: 60px; background: #d4af37; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.15)">
                                     <i class="bx bx-bullhorn" style="font-size: 28px;"></i>
                                 </div>
  <div class="flex-grow-1" >
@@ -677,7 +562,7 @@
  <select class="form-select u-rounded-8" id="communityMemberSelect" >
                                     <option value="">Select a member to add...</option>
                                 </select>
- <button class="text-white border-0 u-rounded-8 u-cursor-pointer u-fw-600 py-2 px-3 u-ws-nowrap" type="button" id="addMemberToCommunityBtn" style="background: var(--bs-ui-info)">
+ <button class="text-white border-0 u-rounded-8 u-cursor-pointer u-fw-600 py-2 px-3 u-ws-nowrap" type="button" id="addMemberToCommunityBtn" style="background: linear-gradient(135deg, #d4af37, #c5a028)">
                                     Add
                                 </button>
                             </div>
@@ -690,9 +575,9 @@
                         <input type="hidden" id="communityMemberIds" name="member_ids" value="[]">
                     </form>
                 </div>
- <div class="modal-footer bg-surface-50 border-top-surface">
- <button type="button" class="btn u-rounded-8 u-fw-600 bg-white py-2 px-3 border-surface-200 text-surface-600" data-bs-dismiss="modal">Cancel</button>
- <button type="button" class="btn btn-primary border-0 u-fw-600" id="createCommunityBtn" style="background: linear-gradient(135deg, var(--bs-ui-info-dark), var(--bs-ui-info-dark)); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px">Create Community</button>
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+ <button type="button" class="btn btn-primary" id="createCommunityBtn">Create Community</button>
                 </div>
             </div>
         </div>
@@ -704,7 +589,7 @@
             <i class="bx bx-x" style="font-size: 20px;"></i>
         </button>
         <div class="announcement-popup-header">
- <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-w-40" id="popupCommunityIcon" style="height: 40px; background: var(--bs-gradient-start); font-size: 20px">
+ <div class="rounded-circle d-flex align-items-center justify-content-center text-white u-w-40" id="popupCommunityIcon" style="height: 40px; background: #d4af37; font-size: 20px">
                 <i class="bx bx-bullhorn"></i>
             </div>
  <div class="flex-grow-1" >
@@ -769,9 +654,9 @@
                         </div>
                     </form>
                 </div>
- <div class="modal-footer bg-surface-50 border-top-surface">
- <button type="button" class="btn u-rounded-8 u-fw-600 bg-white py-2 px-3 border-surface-200 text-surface-600" data-bs-dismiss="modal">Cancel</button>
- <button type="button" class="btn btn-primary border-0 u-fw-600" id="updateAnnouncementBtn" onclick="updateAnnouncement()" style="background: linear-gradient(135deg, var(--bs-ui-info-dark), var(--bs-ui-info-dark)); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); padding: 10px 24px">
+ <div class="modal-footer">
+ <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+ <button type="button" class="btn btn-primary" id="updateAnnouncementBtn" onclick="updateAnnouncement()">
                         <i class="bx bx-save"></i> Update Announcement
                     </button>
                 </div>
@@ -916,7 +801,7 @@ if (typeof window.contextMenuCommunityName === 'undefined') {
 
 // ===== SIDEBAR TAB SWITCHING =====
 document.addEventListener('DOMContentLoaded', function() {
-    const tabButtons = document.querySelectorAll('.chat-icon-btn');
+    const tabButtons = document.querySelectorAll('.chat-tab-pill');
     const tabContents = document.querySelectorAll('.chat-sidebar-content');
 
     tabButtons.forEach(button => {
@@ -944,13 +829,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const peopleMain = document.getElementById('peopleMain');
             
             if (tabName === 'people') {
-                // Hide chat sidebar and main area, show people page
+                // Hide sidebar and chat main, show people page full-width
                 chatSidebar.style.display = 'none';
                 chatMain.style.display = 'none';
-                peopleMain.style.display = 'block';
+                peopleMain.style.display = 'flex';
                 loadPeopleCardsForDisplay();
             } else {
-                // Show chat sidebar and main area, hide people page
+                // Show sidebar and chat main, hide people page
                 chatSidebar.style.display = 'flex';
                 chatMain.style.display = 'flex';
                 peopleMain.style.display = 'none';
@@ -1016,66 +901,26 @@ function renderPeopleCards(users) {
     if (!container) return;
 
     if (users.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--chat-text-secondary); padding: 60px; font-size: 18px;"><i class="bx bx-user" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>No people available</div>';
+        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--bs-secondary-color, #6b7280); padding: 40px; font-size: .82rem;"><i class="bx bx-user" style="font-size: 48px; margin-bottom: 12px; display: block; color: var(--bs-border-color, #e5e7eb);"></i>No people available</div>';
         return;
     }
 
     container.innerHTML = users.map(user => `
         <div class="person-card" onclick="startPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}')" 
-             data-user-name="${user.name}" data-user-email="${user.email}"
-             style="
-                background: var(--chat-bg-body); 
-                border-radius: 16px; 
-                padding: 24px; 
-                text-align: center; 
-                cursor: pointer; 
-                transition: all 0.3s ease;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                border: 1px solid var(--chat-border-color);
-                position: relative;
-                overflow: hidden;
-                color: var(--chat-text-primary);
-             "
-             onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(218, 165, 32, 0.2)';"
-             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)';">
-            
-            <!-- Gold gradient accent -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, ${themeColors.gold} 0%, ${themeColors.goldDark} 100%);"></div>
-            
-            <!-- Profile Picture -->
-            <div style="margin-bottom: 20px; display: flex; justify-content: center;">
-                <div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 4px solid var(--chat-bg-secondary); box-shadow: 0 4px 12px rgba(218, 165, 32, 0.15);">
-                    ${user.avatar ? 
-                        `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; object-fit: cover;">` : 
-                        `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px;">${user.name.charAt(0).toUpperCase()}</div>`
-                    }
-                </div>
+             data-user-name="${user.name}" data-user-email="${user.email}">
+            <div class="conversation-avatar" style="width: 52px; height: 52px; font-size: 1.1rem;">
+                ${user.avatar ? 
+                    `<img src="${user.avatar}" alt="${user.name}">` : 
+                    user.name.charAt(0).toUpperCase()
+                }
             </div>
-            
-            <!-- User Info -->
-            <div style="margin-bottom: 16px;">
-                <h3 style="color: var(--chat-text-primary); font-weight: 600; margin: 0 0 4px 0; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="user-name">${user.name}</h3>
-                <p style="color: var(--chat-text-secondary); margin: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="user-email">${user.email}</p>
+            <div style="flex:1; min-width:0;">
+                <div class="people-card-name">${user.name}</div>
+                <p class="people-card-email">${user.email}</p>
             </div>
-            
-            <!-- Action Button -->
-            <div style="margin-top: 20px;">
-                <button style="
-                    background: linear-gradient(135deg, ${themeColors.gold} 0%, ${themeColors.goldDark} 100%); 
-                    color: white; 
-                    border: none; 
-                    padding: 10px 20px; 
-                    border-radius: 20px; 
-                    font-weight: 600; 
-                    font-size: 14px;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    width: 100%;
-                    box-shadow: 0 2px 8px rgba(218, 165, 32, 0.3);
-                " onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
-                    <i class="bx bx-message" style="margin-right: 6px;"></i>Start Chat
-                </button>
-            </div>
+            <button class="person-chat-btn" onclick="event.stopPropagation(); startPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}')">
+                <i class="bx bx-message"></i> Chat
+            </button>
         </div>
     `).join('');
     
@@ -1126,8 +971,8 @@ function filterPeopleCards(searchTerm) {
         if (!noResultsMsg) {
             noResultsMsg = document.createElement('div');
             noResultsMsg.className = 'no-results-message';
-            noResultsMsg.style.cssText = 'grid-column: 1/-1; text-align: center; color: var(--chat-text-secondary); padding: 40px; font-size: 16px;';
-            noResultsMsg.innerHTML = '<i class="bx bx-search" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>No people found matching your search';
+            noResultsMsg.style.cssText = 'grid-column: 1/-1; text-align: center; color: var(--bs-secondary-color, #6b7280); padding: 30px; font-size: .78rem;';
+            noResultsMsg.innerHTML = '<i class="bx bx-search" style="font-size: 40px; margin-bottom: 10px; display: block; color: var(--bs-border-color, #e5e7eb);"></i>No people found matching your search';
             container.appendChild(noResultsMsg);
         }
         noResultsMsg.style.display = 'block';
@@ -1154,20 +999,18 @@ function startPersonChat(userId, userName) {
 function renderPeopleList(users) {
     const listEl = document.getElementById('peopleList');
     if (users.length === 0) {
-        listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: ${themeColors.surfaceMuted}; font-size: 14px;">No people available</div>`;
+        listEl.innerHTML = '<div class="no-conversations"><p>No people available</p></div>';
         return;
     }
 
     listEl.innerHTML = users.map(user => `
-        <button class="user-item" onclick="openPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}', event)" data-user-id="${user.id}" data-user-name="${user.name}" data-user-email="${user.email}" style="width: 100%; text-align: left; background: none; border: none; padding: 10px; margin: 5px 0; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="user-avatar" style="width: 45px; height: 45px; flex-shrink: 0;">
-                    ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : `<div style="width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, ${themeColors.gradientStart} 0%, ${themeColors.gradientEnd} 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">${user.name.charAt(0).toUpperCase()}</div>`}
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <div class="user-name" style="font-weight: 600; color: ${themeColors.surface700}; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.name}</div>
-                    <div class="user-email" style="font-size: 12px; color: ${themeColors.surfaceMuted}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${user.email}</div>
-                </div>
+        <button class="user-item" onclick="openPersonChat(${user.id}, '${user.name.replace(/'/g, "\\'")}', event)" data-user-id="${user.id}" data-user-name="${user.name}" data-user-email="${user.email}">
+            <div class="user-avatar">
+                ${user.avatar ? `<img src="${user.avatar}" alt="${user.name}">` : `<span>${user.name.charAt(0).toUpperCase()}</span>`}
+            </div>
+            <div class="user-info">
+                <div class="user-name">${user.name}</div>
+                <div class="user-email">${user.email}</div>
             </div>
         </button>
     `).join('');
@@ -1228,7 +1071,7 @@ function openPersonChat(userId, userName, event) {
 function renderCommunitiesList(communities) {
     const listEl = document.getElementById('communitiesList');
     if (communities.length === 0) {
-        listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: ${themeColors.surfaceMuted}; font-size: 14px;">No communities yet</div>`;
+        listEl.innerHTML = `<div class="no-conversations"><p>No communities yet</p></div>`;
         return;
     }
 
@@ -1251,14 +1094,14 @@ function renderCommunitiesList(communities) {
              data-is-creator="${isCreator}"
              onclick="selectCommunityFromData(this)"
              oncontextmenu="showCommunityContextMenu(event, ${community.id}, '${community.name.replace(/'/g, "\\'")}', ${canManage}); return false;"
-             style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border-left: 3px solid ${community.color || themeColors.gradientStart};">
-            <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || themeColors.gradientStart) + ';'} flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                ${community.avatar ? '<img src="/storage/' + community.avatar + '" alt="' + community.name + '" style="width: 100%; height: 100%; object-fit: cover;">' : '<i class="' + iconClass + '"></i>'}
+             style="border-left: 3px solid ${community.color || '#d4af37'};">
+            <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || '#d4af37') + ';'}">
+                ${community.avatar ? '<img src="/storage/' + community.avatar + '" alt="' + community.name + '" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">' : '<i class="' + iconClass + '"></i>'}
             </div>
-            <div class="community-info" style="flex: 1; min-width: 0;">
-                <div class="community-name" style="font-weight: 600;">${community.name}</div>
-                <div style="font-size: 11px; color: ${themeColors.surfaceMuted}; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                    <i class="bx bx-bullhorn" style="font-size: 12px;"></i>
+            <div class="community-info">
+                <div class="community-name">${community.name}</div>
+                <div class="community-description">
+                    <i class="bx bx-bullhorn" style="font-size: 11px;"></i>
                     <span>Announcement Board</span>
                 </div>
             </div>
@@ -1267,7 +1110,7 @@ function renderCommunitiesList(communities) {
                         data-community-id="${community.id}" 
                         data-community-name="${community.name}" 
                         title="Delete Community" 
-                        style="flex-shrink: 0; background: ${themeColors.danger}; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s; opacity: 0;">
+                        style="flex-shrink: 0; background: #f46a6a; color: #fff; border: none; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; opacity: 0; transition: opacity .15s;">
                     <i class="bx bx-trash"></i>
                 </button>
             ` : ''}
@@ -1282,12 +1125,10 @@ function renderCommunitiesList(communities) {
             // Add hover effects to show edit and delete buttons
             communitiesListEl.querySelectorAll('.community-item').forEach(item => {
                 item.addEventListener('mouseenter', function() {
-                    this.style.background = themeColors.surface100;
                     const deleteBtn = this.querySelector('.btn-delete-community');
                     if (deleteBtn) deleteBtn.style.opacity = '1';
                 });
                 item.addEventListener('mouseleave', function() {
-                    this.style.background = 'transparent';
                     const deleteBtn = this.querySelector('.btn-delete-community');
                     if (deleteBtn) deleteBtn.style.opacity = '0';
                 });
@@ -1301,14 +1142,6 @@ function renderCommunitiesList(communities) {
                     const communityName = this.getAttribute('data-community-name');
                     deleteCommunityHandler(e, communityId, communityName);
                 });
-                
-                // Add hover effects
-                btn.addEventListener('mouseenter', function() {
-                    this.style.background = themeColors.dangerDark;
-                });
-                btn.addEventListener('mouseleave', function() {
-                    this.style.background = themeColors.danger;
-                });
             });
         }
     }, 100);
@@ -1318,7 +1151,7 @@ function renderCommunitiesList(communities) {
 function renderGroupConversationsList(conversations) {
     const listEl = document.getElementById('groupConversationsList');
     if (conversations.length === 0) {
-        listEl.innerHTML = `<div style="padding: 20px; text-align: center; color: ${themeColors.surfaceMuted}; font-size: 14px;">No group chats yet</div>`;
+        listEl.innerHTML = '<div class="no-conversations"><p>No group chats yet</p></div>';
         return;
     }
 
@@ -1335,39 +1168,21 @@ function renderGroupConversationsList(conversations) {
         
         return `
         <div class="conversation-item group-conversation-item ${conv.id === window.currentConversationId ? 'active' : ''}"
-             onclick="selectConversation(${conv.id}, '${safeName}', this)"
-             style="position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-            <div class="conversation-avatar" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: ${themeColors.gradientStart}; color: white; font-size: 18px;">
+             onclick="selectConversation(${conv.id}, '${safeName}', this)">
+            <div class="conversation-avatar">
                 ${avatarHtml}
             </div>
-            <div class="conversation-info" style="flex: 1; min-width: 0;">
+            <div class="conversation-info">
                 <div class="conversation-name">${displayName}</div>
-                ${conv.latest_message ? `<div class="conversation-preview" style="font-size: 13px; color: ${themeColors.surfaceMuted}; margin-top: 2px;">${(conv.latest_message.message || '').substring(0, 40)}...</div>` : ''}
+                ${conv.latest_message ? `<div class="conversation-preview">${(conv.latest_message.message || '').substring(0, 40)}...</div>` : ''}
             </div>
-            ${conv.updated_at ? `<div class="conversation-time" style="font-size: 12px; color: ${themeColors.surfaceMuted};">${conv.updated_at}</div>` : ''}
-            ${conv.unread_count > 0 ? `<span class="unread-badge" style="background: ${themeColors.danger}; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; margin-left: 4px;">${conv.unread_count}</span>` : ''}
+            ${conv.updated_at ? `<div class="conversation-time">${conv.updated_at}</div>` : ''}
+            ${conv.unread_count > 0 ? `<span class="unread-badge">${conv.unread_count}</span>` : ''}
         </div>
         `;
     }).join('');
     
-    // Add hover effects for group conversations
-    setTimeout(() => {
-        const groupListEl = document.getElementById('groupConversationsList');
-        if (groupListEl) {
-            groupListEl.querySelectorAll('.group-conversation-item').forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.background = themeColors.surface100;
-                    }
-                });
-                item.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.style.background = 'transparent';
-                    }
-                });
-            });
-        }
-    }, 100);
+    // No need for JS hover effects - CSS handles it
 }
 
 // Helper function to select community from data attribute
@@ -1387,7 +1202,7 @@ async function selectCommunity(community, isCreator = false) {
     try {
         const communityId = community.id;
         const communityName = community.name;
-        const communityColor = community.color || themeColors.gradientStart;
+        const communityColor = community.color || '#d4af37';
         
         // Set current community context
         window.currentCommunityId = communityId;
@@ -1407,7 +1222,7 @@ async function selectCommunity(community, isCreator = false) {
         const canPostAnnouncement = !!announcementsData.can_post;
         
         const chatMain = document.getElementById('chatMain');
-        const avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: ${communityColor}; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;"><i class="bx bx-bullhorn"></i></div>`;
+        const avatarHtml = `<div class="chat-header-avatar" style="background: ${communityColor};"><i class="bx bx-bullhorn"></i></div>`;
         
         // Build the community interface
         chatMain.innerHTML = `
@@ -1416,33 +1231,31 @@ async function selectCommunity(community, isCreator = false) {
                     ${avatarHtml}
                     <div class="chat-header-title">
                         <h5>${communityName}</h5>
-                        <p style="font-size: 12px; color: ${themeColors.surfaceMuted}; display: flex; align-items: center; gap: 4px;">
-                            <i class="bx bx-bullhorn" style="font-size: 13px;"></i>
+                        <p>
+                            <i class="bx bx-bullhorn" style="font-size: 11px;"></i>
                             Announcement Board
                         </p>
                     </div>
                 </div>
                 ${isCreator || window.isSuperAdmin ? `
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="openEditCommunityModal(${communityId})" class="btn btn-sm btn-outline-primary" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600;" title="Edit Community Settings">
-                            <i class="bx bx-cog" style="font-size: 16px;"></i>
-                            <span>Settings</span>
+                    <div class="chat-header-actions">
+                        <button onclick="openEditCommunityModal(${communityId})" class="btn" title="Edit Community Settings">
+                            <i class="bx bx-cog"></i> Settings
                         </button>
-                        <button onclick="openCommunityMemberManagement(${communityId}, '${communityName.replace(/'/g, "\\'")}')" class="btn btn-sm btn-outline-secondary" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; font-weight: 600;" title="Manage Members">
-                            <i class="bx bx-user-plus" style="font-size: 16px;"></i>
-                            <span>Members</span>
+                        <button onclick="openCommunityMemberManagement(${communityId}, '${communityName.replace(/'/g, "\\'")}')" class="btn" title="Manage Members">
+                            <i class="bx bx-user-plus"></i> Members
                         </button>
                     </div>
                 ` : ''}
             </div>
-            <div class="announcement-messages" id="announcementMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: ${themeColors.surface50};">
+            <div class="announcement-messages" id="announcementMessages" style="flex: 1; overflow-y: auto; padding: 20px; background: var(--bs-surface-50, #f8f9fa);">
                 <div id="announcementsContainer">
                     ${announcementsData.announcements.length > 0 ? 
                         renderAnnouncements(announcementsData.announcements, communityColor) : 
-                        `<div style="max-width: 500px; margin: 60px auto; text-align: center;">
+                        `<div class="no-messages" style="max-width: 500px; margin: 60px auto;">
                             <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
-                            <h5 class="mt-3" style="color: ${themeColors.surface700}; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
-                            <p style="color: ${themeColors.surface500}; margin-top: 12px; line-height: 1.6;">
+                            <h5 class="mt-3" style="font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                            <p style="margin-top: 12px; line-height: 1.6;">
                                 ${canPostAnnouncement ? translations.beTheFirstToPost : translations.onlyAuthorizedUsers}
                             </p>
                         </div>`
@@ -1450,21 +1263,21 @@ async function selectCommunity(community, isCreator = false) {
                 </div>
             </div>
             ${canPostAnnouncement ? `
-                <div class="announcement-input-area" style="border-top: 2px solid ${themeColors.surface200}; background: var(--bs-card-bg); padding: 16px;">
-                    <div style="display: flex; flex-direction: column; gap: 12px; position: relative;">
-                        <textarea id="announcementInput" placeholder="Type @ to mention someone, @everyone to mention all..." rows="2" style="width: 100%; padding: 12px; border: 1px solid ${themeColors.surface300}; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 60px;"></textarea>
+                <div class="chat-input-area" style="border-top: 1px solid var(--bs-surface-200, rgba(0,0,0,.08));">
+                    <div style="display: flex; flex-direction: column; gap: 10px; position: relative;">
+                        <textarea id="announcementInput" class="form-control" placeholder="Type @ to mention someone, @everyone to mention all..." rows="2" style="resize: vertical; min-height: 60px;"></textarea>
                         <div id="announcementMentionSuggestions" class="mention-suggestions" style="display: none;"></div>
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; gap: 8px;">
-                                <button type="button" id="attachAnnouncementBtn" title="Attach file" style="padding: 8px 12px; background: ${themeColors.surface100}; border: 1px solid ${themeColors.surface300}; border-radius: 6px; cursor: pointer; color: ${themeColors.surface500};">
-                                    <i class="bx bx-paperclip" style="font-size: 18px;"></i>
+                            <div class="message-input-actions">
+                                <button type="button" id="attachAnnouncementBtn" title="Attach file">
+                                    <i class="bx bx-paperclip"></i>
                                 </button>
-                                <button type="button" id="emojiAnnouncementBtn" title="Add emoji" style="padding: 8px 12px; background: ${themeColors.surface100}; border: 1px solid ${themeColors.surface300}; border-radius: 6px; cursor: pointer; color: ${themeColors.surface500};">
-                                    <i class="bx bx-smile" style="font-size: 18px;"></i>
+                                <button type="button" id="emojiAnnouncementBtn" title="Add emoji">
+                                    <i class="bx bx-smile"></i>
                                 </button>
                             </div>
-                            <button type="button" id="sendAnnouncementBtn" onclick="sendAnnouncement()" style="padding: 10px 24px; background: linear-gradient(135deg, ${communityColor}, ${adjustColor(communityColor, -20)}); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                <i class="bx bx-paper-plane" style="font-size: 16px;"></i>
+                            <button type="button" id="sendAnnouncementBtn" onclick="sendAnnouncement()" style="padding: 8px 18px; background: linear-gradient(135deg, ${communityColor}, ${adjustColor(communityColor, -20)}); color: #fff; border: none; border-radius: 20px; font-weight: 600; font-size: .75rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <i class="bx bx-paper-plane"></i>
                                 Post Announcement
                             </button>
                         </div>
@@ -1472,8 +1285,8 @@ async function selectCommunity(community, isCreator = false) {
                     <input type="file" id="announcementFileInput" multiple style="display: none" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar">
                 </div>
             ` : `
-                <div style="border-top: 2px solid ${themeColors.surface200}; background: ${themeColors.surface50}; padding: 16px; text-align: center; color: ${themeColors.surfaceMuted}; font-size: 13px;">
-                    <i class="bx bx-lock-alt" style="font-size: 16px; vertical-align: middle; margin-right: 4px;"></i>
+                <div style="border-top: 1px solid var(--bs-surface-200, rgba(0,0,0,.08)); background: var(--bs-surface-50, #f8f9fa); padding: 14px; text-align: center; color: var(--bs-surface-400, #adb5bd); font-size: .75rem;">
+                    <i class="bx bx-lock-alt" style="font-size: 14px; vertical-align: middle; margin-right: 3px;"></i>
                     You do not have permission to post announcements. Contact an admin for access.
                 </div>
             `}
@@ -1530,9 +1343,9 @@ async function selectCommunity(community, isCreator = false) {
 // Render announcements
 function renderAnnouncements(announcements, communityColor) {
     if (!announcements || announcements.length === 0) {
-        return `<div style="max-width: 500px; margin: 60px auto; text-align: center;">
+        return `<div class="no-messages" style="max-width: 500px; margin: 60px auto;">
             <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
-            <h5 class="mt-3" style="color: ${themeColors.surface700}; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+            <h5 class="mt-3" style="font-weight: 600;">${translations.noAnnouncementsYet}</h5>
         </div>`;
     }
     
@@ -1545,10 +1358,10 @@ function renderAnnouncements(announcements, communityColor) {
         
         // Priority color mapping
         const priorityColors = {
-            'urgent': themeColors.danger,
-            'warning': themeColors.warning,
-            'info': themeColors.info,
-            'normal': themeColors.surface500
+            'urgent': '#f46a6a',
+            'warning': '#f1b44c',
+            'info': '#50a5f1',
+            'normal': 'var(--bs-surface-500, #6c757d)'
         };
         const priorityIcons = {
             'urgent': 'bx-error-circle',
@@ -1569,34 +1382,34 @@ function renderAnnouncements(announcements, communityColor) {
         const priorityLabel = priorityLabels[priority];
         
         return `
-            <div class="announcement-item" style="margin-bottom: 24px; padding: 20px; background: var(--bs-card-bg); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid ${priorityColor};">
-                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                    <img src="${avatar}" alt="${creatorName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creatorName)}&background=${communityColor.replace('#', '')}&color=fff'" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid ${communityColor};">
+            <div class="announcement-item" style="margin-bottom: 16px; padding: 16px; background: var(--bs-card-bg); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.04); border-left: 4px solid ${priorityColor};">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <img src="${avatar}" alt="${creatorName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(creatorName)}&background=${communityColor.replace('#', '')}&color=fff'" class="announcement-avatar" style="width: 38px; height: 38px; border: 2px solid ${communityColor};">
                     <div style="flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                             <div style="flex: 1;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                    <strong style="color: ${themeColors.surface700}; font-size: 14px;">${creatorName}</strong>
-                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: ${priorityColor}; color: white; border-radius: 12px; font-size: 11px; font-weight: 600;">
-                                        <i class="bx ${priorityIcon}" style="font-size: 13px;"></i>
+                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                                    <strong class="announcement-author">${creatorName}</strong>
+                                    <span style="display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; background: ${priorityColor}; color: #fff; border-radius: 10px; font-size: .6rem; font-weight: 700;">
+                                        <i class="bx ${priorityIcon}" style="font-size: 11px;"></i>
                                         ${priorityLabel}
                                     </span>
                                 </div>
-                                <div style="font-size: 12px; color: ${themeColors.surfaceMuted};">${announcement.created_at_human}</div>
+                                <div class="announcement-time">${announcement.created_at_human}</div>
                             </div>
                             ${creatorId === window.currentUserId ? `
-                                <div style="display: flex; gap: 8px;">
-                                    <button onclick='editAnnouncement(${announcement.id}, ${JSON.stringify(announcement.title || "")}, ${JSON.stringify(announcement.message)}, "${announcement.priority || "normal"}")' style="background: none; border: none; color: ${themeColors.info}; cursor: pointer; padding: 4px 8px;" title="Edit">
-                                        <i class="bx bx-edit" style="font-size: 18px;"></i>
+                                <div style="display: flex; gap: 4px;">
+                                    <button onclick='editAnnouncement(${announcement.id}, ${JSON.stringify(announcement.title || "")}, ${JSON.stringify(announcement.message)}, "${announcement.priority || "normal"}")' style="background: none; border: none; color: #50a5f1; cursor: pointer; padding: 3px 6px;" title="Edit">
+                                        <i class="bx bx-edit" style="font-size: 16px;"></i>
                                     </button>
-                                    <button onclick="deleteAnnouncement(${announcement.id})" style="background: none; border: none; color: ${themeColors.danger}; cursor: pointer; padding: 4px 8px;" title="Delete">
-                                        <i class="bx bx-trash" style="font-size: 18px;"></i>
+                                    <button onclick="deleteAnnouncement(${announcement.id})" style="background: none; border: none; color: #f46a6a; cursor: pointer; padding: 3px 6px;" title="Delete">
+                                        <i class="bx bx-trash" style="font-size: 16px;"></i>
                                     </button>
                                 </div>
                             ` : ''}
                         </div>
-                        ${announcement.title ? `<div style="font-weight: 600; color: ${communityColor}; margin-bottom: 8px; font-size: 15px;">${escapeHtml(announcement.title)}</div>` : ''}
-                        <div style="color: ${themeColors.surface600}; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${formatMessageText(announcement.message)}</div>
+                        ${announcement.title ? `<div style="font-weight: 600; color: ${communityColor}; margin-bottom: 6px; font-size: .85rem;">${escapeHtml(announcement.title)}</div>` : ''}
+                        <div class="announcement-text">${formatMessageText(announcement.message)}</div>
                     </div>
                 </div>
             </div>
@@ -1640,7 +1453,7 @@ async function sendAnnouncement() {
             const container = document.getElementById('announcementsContainer');
             const community = globalCommunities.find(c => c.id === window.currentCommunityId);
             if (container && community) {
-                container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || themeColors.gradientStart);
+                container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#d4af37');
             }
             
             // Scroll to bottom
@@ -1659,8 +1472,8 @@ async function sendAnnouncement() {
         if (sendBtn) {
             sendBtn.disabled = false;
             const community = globalCommunities.find(c => c.id === window.currentCommunityId);
-            const color = community?.color || themeColors.gradientStart;
-            sendBtn.innerHTML = `<i class="bx bx-paper-plane" style="font-size: 16px;"></i> Post Announcement`;
+            const color = community?.color || '#d4af37';
+            sendBtn.innerHTML = `<i class="bx bx-paper-plane"></i> Post Announcement`;
         }
     }
 }
@@ -1682,39 +1495,39 @@ async function loadCommunityAnnouncements(conversationId, communityColor) {
         
         if (!messages.messages || messages.messages.length === 0) {
             container.innerHTML = `
-                <div style="max-width: 500px; margin: 60px auto; text-align: center;">
+                <div class="no-messages" style="max-width: 500px; margin: 60px auto;">
                     <i class="bx bx-bullhorn" style="font-size: 64px; color: ${communityColor}; opacity: 0.3;"></i>
-                    <h5 class="mt-3" style="color: ${themeColors.surface700}; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
-                    <p style="color: ${themeColors.surface500}; margin-top: 12px;">${translations.beTheFirstToPost}</p>
+                    <h5 class="mt-3" style="font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                    <p style="margin-top: 12px;">${translations.beTheFirstToPost}</p>
                 </div>
             `;
             return;
         }
         
         container.innerHTML = messages.messages.map(msg => `
-            <div class="announcement-item" style="background: var(--bs-card-bg); border-left: 4px solid ${communityColor}; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: start; gap: 12px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: ${communityColor}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; flex-shrink: 0;">
+            <div class="announcement-item" style="background: var(--bs-card-bg); border-left: 4px solid ${communityColor}; border-radius: 10px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.04);">
+                <div style="display: flex; align-items: start; gap: 10px;">
+                    <div class="announcement-avatar" style="background: ${communityColor};">
                         ${(msg.user?.name || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div style="flex: 1; min-width: 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
                             <div>
-                                <div style="font-weight: 600; color: ${themeColors.surface700}; font-size: 14px;">${msg.user?.name || 'Unknown'}</div>
-                                <div style="font-size: 12px; color: ${themeColors.surfaceMuted};">${msg.created_at}</div>
+                                <div class="announcement-author">${msg.user?.name || 'Unknown'}</div>
+                                <div class="announcement-time">${msg.created_at}</div>
                             </div>
                             ${msg.user_id === window.currentUserId ? `
-                                <button onclick="deleteAnnouncement(${msg.id})" style="background: none; border: none; color: ${themeColors.danger}; cursor: pointer; padding: 4px 8px;" title="Delete">
-                                    <i class="bx bx-trash" style="font-size: 16px;"></i>
+                                <button onclick="deleteAnnouncement(${msg.id})" style="background: none; border: none; color: #f46a6a; cursor: pointer; padding: 3px 6px;" title="Delete">
+                                    <i class="bx bx-trash" style="font-size: 15px;"></i>
                                 </button>
                             ` : ''}
                         </div>
-                        <div style="color: var(--bs-body-color); font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${msg.message}</div>
+                        <div class="announcement-text">${msg.message}</div>
                         ${msg.attachments && msg.attachments.length > 0 ? `
-                            <div style="margin-top: 12px; display: flex; flex-wrap: gap: 8px;">
+                            <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
                                 ${msg.attachments.map(att => `
-                                    <a href="${att.url}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: ${themeColors.surface100}; border-radius: 6px; text-decoration: none; color: ${themeColors.surface500}; font-size: 13px;">
-                                        <i class="bx bx-file" style="font-size: 16px;"></i>
+                                    <a href="${att.url}" target="_blank" class="file-attachment" style="font-size: .72rem;">
+                                        <i class="bx bx-file"></i>
                                         ${att.file_name}
                                     </a>
                                 `).join('')}
@@ -1809,7 +1622,7 @@ async function updateAnnouncement() {
                 const container = document.getElementById('announcementsContainer');
                 
                 if (container && community && announcementsData.announcements) {
-                    container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || themeColors.gradientStart);
+                    container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#d4af37');
                 }
             } catch (e) {
                 console.error('Failed to reload announcements:', e);
@@ -1861,13 +1674,13 @@ async function deleteAnnouncement(announcementId) {
                 
                 if (container && community) {
                     if (announcementsData.announcements && announcementsData.announcements.length > 0) {
-                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || themeColors.gradientStart);
+                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#d4af37');
                     } else {
                         container.innerHTML = `
-                            <div style="max-width: 500px; margin: 60px auto; text-align: center;">
-                                <i class="bx bx-bullhorn" style="font-size: 64px; color: ${community.color || themeColors.gradientStart}; opacity: 0.3;"></i>
-                                <h5 class="mt-3" style="color: ${themeColors.surface700}; font-weight: 600;">${translations.noAnnouncementsYet}</h5>
-                                <p style="color: ${themeColors.surface500}; margin-top: 12px;">${translations.beTheFirstToPost}</p>
+                            <div class="no-messages" style="max-width: 500px; margin: 60px auto;">
+                                <i class="bx bx-bullhorn" style="font-size: 64px; color: ${community.color || '#d4af37'}; opacity: 0.3;"></i>
+                                <h5 class="mt-3" style="font-weight: 600;">${translations.noAnnouncementsYet}</h5>
+                                <p style="margin-top: 12px;">${translations.beTheFirstToPost}</p>
                             </div>
                         `;
                     }
@@ -1989,7 +1802,7 @@ async function loadConversations() {
     } catch (error) {
         console.error('Error loading conversations:', error);
         const listEl = document.getElementById('conversationsList');
-        listEl.innerHTML = '<div class="no-conversations"><p style="color: red;">Error loading chats. Please refresh the page.</p><p style="font-size: 12px; color: ${themeColors.surface500};">Check browser console for details</p></div>';
+        listEl.innerHTML = '<div class="no-conversations"><p style="color: #f46a6a;">Error loading chats. Please refresh the page.</p><p>Check browser console for details</p></div>';
     }
 }
 
@@ -2149,7 +1962,7 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     const isCommunity = communityId !== null && communityId !== undefined;
 
     // Get conversation avatar if available
-    let avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--bs-gold), var(--bs-gold-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">${conversationName.charAt(0).toUpperCase()}</div>`;
+    let avatarHtml = `<div class="chat-header-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #c5a028); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">${conversationName.charAt(0).toUpperCase()}</div>`;
     try {
         const convData = await apiCall(`/api/chat/conversations/${conversationId}`);
         // For group/community conversations, use conversation avatar
@@ -2634,7 +2447,7 @@ async function sendMessage() {
         fileInput.value = '';
         input.placeholder = 'Type a message...'; // Reset placeholder
         await refreshMessages();
-        loadConversations(); // Update conversation list
+        updateConversationPreview(window.currentConversationId, message); // Update sidebar without full reload
     } catch (error) {
         console.error('Error sending message:', error);
         console.error('Error details:', error.message, error.stack);
@@ -2652,6 +2465,43 @@ async function sendMessage() {
             }
         }
         alert(errorMessage);
+    }
+}
+
+// Update a conversation's preview text and move it to top without full sidebar reload
+function updateConversationPreview(conversationId, messageText) {
+    const listEl = document.getElementById('conversationsList');
+    if (!listEl) return;
+
+    const items = listEl.querySelectorAll('.conversation-item');
+    let targetItem = null;
+
+    items.forEach(item => {
+        // Find the item whose onclick contains this conversation ID
+        const onclickAttr = item.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`selectConversation(${conversationId}`)) {
+            targetItem = item;
+        }
+    });
+
+    if (targetItem) {
+        // Update preview text
+        const preview = targetItem.querySelector('.conversation-preview');
+        if (preview) {
+            preview.textContent = (messageText || '📎 Attachment').substring(0, 40) + '...';
+        }
+        // Update time
+        const time = targetItem.querySelector('.conversation-time');
+        if (time) {
+            time.textContent = 'Just now';
+        }
+        // Move to top (after the section label if present)
+        const sectionLabel = listEl.querySelector('.sidebar-section-label');
+        if (sectionLabel && sectionLabel.nextSibling) {
+            listEl.insertBefore(targetItem, sectionLabel.nextSibling);
+        } else {
+            listEl.prepend(targetItem);
+        }
     }
 }
 
@@ -2895,6 +2745,14 @@ function subscribeToConversation(conversationId) {
                         refreshMessages();
                         // Don't call loadConversations() here - it causes fade-in on every message
                         // The 60-second interval will update the conversation list periodically
+                        
+                        // Play notification sound for messages from other users
+                        // (even when viewing the conversation, so user notices new messages)
+                        if (e.user && e.user.id !== window.currentUserId && !document.hasFocus()) {
+                            if (window.ChatNotify && window.ChatNotify.playSound) {
+                                window.ChatNotify.playSound();
+                            }
+                        }
                     }
                 });
         } catch (e) {
@@ -2948,8 +2806,7 @@ function subscribeToCommunityAnnouncements(communityIdOrArray) {
                                     const community = globalCommunities.find(c => c.id === communityId);
                                     
                                     if (container && community && announcementsData.announcements) {
-                                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || themeColors.gradientStart);
-                                        
+                        container.innerHTML = renderAnnouncements(announcementsData.announcements, community.color || '#d4af37');
                                         // Scroll to bottom
                                         const messagesDiv = document.getElementById('announcementMessages');
                                         if (messagesDiv) {
@@ -3039,10 +2896,10 @@ function showAnnouncementPopup(data) {
         
         // Priority colors and icons
         const priorityData = {
-            'urgent': { color: themeColors.danger, icon: 'bx-error-circle', label: 'URGENT' },
-            'warning': { color: themeColors.warning, icon: 'bx-error', label: 'Warning' },
-            'info': { color: themeColors.info, icon: 'bx-info-circle', label: 'Info' },
-            'normal': { color: themeColors.surface500, icon: 'bx-info-circle', label: 'Normal' }
+            'urgent': { color: '#f46a6a', icon: 'bx-error-circle', label: 'URGENT' },
+            'warning': { color: '#f1b44c', icon: 'bx-error', label: 'Warning' },
+            'info': { color: '#50a5f1', icon: 'bx-info-circle', label: 'Info' },
+            'normal': { color: '#6c757d', icon: 'bx-info-circle', label: 'Normal' }
         };
         
         const priority = announcement.priority || 'normal';
@@ -3050,7 +2907,7 @@ function showAnnouncementPopup(data) {
         
         // Find community color
         const community = globalCommunities.find(c => c.id === communityId);
-        const communityColor = community?.color || themeColors.gradientStart;
+        const communityColor = community?.color || '#d4af37';
         
         // Update popup content
         document.getElementById('popupCommunityName').textContent = communityName;
@@ -3135,17 +2992,17 @@ function showRecentAnnouncements() {
     if (!popup) return;
     
     const priorityData = {
-        'urgent': { color: themeColors.danger, icon: 'bx-error-circle', label: 'URGENT' },
-        'warning': { color: themeColors.warning, icon: 'bx-error', label: 'Warning' },
-        'info': { color: themeColors.info, icon: 'bx-info-circle', label: 'Info' },
-        'normal': { color: themeColors.surface500, icon: 'bx-info-circle', label: 'Normal' }
+        'urgent': { color: '#f46a6a', icon: 'bx-error-circle', label: 'URGENT' },
+        'warning': { color: '#f1b44c', icon: 'bx-error', label: 'Warning' },
+        'info': { color: '#50a5f1', icon: 'bx-info-circle', label: 'Info' },
+        'normal': { color: '#6c757d', icon: 'bx-info-circle', label: 'Normal' }
     };
     
     const priority = latest.priority || 'normal';
     const priorityInfo = priorityData[priority];
     
     document.getElementById('popupCommunityName').textContent = latest.community_name || 'Community';
-    document.getElementById('popupCommunityIcon').style.background = latest.community_color || themeColors.gradientStart;
+    document.getElementById('popupCommunityIcon').style.background = latest.community_color || '#d4af37';
     
     const priorityBadge = document.getElementById('popupPriorityBadge');
     priorityBadge.style.background = priorityInfo.color;
@@ -3775,28 +3632,7 @@ window.ChatToast = {
     }
 };
 
-// Message input action button styles
-if (!document.getElementById('chatInputStyles')) {
-    const style = document.createElement('style');
-    style.id = 'chatInputStyles';
-    style.textContent = `
-        .message-input-actions button {
-            background: transparent;
-            border: none;
-            padding: 8px;
-            font-size: 20px;
-            color: ${themeColors.surfaceMuted};
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        .message-input-actions button:hover {
-            background: ${themeColors.printBgAlt};
-            color: ${themeColors.chartPrimary};
-        }
-    `;
-    document.head.appendChild(style);
-}
+// Message input action button styles are in chat.css
 
 // ==========================================
 // MENTION AUTOCOMPLETE
@@ -3983,7 +3819,7 @@ if (!document.getElementById('chatInputStyles')) {
         const listEl = document.getElementById('communitiesList');
         
         if (communities.length === 0) {
-            listEl.innerHTML = `<div style="padding: 12px; text-align: center; color: ${themeColors.surfaceMuted}; font-size: 0.85rem;">No communities</div>`;
+            listEl.innerHTML = `<div style="padding: 12px; text-align: center; color: var(--bs-surface-400, #adb5bd); font-size: 0.85rem;">No communities</div>`;
             return;
         }
 
@@ -4006,7 +3842,7 @@ if (!document.getElementById('chatInputStyles')) {
                  data-is-creator="${isCreator}"
                  onclick="selectCommunityFromData(this)"
                  oncontextmenu="showCommunityContextMenu(event, ${community.id}, '${community.name.replace(/'/g, "\\'")}', ${canManage}); return false;">
-                <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || themeColors.gradientStart) + ';'} width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <div class="community-avatar" style="${community.avatar ? '' : 'background: ' + (community.color || '#d4af37') + ';'} width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     ${community.avatar ? '<img src="/storage/' + community.avatar + '" alt="' + community.name + '" style="width: 100%; height: 100%; object-fit: cover;">' : '<i class="' + iconClass + '"></i>'}
                 </div>
                 <div class="community-info">
@@ -4090,14 +3926,14 @@ if (!document.getElementById('chatInputStyles')) {
     function renderCommunityMembers() {
         const display = document.getElementById('communityMembersDisplay');
         if (window.communityMembersToAdd.length === 0) {
-            display.innerHTML = `<p style="color: ${themeColors.surfaceMuted}; font-size: 13px;">No members added yet</p>`;
+            display.innerHTML = `<p style="color: var(--bs-surface-400, #adb5bd); font-size: 13px;">No members added yet</p>`;
             return;
         }
         
         display.innerHTML = window.communityMembersToAdd.map(member => `
             <div style="background: var(--bs-light); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px;">
                 <span>${member.name}</span>
-                <button type="button" onclick="removeMemberFromCommunity(${member.id})" style="background: none; border: none; color: ${themeColors.surface500}; cursor: pointer; padding: 0; font-size: 16px;">&times;</button>
+                <button type="button" onclick="removeMemberFromCommunity(${member.id})" style="background: none; border: none; color: var(--bs-surface-500, #6c757d); cursor: pointer; padding: 0; font-size: 16px;">&times;</button>
             </div>
         `).join('');
         
@@ -4149,11 +3985,11 @@ if (!document.getElementById('chatInputStyles')) {
                 // Reset color preview to default
                 const colorPreview = document.getElementById('communityColorPreview');
                 if (colorPreview) {
-                    colorPreview.style.background = themeColors.gradientStart;
+                    colorPreview.style.background = '#d4af37';
                 }
                 const colorInput = document.getElementById('communityColor');
                 if (colorInput) {
-                    colorInput.value = themeColors.gradientStart;
+                    colorInput.value = '#d4af37';
                 }
                 window.communityMembersToAdd = [];
                 renderCommunityMembers();
@@ -4545,7 +4381,7 @@ async function openEditCommunityModal(communityId) {
     document.getElementById('editCommunityId').value = community.id;
     document.getElementById('editCommunityName').value = community.name;
     document.getElementById('editCommunityDescription').value = community.description || '';
-    document.getElementById('editCommunityColor').value = community.color || themeColors.gradientStart;
+    document.getElementById('editCommunityColor').value = community.color || '#d4af37';
     document.getElementById('editCommunityPostingRestricted').checked = community.posting_restricted || false;
     
     // Hide context menu

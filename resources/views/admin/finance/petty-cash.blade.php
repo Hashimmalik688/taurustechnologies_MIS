@@ -1,105 +1,107 @@
 @extends('layouts.master')
-
 @section('title', 'Petty Cash Ledger')
+@section('css')
+@include('partials.pipeline-dashboard-styles')
+@include('partials.custom-select-datepicker-styles')
+<style>
+    .form-page-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem}
+    .form-page-hdr h4{font-size:1.1rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.45rem}
+    .form-page-hdr h4 i{color:#d4af37;font-size:1.25rem}
+    .form-page-hdr p{margin:2px 0 0;font-size:.72rem;color:var(--bs-surface-500)}
+    .crm-label{font-size:.72rem;font-weight:600;color:var(--bs-surface-500);margin-bottom:.25rem}
+    .crm-label.required::after{content:" *";color:#c84646}
+    .crm-input{border:1px solid rgba(0,0,0,.08);border-radius:22px;padding:.38rem .75rem;font-size:.75rem;width:100%;background:var(--bs-card-bg);color:var(--bs-body-color);transition:border-color .15s}
+    .crm-input:focus{border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.12);outline:none}
+    select.crm-input{appearance:none;-webkit-appearance:none;border-radius:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b8860b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:1.8rem}
+    textarea.crm-input{border-radius:.6rem}
+    .modal .modal-content{border-radius:14px;border:none;overflow:hidden}
+    .modal .modal-header-glass{background:linear-gradient(135deg,rgba(212,175,55,.13),rgba(212,175,55,.04));padding:.75rem 1.1rem;border-bottom:1px solid rgba(212,175,55,.12)}
+    .modal .modal-header-glass .modal-title{font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:.4rem}
+    .modal .modal-header-glass .modal-title i{color:#d4af37}
+    .modal .modal-body{padding:1rem 1.1rem}
+    .modal .modal-footer{padding:.6rem 1.1rem;border-top:1px solid rgba(0,0,0,.04)}
+    .info-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:22px;font-size:.72rem;font-weight:600;background:rgba(14,165,233,.08);color:#0ea5e9;border:1px solid rgba(14,165,233,.15)}
+    .info-pill i{font-size:.85rem}
+</style>
+@endsection
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="bx bx-wallet-alt me-2"></i>
-                        Petty Cash Ledger
-                    </h1>
-                    <p class="text-muted mt-2">Manage petty cash entries with debit and credit transactions</p>
-                </div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEntryModal">
-                    <i class="bx bx-plus me-1"></i> Add Entry
-                </button>
+    {{-- Alerts --}}
+    @if ($message = Session::get('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="font-size:.78rem;border-radius:12px">
+        <i class="bx bx-check-circle me-1"></i> {{ $message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+    @if ($message = Session::get('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:.78rem;border-radius:12px">
+        <i class="bx bx-x-circle me-1"></i> {{ $message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
+
+    <div class="form-page-hdr">
+        <div>
+            <h4><i class="bx bx-wallet-alt"></i> Petty Cash Ledger</h4>
+            <p>Manage petty cash entries — debit &amp; credit transactions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('petty-cash.print', request()->query()) }}" target="_blank" class="act-btn a-info"><i class="bx bx-printer"></i> Print</a>
+            <a href="{{ route('petty-cash.export', request()->query()) }}" class="act-btn a-info"><i class="bx bx-download"></i> Export</a>
+            <button class="act-btn a-primary" data-bs-toggle="modal" data-bs-target="#addEntryModal"><i class="bx bx-plus"></i> Add Entry</button>
+        </div>
+    </div>
+
+    {{-- Filters --}}
+    <div class="pipe-filter-bar mb-2">
+        <form method="GET" action="{{ route('petty-cash.index') }}" class="d-flex flex-wrap align-items-end gap-2 w-100">
+            <div style="min-width:140px">
+                <label class="crm-label">Category</label>
+                <select name="head" class="crm-input crm-select">
+                    <option value="">All Categories</option>
+                    @foreach($heads as $head)
+                    <option value="{{ $head }}" {{ $selectedHead === $head ? 'selected' : '' }}>{{ $head }}</option>
+                    @endforeach
+                </select>
             </div>
-        </div>
+            <div style="min-width:130px">
+                <label class="crm-label">From Date</label>
+                <input type="text" name="from_date" id="pcFromDate" class="crm-input crm-date" placeholder="Select" value="{{ $fromDate }}" autocomplete="off">
+            </div>
+            <div style="min-width:130px">
+                <label class="crm-label">To Date</label>
+                <input type="text" name="to_date" id="pcToDate" class="crm-input crm-date" placeholder="Select" value="{{ $toDate }}" autocomplete="off">
+            </div>
+            <button type="submit" class="pipe-pill" style="margin-top:auto"><i class="bx bx-filter-alt"></i> Filter</button>
+            @if($selectedHead || $fromDate || $toDate)
+            <a href="{{ route('petty-cash.index') }}" class="pipe-pill" style="margin-top:auto;background:rgba(239,68,68,.08);color:#ef4444;border-color:rgba(239,68,68,.15)"><i class="bx bx-x"></i> Clear</a>
+            @endif
+        </form>
     </div>
 
-    <!-- Search/Filter by Category and Date -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <form method="GET" action="{{ route('petty-cash.index') }}" class="d-flex gap-2 flex-wrap align-items-end">
-                <!-- Category Filter -->
-                <div>
-                    <label class="form-label small mb-2">Category</label>
- <select name="head" class="form-select form-select-sm u-min-w-150" >
-                        <option value="">-- All Categories --</option>
-                        @foreach($heads as $head)
-                            <option value="{{ $head }}" {{ $selectedHead === $head ? 'selected' : '' }}>
-                                {{ $head }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Date From Filter -->
-                <div>
-                    <label class="form-label small mb-2">From Date</label>
- <input type="date" name="from_date" class="form-control form-control-sm u-min-w-140" value="{{ $fromDate }}" >
-                </div>
-
-                <!-- Date To Filter -->
-                <div>
-                    <label class="form-label small mb-2">To Date</label>
- <input type="date" name="to_date" class="form-control form-control-sm u-min-w-140" value="{{ $toDate }}" >
-                </div>
-
-                <!-- Action Buttons -->
-                <button type="submit" class="btn btn-sm btn-outline-primary">
-                    <i class="bx bx-search me-1"></i> Filter
-                </button>
-                @if($selectedHead || $fromDate || $toDate)
-                    <a href="{{ route('petty-cash.index') }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bx bx-x me-1"></i> Clear
-                    </a>
-                @endif
-            </form>
-        </div>
-    </div>
-
-    <!-- Category Total Alert -->
+    {{-- Category/Date Info --}}
     @if($selectedHead)
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="bx bx-info-circle me-2"></i>
-                    <strong>{{ $selectedHead }}</strong> | 
-                    Total spent all time: <strong class="text-danger">{{ number_format($categoryTotal, 2) }}</strong> | 
-                    @if($fromDate && $toDate)
-                        Date range ({{ date('M d, Y', strtotime($fromDate)) }} - {{ date('M d, Y', strtotime($toDate)) }}):
-                    @else
-                        This month:
-                    @endif
-                    <strong class="text-danger">{{ number_format($categoryMonthTotal, 2) }}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
-        </div>
+    <div class="info-pill mb-2">
+        <i class="bx bx-info-circle"></i>
+        <strong>{{ $selectedHead }}</strong> &mdash;
+        All time: <strong style="color:#ef4444">{{ number_format($categoryTotal, 2) }}</strong> |
+        @if($fromDate && $toDate)
+            {{ date('M d, Y', strtotime($fromDate)) }} – {{ date('M d, Y', strtotime($toDate)) }}:
+        @else
+            This month:
+        @endif
+        <strong style="color:#ef4444">{{ number_format($categoryMonthTotal, 2) }}</strong>
+    </div>
     @endif
-
-    <!-- Date Range Summary -->
     @if($fromDate && $toDate && !$selectedHead)
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="bx bx-calendar-event me-2"></i>
-                    Viewing entries from <strong>{{ date('M d, Y', strtotime($fromDate)) }}</strong> to <strong>{{ date('M d, Y', strtotime($toDate)) }}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
-        </div>
-            </div>
-        </div>
+    <div class="info-pill mb-2">
+        <i class="bx bx-calendar-event"></i>
+        Viewing from <strong>{{ date('M d, Y', strtotime($fromDate)) }}</strong> to <strong>{{ date('M d, Y', strtotime($toDate)) }}</strong>
+    </div>
     @endif
 
-    <!-- Stats Cards -->
+    {{-- Stats KPI --}}
     @php
         if ($selectedHead || $fromDate || $toDate) {
             $totalDebit = $entries->sum('debit');
@@ -112,184 +114,81 @@
             $currentBalance = $lastEntry ? $balanceMap[$lastEntry->id] : 0;
         }
     @endphp
-
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <p class="text-muted mb-1">Total Debits</p>
-                            <h4 class="mb-0 text-success">{{ number_format($totalDebit, 2) }}</h4>
-                        </div>
- <div class="text-success u-fs-2" >
-                            <i class="bx bx-arrow-from-left"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr))">
+        <div class="kpi-card k-green">
+            <div class="kpi-lbl">Total Debits (In)</div>
+            <div class="kpi-val">{{ number_format($totalDebit, 2) }}</div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <p class="text-muted mb-1">Total Credits</p>
-                            <h4 class="mb-0 text-danger">{{ number_format($totalCredit, 2) }}</h4>
-                        </div>
- <div class="text-danger u-fs-2" >
-                            <i class="bx bx-arrow-to-left"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="kpi-card k-red">
+            <div class="kpi-lbl">Total Credits (Out)</div>
+            <div class="kpi-val">{{ number_format($totalCredit, 2) }}</div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <p class="text-muted mb-1">Running Balance</p>
-                            <h4 class="mb-0" style="color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }}">
-                                {{ number_format($currentBalance, 2) }}
-                            </h4>
-                        </div>
- <div class="u-fs-2" style="color: {{ $currentBalance >= 0 ? 'var(--bs-status-present)' : 'var(--bs-status-absent)' }}">
-                            <i class="bx bx-wallet"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="kpi-card k-gold">
+            <div class="kpi-lbl">Running Balance</div>
+            <div class="kpi-val">{{ number_format($currentBalance, 2) }}</div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <p class="text-muted mb-1">Total Entries</p>
-                            <h4 class="mb-0 text-info">{{ $entries->count() }}</h4>
-                        </div>
- <div class="text-info u-fs-2" >
-                            <i class="bx bx-list-check"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="kpi-card k-blue">
+            <div class="kpi-lbl">Total Entries</div>
+            <div class="kpi-val">{{ $entries->count() }}</div>
         </div>
     </div>
 
-    <!-- Alert Messages -->
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bx bx-check-circle me-2"></i>
-            <strong>Success!</strong> {{ $message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if ($message = Session::get('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bx bx-x-circle me-2"></i>
-            <strong>Error!</strong> {{ $message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    <!-- Petty Cash Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-0">
-                    <i class="bx bx-table me-2"></i>
-                    All Entries
-                </h5>
-            </div>
-            <div>
-                <a href="{{ route('petty-cash.print', request()->query()) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                    <i class="bx bx-printer me-1"></i>
-                    Print
-                </a>
-                <a href="{{ route('petty-cash.export', request()->query()) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bx bx-download me-1"></i>
-                    Export CSV
-                </a>
-            </div>
-        </div>
-        <div class="card-body p-0">
+    {{-- Entries Table --}}
+    <div class="ex-card sec-card">
+        <div class="sec-hdr"><i class="bx bx-table"></i> All Entries</div>
+        <div class="sec-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                <table class="ex-tbl w-100">
+                    <thead>
                         <tr>
-                            <th class="text-center u-w-60">S.N.</th>
+                            <th style="width:50px" class="text-center">S.N.</th>
                             <th>Date</th>
                             <th>Description</th>
-                            <th>Head/Category</th>
+                            <th>Head</th>
                             <th class="text-end">Debit</th>
                             <th class="text-end">Credit</th>
                             <th class="text-end">Balance</th>
- <th class="text-center u-w-120" >Actions</th>
+                            <th style="width:80px" class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($entries as $entry)
-                            <tr>
-                                <td class="text-center">
-                                    <span class="badge bg-secondary">{{ $serialNumberMap[$entry->id] }}</span>
-                                </td>
-                                <td>
-                                    <small class="text-muted">{{ $entry->date->format('M d, Y') }}</small>
-                                </td>
-                                <td>
-                                    <strong>{{ $entry->description }}</strong>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark">{{ $entry->head }}</span>
-                                </td>
-                                <td class="text-end">
-                                    @if($entry->debit > 0)
-                                        <span class="text-success fw-bold">{{ number_format($entry->debit, 2) }}</span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    @if($entry->credit > 0)
-                                        <span class="text-danger fw-bold">{{ number_format($entry->credit, 2) }}</span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                                <td class="text-end">
-                                    <strong class="text-primary">{{ number_format($balanceMap[$entry->id] ?? 0, 2) }}</strong>
-                                </td>
-                                <td class="text-center">
-                                    @canEditModule('petty-cash')
-                                    <button class="btn btn-sm btn-light" 
-                                            onclick="editEntry({{ $entry->id }})"
-                                            data-bs-toggle="tooltip" 
-                                            title="Edit">
-                                        <i class="bx bx-pencil text-warning"></i>
-                                    </button>
-                                    @endcanEditModule
-                                    @canDeleteInModule('petty-cash')
-                                    <button class="btn btn-sm btn-light" 
-                                            onclick="deleteEntry({{ $entry->id }})"
-                                            data-bs-toggle="tooltip" 
-                                            title="Delete">
-                                        <i class="bx bx-trash text-danger"></i>
-                                    </button>
-                                    @endcanDeleteInModule
-                                </td>
-                            </tr>
+                        <tr>
+                            <td class="text-center"><span class="v-badge">{{ $serialNumberMap[$entry->id] }}</span></td>
+                            <td style="font-size:.7rem;color:var(--bs-surface-500)">{{ $entry->date->format('M d, Y') }}</td>
+                            <td><strong style="font-size:.75rem">{{ $entry->description }}</strong></td>
+                            <td><span class="v-badge">{{ $entry->head }}</span></td>
+                            <td class="text-end">
+                                @if($entry->debit > 0)
+                                <span style="color:#10b981;font-weight:700;font-size:.75rem">{{ number_format($entry->debit, 2) }}</span>
+                                @else
+                                <span style="opacity:.3;font-size:.72rem">—</span>
+                                @endif
+                            </td>
+                            <td class="text-end">
+                                @if($entry->credit > 0)
+                                <span style="color:#ef4444;font-weight:700;font-size:.75rem">{{ number_format($entry->credit, 2) }}</span>
+                                @else
+                                <span style="opacity:.3;font-size:.72rem">—</span>
+                                @endif
+                            </td>
+                            <td class="text-end"><strong style="color:#d4af37;font-size:.75rem">{{ number_format($balanceMap[$entry->id] ?? 0, 2) }}</strong></td>
+                            <td class="text-center">
+                                @canEditModule('petty-cash')
+                                <button class="act-btn a-warn" style="padding:.15rem .4rem;font-size:.65rem" onclick="editEntry({{ $entry->id }})" title="Edit"><i class="bx bx-pencil"></i></button>
+                                @endcanEditModule
+                                @canDeleteInModule('petty-cash')
+                                <button class="act-btn a-danger" style="padding:.15rem .4rem;font-size:.65rem" onclick="deleteEntry({{ $entry->id }})" title="Delete"><i class="bx bx-trash"></i></button>
+                                @endcanDeleteInModule
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="8" class="text-center py-5">
-                                    <p class="text-muted mb-0">
- <i class="bx bx-inbox u-fs-2" ></i><br>
-                                        No entries found. Click "Add Entry" to create one.
-                                    </p>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="8" class="text-center" style="padding:2.5rem 1rem;color:var(--bs-surface-500)">
+                                <i class="bx bx-inbox" style="font-size:2rem;opacity:.3"></i><br>
+                                <span style="font-size:.75rem">No entries found. Click "Add Entry" to create one.</span>
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -297,329 +196,192 @@
         </div>
     </div>
 
-    <!-- Category Summary (when not filtered) -->
+    {{-- Category Breakdown --}}
     @if(!$selectedHead)
-        <div class="card border-0 shadow-sm mt-4">
-            <div class="card-header bg-light border-bottom">
-                <h5 class="mb-0">
-                    <i class="bx bx-layer me-2"></i>
-                    Category Breakdown
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Category</th>
-                                <th class="text-end">Total Spent (All Time)</th>
-                                <th class="text-end">This Month</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($heads as $head)
-                                @php
-                                    $categorySpent = \App\Models\PettyCashLedger::where('head', $head)->sum('credit');
-                                    $thisMonthSpent = \App\Models\PettyCashLedger::where('head', $head)
-                                        ->whereBetween('date', [now()->startOfMonth(), now()->endOfMonth()])
-                                        ->sum('credit');
-                                @endphp
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-light text-dark">{{ $head }}</span>
-                                    </td>
-                                    <td class="text-end text-danger fw-bold">{{ number_format($categorySpent, 2) }}</td>
-                                    <td class="text-end text-warning fw-bold">{{ number_format($thisMonthSpent, 2) }}</td>
-                                    <td class="text-center">
-                                        <a href="{{ route('petty-cash.index', ['head' => $head]) }}" class="btn btn-xs btn-outline-primary">
-                                            <i class="bx bx-search"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-3 text-muted">No categories found</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+    <div class="ex-card sec-card mt-2">
+        <div class="sec-hdr"><i class="bx bx-layer"></i> Category Breakdown</div>
+        <div class="sec-body p-0">
+            <div class="table-responsive">
+                <table class="ex-tbl w-100">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">All Time</th>
+                            <th class="text-end">This Month</th>
+                            <th class="text-center" style="width:70px">View</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($heads as $headItem)
+                        @php
+                            $categorySpent = \App\Models\PettyCashLedger::where('head', $headItem)->sum('credit');
+                            $thisMonthSpent = \App\Models\PettyCashLedger::where('head', $headItem)->whereBetween('date', [now()->startOfMonth(), now()->endOfMonth()])->sum('credit');
+                        @endphp
+                        <tr>
+                            <td><span class="v-badge">{{ $headItem }}</span></td>
+                            <td class="text-end"><span style="color:#ef4444;font-weight:700;font-size:.75rem">{{ number_format($categorySpent, 2) }}</span></td>
+                            <td class="text-end"><span style="color:#f59e0b;font-weight:700;font-size:.75rem">{{ number_format($thisMonthSpent, 2) }}</span></td>
+                            <td class="text-center"><a href="{{ route('petty-cash.index', ['head' => $headItem]) }}" class="act-btn a-info" style="padding:.15rem .45rem;font-size:.62rem"><i class="bx bx-search"></i></a></td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="4" class="text-center" style="padding:1.5rem;font-size:.75rem;color:var(--bs-surface-500)">No categories found</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
     @endif
 </div>
 
-<!-- Add/Edit Entry Modal -->
+{{-- Add/Edit Entry Modal --}}
 <div class="modal fade" id="addEntryModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light border-bottom">
-                <h5 class="modal-title">
-                    <i class="bx bx-plus-circle me-2"></i>
-                    <span id="modalTitle">Add New Entry</span>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header modal-header-glass">
+                <h5 class="modal-title"><i class="bx bx-plus-circle"></i> <span id="modalTitle">Add New Entry</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.65rem"></button>
             </div>
             <form id="entryForm" method="POST" action="{{ route('petty-cash.store') }}">
                 @csrf
                 <input type="hidden" id="methodInput" name="_method" value="POST">
                 <div class="modal-body">
-                    <div class="row mb-3">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="date" name="date" required>
-                            <span class="text-danger small" id="dateError"></span>
+                            <label class="crm-label required">Date</label>
+                            <input type="text" class="crm-input crm-date" id="date" name="date" placeholder="Select date" required autocomplete="off">
+                            <span class="text-danger" style="font-size:.65rem" id="dateError"></span>
                         </div>
                         <div class="col-md-6">
-                            <label for="head" class="form-label">Head/Category <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="head" name="head" placeholder="Enter head/category" required>
-                            <span class="text-danger small" id="headError"></span>
+                            <label class="crm-label required">Head / Category</label>
+                            <input type="text" class="crm-input" id="head" name="head" placeholder="Enter category" required>
+                            <span class="text-danger" style="font-size:.65rem" id="headError"></span>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="description" name="description" rows="2" placeholder="Enter transaction details" required></textarea>
-                        <span class="text-danger small" id="descriptionError"></span>
-                    </div>
-
-                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="crm-label required">Description</label>
+                            <textarea class="crm-input" id="description" name="description" rows="2" placeholder="Transaction details" required></textarea>
+                            <span class="text-danger" style="font-size:.65rem" id="descriptionError"></span>
+                        </div>
                         <div class="col-md-6">
-                            <label for="debit" class="form-label">Debit (Cash In)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">+</span>
-                                <input type="number" class="form-control" id="debit" name="debit" placeholder="0.00" step="0.01" min="0" value="0">
+                            <label class="crm-label">Debit (Cash In)</label>
+                            <div style="position:relative">
+                                <span style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:#10b981;font-weight:700;font-size:.72rem">+</span>
+                                <input type="number" class="crm-input" id="debit" name="debit" placeholder="0.00" step="0.01" min="0" value="0" style="padding-left:1.4rem">
                             </div>
-                            <span class="text-danger small" id="debitError"></span>
+                            <span class="text-danger" style="font-size:.65rem" id="debitError"></span>
                         </div>
                         <div class="col-md-6">
-                            <label for="credit" class="form-label">Credit (Cash Out)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">-</span>
-                                <input type="number" class="form-control" id="credit" name="credit" placeholder="0.00" step="0.01" min="0" value="0">
+                            <label class="crm-label">Credit (Cash Out)</label>
+                            <div style="position:relative">
+                                <span style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:#ef4444;font-weight:700;font-size:.72rem">−</span>
+                                <input type="number" class="crm-input" id="credit" name="credit" placeholder="0.00" step="0.01" min="0" value="0" style="padding-left:1.4rem">
                             </div>
-                            <span class="text-danger small" id="creditError"></span>
+                            <span class="text-danger" style="font-size:.65rem" id="creditError"></span>
                         </div>
                     </div>
-
-                    <div class="alert alert-info" role="alert">
-                        <i class="bx bx-info-circle me-2"></i>
-                        <strong>Note:</strong> Enter either Debit OR Credit, not both. Debit increases balance, Credit decreases it.
+                    <div class="info-pill mt-3" style="display:block;text-align:center">
+                        <i class="bx bx-info-circle"></i> Enter either Debit OR Credit, not both. Debit increases balance, Credit decreases it.
                     </div>
                 </div>
-                <div class="modal-footer border-top bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="bx bx-save me-1"></i>
-                        <span id="submitBtnText">Save Entry</span>
-                    </button>
+                <div class="modal-footer">
+                    <button type="button" class="act-btn a-danger" data-bs-dismiss="modal"><i class="bx bx-x"></i> Cancel</button>
+                    <button type="submit" class="act-btn a-success" id="submitBtn"><i class="bx bx-save"></i> <span id="submitBtnText">Save Entry</span></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+{{-- Delete Confirmation Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-sm">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white border-bottom">
-                <h5 class="modal-title">
-                    <i class="bx bx-trash-alt me-2"></i>
-                    Delete Entry
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header modal-header-glass" style="background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(239,68,68,.03))">
+                <h5 class="modal-title"><i class="bx bx-trash-alt" style="color:#ef4444"></i> Delete Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.65rem"></button>
             </div>
-            <div class="modal-body">
-                <p class="text-center my-3">
- <i class="bx bx-question-mark u-fs-2" style="color: var(--bs-status-absent)"></i>
-                </p>
-                <p class="text-center">Are you sure you want to delete this entry?</p>
-                <p class="text-muted text-center"><small>This action cannot be undone.</small></p>
+            <div class="modal-body text-center" style="padding:1.5rem">
+                <i class="bx bx-error-circle" style="font-size:2.5rem;color:#ef4444;opacity:.6"></i>
+                <p style="font-size:.82rem;font-weight:600;margin:.75rem 0 .25rem">Delete this entry?</p>
+                <p style="font-size:.68rem;color:var(--bs-surface-500)">This action cannot be undone.</p>
             </div>
-            <div class="modal-footer border-top">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
- <form class="d-inline" id="deleteForm" method="POST" >
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bx bx-trash me-1"></i>
-                        Delete
-                    </button>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="act-btn a-info" data-bs-dismiss="modal">Cancel</button>
+                <form class="d-inline" id="deleteForm" method="POST">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="act-btn a-danger"><i class="bx bx-trash"></i> Delete</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+@endsection
 
-@push('scripts')
+@section('script')
+<script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
 <script>
-    let editingId = null;
+let editingId = null;
 
-    // Export to CSV
-    function exportToCSV() {
-        const table = document.querySelector('table');
-        const rows = Array.from(table.querySelectorAll('tr'));
-        
-        let csv = [];
-        rows.forEach(row => {
-            let cells = Array.from(row.querySelectorAll('td, th'));
-            let rowData = cells.map(cell => {
-                let text = cell.textContent.trim();
-                // Remove icon tags and clean up text
-                text = text.replace(/<[^>]*>/g, '').trim();
-                // Escape quotes and wrap in quotes if contains comma
-                text = text.includes(',') ? '"' + text.replace(/"/g, '""') + '"' : text;
-                return text;
-            }).filter((_, i) => i < cells.length - 1); // Exclude Action column
-            csv.push(rowData.join(','));
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    // Init Select2
+    $('.crm-select').select2({minimumResultsForSearch:10,width:'100%'});
 
-        // Create and download file
-        const csvContent = 'data:text/csv;charset=utf-8,' + csv.join('\n');
-        const link = document.createElement('a');
-        link.setAttribute('href', encodeURI(csvContent));
-        link.setAttribute('download', 'petty-cash-' + new Date().toISOString().split('T')[0] + '.csv');
-        link.click();
-    }
+    // Init datepicker on filter dates
+    $('.crm-date').datepicker({format:'yyyy-mm-dd',autoclose:true,todayHighlight:true,clearBtn:true});
+    $('#date').datepicker('setDate', new Date());
 
-    // Set today's date as default on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').value = today;
-        
-        // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
+    const tl = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tl.map(function(el){ return new bootstrap.Tooltip(el); });
+});
 
-    // Edit entry - load data into modal
-    function editEntry(id) {
-        fetch(`/petty-cash/${id}/edit`)
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to load entry');
-                return response.json();
-            })
-            .then(data => {
-                // Clear previous errors
-                document.querySelectorAll('[id$="Error"]').forEach(el => el.textContent = '');
-                
-                // Populate form fields
-                document.getElementById('date').value = data.date;
-                document.getElementById('description').value = data.description;
-                document.getElementById('head').value = data.head;
-                document.getElementById('debit').value = data.debit || 0;
-                document.getElementById('credit').value = data.credit || 0;
-                
-                // Update modal title and form setup for edit
-                document.getElementById('modalTitle').textContent = 'Edit Entry #' + data.id;
-                document.getElementById('submitBtnText').textContent = 'Update Entry';
-                
-                // Set form action to the update route
-                document.getElementById('entryForm').action = `/petty-cash/${id}`;
-                document.getElementById('methodInput').value = 'PUT';
-                
-                editingId = id;
-                
-                // Show modal
-                const modal = new bootstrap.Modal(document.getElementById('addEntryModal'));
-                modal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to load entry. Please try again.');
-            });
-    }
+function editEntry(id) {
+    fetch('/petty-cash/' + id + '/edit')
+        .then(function(r){ if(!r.ok) throw new Error('Failed'); return r.json(); })
+        .then(function(data){
+            document.querySelectorAll('[id$="Error"]').forEach(function(el){ el.textContent=''; });
+            document.getElementById('date').value = data.date;
+            document.getElementById('description').value = data.description;
+            document.getElementById('head').value = data.head;
+            document.getElementById('debit').value = data.debit || 0;
+            document.getElementById('credit').value = data.credit || 0;
+            document.getElementById('modalTitle').textContent = 'Edit Entry #' + data.id;
+            document.getElementById('submitBtnText').textContent = 'Update Entry';
+            document.getElementById('entryForm').action = '/petty-cash/' + id;
+            document.getElementById('methodInput').value = 'PUT';
+            editingId = id;
+            new bootstrap.Modal(document.getElementById('addEntryModal')).show();
+        })
+        .catch(function(e){ console.error(e); alert('Failed to load entry.'); });
+}
 
-    // Delete entry - show confirmation
-    function deleteEntry(id) {
-        const deleteForm = document.getElementById('deleteForm');
-        deleteForm.action = `/petty-cash/${id}`;
-        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        modal.show();
-    }
+function deleteEntry(id) {
+    document.getElementById('deleteForm').action = '/petty-cash/' + id;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
 
-    // Reset form on modal close
-    document.getElementById('addEntryModal').addEventListener('hidden.bs.modal', function() {
-        document.getElementById('entryForm').reset();
-        document.getElementById('modalTitle').textContent = 'Add New Entry';
-        document.getElementById('submitBtnText').textContent = 'Save Entry';
-        document.getElementById('entryForm').action = "{{ route('petty-cash.store') }}";
-        document.getElementById('methodInput').value = 'POST';
-        
-        // Clear errors
-        document.querySelectorAll('[id$="Error"]').forEach(el => el.textContent = '');
-        
-        // Reset head input
-        document.getElementById('head').value = '';
-        
-        // Reset date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').value = today;
-        
-        editingId = null;
-    });
+document.getElementById('addEntryModal').addEventListener('hidden.bs.modal', function() {
+    document.getElementById('entryForm').reset();
+    document.getElementById('modalTitle').textContent = 'Add New Entry';
+    document.getElementById('submitBtnText').textContent = 'Save Entry';
+    document.getElementById('entryForm').action = "{{ route('petty-cash.store') }}";
+    document.getElementById('methodInput').value = 'POST';
+    document.querySelectorAll('[id$="Error"]').forEach(function(el){ el.textContent=''; });
+    document.getElementById('head').value = '';
+    var fp = document.getElementById('date');
+    if(fp) $(fp).datepicker('setDate', new Date());
+    editingId = null;
+});
 
-    // Handle form submission with validation
-    document.getElementById('entryForm').addEventListener('submit', function(e) {
-        // Clear previous errors
-        document.querySelectorAll('[id$="Error"]').forEach(el => el.textContent = '');
-        
-        const debit = parseFloat(document.getElementById('debit').value) || 0;
-        const credit = parseFloat(document.getElementById('credit').value) || 0;
-        const headValue = document.getElementById('head').value.trim();
-        
-        if (!headValue) {
-            e.preventDefault();
-            alert('Please enter a category');
-            return false;
-        }
-        
-        // Validate that at least one value is entered
-        if (debit === 0 && credit === 0) {
-            e.preventDefault();
-            alert('Please enter either a Debit or Credit amount');
-            return false;
-        }
-        
-        // Validate that both debit and credit aren't entered
-        if (debit > 0 && credit > 0) {
-            e.preventDefault();
-            alert('Please enter either Debit OR Credit, not both');
-            return false;
-        }
-        
-        // Let form submit normally
-        return true;
-    });
+document.getElementById('entryForm').addEventListener('submit', function(e) {
+    document.querySelectorAll('[id$="Error"]').forEach(function(el){ el.textContent=''; });
+    var debit = parseFloat(document.getElementById('debit').value) || 0;
+    var credit = parseFloat(document.getElementById('credit').value) || 0;
+    var headValue = document.getElementById('head').value.trim();
+    if(!headValue){ e.preventDefault(); alert('Please enter a category'); return false; }
+    if(debit === 0 && credit === 0){ e.preventDefault(); alert('Please enter either a Debit or Credit amount'); return false; }
+    if(debit > 0 && credit > 0){ e.preventDefault(); alert('Please enter either Debit OR Credit, not both'); return false; }
+    return true;
+});
 </script>
-@endpush
-
-@push('styles')
-<style>
-    .table hover-effect tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    .table-hover tbody tr:hover {
-        background-color: var(--bs-surface-bg-light);
-    }
-    
-    .badge {
-        font-weight: 500;
-        padding: 0.35rem 0.65rem;
-    }
-    
-    .card {
-        transition: box-shadow 0.2s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-    }
-</style>
-@endpush
 @endsection

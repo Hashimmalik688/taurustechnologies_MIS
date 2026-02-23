@@ -1,291 +1,103 @@
 @extends('layouts.master')
-
-@section('title')
-    Edit Chart of Account
-@endsection
-
+@section('title', 'Edit Account')
 @section('css')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <style>
-        .glassmorphism-card {
-            background: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .section-header {
-            color: var(--bs-gold);
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-label {
-            color: var(--bs-surface-300);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-label.required::after {
-            content: " *";
-            color: var(--bs-ui-danger);
-        }
-
-        .form-control, .form-select, textarea {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            border-radius: 8px;
-            padding: 0.75rem;
-        }
-
-        .form-control:focus, .form-select:focus, textarea:focus {
-            background: rgba(15, 23, 42, 0.95);
-            border-color: var(--bs-gold);
-            color: var(--bs-surface-300);
-            box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
-        }
-
-        .form-select option {
-            background: var(--bs-surface-900);
-            color: var(--bs-surface-300);
-        }
-
-        .gold-gradient-btn {
-            background: linear-gradient(135deg, var(--bs-gold) 0%, var(--bs-gold-dark) 100%);
-            border: none;
-            color: var(--bs-surface-900);
-            font-weight: 600;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-        }
-
-        .gold-gradient-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
-            color: var(--bs-surface-900);
-        }
-
-        .btn-secondary-custom {
-            background: rgba(100, 116, 139, 0.3);
-            border: 1px solid rgba(100, 116, 139, 0.5);
-            color: var(--bs-surface-300);
-            font-weight: 500;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-        }
-
-        .page-header {
-            color: var(--bs-gold);
-            font-weight: 700;
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .select2-container--default .select2-selection--single {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            color: var(--bs-surface-300);
-            height: 45px;
-            padding: 0.5rem;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: var(--bs-surface-300);
-            line-height: 30px;
-        }
-
-        .form-check-input:checked {
-            background-color: var(--bs-gold);
-            border-color: var(--bs-gold);
-        }
-    </style>
+@include('partials.pipeline-dashboard-styles')
+@include('partials.custom-select-datepicker-styles')
+<style>
+    .form-page-hdr { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; margin-bottom:.75rem; }
+    .form-page-hdr h4 { font-size:1.1rem; font-weight:700; margin:0; display:flex; align-items:center; gap:.45rem; }
+    .form-page-hdr h4 i { color:#d4af37; font-size:1.25rem; }
+    .form-page-hdr p { margin:2px 0 0; font-size:.72rem; color:var(--bs-surface-500); }
+    .form-section-title { font-size:.82rem; font-weight:700; color:#b89730; display:flex; align-items:center; gap:.35rem; margin-bottom:.75rem; padding-bottom:.45rem; border-bottom:1px solid rgba(212,175,55,.15); }
+    .form-section-title i { font-size:1rem; opacity:.7; }
+    .crm-label { font-size:.72rem; font-weight:600; color:var(--bs-surface-500); margin-bottom:.25rem; }
+    .crm-label.required::after { content:" *"; color:#c84646; }
+    .crm-input { border:1px solid rgba(0,0,0,.08); border-radius:22px; padding:.38rem .75rem; font-size:.75rem; width:100%; background:var(--bs-card-bg); color:var(--bs-body-color); transition:border-color .15s; }
+    .crm-input:focus { border-color:#d4af37; box-shadow:0 0 0 2px rgba(212,175,55,.12); outline:none; }
+    select.crm-input{appearance:none;-webkit-appearance:none;border-radius:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23b8860b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center;padding-right:1.8rem}
+    textarea.crm-input { border-radius:.6rem; }
+    .crm-check { accent-color:#d4af37; }
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Chart of Accounts
-        @endslot
-        @slot('title')
-            Edit Account
-        @endslot
-    @endcomponent
-
-    <div class="row">
-        <div class="col-12">
-            <h2 class="page-header">
-                <i class="bx bx-edit"></i>
-                Edit Chart of Account
-            </h2>
-
-            <form action="{{ route('chart-of-accounts.update', $account->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <div class="glassmorphism-card mb-4">
-                    <div class="card-body">
-                        <h5 class="section-header">
-                            <i class="bx bx-info-circle"></i>
-                            Account Information
-                        </h5>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="account_code" class="form-label required">Account Code</label>
-                                    <input type="text" class="form-control @error('account_code') is-invalid @enderror" 
-                                           id="account_code" name="account_code" value="{{ old('account_code', $account->account_code) }}" 
-                                           placeholder="e.g., 1000, 2000, 3000" required>
-                                    @error('account_code')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="account_name" class="form-label required">Account Name</label>
-                                    <input type="text" class="form-control @error('account_name') is-invalid @enderror" 
-                                           id="account_name" name="account_name" value="{{ old('account_name', $account->account_name) }}" 
-                                           placeholder="e.g., Cash in Bank" required>
-                                    @error('account_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="account_type" class="form-label required">Account Type</label>
-                                    <select class="form-select @error('account_type') is-invalid @enderror" 
-                                            id="account_type" name="account_type" required>
-                                        <option value="">Select Account Type</option>
-                                        @foreach($accountTypes as $type)
-                                            <option value="{{ $type }}" {{ old('account_type', $account->account_type) == $type ? 'selected' : '' }}>
-                                                {{ $type }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('account_type')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="account_category" class="form-label">Account Category</label>
-                                    <select class="form-select @error('account_category') is-invalid @enderror" 
-                                            id="account_category" name="account_category">
-                                        <option value="">Select Category (Optional)</option>
-                                        @foreach($accountCategories as $category)
-                                            <option value="{{ $category }}" {{ old('account_category', $account->account_category) == $category ? 'selected' : '' }}>
-                                                {{ $category }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('account_category')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="parent_account_id" class="form-label">Parent Account</label>
-                                    <select class="form-select select2 @error('parent_account_id') is-invalid @enderror" 
-                                            id="parent_account_id" name="parent_account_id">
-                                        <option value="">None (Top Level Account)</option>
-                                        @foreach($parentAccounts as $parent)
-                                            <option value="{{ $parent->id }}" {{ old('parent_account_id', $account->parent_account_id) == $parent->id ? 'selected' : '' }}>
-                                                {{ $parent->account_code }} - {{ $parent->account_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('parent_account_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="opening_balance" class="form-label">Opening Balance</label>
-                                    <input type="number" step="0.01" class="form-control @error('opening_balance') is-invalid @enderror" 
-                                           id="opening_balance" name="opening_balance" value="{{ old('opening_balance', $account->opening_balance) }}" 
-                                           placeholder="0.00">
-                                    @error('opening_balance')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" 
-                                              id="description" name="description" rows="3" 
-                                              placeholder="Enter account description">{{ old('description', $account->description) }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" 
-                                           {{ old('is_active', $account->is_active) ? 'checked' : '' }}>
-                                    <label class="form-check-label text-surface-300" for="is_active">
-                                        Account is Active
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12">
-                        <div class="text-end">
-                            <a href="{{ route('chart-of-accounts.index') }}" class="btn btn-secondary-custom me-2">
-                                <i class="bx bx-x-circle"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn gold-gradient-btn">
-                                <i class="bx bx-save"></i> Update Account
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+<div class="container-fluid">
+    <div class="form-page-hdr">
+        <div>
+            <h4><i class="bx bx-edit"></i> Edit Account</h4>
+            <p>{{ $account->account_code }} — {{ $account->account_name }}</p>
         </div>
+        <a href="{{ route('chart-of-accounts.index') }}" class="act-btn a-info"><i class="bx bx-arrow-back"></i> Back</a>
     </div>
+
+    <form action="{{ route('chart-of-accounts.update', $account->id) }}" method="POST">
+        @csrf @method('PUT')
+        <div class="ex-card sec-card">
+            <div class="sec-body">
+                <div class="form-section-title"><i class="bx bx-info-circle"></i> Account Information</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="crm-label required">Account Code</label>
+                        <input type="text" class="crm-input @error('account_code') is-invalid @enderror" name="account_code" value="{{ old('account_code', $account->account_code) }}" required>
+                        @error('account_code')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Account Name</label>
+                        <input type="text" class="crm-input @error('account_name') is-invalid @enderror" name="account_name" value="{{ old('account_name', $account->account_name) }}" required>
+                        @error('account_name')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label required">Account Type</label>
+                        <select class="crm-input @error('account_type') is-invalid @enderror" name="account_type" required>
+                            <option value="">Select Type</option>
+                            @foreach($accountTypes as $type)<option value="{{ $type }}" {{ old('account_type', $account->account_type) == $type ? 'selected' : '' }}>{{ $type }}</option>@endforeach
+                        </select>
+                        @error('account_type')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label">Account Category</label>
+                        <select class="crm-input @error('account_category') is-invalid @enderror" name="account_category">
+                            <option value="">Select Category</option>
+                            @foreach($accountCategories as $category)<option value="{{ $category }}" {{ old('account_category', $account->account_category) == $category ? 'selected' : '' }}>{{ $category }}</option>@endforeach
+                        </select>
+                        @error('account_category')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label">Parent Account</label>
+                        <select class="crm-input @error('parent_account_id') is-invalid @enderror" name="parent_account_id">
+                            <option value="">None (Top Level)</option>
+                            @foreach($parentAccounts as $parent)<option value="{{ $parent->id }}" {{ old('parent_account_id', $account->parent_account_id) == $parent->id ? 'selected' : '' }}>{{ $parent->account_code }} - {{ $parent->account_name }}</option>@endforeach
+                        </select>
+                        @error('parent_account_id')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label class="crm-label">Opening Balance</label>
+                        <input type="number" step="0.01" class="crm-input @error('opening_balance') is-invalid @enderror" name="opening_balance" value="{{ old('opening_balance', $account->opening_balance) }}">
+                        @error('opening_balance')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-12">
+                        <label class="crm-label">Description</label>
+                        <textarea class="crm-input @error('description') is-invalid @enderror" name="description" rows="3">{{ old('description', $account->description) }}</textarea>
+                        @error('description')<div class="invalid-feedback" style="font-size:.68rem">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-md-12">
+                        <label style="font-size:.72rem;font-weight:600;display:flex;align-items:center;gap:.35rem;cursor:pointer;">
+                            <input type="checkbox" name="is_active" value="1" class="crm-check" {{ old('is_active', $account->is_active) ? 'checked' : '' }}>
+                            Account is Active
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-2">
+            <a href="{{ route('chart-of-accounts.index') }}" class="act-btn a-danger"><i class="bx bx-x"></i> Cancel</a>
+            <button type="submit" class="act-btn a-success"><i class="bx bx-save"></i> Update Account</button>
+        </div>
+    </form>
+</div>
 @endsection
 
 @section('script')
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2
-            $('.select2').select2({
-                theme: 'default',
-                width: '100%'
-            });
-        });
-    </script>
+<script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
+<script>$(function(){$('select.crm-input').select2({minimumResultsForSearch:10,width:'100%'})});</script>
 @endsection

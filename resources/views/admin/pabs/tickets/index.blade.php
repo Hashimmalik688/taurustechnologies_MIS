@@ -3,315 +3,159 @@
 @section('title', 'PABS - Support Tickets')
 
 @section('css')
+@include('partials.pipeline-dashboard-styles')
+@include('partials.custom-select-datepicker-styles')
 <style>
-    .border-left-primary { border-left: 4px solid var(--bs-primary); }
-    .border-left-info { border-left: 4px solid var(--bs-info); }
-    .border-left-success { border-left: 4px solid var(--bs-ui-success); }
-    .border-left-danger { border-left: 4px solid var(--bs-status-absent); }
-    .border-left-warning { border-left: 4px solid var(--bs-status-leave); }
-
-    .card {
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        border: none;
-    }
-
-    .kpi-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 160px;
-    }
-
-    .kpi-icon {
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: inherit !important;
-    }
-
-    .kpi-icon i {
-        color: inherit !important;
-    }
-
-    .kpi-icon.text-primary,
-    .kpi-icon.text-primary i {
-        color: var(--bs-primary) !important;
-    }
-
-    .kpi-icon.text-info,
-    .kpi-icon.text-info i {
-        color: var(--bs-info) !important;
-    }
-
-    .kpi-icon.text-success,
-    .kpi-icon.text-success i {
-        color: var(--bs-ui-success) !important;
-    }
-
-    .kpi-icon.text-danger,
-    .kpi-icon.text-danger i {
-        color: var(--bs-status-absent) !important;
-    }
-
-    .kpi-icon.text-warning,
-    .kpi-icon.text-warning i {
-        color: var(--bs-status-leave) !important;
-    }
-
-    .kpi-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--bs-status-default);
-        margin-bottom: 8px;
-        text-align: center;
-    }
-
-    .kpi-value {
-        font-weight: 700;
-        font-size: 2rem;
-        margin: 0;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.35rem 0.65rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-    .status-open { background-color: var(--bs-surface-50); color: var(--bs-ui-info-dark); }
-    .status-in-progress { background-color: var(--bs-surface-100); color: var(--bs-ui-info-dark); }
-    .status-on-hold { background-color: var(--bs-surface-50); color: var(--bs-gold-dark); }
-    .status-resolved { background-color: var(--bs-surface-50); color: var(--bs-ui-success-dark); }
-    .status-closed { background-color: var(--bs-surface-200); color: var(--bs-surface-600); }
-
-    .priority-high { color: var(--bs-status-absent); font-weight: 600; }
-    .priority-medium { color: var(--bs-status-late); font-weight: 600; }
-    .priority-low { color: var(--bs-status-present); font-weight: 600; }
-
-    .section-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.2rem;
-        font-size: 0.75rem;
-        background-color: var(--bs-print-bg-alt);
-        color: var(--bs-surface-700);
-    }
+    .tk-status{display:inline-block;padding:.22rem .7rem;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.3px}
+    .tk-open{background:rgba(59,130,246,.12);color:#2563eb}
+    .tk-in-progress,.tk-in_progress{background:rgba(139,92,246,.12);color:#7c3aed}
+    .tk-on-hold,.tk-on_hold{background:rgba(245,158,11,.12);color:#d97706}
+    .tk-resolved{background:rgba(16,185,129,.12);color:#059669}
+    .tk-closed{background:rgba(107,114,128,.15);color:#6b7280}
+    .pr-high{color:#ef4444;font-weight:600}
+    .pr-medium{color:#f59e0b;font-weight:600}
+    .pr-low{color:#10b981;font-weight:600}
+    .sec-tag{display:inline-block;padding:.18rem .55rem;border-radius:14px;font-size:.7rem;background:rgba(99,102,241,.1);color:#6366f1;font-weight:500}
+    .tk-code{font-weight:700;color:var(--bs-body-color);font-size:.82rem;letter-spacing:.4px}
+    .tk-subject{color:var(--bs-body-color);text-decoration:none;font-weight:500;font-size:.82rem;transition:color .2s}
+    .tk-subject:hover{color:#b8860b}
+    .tk-meta{font-size:.72rem;color:#9ca3af}
+    .app-badge{display:inline-block;padding:.18rem .55rem;border-radius:14px;font-size:.7rem;font-weight:600}
+    .app-pending{background:rgba(245,158,11,.12);color:#d97706}
+    .app-approved{background:rgba(16,185,129,.12);color:#059669}
+    .app-rejected{background:rgba(239,68,68,.12);color:#ef4444}
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <!-- Breadcrumb -->
-    @component('components.breadcrumb')
-        @slot('title') PABS - Support Tickets @endslot
-    @endcomponent
-
-    <!-- Alert Messages -->
+    {{-- Flash --}}
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <!-- KPI Cards -->
-    <div class="row mb-4 g-3">
-        <!-- Total Tickets -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-primary">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-primary">
-                        <i class="bx bx-list-check"></i>
-                    </div>
-                    <p class="kpi-label">Total Tickets</p>
-                    <p class="kpi-value text-primary">{{ $kpis['total_tickets'] }}</p>
-                </div>
-            </div>
+    {{-- KPI Row --}}
+    <div class="kpi-row" style="grid-template-columns:repeat(6,1fr)">
+        <div class="kpi-card k-blue">
+            <div class="kpi-icon"><i class="bx bx-list-check"></i></div>
+            <div class="kpi-label">Total Tickets</div>
+            <div class="kpi-value">{{ $kpis['total_tickets'] }}</div>
         </div>
-
-        <!-- Open Tickets -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-info">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-info">
-                        <i class="bx bx-folder-open"></i>
-                    </div>
-                    <p class="kpi-label">Open Tickets</p>
-                    <p class="kpi-value text-info">{{ $kpis['open_tickets'] }}</p>
-                </div>
-            </div>
+        <div class="kpi-card k-teal">
+            <div class="kpi-icon"><i class="bx bx-folder-open"></i></div>
+            <div class="kpi-label">Open</div>
+            <div class="kpi-value">{{ $kpis['open_tickets'] }}</div>
         </div>
-
-        <!-- Closed Tickets -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-success">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-success">
-                        <i class="bx bx-check-circle"></i>
-                    </div>
-                    <p class="kpi-label">Closed Tickets</p>
-                    <p class="kpi-value text-success">{{ $kpis['closed_tickets'] }}</p>
-                </div>
-            </div>
+        <div class="kpi-card k-green">
+            <div class="kpi-icon"><i class="bx bx-check-circle"></i></div>
+            <div class="kpi-label">Closed</div>
+            <div class="kpi-value">{{ $kpis['closed_tickets'] }}</div>
         </div>
-
-        <!-- High Priority -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-danger">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-danger">
-                        <i class="bx bx-up-arrow-alt"></i>
-                    </div>
-                    <p class="kpi-label">High Priority</p>
-                    <p class="kpi-value text-danger">{{ $kpis['high_priority'] }}</p>
-                </div>
-            </div>
+        <div class="kpi-card k-red">
+            <div class="kpi-icon"><i class="bx bx-error-circle"></i></div>
+            <div class="kpi-label">High Priority</div>
+            <div class="kpi-value">{{ $kpis['high_priority'] }}</div>
         </div>
-
-        <!-- Medium Priority -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-warning">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-warning">
-                        <i class="bx bx-minus-circle"></i>
-                    </div>
-                    <p class="kpi-label">Medium Priority</p>
-                    <p class="kpi-value text-warning">{{ $kpis['medium_priority'] }}</p>
-                </div>
-            </div>
+        <div class="kpi-card k-warn">
+            <div class="kpi-icon"><i class="bx bx-minus-circle"></i></div>
+            <div class="kpi-label">Medium</div>
+            <div class="kpi-value">{{ $kpis['medium_priority'] }}</div>
         </div>
-
-        <!-- Low Priority -->
-        <div class="col-lg-2 col-md-3 col-sm-6">
-            <div class="card border-left-success">
-                <div class="card-body kpi-card">
-                    <div class="kpi-icon text-success">
-                        <i class="bx bx-down-arrow-alt"></i>
-                    </div>
-                    <p class="kpi-label">Low Priority</p>
-                    <p class="kpi-value text-success">{{ $kpis['low_priority'] }}</p>
-                </div>
-            </div>
+        <div class="kpi-card k-gold">
+            <div class="kpi-icon"><i class="bx bx-down-arrow-alt"></i></div>
+            <div class="kpi-label">Low</div>
+            <div class="kpi-value">{{ $kpis['low_priority'] }}</div>
         </div>
     </div>
 
-    <!-- Filter & Create Section -->
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <h5 class="card-title">Support Tickets</h5>
-                </div>
-                <div class="col-md-6 text-end">
-                    <a href="{{ route('pabs.tickets.create') }}" class="btn btn-primary btn-sm">
-                        <i class="bx bx-plus"></i> New Ticket
-                    </a>
-                </div>
-            </div>
-
-            <!-- Filters -->
-            <form method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <select name="section_id" class="form-select form-select-sm">
-                        <option value="">All Sections</option>
-                        @foreach($sections as $id => $name)
-                            <option value="{{ $id }}" {{ request('section_id') == $id ? 'selected' : '' }}>
-                                {{ $name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="">All Status</option>
-                        <option value="OPEN" {{ request('status') == 'OPEN' ? 'selected' : '' }}>Open</option>
-                        <option value="IN PROGRESS" {{ request('status') == 'IN PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                        <option value="ON HOLD" {{ request('status') == 'ON HOLD' ? 'selected' : '' }}>On Hold</option>
-                        <option value="RESOLVED" {{ request('status') == 'RESOLVED' ? 'selected' : '' }}>Resolved</option>
-                        <option value="CLOSED" {{ request('status') == 'CLOSED' ? 'selected' : '' }}>Closed</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search code or subject" value="{{ request('search') }}">
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">Filter</button>
-                </div>
-            </form>
+    {{-- Filter Bar --}}
+    <form method="GET" id="filterForm">
+        <div class="pipe-filter-bar" style="margin-bottom:1.2rem">
+            <select name="section_id" class="pipe-pill crm-select" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All Sections</option>
+                @foreach($sections as $id => $name)
+                    <option value="{{ $id }}" {{ request('section_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                @endforeach
+            </select>
+            <select name="status" class="pipe-pill crm-select" onchange="document.getElementById('filterForm').submit()">
+                <option value="">All Status</option>
+                <option value="OPEN" {{ request('status') == 'OPEN' ? 'selected' : '' }}>Open</option>
+                <option value="IN PROGRESS" {{ request('status') == 'IN PROGRESS' ? 'selected' : '' }}>In Progress</option>
+                <option value="ON HOLD" {{ request('status') == 'ON HOLD' ? 'selected' : '' }}>On Hold</option>
+                <option value="RESOLVED" {{ request('status') == 'RESOLVED' ? 'selected' : '' }}>Resolved</option>
+                <option value="CLOSED" {{ request('status') == 'CLOSED' ? 'selected' : '' }}>Closed</option>
+            </select>
+            <input type="text" name="search" class="pipe-pill" placeholder="🔍 Search code or subject…" value="{{ request('search') }}" style="min-width:200px">
+            <button type="submit" class="act-btn a-primary" style="margin-left:auto"><i class="bx bx-filter-alt"></i> Filter</button>
+            <a href="{{ route('pabs.tickets.create') }}" class="act-btn a-success"><i class="bx bx-plus"></i> New Ticket</a>
         </div>
-    </div>
+    </form>
 
-    <!-- Tickets Table -->
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+    {{-- Tickets Table --}}
+    <div class="sec-card">
+        <div class="sec-hdr"><i class="bx bx-support" style="color:#b8860b"></i> Support Tickets</div>
+        <div class="sec-body" style="padding:0;overflow-x:auto">
+            <table class="ex-tbl">
                 <thead>
                     <tr>
-                        <th width="12%">Code</th>
-                        <th width="22%">Subject</th>
-                        <th width="10%">Section</th>
-                        <th width="10%">Status</th>
-                        <th width="10%">Approval</th>
-                        <th width="10%">Priority</th>
-                        <th width="13%">Created By</th>
-                        <th width="8%">Assigned</th>
-                        <th width="5%">Actions</th>
+                        <th style="width:11%">Code</th>
+                        <th style="width:22%">Subject</th>
+                        <th style="width:10%">Section</th>
+                        <th style="width:10%">Status</th>
+                        <th style="width:9%">Approval</th>
+                        <th style="width:9%">Priority</th>
+                        <th style="width:12%">Created By</th>
+                        <th style="width:10%">Assigned</th>
+                        <th style="width:7%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($tickets as $ticket)
                         <tr>
+                            <td><span class="tk-code">{{ $ticket->ticket_code }}</span></td>
                             <td>
-                                <strong>{{ $ticket->ticket_code }}</strong>
-                            </td>
-                            <td>
-                                <a href="{{ route('pabs.tickets.show', $ticket) }}" class="text-decoration-none">
+                                <a href="{{ route('pabs.tickets.show', $ticket) }}" class="tk-subject">
                                     {{ Str::limit($ticket->subject, 30) }}
                                 </a>
                             </td>
+                            <td><span class="sec-tag">{{ $sections[$ticket->section_id] ?? 'N/A' }}</span></td>
                             <td>
-                                <span class="section-badge">
-                                    {{ $sections[$ticket->section_id] ?? 'N/A' }}
-                                </span>
+                                @php $slug = Str::slug($ticket->status) @endphp
+                                <span class="tk-status tk-{{ $slug }}">{{ $ticket->status }}</span>
                             </td>
                             <td>
-                                <span class="status-badge status-{{ Str::lower($ticket->status) }}">
-                                    {{ $ticket->status }}
-                                </span>
+                                @php
+                                    $apCls = match($ticket->approval_status) {
+                                        'APPROVED' => 'app-approved',
+                                        'REJECTED' => 'app-rejected',
+                                        default    => 'app-pending',
+                                    };
+                                @endphp
+                                <span class="app-badge {{ $apCls }}">{{ $ticket->approval_status }}</span>
                             </td>
-                            <td>
-                                <span class="badge bg-{{ $ticket->approval_status === 'APPROVED' ? 'success' : ($ticket->approval_status === 'REJECTED' ? 'danger' : 'warning') }}">
-                                    {{ $ticket->approval_status }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="priority-{{ Str::lower($ticket->priority) }}">
-                                    {{ $ticket->priority }}
-                                </span>
-                            </td>
-                            <td>
-                                <small>{{ $ticket->creator->name }}</small>
-                            </td>
+                            <td><span class="pr-{{ Str::lower($ticket->priority) }}">{{ $ticket->priority }}</span></td>
+                            <td><span class="tk-meta">{{ $ticket->creator->name }}</span></td>
                             <td>
                                 @if($ticket->assignee)
-                                    <small>{{ $ticket->assignee->name }}</small>
+                                    <span class="tk-meta">{{ $ticket->assignee->name }}</span>
                                 @else
-                                    <small class="text-muted">Unassigned</small>
+                                    <span class="tk-meta" style="opacity:.5">Unassigned</span>
                                 @endif
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('pabs.tickets.show', $ticket) }}" class="btn btn-outline-primary btn-sm" title="View">
-                                        <i class="bx bx-eye"></i>
-                                    </a>
-                                </div>
+                                <a href="{{ route('pabs.tickets.show', $ticket) }}" class="act-btn a-primary" title="View">
+                                    <i class="bx bx-show"></i>
+                                </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <span class="text-muted">No tickets found.</span>
+                            <td colspan="9" style="text-align:center;padding:2.5rem;color:#9ca3af">
+                                <i class="bx bx-inbox" style="font-size:2rem;display:block;margin-bottom:.4rem"></i>
+                                No tickets found.
                             </td>
                         </tr>
                     @endforelse
@@ -320,22 +164,20 @@
         </div>
     </div>
 
-    <!-- Pagination -->
+    {{-- Pagination --}}
     @if($tickets->hasPages())
-        <div class="mt-3">
-            {{ $tickets->links() }}
-        </div>
+        <div style="margin-top:1rem">{{ $tickets->links() }}</div>
     @endif
 </div>
-
 @endsection
 
-@section('scripts')
+@section('script')
+<script src="{{ URL::asset('build/libs/select2/js/select2.min.js') }}"></script>
 <script>
-    document.querySelectorAll('.form-select').forEach(select => {
-        select.addEventListener('change', function() {
-            this.closest('form').submit();
-        });
+$(function(){
+    $('.crm-select').select2({minimumResultsForSearch:10,width:'style'}).on('change',function(){
+        document.getElementById('filterForm').submit();
     });
+});
 </script>
 @endsection

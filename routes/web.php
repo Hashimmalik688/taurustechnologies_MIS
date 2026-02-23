@@ -559,7 +559,7 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
-    Route::get('/themes', [SettingsController::class, 'themes'])->name('themes');
+    Route::get('/themes', [SettingsController::class, 'themes'])->name('themes')->middleware('role.permission:themes,view');
 
     // Chat Shadowing — access controlled by role.permission:chat-shadow,level
     Route::get('/chat-shadow', [ChatShadowController::class, 'index'])->name('chat-shadow.index')->middleware('role.permission:chat-shadow,view');

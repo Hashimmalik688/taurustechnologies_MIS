@@ -10,12 +10,45 @@
         setTimeout(function() { Notification.requestPermission(); }, 3000);
     }
 
-    // ─── Sound ────────────────────────────────────────────────
-    var notifSound = null;
-    try {
-        notifSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNw==');
-        notifSound.volume = 0.3;
-    } catch(e) {}
+    // ─── Sound (Web Audio API - reliable cross-browser) ──────
+    function playNotificationSound() {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // First beep
+            var osc1 = ctx.createOscillator();
+            var gain1 = ctx.createGain();
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.frequency.value = 880; // A5 note
+            osc1.type = 'sine';
+            gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+            osc1.start(ctx.currentTime);
+            osc1.stop(ctx.currentTime + 0.15);
+
+            // Second beep (slightly higher, after a short pause)
+            var osc2 = ctx.createOscillator();
+            var gain2 = ctx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.frequency.value = 1100; // ~C#6 note
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(0.3, ctx.currentTime + 0.18);
+            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+            osc2.start(ctx.currentTime + 0.18);
+            osc2.stop(ctx.currentTime + 0.35);
+
+            // Cleanup
+            setTimeout(function() { ctx.close(); }, 500);
+        } catch(e) {
+            // Fallback: try Audio element
+            try {
+                var a = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjqP1fPPgjMGKHi+7+OZURE=');
+                a.volume = 0.3;
+                a.play().catch(function(){});
+            } catch(e2) {}
+        }
+    }
 
     // ─── Track which messages we already notified about ───────
     var notifiedIds = {};
@@ -41,12 +74,29 @@
     // ─── Poll timestamp ──────────────────────────────────────
     var lastPollTime = null;
 
+    // ─── Check if user is viewing the conversation on chat page ─
+    function isViewingConversation(conversationId) {
+        // window.currentConversationId is set by the chat page when a conversation is open
+        if (window.currentConversationId && window.currentConversationId == conversationId) {
+            // Also check if the window/tab is focused
+            if (document.hasFocus()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ─── Show a single desktop notification ──────────────────
     function showDesktopNotification(senderName, message, conversationName, conversationId) {
+        // Skip if user is actively viewing this conversation
+        if (isViewingConversation(conversationId)) return;
+
         // Play sound
-        if (notifSound) {
-            notifSound.currentTime = 0;
-            notifSound.play().catch(function() {});
+        playNotificationSound();
+
+        // Update the chat badge immediately
+        if (typeof loadChatUnreadCount === 'function') {
+            loadChatUnreadCount();
         }
 
         if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -59,8 +109,7 @@
                 icon: '/images/favicon.ico',
                 badge: '/images/favicon.ico',
                 tag: 'chat-' + (conversationId || Date.now()),
-                requireInteraction: false,
-                silent: true
+                requireInteraction: false
             });
 
             notification.onclick = function() {
@@ -117,13 +166,14 @@
         .catch(function() { /* silent */ });
     }
 
-    // ─── Start polling: first after 3s, then every 5s ────────
-    setTimeout(pollNewMessages, 3000);
-    setInterval(pollNewMessages, 5000);
+    // ─── Start polling: first after 2s, then every 4s ────────
+    setTimeout(pollNewMessages, 2000);
+    setInterval(pollNewMessages, 4000);
 
     // ─── Public API (for chat page inline JS) ────────────────
     window.ChatNotify = {
-        show: showDesktopNotification
+        show: showDesktopNotification,
+        playSound: playNotificationSound
     };
 
     window.ChatToast = {

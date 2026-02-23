@@ -17,8 +17,7 @@
     <!-- Modern White Theme - Complete Redesign -->
     <link rel="stylesheet" href="{{ URL::asset('css/modern-white-theme.css') }}">
 
-    <!-- Dark Theme Stylesheet - Comprehensive -->
-    <link rel="stylesheet" href="{{ URL::asset('css/dark-theme.css') }}?v={{ time() }}" id="dark-theme-style">
+
 
     <!-- Custom Themes -->
     <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ time() }}">
@@ -483,7 +482,7 @@
         });
 
         // All available themes in cycle order
-        var _allThemes = ['light', 'dark', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
+        var _allThemes = ['light', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
 
         // Theme Toggle Function — cycles through all themes
         function toggleTheme() {
@@ -524,6 +523,8 @@
         // Load saved theme on page load
         function loadTheme() {
             var savedTheme = localStorage.getItem('theme') || 'light';
+            // Migrate old "dark" theme to midnight-black
+            if (savedTheme === 'dark') { savedTheme = 'midnight-black'; localStorage.setItem('theme', savedTheme); }
             var html = document.documentElement;
             var themeIcon = document.getElementById('themeIcon');
 
