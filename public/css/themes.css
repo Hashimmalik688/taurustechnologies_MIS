@@ -19,14 +19,14 @@
     --text-primary: #e0f2e9;
     --text-secondary: #a5d6b7;
     --text-muted: #6da882;
-    --border-color: rgba(0,230,118,.15);
+    --border-color: rgba(0,230,118,.06);
     --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
     --shadow-md: 0 4px 12px rgba(0,0,0,.4);
     --shadow-lg: 0 10px 25px rgba(0,0,0,.5);
     --accent: #00e676;
     --accent-rgb: 0,230,118;
     --glass-bg: rgba(10,31,20,.85);
-    --glass-border: rgba(0,230,118,.12);
+    --glass-border: rgba(0,230,118,.05);
     --glass-blur: blur(16px);
     --success: #00e676;
     --danger: #ff5252;
