@@ -29,7 +29,8 @@ class ChatShadowController extends Controller
      */
     public function getNotes(Request $request)
     {
-        $query = StickyNote::with('user:id,name')
+        $query = StickyNote::withTrashed()
+            ->with('user:id,name')
             ->orderBy('updated_at', 'desc');
 
         // Filter by user
@@ -42,10 +43,18 @@ class ChatShadowController extends Controller
             $query->where('content', 'like', '%' . $request->search . '%');
         }
 
+        // Filter by status (active/deleted)
+        if ($request->filled('status') && $request->status === 'deleted') {
+            $query->whereNotNull('deleted_at');
+        } elseif ($request->filled('status') && $request->status === 'active') {
+            $query->whereNull('deleted_at');
+        }
+
         $notes = $query->get();
 
-        // Get all users who have notes for the filter dropdown
-        $usersWithNotes = StickyNote::with('user:id,name')
+        // Get all users who have notes (including deleted notes) for the filter dropdown
+        $usersWithNotes = StickyNote::withTrashed()
+            ->with('user:id,name')
             ->select('user_id')
             ->distinct()
             ->get()
@@ -56,6 +65,8 @@ class ChatShadowController extends Controller
             ->sortBy('name')
             ->values();
 
+        $deletedCount = StickyNote::onlyTrashed()->count();
+
         $notes->transform(function ($note) {
             return [
                 'id' => $note->id,
@@ -63,6 +74,9 @@ class ChatShadowController extends Controller
                 'color' => $note->color,
                 'user_id' => $note->user_id,
                 'user_name' => $note->user?->name ?? 'Deleted User',
+                'is_deleted' => $note->trashed(),
+                'deleted_at' => $note->deleted_at?->format('M d, Y h:i A'),
+                'deleted_ago' => $note->deleted_at?->diffForHumans(),
                 'created_at' => $note->created_at->format('M d, Y h:i A'),
                 'updated_at' => $note->updated_at->format('M d, Y h:i A'),
                 'created_ago' => $note->created_at->diffForHumans(),
@@ -75,6 +89,7 @@ class ChatShadowController extends Controller
             'notes' => $notes,
             'users' => $usersWithNotes,
             'total' => $notes->count(),
+            'deleted_count' => $deletedCount,
         ]);
     }
 

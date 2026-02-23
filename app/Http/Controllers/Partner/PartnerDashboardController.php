@@ -20,8 +20,18 @@ class PartnerDashboardController extends Controller
         
         // Get month filter
         $month = $request->get('month', Carbon::now()->format('Y-m'));
-        $monthStart = Carbon::parse($month . '-01')->startOfMonth();
-        $monthEnd = Carbon::parse($month . '-01')->endOfMonth();
+        
+        // Custom date range takes priority over month filter
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+        
+        if ($dateFrom && $dateTo) {
+            $periodStart = Carbon::parse($dateFrom)->startOfDay();
+            $periodEnd = Carbon::parse($dateTo)->endOfDay();
+        } else {
+            $periodStart = Carbon::parse($month . '-01')->startOfMonth();
+            $periodEnd = Carbon::parse($month . '-01')->endOfMonth();
+        }
 
         // Get partner's assigned carriers with states grouped
         $carrierStates = AgentCarrierState::where('partner_id', $partner->id)
@@ -41,19 +51,19 @@ class PartnerDashboardController extends Controller
                 ];
             });
 
-        // Base query for this partner with month filter
+        // Base query for this partner with period filter
         $baseQuery = Lead::where('partner_id', $partner->id)
             ->whereNotNull('partner_id')
             ->where('status', '!=', 'unassigned')
-            ->whereBetween('created_at', [$monthStart, $monthEnd]);
+            ->whereBetween('created_at', [$periodStart, $periodEnd]);
         
-        // All time totals (without month filter)
+        // All time totals (without period filter)
         $totalLeads = Lead::where('partner_id', $partner->id)
             ->whereNotNull('partner_id')
             ->where('status', '!=', 'unassigned')
             ->count();
         
-        // Monthly filtered statistics
+        // Period filtered statistics
         $monthlyLeads = (clone $baseQuery)->count();
         $totalSales = (clone $baseQuery)
             ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
@@ -65,23 +75,22 @@ class PartnerDashboardController extends Controller
         // Calculate total revenue (check multiple premium fields)
         $salesQuery = (clone $baseQuery)->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done']);
         
-        // Get all sales for this partner in the month
+        // Get all sales for this partner in the period
         $sales = $salesQuery->with('insuranceCarrier')->get();
         
         // Calculate actual revenue from commissions
-        $totalCommissionRevenue = 0; // This is the sum of all commissions
-        $totalPremiumRevenue = 0;    // This is the sum of all premiums (for reference)
+        $totalCommissionRevenue = 0;
+        $totalPremiumRevenue = 0;
         
-        // Sum up all commission amounts - this becomes our "total revenue"
         foreach($sales as $lead) {
             $premium = $lead->monthly_premium ?? $lead->premium_amount ?? $lead->issued_premium ?? 0;
             $commission = $lead->agent_commission ?? 0;
             
-            $totalCommissionRevenue += $commission; // Revenue = sum of commissions
-            $totalPremiumRevenue += $premium;       // Keep premium total for reference
+            $totalCommissionRevenue += $commission;
+            $totalPremiumRevenue += $premium;
         }
 
-        // Calculate Taurus Share in dollars (our commission from the total commission revenue)
+        // Calculate Taurus Share in dollars
         $ourCommissionPercentage = $partner->our_commission_percentage ?? 15.0;
         $taurusShareDollars = $totalCommissionRevenue * ($ourCommissionPercentage / 100);
         
@@ -91,11 +100,36 @@ class PartnerDashboardController extends Controller
         // For display purposes, total revenue is the commission revenue
         $totalRevenue = $totalCommissionRevenue;
 
-        // Get recent leads for table (month filtered)
+        // Commission paid/unpaid tracking
+        $paidSalesQuery = Lead::where('partner_id', $partner->id)
+            ->whereNotNull('partner_id')
+            ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
+            ->whereBetween('created_at', [$periodStart, $periodEnd]);
+        
+        $paidCommissionTotal = 0;
+        $unpaidCommissionTotal = 0;
+        
+        $allPeriodSales = (clone $paidSalesQuery)->get();
+        foreach ($allPeriodSales as $sale) {
+            $saleCommission = $sale->agent_commission ?? 0;
+            // Deduct taurus share from each sale's commission
+            $partnerShare = $saleCommission - ($saleCommission * ($ourCommissionPercentage / 100));
+            
+            if ($sale->commission_paid_to_partner) {
+                $paidCommissionTotal += $partnerShare;
+            } else {
+                $unpaidCommissionTotal += $partnerShare;
+            }
+        }
+        
+        $commissionPaid = $paidCommissionTotal;
+        $commissionUnpaid = $unpaidCommissionTotal;
+
+        // Get recent leads for table (period filtered)
         $recentLeads = (clone $baseQuery)
             ->with('insuranceCarrier')
             ->orderBy('created_at', 'desc')
-            ->limit(50)
+            ->limit(100)
             ->get();
 
         return view('partner.dashboard', compact(
@@ -109,8 +143,71 @@ class PartnerDashboardController extends Controller
             'partnerCommission',
             'ourCommissionPercentage',
             'taurusShareDollars',
+            'commissionPaid',
+            'commissionUnpaid',
             'recentLeads',
             'month'
         ));
+    }
+
+    /**
+     * Mark selected leads as commission paid by partner
+     */
+    public function markCommissionPaid(Request $request)
+    {
+        $partner = Auth::guard('partner')->user();
+        
+        $request->validate([
+            'lead_ids' => 'required|array|min:1',
+            'lead_ids.*' => 'integer|exists:leads,id',
+        ]);
+        
+        $leadIds = $request->input('lead_ids');
+        
+        // Only update leads belonging to this partner that are sales and not already paid
+        $updated = Lead::where('partner_id', $partner->id)
+            ->whereIn('id', $leadIds)
+            ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
+            ->where('commission_paid_to_partner', false)
+            ->update([
+                'commission_paid_to_partner' => true,
+                'commission_paid_at' => now(),
+            ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => $updated . ' sale(s) marked as commission paid.',
+            'updated_count' => $updated,
+        ]);
+    }
+
+    /**
+     * Mark selected leads as commission unpaid (reverse paid status)
+     */
+    public function markCommissionUnpaid(Request $request)
+    {
+        $partner = Auth::guard('partner')->user();
+        
+        $request->validate([
+            'lead_ids' => 'required|array|min:1',
+            'lead_ids.*' => 'integer|exists:leads,id',
+        ]);
+        
+        $leadIds = $request->input('lead_ids');
+        
+        // Only update leads belonging to this partner that are currently marked as paid
+        $updated = Lead::where('partner_id', $partner->id)
+            ->whereIn('id', $leadIds)
+            ->where('commission_paid_to_partner', true)
+            ->update([
+                'commission_paid_to_partner' => false,
+                'commission_paid_at' => null,
+            ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => $updated . ' sale(s) marked as commission unpaid.',
+            'updated_count' => $updated,
+        ]);
     }
 }

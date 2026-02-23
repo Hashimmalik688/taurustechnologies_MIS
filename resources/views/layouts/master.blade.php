@@ -20,6 +20,9 @@
     <!-- Dark Theme Stylesheet - Comprehensive -->
     <link rel="stylesheet" href="{{ URL::asset('css/dark-theme.css') }}?v={{ time() }}" id="dark-theme-style">
 
+    <!-- Custom Themes -->
+    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ time() }}">
+
     <!-- Custom Layout Styles - Optimized -->
     @vite(['resources/css/custom-layout.css'])
     <!-- Admin UI overrides -->
@@ -476,36 +479,54 @@
             }
         });
 
-        // Theme Toggle Function
+        // All available themes in cycle order
+        var _allThemes = ['light', 'dark', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
+
+        // Theme Toggle Function — cycles through all themes
         function toggleTheme() {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            const themeIcon = document.getElementById('themeIcon');
-            
-            // Update theme
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            // Update icon
-            if (newTheme === 'dark') {
-                themeIcon.classList.remove('bx-moon');
-                themeIcon.classList.add('bx-sun');
-            } else {
-                themeIcon.classList.remove('bx-sun');
-                themeIcon.classList.add('bx-moon');
+            var html = document.documentElement;
+            var current = html.getAttribute('data-theme') || 'light';
+            var idx = _allThemes.indexOf(current);
+            var next = _allThemes[(idx + 1) % _allThemes.length];
+            var themeIcon = document.getElementById('themeIcon');
+
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+
+            if (themeIcon) {
+                if (next === 'light') {
+                    themeIcon.classList.remove('bx-sun');
+                    themeIcon.classList.add('bx-moon');
+                } else {
+                    themeIcon.classList.remove('bx-moon');
+                    themeIcon.classList.add('bx-sun');
+                }
             }
+
+            // Refresh theme colors bridge
+            setTimeout(function() {
+                var s = getComputedStyle(document.documentElement);
+                var g = function(v) { return s.getPropertyValue('--bs-' + v).trim() || s.getPropertyValue('--' + v).trim(); };
+                window.themeColors = {
+                    gold: g('gold'), goldDark: g('gold-dark'), goldLight: g('gold-light'), goldBright: g('gold-bright'),
+                    success: g('ui-success') || g('success'), danger: g('ui-danger') || g('danger'),
+                    warning: g('ui-warning') || g('warning'), info: g('ui-info') || g('info'),
+                    chartPrimary: g('chart-primary'), chartSuccess: g('chart-success'),
+                    chartWarning: g('chart-warning'), chartDanger: g('chart-danger'),
+                    chartInfo: g('chart-info'), chartMuted: g('chart-muted'),
+                };
+            }, 100);
         }
 
         // Load saved theme on page load
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('themeIcon');
-            
+            var savedTheme = localStorage.getItem('theme') || 'light';
+            var html = document.documentElement;
+            var themeIcon = document.getElementById('themeIcon');
+
             html.setAttribute('data-theme', savedTheme);
-            
-            if (savedTheme === 'dark' && themeIcon) {
+
+            if (savedTheme !== 'light' && themeIcon) {
                 themeIcon.classList.remove('bx-moon');
                 themeIcon.classList.add('bx-sun');
             }

@@ -1003,7 +1003,7 @@
     color: #b8a89f;
 }
 /* Dark Mode Support */
-[data-theme="dark"] {
+:is([data-theme="dark"],[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) {
     /* CSS Variables for Dark Mode */
     --chat-bg-body: #2a3042;
     --chat-bg-secondary: #222736;

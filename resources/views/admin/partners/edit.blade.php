@@ -1,460 +1,242 @@
 @extends('layouts.master')
 
-@section('title')
-    Edit Partner
-@endsection
+@section('title') Edit Partner — {{ $partner->name }} @endsection
 
 @section('css')
-    <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-5-theme/1.3.0/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+<style>
+/* ─── Edit Partner Page ─── */
+.ep-page-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
+.ep-page-hdr h5 { font-weight:800; font-size:1.05rem; color:var(--bs-surface-800); display:flex; align-items:center; gap:.5rem; margin:0; }
+.ep-back-btn { font-size:.72rem; color:var(--bs-surface-500); text-decoration:none; display:inline-flex; align-items:center; gap:.25rem; transition:all .15s; }
+.ep-back-btn:hover { color:var(--bs-gradient-start); }
 
-    <style>
-        .required::after {
-            content: " *";
-            color: red;
-        }
+.ep-card { background:var(--bs-card-bg); border-radius:.75rem; box-shadow:0 1px 4px rgba(0,0,0,.04); overflow:hidden; margin-bottom:1rem; }
+.ep-card-hdr { padding:.65rem 1rem; border-bottom:1px solid var(--bs-surface-100); display:flex; align-items:center; gap:.5rem; }
+.ep-card-hdr h6 { font-weight:700; font-size:.78rem; color:var(--bs-surface-700); margin:0; }
+.ep-card-hdr i { color:var(--bs-gradient-start); font-size:.9rem; }
+.ep-card-body { padding:1rem; }
 
-        .select2-container {
-            width: 100% !important;
-        }
+.ep-label { font-size:.68rem; font-weight:600; color:var(--bs-surface-600); margin-bottom:.3rem; display:block; }
+.ep-label.required::after { content:' *'; color:#f46a6a; }
+.ep-input { font-size:.72rem; border:1.5px solid var(--bs-surface-200); border-radius:.4rem; padding:.4rem .6rem; width:100%; transition:all .2s; background:var(--bs-card-bg); }
+.ep-input:focus { outline:none; border-color:var(--bs-gradient-start); box-shadow:0 0 0 2px rgba(102,126,234,.1); }
+.ep-hint { font-size:.6rem; color:var(--bs-surface-400); margin-top:.2rem; }
 
-        .select2-selection {
-            border: 1px solid var(--bs-surface-200) !important;
-            border-radius: 0.375rem !important;
-            min-height: 38px !important;
-        }
+.ep-status-box { display:flex; align-items:center; gap:.5rem; padding:.4rem .6rem; border-radius:.4rem; font-size:.68rem; font-weight:600; }
+.ep-status-box.set { background:rgba(52,195,143,.08); color:#34c38f; }
+.ep-status-box.unset { background:rgba(244,106,106,.08); color:#f46a6a; }
 
-        .select2-selection--multiple .select2-selection__choice {
-            background-color: var(--bs-primary) !important;
-            border: 1px solid var(--bs-primary) !important;
-            color: var(--bs-white) !important;
-            border-radius: 0.25rem !important;
-        }
+/* Carrier Section */
+.ep-carrier-sec { border:1.5px solid var(--bs-surface-200); border-radius:.6rem; padding:1rem; margin-bottom:.75rem; background:var(--bs-surface-bg-light); transition:all .2s; }
+.ep-carrier-sec:hover { border-color:var(--bs-gradient-start); }
+.ep-carrier-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; }
+.ep-carrier-name { font-weight:700; font-size:.78rem; color:var(--bs-gradient-start); display:flex; align-items:center; gap:.35rem; }
+.ep-carrier-remove { font-size:.62rem; color:#f46a6a; cursor:pointer; display:inline-flex; align-items:center; gap:.2rem; border:1px solid rgba(244,106,106,.2); padding:.15rem .4rem; border-radius:.3rem; background:rgba(244,106,106,.04); transition:all .15s; }
+.ep-carrier-remove:hover { background:rgba(244,106,106,.1); border-color:#f46a6a; }
 
-        .carrier-state-section {
-            border: 2px solid var(--bs-surface-200);
-            padding: 20px;
-            border-radius: 8px;
-            background-color: var(--bs-surface-bg-light);
-            margin-bottom: 20px;
-        }
+.ep-commission-card { background:var(--bs-card-bg); border:1px solid var(--bs-surface-200); border-radius:.5rem; padding:.75rem; margin-top:.5rem; }
+.ep-commission-card h6 { font-size:.68rem; font-weight:700; color:var(--bs-surface-600); margin-bottom:.5rem; }
 
-        .state-settlement-row {
-            background-color: var(--bs-card-bg);
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border: 1px solid var(--bs-surface-200);
-        }
+.ep-state-tags { display:flex; flex-wrap:wrap; gap:.25rem; margin-top:.4rem; }
+.ep-state-tag { font-size:.55rem; font-weight:600; padding:.1rem .35rem; border-radius:.2rem; background:rgba(102,126,234,.1); color:var(--bs-gradient-start); }
 
-        .card-header {
-            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            color: var(--bs-white);
-        }
+/* Submit */
+.ep-submit-row { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+.ep-btn { font-size:.72rem; font-weight:600; padding:.45rem 1.25rem; border-radius:.45rem; border:none; cursor:pointer; transition:all .2s; display:inline-flex; align-items:center; gap:.3rem; }
+.ep-btn.primary { background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end)); color:#fff; box-shadow:0 2px 8px rgba(102,126,234,.25); }
+.ep-btn.primary:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(102,126,234,.35); }
+.ep-btn.secondary { background:var(--bs-surface-200); color:var(--bs-surface-600); text-decoration:none; }
+.ep-btn.secondary:hover { background:var(--bs-surface-300); color:var(--bs-surface-700); }
 
-        .text-primary {
-            color: var(--bs-gradient-start) !important;
-        }
+/* Switch */
+.ep-switch { display:flex; align-items:center; gap:.5rem; }
+.ep-switch label { font-size:.72rem; font-weight:600; color:var(--bs-surface-600); cursor:pointer; }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--bs-gradient-start) 0%, var(--bs-gradient-end) 100%);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--bs-ui-info) 0%, var(--bs-ui-purple) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+/* Select2 overrides */
+.select2-container { width:100% !important; }
+.select2-selection { border:1.5px solid var(--bs-surface-200) !important; border-radius:.4rem !important; min-height:34px !important; font-size:.72rem !important; }
+.select2-selection--multiple .select2-selection__choice { background:linear-gradient(135deg,var(--bs-gradient-start),var(--bs-gradient-end)) !important; border:none !important; color:#fff !important; border-radius:.25rem !important; font-size:.6rem !important; padding:.1rem .35rem !important; }
+.select2-container--focus .select2-selection { border-color:var(--bs-gradient-start) !important; box-shadow:0 0 0 2px rgba(102,126,234,.1) !important; }
+.ep-toolbar-btns { display:flex; gap:.4rem; }
+.ep-toolbar-btn { font-size:.65rem; padding:.25rem .6rem; border-radius:.35rem; border:1px solid var(--bs-surface-200); background:var(--bs-card-bg); color:var(--bs-surface-600); cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:.25rem; }
+.ep-toolbar-btn:hover { border-color:var(--bs-gradient-start); color:var(--bs-gradient-start); }
+.ep-toolbar-btn.success { border-color:#34c38f; color:#34c38f; }
+.ep-toolbar-btn.success:hover { background:rgba(52,195,143,.05); }
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            <a href="{{ route('admin.partners.index') }}">Partners</a>
-        @endslot
-        @slot('title')
-            Edit Partner
-        @endslot
-    @endcomponent
+@component('components.breadcrumb')
+    @slot('li_1') <a href="{{ route('admin.partners.index') }}">Partners</a> @endslot
+    @slot('title') Edit Partner @endslot
+@endcomponent
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+<div class="ep-page-hdr">
+    <h5><i class="bx bx-edit"></i> Edit Partner — {{ $partner->name }}</h5>
+    <a href="{{ route('admin.partners.index') }}" class="ep-back-btn"><i class="bx bx-arrow-back"></i> Back to Partners</a>
+</div>
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem" role="alert">
+    <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem"></button>
+</div>
+@endif
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show py-2 px-3" style="font-size:.75rem;border-radius:.5rem" role="alert">
+    <i class="bx bx-error me-1"></i> {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.5rem;padding:.75rem"></button>
+</div>
+@endif
 
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">
-                        <i class="mdi mdi-account-edit me-2"></i>
-                        Edit Partner Information
-                    </h4>
+<form method="POST" action="{{ route('admin.partners.update', $partner->id) }}" id="partnerForm">
+    @csrf @method('PUT')
+
+    <!-- Basic Information -->
+    <div class="ep-card">
+        <div class="ep-card-hdr"><i class="bx bx-user"></i><h6>Basic Information</h6></div>
+        <div class="ep-card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="ep-label required">Partner Name</label>
+                    <input type="text" class="ep-input @error('name') is-invalid @enderror" name="name" value="{{ old('name', $partner->name) }}" required>
+                    @error('name')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
                 </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('admin.partners.update', $partner->id) }}" id="partnerForm">
-                        @csrf
-                        @method('PUT')
-
-                        {{-- Basic Information Section --}}
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary border-bottom pb-2">
-                                    <i class="mdi mdi-account-circle me-1"></i>
-                                    Basic Information
-                                </h5>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="name" class="form-label required">
-                                        <i class="mdi mdi-account me-1"></i>
-                                        Partner Name
-                                    </label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        id="name" name="name" value="{{ old('name', $partner->name) }}"
-                                        placeholder="Enter partner name" required>
-                                    @error('name')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="code" class="form-label required">
-                                        <i class="mdi mdi-barcode me-1"></i>
-                                        Partner Code
-                                    </label>
-                                    <input type="text" class="form-control @error('code') is-invalid @enderror"
-                                        id="code" name="code" value="{{ old('code', $partner->code) }}"
-                                        placeholder="E.g., E-1, Y-1, F-1" required>
-                                    @error('code')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="mdi mdi-email me-1"></i>
-                                        Email Address
-                                    </label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                        id="email" name="email" value="{{ old('email', $partner->email) }}"
-                                        placeholder="Enter email address">
-                                    @error('email')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">
-                                        <i class="mdi mdi-phone me-1"></i>
-                                        Phone Number
-                                    </label>
-                                    <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                        id="phone" name="phone" value="{{ old('phone', $partner->phone) }}"
-                                        placeholder="(555) 123-4567">
-                                    @error('phone')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="ssn_last4" class="form-label">
-                                        <i class="mdi mdi-lock me-1"></i>
-                                        Last 4 of SSN
-                                    </label>
-                                    <input type="text" class="form-control @error('ssn_last4') is-invalid @enderror"
-                                        id="ssn_last4" name="ssn_last4" value="{{ old('ssn_last4', $partner->ssn_last4) }}"
-                                        maxlength="4" pattern="[0-9]{4}" placeholder="1234">
-                                    @error('ssn_last4')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="our_commission_percentage" class="form-label">
-                                        <i class="mdi mdi-percent me-1"></i>
-                                        Our Commission Percentage
-                                    </label>
-                                    <input type="number" class="form-control @error('our_commission_percentage') is-invalid @enderror"
-                                        id="our_commission_percentage" name="our_commission_percentage" 
-                                        value="{{ old('our_commission_percentage', $partner->our_commission_percentage ?? 0) }}"
-                                        min="0" max="100" step="0.01" placeholder="e.g., 15.00">
-                                    <small class="text-muted">Percentage of total revenue that partner owes us</small>
-                                    @error('our_commission_percentage')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <div class="form-check form-switch" style="margin-top: 32px;">
-                                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $partner->is_active) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="is_active">
-                                            <i class="mdi mdi-check-circle me-1"></i>
-                                            Active Partner
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Password Section --}}
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary border-bottom pb-2">
-                                    <i class="mdi mdi-lock-outline me-1"></i>
-                                    Password Management
-                                </h5>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        <i class="mdi mdi-key me-1"></i>
-                                        Current Password Status
-                                    </label>
-                                    <div class="alert alert-{{ $partner->password ? 'success' : 'warning' }} mb-0">
-                                        @if($partner->password)
-                                            <i class="mdi mdi-check-circle me-2"></i>
-                                            Password is set
-                                        @else
-                                            <i class="mdi mdi-alert me-2"></i>
-                                            No password set
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="mdi mdi-lock-reset me-1"></i>
-                                        New Password
-                                    </label>
-                                    <input type="password" 
-                                           class="form-control @error('password') is-invalid @enderror"
-                                           id="password" 
-                                           name="password"
-                                           placeholder="Enter new password (min 8 characters)">
-                                    <small class="text-muted">Leave blank to keep current password</small>
-                                    @error('password')
-                                        <div class="invalid-feedback d-block">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="password_confirmation" class="form-label">
-                                        <i class="mdi mdi-lock-check me-1"></i>
-                                        Confirm New Password
-                                    </label>
-                                    <input type="password" 
-                                           class="form-control"
-                                           id="password_confirmation" 
-                                           name="password_confirmation"
-                                           placeholder="Confirm new password">
-                                    <small class="text-muted">Must match new password</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Carriers & States Section --}}
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h5 class="text-primary border-bottom pb-2">
-                                    <i class="mdi mdi-briefcase-variant me-1"></i>
-                                    Carriers & Licensed States
-                                </h5>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="alert alert-info">
-                                    <i class="mdi mdi-information me-2"></i>
-                                    For each carrier, select the states where this partner is licensed and specify their settlement percentages (Level %, Graded %, GI %, Modified %).
-                                </div>
-                            </div>
-                        </div>
-
-                        @include('admin.partners.partials.carrier-states', [
-                            'insuranceCarriers' => $insuranceCarriers,
-                            'partnerCarrierStates' => $partnerCarrierStates ?? collect()
-                        ])
-
-                        {{-- Submit Section --}}
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex gap-2 justify-content-end">
-                                    <a href="{{ route('admin.partners.index') }}" class="btn btn-outline-secondary">
-                                        <i class="mdi mdi-arrow-left me-1"></i>
-                                        Cancel
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="mdi mdi-content-save me-1"></i>
-                                        Update Partner
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                <div class="col-md-4">
+                    <label class="ep-label required">Partner Code</label>
+                    <input type="text" class="ep-input @error('code') is-invalid @enderror" name="code" value="{{ old('code', $partner->code) }}" required>
+                    @error('code')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                    <div class="ep-hint">Unique ID e.g., E-1, Y-1, F-1</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">Email Address</label>
+                    <input type="email" class="ep-input @error('email') is-invalid @enderror" name="email" value="{{ old('email', $partner->email) }}">
+                    @error('email')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label">Phone Number</label>
+                    <input type="text" class="ep-input @error('phone') is-invalid @enderror" name="phone" value="{{ old('phone', $partner->phone) }}" placeholder="(555) 123-4567">
+                    @error('phone')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label">Last 4 of SSN</label>
+                    <input type="text" class="ep-input @error('ssn_last4') is-invalid @enderror" name="ssn_last4" value="{{ old('ssn_last4', $partner->ssn_last4) }}" maxlength="4" pattern="[0-9]{4}" placeholder="1234">
+                    @error('ssn_last4')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label">Our Commission %</label>
+                    <input type="number" class="ep-input @error('our_commission_percentage') is-invalid @enderror" name="our_commission_percentage" value="{{ old('our_commission_percentage', $partner->our_commission_percentage ?? 0) }}" min="0" max="100" step="0.01">
+                    @error('our_commission_percentage')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                    <div class="ep-hint">% of total revenue partner owes us</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label">Status</label>
+                    <div class="ep-switch" style="margin-top:.3rem">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', $partner->is_active) ? 'checked' : '' }}>
+                        <label for="is_active">Active Partner</label>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Password Management -->
+    <div class="ep-card">
+        <div class="ep-card-hdr"><i class="bx bx-lock-alt"></i><h6>Password Management</h6></div>
+        <div class="ep-card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="ep-label">Current Status</label>
+                    <div class="ep-status-box {{ $partner->password ? 'set' : 'unset' }}">
+                        <i class="bx {{ $partner->password ? 'bx-check-circle' : 'bx-error-circle' }}"></i>
+                        {{ $partner->password ? 'Password is set — partner can login' : 'No password set — partner cannot login' }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">New Password</label>
+                    <input type="password" class="ep-input @error('password') is-invalid @enderror" name="password" placeholder="Min 8 characters">
+                    @error('password')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                    <div class="ep-hint">Leave blank to keep current</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">Confirm Password</label>
+                    <input type="password" class="ep-input" name="password_confirmation" placeholder="Confirm new password">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carriers & States -->
+    <div class="ep-card">
+        <div class="ep-card-hdr">
+            <i class="bx bx-briefcase"></i><h6>Carriers & Licensed States</h6>
+            <div class="ms-auto ep-toolbar-btns">
+                <button type="button" class="ep-toolbar-btn" onclick="toggleAllCarriers()"><i class="bx bx-show"></i> Show/Hide All</button>
+                <button type="button" class="ep-toolbar-btn success" onclick="openCreateCarrierModal()"><i class="bx bx-plus"></i> New Carrier</button>
+            </div>
+        </div>
+        <div class="ep-card-body">
+            <div style="font-size:.68rem;color:var(--bs-surface-500);margin-bottom:.75rem;padding:.4rem .6rem;background:rgba(102,126,234,.04);border-radius:.35rem;border-left:3px solid var(--bs-gradient-start);">
+                <i class="bx bx-info-circle me-1"></i> Select states for each carrier. Commission rates apply to ALL selected states per carrier.
+            </div>
+
+            @include('admin.partners.partials.carrier-states', [
+                'insuranceCarriers' => $insuranceCarriers,
+                'partnerCarrierStates' => $partnerCarrierStates ?? collect()
+            ])
+        </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="ep-submit-row">
+        <a href="{{ route('admin.partners.index') }}" class="ep-btn secondary"><i class="bx bx-x"></i> Cancel</a>
+        <button type="submit" class="ep-btn primary"><i class="bx bx-save"></i> Update Partner</button>
+    </div>
+</form>
 @endsection
 
 @section('script')
-    <!-- Select2 JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.select2-multiple').select2({ placeholder:"Select states...", allowClear:true, width:'100%', theme:'bootstrap-5' });
+    @foreach($insuranceCarriers as $carrier)
+        @if(isset($partnerCarrierStates[$carrier->id]) && $partnerCarrierStates[$carrier->id]->isNotEmpty())
+            $('#carrier-state-section-{{ $carrier->id }}').removeClass('d-none');
+        @endif
+    @endforeach
+});
 
-    <script>
-        $(document).ready(function() {
-            // Initialize Select2 for all state selects
-            $('.select2-multiple').select2({
-                placeholder: "Select states...",
-                allowClear: true,
-                width: '100%',
-                theme: 'bootstrap-5'
-            });
+function updateStateSettlementFields(carrierId) {
+    const sel = document.getElementById('carrier_states_' + carrierId);
+    const states = Array.from(sel.selectedOptions).map(o => o.value);
+    const div = document.getElementById('selected-states-' + carrierId);
+    const sec = document.getElementById('carrier-state-section-' + carrierId);
+    if (div && states.length > 0) {
+        div.innerHTML = '<div class="ep-state-tags">' + states.map(s => '<span class="ep-state-tag">' + s + '</span>').join('') + '</div>';
+    } else if (div) { div.innerHTML = ''; }
+    if (states.length > 0) { sec.classList.remove('d-none'); } else { sec.classList.add('d-none'); }
+}
 
-            // Show carrier sections that have existing states
-            @foreach($insuranceCarriers as $carrier)
-                @if(isset($partnerCarrierStates[$carrier->id]) && $partnerCarrierStates[$carrier->id]->isNotEmpty())
-                    $('#carrier-state-section-{{ $carrier->id }}').removeClass('d-none');
-                @endif
-            @endforeach
-        });
+function toggleAllCarriers() {
+    document.querySelectorAll('.ep-carrier-sec').forEach(s => s.classList.toggle('d-none'));
+}
 
-        // Update state display when states are selected/deselected (no longer creates individual fields)
-        function updateStateSettlementFields(carrierId) {
-            const selectElement = document.getElementById('carrier_states_' + carrierId);
-            const selectedStates = Array.from(selectElement.selectedOptions).map(option => option.value);
-            const selectedStatesDiv = document.getElementById('selected-states-' + carrierId);
-            
-            // Update selected states display
-            if (selectedStatesDiv && selectedStates.length > 0) {
-                selectedStatesDiv.innerHTML = `
-                    <div class="alert alert-light">
-                        <strong>Licensed States:</strong>
-                        ${selectedStates.map(state => `<span class="badge bg-primary me-1">${state}</span>`).join('')}
-                    </div>
-                `;
-            } else if (selectedStatesDiv) {
-                selectedStatesDiv.innerHTML = '';
-            }
+function removeCarrierSection(carrierId) {
+    if (!confirm('Remove this carrier? All state assignments will be cleared.')) return;
+    const sec = document.getElementById('carrier-state-section-' + carrierId);
+    const sel = document.getElementById('carrier_states_' + carrierId);
+    sec.querySelectorAll('input[name^="settlement_"]').forEach(i => i.remove());
+    if (sel) sel.remove();
+    sec.style.display = 'none';
+}
 
-            // Show/hide section based on whether states are selected
-            const section = document.getElementById('carrier-state-section-' + carrierId);
-            if (selectedStates.length > 0) {
-                section.classList.remove('d-none');
-            } else {
-                section.classList.add('d-none');
-            }
-        }
-
-        // Toggle all carriers
-        function toggleAllCarriers() {
-            const sections = document.querySelectorAll('.carrier-state-section');
-            sections.forEach(section => {
-                section.classList.toggle('d-none');
-            });
-        }
-
-        // Remove carrier section
-        function removeCarrierSection(carrierId) {
-            if (confirm('Are you sure you want to remove this carrier from this partner? All state assignments and settlement percentages will be cleared.')) {
-                const section = document.getElementById('carrier-state-section-' + carrierId);
-                
-                // Remove all form inputs for this carrier to prevent submission
-                const selectElement = document.getElementById('carrier_states_' + carrierId);
-                const settlementInputs = section.querySelectorAll('input[name^="settlement_"][name*="[' + carrierId + ']"]');
-                
-                // Remove the select element
-                if (selectElement) {
-                    selectElement.remove();
-                }
-                
-                // Remove all settlement input fields
-                settlementInputs.forEach(input => {
-                    input.remove();
-                });
-                
-                // Hide the entire section
-                section.style.display = 'none';
-                
-                // Mark as removed for visual feedback
-                section.setAttribute('data-removed', 'true');
-                
-                console.log('Removed carrier ' + carrierId + ' from form submission');
-            }
-        }
-
-        // Open modal to create new carrier
-        function openCreateCarrierModal() {
-            const width = 900;
-            const height = 700;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-            
-            const carrierWindow = window.open(
-                '{{ route("admin.insurance-carriers.create") }}?modal=1',
-                'CreateCarrier',
-                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
-            );
-            
-            // Listen for message from child window
-            window.addEventListener('message', function(event) {
-                if (event.data.type === 'carrierCreated') {
-                    // Reload the page to show the new carrier
-                    location.reload();
-                }
-            });
-        }
-    </script>
+function openCreateCarrierModal() {
+    const w=900, h=700, l=(screen.width-w)/2, t=(screen.height-h)/2;
+    window.open('{{ route("admin.insurance-carriers.create") }}?modal=1', 'CreateCarrier', `width=${w},height=${h},left=${l},top=${t},scrollbars=yes,resizable=yes`);
+    window.addEventListener('message', function(e) { if (e.data.type === 'carrierCreated') location.reload(); });
+}
+</script>
 @endsection

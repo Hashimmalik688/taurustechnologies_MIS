@@ -60,6 +60,8 @@ Route::prefix('partner')->group(function () {
     // Protected partner routes (only partners can access)
     Route::middleware(['partner.auth', 'prevent.user'])->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'index'])->name('partner.dashboard');
+        Route::post('mark-commission-paid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionPaid'])->name('partner.mark-commission-paid');
+        Route::post('mark-commission-unpaid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionUnpaid'])->name('partner.mark-commission-unpaid');
         Route::post('logout', [App\Http\Controllers\Partner\PartnerAuthController::class, 'logout'])->name('partner.logout');
     });
 });
@@ -557,6 +559,7 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
+    Route::get('/themes', [SettingsController::class, 'themes'])->name('themes');
 
     // Chat Shadowing — access controlled by role.permission:chat-shadow,level
     Route::get('/chat-shadow', [ChatShadowController::class, 'index'])->name('chat-shadow.index')->middleware('role.permission:chat-shadow,view');

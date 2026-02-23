@@ -110,6 +110,8 @@ class Lead extends Model
         'assigned_agent_set_at',
         'partner_id',
         'partner_set_at',
+        'commission_paid_to_partner',
+        'commission_paid_at',
         
         // Followup fields
         'assigned_followup_person',

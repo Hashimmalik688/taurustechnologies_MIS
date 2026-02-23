@@ -1,14 +1,14 @@
-@use('App\Support\Roles')
-@extends('layouts.master')
+<?php use \App\Support\Roles; ?>
 
-@section('title')
+
+<?php $__env->startSection('title'); ?>
     Users Management
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    @include('partials.pipeline-dashboard-styles')
-    @include('partials.sl-filter-assets')
-    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+<?php $__env->startSection('css'); ?>
+    <?php echo $__env->make('partials.pipeline-dashboard-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <?php echo $__env->make('partials.sl-filter-assets', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <link href="<?php echo e(URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css')); ?>" rel="stylesheet" type="text/css" />
     <style>
         .u-page-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem }
         .u-page-hdr h5 { margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.4rem }
@@ -57,51 +57,53 @@
         .del-warn { text-align:center;padding:1.25rem;font-size:.82rem;color:var(--bs-body-color) }
         .del-warn i { font-size:2.5rem;color:#f46a6a;display:block;margin-bottom:.5rem }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="u-page-hdr">
         <h5>
             <i class="bx bx-group"></i> Users Management
-            <span class="u-sub">{{ count($users) }} users</span>
+            <span class="u-sub"><?php echo e(count($users)); ?> users</span>
         </h5>
-        <a href="{{ route('users.create') }}" class="act-btn a-success" style="font-size:.72rem;padding:.3rem .65rem">
+        <a href="<?php echo e(route('users.create')); ?>" class="act-btn a-success" style="font-size:.72rem;padding:.3rem .65rem">
             <i class="bx bx-plus"></i> Add User
         </a>
     </div>
 
-    @if (session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="font-size:.78rem;border-radius:10px;border:none;background:rgba(52,195,143,.08);color:#1a8754">
-            <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
+            <i class="bx bx-check-circle me-1"></i> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.6rem"></button>
         </div>
-    @endif
-    @if (session('error'))
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert" style="font-size:.78rem;border-radius:10px;border:none;background:rgba(244,106,106,.08);color:#c84646">
-            <i class="bx bx-error-circle me-1"></i> {{ session('error') }}
+            <i class="bx bx-error-circle me-1"></i> <?php echo e(session('error')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size:.6rem"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="kpi-row">
         <div class="ex-card kpi-card k-gold">
             <i class="bx bx-group k-icon"></i>
-            <div class="k-val">{{ count($users) }}</div>
+            <div class="k-val"><?php echo e(count($users)); ?></div>
             <div class="k-lbl">Total Users</div>
         </div>
         <div class="ex-card kpi-card k-green">
             <i class="bx bx-check-circle k-icon"></i>
-            <div class="k-val">{{ $users->where('status','active')->count() }}</div>
+            <div class="k-val"><?php echo e($users->where('status','active')->count()); ?></div>
             <div class="k-lbl">Active</div>
         </div>
         <div class="ex-card kpi-card k-warn">
             <i class="bx bx-pause-circle k-icon"></i>
-            <div class="k-val">{{ $users->where('status','inactive')->count() }}</div>
+            <div class="k-val"><?php echo e($users->where('status','inactive')->count()); ?></div>
             <div class="k-lbl">Inactive</div>
         </div>
         <div class="ex-card kpi-card k-red">
             <i class="bx bx-block k-icon"></i>
-            <div class="k-val">{{ $users->where('status','suspended')->count() }}</div>
+            <div class="k-val"><?php echo e($users->where('status','suspended')->count()); ?></div>
             <div class="k-lbl">Suspended</div>
         </div>
     </div>
@@ -109,7 +111,7 @@
     <div class="ex-card sec-card">
         <div class="sec-hdr">
             <h6><i class="bx bx-table"></i> All Users</h6>
-            <span class="badge-count" style="font-size:.6rem;padding:.15rem .45rem;border-radius:1rem;background:rgba(212,175,55,.12);color:#b89730">{{ count($users) }}</span>
+            <span class="badge-count" style="font-size:.6rem;padding:.15rem .45rem;border-radius:1rem;background:rgba(212,175,55,.12);color:#b89730"><?php echo e(count($users)); ?></span>
         </div>
         <div class="sec-body" style="padding:.5rem .65rem">
             <table id="datatable" class="ex-tbl w-100">
@@ -128,156 +130,157 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($users as $user)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td>{{ $user->id }}</td>
-                            <td style="font-weight:600">{{ $user->name }}</td>
-                            <td>{{ $user->userDetail->phone ?? '—' }}</td>
-                            <td>{{ $user->email }}</td>
+                            <td><?php echo e($user->id); ?></td>
+                            <td style="font-weight:600"><?php echo e($user->name); ?></td>
+                            <td><?php echo e($user->userDetail->phone ?? '—'); ?></td>
+                            <td><?php echo e($user->email); ?></td>
                             <td>
                                 <input type="text" class="pw-inline password-field"
-                                       data-user-id="{{ $user->id }}"
-                                       value="{{ $user->userDetail->plain_password ?? '' }}"
+                                       data-user-id="<?php echo e($user->id); ?>"
+                                       value="<?php echo e($user->userDetail->plain_password ?? ''); ?>"
                                        placeholder="Set password">
                             </td>
-                            <td>{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : '—' }}</td>
-                            <td>{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : '—' }}</td>
+                            <td><?php echo e($user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : '—'); ?></td>
+                            <td><?php echo e($user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : '—'); ?></td>
                             <td>
-                                @if($user->status === 'active')
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user->status === 'active'): ?>
                                     <span class="s-pill s-sale">Active</span>
-                                @elseif($user->status === 'inactive')
+                                <?php elseif($user->status === 'inactive'): ?>
                                     <span class="s-pill s-pending">Inactive</span>
-                                @elseif($user->status === 'suspended')
+                                <?php elseif($user->status === 'suspended'): ?>
                                     <span class="s-pill s-declined">Suspended</span>
-                                @else
+                                <?php else: ?>
                                     <span class="s-pill" style="background:rgba(108,117,125,.1);color:#6c757d">Unknown</span>
-                                @endif
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td>
-                                @foreach ($user->roles as $role)
-                                    <span class="v-badge v-blue" style="margin:1px 0">{{ $role->name }}</span>
-                                @endforeach
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $user->roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <span class="v-badge v-blue" style="margin:1px 0"><?php echo e($role->name); ?></span>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td style="white-space:nowrap">
-                                @hasrole('Super Admin')
-                                    <a href="{{ route('settings.permissions.users.edit', $user) }}" class="act-btn a-warning" title="Manage Permissions" style="color:#d4af37">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Super Admin')): ?>
+                                    <a href="<?php echo e(route('settings.permissions.users.edit', $user)); ?>" class="act-btn a-warning" title="Manage Permissions" style="color:#d4af37">
                                         <i class="bx bx-shield-alt"></i>
                                     </a>
-                                @endhasrole
-                                @canEditModule('users')
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#edit-user-{{ $user->id }}" class="act-btn a-primary" title="Edit">
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php if(auth()->check() && auth()->user()->canEditModule('users')): ?>
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#edit-user-<?php echo e($user->id); ?>" class="act-btn a-primary" title="Edit">
                                         <i class="bx bx-edit-alt"></i>
                                     </a>
-                                @endcanEditModule
-                                @canDeleteInModule('users')
-                                    @if ($user->id !== auth()->id())
-                                        <button type="button" class="act-btn a-danger" onclick="confirmDelete({{ $user->id }})" title="Delete">
+                                <?php endif; ?>
+                                <?php if(auth()->check() && auth()->user()->canDeleteInModule('users')): ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user->id !== auth()->id()): ?>
+                                        <button type="button" class="act-btn a-danger" onclick="confirmDelete(<?php echo e($user->id); ?>)" title="Delete">
                                             <i class="bx bx-trash"></i>
                                         </button>
-                                    @endif
-                                @endcanDeleteInModule
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php endif; ?>
                             </td>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    @foreach ($users as $user)
-        <div class="modal fade" id="edit-user-{{ $user->id }}" tabindex="-1" aria-hidden="true">
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="modal fade" id="edit-user-<?php echo e($user->id); ?>" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog" style="max-width:600px">
                 <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden">
                     <div class="modal-header modal-header-glass">
                         <h5 class="modal-title" style="font-size:.85rem;font-weight:700">
-                            <i class="bx bx-edit-alt" style="color:#d4af37;margin-right:.3rem"></i> Edit — {{ $user->name }}
+                            <i class="bx bx-edit-alt" style="color:#d4af37;margin-right:.3rem"></i> Edit — <?php echo e($user->name); ?>
+
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.6rem"></button>
                     </div>
-                    <form action="{{ route('users.update', $user->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                    <form action="<?php echo e(route('users.update', $user->id)); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
+                        <?php echo method_field('PUT'); ?>
                         <div class="modal-body" style="max-height:70vh;overflow-y:auto;padding:1rem 1.25rem">
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
                                 <div>
                                     <label class="f-label">Name</label>
-                                    <input type="text" class="f-input" name="name" value="{{ $user->name }}" required>
+                                    <input type="text" class="f-input" name="name" value="<?php echo e($user->name); ?>" required>
                                 </div>
                                 <div>
                                     <label class="f-label">Email</label>
-                                    <input type="email" class="f-input" name="email" value="{{ $user->email }}" required>
+                                    <input type="email" class="f-input" name="email" value="<?php echo e($user->email); ?>" required>
                                 </div>
                                 <div>
                                     <label class="f-label">Status</label>
                                     <select class="f-input" name="status" required>
-                                        <option value="active" {{ $user->status === 'active' ? 'selected' : '' }}>Active</option>
-                                        <option value="inactive" {{ $user->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                        <option value="suspended" {{ $user->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                                        <option value="active" <?php echo e($user->status === 'active' ? 'selected' : ''); ?>>Active</option>
+                                        <option value="inactive" <?php echo e($user->status === 'inactive' ? 'selected' : ''); ?>>Inactive</option>
+                                        <option value="suspended" <?php echo e($user->status === 'suspended' ? 'selected' : ''); ?>>Suspended</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="f-label">Phone</label>
-                                    <input type="text" class="f-input" name="phone" value="{{ $user->userDetail->phone ?? '' }}">
+                                    <input type="text" class="f-input" name="phone" value="<?php echo e($user->userDetail->phone ?? ''); ?>">
                                 </div>
                                 <div style="grid-column:1/-1">
                                     <label class="f-label">Password (Plaintext Reference)</label>
-                                    <input type="text" class="f-input" name="plain_password" value="{{ $user->userDetail->plain_password ?? '' }}" placeholder="For reference only">
+                                    <input type="text" class="f-input" name="plain_password" value="<?php echo e($user->userDetail->plain_password ?? ''); ?>" placeholder="For reference only">
                                 </div>
                             </div>
 
                             <div style="margin-top:.75rem">
                                 <label class="f-label">Roles</label>
-                                @php $currentRoles = $user->roles->pluck('name')->toArray(); @endphp
+                                <?php $currentRoles = $user->roles->pluck('name')->toArray(); ?>
                                 <div class="role-grid" style="background:rgba(0,0,0,.015);border-radius:10px;padding:.5rem .65rem">
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::SUPER_ADMIN }}" id="mr-sa-{{ $user->id }}" {{ in_array(Roles::SUPER_ADMIN, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-sa-{{ $user->id }}">Super Admin</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::SUPER_ADMIN); ?>" id="mr-sa-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::SUPER_ADMIN, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-sa-<?php echo e($user->id); ?>">Super Admin</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::MANAGER }}" id="mr-mg-{{ $user->id }}" {{ in_array(Roles::MANAGER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-mg-{{ $user->id }}">Manager</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::MANAGER); ?>" id="mr-mg-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::MANAGER, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-mg-<?php echo e($user->id); ?>">Manager</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::HR }}" id="mr-hr-{{ $user->id }}" {{ in_array(Roles::HR, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-hr-{{ $user->id }}">HR</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::HR); ?>" id="mr-hr-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::HR, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-hr-<?php echo e($user->id); ?>">HR</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::EMPLOYEE }}" id="mr-em-{{ $user->id }}" {{ in_array(Roles::EMPLOYEE, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-em-{{ $user->id }}">Employee</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::EMPLOYEE); ?>" id="mr-em-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::EMPLOYEE, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-em-<?php echo e($user->id); ?>">Employee</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::COORDINATOR }}" id="mr-co-{{ $user->id }}" {{ in_array(Roles::COORDINATOR, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-co-{{ $user->id }}">Co-ordinator</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::COORDINATOR); ?>" id="mr-co-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::COORDINATOR, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-co-<?php echo e($user->id); ?>">Co-ordinator</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::CEO }}" id="mr-ceo-{{ $user->id }}" {{ in_array(Roles::CEO, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-ceo-{{ $user->id }}">CEO</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::CEO); ?>" id="mr-ceo-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::CEO, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-ceo-<?php echo e($user->id); ?>">CEO</label>
                                     </div>
                                     <div class="role-section-lbl">Peregrine Team</div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="mr-pc-{{ $user->id }}" {{ in_array(Roles::PEREGRINE_CLOSER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-pc-{{ $user->id }}">Peregrine Closer</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::PEREGRINE_CLOSER); ?>" id="mr-pc-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::PEREGRINE_CLOSER, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-pc-<?php echo e($user->id); ?>">Peregrine Closer</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_VALIDATOR }}" id="mr-pv-{{ $user->id }}" {{ in_array(Roles::PEREGRINE_VALIDATOR, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-pv-{{ $user->id }}">Peregrine Validator</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::PEREGRINE_VALIDATOR); ?>" id="mr-pv-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::PEREGRINE_VALIDATOR, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-pv-<?php echo e($user->id); ?>">Peregrine Validator</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="mr-vr-{{ $user->id }}" {{ in_array(Roles::VERIFIER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-vr-{{ $user->id }}">Verifier</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::VERIFIER); ?>" id="mr-vr-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::VERIFIER, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-vr-<?php echo e($user->id); ?>">Verifier</label>
                                     </div>
                                     <div class="role-section-lbl">Other Roles</div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::RAVENS_CLOSER }}" id="mr-rc-{{ $user->id }}" {{ in_array(Roles::RAVENS_CLOSER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-rc-{{ $user->id }}">Ravens Closer</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::RAVENS_CLOSER); ?>" id="mr-rc-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::RAVENS_CLOSER, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-rc-<?php echo e($user->id); ?>">Ravens Closer</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::RETENTION_OFFICER }}" id="mr-ro-{{ $user->id }}" {{ in_array(Roles::RETENTION_OFFICER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-ro-{{ $user->id }}">Retention Officer</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::RETENTION_OFFICER); ?>" id="mr-ro-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::RETENTION_OFFICER, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-ro-<?php echo e($user->id); ?>">Retention Officer</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::QA }}" id="mr-qa-{{ $user->id }}" {{ in_array(Roles::QA, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-qa-{{ $user->id }}">QA</label>
+                                        <input type="checkbox" name="roles[]" value="<?php echo e(Roles::QA); ?>" id="mr-qa-<?php echo e($user->id); ?>" <?php echo e(in_array(Roles::QA, $currentRoles) ? 'checked' : ''); ?>>
+                                        <label for="mr-qa-<?php echo e($user->id); ?>">QA</label>
                                     </div>
                                 </div>
                             </div>
@@ -293,32 +296,32 @@
                                 </div>
                                 <div>
                                     <label class="f-label">Date of Birth</label>
-                                    <input type="text" class="f-input sl-pill-date" name="dob" value="{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('Y-m-d') : '' }}" placeholder="Select date">
+                                    <input type="text" class="f-input sl-pill-date" name="dob" value="<?php echo e($user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('Y-m-d') : ''); ?>" placeholder="Select date">
                                 </div>
                                 <div>
                                     <label class="f-label">Gender</label>
                                     <select class="f-input" name="gender">
                                         <option value="">Select</option>
-                                        <option value="Male" {{ ($user->userDetail->gender ?? '') == 'Male' ? 'selected' : '' }}>Male</option>
-                                        <option value="Female" {{ ($user->userDetail->gender ?? '') == 'Female' ? 'selected' : '' }}>Female</option>
-                                        <option value="Other" {{ ($user->userDetail->gender ?? '') == 'Other' ? 'selected' : '' }}>Other</option>
+                                        <option value="Male" <?php echo e(($user->userDetail->gender ?? '') == 'Male' ? 'selected' : ''); ?>>Male</option>
+                                        <option value="Female" <?php echo e(($user->userDetail->gender ?? '') == 'Female' ? 'selected' : ''); ?>>Female</option>
+                                        <option value="Other" <?php echo e(($user->userDetail->gender ?? '') == 'Other' ? 'selected' : ''); ?>>Other</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="f-label">Join Date</label>
-                                    <input type="text" class="f-input sl-pill-date" name="join_date" value="{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('Y-m-d') : '' }}" placeholder="Select date">
+                                    <input type="text" class="f-input sl-pill-date" name="join_date" value="<?php echo e($user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('Y-m-d') : ''); ?>" placeholder="Select date">
                                 </div>
                                 <div>
                                     <label class="f-label">City</label>
-                                    <input type="text" class="f-input" name="city" value="{{ $user->userDetail->city ?? '' }}">
+                                    <input type="text" class="f-input" name="city" value="<?php echo e($user->userDetail->city ?? ''); ?>">
                                 </div>
                                 <div style="grid-column:1/-1">
                                     <label class="f-label">Address</label>
-                                    <textarea class="f-input" name="address" rows="2">{{ $user->userDetail->address ?? '' }}</textarea>
+                                    <textarea class="f-input" name="address" rows="2"><?php echo e($user->userDetail->address ?? ''); ?></textarea>
                                 </div>
                                 <div>
                                     <label class="f-label">Zoom Number</label>
-                                    <input type="text" class="f-input" name="zoom_number" value="{{ $user->zoom_number ?? '' }}">
+                                    <input type="text" class="f-input" name="zoom_number" value="<?php echo e($user->zoom_number ?? ''); ?>">
                                 </div>
                             </div>
                         </div>
@@ -332,7 +335,7 @@
                 </div>
             </div>
         </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -353,8 +356,8 @@
                 <div class="modal-footer" style="border-top:1px solid rgba(0,0,0,.05);padding:.65rem 1rem;justify-content:center;gap:.5rem">
                     <button type="button" class="act-btn a-primary" data-bs-dismiss="modal" style="padding:.3rem .75rem">Cancel</button>
                     <form class="d-inline" id="deleteForm" method="POST">
-                        @csrf
-                        @method('DELETE')
+                        <?php echo csrf_field(); ?>
+                        <?php echo method_field('DELETE'); ?>
                         <button type="submit" class="act-btn a-danger" style="padding:.3rem .75rem">
                             <i class="bx bx-trash"></i> Delete
                         </button>
@@ -363,11 +366,11 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js')); ?>"></script>
     <script>
         function confirmDelete(userId) {
             document.getElementById('deleteForm').action = '/users/delete/' + userId;
@@ -409,4 +412,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/users/index.blade.php ENDPATH**/ ?>

@@ -16,8 +16,8 @@
     /* Upcoming holiday cards */
     .up-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .65rem; margin-bottom: .85rem; }
     .up-card {
-        background: #fff; border-radius: .55rem; padding: .85rem;
-        border: 1px solid rgba(0,0,0,.04);
+        background: var(--bs-card-bg, #fff); border-radius: .55rem; padding: .85rem;
+        border: 1px solid var(--bs-border-color, rgba(0,0,0,.04));
         box-shadow: 0 1px 4px rgba(0,0,0,.03);
         display: flex; gap: .65rem; align-items: flex-start;
         transition: all .2s ease;
