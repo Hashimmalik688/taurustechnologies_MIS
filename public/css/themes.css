@@ -291,6 +291,31 @@
    Applied to ALL custom themes (not light or dark)
    ============================================================ */
 
+/* ── Smooth theme transitions ── */
+body,
+#page-content,
+.container-fluid,
+.card,
+.sidebar,
+.topbar,
+.att-card,
+.cal-hdr,
+.cal-day,
+.stat-card,
+.table,
+.table th,
+.table td,
+.form-control,
+.form-select,
+.btn,
+.badge,
+.modal-content,
+.dropdown-menu,
+.nav-link,
+.alert {
+    transition: background-color .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
 /* Selector that matches all custom themes */
 [data-theme="emerald-glass"] body,
 [data-theme="midnight-black"] body,
