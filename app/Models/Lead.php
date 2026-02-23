@@ -62,6 +62,7 @@ class Lead extends Model
         'source_type',
         'team',
         'closer_name',
+        'closer_id',
         'assigned_partner',
         'managed_by',
         'verified_by',
@@ -180,7 +181,7 @@ class Lead extends Model
 
     // Cast attributes
     protected $casts = [
-        'sale_at' => 'date',
+        'sale_at' => 'datetime',
         'sale_date' => 'date',
         'date_of_birth' => 'date',
         'beneficiary_dob' => 'date',

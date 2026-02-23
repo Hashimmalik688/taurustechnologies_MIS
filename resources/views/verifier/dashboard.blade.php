@@ -16,9 +16,9 @@
         <span id="customRange" style="display:{{ $filter === 'custom' ? 'flex' : 'none' }};align-items:center;gap:.3rem;">
             <input type="hidden" name="filter" value="custom">
             <span class="pipe-pill-lbl">FROM</span>
-            <input type="date" name="start_date" class="pipe-pill-date" value="{{ request('start_date') }}">
+            <input type="text" name="start_date" class="pipe-pill-date" value="{{ request('start_date') }}" placeholder="YYYY-MM-DD" readonly>
             <span class="pipe-pill-lbl">TO</span>
-            <input type="date" name="end_date" class="pipe-pill-date" value="{{ request('end_date') }}">
+            <input type="text" name="end_date" class="pipe-pill-date" value="{{ request('end_date') }}" placeholder="YYYY-MM-DD" readonly>
             <button type="submit" class="pipe-pill-apply">Apply</button>
         </span>
         @if($filter !== 'today')
@@ -159,6 +159,7 @@
 @endsection
 
 @section('script')
+@include('partials.sl-filter-assets')
 <script>
     // No additional JS needed — bubble pills use direct links/form submit
 </script>

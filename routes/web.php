@@ -17,7 +17,6 @@ use App\Http\Controllers\Admin\RetentionController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ChatShadowController;
-use App\Http\Controllers\Admin\HolidayController;
 use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\EmployeeDashboardController;
@@ -86,11 +85,11 @@ Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Role
     Route::get('/dashboard/kpi-data', [DashboardController::class, 'getKpiData'])->name('dashboard.kpi-data');
 });
 
-// Team Dashboards - restricted access
-Route::group(['middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE)]], function () {
-    Route::get('/team/peregrine', [TeamDashboardController::class, 'peregrineTeam'])->name('team.peregrine');
-    Route::get('/team/ravens', [TeamDashboardController::class, 'ravensTeam'])->name('team.ravens');
-    Route::get('/closer/{userId}/details', [TeamDashboardController::class, 'closerDetails'])->name('closer.details');
+// Team Dashboards — access controlled by role.permission:team-dashboards,level
+Route::group(['middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/team/peregrine', [TeamDashboardController::class, 'peregrineTeam'])->name('team.peregrine')->middleware('role.permission:team-dashboards,view');
+    Route::get('/team/ravens', [TeamDashboardController::class, 'ravensTeam'])->name('team.ravens')->middleware('role.permission:team-dashboards,view');
+    Route::get('/closer/{userId}/details', [TeamDashboardController::class, 'closerDetails'])->name('closer.details')->middleware('role.permission:team-dashboards,view');
 });
 
 // Employee & Ravens Closer Routes - Only Attendance and Chat access
@@ -109,8 +108,8 @@ Route::group(['prefix' => 'hr', 'as' => 'hr.', 'middleware' => ['auth', Roles::m
     })->name('dashboard');
 });
 
-// Users Management (CEO & Super Admin & Co-ordinator)
-Route::group(['prefix' => 'users', 'as' => 'users.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
+// Users Management — access controlled by role.permission:users,level
+Route::group(['prefix' => 'users', 'as' => 'users.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [UserController::class, 'index'])->name('index')->middleware('role.permission:users,view');
     Route::get('/create', [UserController::class, 'create'])->name('create')->middleware('role.permission:users,edit');
     Route::post('/store', [UserController::class, 'store'])->name('store')->middleware('role.permission:users,edit');
@@ -131,8 +130,8 @@ Route::group(['prefix' => 'users', 'as' => 'users.', 'middleware' => ['auth', Ro
     Route::post('/{id}/update-password', [UserController::class, 'updatePassword'])->name('update-password')->middleware('role.permission:users,edit');
 });
 
-// Employee Management Sheet (E.M.S) - HR has view-only, others have full access
-Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::HR, Roles::COORDINATOR, Roles::MANAGER)]], function () {
+// Employee Management Sheet (E.M.S) — access controlled by role.permission:ems,level
+Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     // View and export - accessible to all roles in this group
     Route::get('/', [EmployeeController::class, 'index'])->name('ems')->middleware('role.permission:ems,view');
     Route::get('/export', [EmployeeController::class, 'export'])->name('export')->middleware('role.permission:ems,view');
@@ -146,16 +145,16 @@ Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', R
     Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('destroy')->middleware('role.permission:ems,full');
 });
 
-// Dupe Checker (CEO, Super Admin and Co-ordinator)
-Route::group(['prefix' => 'admin/dupe-checker', 'as' => 'admin.dupe-checker.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
+// Dupe Checker — access controlled by role.permission:duplicate-checker,level
+Route::group(['prefix' => 'admin/dupe-checker', 'as' => 'admin.dupe-checker.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [DupeCheckerController::class, 'index'])->name('index')->middleware('role.permission:duplicate-checker,view');
     Route::post('/self-check', [DupeCheckerController::class, 'selfCheck'])->name('self-check')->middleware('role.permission:duplicate-checker,edit');
     Route::post('/file-comparison', [DupeCheckerController::class, 'fileComparison'])->name('file-comparison')->middleware('role.permission:duplicate-checker,edit');
     Route::post('/run-deduplication', [DupeCheckerController::class, 'runDeduplication'])->name('run-deduplication')->middleware('role.permission:duplicate-checker,full');
 });
 
-// Account Switching Log & Audit Logs (CEO, Super Admin and Co-ordinator)
-Route::group(['prefix' => 'admin', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
+// Account Switching Log & Audit Logs — access controlled by role.permission:account-switch-log,level
+Route::group(['prefix' => 'admin', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/account-switching-log', [AuditLogController::class, 'accountSwitchingLog'])->name('admin.account-switching-log')->middleware('role.permission:account-switch-log,view');
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('admin.audit-logs.index')->middleware('role.permission:account-switch-log,view');
     Route::get('/audit-logs/export/csv', [AuditLogController::class, 'export'])->name('admin.audit-logs.export')->middleware('role.permission:account-switch-log,view');
@@ -175,7 +174,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Agents Management - Redirects to Partners (agents are now managed as partners)
-Route::group(['prefix' => 'agents', 'as' => 'agents.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+Route::group(['prefix' => 'agents', 'as' => 'agents.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', function() { return redirect()->route('admin.partners.index'); })->name('index');
     Route::get('/create', function() { return redirect()->route('admin.partners.create'); })->name('create');
     Route::post('/store', function() { return redirect()->route('admin.partners.index'); })->name('store');
@@ -185,8 +184,8 @@ Route::group(['prefix' => 'agents', 'as' => 'agents.', 'middleware' => ['auth', 
     Route::delete('/delete/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'destroy'])->name('delete');
 });
 
-// Partners Management (CEO & Super Admin & Manager & Co-ordinator)
-Route::group(['prefix' => 'admin/partners', 'as' => 'admin.partners.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Partners Management — access controlled by role.permission:partners,level
+Route::group(['prefix' => 'admin/partners', 'as' => 'admin.partners.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [App\Http\Controllers\Admin\PartnerController::class, 'index'])->name('index')->middleware('role.permission:partners,view');
     Route::get('/create', [App\Http\Controllers\Admin\PartnerController::class, 'create'])->name('create')->middleware('role.permission:partners,edit');
     Route::post('/store', [App\Http\Controllers\Admin\PartnerController::class, 'store'])->name('store')->middleware('role.permission:partners,edit');
@@ -197,8 +196,8 @@ Route::group(['prefix' => 'admin/partners', 'as' => 'admin.partners.', 'middlewa
     Route::delete('/{partnerId}/carriers/{carrierId}', [App\Http\Controllers\Admin\PartnerController::class, 'removeCarrierAssignment'])->name('remove-carrier-assignment')->middleware('role.permission:partners,edit');
 });
 
-// Insurance Carriers Management (CEO & Super Admin & Manager & Co-ordinator)
-Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-carriers.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Insurance Carriers Management — access controlled by role.permission:carriers,level
+Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-carriers.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [InsuranceCarrierController::class, 'index'])->name('index')->middleware('role.permission:carriers,view');
     Route::get('/create', [InsuranceCarrierController::class, 'create'])->name('create')->middleware('role.permission:carriers,edit');
     Route::post('/store', [InsuranceCarrierController::class, 'store'])->name('store')->middleware('role.permission:carriers,edit');
@@ -209,8 +208,8 @@ Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-c
     Route::delete('/{insuranceCarrier}', [InsuranceCarrierController::class, 'destroy'])->name('destroy')->middleware('role.permission:carriers,full');
 });
 
-// Leads Management (Add/Import only - no actions)
-Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER)]], function () {
+// Leads Management — access controlled by role.permission:leads/leads-peregrine,level
+Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LeadController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
     Route::get('/peregrine', [LeadController::class, 'peregrineLeads'])->name('peregrine')->middleware('role.permission:leads-peregrine,view');
     Route::get('/create', [LeadController::class, 'create'])->name('create')->middleware('role.permission:leads-peregrine,edit');
@@ -225,8 +224,8 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Ro
     Route::post('/{id}/unassign-partner', [LeadController::class, 'unassignPartner'])->name('unassignPartner');
 });
 
-// Sales Management (with actions and status management)
-Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::COORDINATOR, Roles::QA)]], function () {
+// Sales Management — access controlled by role.permission:sales,level
+Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LeadController::class, 'sales'])->name('index')->middleware('role.permission:sales,view');
     Route::get('/pretty-print/{id}', [LeadController::class, 'prettyPrint'])->name('prettyPrint')->middleware('role.permission:sales,view');
     Route::post('/manual-entry', [LeadController::class, 'storeManualSale'])->name('storeManual')->middleware('role.permission:sales,edit');
@@ -248,8 +247,8 @@ Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', Ro
     Route::post('/{id}/retention-sale', [LeadController::class, 'markRetentionSale'])->name('markRetentionSale')->middleware('role.permission:sales,edit');
 });
 
-// Issuance Management Routes (with permission enforcement)
-Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Issuance Management — access controlled by role.permission:issuance,level
+Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LeadController::class, 'issuance'])->name('index')->middleware('role.permission:issuance,view');
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show')->middleware('role.permission:issuance,view');
     Route::post('/{id}/issuance-status', [LeadController::class, 'updateIssuanceStatus'])->name('updateIssuanceStatus')->middleware('role.permission:issuance,edit');
@@ -259,8 +258,8 @@ Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['aut
     Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission')->middleware('role.permission:issuance,full');
 });
 
-// QA Review Routes (with permission enforcement)
-Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::QA, Roles::COORDINATOR)]], function () {
+// QA Review — access controlled by role.permission:qa-review,level
+Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/review', [LeadController::class, 'qaReview'])->name('review')->middleware('role.permission:qa-review,view');
 });
 
@@ -274,29 +273,29 @@ Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['aut
     Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification');
 });
 
-// Verifier Routes (only Verifier role)
+// Verifier Routes — access controlled by role.permission:peregrine*,level
 Route::group([
     'prefix' => 'verifier',
     'as' => 'verifier.',
-    'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::VERIFIER, Roles::SUPER_ADMIN, Roles::COORDINATOR)]
+    'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
     // Dashboard
-    Route::get('/dashboard', [VerifierController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [VerifierController::class, 'dashboard'])->name('dashboard')->middleware('role.permission:peregrine-dashboard,view');
     
     // Default to Peregrine for backwards compatibility
-    Route::get('/create', [VerifierController::class, 'create'])->name('create');
-    Route::post('/store', [VerifierController::class, 'store'])->name('store');
+    Route::get('/create', [VerifierController::class, 'create'])->name('create')->middleware('role.permission:peregrine-verifier,view');
+    Route::post('/store', [VerifierController::class, 'store'])->name('store')->middleware('role.permission:peregrine-verifier,edit');
 
     // Team-specific endpoints
-    Route::get('/{team}/create', [VerifierController::class, 'create'])->name('create.team');
-    Route::post('/{team}/store', [VerifierController::class, 'store'])->name('store.team');
+    Route::get('/{team}/create', [VerifierController::class, 'create'])->name('create.team')->middleware('role.permission:peregrine-verifier,view');
+    Route::post('/{team}/store', [VerifierController::class, 'store'])->name('store.team')->middleware('role.permission:peregrine-verifier,edit');
 });
 
-// Peregrine Closers
+// Peregrine Closers — access controlled by role.permission:peregrine-closers,level
 Route::group([
     'prefix' => 'peregrine/closers',
     'as' => 'peregrine.closers.',
-    'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::PEREGRINE_CLOSER, Roles::SUPER_ADMIN, Roles::COORDINATOR)]
+    'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
     Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index')->middleware('role.permission:leads-peregrine,view');
     Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
@@ -305,11 +304,11 @@ Route::group([
     Route::put('/{lead}/mark-pending', [PeregrineController::class, 'closerMarkPending'])->name('mark-pending')->middleware('role.permission:leads-peregrine,edit');
 });
 
-// Peregrine Validator
+// Peregrine Validator — access controlled by role.permission:peregrine-validation,level
 Route::group([
     'prefix' => 'validator',
     'as' => 'validator.',
-    'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR)]
+    'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
     Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
     Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
@@ -352,15 +351,11 @@ Route::group([
 //     });
 // });
 
-// Dock Section - READ and ADD access for HR, Super Admin, Manager, QA, Co-ordinator
-Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::QA, Roles::HR, Roles::COORDINATOR, Roles::CEO)]], function () {
+// Dock Section — READ and ADD access controlled by role.permission:dock,level
+Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [\App\Http\Controllers\Admin\DockController::class, 'index'])->name('index')->middleware('role.permission:dock,view');
     Route::post('/', [\App\Http\Controllers\Admin\DockController::class, 'store'])->name('store')->middleware('role.permission:dock,edit');
     Route::get('/history/{userId}', [\App\Http\Controllers\Admin\DockController::class, 'history'])->name('history')->middleware('role.permission:dock,view');
-});
-
-// Dock Section - EDIT and DELETE access for Super Admin, Manager, QA, Co-ordinator only (NOT HR)
-Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::QA, Roles::COORDINATOR)]], function () {
     Route::put('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'update'])->name('update')->middleware('role.permission:dock,edit');
     Route::patch('/{dockRecord}/cancel', [\App\Http\Controllers\Admin\DockController::class, 'cancel'])->name('cancel')->middleware('role.permission:dock,edit');
     Route::delete('/{dockRecord}', [\App\Http\Controllers\Admin\DockController::class, 'destroy'])->name('destroy')->middleware('role.permission:dock,full');
@@ -369,8 +364,8 @@ Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Role
 // Employee Dock View - Read-only access for employees to view their own dock records
 Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::class, 'myDockRecords'])->name('my-dock-records')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::COORDINATOR)]);
 
-// Attendance
-Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::HR, Roles::RETENTION_OFFICER, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::COORDINATOR)]], function () {
+// Attendance — access controlled by role.permission:attendance,level
+Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [AttendanceController::class, 'index'])->name('index')->middleware('role.permission:attendance,view');
     Route::get('/history', [AttendanceController::class, 'history'])->name('history')->middleware('role.permission:attendance,view');
     Route::get('/print-view', [AttendanceController::class, 'printView'])->name('print-view')->middleware('role.permission:attendance,view');
@@ -379,13 +374,11 @@ Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => [
     Route::get('/export', [AttendanceController::class, 'index'])->name('export')->middleware('role.permission:attendance,view');
     Route::get('/{id}/json', [AttendanceController::class, 'json'])->name('json')->middleware('role.permission:attendance,view');
     
-    // Manual entry, editing, and deleting - CEO, Super Admin, Co-ordinator & HR
-    Route::middleware([Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR)])->group(function () {
-        Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual')->middleware('role.permission:attendance,edit');
-        Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post')->middleware('role.permission:attendance,edit');
-        Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update')->middleware('role.permission:attendance,edit');
-        Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete')->middleware('role.permission:attendance,full');
-    });
+    // Manual entry, editing, and deleting — controlled by role.permission:attendance,edit/full
+    Route::get('/mark-manual', [AttendanceController::class, 'index'])->name('mark-manual')->middleware('role.permission:attendance,edit');
+    Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post')->middleware('role.permission:attendance,edit');
+    Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update')->middleware('role.permission:attendance,edit');
+    Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete')->middleware('role.permission:attendance,full');
 });
 
 // Notifications
@@ -427,8 +420,8 @@ Route::prefix('api/notifications')->name('api.notifications.')->middleware(['aut
 // });
 // ========== END SALARY MODULE REMOVAL ==========
 
-// EPMS - Effective Project Management System (CEO, Super Admin Only)
-Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN)]], function () {
+// EPMS - Effective Project Management System — access controlled by role.permission:epms,level
+Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     // Project CRUD
     Route::get('/', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'index'])->name('index')->middleware('role.permission:epms,view');
     Route::get('/create', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'create'])->name('create')->middleware('role.permission:epms,edit');
@@ -486,17 +479,13 @@ Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', Role
     Route::get('/{id}/gantt-data', [\App\Http\Controllers\Admin\EPMSProjectController::class, 'getGanttData'])->name('gantt-data');
 });
 
-// Payroll - View Access (CEO, Super Admin, Co-ordinator & Manager can view)
-Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::MANAGER)]], function () {
+// Payroll - View Access — controlled by role.permission:payroll,level
+Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SalaryController::class, 'payroll'])->name('index')->middleware('role.permission:payroll,view');
     Route::get('/print', [SalaryController::class, 'printPayroll'])->name('print')->middleware('role.permission:payroll,view');
-});
-
-// Payroll - Edit Access (Only CEO, Super Admin & Co-ordinator can edit)
-Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
     Route::post('/working-days', [SalaryController::class, 'updateWorkingDays'])->name('working-days.update')->middleware('role.permission:payroll,edit');
     
-    // Manual Payroll Entries (for non-system users like ex-employees) - MUST come before /{userId} route
+    // Manual Payroll Entries (for non-system users like ex-employees)
     Route::post('/manual', [SalaryController::class, 'storeManualEntry'])->name('manual.store')->middleware('role.permission:payroll,edit');
     Route::put('/manual/{id}', [SalaryController::class, 'updateManualEntry'])->name('manual.update')->middleware('role.permission:payroll,edit');
     Route::delete('/manual/{id}', [SalaryController::class, 'destroyManualEntry'])->name('manual.destroy')->middleware('role.permission:payroll,full');
@@ -504,8 +493,8 @@ Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth'
     Route::match(['post', 'put'], '/{userId}', [SalaryController::class, 'updatePayroll'])->name('update')->middleware('role.permission:payroll,edit');
 });
 
-// Chart of Accounts
-Route::group(['prefix' => 'chart-of-accounts', 'as' => 'chart-of-accounts.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Chart of Accounts — access controlled by role.permission:chart-of-accounts,level
+Route::group(['prefix' => 'chart-of-accounts', 'as' => 'chart-of-accounts.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [ChartOfAccountController::class, 'index'])->name('index')->middleware('role.permission:chart-of-accounts,view');
     Route::get('/create', [ChartOfAccountController::class, 'create'])->name('create')->middleware('role.permission:chart-of-accounts,edit');
     Route::post('/store', [ChartOfAccountController::class, 'store'])->name('store')->middleware('role.permission:chart-of-accounts,edit');
@@ -515,8 +504,8 @@ Route::group(['prefix' => 'chart-of-accounts', 'as' => 'chart-of-accounts.', 'mi
     Route::delete('/delete/{id}', [ChartOfAccountController::class, 'destroy'])->name('delete')->middleware('role.permission:chart-of-accounts,full');
 });
 
-// Ledger
-Route::group(['prefix' => 'ledger', 'as' => 'ledger.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Ledger — access controlled by role.permission:general-ledger,level
+Route::group(['prefix' => 'ledger', 'as' => 'ledger.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LedgerController::class, 'index'])->name('index')->middleware('role.permission:general-ledger,view');
     Route::get('/create', [LedgerController::class, 'create'])->name('create')->middleware('role.permission:general-ledger,edit');
     Route::post('/store', [LedgerController::class, 'store'])->name('store')->middleware('role.permission:general-ledger,edit');
@@ -525,8 +514,8 @@ Route::group(['prefix' => 'ledger', 'as' => 'ledger.', 'middleware' => ['auth', 
     Route::get('/summary', [LedgerController::class, 'summary'])->name('summary')->middleware('role.permission:general-ledger,view');
 });
 
-// Petty Cash Ledger (CEO, Super Admin & Co-ordinator only)
-Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
+// Petty Cash Ledger — access controlled by role.permission:petty-cash,level
+Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LedgerController::class, 'pettyCashIndex'])->name('index')->middleware('role.permission:petty-cash,view');
     Route::post('/store', [LedgerController::class, 'pettyCashStore'])->name('store')->middleware('role.permission:petty-cash,edit');
     Route::get('/{id}/edit', [LedgerController::class, 'pettyCashEdit'])->name('edit')->middleware('role.permission:petty-cash,edit');
@@ -536,13 +525,13 @@ Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => [
     Route::get('/export', [LedgerController::class, 'pettyCashExport'])->name('export')->middleware('role.permission:petty-cash,view');
 });
 
-// Revenue Analytics (Super Admin & Manager only)
+// Revenue Analytics — access controlled by role.permission:revenue-analytics,level
 Route::get('/revenue', [DashboardController::class, 'revenue'])
     ->name('revenue.index')
-    ->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER), 'role.permission:revenue-analytics,view']);
+    ->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:revenue-analytics,view']);
 
-// Live Analytics Dashboard (CEO, Super Admin, Manager & Co-ordinator)
-Route::group(['prefix' => 'analytics', 'as' => 'analytics.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Live Analytics Dashboard — access controlled by role.permission:live-analytics,level
+Route::group(['prefix' => 'analytics', 'as' => 'analytics.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/live', [\App\Http\Controllers\Admin\AnalyticsController::class, 'live'])->name('live')->middleware('role.permission:live-analytics,view');
     Route::get('/live/data', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getLiveData'])->name('live.data')->middleware('role.permission:live-analytics,view');
     Route::get('/historical', [\App\Http\Controllers\Admin\AnalyticsController::class, 'getHistoricalData'])->name('historical')->middleware('role.permission:live-analytics,view');
@@ -559,28 +548,28 @@ Route::get('/check-my-ip', function () {
 });
 
 // Hub Pages
-Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
-Route::get('/hr/hub', function () { return view('admin.hr.hub'); })->name('hr.hub')->middleware(['auth', Roles::middleware(Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
-Route::get('/finance/hub', function () { return view('admin.finance.hub'); })->name('finance.hub')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]);
+Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:settings,view']);
+Route::get('/hr/hub', function () { return view('admin.hr.hub'); })->name('hr.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:hr,view']);
+Route::get('/finance/hub', function () { return view('admin.finance.hub'); })->name('finance.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:finance,view']);
 
-// Settings (Super Admin only)
-Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
+// Settings (access controlled by role.permission:settings,level — Permission Management remains Super Admin only)
+Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
     Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
 
-    // Chat Shadowing
-    Route::get('/chat-shadow', [ChatShadowController::class, 'index'])->name('chat-shadow.index');
-    Route::get('/chat-shadow/conversations', [ChatShadowController::class, 'getConversations'])->name('chat-shadow.conversations');
-    Route::get('/chat-shadow/conversations/{id}/messages', [ChatShadowController::class, 'getMessages'])->name('chat-shadow.messages');
-    Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes');
+    // Chat Shadowing — access controlled by role.permission:chat-shadow,level
+    Route::get('/chat-shadow', [ChatShadowController::class, 'index'])->name('chat-shadow.index')->middleware('role.permission:chat-shadow,view');
+    Route::get('/chat-shadow/conversations', [ChatShadowController::class, 'getConversations'])->name('chat-shadow.conversations')->middleware('role.permission:chat-shadow,view');
+    Route::get('/chat-shadow/conversations/{id}/messages', [ChatShadowController::class, 'getMessages'])->name('chat-shadow.messages')->middleware('role.permission:chat-shadow,view');
+    Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes')->middleware('role.permission:chat-shadow,view');
 });
 
-// Reports (Super Admin, Manager, Co-ordinator, CEO)
-Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO)]], function () {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/generate', [ReportController::class, 'generate'])->name('generate');
-    Route::get('/export', [ReportController::class, 'export'])->name('export');
+// Reports — access controlled by role.permission:reports,level
+Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index')->middleware('role.permission:reports,view');
+    Route::get('/generate', [ReportController::class, 'generate'])->name('generate')->middleware('role.permission:reports,view');
+    Route::get('/export', [ReportController::class, 'export'])->name('export')->middleware('role.permission:reports,view');
 });
 
 // Permission Management (Super Admin only)
@@ -601,19 +590,8 @@ Route::group(['prefix' => 'settings/permissions', 'as' => 'settings.permissions.
     Route::post('/clear-cache', [\App\Http\Controllers\Admin\PermissionController::class, 'clearCache'])->name('clear-cache');
 });
 
-// Holidays (Super Admin and Manager and Co-ordinator)
-Route::group(['prefix' => 'holidays', 'as' => 'admin.holidays.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
-    Route::get('/', [HolidayController::class, 'index'])->name('index')->middleware('role.permission:holidays,view');
-    Route::get('/create', [HolidayController::class, 'create'])->name('create')->middleware('role.permission:holidays,edit');
-    Route::post('/', [HolidayController::class, 'store'])->name('store')->middleware('role.permission:holidays,edit');
-    Route::get('/{holiday}/edit', [HolidayController::class, 'edit'])->name('edit')->middleware('role.permission:holidays,edit');
-    Route::put('/{holiday}', [HolidayController::class, 'update'])->name('update')->middleware('role.permission:holidays,edit');
-    Route::delete('/{holiday}', [HolidayController::class, 'destroy'])->name('destroy')->middleware('role.permission:holidays,full');
-    Route::post('/check-date', [HolidayController::class, 'checkDate'])->name('check-date')->middleware('role.permission:holidays,view');
-});
-
-// Public Holidays Management (Super Admin only - HR and Co-ordinator can view)
-Route::group(['prefix' => 'admin/public-holidays', 'as' => 'admin.public-holidays.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::HR, Roles::COORDINATOR)]], function () {
+// Public Holidays Management — access controlled by role.permission:public-holidays,level
+Route::group(['prefix' => 'admin/public-holidays', 'as' => 'admin.public-holidays.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PublicHolidayController::class, 'index'])->name('index')->middleware('role.permission:public-holidays,view');
     Route::get('/create', [PublicHolidayController::class, 'create'])->name('create')->middleware('role.permission:public-holidays,edit');
     Route::post('/', [PublicHolidayController::class, 'store'])->name('store')->middleware('role.permission:public-holidays,edit');
@@ -686,14 +664,14 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     Route::get('/search', [ChatController::class, 'search']);
 });
 
-// Chargebacks
-Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::COORDINATOR)]], function () {
-    Route::get('/', [ChargebackController::class, 'index'])->name('index');
-    Route::get('/show/{id}', [ChargebackController::class, 'show'])->name('show');
+// Chargebacks — access controlled by role.permission:chargebacks,view
+Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [ChargebackController::class, 'index'])->name('index')->middleware('role.permission:chargebacks,view');
+    Route::get('/show/{id}', [ChargebackController::class, 'show'])->name('show')->middleware('role.permission:chargebacks,view');
 });
 
-// Retention
-Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::CEO)]], function () {
+// Retention — access controlled by role.permission:retention,level
+Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [RetentionController::class, 'index'])->name('index')->middleware('role.permission:retention,view');
     Route::post('/{id}/status', [RetentionController::class, 'updateStatus'])->name('updateStatus')->middleware('role.permission:retention,edit');
     Route::get('/incomplete', [RetentionController::class, 'incompleteIssuance'])->name('incomplete')->middleware('role.permission:retention,view');
@@ -704,12 +682,12 @@ Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['a
 
 // Retention Officer Dashboard
 Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'])
-    ->middleware(['auth', Roles::middleware(Roles::RETENTION_OFFICER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO, Roles::MANAGER)])
+    ->middleware(['auth', Roles::middleware(...Roles::ALL)])
     ->middleware('role.permission:retention,view')
     ->name('retention.dashboard');
 
-// Bank Verification (Super Admin Only)
-Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Bank Verification — access controlled by role.permission:bank-verification,level
+Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index')->middleware('role.permission:bank-verification,view');
     Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show')->middleware('role.permission:bank-verification,view');
     Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update')->middleware('role.permission:bank-verification,edit');
@@ -717,13 +695,13 @@ Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'mi
     Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment')->middleware('role.permission:bank-verification,edit');
 });
 
-// Revenue Analytics (Super Admin Only)
-Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::CEO, Roles::COORDINATOR, Roles::MANAGER)]], function () {
+// Revenue Analytics — access controlled by role.permission:revenue-analytics,level
+Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [\App\Http\Controllers\Admin\RevenueAnalyticsController::class, 'index'])->name('index')->middleware('role.permission:revenue-analytics,view');
 });
 
-// Ravens Routes
-Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::RAVENS_CLOSER, Roles::COORDINATOR)]], function () {
+// Ravens Routes — access controlled by role.permission:ravens*,level
+Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/dashboard', [RavensDashboardController::class, 'index'])->name('dashboard')->middleware('role.permission:ravens-dashboard,view');
     Route::get('/calling', [RavensDashboardController::class, 'calling'])->name('calling')->middleware('role.permission:ravens-calling,view');
     Route::get('/leads/{leadId}/data', [RavensDashboardController::class, 'getLeadData'])->name('leads.data')->middleware('role.permission:ravens,view');
@@ -819,8 +797,8 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-// Project Authorization & Budget System (PABS) Routes - CEO, Super Admin, Manager, Co-ordinator
-Route::group(['prefix' => 'pabs', 'as' => 'pabs.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR)]], function () {
+// Project Authorization & Budget System (PABS) — access controlled by role.permission:pabs-tickets,level
+Route::group(['prefix' => 'pabs', 'as' => 'pabs.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     // Tickets
     Route::get('/tickets', [App\Http\Controllers\Admin\TicketController::class, 'index'])->name('tickets.index')->middleware('role.permission:pabs-tickets,view');
     Route::get('/tickets/create', [App\Http\Controllers\Admin\TicketController::class, 'create'])->name('tickets.create')->middleware('role.permission:pabs-tickets,edit');

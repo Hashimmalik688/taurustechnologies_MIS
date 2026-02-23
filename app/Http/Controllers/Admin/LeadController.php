@@ -391,8 +391,11 @@ class LeadController extends Controller
         }
 
         // Set proper status and closer name for manually created leads
+        // Note: 'closed' status = lead form submitted by closer, NOT a completed sale.
+        // sale_at is set later when submitSale() is called from the calling system.
         $leadData['status'] = Statuses::LEAD_CLOSED;
         $leadData['closer_name'] = $user->name;
+        $leadData['closer_id'] = $user->id;
         $leadData['verified_by'] = null;
 
         // Convert smoker to 'yes'/'no' for ENUM

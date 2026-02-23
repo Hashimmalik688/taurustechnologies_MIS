@@ -200,13 +200,6 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 160,
             ],
             [
-                'name' => 'Holidays',
-                'slug' => 'holidays',
-                'description' => 'Manage company holidays and office closures',
-                'category' => 'HR Operations',
-                'sort_order' => 170,
-            ],
-            [
                 'name' => 'Public Holidays',
                 'slug' => 'public-holidays',
                 'description' => 'Manage public/national holidays for attendance calculations',
@@ -313,6 +306,40 @@ class ModuleSeeder extends Seeder
                 'description' => 'Manage user accounts, roles, and permissions',
                 'category' => 'Users Management',
                 'sort_order' => 290,
+            ],
+
+            // Additional Settings modules
+            [
+                'name' => 'Chat Shadowing',
+                'slug' => 'chat-shadow',
+                'description' => 'Monitor & review user conversations and notes in read-only mode',
+                'category' => 'Settings',
+                'sort_order' => 225,
+            ],
+            [
+                'name' => 'Reports',
+                'slug' => 'reports',
+                'description' => 'Generate sales, partner, agent & manager reports with CSV export',
+                'category' => 'Settings',
+                'sort_order' => 226,
+            ],
+
+            // 12. Communication
+            [
+                'name' => 'Team Chat',
+                'slug' => 'chat',
+                'description' => 'Real-time team messaging, group chats & community announcements',
+                'category' => 'Communication',
+                'sort_order' => 300,
+            ],
+
+            // Additional Company Overview modules
+            [
+                'name' => 'Team Dashboards',
+                'slug' => 'team-dashboards',
+                'description' => 'Peregrine & Ravens team performance dashboards',
+                'category' => 'Company Overview',
+                'sort_order' => 15,
             ],
 
         ];

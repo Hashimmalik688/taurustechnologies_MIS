@@ -199,20 +199,19 @@
                     <div class="notification-dropdown" id="notificationDropdown">
                         <div class="notification-header">
                             <h6>Notifications</h6>
- <button class="btn btn-sm btn-link u-fw-600 text-decoration-none text-gold" onclick="markAllRead()">
-                                Mark all read
+                            <button style="font-size:.68rem;font-weight:700;color:#d4af37;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.15);border-radius:22px;padding:.2rem .55rem;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(212,175,55,.15)'" onmouseout="this.style.background='rgba(212,175,55,.08)'" onclick="markAllRead()">
+                                <i class="bx bx-check-double" style="font-size:.75rem;vertical-align:middle"></i> Mark all read
                             </button>
                         </div>
                         <div id="notificationList">
-                            <!-- Notifications will be loaded via AJAX -->
- <div class="text-center text-surface-400" style="padding: 2rem">
- <i class="bx bx-loader-alt bx-spin u-fs-2" ></i>
-                                <div style="margin-top: 0.5rem;">Loading notifications...</div>
+                            <div style="text-align:center;padding:2.5rem 1rem;color:var(--bs-surface-400,#94a3b8)">
+                                <i class="bx bx-loader-alt bx-spin" style="font-size:1.5rem;opacity:.5"></i>
+                                <div style="margin-top:.5rem;font-size:.75rem;font-weight:600">Loading notifications...</div>
                             </div>
                         </div>
- <div class="text-center border-top-surface" style="padding: 1rem">
- <a class="u-fw-600 text-decoration-none text-gold" href="{{ route('notifications.index') }}">
-                                View all notifications
+                        <div style="text-align:center;padding:.65rem 1rem;border-top:1px solid rgba(212,175,55,.1)">
+                            <a href="{{ route('notifications.index') }}" style="font-size:.72rem;font-weight:700;color:#d4af37;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem;transition:opacity .15s" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+                                View all notifications <i class="bx bx-right-arrow-alt" style="font-size:.85rem"></i>
                             </a>
                         </div>
                     </div>
@@ -414,31 +413,33 @@
                 .then(data => {
                     if (data.notifications.length === 0) {
                         listContainer.innerHTML = `
-                            <div style="text-align: center; padding: 3rem 2rem; color: ${themeColors.surface400};">
-                                <i class="bx bx-bell-off" style="font-size: 3rem; opacity: 0.5;"></i>
-                                <div style="margin-top: 1rem; font-weight: 600;">No notifications</div>
-                                <div style="font-size: 0.875rem; margin-top: 0.5rem;">You're all caught up!</div>
+                            <div style="text-align:center;padding:2.5rem 1rem;color:var(--bs-surface-400,#94a3b8)">
+                                <i class="bx bx-bell-off" style="font-size:2rem;opacity:.4"></i>
+                                <div style="margin-top:.75rem;font-weight:700;font-size:.82rem">No notifications</div>
+                                <div style="font-size:.72rem;margin-top:.3rem;opacity:.7">You're all caught up!</div>
                             </div>
                         `;
                     } else {
                         listContainer.innerHTML = data.notifications.map(notif => `
                             <div class="notification-item ${notif.is_read ? '' : 'unread'}">
-                                <div style="font-weight: 600; color: ${themeColors.surface700};">${notif.title}</div>
-                                <div style="font-size: 0.875rem; color: ${themeColors.surface500};">${notif.message}</div>
-                                <div class="time">${notif.time_ago}</div>
+                                <div style="font-weight:700;font-size:.78rem;color:var(--bs-body-color)">${notif.title}</div>
+                                <div style="font-size:.72rem;color:var(--bs-surface-500,#64748b);line-height:1.4;margin-top:1px">${notif.message}</div>
+                                <div class="time"><i class="mdi mdi-clock-outline" style="font-size:.7rem"></i> ${notif.time_ago}</div>
                             </div>
                         `).join('');
                     }
 
                     // Update badge
-                    document.getElementById('notifBadge').textContent = data.unread_count;
+                    const badge = document.getElementById('notifBadge');
+                    badge.textContent = data.unread_count;
+                    badge.style.display = data.unread_count > 0 ? 'inline-flex' : 'none';
                 })
                 .catch(error => {
                     console.error('Error loading notifications:', error);
                     listContainer.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: ${themeColors.danger};">
-                            <i class="bx bx-error-circle" style="font-size: 2rem;"></i>
-                            <div style="margin-top: 0.5rem;">Failed to load notifications</div>
+                        <div style="text-align:center;padding:2rem 1rem;color:var(--bs-danger,#dc2626)">
+                            <i class="bx bx-error-circle" style="font-size:1.5rem;opacity:.6"></i>
+                            <div style="margin-top:.5rem;font-size:.75rem;font-weight:600">Failed to load notifications</div>
                         </div>
                     `;
                 });

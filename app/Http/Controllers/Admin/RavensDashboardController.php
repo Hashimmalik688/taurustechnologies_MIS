@@ -19,25 +19,83 @@ use Illuminate\Support\Facades\Log;
 
 class RavensDashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $filter = $request->input('filter', 'today');
+        $customStart = $request->input('start_date');
+        $customEnd = $request->input('end_date');
+        $search = $request->input('search');
 
-        // Get stats for the Ravens employee
+        // Determine date range
+        $timezone = 'America/Denver';
+        if ($filter === 'custom' && $customStart && $customEnd) {
+            try {
+                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay();
+                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay();
+            } catch (\Exception $e) {
+                $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
+                $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+            }
+        } else {
+            $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
+            $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+        }
+
+        // Get stats for the Ravens employee (filtered by date range)
         $stats = [
-            'dialed_today' => $this->getDialedTodayCount($user->id),
-            'calls_connected' => $this->getCallsConnectedCount($user->id),
-            'sales_today' => $this->getSalesTodayCount($user->id),
+            'dialed' => $this->getDialedCount($user->id, $startDate, $endDate),
+            'calls_connected' => $this->getCallsConnectedFiltered($user->id, $startDate, $endDate),
+            'sales' => $this->getSalesCount($user->id, $startDate, $endDate),
             'mtd_sales' => $this->getMTDSalesCount($user->id),
         ];
 
-        // Get sales made by this closer for dashboard
-        $mySales = Lead::where('closer_name', $user->name)
-            ->whereNotNull('sale_at')
-            ->orderBy('sale_at', 'desc')
-            ->paginate(10);
+        // Get sales made by this closer for the Ravens dashboard (filtered)
+        $mySalesQuery = Lead::where(function($q) use ($user) {
+                $q->where('closer_name', $user->name)
+                  ->orWhere('closer_id', $user->id);
+            })
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->where('team', Teams::RAVENS);
 
-        return view('ravens.dashboard', compact('stats', 'mySales'));
+        // Apply date filter to sales
+        $mySalesQuery->where(function($q) use ($startDate, $endDate) {
+            $q->whereBetween('sale_at', [$startDate, $endDate])
+              ->orWhereBetween('sale_date', [$startDate, $endDate]);
+        });
+
+        // Apply search filter
+        if ($search) {
+            $mySalesQuery->where(function($q) use ($search) {
+                $q->where('cn_name', 'like', '%'.$search.'%')
+                  ->orWhere('phone_number', 'like', '%'.$search.'%')
+                  ->orWhere('carrier_name', 'like', '%'.$search.'%');
+            });
+        }
+
+        $mySales = $mySalesQuery->orderByRaw('COALESCE(sale_at, sale_date, created_at) DESC')
+            ->paginate(10)
+            ->appends($request->query());
+
+        // Get declined/chargeback leads for this closer
+        $declinedChargebacks = Lead::where(function($q) use ($user) {
+                $q->where('closer_name', $user->name)
+                  ->orWhere('closer_id', $user->id);
+            })
+            ->where('team', Teams::RAVENS)
+            ->whereIn('status', ['declined', 'chargeback'])
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('updated_at', [$startDate, $endDate])
+                  ->orWhereBetween('sale_at', [$startDate, $endDate])
+                  ->orWhereBetween('sale_date', [$startDate, $endDate]);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('ravens.dashboard', compact('stats', 'mySales', 'declinedChargebacks', 'filter', 'search'));
     }
 
     public function calling(Request $request)
@@ -163,13 +221,30 @@ class RavensDashboardController extends Controller
     }
 
     /**
+     * Get total number of dials made in date range (each attempt counts).
+     * Uses LeadDial table — the single source of truth for dial tracking.
+     */
+    private function getDialedCount($userId, $startDate, $endDate)
+    {
+        return LeadDial::where('user_id', $userId)
+            ->whereBetween('dialed_at', [$startDate, $endDate])
+            ->count();
+    }
+
+    /**
      * Get count of sales made today by this employee
      */
     private function getSalesTodayCount($userId)
     {
-        return Lead::where('closer_name', Auth::user()->name)
-            ->whereDate('sale_at', today())
-            ->where('manager_status', 'approved')
+        return Lead::where(function($q) use ($userId) {
+                $q->where('closer_name', Auth::user()->name)
+                  ->orWhere('closer_id', $userId);
+            })
+            ->where(function($q) {
+                $q->whereDate('sale_at', today())
+                  ->orWhereDate('sale_date', today());
+            })
+            ->where('team', Teams::RAVENS)
             ->count();
     }
 
@@ -185,14 +260,54 @@ class RavensDashboardController extends Controller
     }
 
     /**
+     * Get count of sales in date range
+     */
+    private function getSalesCount($userId, $startDate, $endDate)
+    {
+        return Lead::where(function($q) use ($userId) {
+                $q->where('closer_name', Auth::user()->name)
+                  ->orWhere('closer_id', $userId);
+            })
+            ->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('sale_at', [$startDate, $endDate])
+                  ->orWhereBetween('sale_date', [$startDate, $endDate]);
+            })
+            ->where('team', Teams::RAVENS)
+            ->count();
+    }
+
+    /**
+     * Get count of calls connected in date range.
+     * Uses LeadDial table with outcome = 'connected'.
+     */
+    private function getCallsConnectedFiltered($userId, $startDate, $endDate)
+    {
+        return LeadDial::where('user_id', $userId)
+            ->whereBetween('dialed_at', [$startDate, $endDate])
+            ->where('outcome', 'connected')
+            ->count();
+    }
+
+    /**
      * Get MTD (Month-To-Date) sales count for this employee
      */
     private function getMTDSalesCount($userId)
     {
-        return Lead::where('closer_name', Auth::user()->name)
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->where('manager_status', 'approved')
+        return Lead::where(function($q) use ($userId) {
+                $q->where('closer_name', Auth::user()->name)
+                  ->orWhere('closer_id', $userId);
+            })
+            ->where(function($q) {
+                $q->where(function($sub) {
+                    $sub->whereMonth('sale_at', now()->month)
+                        ->whereYear('sale_at', now()->year);
+                })
+                ->orWhere(function($sub) {
+                    $sub->whereMonth('sale_date', now()->month)
+                        ->whereYear('sale_date', now()->year);
+                });
+            })
+            ->where('team', Teams::RAVENS)
             ->count();
     }
 
@@ -677,6 +792,7 @@ class RavensDashboardController extends Controller
             $updateData['sale_at'] = now();
             $updateData['sale_date'] = now()->format('Y-m-d');
             $updateData['team'] = Teams::RAVENS; // Mark as Ravens team sale
+            $updateData['closer_id'] = Auth::id(); // Store user ID for reliable matching
 
             $lead->update($updateData);
 
@@ -859,13 +975,60 @@ class RavensDashboardController extends Controller
     /**
      * View all bad/disposed leads
      */
-    public function badLeads()
+    public function badLeads(Request $request)
     {
-        $badLeads = BadLead::with(['lead', 'disposedBy'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+        $filter = $request->input('filter', 'today');
+        $customStart = $request->input('start_date');
+        $customEnd = $request->input('end_date');
+        $search = $request->input('search');
+        $timezone = 'America/Denver';
 
-        return view('ravens.bad-leads', compact('badLeads'));
+        if ($filter === 'custom' && $customStart && $customEnd) {
+            try {
+                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay();
+                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay();
+            } catch (\Exception $e) {
+                $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
+                $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+            }
+        } else {
+            $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
+            $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+        }
+
+        $query = BadLead::with(['lead', 'disposedBy'])
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('lead_name', 'like', '%'.$search.'%')
+                  ->orWhere('lead_phone', 'like', '%'.$search.'%')
+                  ->orWhere('notes', 'like', '%'.$search.'%');
+            });
+        }
+
+        $badLeads = $query->orderBy('created_at', 'desc')
+            ->paginate(50)
+            ->appends($request->query());
+
+        // KPI stats for the filtered period
+        $allBadInRange = BadLead::whereBetween('created_at', [$startDate, $endDate]);
+        $totalBad = (clone $allBadInRange)->count();
+        $dispositionCounts = BadLead::whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('disposition, COUNT(*) as cnt')
+            ->groupBy('disposition')
+            ->pluck('cnt', 'disposition')
+            ->toArray();
+
+        $badStats = [
+            'total' => $totalBad,
+            'no_answer' => $dispositionCounts['no_answer'] ?? 0,
+            'wrong_number' => $dispositionCounts['wrong_number'] ?? 0,
+            'not_interested' => $dispositionCounts['not_interested'] ?? 0,
+            'other' => $totalBad - ($dispositionCounts['no_answer'] ?? 0) - ($dispositionCounts['wrong_number'] ?? 0) - ($dispositionCounts['not_interested'] ?? 0),
+        ];
+
+        return view('ravens.bad-leads', compact('badLeads', 'badStats', 'filter', 'search'));
     }
 
     /**
@@ -968,7 +1131,7 @@ class RavensDashboardController extends Controller
 
     /**
      * Record that the current user dialed a lead.
-     * Uses upsert so re-dialing the same lead just updates the timestamp.
+     * Each dial attempt creates a NEW row so every call is counted.
      */
     public function recordDial(Request $request)
     {
@@ -978,16 +1141,12 @@ class RavensDashboardController extends Controller
                 'outcome' => 'nullable|string|in:dialed,no_answer,callback,connected,not_interested',
             ]);
 
-            $dial = LeadDial::updateOrCreate(
-                [
-                    'lead_id' => $request->input('lead_id'),
-                    'user_id' => Auth::id(),
-                ],
-                [
-                    'dialed_at' => now(),
-                    'outcome' => $request->input('outcome', 'dialed'),
-                ]
-            );
+            $dial = LeadDial::create([
+                'lead_id' => $request->input('lead_id'),
+                'user_id' => Auth::id(),
+                'dialed_at' => now(),
+                'outcome' => $request->input('outcome', 'dialed'),
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -1033,34 +1192,45 @@ class RavensDashboardController extends Controller
                 '#6610f2', // indigo
             ];
 
-            $dialMap = [];
+            // Group dials by lead+user: show one badge per user per lead
+            // with a count of how many times and the latest timestamp.
+            $raw = [];
             foreach ($dials as $dial) {
                 $userId = $dial->user_id;
-                $userName = $dial->user->name ?? 'Unknown';
-
-                // Assign color based on user ID (consistent across page loads)
-                if (!isset($userColors[$userId])) {
-                    $userColors[$userId] = $colorPalette[$userId % count($colorPalette)];
-                }
-
-                // Get initials from name
-                $parts = explode(' ', $userName);
-                $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
-
                 $leadId = $dial->lead_id;
-                if (!isset($dialMap[$leadId])) {
-                    $dialMap[$leadId] = [];
-                }
+                $key = $leadId . '-' . $userId;
 
-                $dialMap[$leadId][] = [
-                    'user_id' => $userId,
-                    'user_name' => $userName,
-                    'initials' => $initials,
-                    'color' => $userColors[$userId],
-                    'is_mine' => $userId === $currentUserId,
-                    'dialed_at' => $dial->dialed_at->format('g:i A'),
-                    'outcome' => $dial->outcome,
-                ];
+                if (!isset($raw[$key])) {
+                    $userName = $dial->user->name ?? 'Unknown';
+                    if (!isset($userColors[$userId])) {
+                        $userColors[$userId] = $colorPalette[$userId % count($colorPalette)];
+                    }
+                    $parts = explode(' ', $userName);
+                    $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+
+                    $raw[$key] = [
+                        'lead_id' => $leadId,
+                        'user_id' => $userId,
+                        'user_name' => $userName,
+                        'initials' => $initials,
+                        'color' => $userColors[$userId],
+                        'is_mine' => $userId === $currentUserId,
+                        'dialed_at' => $dial->dialed_at->format('g:i A'),
+                        'outcome' => $dial->outcome,
+                        'count' => 0,
+                    ];
+                }
+                $raw[$key]['count']++;
+                // Keep the latest time
+                if ($dial->dialed_at->format('g:i A') !== $raw[$key]['dialed_at']) {
+                    $raw[$key]['dialed_at'] = $dial->dialed_at->format('g:i A');
+                }
+            }
+
+            // Restructure into per-lead map
+            $dialMap = [];
+            foreach ($raw as $entry) {
+                $dialMap[$entry['lead_id']][] = $entry;
             }
 
             return response()->json([

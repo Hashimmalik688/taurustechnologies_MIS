@@ -19,28 +19,43 @@ class ChargebackController extends Controller
         $search = $request->get('search');
         $month = $request->get('month');
         $year = $request->get('year');
+        $date_from = $request->get('date_from');
+        $date_to = $request->get('date_to');
+
+        // Reusable filter closure
+        $applyFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('cn_name', 'like', "%{$search}%")
+                      ->orWhere('phone_number', 'like', "%{$search}%")
+                      ->orWhere('carrier_name', 'like', "%{$search}%")
+                      ->orWhere('closer_name', 'like', "%{$search}%");
+                });
+            }
+
+            if ($date_from) {
+                $query->whereDate('sale_date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $query->whereDate('sale_date', '<=', $date_to);
+            }
+
+            if (!$date_from && !$date_to) {
+                if ($month && $year) {
+                    $query->whereMonth('sale_date', $month)
+                          ->whereYear('sale_date', $year);
+                } elseif ($year) {
+                    $query->whereYear('sale_date', $year);
+                }
+            }
+
+            return $query;
+        };
 
         // Get chargebacks from leads table
         $query = Lead::where('status', 'chargeback')
             ->with(['insuranceCarrier', 'managedBy']);
-
-        // Apply search filter
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('cn_name', 'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%")
-                  ->orWhere('carrier_name', 'like', "%{$search}%")
-                  ->orWhere('closer_name', 'like', "%{$search}%");
-            });
-        }
-
-        // Apply month/year filter based on sale_date only if specified
-        if ($month && $year) {
-            $query->whereMonth('sale_date', $month)
-                  ->whereYear('sale_date', $year);
-        } elseif ($year) {
-            $query->whereYear('sale_date', $year);
-        }
+        $applyFilters($query);
 
         $chargebacks = $query->latest('sale_date')->paginate(50);
 
@@ -49,22 +64,7 @@ class ChargebackController extends Controller
         
         // Get total amount based on the same filter
         $totalQuery = Lead::where('status', 'chargeback');
-        
-        if ($search) {
-            $totalQuery->where(function($q) use ($search) {
-                $q->where('cn_name', 'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%")
-                  ->orWhere('carrier_name', 'like', "%{$search}%")
-                  ->orWhere('closer_name', 'like', "%{$search}%");
-            });
-        }
-        
-        if ($month && $year) {
-            $totalQuery->whereMonth('sale_date', $month)
-                       ->whereYear('sale_date', $year);
-        } elseif ($year) {
-            $totalQuery->whereYear('sale_date', $year);
-        }
+        $applyFilters($totalQuery);
         
         $total_amount = $totalQuery->sum('monthly_premium');
 
@@ -73,6 +73,8 @@ class ChargebackController extends Controller
             'search',
             'month',
             'year',
+            'date_from',
+            'date_to',
             'total_count',
             'total_amount'
         ));

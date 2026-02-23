@@ -5,242 +5,162 @@
 @endsection
 
 @section('css')
-<style>
-    .report-page { padding: 24px; }
-    .report-header { margin-bottom: 24px; }
-    .report-header h4 { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
-    .report-header p { color: #6c757d; margin: 0; }
+    @include('partials.pipeline-dashboard-styles')
+    @include('partials.sl-filter-assets')
+    <style>
+        .rp-page-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem }
+        .rp-page-hdr h5 { margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.4rem }
+        .rp-page-hdr h5 i { color:var(--bs-gold,#d4af37) }
+        .rp-page-hdr .rp-sub { font-size:.72rem;color:var(--bs-surface-500);margin-left:.2rem }
 
-    /* Report Type Tabs */
-    .report-type-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .report-type-btn {
-        padding: 8px 18px; border-radius: 8px; border: 1px solid #dee2e6;
-        background: #fff; color: #495057; cursor: pointer; font-size: 0.875rem; font-weight: 500;
-        transition: all 0.2s;
-    }
-    .report-type-btn:hover { border-color: #556ee6; color: #556ee6; }
-    .report-type-btn.active { background: #556ee6; color: #fff; border-color: #556ee6; }
+        /* Results table overrides */
+        .rp-results .results-header {
+            padding:.55rem .75rem;border-bottom:1px solid rgba(0,0,0,.05);
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        .rp-results .results-header h6 { margin:0;font-size:.78rem;font-weight:700 }
 
-    /* Filter Card */
-    .filter-card {
-        background: #fff; border: 1px solid #e9ecef; border-radius: 12px;
-        padding: 20px; margin-bottom: 20px;
-    }
-    .filter-card .filter-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 16px; cursor: pointer;
-    }
-    .filter-card .filter-header h6 { margin: 0; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
-    .filter-card .filter-header .toggle-icon { transition: transform 0.3s; }
-    .filter-card .filter-header.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .rp-empty { text-align:center;padding:3rem 1rem;color:var(--bs-surface-500) }
+        .rp-empty i { font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.25 }
+        .rp-empty h6 { font-size:.85rem;font-weight:700;margin-bottom:.25rem }
+        .rp-empty p { font-size:.72rem }
 
-    .filter-grid {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 14px;
-    }
-    .filter-group label { font-size: 0.8rem; font-weight: 600; color: #495057; margin-bottom: 4px; display: block; }
-    .filter-group select,
-    .filter-group input {
-        width: 100%; padding: 7px 12px; border: 1px solid #dee2e6; border-radius: 6px;
-        font-size: 0.85rem; background: #fff; color: #212529;
-    }
-    .filter-group select:focus,
-    .filter-group input:focus { border-color: #556ee6; outline: none; box-shadow: 0 0 0 2px rgba(85,110,230,0.15); }
+        .loading-overlay {
+            position:absolute;top:0;left:0;right:0;bottom:0;
+            background:rgba(255,255,255,.8);display:flex;align-items:center;
+            justify-content:center;z-index:10;border-radius:.55rem;
+        }
+        .loading-overlay .spinner-border { width:2rem;height:2rem }
 
-    .filter-actions { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
-    .filter-actions .btn { padding: 8px 20px; font-size: 0.85rem; border-radius: 6px; }
-
-    /* Summary Cards */
-    .summary-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
-    .summary-card {
-        background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 16px;
-        text-align: center;
-    }
-    .summary-card .summary-value { font-size: 1.4rem; font-weight: 700; color: #212529; }
-    .summary-card .summary-label { font-size: 0.78rem; color: #6c757d; margin-top: 2px; }
-
-    /* Results Table */
-    .results-card { background: #fff; border: 1px solid #e9ecef; border-radius: 12px; overflow: hidden; }
-    .results-card .results-header {
-        padding: 16px 20px; border-bottom: 1px solid #e9ecef;
-        display: flex; justify-content: space-between; align-items: center;
-    }
-    .results-card .results-header h6 { margin: 0; font-weight: 600; }
-    .results-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .results-table thead th {
-        padding: 10px 14px; text-align: left; font-weight: 600; color: #495057;
-        border-bottom: 2px solid #e9ecef; white-space: nowrap; font-size: 0.8rem;
-        cursor: pointer; user-select: none;
-    }
-    .results-table thead th:hover { color: #556ee6; }
-    .results-table tbody td {
-        padding: 10px 14px; border-bottom: 1px solid #f1f3f5; color: #212529;
-        white-space: nowrap;
-    }
-    .results-table tbody tr:hover { background: #f8f9ff; }
-
-    .status-badge {
-        padding: 3px 10px; border-radius: 20px; font-size: 0.75rem;
-        font-weight: 600; display: inline-block;
-    }
-    .status-sale { background: #d4edda; color: #155724; }
-    .status-pending { background: #fff3cd; color: #856404; }
-    .status-declined { background: #f8d7da; color: #721c24; }
-    .status-chargeback { background: #f8d7da; color: #721c24; }
-    .status-accepted { background: #d1ecf1; color: #0c5460; }
-    .status-default { background: #e9ecef; color: #495057; }
-
-    .empty-state { padding: 60px 20px; text-align: center; color: #6c757d; }
-    .empty-state i { font-size: 3rem; margin-bottom: 12px; display: block; color: #dee2e6; }
-
-    .loading-overlay {
-        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(255,255,255,0.8); display: flex; align-items: center;
-        justify-content: center; z-index: 10; border-radius: 12px;
-    }
-    .loading-overlay .spinner-border { width: 2.5rem; height: 2.5rem; }
-
-    .table-responsive { overflow-x: auto; }
-
-    @media (max-width: 768px) {
-        .filter-grid { grid-template-columns: 1fr 1fr; }
-        .summary-row { grid-template-columns: 1fr 1fr; }
-    }
-</style>
+        /* Status badges in results */
+        .rp-status { font-size:.62rem;font-weight:700;padding:.15rem .4rem;border-radius:1rem;display:inline-block;text-transform:uppercase;letter-spacing:.3px }
+        .rp-sale { background:rgba(52,195,143,.12);color:#1a8754 }
+        .rp-pending { background:rgba(241,180,76,.12);color:#b87a14 }
+        .rp-declined { background:rgba(244,106,106,.12);color:#c84646 }
+        .rp-chargeback { background:rgba(244,106,106,.12);color:#c84646 }
+        .rp-accepted { background:rgba(80,165,241,.12);color:#2b81c9 }
+        .rp-default { background:rgba(108,117,125,.08);color:#6c757d }
+    </style>
 @endsection
 
 @section('content')
-<div class="report-page">
-    <div class="report-header">
-        <h4><i class="bx bx-bar-chart-alt-2"></i> Reports</h4>
-        <p>Generate and export reports across leads, sales, partners, and more</p>
+    <div class="rp-page-hdr">
+        <h5>
+            <i class="bx bx-bar-chart-alt-2"></i> Reports
+            <span class="rp-sub">Generate &amp; export</span>
+        </h5>
+        <a href="{{ route('settings.hub') }}" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
+            <i class="bx bx-arrow-back"></i> Settings
+        </a>
     </div>
 
-    {{-- Report Type Selector --}}
-    <div class="report-type-tabs">
-        <button class="report-type-btn active" data-type="all">All Records</button>
-        <button class="report-type-btn" data-type="sales">Sales Report</button>
-        <button class="report-type-btn" data-type="partner">Partner Report</button>
-        <button class="report-type-btn" data-type="submissions">Manager Submissions</button>
-        <button class="report-type-btn" data-type="chargebacks">Chargebacks</button>
-        <button class="report-type-btn" data-type="retention">Retention</button>
-        <button class="report-type-btn" data-type="issuance">Issuance</button>
+    {{-- Report Type Pills --}}
+    <div class="ex-card pipe-filter-bar" style="margin-bottom:.65rem">
+        <span class="pipe-pill-lbl">Type</span>
+        <button class="pipe-pill active" data-type="all">All Records</button>
+        <button class="pipe-pill" data-type="sales">Sales</button>
+        <button class="pipe-pill" data-type="partner">Partner</button>
+        <button class="pipe-pill" data-type="submissions">Manager Submissions</button>
+        <button class="pipe-pill" data-type="chargebacks">Chargebacks</button>
+        <button class="pipe-pill" data-type="retention">Retention</button>
+        <button class="pipe-pill" data-type="issuance">Issuance</button>
     </div>
 
     {{-- Filters --}}
-    <div class="filter-card">
-        <div class="filter-header" id="filterToggle">
+    <div class="ex-card sec-card" style="margin-bottom:.65rem">
+        <div class="sec-hdr" id="filterToggle" style="cursor:pointer">
             <h6><i class="bx bx-filter-alt"></i> Filters</h6>
-            <i class="bx bx-chevron-down toggle-icon"></i>
+            <i class="bx bx-chevron-down" id="filterToggleIcon" style="font-size:1rem;opacity:.5;transition:transform .2s"></i>
         </div>
-        <div class="filter-body" id="filterBody">
+        <div class="sec-body" id="filterBody" style="padding:.75rem">
             <form id="reportForm">
                 <input type="hidden" name="report_type" id="reportType" value="all">
 
-                <div class="filter-grid">
-                    {{-- Closer --}}
-                    <div class="filter-group">
-                        <label>Closer</label>
-                        <select name="closer_id" id="closerFilter">
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.55rem">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Closer</label>
+                        <select name="closer_id" id="closerFilter" class="sl-pill-select">
                             <option value="">All Closers</option>
                             @foreach($closers as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Manager --}}
-                    <div class="filter-group">
-                        <label>Manager</label>
-                        <select name="manager_id" id="managerFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Manager</label>
+                        <select name="manager_id" id="managerFilter" class="sl-pill-select">
                             <option value="">All Managers</option>
                             @foreach($managers as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Carrier --}}
-                    <div class="filter-group">
-                        <label>Carrier</label>
-                        <select name="carrier_id" id="carrierFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Carrier</label>
+                        <select name="carrier_id" id="carrierFilter" class="sl-pill-select">
                             <option value="">All Carriers</option>
                             @foreach($carriers as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Partner --}}
-                    <div class="filter-group">
-                        <label>Partner</label>
-                        <select name="partner_id" id="partnerFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Partner</label>
+                        <select name="partner_id" id="partnerFilter" class="sl-pill-select">
                             <option value="">All Partners</option>
                             @foreach($partners as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Verifier --}}
-                    <div class="filter-group">
-                        <label>Verifier</label>
-                        <select name="verifier_id" id="verifierFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Verifier</label>
+                        <select name="verifier_id" id="verifierFilter" class="sl-pill-select">
                             <option value="">All Verifiers</option>
                             @foreach($verifiers as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Status --}}
-                    <div class="filter-group">
-                        <label>Lead Status</label>
-                        <select name="status" id="statusFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Lead Status</label>
+                        <select name="status" id="statusFilter" class="sl-pill-select">
                             <option value="">All Statuses</option>
                             @foreach($statuses as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Team --}}
-                    <div class="filter-group">
-                        <label>Team</label>
-                        <select name="team" id="teamFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Team</label>
+                        <select name="team" id="teamFilter" class="sl-pill-select">
                             <option value="">All Teams</option>
                             @foreach($teams as $team)
                                 <option value="{{ $team }}">{{ $team }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Source --}}
-                    <div class="filter-group">
-                        <label>Source</label>
-                        <select name="source" id="sourceFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Source</label>
+                        <select name="source" id="sourceFilter" class="sl-pill-select">
                             <option value="">All Sources</option>
                             @foreach($sources as $source)
                                 <option value="{{ $source }}">{{ $source }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- State --}}
-                    <div class="filter-group">
-                        <label>State</label>
-                        <select name="state" id="stateFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">State</label>
+                        <select name="state" id="stateFilter" class="sl-pill-select">
                             <option value="">All States</option>
                             @foreach($states as $state)
                                 <option value="{{ $state }}">{{ $state }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- QA Status --}}
-                    <div class="filter-group">
-                        <label>QA Status</label>
-                        <select name="qa_status" id="qaStatusFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">QA Status</label>
+                        <select name="qa_status" id="qaStatusFilter" class="sl-pill-select">
                             <option value="">All</option>
                             <option value="Good">Good</option>
                             <option value="Avg">Avg</option>
@@ -249,11 +169,9 @@
                             <option value="Pending">Pending</option>
                         </select>
                     </div>
-
-                    {{-- Manager Status --}}
-                    <div class="filter-group">
-                        <label>Manager Status</label>
-                        <select name="manager_status" id="managerStatusFilter">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Manager Status</label>
+                        <select name="manager_status" id="managerStatusFilter" class="sl-pill-select">
                             <option value="">All</option>
                             <option value="approved">Approved</option>
                             <option value="pending">Pending</option>
@@ -262,78 +180,78 @@
                             <option value="chargeback">Chargeback</option>
                         </select>
                     </div>
-
-                    {{-- Date Range --}}
-                    <div class="filter-group">
-                        <label>Created From</label>
-                        <input type="date" name="date_from" id="dateFrom">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Created From</label>
+                        <input type="text" name="date_from" id="dateFrom" class="pipe-pill-date sl-pill-date" placeholder="From">
                     </div>
-                    <div class="filter-group">
-                        <label>Created To</label>
-                        <input type="date" name="date_to" id="dateTo">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Created To</label>
+                        <input type="text" name="date_to" id="dateTo" class="pipe-pill-date sl-pill-date" placeholder="To">
                     </div>
-
-                    {{-- Sale Date Range --}}
-                    <div class="filter-group">
-                        <label>Sale Date From</label>
-                        <input type="date" name="sale_date_from" id="saleDateFrom">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Sale From</label>
+                        <input type="text" name="sale_date_from" id="saleDateFrom" class="pipe-pill-date sl-pill-date" placeholder="From">
                     </div>
-                    <div class="filter-group">
-                        <label>Sale Date To</label>
-                        <input type="date" name="sale_date_to" id="saleDateTo">
+                    <div>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Sale To</label>
+                        <input type="text" name="sale_date_to" id="saleDateTo" class="pipe-pill-date sl-pill-date" placeholder="To">
                     </div>
                 </div>
 
-                <div class="filter-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-search-alt me-1"></i> Generate Report
+                <div style="display:flex;gap:.4rem;margin-top:.65rem;align-items:center">
+                    <button type="submit" class="pipe-pill-apply" style="font-size:.72rem;padding:.3rem .75rem">
+                        <i class="bx bx-search-alt" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Generate
                     </button>
-                    <button type="button" class="btn btn-outline-secondary" id="resetFilters">
-                        <i class="bx bx-reset me-1"></i> Reset
+                    <button type="button" class="pipe-pill-clear" id="resetFilters">
+                        <i class="bx bx-reset"></i> Reset
                     </button>
-                    <button type="button" class="btn btn-outline-success" id="exportCsv">
-                        <i class="bx bx-download me-1"></i> Export CSV
+                    <button type="button" class="act-btn a-success" id="exportCsv" style="margin-left:auto">
+                        <i class="bx bx-download"></i> Export CSV
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Summary Cards --}}
-    <div class="summary-row" id="summaryRow" style="display: none;">
-        <div class="summary-card">
-            <div class="summary-value" id="summaryTotal">0</div>
-            <div class="summary-label">Total Records</div>
+    {{-- Summary KPIs --}}
+    <div class="kpi-row" id="summaryRow" style="display:none">
+        <div class="ex-card kpi-card k-gold">
+            <i class="bx bx-file k-icon"></i>
+            <div class="k-val" id="summaryTotal">0</div>
+            <div class="k-lbl">Records</div>
         </div>
-        <div class="summary-card">
-            <div class="summary-value" id="summaryPremium">$0</div>
-            <div class="summary-label">Total Premium</div>
+        <div class="ex-card kpi-card k-green">
+            <i class="bx bx-dollar-circle k-icon"></i>
+            <div class="k-val" id="summaryPremium">$0</div>
+            <div class="k-lbl">Premium</div>
         </div>
-        <div class="summary-card">
-            <div class="summary-value" id="summaryCoverage">$0</div>
-            <div class="summary-label">Total Coverage</div>
+        <div class="ex-card kpi-card k-blue">
+            <i class="bx bx-shield k-icon"></i>
+            <div class="k-val" id="summaryCoverage">$0</div>
+            <div class="k-lbl">Coverage</div>
         </div>
-        <div class="summary-card">
-            <div class="summary-value" id="summaryCommission">$0</div>
-            <div class="summary-label">Total Commission</div>
+        <div class="ex-card kpi-card k-purple">
+            <i class="bx bx-trending-up k-icon"></i>
+            <div class="k-val" id="summaryCommission">$0</div>
+            <div class="k-lbl">Commission</div>
         </div>
-        <div class="summary-card">
-            <div class="summary-value" id="summaryRevenue">$0</div>
-            <div class="summary-label">Total Revenue</div>
+        <div class="ex-card kpi-card k-teal">
+            <i class="bx bx-wallet k-icon"></i>
+            <div class="k-val" id="summaryRevenue">$0</div>
+            <div class="k-lbl">Revenue</div>
         </div>
     </div>
 
     {{-- Results --}}
-    <div class="results-card" id="resultsCard" style="position: relative;">
+    <div class="ex-card sec-card rp-results" id="resultsCard" style="position:relative">
         <div id="resultsContent">
-            <div class="empty-state">
+            <div class="rp-empty">
                 <i class="bx bx-bar-chart"></i>
                 <h6>Select filters and generate a report</h6>
-                <p>Use the filters above to customize your report, then click "Generate Report"</p>
+                <p>Use the filters above to customize your report</p>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @section('script')
@@ -345,10 +263,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const summaryRow = document.getElementById('summaryRow');
     const reportTypeInput = document.getElementById('reportType');
 
-    // Report type tabs
-    document.querySelectorAll('.report-type-btn').forEach(btn => {
+    // Report type pills
+    document.querySelectorAll('.pipe-pill[data-type]').forEach(btn => {
         btn.addEventListener('click', function() {
-            document.querySelectorAll('.report-type-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.pipe-pill[data-type]').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             reportTypeInput.value = this.dataset.type;
         });
@@ -357,9 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle filters
     document.getElementById('filterToggle').addEventListener('click', function() {
         const body = document.getElementById('filterBody');
+        const icon = document.getElementById('filterToggleIcon');
         const isVisible = body.style.display !== 'none';
         body.style.display = isVisible ? 'none' : 'block';
-        this.classList.toggle('collapsed', isVisible);
+        icon.style.transform = isVisible ? 'rotate(-90deg)' : '';
     });
 
     // Generate report
@@ -368,19 +287,19 @@ document.addEventListener('DOMContentLoaded', function() {
         loadReport();
     });
 
-    // Reset filters
+    // Reset
     document.getElementById('resetFilters').addEventListener('click', function() {
         form.reset();
-        document.querySelectorAll('.report-type-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('.report-type-btn[data-type="all"]').classList.add('active');
+        document.querySelectorAll('.pipe-pill[data-type]').forEach(b => b.classList.remove('active'));
+        document.querySelector('.pipe-pill[data-type="all"]').classList.add('active');
         reportTypeInput.value = 'all';
         summaryRow.style.display = 'none';
-        resultsContent.innerHTML = `
-            <div class="empty-state">
-                <i class="bx bx-bar-chart"></i>
-                <h6>Select filters and generate a report</h6>
-                <p>Use the filters above to customize your report, then click "Generate Report"</p>
-            </div>`;
+        // Reset custom dropdowns
+        document.querySelectorAll('.sl-cdd-trigger').forEach(t => {
+            const firstOpt = t.closest('.sl-cdd')?.querySelector('.sl-cdd-opt');
+            if (firstOpt) { t.textContent = firstOpt.textContent; }
+        });
+        resultsContent.innerHTML = '<div class="rp-empty"><i class="bx bx-bar-chart"></i><h6>Select filters and generate a report</h6><p>Use the filters above</p></div>';
     });
 
     // Export CSV
@@ -389,66 +308,47 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '{{ route("settings.reports.export") }}?' + params.toString();
     });
 
-    // Pagination clicks (delegated)
+    // Pagination
     document.addEventListener('click', function(e) {
         const link = e.target.closest('#resultsContent .pagination a');
-        if (link) {
-            e.preventDefault();
-            loadReport(link.href);
-        }
+        if (link) { e.preventDefault(); loadReport(link.href); }
     });
 
     function loadReport(url) {
         url = url || '{{ route("settings.reports.generate") }}';
-
-        // Show loading
         const loader = document.createElement('div');
         loader.className = 'loading-overlay';
-        loader.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+        loader.innerHTML = '<div class="spinner-border text-warning"><span class="visually-hidden">Loading...</span></div>';
         resultsCard.appendChild(loader);
 
         const formData = new FormData(form);
         const params = new URLSearchParams(formData);
-
-        // If URL already has query params (pagination), merge them
         const urlObj = new URL(url, window.location.origin);
         for (const [key, value] of params.entries()) {
-            if (!urlObj.searchParams.has(key)) {
-                urlObj.searchParams.set(key, value);
-            }
+            if (!urlObj.searchParams.has(key)) urlObj.searchParams.set(key, value);
         }
 
         fetch(urlObj.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             resultsContent.innerHTML = data.html;
-
-            // Update summary
             if (data.summary) {
-                summaryRow.style.display = 'grid';
+                summaryRow.style.display = 'flex';
                 document.getElementById('summaryTotal').textContent = Number(data.summary.total_records).toLocaleString();
-                document.getElementById('summaryPremium').textContent = '$' + Number(data.summary.total_premium).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                document.getElementById('summaryCoverage').textContent = '$' + Number(data.summary.total_coverage).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                document.getElementById('summaryCommission').textContent = '$' + Number(data.summary.total_commission).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                document.getElementById('summaryRevenue').textContent = '$' + Number(data.summary.total_revenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('summaryPremium').textContent = '$' + Number(data.summary.total_premium).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                document.getElementById('summaryCoverage').textContent = '$' + Number(data.summary.total_coverage).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                document.getElementById('summaryCommission').textContent = '$' + Number(data.summary.total_commission).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+                document.getElementById('summaryRevenue').textContent = '$' + Number(data.summary.total_revenue).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
             }
         })
         .catch(err => {
-            resultsContent.innerHTML = `
-                <div class="empty-state">
-                    <i class="bx bx-error-circle"></i>
-                    <h6>Error loading report</h6>
-                    <p>${err.message || 'Something went wrong. Please try again.'}</p>
-                </div>`;
+            resultsContent.innerHTML = '<div class="rp-empty"><i class="bx bx-error-circle"></i><h6>Error loading report</h6><p>' + (err.message || 'Something went wrong') + '</p></div>';
         })
         .finally(() => {
-            const overlay = resultsCard.querySelector('.loading-overlay');
-            if (overlay) overlay.remove();
+            const o = resultsCard.querySelector('.loading-overlay');
+            if (o) o.remove();
         });
     }
 });
