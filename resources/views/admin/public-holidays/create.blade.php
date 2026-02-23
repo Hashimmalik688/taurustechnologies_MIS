@@ -1,118 +1,76 @@
 @extends('layouts.master')
 
-@section('title')
-    Add Public Holiday
+@section('title', 'Add Holiday')
+
+@section('css')
+@include('partials.pipeline-dashboard-styles')
+@include('partials.sl-filter-assets')
+<style>
+    .form-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: .5rem; margin-bottom: .65rem;
+    }
+    .form-hdr h4 { font-size: 1.1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: .45rem; }
+    .form-hdr h4 i { color: #d4af37; font-size: 1.2rem; }
+    .f-label { font-size: .72rem; font-weight: 700; color: var(--bs-surface-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .25rem; }
+    .f-input {
+        width: 100%; font-size: .78rem; font-weight: 500; padding: .45rem .65rem;
+        border-radius: 12px; border: 1px solid rgba(0,0,0,.08);
+        background: var(--bs-card-bg); color: var(--bs-body-color);
+        outline: none; transition: border-color .15s;
+    }
+    .f-input:focus { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+    .f-input.is-invalid { border-color: #ef4444; }
+    textarea.f-input { resize: vertical; min-height: 80px; }
+    .f-switch { display: flex; align-items: center; gap: .5rem; font-size: .78rem; }
+    .f-switch .form-check-input:checked { background-color: #d4af37; border-color: #d4af37; }
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            <a href="{{ route('admin.public-holidays.index') }}">Public Holidays</a>
-        @endslot
-        @slot('title')
-            Add Holiday
-        @endslot
-    @endcomponent
+    <div class="form-hdr">
+        <h4><i class="bx bx-calendar-plus"></i> Add Holiday</h4>
+        <a href="{{ route('admin.public-holidays.index') }}" class="act-btn a-primary"><i class="mdi mdi-arrow-left"></i> Back</a>
+    </div>
 
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title mb-0">
-                        <i class="mdi mdi-calendar-plus me-2"></i>Add New Public Holiday
-                    </h4>
-                </div>
-                <div class="card-body">
+        <div class="col-lg-7 offset-lg-2">
+            <div class="ex-card sec-card">
+                <div class="pipe-hdr"><i class="mdi mdi-calendar-plus"></i> New Holiday</div>
+                <div class="sec-body">
                     <form action="{{ route('admin.public-holidays.store') }}" method="POST">
                         @csrf
 
                         <div class="mb-3">
-                            <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
-                            <input type="date" 
-                                   class="form-control @error('date') is-invalid @enderror" 
-                                   id="date" 
-                                   name="date" 
-                                   value="{{ old('date') }}" 
-                                   required>
-                            @error('date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="text-muted">Select the date of the public holiday</small>
+                            <label for="date" class="f-label">Date <span class="text-danger">*</span></label>
+                            <input type="text" class="f-input pipe-pill-date @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date') }}" placeholder="Select date" required>
+                            @error('date') <div class="invalid-feedback d-block" style="font-size:.7rem">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="name" class="form-label">Holiday Name <span class="text-danger">*</span></label>
-                            <input type="text" 
-                                   class="form-control @error('name') is-invalid @enderror" 
-                                   id="name" 
-                                   name="name" 
-                                   value="{{ old('name') }}" 
-                                   placeholder="e.g., New Year's Day, Eid ul-Fitr"
-                                   required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label for="name" class="f-label">Holiday Name <span class="text-danger">*</span></label>
+                            <input type="text" class="f-input @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="e.g., New Year's Day, Eid ul-Fitr" required>
+                            @error('name') <div class="invalid-feedback d-block" style="font-size:.7rem">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label">Description (Optional)</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                      id="description" 
-                                      name="description" 
-                                      rows="3" 
-                                      placeholder="Add any notes about this holiday...">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label for="description" class="f-label">Description</label>
+                            <textarea class="f-input @error('description') is-invalid @enderror" id="description" name="description" rows="3" placeholder="Optional description...">{{ old('description') }}</textarea>
+                            @error('description') <div class="invalid-feedback d-block" style="font-size:.7rem">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" 
-                                       type="checkbox" 
-                                       id="is_active" 
-                                       name="is_active" 
-                                       {{ old('is_active', true) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active">
-                                    Active (Attendance will be skipped on this day)
-                                </label>
+                            <div class="f-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {{ old('is_active', true) ? 'checked' : '' }}>
+                                <label for="is_active">Active (attendance will be skipped on this day)</label>
                             </div>
-                            <small class="text-muted">When active, employees won't be marked absent on this day</small>
                         </div>
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-check me-1"></i>Add Holiday
-                            </button>
-                            <a href="{{ route('admin.public-holidays.index') }}" class="btn btn-secondary">
-                                <i class="mdi mdi-close me-1"></i>Cancel
-                            </a>
+                        <div class="d-flex justify-content-between align-items-center" style="border-top:1px solid rgba(0,0,0,.05);padding-top:.75rem;margin-top:.5rem">
+                            <a href="{{ route('admin.public-holidays.index') }}" class="act-btn a-danger"><i class="mdi mdi-close"></i> Cancel</a>
+                            <button type="submit" class="act-btn a-success" style="padding:.3rem .8rem"><i class="mdi mdi-check"></i> Add Holiday</button>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            <!-- Quick Add Common Holidays -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="mdi mdi-lightbulb-outline me-2"></i>Common Holidays for {{ date('Y') }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Here are some common holidays you might want to add:</p>
-                    <ul class="list-unstyled">
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> New Year's Day (January 1)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Kashmir Day (February 5)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Pakistan Day (March 23)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Labour Day (May 1)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Independence Day (August 14)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Iqbal Day (November 9)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Quaid-e-Azam Day (December 25)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Eid ul-Fitr (Islamic calendar)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Eid ul-Adha (Islamic calendar)</li>
-                        <li class="mb-2"><i class="mdi mdi-circle-small text-primary"></i> Eid Milad un-Nabi (Islamic calendar)</li>
-                    </ul>
                 </div>
             </div>
         </div>

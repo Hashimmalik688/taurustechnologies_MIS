@@ -51,20 +51,16 @@ class RetentionDashboardController extends Controller
         }
         
         while ($cursor->lte($periodEnd)) {
-            // Skip if future date (only check if viewing current period)
-            // If cursor is beyond today, skip it (don't count future days)
             if ($cursor->gt($now)) {
                 $cursor->addDay();
                 continue;
             }
             
-            // Skip weekends
             if (in_array($cursor->dayOfWeek, [\Carbon\Carbon::SATURDAY, \Carbon\Carbon::SUNDAY])) {
                 $cursor->addDay();
                 continue;
             }
             
-            // Skip public holidays
             if (PublicHoliday::isHoliday($cursor)) {
                 $cursor->addDay();
                 continue;
@@ -99,8 +95,23 @@ class RetentionDashboardController extends Controller
             SUM(CASE WHEN status = 'chargeback' AND (retention_status IS NULL OR retention_status = 'pending') THEN 1 ELSE 0 END) as yet_to_retain,
             SUM(CASE WHEN retention_status = 'retained' AND DATE(retained_at) = ? THEN 1 ELSE 0 END) as retained_today,
             SUM(CASE WHEN retention_status = 'retained' AND MONTH(retained_at) = ? AND YEAR(retained_at) = ? THEN 1 ELSE 0 END) as retained_mtd,
-            SUM(CASE WHEN status = 'chargeback' AND is_rewrite = 1 THEN 1 ELSE 0 END) as rewrite_count
+            SUM(CASE WHEN status = 'chargeback' AND is_rewrite = 1 THEN 1 ELSE 0 END) as rewrite_count,
+            SUM(CASE WHEN retention_status = 'retained' THEN 1 ELSE 0 END) as total_retained
         ", [today()->toDateString(), now()->month, now()->year])->first();
+
+        // Fetch retained/rewritten leads for the table
+        $retainedLeads = Lead::where('retention_status', Statuses::RETENTION_RETAINED)
+            ->with(['insuranceCarrier', 'retentionOfficer'])
+            ->latest('retained_at')
+            ->limit(50)
+            ->get();
+
+        $rewriteLeads = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where('is_rewrite', true)
+            ->with(['insuranceCarrier', 'retentionOfficer'])
+            ->latest('sale_date')
+            ->limit(50)
+            ->get();
 
         $stats = [
             'total_chargebacks' => (int) ($retAgg->total_chargebacks ?? 0),
@@ -108,10 +119,11 @@ class RetentionDashboardController extends Controller
             'retained_today' => (int) ($retAgg->retained_today ?? 0),
             'retained_mtd' => (int) ($retAgg->retained_mtd ?? 0),
             'rewrite_count' => (int) ($retAgg->rewrite_count ?? 0),
+            'total_retained' => (int) ($retAgg->total_retained ?? 0),
             'attendance_summary' => $attendanceSummary,
             'today_status' => Attendance::where('user_id', $user->id)->whereDate('date', today())->first(),
         ];
 
-        return view('retention.dashboard', compact('stats'));
+        return view('retention.dashboard', compact('stats', 'retainedLeads', 'rewriteLeads'));
     }
 }

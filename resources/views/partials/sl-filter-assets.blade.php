@@ -288,6 +288,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // ═══ Flatpickr: attach to .pipe-pill-date (pipeline pages with Apply button) ═══
+    document.querySelectorAll('.pipe-pill-date').forEach(function(input) {
+        flatpickr(input, {
+            dateFormat: 'Y-m-d',
+            altInput: false,
+            allowInput: true,
+            disableMobile: true,
+            clickOpens: true
+        });
+    });
+
     // ═══ QA Bubble Select: color-coded status ═══
     function colorQaBubble(sel) {
         var map = { Pending: '#d97706', Good: '#059669', Avg: '#6366f1', Bad: '#dc2626' };

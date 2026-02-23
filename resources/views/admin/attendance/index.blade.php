@@ -2,429 +2,259 @@
 @use('App\Support\Statuses')
 @extends('layouts.master')
 
-@section('title')
-    Attendance Overview
-@endsection
+@section('title', 'Attendance Overview')
 
 @section('css')
-    <link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-    <style>
-        /* ── Compact CRM Attendance Styles ── */
+<link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+@include('partials.pipeline-dashboard-styles')
+@include('partials.sl-filter-assets')
+<style>
+    /* ── Attendance Overrides ── */
+    .att-hdr {
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: .5rem; margin-bottom: .65rem;
+    }
+    .att-hdr h4 { font-size: 1.1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: .45rem; }
+    .att-hdr h4 i { color: #d4af37; font-size: 1.2rem; }
+    .att-hdr p { margin: 2px 0 0; font-size: .72rem; color: var(--bs-surface-500); }
 
-        /* Stat mini-cards */
-        .stat-mini {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding: 0.6rem 0.85rem;
-            border-radius: 0.5rem;
-            background: var(--bs-card-bg);
-            border: 1px solid var(--bs-surface-200);
-            transition: box-shadow .15s;
-        }
-        .stat-mini:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
-        .stat-mini .stat-icon {
-            width: 36px; height: 36px;
-            border-radius: 0.45rem;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.05rem;
-            flex-shrink: 0;
-        }
-        .stat-mini .stat-info { line-height: 1.2; }
-        .stat-mini .stat-value { font-size: 1.15rem; font-weight: 700; }
-        .stat-mini .stat-label { font-size: 0.7rem; color: var(--bs-surface-500); text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
+    /* DataTable overrides */
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid rgba(0,0,0,.08); border-radius: 22px;
+        padding: .3rem .65rem; font-size: .72rem; width: 180px;
+    }
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.12); outline: none;
+    }
+    .dataTables_wrapper .dataTables_length label { font-size: .72rem; font-weight: 600; }
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid rgba(0,0,0,.08); border-radius: .3rem;
+        padding: .2rem 1.2rem .2rem .4rem; font-size: .72rem;
+    }
+    .dataTables_wrapper .dataTables_info { font-size: .68rem; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: .25rem .5rem; font-size: .68rem; border-radius: .3rem;
+        border: 1px solid rgba(0,0,0,.06); margin: 0 1px;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: linear-gradient(135deg, #d4af37, #e8c84a) !important;
+        color: #fff !important; border-color: #d4af37 !important;
+    }
 
-        /* Compact filter bar */
-        .filter-bar .card-body { padding: 0.65rem 0.85rem; }
-        .filter-bar .form-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; color: var(--bs-surface-500); margin-bottom: 0.15rem; }
-        .filter-bar .form-control,
-        .filter-bar .form-select { font-size: 0.82rem; padding: 0.3rem 0.5rem; height: auto; }
-        .filter-bar .btn { font-size: 0.78rem; padding: 0.3rem 0.65rem; }
+    /* Absent list */
+    .absent-row {
+        display: flex; align-items: center; gap: .5rem; padding: .35rem 0;
+        border-bottom: 1px solid rgba(0,0,0,.03);
+    }
+    .absent-row:last-child { border-bottom: none; }
+    .abs-avatar {
+        width: 26px; height: 26px; border-radius: 50%;
+        background: rgba(244,106,106,.12); color: #c84646;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .absent-row .abs-name { font-size: .75rem; font-weight: 600; flex: 1; }
 
-        /* Quick action pills */
-        .quick-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.45rem; }
-        .quick-actions .btn { font-size: 0.72rem; padding: 0.2rem 0.55rem; border-radius: 1rem; }
-
-        /* Compact DataTable */
-        .dataTables_wrapper .dataTables_filter { margin-bottom: 8px; }
-        .dataTables_wrapper .dataTables_filter input {
-            border: 1px solid var(--bs-surface-200);
-            border-radius: 0.3rem;
-            padding: 0.3rem 0.6rem;
-            width: 220px;
-            font-size: 0.82rem;
-        }
-        .dataTables_wrapper .dataTables_filter input:focus {
-            border-color: var(--bs-chart-primary);
-            box-shadow: 0 0 0 .15rem rgba(85,110,230,.12);
-            outline: none;
-        }
-        .dataTables_wrapper .dataTables_length { margin-bottom: 8px; }
-        .dataTables_wrapper .dataTables_length label { font-weight: 500; font-size: 0.8rem; }
-        .dataTables_wrapper .dataTables_length select {
-            border: 1px solid var(--bs-surface-200);
-            border-radius: 0.3rem;
-            padding: 0.25rem 1.5rem 0.25rem 0.5rem;
-            margin: 0 0.4rem;
-            font-size: 0.82rem;
-        }
-        .dataTables_wrapper .dataTables_info { padding-top: .8em; font-size: 0.78rem; }
-        .dataTables_wrapper .dataTables_paginate { padding-top: .8em; }
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.3rem 0.6rem;
-            margin: 0 2px;
-            border: 1px solid var(--bs-surface-200);
-            border-radius: 0.3rem;
-            font-size: 0.78rem;
-            font-weight: 500;
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--bs-chart-primary);
-            color: #fff !important;
-            border-color: var(--bs-chart-primary);
-        }
-        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
-            background: var(--bs-surface-50);
-            border-color: var(--bs-chart-primary);
-            color: var(--bs-chart-primary) !important;
-        }
-
-        /* Compact table */
-        #attendance-table { border-collapse: separate; border-spacing: 0; font-size: 0.82rem; }
-        #attendance-table thead th {
-            background: var(--bs-surface-100);
-            color: var(--bs-surface-600);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.68rem;
-            letter-spacing: .4px;
-            padding: 0.5rem 0.6rem;
-            border-bottom: 2px solid var(--bs-surface-200);
-            white-space: nowrap;
-        }
-        #attendance-table tbody tr { transition: background .15s; }
-        #attendance-table tbody tr:hover { background-color: var(--bs-surface-50); }
-        #attendance-table tbody td { vertical-align: middle; padding: 0.45rem 0.6rem; }
-        #attendance-table .avatar-xs { width: 28px; height: 28px; }
-        #attendance-table .avatar-title { font-size: 0.7rem; }
-
-        /* Sidebar cards */
-        .sidebar-card .card-header { padding: 0.55rem 0.85rem; }
-        .sidebar-card .card-header .card-title { font-size: 0.82rem; }
-        .sidebar-card .card-body { padding: 0.55rem 0.85rem; }
-
-        /* Absent employee row — compact */
-        .absent-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid var(--bs-surface-100); }
-        .absent-row:last-child { border-bottom: none; }
-        .absent-row .avatar-xs { width: 26px; height: 26px; }
-        .absent-row .avatar-title { font-size: 0.65rem; }
-        .absent-row h6 { font-size: 0.78rem; margin: 0; }
-        .absent-row p { font-size: 0.68rem; margin: 0; }
-
-        /* Soft buttons */
-        .btn-soft-primary {
-            background-color: rgba(85, 110, 230, 0.1);
-            border-color: transparent;
-            color: var(--bs-chart-primary);
-        }
-        .btn-soft-primary:hover { background-color: var(--bs-chart-primary); color: #fff; }
-        .btn-soft-danger {
-            background-color: rgba(244, 106, 106, 0.1);
-            border-color: transparent;
-            color: var(--bs-chart-danger);
-        }
-        .btn-soft-danger:hover { background-color: var(--bs-chart-danger); color: #fff; }
-
-        /* Weekly trend table */
-        .trend-table th, .trend-table td { font-size: 0.75rem; padding: 0.3rem 0.45rem; }
-        .trend-table .progress { height: 5px; }
-
-        /* Remove heavy card margins */
-        .attendance-page .card { margin-bottom: 0.65rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); border: 1px solid var(--bs-surface-100); }
-        .attendance-page .card .card-body { /* already scoped per context */ }
-        .attendance-page .card .card-header { background: transparent; border-bottom: 1px solid var(--bs-surface-100); }
-        .attendance-page .card-header .card-title { font-size: 0.85rem; font-weight: 600; }
-    </style>
+    /* Weekly trend */
+    .trend-tbl { width: 100%; font-size: .72rem; }
+    .trend-tbl th { font-size: .58rem; text-transform: uppercase; letter-spacing: .4px; color: var(--bs-surface-500); padding: .3rem .4rem; font-weight: 700; }
+    .trend-tbl td { padding: .3rem .4rem; }
+    .trend-tbl .progress { height: 4px; border-radius: 2px; }
+</style>
 @endsection
 
 @section('content')
-    @component('components.breadcrumb')
-        @slot('li_1')
-            Attendance
-        @endslot
-        @slot('title')
-            Overview
-        @endslot
-    @endcomponent
 
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show py-2 mb-2" role="alert">
-            <i class="mdi mdi-check-all me-1"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-2" role="alert" style="font-size:.78rem">
+            <i class="mdi mdi-check-all me-1"></i>{{ session('success') }}
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
         </div>
     @endif
-
     @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show py-2 mb-2" role="alert">
-            <i class="mdi mdi-block-helper me-1"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-danger alert-dismissible fade show py-2 mb-2" role="alert" style="font-size:.78rem">
+            <i class="mdi mdi-block-helper me-1"></i>{{ session('error') }}
+            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <div class="attendance-page">
-
-    <!-- Compact Filter Bar -->
-    <div class="card filter-bar mb-2">
-        <div class="card-body">
-            <form method="GET" action="{{ route('attendance.index') }}" id="filterForm">
-                <div class="row g-2 align-items-end">
-                    <div class="col-lg-2 col-md-3">
-                        <label class="form-label">Start Date</label>
-                        <input type="date" class="form-control" name="start_date"
-                            value="{{ $startDate }}" max="{{ date('Y-m-d') }}">
-                    </div>
-                    <div class="col-lg-2 col-md-3">
-                        <label class="form-label">End Date</label>
-                        <input type="date" class="form-control" name="end_date"
-                            value="{{ $endDate }}" max="{{ date('Y-m-d') }}">
-                    </div>
-                    <div class="col-lg-3 col-md-3">
-                        <label class="form-label">Employee</label>
-                        <input type="text" class="form-control" name="search_name"
-                            placeholder="Search name..." value="{{ $searchName ?? '' }}">
-                    </div>
-                    <div class="col-lg-2 col-md-2">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" name="status">
-                            <option value="">All</option>
-                            <option value="present" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_PRESENT ? 'selected' : '' }}>Present</option>
-                            <option value="late" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_LATE ? 'selected' : '' }}>Late</option>
-                            <option value="absent" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_ABSENT ? 'selected' : '' }}>Absent</option>
-                            <option value="half_day" {{ ($searchStatus ?? '') == 'half_day' ? 'selected' : '' }}>Half Day</option>
-                            <option value="paid_leave" {{ ($searchStatus ?? '') == 'paid_leave' ? 'selected' : '' }}>Paid Leave</option>
-                        </select>
-                    </div>
-                    <div class="col-lg-1 col-md-1">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="mdi mdi-magnify"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="quick-actions">
-                    <button type="button" class="btn btn-outline-secondary" id="prevDayBtn">
-                        <i class="mdi mdi-chevron-left"></i> Prev
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" id="nextDayBtn">
-                        Next <i class="mdi mdi-chevron-right"></i>
-                    </button>
-                    <a href="{{ route('attendance.index') }}" class="btn btn-outline-secondary">
-                        <i class="mdi mdi-refresh"></i> Reset
-                    </a>
-                    <a href="{{ route('attendance.history') }}" class="btn btn-outline-primary">
-                        <i class="mdi mdi-history"></i> History
-                    </a>
-                    <a href="{{ route('attendance.print-view') }}" class="btn btn-outline-success" target="_blank">
-                        <i class="mdi mdi-printer"></i> Print
-                    </a>
-                    @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#manualEntryModal">
-                        <i class="mdi mdi-plus"></i> Manual
-                    </button>
-                    @endif
-                </div>
-            </form>
+    <!-- Header -->
+    <div class="att-hdr">
+        <div>
+            <h4><i class="bx bx-time-five"></i> Attendance Overview</h4>
+            <p>Track daily check-ins, reports &amp; time records</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('attendance.history') }}" class="act-btn a-primary"><i class="mdi mdi-history"></i> History</a>
+            <a href="{{ route('attendance.print-view') }}" class="act-btn a-success" target="_blank"><i class="mdi mdi-printer"></i> Print</a>
+            @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+            <button type="button" class="act-btn a-warn" data-bs-toggle="modal" data-bs-target="#manualEntryModal"><i class="mdi mdi-plus"></i> Manual Entry</button>
+            @endif
         </div>
     </div>
 
-    <!-- Stat Mini-Cards -->
-    <div class="row g-2 mb-2">
-        <div class="col-xl-3 col-sm-6">
-            <div class="stat-mini">
-                <div class="stat-icon bg-primary-subtle text-primary">
-                    <i class="mdi mdi-account-group"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value">{{ $totalEmployees }}</div>
-                    <div class="stat-label">Total Staff</div>
-                </div>
-            </div>
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi-card k-gold">
+            <span class="k-icon"><i class="bx bx-group"></i></span>
+            <span class="k-val">{{ $totalEmployees }}</span>
+            <span class="k-lbl">Total Staff</span>
         </div>
-        <div class="col-xl-3 col-sm-6">
-            <div class="stat-mini">
-                <div class="stat-icon bg-success-subtle text-success">
-                    <i class="mdi mdi-check-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value text-success">{{ $presentCount }}</div>
-                    <div class="stat-label">Present <span class="text-muted">({{ $totalEmployees > 0 ? round(($presentCount / $totalEmployees) * 100) : 0 }}%)</span></div>
-                </div>
-            </div>
+        <div class="kpi-card k-green">
+            <span class="k-icon"><i class="bx bx-check-circle"></i></span>
+            <span class="k-val">{{ $presentCount }}</span>
+            <span class="k-lbl">Present ({{ $totalEmployees > 0 ? round(($presentCount/$totalEmployees)*100) : 0 }}%)</span>
         </div>
-        <div class="col-xl-3 col-sm-6">
-            <div class="stat-mini">
-                <div class="stat-icon bg-warning-subtle text-warning">
-                    <i class="mdi mdi-clock-alert"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value text-warning">{{ $lateCount }}</div>
-                    <div class="stat-label">Late <span class="text-muted">({{ $totalEmployees > 0 ? round(($lateCount / $totalEmployees) * 100) : 0 }}%)</span></div>
-                </div>
-            </div>
+        <div class="kpi-card k-warn">
+            <span class="k-icon"><i class="bx bx-time"></i></span>
+            <span class="k-val">{{ $lateCount }}</span>
+            <span class="k-lbl">Late ({{ $totalEmployees > 0 ? round(($lateCount/$totalEmployees)*100) : 0 }}%)</span>
         </div>
-        <div class="col-xl-3 col-sm-6">
-            <div class="stat-mini">
-                <div class="stat-icon bg-danger-subtle text-danger">
-                    <i class="mdi mdi-account-off"></i>
-                </div>
-                <div class="stat-info">
-                    <div class="stat-value text-danger">{{ $absentCount }}</div>
-                    <div class="stat-label">Absent <span class="text-muted">({{ $totalEmployees > 0 ? round(($absentCount / $totalEmployees) * 100) : 0 }}%)</span></div>
-                </div>
-            </div>
+        <div class="kpi-card k-red">
+            <span class="k-icon"><i class="bx bx-user-x"></i></span>
+            <span class="k-val">{{ $absentCount }}</span>
+            <span class="k-lbl">Absent ({{ $totalEmployees > 0 ? round(($absentCount/$totalEmployees)*100) : 0 }}%)</span>
         </div>
     </div>
+
+    <!-- Filter Bar -->
+    <form method="GET" action="{{ route('attendance.index') }}" id="filterForm">
+    <div class="ex-card pipe-filter-bar">
+        <span class="pipe-pill-lbl">DATE</span>
+        <input type="text" class="pipe-pill-date sl-pill-date" name="start_date" value="{{ $startDate }}" placeholder="Start date">
+        <span style="font-size:.65rem;color:var(--bs-surface-400)">TO</span>
+        <input type="text" class="pipe-pill-date sl-pill-date" name="end_date" value="{{ $endDate }}" placeholder="End date">
+
+        <span class="pipe-pill-lbl" style="margin-left:.5rem">EMPLOYEE</span>
+        <input type="text" class="pipe-pill-date" name="search_name" placeholder="Search name..." value="{{ $searchName ?? '' }}" style="min-width:140px">
+
+        <span class="pipe-pill-lbl" style="margin-left:.5rem">STATUS</span>
+        <select class="sl-pill-select" name="status" style="min-width:90px">
+            <option value="">All</option>
+            <option value="present" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_PRESENT ? 'selected' : '' }}>Present</option>
+            <option value="late" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_LATE ? 'selected' : '' }}>Late</option>
+            <option value="absent" {{ ($searchStatus ?? '') == Statuses::ATTENDANCE_ABSENT ? 'selected' : '' }}>Absent</option>
+            <option value="half_day" {{ ($searchStatus ?? '') == 'half_day' ? 'selected' : '' }}>Half Day</option>
+            <option value="paid_leave" {{ ($searchStatus ?? '') == 'paid_leave' ? 'selected' : '' }}>Paid Leave</option>
+        </select>
+
+        <button type="submit" class="pipe-pill-apply"><i class="mdi mdi-magnify"></i> Filter</button>
+
+        <div class="d-flex gap-1 ms-1">
+            <button type="button" class="pipe-pill" id="prevDayBtn"><i class="mdi mdi-chevron-left"></i> Prev</button>
+            <button type="button" class="pipe-pill" id="nextDayBtn">Next <i class="mdi mdi-chevron-right"></i></button>
+            <a href="{{ route('attendance.index') }}" class="pipe-pill-clear"><i class="mdi mdi-refresh"></i> Reset</a>
+        </div>
+    </div>
+    </form>
 
     <div class="row g-2">
-        <!-- Attendance Details Table -->
+        <!-- Main Table -->
         <div class="col-xl-8">
-            <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between py-2">
-                    <h4 class="card-title mb-0" style="font-size:.85rem">
-                        <i class="mdi mdi-table me-1"></i>
-                        @if($startDate == $endDate)
-                            {{ \Carbon\Carbon::parse($startDate)->format('M j, Y') }}
-                        @else
-                            {{ \Carbon\Carbon::parse($startDate)->format('M j') }} – {{ \Carbon\Carbon::parse($endDate)->format('M j, Y') }}
-                        @endif
-                    </h4>
-                    <span class="badge badge-soft-primary rounded-pill" style="font-size:.68rem">{{ $attendanceDetails->count() }} records</span>
+            <div class="ex-card sec-card">
+                <div class="pipe-hdr">
+                    <i class="mdi mdi-table"></i>
+                    @if($startDate == $endDate)
+                        {{ \Carbon\Carbon::parse($startDate)->format('M j, Y') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($startDate)->format('M j') }} – {{ \Carbon\Carbon::parse($endDate)->format('M j, Y') }}
+                    @endif
+                    <span class="badge-count">{{ $attendanceDetails->count() }} records</span>
                 </div>
-                <div class="card-body p-0">
+                <div class="sec-body" style="padding:0">
                     <div class="table-responsive">
-                        <table class="table table-centered table-nowrap mb-0" id="attendance-table">
+                        <table class="ex-tbl" id="attendance-table">
                             <thead>
                                 <tr>
-                                    <th>Employee</th>
-                                    <th>Login</th>
-                                    <th>Logout</th>
-                                    <th>Status</th>
-                                    <th>Hours</th>
-                                    <th>Action</th>
+                                    <th>Employee</th><th>Login</th><th>Logout</th><th>Status</th><th>Hours</th><th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($attendanceDetails as $attendance)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                @if($attendance->user)
-                                                <div class="avatar-xs me-2">
-                                                    <span class="avatar-title rounded-circle bg-primary-subtle text-primary">
-                                                        {{ substr($attendance->user->name, 0, 1) }}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <span class="fw-semibold" style="font-size:.82rem">{{ $attendance->user->name }}
-                                                        @if($attendance->user->trashed())
-                                                            <span class="badge bg-danger-subtle text-danger ms-1" style="font-size:.6rem">Ended</span>
-                                                        @endif
-                                                    </span>
-                                                </div>
-                                                @else
-                                                <span class="text-muted"><em>User Deleted</em></span>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            @if($attendance->user)
+                                            <div class="abs-avatar" style="background:rgba(85,110,230,.12);color:#556ee6">{{ substr($attendance->user->name, 0, 1) }}</div>
+                                            <span style="font-size:.78rem;font-weight:600">{{ $attendance->user->name }}
+                                                @if($attendance->user->trashed())
+                                                    <span class="s-pill s-declined" style="font-size:.5rem">Ended</span>
                                                 @endif
-                                            </div>
-                                        </td>
-                                        <td>
-                                            @if ($attendance->login_time)
-                                                <span class="badge badge-soft-info">
-                                                    {{ $attendance->date ? $attendance->date->format('M d, Y') : '' }}<br>
-                                                    {{ \Carbon\Carbon::parse($attendance->login_time)->format('g:i A') }}
-                                                </span>
+                                            </span>
                                             @else
-                                                <span class="text-muted">-</span>
+                                            <span class="text-muted"><em>Deleted</em></span>
                                             @endif
-                                        </td>
-                                        <td>
-                                            @if ($attendance->logout_time)
-                                                <span class="badge badge-soft-secondary">
-                                                    {{ \Carbon\Carbon::parse($attendance->logout_time)->format('M d, Y g:i A') }}
-                                                </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($attendance->login_time)
+                                            <span class="v-badge v-teal">{{ $attendance->date ? $attendance->date->format('M d') : '' }} {{ \Carbon\Carbon::parse($attendance->login_time)->format('g:i A') }}</span>
+                                        @else <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($attendance->logout_time)
+                                            <span class="v-badge v-gray">{{ \Carbon\Carbon::parse($attendance->logout_time)->format('M d g:i A') }}</span>
+                                        @else <span class="text-muted" style="font-size:.72rem">Still working</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $sPill = match($attendance->status) {
+                                                Statuses::ATTENDANCE_PRESENT => 's-sale',
+                                                Statuses::ATTENDANCE_LATE => 's-pending',
+                                                Statuses::ATTENDANCE_ABSENT => 's-declined',
+                                                'half_day' => 's-transferred',
+                                                'paid_leave' => 's-forwarded',
+                                                default => 's-closed'
+                                            };
+                                            $sLabel = match($attendance->status) {
+                                                Statuses::ATTENDANCE_PRESENT => 'On Time',
+                                                Statuses::ATTENDANCE_LATE => 'Late',
+                                                Statuses::ATTENDANCE_ABSENT => 'Absent',
+                                                'half_day' => 'Half Day',
+                                                'paid_leave' => 'Paid Leave',
+                                                default => $attendance->status
+                                            };
+                                        @endphp
+                                        <span class="s-pill {{ $sPill }}">{{ $sLabel }}</span>
+                                    </td>
+                                    <td>
+                                        @if($attendance->login_time)
+                                            @if($attendance->logout_time)
+                                                @php
+                                                    $loginTime = \Carbon\Carbon::parse($attendance->login_time);
+                                                    $logoutTime = \Carbon\Carbon::parse($attendance->logout_time);
+                                                    if ($logoutTime->lt($loginTime)) $logoutTime->addDay();
+                                                    $workingMinutes = $loginTime->diffInMinutes($logoutTime);
+                                                    $hours = floor($workingMinutes / 60);
+                                                    $minutes = $workingMinutes % 60;
+                                                @endphp
+                                                <span style="font-size:.75rem">{{ $hours }}h {{ $minutes }}m</span>
                                             @else
-                                                <span class="text-muted">Still working</span>
+                                                <span style="font-size:.75rem;color:#556ee6;font-weight:600">{{ $attendance->getFormattedCurrentWorkingHours() }}</span>
                                             @endif
-                                        </td>
-                                        <td>
-                                            @if ($attendance->status === Statuses::ATTENDANCE_PRESENT)
-                                                <span class="badge badge-soft-success">On Time</span>
-                                            @elseif($attendance->status === Statuses::ATTENDANCE_LATE)
-                                                <span class="badge badge-soft-warning">Late</span>
-                                            @elseif($attendance->status === Statuses::ATTENDANCE_ABSENT)
-                                                <span class="badge badge-soft-danger">Absent</span>
-                                            @elseif($attendance->status === 'half_day')
-                                                <span class="badge badge-soft-info">Half Day</span>
-                                            @elseif($attendance->status === 'paid_leave')
-                                                <span class="badge badge-soft-primary">Paid Leave</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($attendance->login_time)
-                                                @if ($attendance->logout_time)
-                                                    @php
-                                                        $loginTime = \Carbon\Carbon::parse($attendance->login_time);
-                                                        $logoutTime = \Carbon\Carbon::parse($attendance->logout_time);
-                                                        
-                                                        // Handle night shift - if logout is before login, add a day
-                                                        if ($logoutTime->lt($loginTime)) {
-                                                            $logoutTime->addDay();
-                                                        }
-                                                        
-                                                        $workingMinutes = $loginTime->diffInMinutes($logoutTime);
-                                                        $hours = floor($workingMinutes / 60);
-                                                        $minutes = $workingMinutes % 60;
-                                                    @endphp
-                                                    {{ $hours }}h {{ $minutes }}m
-                                                @else
-                                                    {{-- Still working - show live hours --}}
-                                                    <span class="text-primary fw-semibold">{{ $attendance->getFormattedCurrentWorkingHours() }}</span>
-                                                @endif
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @canEditModule('attendance')
-                                            <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-soft-primary" 
-                                                    onclick="editAttendance({{ $attendance->id }})" 
-                                                    title="Edit Attendance">
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </button>
-                                                @canDeleteInModule('attendance')
-                                                <button type="button" class="btn btn-sm btn-soft-danger" 
-                                                    onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user ? $attendance->user->name : 'Unknown User' }}', '{{ $attendance->date->format('M d, Y') }}')" 
-                                                    title="Delete Attendance">
-                                                    <i class="mdi mdi-delete"></i>
-                                                </button>
-                                                @endcanDeleteInModule
-                                            </div>
-                                            @else
-                                            <span class="text-muted">-</span>
-                                            @endcanEditModule
-                                        </td>
-                                    </tr>
+                                        @else <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @canEditModule('attendance')
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="act-btn a-primary" onclick="editAttendance({{ $attendance->id }})" title="Edit"><i class="mdi mdi-pencil"></i></button>
+                                            @canDeleteInModule('attendance')
+                                            <button type="button" class="act-btn a-danger" onclick="deleteAttendance({{ $attendance->id }}, '{{ $attendance->user ? $attendance->user->name : 'Unknown' }}', '{{ $attendance->date->format('M d, Y') }}')" title="Delete"><i class="mdi mdi-delete"></i></button>
+                                            @endcanDeleteInModule
+                                        </div>
+                                        @else <span class="text-muted">-</span>
+                                        @endcanEditModule
+                                    </td>
+                                </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <div class="text-muted">
-                                                <i class="mdi mdi-account-off-outline font-size-48 mb-3 d-block"></i>
-                                                No attendance records found for this date.
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <tr><td colspan="6" class="text-center py-4">
+                                    <i class="mdi mdi-account-off-outline" style="font-size:2rem;color:var(--bs-surface-300)"></i>
+                                    <p class="text-muted mt-1" style="font-size:.78rem">No attendance records found.</p>
+                                </td></tr>
                                 @endforelse
                             </tbody>
                         </table>
@@ -433,80 +263,50 @@
             </div>
         </div>
 
-        <!-- Sidebar: Absent & Trends -->
+        <!-- Sidebar -->
         <div class="col-xl-4">
-            <!-- Absent Employees -->
-            <div class="card sidebar-card">
-                <div class="card-header d-flex align-items-center justify-content-between py-2">
-                    <h4 class="card-title mb-0" style="font-size:.82rem">
-                        <i class="mdi mdi-account-off-outline me-1 text-danger"></i> Absent Today
-                    </h4>
-                    <span class="badge badge-soft-danger rounded-pill" style="font-size:.65rem">{{ $absentEmployees->count() }}</span>
+            <!-- Absent Today -->
+            <div class="ex-card sec-card" style="margin-bottom:.65rem">
+                <div class="pipe-hdr">
+                    <i class="mdi mdi-account-off-outline" style="color:#c84646"></i> Absent Today
+                    <span class="badge-count" style="background:rgba(244,106,106,.12);color:#c84646">{{ $absentEmployees->count() }}</span>
                 </div>
-                <div class="card-body" style="max-height: 260px; overflow-y: auto;">
+                <div class="sec-body" style="max-height:220px;overflow-y:auto">
                     @forelse($absentEmployees as $employee)
-                        <div class="absent-row">
-                            <div class="avatar-xs flex-shrink-0">
-                                <span class="avatar-title rounded-circle bg-danger-subtle text-danger">
-                                    {{ substr($employee->name, 0, 1) }}
-                                </span>
-                            </div>
-                            <div class="flex-grow-1 min-width-0">
-                                <h6 class="text-truncate">{{ $employee->name }}</h6>
-                            </div>
-                            <div class="dropdown flex-shrink-0">
-                                <a href="#" class="text-muted" data-bs-toggle="dropdown" style="font-size:.8rem">
-                                    <i class="mdi mdi-dots-vertical"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <a class="dropdown-item" href="#"
-                                        onclick="markManualAttendance({{ $employee->id }})">
-                                        <i class="mdi mdi-plus me-1"></i> Mark Present
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="absent-row">
+                        <div class="abs-avatar">{{ substr($employee->name, 0, 1) }}</div>
+                        <span class="abs-name">{{ $employee->name }}</span>
+                        <a href="#" class="act-btn a-success" onclick="markManualAttendance({{ $employee->id }})" style="font-size:.58rem"><i class="mdi mdi-plus"></i></a>
+                    </div>
                     @empty
-                        <div class="text-center text-muted py-2">
-                            <i class="mdi mdi-check-circle-outline d-block text-success" style="font-size:1.4rem"></i>
-                            <span style="font-size:.78rem">All present!</span>
-                        </div>
+                    <div class="text-center py-2">
+                        <i class="bx bx-check-circle" style="font-size:1.2rem;color:#1a8754"></i>
+                        <span style="font-size:.72rem;color:var(--bs-surface-500);display:block">All present!</span>
+                    </div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- Weekly Trends -->
-            <div class="card sidebar-card">
-                <div class="card-header py-2">
-                    <h4 class="card-title mb-0" style="font-size:.82rem">
-                        <i class="mdi mdi-chart-timeline-variant me-1 text-primary"></i> Weekly Trend
-                    </h4>
+            <!-- Weekly Trend -->
+            <div class="ex-card sec-card">
+                <div class="pipe-hdr">
+                    <i class="mdi mdi-chart-timeline-variant" style="color:#556ee6"></i> Weekly Trend
                 </div>
-                <div class="card-body p-0">
-                    <table class="table table-sm mb-0 trend-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Present</th>
-                                <th>Rate</th>
-                            </tr>
-                        </thead>
+                <div class="sec-body" style="padding:0">
+                    <table class="trend-tbl">
+                        <thead><tr><th>Date</th><th>Present</th><th>Rate</th></tr></thead>
                         <tbody>
                             @foreach ($weeklyStats as $stat)
-                                <tr>
-                                    <td>{{ $stat['date'] }}</td>
-                                    <td>
-                                        <span class="badge badge-soft-primary" style="font-size:.68rem">{{ $stat['present'] + $stat['late'] }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-1">
-                                            <div class="progress flex-grow-1" style="height:5px">
-                                                <div class="progress-bar bg-primary" style="width:{{ $stat['percentage'] }}%"></div>
-                                            </div>
-                                            <span style="font-size:.68rem;min-width:28px" class="text-muted">{{ $stat['percentage'] }}%</span>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>{{ $stat['date'] }}</td>
+                                <td><span class="v-badge v-blue">{{ $stat['present'] + $stat['late'] }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <div class="progress flex-grow-1" style="height:4px"><div class="progress-bar" style="width:{{ $stat['percentage'] }}%;background:#d4af37"></div></div>
+                                        <span style="font-size:.62rem;min-width:26px;color:var(--bs-surface-500)">{{ $stat['percentage'] }}%</span>
+                                    </div>
+                                </td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -515,20 +315,18 @@
         </div>
     </div>
 
-    </div><!-- /.attendance-page -->
-
     <!-- Manual Entry Modal -->
-    <div class="modal fade" id="manualEntryModal" tabindex="-1" aria-labelledby="manualEntryModalLabel" aria-hidden="true">
+    <div class="modal fade" id="manualEntryModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="manualEntryModalLabel">Manual Attendance Entry</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header modal-header-glass">
+                    <h5 class="modal-title" style="font-size:.88rem"><i class="mdi mdi-plus-circle me-1"></i> Manual Attendance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="manualEntryForm">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="employee_select" class="form-label">Employee</label>
+                            <label class="form-label">Employee</label>
                             <select class="form-select" id="employee_select" name="user_id" required>
                                 <option value="">Select Employee</option>
                                 @foreach ($allEmployees as $user)
@@ -537,33 +335,21 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="attendance_date" class="form-label">Date</label>
+                            <label class="form-label">Date</label>
                             <input type="date" class="form-control" id="attendance_date" name="date" required>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="login_time" class="form-label">Login Time</label>
-                                    <input type="time" class="form-control" id="login_time" name="login_time" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="logout_time" class="form-label">Logout Time</label>
-                                    <input type="time" class="form-control" id="logout_time" name="logout_time">
-                                </div>
-                            </div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Login Time</label><input type="time" class="form-control" id="login_time" name="login_time" required></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Logout Time</label><input type="time" class="form-control" id="logout_time" name="logout_time"></div>
                         </div>
- <div class="mb-3 d-none" id="overnight_shift_alert" >
-                            <div class="alert alert-info mb-0">
-                                <i class="mdi mdi-information me-2"></i>
-                                <strong>Overnight Shift Detected!</strong>
-                                <p class="mb-0 mt-1 small">This shift crosses midnight. It will be saved to the start date with correct duration calculation.</p>
-                                <p class="mb-0 small" id="shift_duration_display"></p>
+                        <div class="mb-3 d-none" id="overnight_shift_alert">
+                            <div style="padding:.5rem;border-radius:.4rem;background:rgba(80,165,241,.06);border:1px solid rgba(80,165,241,.2);font-size:.72rem;color:#2b81c9">
+                                <i class="mdi mdi-information me-1"></i><strong>Overnight Shift Detected!</strong>
+                                <p class="mb-0 mt-1" id="shift_duration_display" style="font-size:.68rem"></p>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="status_select" class="form-label">Status</label>
+                            <label class="form-label">Status</label>
                             <select class="form-select" id="status_select" name="status" required>
                                 <option value="present">Present</option>
                                 <option value="late">Late</option>
@@ -573,9 +359,9 @@
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Attendance</button>
+                    <div class="modal-footer border-top" style="background:rgba(212,175,55,.03)">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="act-btn a-success"><i class="mdi mdi-check"></i> Save</button>
                     </div>
                 </form>
             </div>
@@ -586,50 +372,32 @@
     <div class="modal fade" id="editAttendanceModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Attendance</h5>
+                <div class="modal-header modal-header-glass">
+                    <h5 class="modal-title" style="font-size:.88rem">Edit Attendance</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="editAttendanceForm" method="POST" action="#">
                     @csrf
                     <input type="hidden" id="edit_attendance_id" name="id">
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Employee</label>
-                            <input type="text" class="form-control" id="edit_employee_name" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit_date" class="form-label">Attendance Date</label>
-                            <input type="date" class="form-control" id="edit_date" required>
-                        </div>
+                        <div class="mb-3"><label class="form-label">Employee</label><input type="text" class="form-control" id="edit_employee_name" readonly></div>
+                        <div class="mb-3"><label class="form-label">Date</label><input type="date" class="form-control" id="edit_date" required></div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="edit_login" class="form-label">Login Time</label>
-                                    <input type="time" class="form-control" id="edit_login" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="edit_logout" class="form-label">Logout Time</label>
-                                    <input type="time" class="form-control" id="edit_logout">
-                                </div>
-                            </div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Login</label><input type="time" class="form-control" id="edit_login" required></div>
+                            <div class="col-md-6 mb-3"><label class="form-label">Logout</label><input type="time" class="form-control" id="edit_logout"></div>
                         </div>
                         <div class="mb-3">
-                            <label for="edit_status" class="form-label">Status</label>
+                            <label class="form-label">Status</label>
                             <select class="form-select" id="edit_status" required>
-                                <option value="present">Present</option>
-                                <option value="late">Late</option>
-                                <option value="absent">Absent</option>
-                                <option value="half_day">Half Day</option>
+                                <option value="present">Present</option><option value="late">Late</option>
+                                <option value="absent">Absent</option><option value="half_day">Half Day</option>
                                 <option value="paid_leave">Paid Leave</option>
                             </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                    <div class="modal-footer border-top" style="background:rgba(212,175,55,.03)">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="act-btn a-primary"><i class="mdi mdi-check"></i> Update</button>
                     </div>
                 </form>
             </div>
@@ -638,372 +406,121 @@
 @endsection
 
 @section('script')
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-    <!-- Flatpickr -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <script>
-        $(document).ready(function() {
-            // Safe DataTable initialization - only once per page load
-            if (window.attendanceTableInitialized) {
-                return; // Already initialized, skip
-            }
-            window.attendanceTableInitialized = true;
-            
-            var tableElement = $('#attendance-table');
-            
-            // Verify table exists and has proper structure
-            if (tableElement.length === 0) {
-                console.warn('Attendance table not found');
-                return;
-            }
-            
-            // Check if table has actual data rows (not just empty state)
-            var dataRows = tableElement.find('tbody tr:not(:has(td[colspan]))');
-            if (dataRows.length === 0) {
-                console.log('Table is empty, skipping DataTable initialization');
-                return;
-            }
-            
-            // If DataTable already exists, destroy it carefully
-            if ($.fn.DataTable.isDataTable('#attendance-table')) {
-                try {
-                    tableElement.DataTable().clear().destroy();
-                } catch (e) {
-                    console.warn('Error destroying existing DataTable:', e);
-                }
-            }
-            
-            // Initialize DataTable
-            try {
-                tableElement.DataTable({
-                    "pageLength": 25,
-                    "responsive": true,
-                    "order": [[1, "asc"]], // Sort by login time
-                    "columnDefs": [{
-                        "orderable": false,
-                        "targets": [5] // Disable sorting for action column
-                    }],
-                    "language": {
-                        "search": "Search:",
-                        "searchPlaceholder": "Type to filter...",
-                        "lengthMenu": "Show _MENU_ entries",
-                        "info": "Showing _START_ to _END_ of _TOTAL_ records",
-                        "infoEmpty": "No records available",
-                        "infoFiltered": "(filtered from _MAX_ total records)",
-                        "paginate": {
-                            "first": "First",
-                            "last": "Last",
-                            "next": "Next",
-                            "previous": "Previous"
-                        }
-                    },
-                    "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                           "<'row'<'col-sm-12'tr>>" +
-                           "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
-                });
-                console.log('DataTable initialized successfully');
-            } catch (e) {
-                console.error('DataTable initialization error:', e);
-            }
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    if (window.attendanceTableInitialized) return;
+    window.attendanceTableInitialized = true;
+    var t = $('#attendance-table');
+    if (t.length === 0) return;
+    var dataRows = t.find('tbody tr:not(:has(td[colspan]))');
+    if (dataRows.length === 0) return;
+    if ($.fn.DataTable.isDataTable('#attendance-table')) { try { t.DataTable().clear().destroy(); } catch(e) {} }
+    try {
+        t.DataTable({
+            pageLength: 25, responsive: true, order: [[1, "asc"]],
+            columnDefs: [{ orderable: false, targets: [5] }],
+            language: { search: "Search:", searchPlaceholder: "Type to filter...", lengthMenu: "Show _MENU_", info: "_START_-_END_ of _TOTAL_", infoEmpty: "No records", paginate: { next: "Next", previous: "Prev" } },
+            dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>"
         });
+    } catch(e) { console.error('DataTable error:', e); }
+});
 
-        // Overnight shift detection for manual entry
-        function checkOvernightShift() {
-            const loginTime = document.getElementById('login_time').value;
-            const logoutTime = document.getElementById('logout_time').value;
-            const alertDiv = document.getElementById('overnight_shift_alert');
-            const durationDisplay = document.getElementById('shift_duration_display');
-
-            if (loginTime && logoutTime) {
-                const [loginHour, loginMin] = loginTime.split(':').map(Number);
-                const [logoutHour, logoutMin] = logoutTime.split(':').map(Number);
-                
-                // Calculate if it's overnight (login in evening, logout in morning)
-                const isOvernight = loginHour >= 12 && logoutHour < 12;
-                
-                if (isOvernight) {
-                    // Calculate duration across midnight
-                    const loginMinutes = loginHour * 60 + loginMin;
-                    const logoutMinutes = (logoutHour + 24) * 60 + logoutMin; // Add 24h for next day
-                    const durationMinutes = logoutMinutes - loginMinutes;
-                    const hours = Math.floor(durationMinutes / 60);
-                    const minutes = durationMinutes % 60;
-                    
-                    durationDisplay.textContent = `Calculated Duration: ${hours}h ${minutes}m (${loginTime} → ${logoutTime} next day)`;
-                    alertDiv.style.display = 'block';
-                } else {
-                    alertDiv.style.display = 'none';
-                }
-            } else {
-                alertDiv.style.display = 'none';
-            }
+function checkOvernightShift() {
+    var l = document.getElementById('login_time').value, o = document.getElementById('logout_time').value;
+    var a = document.getElementById('overnight_shift_alert'), d = document.getElementById('shift_duration_display');
+    if (l && o) {
+        var lh = parseInt(l.split(':')[0]), oh = parseInt(o.split(':')[0]);
+        if (lh >= 12 && oh < 12) {
+            var lm = lh*60+parseInt(l.split(':')[1]), om = (oh+24)*60+parseInt(o.split(':')[1]);
+            var dur = om - lm; d.textContent = 'Duration: ' + Math.floor(dur/60) + 'h ' + (dur%60) + 'm';
+            a.style.display = 'block'; return;
         }
+    }
+    a.style.display = 'none';
+}
+document.getElementById('login_time')?.addEventListener('change', checkOvernightShift);
+document.getElementById('logout_time')?.addEventListener('change', checkOvernightShift);
 
-        // Add event listeners for time inputs
-        document.getElementById('login_time')?.addEventListener('change', checkOvernightShift);
-        document.getElementById('logout_time')?.addEventListener('change', checkOvernightShift);
+document.getElementById('manualEntryForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var fd = new FormData(this), btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    fetch('{{ route("attendance.mark-manual.post") }}', { method: 'POST', body: fd, headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })
+    .then(r => r.ok ? r.json() : r.text().then(t => { throw new Error(t); }))
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('manualEntryModal')).hide();
+            alert(data.message || 'Saved');
+            var cd = data.attendance?.date || document.getElementById('attendance_date').value;
+            window.location.href = '{{ route("attendance.index") }}?start_date=' + cd + '&end_date=' + cd;
+        } else { alert('Error: ' + (data.message || 'Failed')); btn.disabled = false; btn.textContent = 'Save'; }
+    }).catch(err => { alert('Error: ' + err.message); btn.disabled = false; btn.textContent = 'Save'; });
+});
 
-        // Filter by date
-        function filterByDate() {
-            const date = document.getElementById('attendance-date').value;
-            window.location.href = `{{ route('attendance.index') }}?date=${date}`;
-        }
+function markManualAttendance(userId) {
+    var now = new Date(), t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('employee_select').value = userId;
+    document.getElementById('attendance_date').value = '{{ date("Y-m-d") }}';
+    document.getElementById('login_time').value = t;
+    document.getElementById('status_select').value = 'late';
+    new bootstrap.Modal(document.getElementById('manualEntryModal')).show();
+}
 
-        // Manual entry form submission
-        document.getElementById('manualEntryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+function editAttendance(id) {
+    document.getElementById('editAttendanceForm').action = '/attendance/' + id + '/update';
+    fetch('/attendance/' + id + '/json').then(r => r.json()).then(data => {
+        if (data.success) {
+            document.getElementById('edit_attendance_id').value = data.attendance.id;
+            document.getElementById('edit_employee_name').value = data.attendance.user_name;
+            document.getElementById('edit_date').value = data.attendance.date;
+            document.getElementById('edit_login').value = data.attendance.login_time || '';
+            document.getElementById('edit_logout').value = data.attendance.logout_time || '';
+            document.getElementById('edit_status').value = data.attendance.status;
+            new bootstrap.Modal(document.getElementById('editAttendanceModal')).show();
+        } else alert('Error: ' + (data.message || 'Could not load'));
+    }).catch(err => alert('Error: ' + err.message));
+}
 
-            const formData = new FormData(this);
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const loginTime = document.getElementById('login_time').value;
-            const logoutTime = document.getElementById('logout_time').value;
-            
-            // Debug: Log form data
-            console.log('Manual Entry Form Data:', {
-                user_id: formData.get('user_id'),
-                date: formData.get('date'),
-                login_time: formData.get('login_time'),
-                logout_time: formData.get('logout_time'),
-                status: formData.get('status')
-            });
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Saving...';
+document.getElementById('editAttendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var id = document.getElementById('edit_attendance_id').value;
+    var payload = { date: document.getElementById('edit_date').value, login_time: document.getElementById('edit_login').value, logout_time: document.getElementById('edit_logout').value, status: document.getElementById('edit_status').value };
+    fetch('/attendance/' + id + '/update', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify(payload) })
+    .then(r => r.json()).then(data => {
+        if (data.success) { bootstrap.Modal.getInstance(document.getElementById('editAttendanceModal')).hide(); location.reload(); }
+        else alert('Error: ' + (data.message || 'Failed'));
+    }).catch(err => alert('Error: ' + err.message));
+});
 
-            // Check if it's an overnight shift
-            let isOvernightShift = false;
-            if (loginTime && logoutTime) {
-                const loginHour = parseInt(loginTime.split(':')[0]);
-                const logoutHour = parseInt(logoutTime.split(':')[0]);
-                // If login is evening (after 12pm) and logout is morning (before 12pm)
-                isOvernightShift = loginHour >= 12 && logoutHour < 12;
-            }
+function deleteAttendance(id, name, date) {
+    if (!confirm('Delete attendance for ' + name + ' on ' + date + '?')) return;
+    fetch('/attendance/' + id, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' } })
+    .then(r => r.json()).then(data => { if (data.success) { alert('Deleted'); location.reload(); } else alert('Error: ' + (data.message || 'Failed')); })
+    .catch(err => alert('Error: ' + err.message));
+}
 
-            fetch('{{ route('attendance.mark-manual.post') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(`HTTP ${response.status}: ${text}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Response data:', data);
-                    if (data.success) {
-                        // Close the modal
-                        bootstrap.Modal.getInstance(document.getElementById('manualEntryModal')).hide();
-                        
-                        // Show success message with overnight shift info
-                        let message = data.message;
-                        if (data.attendance && data.attendance.is_overnight) {
-                            message += `\n\nOvernight Shift Detected:\n` +
-                                      `Start: ${data.attendance.login_time}\n` +
-                                      `End: ${data.attendance.logout_time} (next day)\n` +
-                                      `Duration: ${data.attendance.duration_hours}h`;
-                        }
-                        alert(message);
-                        
-                        // Reload page with the date filter set to the created attendance date
-                        const createdDate = data.attendance.date || document.getElementById('attendance_date').value;
-                        window.location.href = `{{ route('attendance.index') }}?start_date=${createdDate}&end_date=${createdDate}`;
-                    } else {
-                        alert('Error: ' + (data.message || 'Failed to save attendance'));
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Save Attendance';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while saving attendance. Please check the console for details.');
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Save Attendance';
-                });
-        });
-
-        // Quick mark present for absent employees
-        function markManualAttendance(userId) {
-            const now = new Date();
-            const currentTime = now.getHours().toString().padStart(2, '0') + ':' +
-                now.getMinutes().toString().padStart(2, '0');
-
-            document.getElementById('employee_select').value = userId;
-            document.getElementById('attendance_date').value = '{{ date("Y-m-d") }}';
-            document.getElementById('login_time').value = currentTime;
-            document.getElementById('status_select').value = 'late';
-
-            new bootstrap.Modal(document.getElementById('manualEntryModal')).show();
-        }
-
-        // Edit Attendance
-        function editAttendance(id) {
-            console.log('Editing attendance ID:', id);
-            // Set form action to prevent default submission to current URL
-            document.getElementById('editAttendanceForm').action = `/attendance/${id}/update`;
-            
-            fetch(`/attendance/${id}/json`)
-                .then(res => {
-                    console.log('Response status:', res.status);
-                    if (!res.ok) {
-                        throw new Error('HTTP ' + res.status);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    console.log('Data received:', data);
-                    if (data.success) {
-                        document.getElementById('edit_attendance_id').value = data.attendance.id;
-                        document.getElementById('edit_employee_name').value = data.attendance.user_name;
-                        document.getElementById('edit_date').value = data.attendance.date;
-                        document.getElementById('edit_login').value = data.attendance.login_time || '';
-                        document.getElementById('edit_logout').value = data.attendance.logout_time || '';
-                        document.getElementById('edit_status').value = data.attendance.status;
-                        new bootstrap.Modal(document.getElementById('editAttendanceModal')).show();
-                    } else {
-                        alert('Error: ' + (data.message || 'Could not load attendance'));
-                    }
-                })
-                .catch(err => {
-                    console.error('Fetch error:', err);
-                    alert('Error loading attendance: ' + err.message);
-                });
-        }
-
-        document.getElementById('editAttendanceForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit_attendance_id').value;
-            const dateValue = document.getElementById('edit_date').value;
-            const loginValue = document.getElementById('edit_login').value;
-            const logoutValue = document.getElementById('edit_logout').value;
-            const statusValue = document.getElementById('edit_status').value;
-
-            console.log('Form values:', { id, dateValue, loginValue, logoutValue, statusValue });
-
-            if (!dateValue || !loginValue || !statusValue) {
-                alert('Please fill in all required fields (Date, Login Time, Status)');
-                return;
-            }
-
-            const payload = {
-                date: dateValue,
-                login_time: loginValue,
-                logout_time: logoutValue,
-                status: statusValue
-            };
-
-            console.log('Sending JSON payload:', payload);
-
-            fetch(`/attendance/${id}/update`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log('Update result:', data);
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('editAttendanceModal')).hide();
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Update failed'));
-                }
-            })
-            .catch(err => {
-                console.error('Update error:', err);
-                alert('Error: ' + err.message);
-            });
-        });
-
-        // Delete attendance record
-        function deleteAttendance(id, employeeName, date) {
-            if (!confirm(`Are you sure you want to delete attendance for ${employeeName} on ${date}?\n\nThis action cannot be undone.`)) {
-                return;
-            }
-
-            fetch(`/attendance/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Attendance record deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to delete attendance'));
-                }
-            })
-            .catch(err => {
-                console.error('Delete error:', err);
-                alert('Error deleting attendance: ' + err.message);
-            });
-        }
-
-        // Previous/Next Day Navigation
-        document.getElementById('prevDayBtn')?.addEventListener('click', function() {
-            const startDateInput = document.querySelector('input[name="start_date"]');
-            const endDateInput = document.querySelector('input[name="end_date"]');
-            
-            if (startDateInput && startDateInput.value) {
-                const [year, month, day] = startDateInput.value.split('-').map(Number);
-                const currentDate = new Date(year, month - 1, day);
-                currentDate.setDate(currentDate.getDate() - 1);
-                
-                const newYear = currentDate.getFullYear();
-                const newMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const newDay = String(currentDate.getDate()).padStart(2, '0');
-                const newDate = `${newYear}-${newMonth}-${newDay}`;
-                
-                startDateInput.value = newDate;
-                endDateInput.value = newDate;
-                
-                document.getElementById('filterForm').submit();
-            }
-        });
-
-        document.getElementById('nextDayBtn')?.addEventListener('click', function() {
-            const startDateInput = document.querySelector('input[name="start_date"]');
-            const endDateInput = document.querySelector('input[name="end_date"]');
-            
-            if (startDateInput && startDateInput.value) {
-                const [year, month, day] = startDateInput.value.split('-').map(Number);
-                const currentDate = new Date(year, month - 1, day);
-                currentDate.setDate(currentDate.getDate() + 1);
-                
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                // Don't allow navigation beyond today
-                if (currentDate <= today) {
-                    const newYear = currentDate.getFullYear();
-                    const newMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-                    const newDay = String(currentDate.getDate()).padStart(2, '0');
-                    const newDate = `${newYear}-${newMonth}-${newDay}`;
-                    
-                    startDateInput.value = newDate;
-                    endDateInput.value = newDate;
-                    
-                    document.getElementById('filterForm').submit();
-                } else {
-                    alert('Cannot navigate to future dates');
-                }
-            }
-        });
-    </script>
+document.getElementById('prevDayBtn')?.addEventListener('click', function() {
+    var s = document.querySelector('input[name="start_date"]'), e = document.querySelector('input[name="end_date"]');
+    if (s && s.value) {
+        var p = s.value.split('-').map(Number), d = new Date(p[0], p[1]-1, p[2]);
+        d.setDate(d.getDate() - 1);
+        var nd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        s.value = nd; e.value = nd; document.getElementById('filterForm').submit();
+    }
+});
+document.getElementById('nextDayBtn')?.addEventListener('click', function() {
+    var s = document.querySelector('input[name="start_date"]'), e = document.querySelector('input[name="end_date"]');
+    if (s && s.value) {
+        var p = s.value.split('-').map(Number), d = new Date(p[0], p[1]-1, p[2]);
+        d.setDate(d.getDate() + 1);
+        var today = new Date(); today.setHours(0,0,0,0);
+        if (d <= today) {
+            var nd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            s.value = nd; e.value = nd; document.getElementById('filterForm').submit();
+        } else alert('Cannot navigate to future');
+    }
+});
+</script>
 @endsection

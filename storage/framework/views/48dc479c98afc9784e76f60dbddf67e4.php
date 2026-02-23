@@ -9,8 +9,6 @@
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 0.6rem;
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     transition: box-shadow .2s;
 }
 .ex-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
@@ -177,6 +175,9 @@
     margin-bottom: 0.65rem;
     border-radius: 0.6rem;
     flex-wrap: wrap;
+    overflow: visible;
+    position: relative;
+    z-index: 10;
 }
 .pipe-pill {
     font-size: .72rem; font-weight: 600;

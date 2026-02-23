@@ -587,8 +587,10 @@
                                             <td>
                                                 @if($lead->closer_name)
                                                     <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
-                                                        <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                                    @if($lead->team === 'peregrine')
+                                                        <span class="badge bg-purple ms-1" title="Peregrine Team">Peregrine</span>
+                                                    @elseif($lead->team === 'ravens')
+                                                        <span class="badge bg-dark ms-1" title="Ravens Team"><i class="bx bxs-star me-1" style="font-size:.65rem"></i>Ravens</span>
                                                     @endif
                                                 @else
                                                     <span class="text-muted">—</span>
@@ -654,8 +656,10 @@
                                             <td>
                                                 @if($lead->closer_name)
                                                     <span class="badge bg-info">{{ $lead->closer_name }}</span>
-                                                    @if(isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
-                                                        <span class="badge bg-purple ms-1" title="Peregrine Closer">Peregrine</span>
+                                                    @if($lead->team === 'peregrine')
+                                                        <span class="badge bg-purple ms-1" title="Peregrine Team">Peregrine</span>
+                                                    @elseif($lead->team === 'ravens')
+                                                        <span class="badge bg-dark ms-1" title="Ravens Team"><i class="bx bxs-star me-1" style="font-size:.65rem"></i>Ravens</span>
                                                     @endif
                                                 @else
                                                     <span class="text-muted">—</span>

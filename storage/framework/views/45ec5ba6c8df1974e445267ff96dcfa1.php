@@ -52,308 +52,256 @@
     <!-- Menu -->
     <nav class="sidebar-menu">
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', Roles::RETENTION_OFFICER)): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('dashboard')): ?>
-                <a href="<?php echo e(route('retention.dashboard')); ?>" class="menu-item <?php echo e(Request::is('retention-dashboard*') ? 'active' : ''); ?>">
-                    <i class="bx bx-home-circle"></i>
-                    <span class="menu-text">Company Overview</span>
-                </a>
-            <?php endif; ?>
-
-            <?php if(auth()->check() && auth()->user()->canViewModule('retention')): ?>
-                <a href="<?php echo e(route('retention.index')); ?>" class="menu-item <?php echo e(Request::is('retention') || Request::is('retention/*') ? 'active' : ''); ?>">
-                    <i class="bx bx-refresh"></i>
-                    <span class="menu-text">Retention Management</span>
-                </a>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php if(auth()->check() && auth()->user()->canViewModule('dashboard')): ?>
+            <a href="<?php echo e(route('dashboard')); ?>" class="menu-item <?php echo e(Request::is('dashboard') || Request::is('retention-dashboard*') ? 'active' : ''); ?>">
+                <i class="bx bx-home-circle"></i>
+                <span class="menu-text">Company Overview</span>
+            </a>
+        <?php endif; ?>
 
         
-        <?php if (! \Illuminate\Support\Facades\Blade::check('role', [Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::RETENTION_OFFICER, Roles::QA, Roles::HR])): ?>
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', Roles::EMPLOYEE)): ?>
-                <!-- Employee only sees COMMUNICATION section below -->
-            <?php elseif (\Illuminate\Support\Facades\Blade::check('hasrole', Roles::RAVENS_CLOSER)): ?>
-                <!-- Ravens Closer sees same as Employee - attendance and chat only -->
-            <?php elseif (\Illuminate\Support\Facades\Blade::check('hasrole', Roles::QA)): ?>
-                <!-- QA only sees QA Review and COMMUNICATION section below -->
-            <?php elseif (\Illuminate\Support\Facades\Blade::check('hasrole', Roles::HR)): ?>
-                <!-- HR only sees Dock, Attendance, and Public Holidays -->
-            <?php else: ?>
-                <?php if(auth()->check() && auth()->user()->canViewModule('dashboard')): ?>
-                    <a href="<?php echo e(route('dashboard')); ?>" class="menu-item <?php echo e(Request::is('dashboard') ? 'active' : ''); ?>">
-                        <i class="bx bx-home-circle"></i>
-                        <span class="menu-text">Company Overview</span>
+        <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
+                <i class="bx bx-briefcase-alt"></i>
+                <span class="menu-text">Sales Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="misDropdown">
+                <?php if(auth()->check() && auth()->user()->canViewModule('leads-peregrine')): ?>
+                    <a href="<?php echo e(route('leads.peregrine')); ?>" class="dropdown-item <?php echo e(Request::is('leads/peregrine*') ? 'active' : ''); ?>">
+                        <i class="bx bx-user-voice"></i>
+                        <span class="menu-text">Peregrine Leads</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('leads')): ?>
+                    <a href="<?php echo e(route('leads.index')); ?>" class="dropdown-item <?php echo e(Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : ''); ?>">
+                        <i class="bx bx-briefcase"></i>
+                        <span class="menu-text">Raven Leads</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('qa-review')): ?>
+                    <a href="<?php echo e(route('qa.review')); ?>" class="dropdown-item <?php echo e(Request::is('qa*') ? 'active' : ''); ?>">
+                        <i class="bx bx-check-circle"></i>
+                        <span class="menu-text">QA Review</span>
                     </a>
                 <?php endif; ?>
 
                 <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
-                        <i class="bx bx-briefcase-alt"></i>
-                        <span class="menu-text">Sales Operations</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
+                    <a href="<?php echo e(route('sales.index')); ?>" class="dropdown-item <?php echo e(Request::is('sales*') ? 'active' : ''); ?>">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span class="menu-text">Sales Records</span>
                     </a>
-
-                    <div class="menu-dropdown" id="misDropdown">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])): ?>
-                            <?php if(auth()->check() && auth()->user()->canViewModule('leads-peregrine')): ?>
-                                <a href="<?php echo e(route('leads.peregrine')); ?>" class="dropdown-item <?php echo e(Request::is('leads/peregrine*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-user-voice"></i>
-                                    <span class="menu-text">Peregrine Leads</span>
-                                </a>
-                            <?php endif; ?>
-
-                            <?php if(auth()->check() && auth()->user()->canViewModule('leads')): ?>
-                                <a href="<?php echo e(route('leads.index')); ?>" class="dropdown-item <?php echo e(Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-briefcase"></i>
-                                    <span class="menu-text">Raven Leads</span>
-                                </a>
-                            <?php endif; ?>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::QA, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-                            <?php if(auth()->check() && auth()->user()->canViewModule('qa-review')): ?>
-                                <a href="<?php echo e(route('qa.review')); ?>" class="dropdown-item <?php echo e(Request::is('qa*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-check-circle"></i>
-                                    <span class="menu-text">QA Review</span>
-                                </a>
-                            <?php endif; ?>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-                        <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
-                            <a href="<?php echo e(route('sales.index')); ?>" class="dropdown-item <?php echo e(Request::is('sales*') ? 'active' : ''); ?>">
-                                <i class="bx bx-dollar-circle"></i>
-                                <span class="menu-text">Sales Records</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <?php if(auth()->check() && auth()->user()->canViewModule('issuance')): ?>
-                            <a href="<?php echo e(route('issuance.index')); ?>" class="dropdown-item <?php echo e(Request::is('issuance*') ? 'active' : ''); ?>">
-                                <i class="bx bx-send"></i>
-                                <span class="menu-text">Policy Submission</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-                            <?php if(auth()->check() && auth()->user()->canViewModule('bank-verification')): ?>
-                                <a href="<?php echo e(route('bank-verification.index')); ?>" class="dropdown-item <?php echo e(Request::is('bank-verification*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-check-shield"></i>
-                                    <span class="menu-text">Bank Verification</span>
-                                </a>
-                            <?php endif; ?>
-
-                            <?php if(auth()->check() && auth()->user()->canViewModule('revenue-analytics')): ?>
-                                <a href="<?php echo e(route('revenue-analytics.index')); ?>" class="dropdown-item <?php echo e(Request::is('revenue-analytics*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-line-chart"></i>
-                                    <span class="menu-text">Revenue Analytics</span>
-                                </a>
-                            <?php endif; ?>
-
-                            <?php if(auth()->check() && auth()->user()->canViewModule('live-analytics')): ?>
-                                <a href="<?php echo e(route('analytics.live')); ?>" class="dropdown-item <?php echo e(Request::is('analytics/live*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-line-chart"></i>
-                                    <span class="menu-text">Live Analytics</span>
-                                </a>
-                            <?php endif; ?>
-                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                    </div>
                 <?php endif; ?>
 
-                <?php if(auth()->check() && auth()->user()->canViewModule('retention')): ?>
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
-                        <i class="bx bx-refresh"></i>
-                        <span class="menu-text">Retention & Chargebacks</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
+                <?php if(auth()->check() && auth()->user()->canViewModule('issuance')): ?>
+                    <a href="<?php echo e(route('issuance.index')); ?>" class="dropdown-item <?php echo e(Request::is('issuance*') ? 'active' : ''); ?>">
+                        <i class="bx bx-send"></i>
+                        <span class="menu-text">Policy Submission</span>
                     </a>
-
-                    <div class="menu-dropdown" id="retentionDropdown">
-                        <a href="<?php echo e(route('retention.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('retention-dashboard*') ? 'active' : ''); ?>">
-                            <i class="bx bx-tachometer"></i>
-                            <span class="menu-text">Retention Dashboard</span>
-                        </a>
-
-                        <a href="<?php echo e(route('retention.index')); ?>" class="dropdown-item <?php echo e(Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : ''); ?>">
-                            <i class="bx bx-user-check"></i>
-                            <span class="menu-text">Manage Retention</span>
-                        </a>
-
-                        <a href="<?php echo e(route('chargebacks.index')); ?>" class="dropdown-item <?php echo e(Request::is('chargebacks*') ? 'active' : ''); ?>">
-                            <i class="bx bx-error-circle"></i>
-                            <span class="menu-text">Chargebacks</span>
-                        </a>
-                    </div>
                 <?php endif; ?>
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('bank-verification')): ?>
+                    <a href="<?php echo e(route('bank-verification.index')); ?>" class="dropdown-item <?php echo e(Request::is('bank-verification*') ? 'active' : ''); ?>">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Bank Verification</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('revenue-analytics')): ?>
+                    <a href="<?php echo e(route('revenue-analytics.index')); ?>" class="dropdown-item <?php echo e(Request::is('revenue-analytics*') ? 'active' : ''); ?>">
+                        <i class="bx bx-line-chart"></i>
+                        <span class="menu-text">Revenue Analytics</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('live-analytics')): ?>
+                    <a href="<?php echo e(route('analytics.live')); ?>" class="dropdown-item <?php echo e(Request::is('analytics/live*') ? 'active' : ''); ?>">
+                        <i class="bx bx-line-chart"></i>
+                        <span class="menu-text">Live Analytics</span>
+                    </a>
+                <?php endif; ?>
+            </div>
         <?php endif; ?>
 
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('peregrine')): ?>
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
-                    <i class="bx bx-shield-alt"></i>
-                    <span class="menu-text">Peregrine Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
+        <?php if(auth()->check() && auth()->user()->canViewModule('retention')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
+                <i class="bx bx-refresh"></i>
+                <span class="menu-text">Retention & Chargebacks</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="retentionDropdown">
+                <a href="<?php echo e(route('retention.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('retention-dashboard*') ? 'active' : ''); ?>">
+                    <i class="bx bx-tachometer"></i>
+                    <span class="menu-text">Retention Dashboard</span>
                 </a>
 
-                <div class="menu-dropdown" id="peregrineDropdown">
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::VERIFIER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])): ?>
-                        <?php if (! \Illuminate\Support\Facades\Blade::check('role', Roles::PEREGRINE_VALIDATOR)): ?>
-                            <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-dashboard')): ?>
-                                <a href="<?php echo e(route('verifier.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('verifier/dashboard') ? 'active' : ''); ?>">
-                                    <i class="bx bx-shield-alt"></i>
-                                    <span class="menu-text">Peregrine Dashboard</span>
-                                </a>
-                            <?php endif; ?>
-
-                            <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-verifier')): ?>
-                                <a href="<?php echo e(route('verifier.create.team', 'peregrine')); ?>" class="dropdown-item <?php echo e(Request::is('verifier*create*') ? 'active' : ''); ?>">
-                                    <i class="bx bx-edit-alt"></i>
-                                    <span class="menu-text">Verifier Form</span>
-                                </a>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::PEREGRINE_CLOSER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])): ?>
-                        <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-closers')): ?>
-                            <a href="<?php echo e(route('peregrine.closers.index')); ?>" class="dropdown-item <?php echo e(Request::is('peregrine/closers*') ? 'active' : ''); ?>">
-                                <i class="bx bx-shield-alt"></i>
-                                <span class="menu-text">Peregrine Closers</span>
-                            </a>
-                        <?php endif; ?>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])): ?>
-                        <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-validation')): ?>
-                            <a href="<?php echo e(route('validator.index')); ?>" class="dropdown-item <?php echo e(Request::is('validator*') ? 'active' : ''); ?>">
-                                <i class="bx bx-check-shield"></i>
-                                <span class="menu-text">Validation Dashboard</span>
-                            </a>
-                        <?php endif; ?>
-                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-        
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::RAVENS_CLOSER, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('ravens')): ?>
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
-                    <i class="bx bx-phone-call"></i>
-                    <span class="menu-text">Ravens Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="ravensDropdown">
-                    <?php if(auth()->check() && auth()->user()->canViewModule('ravens-dashboard')): ?>
-                        <a href="<?php echo e(route('ravens.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/dashboard') ? 'active' : ''); ?>">
-                            <i class="bx bx-phone-call"></i>
-                            <span class="menu-text">Ravens Dashboard</span>
-                        </a>
-                    <?php endif; ?>
-
-                    <?php if(auth()->check() && auth()->user()->canViewModule('ravens-calling')): ?>
-                        <a href="<?php echo e(route('ravens.calling')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/calling*') ? 'active' : ''); ?>">
-                            <i class="bx bx-phone"></i>
-                            <span class="menu-text">Ravens Calling</span>
-                        </a>
-                    <?php endif; ?>
-
-                    <?php if(auth()->check() && auth()->user()->canViewModule('ravens-bad-leads')): ?>
-                        <a href="<?php echo e(route('ravens.bad-leads')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/bad-leads*') ? 'active' : ''); ?>">
-                            <i class="bx bx-x-circle"></i>
-                            <span class="menu-text">Bad Leads</span>
-                        </a>
-                    <?php endif; ?>
-
-                    <?php if(auth()->check() && auth()->user()->canViewModule('ravens-followups')): ?>
-                        <a href="<?php echo e(route('followup.my-followups')); ?>" class="dropdown-item <?php echo e(Request::is('followup*') ? 'active' : ''); ?>">
-                            <i class="bx bx-task"></i>
-                            <span class="menu-text">My Followup & Bank Verification</span>
-                        </a>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('hr')): ?>
-                <a href="<?php echo e(route('hr.hub')); ?>" class="menu-item <?php echo e(Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('retention.index')); ?>" class="dropdown-item <?php echo e(Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : ''); ?>">
                     <i class="bx bx-user-check"></i>
-                    <span class="menu-text">HR Operations</span>
+                    <span class="menu-text">Manage Retention</span>
                 </a>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('chargebacks')): ?>
+                    <a href="<?php echo e(route('chargebacks.index')); ?>" class="dropdown-item <?php echo e(Request::is('chargebacks*') ? 'active' : ''); ?>">
+                        <i class="bx bx-error-circle"></i>
+                        <span class="menu-text">Chargebacks</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::CEO])): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('epms')): ?>
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
-                    <i class="bx bx-briefcase-alt"></i>
-                    <span class="menu-text">Project Management</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
+        <?php if(auth()->check() && auth()->user()->canViewModule('peregrine')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
+                <i class="bx bx-shield-alt"></i>
+                <span class="menu-text">Peregrine Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
 
-                <div class="menu-dropdown" id="epmsDropdown">
-                    <a href="<?php echo e(route('epms.index')); ?>" class="dropdown-item <?php echo e(Request::is('epms') && !Request::is('epms/*') ? 'active' : ''); ?>">
-                        <i class="bx bx-list-ul"></i>
-                        <span class="menu-text">All Projects</span>
+            <div class="menu-dropdown" id="peregrineDropdown">
+                <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-dashboard')): ?>
+                    <a href="<?php echo e(route('verifier.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('verifier/dashboard') ? 'active' : ''); ?>">
+                        <i class="bx bx-shield-alt"></i>
+                        <span class="menu-text">Peregrine Dashboard</span>
                     </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-verifier')): ?>
+                    <a href="<?php echo e(route('verifier.create.team', 'peregrine')); ?>" class="dropdown-item <?php echo e(Request::is('verifier*create*') ? 'active' : ''); ?>">
+                        <i class="bx bx-edit-alt"></i>
+                        <span class="menu-text">Verifier Form</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-closers')): ?>
+                    <a href="<?php echo e(route('peregrine.closers.index')); ?>" class="dropdown-item <?php echo e(Request::is('peregrine/closers*') ? 'active' : ''); ?>">
+                        <i class="bx bx-shield-alt"></i>
+                        <span class="menu-text">Peregrine Closers</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('peregrine-validation')): ?>
+                    <a href="<?php echo e(route('validator.index')); ?>" class="dropdown-item <?php echo e(Request::is('validator*') ? 'active' : ''); ?>">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Validation Dashboard</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        
+        <?php if(auth()->check() && auth()->user()->canViewModule('ravens')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
+                <i class="bx bx-phone-call"></i>
+                <span class="menu-text">Ravens Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="ravensDropdown">
+                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-dashboard')): ?>
+                    <a href="<?php echo e(route('ravens.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/dashboard') ? 'active' : ''); ?>">
+                        <i class="bx bx-phone-call"></i>
+                        <span class="menu-text">Ravens Dashboard</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-calling')): ?>
+                    <a href="<?php echo e(route('ravens.calling')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/calling*') ? 'active' : ''); ?>">
+                        <i class="bx bx-phone"></i>
+                        <span class="menu-text">Ravens Calling</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-bad-leads')): ?>
+                    <a href="<?php echo e(route('ravens.bad-leads')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/bad-leads*') ? 'active' : ''); ?>">
+                        <i class="bx bx-x-circle"></i>
+                        <span class="menu-text">Bad Leads</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-followups')): ?>
+                    <a href="<?php echo e(route('followup.my-followups')); ?>" class="dropdown-item <?php echo e(Request::is('followup*') ? 'active' : ''); ?>">
+                        <i class="bx bx-task"></i>
+                        <span class="menu-text">My Followup & Bank Verification</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        
+        <?php if(auth()->check() && auth()->user()->canViewModule('hr')): ?>
+            <a href="<?php echo e(route('hr.hub')); ?>" class="menu-item <?php echo e(Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : ''); ?>">
+                <i class="bx bx-user-check"></i>
+                <span class="menu-text">HR Operations</span>
+            </a>
+        <?php endif; ?>
+
+        
+        <?php if(auth()->check() && auth()->user()->canViewModule('epms')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
+                <i class="bx bx-briefcase-alt"></i>
+                <span class="menu-text">Project Management</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="epmsDropdown">
+                <a href="<?php echo e(route('epms.index')); ?>" class="dropdown-item <?php echo e(Request::is('epms') && !Request::is('epms/*') ? 'active' : ''); ?>">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-text">All Projects</span>
+                </a>
+                <?php if(auth()->check() && auth()->user()->canEditModule('epms')): ?>
                     <a href="<?php echo e(route('epms.create')); ?>" class="dropdown-item <?php echo e(Request::is('epms/create') ? 'active' : ''); ?>">
                         <i class="bx bx-plus-circle"></i>
                         <span class="menu-text">New Project</span>
                     </a>
-                </div>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-        
-        <?php if (! \Illuminate\Support\Facades\Blade::check('role', [Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER])): ?>
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO, Roles::MANAGER])): ?>
-                <?php if(auth()->check() && auth()->user()->canViewModule('partners')): ?>
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
-                        <i class="bx bx-group"></i>
-                        <span class="menu-text">Partner Management</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
-                    </a>
-
-                    <div class="menu-dropdown" id="partnersDropdown">
-                        <?php if(auth()->check() && auth()->user()->canViewModule('partners')): ?>
-                            <a href="<?php echo e(route('agents.index')); ?>" class="dropdown-item <?php echo e(Request::is('agents*') ? 'active' : ''); ?>">
-                                <i class="bx bx-user-circle"></i>
-                                <span class="menu-text">Partners</span>
-                            </a>
-                        <?php endif; ?>
-
-                        <?php if(auth()->check() && auth()->user()->canViewModule('carriers')): ?>
-                            <a href="<?php echo e(route('admin.insurance-carriers.index')); ?>" class="dropdown-item <?php echo e(Request::is('admin/insurance-carriers*') ? 'active' : ''); ?>">
-                                <i class="bx bx-buildings"></i>
-                                <span class="menu-text">Insurance Cluster</span>
-                            </a>
-                        <?php endif; ?>
-                    </div>
                 <?php endif; ?>
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-
-            
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-                <?php if(auth()->check() && auth()->user()->canViewModule('finance')): ?>
-                    <a href="<?php echo e(route('finance.hub')); ?>" class="menu-item <?php echo e(Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : ''); ?>">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Finance & Accounts</span>
-                    </a>
-                <?php endif; ?>
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </div>
         <?php endif; ?>
 
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])): ?>
-            <?php if(auth()->check() && auth()->user()->canViewModule('users')): ?>
-                <a href="<?php echo e(route('users.index')); ?>" class="menu-item <?php echo e(Request::is('users*') ? 'active' : ''); ?>">
-                    <i class="bx bx-user-circle"></i>
-                    <span class="menu-text">Users MGMT</span>
-                </a>
-            <?php endif; ?>
-        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php if(auth()->check() && auth()->user()->canViewModule('partners')): ?>
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
+                <i class="bx bx-group"></i>
+                <span class="menu-text">Partner Management</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="partnersDropdown">
+                <?php if(auth()->check() && auth()->user()->canViewModule('partners')): ?>
+                    <a href="<?php echo e(route('agents.index')); ?>" class="dropdown-item <?php echo e(Request::is('agents*') ? 'active' : ''); ?>">
+                        <i class="bx bx-user-circle"></i>
+                        <span class="menu-text">Partners</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('carriers')): ?>
+                    <a href="<?php echo e(route('admin.insurance-carriers.index')); ?>" class="dropdown-item <?php echo e(Request::is('admin/insurance-carriers*') ? 'active' : ''); ?>">
+                        <i class="bx bx-buildings"></i>
+                        <span class="menu-text">Insurance Cluster</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        
+        <?php if(auth()->check() && auth()->user()->canViewModule('finance')): ?>
+            <a href="<?php echo e(route('finance.hub')); ?>" class="menu-item <?php echo e(Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : ''); ?>">
+                <i class="bx bx-dollar-circle"></i>
+                <span class="menu-text">Finance & Accounts</span>
+            </a>
+        <?php endif; ?>
+
+        
+        <?php if(auth()->check() && auth()->user()->canViewModule('users')): ?>
+            <a href="<?php echo e(route('users.index')); ?>" class="menu-item <?php echo e(Request::is('users*') ? 'active' : ''); ?>">
+                <i class="bx bx-user-circle"></i>
+                <span class="menu-text">Users MGMT</span>
+            </a>
+        <?php endif; ?>
 
         
         <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'myRecordsDropdown')">
@@ -376,16 +324,14 @@
     </nav>
 
     
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', [Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])): ?>
-        <?php if(auth()->check() && auth()->user()->canViewModule('settings')): ?>
-            <div class="sidebar-bottom">
-                <a href="<?php echo e(route('settings.hub')); ?>" class="sidebar-bottom-item <?php echo e(Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : ''); ?>">
-                    <i class="bx bx-cog"></i>
-                    <span class="sidebar-bottom-text">Settings</span>
-                </a>
-            </div>
-        <?php endif; ?>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php if(auth()->check() && auth()->user()->canViewModule('settings')): ?>
+        <div class="sidebar-bottom">
+            <a href="<?php echo e(route('settings.hub')); ?>" class="sidebar-bottom-item <?php echo e(Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : ''); ?>">
+                <i class="bx bx-cog"></i>
+                <span class="sidebar-bottom-text">Settings</span>
+            </a>
+        </div>
+    <?php endif; ?>
 </div>
 
 <style>

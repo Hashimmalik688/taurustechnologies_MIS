@@ -41,12 +41,12 @@ class PublicHolidayController extends Controller
             ->unique(function($h) { return $h->date->format('Y-m-d'); })
             ->take(5);
         
-        return view('admin.holidays.index', compact('holidays', 'upcomingHolidays'));
+        return view('admin.public-holidays.index', compact('holidays', 'upcomingHolidays'));
     }
 
     public function create()
     {
-        return view('admin.holidays.create');
+        return view('admin.public-holidays.create');
     }
 
     public function store(Request $request)
@@ -62,13 +62,13 @@ class PublicHolidayController extends Controller
 
         PublicHoliday::create($validated);
 
-        return redirect()->route('admin.holidays.index')
+        return redirect()->route('admin.public-holidays.index')
             ->with('success', 'Public holiday added successfully.');
     }
 
     public function edit(PublicHoliday $holiday)
     {
-        return view('admin.holidays.edit', compact('holiday'));
+        return view('admin.public-holidays.edit', compact('holiday'));
     }
 
     public function update(Request $request, PublicHoliday $holiday)
@@ -84,7 +84,7 @@ class PublicHolidayController extends Controller
 
         $holiday->update($validated);
 
-        return redirect()->route('admin.holidays.index')
+        return redirect()->route('admin.public-holidays.index')
             ->with('success', 'Public holiday updated successfully.');
     }
 
@@ -92,7 +92,7 @@ class PublicHolidayController extends Controller
     {
         $holiday->delete();
 
-        return redirect()->route('admin.holidays.index')
+        return redirect()->route('admin.public-holidays.index')
             ->with('success', 'Public holiday deleted successfully.');
     }
 

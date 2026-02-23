@@ -184,6 +184,35 @@
     transition: border-color .15s;
 }
 .filter-form .f-input:focus { border-color: var(--bs-gold, #d4af37); box-shadow: 0 0 0 2px rgba(212,175,55,.1); }
+
+/* Pill-select & pill-date base */
+.sl-pill-select, .sl-pill-date {
+    font-size: .72rem; font-weight: 600;
+    padding: .32rem .55rem; border-radius: 22px !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    background: #fff; color: #475569;
+    cursor: pointer; outline: none;
+    transition: border-color .15s;
+}
+.sl-pill-select {
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .5rem center;
+    padding-right: 1.5rem;
+    max-width: 180px;
+}
+.sl-pill-select:focus, .sl-pill-date:focus { border-color: #d4af37 !important; box-shadow: 0 0 0 2px rgba(212,175,55,.12); }
+
+/* Dark mode — pill filters */
+[data-theme="dark"] .sl-pill-select,
+[data-theme="dark"] .sl-pill-date {
+    background: rgba(30,41,59,.8) !important; border-color: rgba(255,255,255,.1) !important; color: #cbd5e1;
+}
+[data-theme="dark"] .sl-pill-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E") !important;
+}
+
 .filter-form .f-btn {
     background: var(--bs-gold, #d4af37);
     border: none;
@@ -212,10 +241,19 @@
 
 /* Inline controls */
 .ex-tbl .form-select-sm {
-    border-radius: 0.4rem;
+    -webkit-appearance: none; -moz-appearance: none; appearance: none;
+    border-radius: 22px;
     font-size: 0.7rem;
-    padding: 0.2rem 0.4rem;
-    border: 1px solid var(--bs-surface-300);
+    font-weight: 600;
+    padding: 0.22rem 1.4rem 0.22rem 0.5rem;
+    border: 1px solid rgba(0,0,0,.08);
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .45rem center;
+    background-size: 8px 5px;
+    cursor: pointer;
+    color: inherit;
 }
 .ex-tbl .form-select-sm:focus {
     border-color: var(--bs-gold, #d4af37);
@@ -372,23 +410,23 @@
         </div>
         <form method="GET" action="{{ route('issuance.index') }}" class="filter-form">
             <input type="text" name="search" class="f-input" style="min-width:160px;" placeholder="Search name, phone, carrier..." value="{{ request('search') }}">
-            <select name="carrier" class="f-input">
+            <select name="carrier" class="sl-pill-select">
                 <option value="">All Carriers</option>
                 @foreach($carriers as $carrier)
                     <option value="{{ $carrier->id }}" {{ request('carrier') == $carrier->id ? 'selected' : '' }}>{{ $carrier->name }}</option>
                 @endforeach
             </select>
-            <select name="issuance_status" class="f-input">
+            <select name="issuance_status" class="sl-pill-select">
                 <option value="">All Status</option>
                 <option value="Issued" {{ request('issuance_status') == 'Issued' ? 'selected' : '' }}>Issued</option>
                 <option value="Incomplete" {{ request('issuance_status') == 'Incomplete' ? 'selected' : '' }}>Incomplete</option>
             </select>
-            <select name="followup_status" class="f-input">
+            <select name="followup_status" class="sl-pill-select">
                 <option value="">Followup</option>
                 <option value="Yes" {{ request('followup_status') == 'Yes' ? 'selected' : '' }}>Yes</option>
                 <option value="No" {{ request('followup_status') == 'No' ? 'selected' : '' }}>No</option>
             </select>
-            <select name="policy_type" class="f-input">
+            <select name="policy_type" class="sl-pill-select">
                 <option value="">Policy Type</option>
                 <option value="G.I" {{ request('policy_type') == 'G.I' ? 'selected' : '' }}>G.I</option>
                 <option value="Graded" {{ request('policy_type') == 'Graded' ? 'selected' : '' }}>Graded</option>
@@ -603,6 +641,8 @@
         </div>
     @endforeach
 @endsection
+
+@include('partials.sl-filter-assets')
 
 @section('script')
 <script>

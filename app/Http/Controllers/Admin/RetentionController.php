@@ -19,9 +19,11 @@ class RetentionController extends Controller
         $search = $request->get('search');
         $month = $request->get('month');
         $year = $request->get('year');
+        $date_from = $request->get('date_from');
+        $date_to = $request->get('date_to');
 
         // Base query builder helper
-        $applyFilters = function($query) use ($search, $month, $year) {
+        $applyFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
             if ($search) {
                 $query->where(function($q) use ($search) {
                     $q->where('cn_name', 'like', "%{$search}%")
@@ -31,11 +33,20 @@ class RetentionController extends Controller
                 });
             }
 
-            if ($month && $year) {
-                $query->whereMonth('sale_date', $month)
-                      ->whereYear('sale_date', $year);
-            } elseif ($year) {
-                $query->whereYear('sale_date', $year);
+            if ($date_from) {
+                $query->whereDate('sale_date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $query->whereDate('sale_date', '<=', $date_to);
+            }
+
+            if (!$date_from && !$date_to) {
+                if ($month && $year) {
+                    $query->whereMonth('sale_date', $month)
+                          ->whereYear('sale_date', $year);
+                } elseif ($year) {
+                    $query->whereYear('sale_date', $year);
+                }
             }
 
             return $query;
@@ -119,6 +130,8 @@ class RetentionController extends Controller
             'search',
             'month',
             'year',
+            'date_from',
+            'date_to',
             'cb_count',
             'rewrite_count',
             'yet_to_retain_count',

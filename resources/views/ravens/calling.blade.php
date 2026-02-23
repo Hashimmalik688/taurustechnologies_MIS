@@ -79,22 +79,104 @@
         .sl-result-count{font-size:.78rem;color:var(--bs-secondary-color)}
 
         /* ── Modal overrides ── */
-        .sl-modal .modal-content{border-radius:16px;overflow:hidden;border:none;box-shadow:0 8px 32px rgba(0,0,0,.12)}
-        .sl-modal .modal-header{background:linear-gradient(135deg,#d4af37,#c5a028);padding:.875rem 1.25rem}
-        .sl-modal .modal-header .modal-title{color:#fff;font-size:1rem;font-weight:600}
-        .sl-modal .modal-header .btn-close{filter:brightness(0) invert(1)}
-        .sl-modal .modal-body{padding:1.25rem}
-        .sl-modal .modal-footer{padding:.75rem 1.25rem;border-top:1px solid var(--bs-border-color);gap:.5rem}
-        .sl-modal .form-control,.sl-modal .form-select{border-radius:10px;font-size:.84rem;border-color:var(--bs-border-color)}
-        .sl-modal .form-control:focus,.sl-modal .form-select:focus{border-color:#d4af37;box-shadow:0 0 0 2px rgba(212,175,55,.15)}
-        .sl-modal .badge{border-radius:8px;font-size:.72rem;font-weight:600}
-        .sl-modal h5.text-gold{color:#d4af37!important;font-size:.95rem;font-weight:600}
-        .sl-modal .form-label{font-size:.8rem;margin-bottom:.25rem}
-        .sl-modal .alert{border-radius:10px;font-size:.84rem}
-        .sl-modal .btn{border-radius:10px}
+        .sl-modal .modal-content{border-radius:20px;overflow:hidden;border:none;box-shadow:0 12px 48px rgba(0,0,0,.18)}
+        .sl-modal .modal-header{background:linear-gradient(135deg,#d4af37 0%,#b8962e 50%,#d4af37 100%);background-size:200% 200%;animation:shimmerGold 3s ease infinite;padding:1rem 1.5rem;position:relative;overflow:hidden}
+        .sl-modal .modal-header::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 60%);pointer-events:none}
+        .sl-modal .modal-header .modal-title{color:#fff;font-size:1.05rem;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:.5rem}
+        .sl-modal .modal-header .btn-close{filter:brightness(0) invert(1);opacity:.8;transition:opacity .2s}
+        .sl-modal .modal-header .btn-close:hover{opacity:1}
+        .sl-modal .modal-body{padding:1.5rem;position:relative}
+        .sl-modal .modal-footer{padding:.75rem 1.25rem;border-top:1px solid rgba(0,0,0,.06);gap:.5rem;background:var(--bs-tertiary-bg,#fafafa)}
+        .sl-modal .form-control,.sl-modal .form-select{border-radius:12px;font-size:.82rem;border:1.5px solid rgba(0,0,0,.08);transition:all .25s;padding:.45rem .75rem}
+        .sl-modal .form-control:focus,.sl-modal .form-select:focus{border-color:#d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.12);transform:translateY(-1px)}
+        .sl-modal .badge{border-radius:8px;font-size:.68rem;font-weight:600;padding:.25rem .5rem}
+        .sl-modal h5.text-gold{color:#d4af37!important;font-size:.92rem;font-weight:700;display:flex;align-items:center;gap:.4rem}
+        .sl-modal .form-label{font-size:.78rem;margin-bottom:.3rem;font-weight:600;color:var(--bs-heading-color)}
+        .sl-modal .alert{border-radius:14px;font-size:.82rem;border:none}
+        .sl-modal .btn{border-radius:12px}
+
+        /* Phase transitions */
+        .phase-enter{animation:phaseSlideIn .35s cubic-bezier(.22,1,.36,1) forwards}
+        @keyframes phaseSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes shimmerGold{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+        /* Phase 1 — Call Connected */
+        .p1-wrap{text-align:center;padding:2.5rem 1rem}
+        .p1-ring{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(212,175,55,.04));display:inline-flex;align-items:center;justify-content:center;margin-bottom:1.25rem;position:relative;animation:ringPulse 2s ease-in-out infinite}
+        .p1-ring::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(212,175,55,.2);animation:ringExpand 2s ease-in-out infinite}
+        .p1-ring::after{content:'';position:absolute;inset:-14px;border-radius:50%;border:1.5px solid rgba(212,175,55,.08);animation:ringExpand 2s ease-in-out .4s infinite}
+        .p1-ring i{font-size:2.8rem;color:#d4af37;animation:phoneWiggle 1.2s ease-in-out infinite}
+        @keyframes ringPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+        @keyframes ringExpand{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.15);opacity:0}}
+        @keyframes phoneWiggle{0%,100%{transform:rotate(0deg)}15%{transform:rotate(12deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-4deg)}75%{transform:rotate(2deg)}}
+        .p1-name{font-size:1.4rem;font-weight:800;color:#d4af37;margin-bottom:.35rem;letter-spacing:.2px}
+        .p1-phone{font-size:1rem;font-weight:600;color:var(--bs-body-color);margin-bottom:.2rem;font-variant-numeric:tabular-nums}
+        .p1-status{font-size:.78rem;color:var(--bs-secondary-color);display:flex;align-items:center;justify-content:center;gap:.35rem;margin-bottom:1.5rem}
+        .p1-status .dot{width:7px;height:7px;border-radius:50%;background:#34c759;animation:dotBlink 1.4s infinite}
+        @keyframes dotBlink{0%,100%{opacity:1}50%{opacity:.3}}
+        .p1-cta{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff;border:none;border-radius:14px;padding:.65rem 2rem;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:inline-flex;align-items:center;gap:.45rem;box-shadow:0 4px 16px rgba(212,175,55,.25)}
+        .p1-cta:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,175,55,.35);color:#fff}
+        .p1-cta:active{transform:translateY(0)}
+
+        /* Phase field cards */
+        .ph-field{background:var(--bs-tertiary-bg,#f8f9fa);border-radius:14px;padding:.75rem .85rem;border:1.5px solid transparent;transition:all .25s}
+        .ph-field:hover{border-color:rgba(212,175,55,.15);background:rgba(212,175,55,.02)}
+        .ph-field:focus-within{border-color:rgba(212,175,55,.3);box-shadow:0 2px 12px rgba(212,175,55,.06)}
+        .ph-cur{display:flex;align-items:center;gap:.35rem;margin-bottom:.4rem;font-size:.72rem}
+        .ph-cur-tag{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff;font-size:.6rem;padding:.15rem .4rem;border-radius:6px;font-weight:700;letter-spacing:.3px}
+        .ph-cur-val{font-weight:700;color:var(--bs-heading-color);font-size:.78rem}
+        .ph-field label{font-size:.72rem!important;margin-bottom:.2rem!important;color:var(--bs-secondary-color)!important;font-weight:500!important}
+        .ph-field .form-control,.ph-field .form-select{border-radius:10px;font-size:.8rem;border:1.5px solid rgba(0,0,0,.06);background:var(--bs-card-bg,#fff)}
+
+        /* Section headers for Phase 3 */
+        .ph-section{display:flex;align-items:center;gap:.5rem;padding:.55rem .85rem;border-radius:12px;background:linear-gradient(135deg,rgba(212,175,55,.06),rgba(212,175,55,.02));border:1px solid rgba(212,175,55,.1);margin-top:.5rem}
+        .ph-section i{color:#d4af37;font-size:1.1rem}
+        .ph-section span{font-size:.85rem;font-weight:700;color:#d4af37}
+
+        /* Phase nav buttons */
+        .ph-nav{display:flex;justify-content:center;gap:.65rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,.04)}
+        .ph-nav-btn{border:none;border-radius:12px;padding:.5rem 1.2rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem}
+        .ph-nav-back{background:transparent;border:1.5px solid rgba(0,0,0,.1);color:var(--bs-body-color)}
+        .ph-nav-back:hover{border-color:#d4af37;color:#d4af37}
+        .ph-nav-next{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff;box-shadow:0 3px 12px rgba(212,175,55,.2)}
+        .ph-nav-next:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(212,175,55,.3);color:#fff}
+
+        /* Phase indicator dots */
+        .ph-dots{display:flex;justify-content:center;gap:.4rem;margin-bottom:1rem}
+        .ph-dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.1);transition:all .3s}
+        .ph-dot.active{width:24px;border-radius:8px;background:linear-gradient(135deg,#d4af37,#c5a028)}
+
+        /* Footer action buttons */
+        .mf-btn{border:none;border-radius:12px;padding:.45rem 1rem;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem;letter-spacing:.2px}
+        .mf-btn:hover{transform:translateY(-1px)}
+        .mf-dispose{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 2px 10px rgba(239,68,68,.2)}
+        .mf-dispose:hover{box-shadow:0 4px 16px rgba(239,68,68,.3);color:#fff}
+        .mf-end{background:var(--bs-body-color,#323a46);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+        .mf-end:hover{box-shadow:0 4px 14px rgba(0,0,0,.2);color:#fff}
+        .mf-save{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;box-shadow:0 2px 10px rgba(245,158,11,.2)}
+        .mf-save:hover{box-shadow:0 4px 16px rgba(245,158,11,.3);color:#fff}
+        .mf-submit{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;box-shadow:0 2px 10px rgba(34,197,94,.2)}
+        .mf-submit:hover{box-shadow:0 4px 16px rgba(34,197,94,.3);color:#fff}
+
+        /* Phase content tip alert */
+        .ph-tip{display:flex;align-items:center;gap:.55rem;padding:.6rem 1rem;border-radius:14px;font-size:.78rem;font-weight:500;margin-bottom:1rem}
+        .ph-tip-info{background:rgba(59,130,246,.06);color:#2563eb}
+        .ph-tip-info i{font-size:1.1rem;color:#3b82f6}
+        .ph-tip-success{background:rgba(34,197,94,.06);color:#16a34a}
+        .ph-tip-success i{font-size:1.1rem;color:#22c55e}
+
+        /* Beneficiary add button */
+        .ph-add-btn{border:1.5px dashed rgba(212,175,55,.3);background:transparent;border-radius:10px;padding:.35rem .8rem;font-size:.75rem;font-weight:600;color:#d4af37;cursor:pointer;transition:all .2s}
+        .ph-add-btn:hover{background:rgba(212,175,55,.04);border-color:#d4af37}
 
         /* Phase content */
         .sl-phase-title{font-size:2.5rem;color:var(--bs-success)}
+
+        /* Dropdown menu in footer */
+        .mf-dropdown .dropdown-menu{border-radius:14px;padding:.35rem;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+        .mf-dropdown .dropdown-item{border-radius:10px;font-size:.8rem;padding:.45rem .75rem;font-weight:500;transition:background .15s}
+        .mf-dropdown .dropdown-item:hover{background:rgba(239,68,68,.06);color:#dc2626}
+        .mf-dropdown .dropdown-item i{font-size:1rem;width:1.2rem;text-align:center}
 
         /* Auto-dial button states */
         .auto-dial-btn{position:relative;min-width:150px}
@@ -236,7 +318,7 @@
     </div>
 
     <!-- PHASED CALL POPUP MODAL -->
-    <div class="modal fade sl-modal" id="callDetailsModal" tabindex="-1">
+    <div class="modal fade sl-modal" id="callDetailsModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
@@ -245,708 +327,666 @@
                 </div>
                 <div class="modal-body" id="callModalBody">
 
+                    <!-- Phase Indicator Dots -->
+                    <div class="ph-dots" id="phaseIndicator">
+                        <span class="ph-dot active" data-phase="1"></span>
+                        <span class="ph-dot" data-phase="2"></span>
+                        <span class="ph-dot" data-phase="3"></span>
+                    </div>
+
                     <!-- PHASE 1: CALL CONNECTED -->
                     <div class="d-none" id="phase1">
-                        <div class="text-center py-5">
-                            <div class="mb-4">
-                                <i class="bx bx-phone-call sl-phase-title"></i>
+                        <div class="p1-wrap phase-enter">
+                            <div class="p1-ring">
+                                <i class="bx bx-phone-call"></i>
                             </div>
-                            <h3 class="mb-3" style="color:#d4af37" id="callerName">Connecting...</h3>
-                            <p class="lead mb-2" id="callerPhone"></p>
-                            <p class="text-muted">Call in progress</p>
-                            <button type="button" class="sl-btn sl-btn-gold mt-4" style="padding:.55rem 1.5rem;font-size:.9rem" onclick="goToPhase2()">
-                                Start Call Info <i class="bx bx-right-arrow-alt ms-1"></i>
+                            <div class="p1-name" id="callerName">Connecting...</div>
+                            <div class="p1-phone" id="callerPhone"></div>
+                            <div class="p1-status"><span class="dot"></span> Call in progress</div>
+                            <button type="button" class="p1-cta" onclick="goToPhase2()">
+                                Start Call Info <i class="bx bx-right-arrow-alt"></i>
                             </button>
                         </div>
                     </div>
 
                     <!-- PHASE 2: ESSENTIAL FIELDS -->
                     <div class="d-none" id="phase2">
-                        <div class="alert alert-info mb-3" style="border-radius:10px">
-                            <i class="bx bx-info-circle me-2"></i> <strong>Review and update information as needed</strong>
-                        </div>
-
-                        <div class="row g-3">
-                            <!-- Name -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayName">-</span></p>
-                                <label class="form-label small">Enter new name if changed</label>
-                                <input type="text" class="form-control" id="phase2_name" placeholder="Leave empty if no change">
+                        <div class="phase-enter">
+                            <div class="ph-tip ph-tip-info">
+                                <i class="bx bx-edit"></i> <span>Review and update the customer's information as needed</span>
                             </div>
 
-                            <!-- Phone Number -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayPhone">-</span></p>
-                                <label class="form-label small">Enter new phone if changed</label>
-                                <input type="text" class="form-control" id="phase2_phone" placeholder="Leave empty if no change">
-                            </div>
-
-                            <!-- Secondary Phone Number -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displaySecondaryPhone">-</span></p>
-                                <label class="form-label small">Secondary Phone</label>
-                                <input type="text" class="form-control" id="phase2_secondary_phone" placeholder="Leave empty if no change">
-                            </div>
-
-                            <!-- State -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayState">-</span></p>
-                                <label class="form-label small">State</label>
-                                <select class="form-select" id="phase2_state">
-                                    <option value="">Select State</option>
-                                    @foreach($usStates as $code => $name)
-                                        <option value="{{ $code }}">{{ $name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <!-- Zip Code -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayZipCode">-</span></p>
-                                <label class="form-label small">Zip Code</label>
-                                <input type="text" class="form-control" id="phase2_zip" placeholder="Leave empty if no change">
-                            </div>
-
-                            <!-- DOB -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayDOB">-</span></p>
-                                <label class="form-label small">Date of Birth</label>
-                                <input type="date" class="form-control" id="phase2_dob">
-                            </div>
-                            
-                            <!-- SSN -->
-                            <div class="col-md-6">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displaySSN">-</span></p>
-                                <label class="form-label small">SSN</label>
-                                <input type="text" class="form-control" id="phase2_ssn" placeholder="XXX-XX-XXXX">
-                            </div>
-
-                            <!-- Address -->
-                            <div class="col-12">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayAddress">-</span></p>
-                                <label class="form-label small">Address</label>
-                                <input type="text" class="form-control" id="phase2_address" placeholder="Enter address">
-                            </div>
-
-                            <!-- Emergency Contact -->
-                            <div class="col-12">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayEmergencyContact">-</span></p>
-                                <label class="form-label small">Emergency Contact</label>
-                                <input type="text" class="form-control" id="phase2_emergency_contact" placeholder="Leave empty if no change">
-                            </div>
-
-                            <!-- Beneficiary -->
-                            <div class="col-12">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-success fw-bold" id="displayBeneficiary">-</span></p>
-                                <label class="form-label small">Add/Update Beneficiaries</label>
-                                <div id="beneficiaries-container-ravens">
-                                    <!-- Beneficiaries will be populated dynamically -->
+                            <div class="row g-2">
+                                <!-- Name -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayName">-</span></div>
+                                        <label>Name</label>
+                                        <input type="text" class="form-control" id="phase2_name" placeholder="Leave empty if no change">
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline-success mt-2" onclick="window.addBeneficiaryRow()">
-                                    <i class="bx bx-plus"></i> Add Beneficiary
+
+                                <!-- Phone -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayPhone">-</span></div>
+                                        <label>Phone Number</label>
+                                        <input type="text" class="form-control" id="phase2_phone" placeholder="Leave empty if no change">
+                                    </div>
+                                </div>
+
+                                <!-- Secondary Phone -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displaySecondaryPhone">-</span></div>
+                                        <label>Secondary Phone</label>
+                                        <input type="text" class="form-control" id="phase2_secondary_phone" placeholder="Leave empty if no change">
+                                    </div>
+                                </div>
+
+                                <!-- State -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayState">-</span></div>
+                                        <label>State</label>
+                                        <select class="form-select" id="phase2_state">
+                                            <option value="">Select State</option>
+                                            @foreach($usStates as $code => $name)
+                                                <option value="{{ $code }}">{{ $name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Zip -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayZipCode">-</span></div>
+                                        <label>Zip Code</label>
+                                        <input type="text" class="form-control" id="phase2_zip" placeholder="Leave empty if no change">
+                                    </div>
+                                </div>
+
+                                <!-- DOB -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayDOB">-</span></div>
+                                        <label>Date of Birth</label>
+                                        <input type="date" class="form-control" id="phase2_dob">
+                                    </div>
+                                </div>
+
+                                <!-- SSN -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displaySSN">-</span></div>
+                                        <label>SSN</label>
+                                        <input type="text" class="form-control" id="phase2_ssn" placeholder="XXX-XX-XXXX">
+                                    </div>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayAddress">-</span></div>
+                                        <label>Address</label>
+                                        <input type="text" class="form-control" id="phase2_address" placeholder="Enter address">
+                                    </div>
+                                </div>
+
+                                <!-- Emergency Contact -->
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayEmergencyContact">-</span></div>
+                                        <label>Emergency Contact</label>
+                                        <input type="text" class="form-control" id="phase2_emergency_contact" placeholder="Leave empty if no change">
+                                    </div>
+                                </div>
+
+                                <!-- Beneficiary -->
+                                <div class="col-12">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayBeneficiary" style="color:#16a34a">-</span></div>
+                                        <label>Beneficiaries</label>
+                                        <div id="beneficiaries-container-ravens"></div>
+                                        <button type="button" class="ph-add-btn mt-2" onclick="window.addBeneficiaryRow()">
+                                            <i class="bx bx-plus"></i> Add Beneficiary
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Carrier -->
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayCarrier">-</span></div>
+                                        <label>Policy Carrier</label>
+                                        <select class="form-select" id="phase2_carrier">
+                                            <option value="">Select Carrier</option>
+                                            @foreach($insuranceCarriers as $carrier)
+                                                <option value="{{ $carrier }}">{{ $carrier }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Coverage -->
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayCoverage">-</span></div>
+                                        <label>Coverage Amount</label>
+                                        <input type="number" class="form-control" id="phase2_coverage" step="0.01" placeholder="Amount">
+                                    </div>
+                                </div>
+
+                                <!-- Premium -->
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="displayPremium">-</span></div>
+                                        <label>Monthly Premium</label>
+                                        <input type="number" class="form-control" id="phase2_premium" step="0.01" placeholder="Amount">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="ph-nav">
+                                <button type="button" class="ph-nav-btn ph-nav-back" onclick="goToPhase1()">
+                                    <i class="bx bx-left-arrow-alt"></i> Back
+                                </button>
+                                <button type="button" class="ph-nav-btn ph-nav-next" id="showMoreBtn" onclick="goToPhase3()">
+                                    Continue <i class="bx bx-right-arrow-alt"></i>
                                 </button>
                             </div>
-
-                            <!-- Policy Carrier -->
-                            <div class="col-md-4">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayCarrier">-</span></p>
-                                <label class="form-label small">Policy Carrier</label>
-                                <select class="form-select" id="phase2_carrier">
-                                    <option value="">Select Carrier</option>
-                                    @foreach($insuranceCarriers as $carrier)
-                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            
-                            <!-- Coverage Amount -->
-                            <div class="col-md-4">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayCoverage">-</span></p>
-                                <label class="form-label small">Coverage Amount</label>
-                                <input type="number" class="form-control" id="phase2_coverage" step="0.01" placeholder="Amount">
-                            </div>
-                            
-                            <!-- Monthly Premium -->
-                            <div class="col-md-4">
-                                <p class="mb-1"><span class="badge bg-info">Current</span> <span class="text-primary fw-bold" id="displayPremium">-</span></p>
-                                <label class="form-label small">Monthly Premium</label>
-                                <input type="number" class="form-control" id="phase2_premium" step="0.01" placeholder="Amount">
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button type="button" class="sl-btn sl-btn-outline me-2" onclick="goToPhase1()">
-                                <i class="bx bx-left-arrow-alt"></i> Back
-                            </button>
-                            <button type="button" class="sl-btn sl-btn-gold" id="showMoreBtn" onclick="goToPhase3()">
-                                Continue <i class="bx bx-right-arrow-alt"></i>
-                            </button>
                         </div>
                     </div>
 
                     <!-- PHASE 3: FULL DETAILS WITH CHANGE TRACKING -->
                     <div class="d-none" id="phase3">
-                        <div class="alert alert-success mb-3" style="border-radius:10px">
-                            <i class="bx bx-check-circle me-2"></i> All essential fields captured. Review and update complete information below.
-                        </div>
-
-                        <div class="row g-3">
-                            <!-- Personal Information Section -->
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold">Personal Information</h5>
+                        <div class="phase-enter">
+                            <div class="ph-tip ph-tip-success">
+                                <i class="bx bx-check-circle"></i> <span>Essential fields captured — review complete details below</span>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Name:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_name"></span>
+                            <div class="row g-2">
+                                <!-- Personal Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-user"></i><span>Personal Information</span></div></div>
+
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_name"></span></div>
+                                        <label>Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_name" placeholder="Enter new name if changed">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_name" placeholder="Enter new name if changed">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Phone Number:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_phone"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_phone"></span></div>
+                                        <label>Phone Number</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_phone" placeholder="Enter new phone if changed">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_phone" placeholder="Enter new phone if changed">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Secondary Phone:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_secondary_phone"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_secondary_phone"></span></div>
+                                        <label>Secondary Phone</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_secondary_phone" placeholder="Enter secondary phone">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_secondary_phone" placeholder="Enter secondary phone">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">State:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_state"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_state"></span></div>
+                                        <label>State</label>
+                                        <select class="form-select form-select-sm" id="change_state">
+                                            <option value="">Select State</option>
+                                            @foreach($usStates as $state)
+                                                <option value="{{ $state }}">{{ $state }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <select class="form-select form-select-sm" id="change_state">
-                                    <option value="">Select State</option>
-                                    @foreach($usStates as $state)
-                                        <option value="{{ $state }}">{{ $state }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Zip Code:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_zip"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_zip"></span></div>
+                                        <label>Zip Code</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_zip" placeholder="Enter zip code">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_zip" placeholder="Enter zip code">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Date of Birth:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_dob"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_dob"></span></div>
+                                        <label>Date of Birth</label>
+                                        <input type="date" class="form-control form-control-sm" id="change_dob">
+                                    </div>
                                 </div>
-                                <input type="date" class="form-control form-control-sm" id="change_dob">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Gender:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_gender"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_gender"></span></div>
+                                        <label>Gender</label>
+                                        <select class="form-select form-select-sm" id="change_gender">
+                                            <option value="">Select</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <select class="form-select form-select-sm" id="change_gender">
-                                    <option value="">Select</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Birth Place:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_birthplace"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_birthplace"></span></div>
+                                        <label>Birth Place</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_birthplace" placeholder="Enter birth place">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_birthplace" placeholder="Enter birth place">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">SSN:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_ssn"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_ssn"></span></div>
+                                        <label>SSN</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_ssn" placeholder="Enter SSN">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_ssn" placeholder="Enter SSN">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Smoker:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_smoker"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_smoker"></span></div>
+                                        <label>Smoker</label>
+                                        <select class="form-select form-select-sm" id="change_smoker">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <select class="form-select form-select-sm" id="change_smoker">
-                                    <option value="0">No</option>
-                                    <option value="1">Yes</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label fw-bold">Height:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_height"></span>
+                                <div class="col-md-2">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_height"></span></div>
+                                        <label>Height</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_height" placeholder="5'10&quot;">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_height" placeholder="e.g., 5'10&quot;">
-                            </div>
-
-                            <div class="col-md-2">
-                                <label class="form-label fw-bold">Weight:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_weight"></span>
+                                <div class="col-md-2">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_weight"></span></div>
+                                        <label>Weight</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_weight" placeholder="180">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_weight" placeholder="e.g., 180">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Driving License:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_driving_license"></span>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_driving_license"></span></div>
+                                        <label>Driving License</label>
+                                        <select class="form-select form-select-sm" id="change_driving_license">
+                                            <option value="">Select</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <select class="form-select form-select-sm" id="change_driving_license">
-                                    <option value="">Select</option>
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Address:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_address"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_address"></span></div>
+                                        <label>Address</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_address" placeholder="Enter address">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_address" placeholder="Enter address">
-                            </div>
-
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Emergency Contact:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_emergency_contact"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_emergency_contact"></span></div>
+                                        <label>Emergency Contact</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_emergency_contact" placeholder="Enter emergency contact">
+                                    </div>
                                 </div>
-                                <input type="text" class="form-control form-control-sm" id="change_emergency_contact" placeholder="Enter emergency contact">
-                            </div>
 
-                            <!-- Medical Information Section -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold">Medical Information</h5>
-                            </div>
+                                <!-- Medical Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-plus-medical"></i><span>Medical Information</span></div></div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Medical Issue:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_medical_issue"></span>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_medical_issue"></span></div>
+                                        <label>Medical Issue</label>
+                                        <textarea class="form-control form-control-sm" id="change_medical_issue" rows="2" placeholder="Enter medical issues"></textarea>
+                                    </div>
                                 </div>
-                                <textarea class="form-control form-control-sm" id="change_medical_issue" rows="2" placeholder="Enter medical issues"></textarea>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_medications"></span></div>
+                                        <label>Medications</label>
+                                        <textarea class="form-control form-control-sm" id="change_medications" rows="2" placeholder="Enter medications"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_doctor"></span></div>
+                                        <label>Doctor Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_doctor" placeholder="Enter doctor name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_doctor_phone"></span></div>
+                                        <label>Doctor Phone</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_doctor_phone" placeholder="Enter doctor phone">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_doctor_address"></span></div>
+                                        <label>Doctor Address</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_doctor_address" placeholder="Enter doctor address">
+                                    </div>
+                                </div>
+
+                                <!-- Policy Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-shield-quarter"></i><span>Policy Information</span></div></div>
+
+                                <div class="col-12">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_beneficiary"></span></div>
+                                        <label>Beneficiaries</label>
+                                        <div id="beneficiaries-container-phase3" class="mb-2"></div>
+                                        <button type="button" class="ph-add-btn" onclick="window.addBeneficiaryRowPhase3()">
+                                            <i class="bx bx-plus"></i> Add Beneficiary
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_policy_type"></span></div>
+                                        <label>Policy Type</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_policy_type" placeholder="Enter policy type">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_policy_number"></span></div>
+                                        <label>Policy Number</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_policy_number" placeholder="Enter policy number">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_carrier"></span></div>
+                                        <label>Carrier</label>
+                                        <select class="form-select form-select-sm" id="change_carrier">
+                                            <option value="">Select Carrier</option>
+                                            @foreach($insuranceCarriers as $carrier)
+                                                <option value="{{ $carrier }}">{{ $carrier }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_coverage"></span></div>
+                                        <label>Coverage Amount</label>
+                                        <input type="number" class="form-control form-control-sm" id="change_coverage" step="0.01" placeholder="Enter amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_premium"></span></div>
+                                        <label>Monthly Premium</label>
+                                        <input type="number" class="form-control form-control-sm" id="change_premium" step="0.01" placeholder="Enter amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_draft_date"></span></div>
+                                        <label>Initial Draft Date</label>
+                                        <input type="date" class="form-control form-control-sm" id="change_draft_date">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_future_draft_date"></span></div>
+                                        <label>Future Draft Date</label>
+                                        <input type="date" class="form-control form-control-sm" id="change_future_draft_date">
+                                    </div>
+                                </div>
+
+                                <!-- Banking Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-building-house"></i><span>Banking Information</span></div></div>
+
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_bank_name"></span></div>
+                                        <label>Bank Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_bank_name" placeholder="Enter bank name">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_account_title"></span></div>
+                                        <label>Account Title</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_account_title" placeholder="Enter account title">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_account_type"></span></div>
+                                        <label>Account Type</label>
+                                        <select class="form-select form-select-sm" id="change_account_type">
+                                            <option value="">Select</option>
+                                            <option value="Checking">Checking</option>
+                                            <option value="Savings">Savings</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_routing"></span></div>
+                                        <label>Routing Number</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_routing" placeholder="Enter routing number">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_account"></span></div>
+                                        <label>Account Number</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_account" placeholder="Enter account number">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_verified_by"></span></div>
+                                        <label>Verified By</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_verified_by" placeholder="Enter verifier name">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_balance"></span></div>
+                                        <label>Bank Balance</label>
+                                        <input type="number" class="form-control form-control-sm" id="change_balance" step="0.01" placeholder="Enter balance">
+                                    </div>
+                                </div>
+
+                                <!-- Card Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-credit-card"></i><span>Card Information</span></div></div>
+
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_card_number"></span></div>
+                                        <label>Card Number</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_card_number" placeholder="Enter card number">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_cvv"></span></div>
+                                        <label>CVV</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_cvv" placeholder="CVV" maxlength="4">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_expiry_date"></span></div>
+                                        <label>Expiry Date</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_expiry_date" placeholder="MM/YY">
+                                    </div>
+                                </div>
+
+                                <!-- Additional Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-info-circle"></i><span>Additional Information</span></div></div>
+
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_closer"></span></div>
+                                        <label>Closer Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_closer" placeholder="Changes (if any)">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_source"></span></div>
+                                        <label>Source</label>
+                                        <input type="text" class="form-control form-control-sm" id="change_source" placeholder="Lead source">
+                                    </div>
+                                </div>
+
+                                <!-- Sale Assignment -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-user-check"></i><span>Sale Assignment</span></div></div>
+
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <label>Policy Carrier</label>
+                                        <select class="form-select" id="phase3_policy_carrier" data-carrier-partner-info='@json($carrierPartnerData)'>
+                                            <option value="">Select Carrier</option>
+                                            @foreach($carrierPartnerData as $cp)
+                                                <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}" 
+                                                        data-carrier-name="{{ $cp['carrier_name'] }}" 
+                                                        data-partner-id="{{ $cp['partner_id'] }}"
+                                                        data-partner-name="{{ $cp['partner_name'] }}"
+                                                        data-states='@json($cp['states'])'>
+                                                    {{ $cp['display_name'] }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ph-field">
+                                        <label>State</label>
+                                        <select class="form-select" id="phase3_approved_state">
+                                            <option value="">Select Carrier First</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Partner Information -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-briefcase"></i><span>Partner Information</span></div></div>
+
+                                <div class="col-md-12">
+                                    <div class="ph-field">
+                                        <label>Assigned Partner</label>
+                                        <input type="text" class="form-control" id="phase3_assigned_partner" placeholder="Auto-filled from carrier selection" readonly>
+                                        <input type="hidden" id="phase3_partner_id">
+                                    </div>
+                                </div>
+
+                                <!-- Follow Up -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-calendar"></i><span>Follow Up Schedule</span></div></div>
+
+                                <div class="col-md-12">
+                                    <div class="ph-field">
+                                        <label>Follow Up Required</label>
+                                        <select class="form-select" id="phase3_followup_required">
+                                            <option value="">Select option...</option>
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 d-none" id="followup_datetime_field">
+                                    <div class="ph-field">
+                                        <label>Follow Up Date & Time</label>
+                                        <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
+                                        <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">When should the follow-up call be scheduled?</small>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Medications:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_medications"></span>
-                                </div>
-                                <textarea class="form-control form-control-sm" id="change_medications" rows="2" placeholder="Enter medications"></textarea>
-                            </div>
+                            <script>
+                            (function() {
+                                const followupRequired = document.getElementById('phase3_followup_required');
+                                const followupDatetimeField = document.getElementById('followup_datetime_field');
+                                const followupScheduledAt = document.getElementById('phase3_followup_scheduled_at');
+                                
+                                if (followupRequired) {
+                                    followupRequired.addEventListener('change', function() {
+                                        if (this.value === '1') {
+                                            followupDatetimeField.style.display = 'block';
+                                            followupScheduledAt.setAttribute('required', 'required');
+                                        } else {
+                                            followupDatetimeField.style.display = 'none';
+                                            followupScheduledAt.removeAttribute('required');
+                                        }
+                                    });
+                                }
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Doctor Name:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_doctor"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor" placeholder="Enter doctor name">
-                            </div>
+                                // Carrier-Partner State Filtering
+                                const carrierSelect = document.getElementById('phase3_policy_carrier');
+                                const stateSelect = document.getElementById('phase3_approved_state');
+                                const partnerInput = document.getElementById('phase3_assigned_partner');
+                                const partnerIdInput = document.getElementById('phase3_partner_id');
+                                const allStates = @json($usStates);
 
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Doctor Phone:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_doctor_phone"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor_phone" placeholder="Enter doctor phone">
-                            </div>
+                                if (carrierSelect) {
+                                    carrierSelect.addEventListener('change', function() {
+                                        const selectedOption = this.options[this.selectedIndex];
+                                        
+                                        // Clear state dropdown
+                                        stateSelect.innerHTML = '<option value="">Select State</option>';
+                                        
+                                        if (this.value) {
+                                            // Get approved states for this carrier-partner combo
+                                            const approvedStates = JSON.parse(selectedOption.dataset.states || '[]');
+                                            const partnerName = selectedOption.dataset.partnerName;
+                                            const partnerId = selectedOption.dataset.partnerId;
+                                            
+                                            // Update assigned partner field
+                                            if (partnerInput) {
+                                                partnerInput.value = partnerName;
+                                            }
+                                            if (partnerIdInput) {
+                                                partnerIdInput.value = partnerId;
+                                            }
+                                            
+                                            // Populate states dropdown with approved states only
+                                            approvedStates.forEach(stateCode => {
+                                                if (allStates[stateCode]) {
+                                                    const option = document.createElement('option');
+                                                    option.value = stateCode;
+                                                    option.textContent = allStates[stateCode];
+                                                    stateSelect.appendChild(option);
+                                                }
+                                            });
+                                            
+                                            if (approvedStates.length === 0) {
+                                                stateSelect.innerHTML = '<option value="">No approved states</option>';
+                                            }
+                                        } else {
+                                            stateSelect.innerHTML = '<option value="">Select Carrier First</option>';
+                                            if (partnerInput) partnerInput.value = '';
+                                            if (partnerIdInput) partnerIdInput.value = '';
+                                        }
+                                    });
+                                }
+                            })();
+                            </script>
 
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Doctor Address:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_doctor_address"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_doctor_address" placeholder="Enter doctor address">
-                            </div>
-
-                            <!-- Policy Information Section -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold">Policy Information</h5>
-                            </div>
-
-                            <!-- Beneficiaries Section -->
-                            <div class="col-12">
-                                <label class="form-label fw-bold">Beneficiaries:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_beneficiary"></span>
-                                </div>
-                                <div id="beneficiaries-container-phase3" class="mb-3">
-                                    <!-- Beneficiaries will be populated from Phase 2 -->
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-success" onclick="window.addBeneficiaryRowPhase3()">
-                                    <i class="bx bx-plus"></i> Add Beneficiary
+                            <div class="ph-nav">
+                                <button type="button" class="ph-nav-btn ph-nav-back" onclick="goToPhase2()">
+                                    <i class="bx bx-left-arrow-alt"></i> Back to Essential Fields
                                 </button>
                             </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Policy Type:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_policy_type"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_policy_type" placeholder="Enter policy type">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Policy Number:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_policy_number"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_policy_number" placeholder="Enter policy number">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Carrier:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_carrier"></span>
-                                </div>
-                                <select class="form-select form-select-sm" id="change_carrier">
-                                    <option value="">Select Carrier</option>
-                                    @foreach($insuranceCarriers as $carrier)
-                                        <option value="{{ $carrier }}">{{ $carrier }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Coverage Amount:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_coverage"></span>
-                                </div>
-                                <input type="number" class="form-control form-control-sm" id="change_coverage" step="0.01" placeholder="Enter coverage amount">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Monthly Premium:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_premium"></span>
-                                </div>
-                                <input type="number" class="form-control form-control-sm" id="change_premium" step="0.01" placeholder="Enter premium amount">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Initial Draft Date:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_draft_date"></span>
-                                </div>
-                                <input type="date" class="form-control form-control-sm" id="change_draft_date">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Future Draft Date:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_future_draft_date"></span>
-                                </div>
-                                <input type="date" class="form-control form-control-sm" id="change_future_draft_date">
-                            </div>
-
-                            <!-- Banking Information Section -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold">Banking Information</h5>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Bank Name:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_bank_name"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_bank_name" placeholder="Enter bank name">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Account Title:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_account_title"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_account_title" placeholder="Enter account title">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Account Type:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_account_type"></span>
-                                </div>
-                                <select class="form-select form-select-sm" id="change_account_type">
-                                    <option value="">Select</option>
-                                    <option value="Checking">Checking</option>
-                                    <option value="Savings">Savings</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Routing Number:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_routing"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_routing" placeholder="Enter routing number">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Account Number:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_account"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_account" placeholder="Enter account number">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Verified By:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_verified_by"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_verified_by" placeholder="Enter verifier name">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Bank Balance:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_balance"></span>
-                                </div>
-                                <input type="number" class="form-control form-control-sm" id="change_balance" step="0.01" placeholder="Enter balance">
-                            </div>
-
-                            <!-- Card Information Section -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-credit-card me-2"></i>Card Information</h5>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Card Number:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_card_number"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_card_number" placeholder="Enter card number">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">CVV:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_cvv"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_cvv" placeholder="CVV" maxlength="4">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold">Expiry Date:</label>
-                                <div class="mb-2">
-                                    <span class="badge bg-info">Current</span>
-                                    <span class="text-primary fw-bold" id="orig_expiry_date"></span>
-                                </div>
-                                <input type="text" class="form-control form-control-sm" id="change_expiry_date" placeholder="MM/YY">
-                            </div>
-
-                            <!-- Additional Information -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold">Additional Information</h5>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Closer Name:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_closer"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_closer" placeholder="Changes (if any)">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Source:</label>
-                                <div class="p-2 bg-light rounded mb-1" id="orig_source"></div>
-                                <input type="text" class="form-control form-control-sm" id="change_source" placeholder="Lead source">
-                            </div>
-
-                            <!-- Sale Assignment Section (moved from Phase 2) -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-user-check me-2"></i>Sale Assignment</h5>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Policy Carrier:</label>
-                                <select class="form-select" id="phase3_policy_carrier" data-carrier-partner-info='@json($carrierPartnerData)'>
-                                    <option value="">Select Carrier</option>
-                                    @foreach($carrierPartnerData as $cp)
-                                        <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}" 
-                                                data-carrier-name="{{ $cp['carrier_name'] }}" 
-                                                data-partner-id="{{ $cp['partner_id'] }}"
-                                                data-partner-name="{{ $cp['partner_name'] }}"
-                                                data-states='@json($cp['states'])'>
-                                            {{ $cp['display_name'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">State:</label>
-                                <select class="form-select" id="phase3_approved_state">
-                                    <option value="">Select Carrier First</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-briefcase me-2"></i>Partner Information</h5>
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Assigned Partner:</label>
-                                <input type="text" class="form-control" id="phase3_assigned_partner" placeholder="Auto-filled from carrier selection" readonly>
-                                <input type="hidden" id="phase3_partner_id">
-                            </div>
-
-                            <!-- Follow Up Schedule -->
-                            <div class="col-12 mt-4">
-                                <h5 class="border-bottom pb-2 mb-3 text-gold"><i class="bx bx-calendar me-2"></i>Follow Up Schedule</h5>
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold">Follow Up Required:</label>
-                                <select class="form-select" id="phase3_followup_required">
-                                    <option value="">Select option...</option>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                            <div class="col-md-12 d-none" id="followup_datetime_field">
-                                <label class="form-label fw-bold">Follow Up Date & Time:</label>
-                                <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
-                                <small class="text-muted">When should the follow-up call be scheduled?</small>
-                            </div>
-                        </div>
-
-                        <script>
-                        (function() {
-                            const followupRequired = document.getElementById('phase3_followup_required');
-                            const followupDatetimeField = document.getElementById('followup_datetime_field');
-                            const followupScheduledAt = document.getElementById('phase3_followup_scheduled_at');
-                            
-                            if (followupRequired) {
-                                followupRequired.addEventListener('change', function() {
-                                    if (this.value === '1') {
-                                        followupDatetimeField.style.display = 'block';
-                                        followupScheduledAt.setAttribute('required', 'required');
-                                    } else {
-                                        followupDatetimeField.style.display = 'none';
-                                        followupScheduledAt.removeAttribute('required');
-                                    }
-                                });
-                            }
-
-                            // Carrier-Partner State Filtering
-                            const carrierSelect = document.getElementById('phase3_policy_carrier');
-                            const stateSelect = document.getElementById('phase3_approved_state');
-                            const partnerInput = document.getElementById('phase3_assigned_partner');
-                            const partnerIdInput = document.getElementById('phase3_partner_id');
-                            const allStates = @json($usStates);
-
-                            if (carrierSelect) {
-                                carrierSelect.addEventListener('change', function() {
-                                    const selectedOption = this.options[this.selectedIndex];
-                                    
-                                    // Clear state dropdown
-                                    stateSelect.innerHTML = '<option value="">Select State</option>';
-                                    
-                                    if (this.value) {
-                                        // Get approved states for this carrier-partner combo
-                                        const approvedStates = JSON.parse(selectedOption.dataset.states || '[]');
-                                        const partnerName = selectedOption.dataset.partnerName;
-                                        const partnerId = selectedOption.dataset.partnerId;
-                                        
-                                        // Update assigned partner field
-                                        if (partnerInput) {
-                                            partnerInput.value = partnerName;
-                                        }
-                                        if (partnerIdInput) {
-                                            partnerIdInput.value = partnerId;
-                                        }
-                                        
-                                        // Populate states dropdown with approved states only
-                                        approvedStates.forEach(stateCode => {
-                                            if (allStates[stateCode]) {
-                                                const option = document.createElement('option');
-                                                option.value = stateCode;
-                                                option.textContent = allStates[stateCode];
-                                                stateSelect.appendChild(option);
-                                            }
-                                        });
-                                        
-                                        if (approvedStates.length === 0) {
-                                            stateSelect.innerHTML = '<option value="">No approved states</option>';
-                                        }
-                                    } else {
-                                        stateSelect.innerHTML = '<option value="">Select Carrier First</option>';
-                                        if (partnerInput) partnerInput.value = '';
-                                        if (partnerIdInput) partnerIdInput.value = '';
-                                    }
-                                });
-                            }
-                        })();
-                        </script>
-
-                        <div class="text-center mt-4">
-                            <button type="button" class="sl-btn sl-btn-secondary" onclick="goToPhase2()">
-                                <i class="bx bx-left-arrow-alt"></i> Back to Essential Fields
-                            </button>
                         </div>
                     </div>
 
                 </div>
                 <div class="modal-footer">
                     <!-- Disposition Dropdown (on the left) -->
-                    <div class="btn-group dropup me-auto">
-                        <button type="button" class="sl-btn sl-btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="btn-group dropup me-auto mf-dropdown">
+                        <button type="button" class="mf-btn mf-dispose dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bx bx-block"></i> Dispose Lead
                         </button>
-                        <ul class="dropdown-menu" style="border-radius:10px">
+                        <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('no_answer'); return false;"><i class="bx bx-phone-off me-2"></i> No Answer</a></li>
                             <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_number'); return false;"><i class="bx bx-x-circle me-2"></i> Wrong Number</a></li>
                             <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_details'); return false;"><i class="bx bx-error me-2"></i> Wrong Details</a></li>
@@ -954,9 +994,9 @@
                     </div>
                     
                     <!-- Action buttons (on the right) -->
-                    <button type="button" class="sl-btn sl-btn-secondary" onclick="closeCallModal()"><i class="bx bx-phone-off"></i> End Call</button>
-                    <button type="button" class="sl-btn sl-btn-warning" onclick="saveAndExit()"><i class="bx bx-save"></i> Save & Exit</button>
-                    <button type="button" class="sl-btn sl-btn-success" onclick="submitSale()"><i class="bx bx-check-circle"></i> Submit Sale</button>
+                    <button type="button" class="mf-btn mf-end" onclick="closeCallModal()"><i class="bx bx-phone-off"></i> End Call</button>
+                    <button type="button" class="mf-btn mf-save" onclick="saveAndExit()"><i class="bx bx-save"></i> Save & Exit</button>
+                    <button type="button" class="mf-btn mf-submit" onclick="submitSale()"><i class="bx bx-check-circle"></i> Submit Sale</button>
                 </div>
             </div>
         </div>
@@ -1030,8 +1070,9 @@
                 const badge = document.createElement('span');
                 badge.className = 'dial-badge' + (dialer.is_mine ? ' is-mine' : '');
                 badge.style.backgroundColor = dialer.color;
-                badge.title = dialer.user_name + ' at ' + dialer.dialed_at;
-                badge.innerHTML = dialer.initials + '<span class="dial-time">' + dialer.user_name + ' - ' + dialer.dialed_at + '</span>';
+                const countLabel = dialer.count > 1 ? ' ×' + dialer.count : '';
+                badge.title = dialer.user_name + ' at ' + dialer.dialed_at + (dialer.count > 1 ? ' (' + dialer.count + ' dials)' : '');
+                badge.innerHTML = dialer.initials + '<span class="dial-time">' + dialer.user_name + ' - ' + dialer.dialed_at + countLabel + '</span>';
                 badgeContainer.appendChild(badge);
 
                 if (dialer.is_mine) {
@@ -1983,31 +2024,25 @@
         console.log('Call modal closed');
     }
 
+    function updatePhaseDots(activePhase) {
+        document.querySelectorAll('#phaseIndicator .ph-dot').forEach(dot => {
+            dot.classList.toggle('active', parseInt(dot.dataset.phase) === activePhase);
+        });
+    }
+
     function goToPhase1() {
         console.log('📋 Switching to Phase 1');
-        
         const phase1 = document.getElementById('phase1');
         const phase2 = document.getElementById('phase2');
         const phase3 = document.getElementById('phase3');
         
-        console.log('🔍 Phase elements found:', {
-            phase1: !!phase1,
-            phase2: !!phase2,
-            phase3: !!phase3
-        });
-        
         if (phase1) {
             phase1.classList.remove('d-none');
             phase1.style.display = 'block';
-            console.log('✅ Phase 1 visible');
-        } else {
-            console.error('❌ Phase 1 element not found!');
         }
-        
         if (phase2) { phase2.classList.add('d-none'); phase2.style.display = 'none'; }
         if (phase3) { phase3.classList.add('d-none'); phase3.style.display = 'none'; }
-        
-        console.log('📋 Phase 1 should now be visible');
+        updatePhaseDots(1);
     }
 
     function goToPhase2() {
@@ -2018,6 +2053,7 @@
         if (phase1) { phase1.classList.add('d-none'); phase1.style.display = 'none'; }
         if (phase2) { phase2.classList.remove('d-none'); phase2.style.display = 'block'; }
         if (phase3) { phase3.classList.add('d-none'); phase3.style.display = 'none'; }
+        updatePhaseDots(2);
     }
 
     function goToPhase3_old() {
@@ -2118,6 +2154,7 @@
         if (phase1) { phase1.classList.add('d-none'); phase1.style.display = 'none'; }
         if (phase2) { phase2.classList.add('d-none'); phase2.style.display = 'none'; }
         if (phase3) { phase3.classList.remove('d-none'); phase3.style.display = 'block'; }
+        updatePhaseDots(3);
     }
 
     // Copy beneficiaries from Phase 2 to Phase 3

@@ -50,309 +50,257 @@
 
     <!-- Menu -->
     <nav class="sidebar-menu">
-        {{-- RETENTION OFFICER --}}
-        @hasrole(Roles::RETENTION_OFFICER)
-            @canViewModule('dashboard')
-                <a href="{{ route('retention.dashboard') }}" class="menu-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
-                    <i class="bx bx-home-circle"></i>
-                    <span class="menu-text">Company Overview</span>
-                </a>
-            @endcanViewModule
+        {{-- COMPANY OVERVIEW --}}
+        @canViewModule('dashboard')
+            <a href="{{ route('dashboard') }}" class="menu-item {{ Request::is('dashboard') || Request::is('retention-dashboard*') ? 'active' : '' }}">
+                <i class="bx bx-home-circle"></i>
+                <span class="menu-text">Company Overview</span>
+            </a>
+        @endcanViewModule
 
-            @canViewModule('retention')
-                <a href="{{ route('retention.index') }}" class="menu-item {{ Request::is('retention') || Request::is('retention/*') ? 'active' : '' }}">
-                    <i class="bx bx-refresh"></i>
-                    <span class="menu-text">Retention Management</span>
-                </a>
-            @endcanViewModule
-        @endhasrole
+        {{-- SALES OPERATIONS --}}
+        @canViewModule('sales')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
+                <i class="bx bx-briefcase-alt"></i>
+                <span class="menu-text">Sales Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
 
-        {{-- MAIN MENU (NON-RESTRICTED ROLES) --}}
-        @unlessrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::RETENTION_OFFICER, Roles::QA, Roles::HR])
-            @hasrole(Roles::EMPLOYEE)
-                <!-- Employee only sees COMMUNICATION section below -->
-            @elsehasrole(Roles::RAVENS_CLOSER)
-                <!-- Ravens Closer sees same as Employee - attendance and chat only -->
-            @elsehasrole(Roles::QA)
-                <!-- QA only sees QA Review and COMMUNICATION section below -->
-            @elsehasrole(Roles::HR)
-                <!-- HR only sees Dock, Attendance, and Public Holidays -->
-            @else
-                @canViewModule('dashboard')
-                    <a href="{{ route('dashboard') }}" class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
-                        <i class="bx bx-home-circle"></i>
-                        <span class="menu-text">Company Overview</span>
+            <div class="menu-dropdown" id="misDropdown">
+                @canViewModule('leads-peregrine')
+                    <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
+                        <i class="bx bx-user-voice"></i>
+                        <span class="menu-text">Peregrine Leads</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('leads')
+                    <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
+                        <i class="bx bx-briefcase"></i>
+                        <span class="menu-text">Raven Leads</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('qa-review')
+                    <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
+                        <i class="bx bx-check-circle"></i>
+                        <span class="menu-text">QA Review</span>
                     </a>
                 @endcanViewModule
 
                 @canViewModule('sales')
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
-                        <i class="bx bx-briefcase-alt"></i>
-                        <span class="menu-text">Sales Operations</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
+                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span class="menu-text">Sales Records</span>
                     </a>
-
-                    <div class="menu-dropdown" id="misDropdown">
-                        @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO, Roles::MANAGER, Roles::COORDINATOR])
-                            @canViewModule('leads-peregrine')
-                                <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
-                                    <i class="bx bx-user-voice"></i>
-                                    <span class="menu-text">Peregrine Leads</span>
-                                </a>
-                            @endcanViewModule
-
-                            @canViewModule('leads')
-                                <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
-                                    <i class="bx bx-briefcase"></i>
-                                    <span class="menu-text">Raven Leads</span>
-                                </a>
-                            @endcanViewModule
-                        @endhasanyrole
-
-                        @hasanyrole([Roles::QA, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                            @canViewModule('qa-review')
-                                <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
-                                    <i class="bx bx-check-circle"></i>
-                                    <span class="menu-text">QA Review</span>
-                                </a>
-                            @endcanViewModule
-                        @endhasanyrole
-
-                        @canViewModule('sales')
-                            <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
-                                <i class="bx bx-dollar-circle"></i>
-                                <span class="menu-text">Sales Records</span>
-                            </a>
-                        @endcanViewModule
-
-                        @canViewModule('issuance')
-                            <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
-                                <i class="bx bx-send"></i>
-                                <span class="menu-text">Policy Submission</span>
-                            </a>
-                        @endcanViewModule
-
-                        @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                            @canViewModule('bank-verification')
-                                <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
-                                    <i class="bx bx-check-shield"></i>
-                                    <span class="menu-text">Bank Verification</span>
-                                </a>
-                            @endcanViewModule
-
-                            @canViewModule('revenue-analytics')
-                                <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
-                                    <i class="bx bx-line-chart"></i>
-                                    <span class="menu-text">Revenue Analytics</span>
-                                </a>
-                            @endcanViewModule
-
-                            @canViewModule('live-analytics')
-                                <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
-                                    <i class="bx bx-line-chart"></i>
-                                    <span class="menu-text">Live Analytics</span>
-                                </a>
-                            @endcanViewModule
-                        @endhasanyrole
-                    </div>
                 @endcanViewModule
 
-                @canViewModule('retention')
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
-                        <i class="bx bx-refresh"></i>
-                        <span class="menu-text">Retention & Chargebacks</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
+                @canViewModule('issuance')
+                    <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
+                        <i class="bx bx-send"></i>
+                        <span class="menu-text">Policy Submission</span>
                     </a>
-
-                    <div class="menu-dropdown" id="retentionDropdown">
-                        <a href="{{ route('retention.dashboard') }}" class="dropdown-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
-                            <i class="bx bx-tachometer"></i>
-                            <span class="menu-text">Retention Dashboard</span>
-                        </a>
-
-                        <a href="{{ route('retention.index') }}" class="dropdown-item {{ Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : '' }}">
-                            <i class="bx bx-user-check"></i>
-                            <span class="menu-text">Manage Retention</span>
-                        </a>
-
-                        <a href="{{ route('chargebacks.index') }}" class="dropdown-item {{ Request::is('chargebacks*') ? 'active' : '' }}">
-                            <i class="bx bx-error-circle"></i>
-                            <span class="menu-text">Chargebacks</span>
-                        </a>
-                    </div>
                 @endcanViewModule
-            @endhasrole
-        @endunlessrole
 
-        {{-- PEREGRINE SECTION --}}
-        @hasanyrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-            @canViewModule('peregrine')
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
-                    <i class="bx bx-shield-alt"></i>
-                    <span class="menu-text">Peregrine Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
+                @canViewModule('bank-verification')
+                    <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Bank Verification</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('revenue-analytics')
+                    <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
+                        <i class="bx bx-line-chart"></i>
+                        <span class="menu-text">Revenue Analytics</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('live-analytics')
+                    <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
+                        <i class="bx bx-line-chart"></i>
+                        <span class="menu-text">Live Analytics</span>
+                    </a>
+                @endcanViewModule
+            </div>
+        @endcanViewModule
+
+        {{-- RETENTION & CHARGEBACKS --}}
+        @canViewModule('retention')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
+                <i class="bx bx-refresh"></i>
+                <span class="menu-text">Retention & Chargebacks</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="retentionDropdown">
+                <a href="{{ route('retention.dashboard') }}" class="dropdown-item {{ Request::is('retention-dashboard*') ? 'active' : '' }}">
+                    <i class="bx bx-tachometer"></i>
+                    <span class="menu-text">Retention Dashboard</span>
                 </a>
 
-                <div class="menu-dropdown" id="peregrineDropdown">
-                    @hasanyrole([Roles::VERIFIER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-                        @unlessrole(Roles::PEREGRINE_VALIDATOR)
-                            @canViewModule('peregrine-dashboard')
-                                <a href="{{ route('verifier.dashboard') }}" class="dropdown-item {{ Request::is('verifier/dashboard') ? 'active' : '' }}">
-                                    <i class="bx bx-shield-alt"></i>
-                                    <span class="menu-text">Peregrine Dashboard</span>
-                                </a>
-                            @endcanViewModule
-
-                            @canViewModule('peregrine-verifier')
-                                <a href="{{ route('verifier.create.team', 'peregrine') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
-                                    <i class="bx bx-edit-alt"></i>
-                                    <span class="menu-text">Verifier Form</span>
-                                </a>
-                            @endcanViewModule
-                        @endunlessrole
-                    @endhasanyrole
-
-                    @hasanyrole([Roles::PEREGRINE_CLOSER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-                        @canViewModule('peregrine-closers')
-                            <a href="{{ route('peregrine.closers.index') }}" class="dropdown-item {{ Request::is('peregrine/closers*') ? 'active' : '' }}">
-                                <i class="bx bx-shield-alt"></i>
-                                <span class="menu-text">Peregrine Closers</span>
-                            </a>
-                        @endcanViewModule
-                    @endhasanyrole
-
-                    @hasanyrole([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER, Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-                        @canViewModule('peregrine-validation')
-                            <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
-                                <i class="bx bx-check-shield"></i>
-                                <span class="menu-text">Validation Dashboard</span>
-                            </a>
-                        @endcanViewModule
-                    @endhasanyrole
-                </div>
-            @endcanViewModule
-        @endhasanyrole
-
-        {{-- RAVENS SECTION --}}
-        @hasanyrole([Roles::RAVENS_CLOSER, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-            @canViewModule('ravens')
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
-                    <i class="bx bx-phone-call"></i>
-                    <span class="menu-text">Ravens Operations</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
-                </a>
-
-                <div class="menu-dropdown" id="ravensDropdown">
-                    @canViewModule('ravens-dashboard')
-                        <a href="{{ route('ravens.dashboard') }}" class="dropdown-item {{ Request::is('ravens/dashboard') ? 'active' : '' }}">
-                            <i class="bx bx-phone-call"></i>
-                            <span class="menu-text">Ravens Dashboard</span>
-                        </a>
-                    @endcanViewModule
-
-                    @canViewModule('ravens-calling')
-                        <a href="{{ route('ravens.calling') }}" class="dropdown-item {{ Request::is('ravens/calling*') ? 'active' : '' }}">
-                            <i class="bx bx-phone"></i>
-                            <span class="menu-text">Ravens Calling</span>
-                        </a>
-                    @endcanViewModule
-
-                    @canViewModule('ravens-bad-leads')
-                        <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
-                            <i class="bx bx-x-circle"></i>
-                            <span class="menu-text">Bad Leads</span>
-                        </a>
-                    @endcanViewModule
-
-                    @canViewModule('ravens-followups')
-                        <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
-                            <i class="bx bx-task"></i>
-                            <span class="menu-text">My Followup & Bank Verification</span>
-                        </a>
-                    @endcanViewModule
-                </div>
-            @endcanViewModule
-        @endhasanyrole
-
-        @hasanyrole([Roles::QA, Roles::HR, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-            @canViewModule('hr')
-                <a href="{{ route('hr.hub') }}" class="menu-item {{ Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : '' }}">
+                <a href="{{ route('retention.index') }}" class="dropdown-item {{ Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : '' }}">
                     <i class="bx bx-user-check"></i>
-                    <span class="menu-text">HR Operations</span>
-                </a>
-            @endcanViewModule
-        @endhasanyrole
-
-        {{-- EPMS - Project Management (CEO, Super Admin Only) --}}
-        @hasanyrole([Roles::SUPER_ADMIN, Roles::CEO])
-            @canViewModule('epms')
-                <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
-                    <i class="bx bx-briefcase-alt"></i>
-                    <span class="menu-text">Project Management</span>
-                    <i class="bx bx-chevron-down dropdown-icon"></i>
+                    <span class="menu-text">Manage Retention</span>
                 </a>
 
-                <div class="menu-dropdown" id="epmsDropdown">
-                    <a href="{{ route('epms.index') }}" class="dropdown-item {{ Request::is('epms') && !Request::is('epms/*') ? 'active' : '' }}">
-                        <i class="bx bx-list-ul"></i>
-                        <span class="menu-text">All Projects</span>
+                @canViewModule('chargebacks')
+                    <a href="{{ route('chargebacks.index') }}" class="dropdown-item {{ Request::is('chargebacks*') ? 'active' : '' }}">
+                        <i class="bx bx-error-circle"></i>
+                        <span class="menu-text">Chargebacks</span>
                     </a>
+                @endcanViewModule
+            </div>
+        @endcanViewModule
+
+        {{-- PEREGRINE OPERATIONS --}}
+        @canViewModule('peregrine')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
+                <i class="bx bx-shield-alt"></i>
+                <span class="menu-text">Peregrine Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="peregrineDropdown">
+                @canViewModule('peregrine-dashboard')
+                    <a href="{{ route('verifier.dashboard') }}" class="dropdown-item {{ Request::is('verifier/dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-shield-alt"></i>
+                        <span class="menu-text">Peregrine Dashboard</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('peregrine-verifier')
+                    <a href="{{ route('verifier.create.team', 'peregrine') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
+                        <i class="bx bx-edit-alt"></i>
+                        <span class="menu-text">Verifier Form</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('peregrine-closers')
+                    <a href="{{ route('peregrine.closers.index') }}" class="dropdown-item {{ Request::is('peregrine/closers*') ? 'active' : '' }}">
+                        <i class="bx bx-shield-alt"></i>
+                        <span class="menu-text">Peregrine Closers</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('peregrine-validation')
+                    <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Validation Dashboard</span>
+                    </a>
+                @endcanViewModule
+            </div>
+        @endcanViewModule
+
+        {{-- RAVENS OPERATIONS --}}
+        @canViewModule('ravens')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
+                <i class="bx bx-phone-call"></i>
+                <span class="menu-text">Ravens Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="ravensDropdown">
+                @canViewModule('ravens-dashboard')
+                    <a href="{{ route('ravens.dashboard') }}" class="dropdown-item {{ Request::is('ravens/dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-phone-call"></i>
+                        <span class="menu-text">Ravens Dashboard</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('ravens-calling')
+                    <a href="{{ route('ravens.calling') }}" class="dropdown-item {{ Request::is('ravens/calling*') ? 'active' : '' }}">
+                        <i class="bx bx-phone"></i>
+                        <span class="menu-text">Ravens Calling</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('ravens-bad-leads')
+                    <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
+                        <i class="bx bx-x-circle"></i>
+                        <span class="menu-text">Bad Leads</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('ravens-followups')
+                    <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
+                        <i class="bx bx-task"></i>
+                        <span class="menu-text">My Followup & Bank Verification</span>
+                    </a>
+                @endcanViewModule
+            </div>
+        @endcanViewModule
+
+        {{-- HR OPERATIONS --}}
+        @canViewModule('hr')
+            <a href="{{ route('hr.hub') }}" class="menu-item {{ Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : '' }}">
+                <i class="bx bx-user-check"></i>
+                <span class="menu-text">HR Operations</span>
+            </a>
+        @endcanViewModule
+
+        {{-- EPMS - Project Management --}}
+        @canViewModule('epms')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'epmsDropdown')">
+                <i class="bx bx-briefcase-alt"></i>
+                <span class="menu-text">Project Management</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="epmsDropdown">
+                <a href="{{ route('epms.index') }}" class="dropdown-item {{ Request::is('epms') && !Request::is('epms/*') ? 'active' : '' }}">
+                    <i class="bx bx-list-ul"></i>
+                    <span class="menu-text">All Projects</span>
+                </a>
+                @canEditModule('epms')
                     <a href="{{ route('epms.create') }}" class="dropdown-item {{ Request::is('epms/create') ? 'active' : '' }}">
                         <i class="bx bx-plus-circle"></i>
                         <span class="menu-text">New Project</span>
                     </a>
-                </div>
-            @endcanViewModule
-        @endhasanyrole
+                @endcanEditModule
+            </div>
+        @endcanViewModule
 
-        {{-- ADMIN SECTION --}}
-        @unlessrole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER])
-            @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO, Roles::MANAGER])
+        {{-- PARTNER MANAGEMENT --}}
+        @canViewModule('partners')
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
+                <i class="bx bx-group"></i>
+                <span class="menu-text">Partner Management</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="partnersDropdown">
                 @canViewModule('partners')
-                    <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
-                        <i class="bx bx-group"></i>
-                        <span class="menu-text">Partner Management</span>
-                        <i class="bx bx-chevron-down dropdown-icon"></i>
-                    </a>
-
-                    <div class="menu-dropdown" id="partnersDropdown">
-                        @canViewModule('partners')
-                            <a href="{{ route('agents.index') }}" class="dropdown-item {{ Request::is('agents*') ? 'active' : '' }}">
-                                <i class="bx bx-user-circle"></i>
-                                <span class="menu-text">Partners</span>
-                            </a>
-                        @endcanViewModule
-
-                        @canViewModule('carriers')
-                            <a href="{{ route('admin.insurance-carriers.index') }}" class="dropdown-item {{ Request::is('admin/insurance-carriers*') ? 'active' : '' }}">
-                                <i class="bx bx-buildings"></i>
-                                <span class="menu-text">Insurance Cluster</span>
-                            </a>
-                        @endcanViewModule
-                    </div>
-                @endcanViewModule
-            @endhasanyrole
-
-            {{-- FINANCE SECTION --}}
-            @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-                @canViewModule('finance')
-                    <a href="{{ route('finance.hub') }}" class="menu-item {{ Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : '' }}">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Finance & Accounts</span>
+                    <a href="{{ route('agents.index') }}" class="dropdown-item {{ Request::is('agents*') ? 'active' : '' }}">
+                        <i class="bx bx-user-circle"></i>
+                        <span class="menu-text">Partners</span>
                     </a>
                 @endcanViewModule
-            @endhasanyrole
-        @endunlessrole
 
-        {{-- USERS MANAGEMENT SECTION --}}
-        @hasanyrole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::CEO])
-            @canViewModule('users')
-                <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
-                    <i class="bx bx-user-circle"></i>
-                    <span class="menu-text">Users MGMT</span>
-                </a>
-            @endcanViewModule
-        @endhasanyrole
+                @canViewModule('carriers')
+                    <a href="{{ route('admin.insurance-carriers.index') }}" class="dropdown-item {{ Request::is('admin/insurance-carriers*') ? 'active' : '' }}">
+                        <i class="bx bx-buildings"></i>
+                        <span class="menu-text">Insurance Cluster</span>
+                    </a>
+                @endcanViewModule
+            </div>
+        @endcanViewModule
+
+        {{-- FINANCE & ACCOUNTS --}}
+        @canViewModule('finance')
+            <a href="{{ route('finance.hub') }}" class="menu-item {{ Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : '' }}">
+                <i class="bx bx-dollar-circle"></i>
+                <span class="menu-text">Finance & Accounts</span>
+            </a>
+        @endcanViewModule
+
+        {{-- USERS MANAGEMENT --}}
+        @canViewModule('users')
+            <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
+                <i class="bx bx-user-circle"></i>
+                <span class="menu-text">Users MGMT</span>
+            </a>
+        @endcanViewModule
 
         {{-- PERSONAL RECORDS SECTION (ALL USERS) --}}
         <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'myRecordsDropdown')">
@@ -375,16 +323,14 @@
     </nav>
 
     {{-- Settings pinned to bottom --}}
-    @hasanyrole([Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::CEO])
-        @canViewModule('settings')
-            <div class="sidebar-bottom">
-                <a href="{{ route('settings.hub') }}" class="sidebar-bottom-item {{ Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : '' }}">
-                    <i class="bx bx-cog"></i>
-                    <span class="sidebar-bottom-text">Settings</span>
-                </a>
-            </div>
-        @endcanViewModule
-    @endhasanyrole
+    @canViewModule('settings')
+        <div class="sidebar-bottom">
+            <a href="{{ route('settings.hub') }}" class="sidebar-bottom-item {{ Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : '' }}">
+                <i class="bx bx-cog"></i>
+                <span class="sidebar-bottom-text">Settings</span>
+            </a>
+        </div>
+    @endcanViewModule
 </div>
 
 <style>
