@@ -165,13 +165,23 @@
                 
                 <div class="th-clocks">
                     <div class="th-clock">
-                        <span class="th-clock-label">NY</span>
-                        <span class="th-clock-time" id="navFloridaTime">--:--</span>
+                        <span class="th-clock-label">ET</span>
+                        <span class="th-clock-time" id="navEasternTime">--:--</span>
                     </div>
                     <span class="th-clock-dot"></span>
                     <div class="th-clock">
-                        <span class="th-clock-label">PK</span>
-                        <span class="th-clock-time" id="navPakistanTime">--:--</span>
+                        <span class="th-clock-label">CT</span>
+                        <span class="th-clock-time" id="navCentralTime">--:--</span>
+                    </div>
+                    <span class="th-clock-dot"></span>
+                    <div class="th-clock">
+                        <span class="th-clock-label">MT</span>
+                        <span class="th-clock-time" id="navMountainTime">--:--</span>
+                    </div>
+                    <span class="th-clock-dot"></span>
+                    <div class="th-clock">
+                        <span class="th-clock-label">PT</span>
+                        <span class="th-clock-time" id="navPacificTime">--:--</span>
                     </div>
                 </div>
 
@@ -760,27 +770,22 @@
     </div>
 
     <script>
-    // Dual Clock Display in Topbar
+    // US Timezone Clocks in Topbar
     function updateNavClocks() {
         const now = new Date();
+        const opts = { hour: '2-digit', minute: '2-digit', hour12: true };
 
-        const usaTime = now.toLocaleString('en-US', {
-            timeZone: 'America/New_York',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-        const el1 = document.getElementById('navFloridaTime');
-        if (el1) el1.textContent = usaTime;
+        const zones = [
+            { id: 'navEasternTime',  tz: 'America/New_York' },
+            { id: 'navCentralTime',  tz: 'America/Chicago' },
+            { id: 'navMountainTime', tz: 'America/Denver' },
+            { id: 'navPacificTime',  tz: 'America/Los_Angeles' },
+        ];
 
-        const pakTime = now.toLocaleString('en-US', {
-            timeZone: 'Asia/Karachi',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
+        zones.forEach(z => {
+            const el = document.getElementById(z.id);
+            if (el) el.textContent = now.toLocaleString('en-US', { ...opts, timeZone: z.tz });
         });
-        const el2 = document.getElementById('navPakistanTime');
-        if (el2) el2.textContent = pakTime;
     }
 
     // Initialize timer on page load

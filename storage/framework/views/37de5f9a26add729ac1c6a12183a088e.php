@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Executive Dashboard'); ?>
 
-@section('title', 'Executive Dashboard')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    Executive Dashboard — Polished CRM Design
@@ -335,14 +333,14 @@
 .att-alert .btn-mark.primary { background: var(--bs-gold); color: #fff; }
 .att-alert .btn-mark.secondary { background: var(--bs-surface-200); color: var(--bs-surface-600); }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-@if(session('attendance_manual_needed'))
+<?php $__env->startSection('content'); ?>
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('attendance_manual_needed')): ?>
     <div class="ex-card att-alert" id="attendance-manual-banner">
         <div>
             <strong><i class="bx bx-time-five"></i> Mark Attendance:</strong>
-            <span>{{ session('attendance_manual_needed') }}</span>
+            <span><?php echo e(session('attendance_manual_needed')); ?></span>
         </div>
         <div class="d-flex gap-2">
             <button id="markAttendanceBtn" class="btn-mark primary">Mark Attendance</button>
@@ -360,7 +358,7 @@
                 btn.disabled = true;
                 btnForce.disabled = true;
 
-                fetch('{{ route('attendance.mark-manual.post') }}', {
+                fetch('<?php echo e(route('attendance.mark-manual.post')); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -397,72 +395,72 @@
             });
         })();
     </script>
-@endif
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-{{-- KPI Row 1 — Primary Metrics --}}
+
 <div class="kpi-row">
     <div class="kpi-card k-gold ex-card">
         <i class="bx bx-trending-up k-icon"></i>
-        <div class="k-val" id="salesToday">{{ $total_sales_today }}</div>
+        <div class="k-val" id="salesToday"><?php echo e($total_sales_today); ?></div>
         <div class="k-lbl">Today</div>
     </div>
     <div class="kpi-card k-blue ex-card">
         <i class="bx bx-bar-chart-alt-2 k-icon"></i>
-        <div class="k-val" id="salesMTD">{{ $total_monthly_sales }}</div>
+        <div class="k-val" id="salesMTD"><?php echo e($total_monthly_sales); ?></div>
         <div class="k-lbl">MTD Sales</div>
     </div>
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-dollar-circle k-icon"></i>
-        <div class="k-val" id="revenue">${{ number_format($total_revenue, 0) }}</div>
+        <div class="k-val" id="revenue">$<?php echo e(number_format($total_revenue, 0)); ?></div>
         <div class="k-lbl">Revenue</div>
     </div>
     <div class="kpi-card k-teal ex-card">
         <i class="bx bx-user-check k-icon"></i>
-        <div class="k-val" id="activeTeam">{{ count($attendance) }}</div>
+        <div class="k-val" id="activeTeam"><?php echo e(count($attendance)); ?></div>
         <div class="k-lbl">Active</div>
     </div>
 </div>
 
-{{-- KPI Row 2 — Pipeline Status --}}
+
 <div class="kpi-row">
     <div class="kpi-card k-blue ex-card">
         <i class="bx bx-send k-icon"></i>
-        <div class="k-val" id="statusDone">{{ $done_count }}</div>
+        <div class="k-val" id="statusDone"><?php echo e($done_count); ?></div>
         <div class="k-lbl">Submitted</div>
     </div>
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-check-double k-icon"></i>
-        <div class="k-val" id="statusApproved">{{ $approved_count }}</div>
+        <div class="k-val" id="statusApproved"><?php echo e($approved_count); ?></div>
         <div class="k-lbl">Approved</div>
     </div>
     <div class="kpi-card k-warn ex-card">
         <i class="bx bx-loader-alt k-icon"></i>
-        <div class="k-val" id="statusUW">{{ $underwriting_count }}</div>
+        <div class="k-val" id="statusUW"><?php echo e($underwriting_count); ?></div>
         <div class="k-lbl">UW</div>
     </div>
     <div class="kpi-card k-red ex-card">
         <i class="bx bx-x-circle k-icon"></i>
-        <div class="k-val" id="statusDeclined">{{ $declined_count }}</div>
+        <div class="k-val" id="statusDeclined"><?php echo e($declined_count); ?></div>
         <div class="k-lbl">Declined</div>
     </div>
 </div>
 
-{{-- Main Content Grid --}}
+
 <div class="row g-2">
 
-    {{-- LEFT: Team Performance + Attendance --}}
+    
     <div class="col-xl-9 col-lg-8">
 
-        {{-- Team Performance Table --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-group"></i> Team Performance</h6>
                 <div class="team-tabs">
                     <button class="team-tab-btn active" onclick="switchTeam('peregrine')" id="peregrineTab">
-                        Peregrine (<span id="peregrineCount">{{ $peregrine_count ?? 0 }}</span>)
+                        Peregrine (<span id="peregrineCount"><?php echo e($peregrine_count ?? 0); ?></span>)
                     </button>
                     <button class="team-tab-btn" onclick="switchTeam('ravens')" id="ravensTab">
-                        Ravens (<span id="ravensCount">{{ $ravens_count ?? 0 }}</span>)
+                        Ravens (<span id="ravensCount"><?php echo e($ravens_count ?? 0); ?></span>)
                     </button>
                 </div>
             </div>
@@ -479,27 +477,27 @@
                         </tr>
                     </thead>
                     <tbody id="closerTable">
-                        @forelse($sales_per_closer as $closer)
-                        <tr class="closer-row" data-team="{{ $closer['team'] ?? '' }}">
-                            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>{{ $closer['closer'] ?? 'N/A' }}</td>
-                            <td class="text-center"><span class="bd-mini bd-teal">{{ $closer['today'] ?? 0 }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-blue">{{ $closer['mtd'] ?? 0 }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-green">{{ $closer['approvedMTD'] ?? 0 }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-red">{{ $closer['declinedMTD'] ?? 0 }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-warn">{{ $closer['uwMTD'] ?? $closer['uw'] ?? $closer['underwriting'] ?? 0 }}</span></td>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $sales_per_closer; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $closer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr class="closer-row" data-team="<?php echo e($closer['team'] ?? ''); ?>">
+                            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i><?php echo e($closer['closer'] ?? 'N/A'); ?></td>
+                            <td class="text-center"><span class="bd-mini bd-teal"><?php echo e($closer['today'] ?? 0); ?></span></td>
+                            <td class="text-center"><span class="bd-mini bd-blue"><?php echo e($closer['mtd'] ?? 0); ?></span></td>
+                            <td class="text-center"><span class="bd-mini bd-green"><?php echo e($closer['approvedMTD'] ?? 0); ?></span></td>
+                            <td class="text-center"><span class="bd-mini bd-red"><?php echo e($closer['declinedMTD'] ?? 0); ?></span></td>
+                            <td class="text-center"><span class="bd-mini bd-warn"><?php echo e($closer['uwMTD'] ?? $closer['uw'] ?? $closer['underwriting'] ?? 0); ?></span></td>
                         </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No closers data available</td>
                         </tr>
-                        @endforelse
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        {{-- Attendance --}}
-        @php
+        
+        <?php
             $lateCount = 0;
             $halfDayCount = 0;
             foreach($attendance as $a) {
@@ -507,21 +505,21 @@
                 if ($s === 'late') $lateCount++;
                 elseif (in_array($s, ['half day', 'half_day', 'halfday'])) $halfDayCount++;
             }
-        @endphp
+        ?>
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-time-five"></i> Attendance</h6>
                 <div class="att-caps">
-                    <span class="att-cap cap-p"><span id="presentCount">{{ $present_count }}</span>&nbsp;P</span>
-                    <span class="att-cap cap-a"><span id="absentCount">{{ $absent_count }}</span>&nbsp;A</span>
-                    <span class="att-cap cap-l"><span id="lateCount">{{ $lateCount }}</span>&nbsp;L</span>
-                    <span class="att-cap cap-h"><span id="halfDayCount">{{ $halfDayCount }}</span>&nbsp;HD</span>
+                    <span class="att-cap cap-p"><span id="presentCount"><?php echo e($present_count); ?></span>&nbsp;P</span>
+                    <span class="att-cap cap-a"><span id="absentCount"><?php echo e($absent_count); ?></span>&nbsp;A</span>
+                    <span class="att-cap cap-l"><span id="lateCount"><?php echo e($lateCount); ?></span>&nbsp;L</span>
+                    <span class="att-cap cap-h"><span id="halfDayCount"><?php echo e($halfDayCount); ?></span>&nbsp;HD</span>
                 </div>
             </div>
             <div class="sec-body">
                 <div class="att-mini-list" id="attendanceTable">
-                    @forelse($attendance as $att)
-                    @php
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $attendance; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         $status = strtolower($att['status'] ?? '');
                         if ($status === 'late') {
                             $pillClass = 'l';
@@ -536,24 +534,24 @@
                             $pillClass = 'a';
                             $pillText = ucfirst($att['status'] ?? 'Absent');
                         }
-                    @endphp
+                    ?>
                     <div class="att-row">
-                        <span class="att-name">{{ $att['name'] ?? 'N/A' }}</span>
-                        <span class="att-pill {{ $pillClass }}">{{ $pillText }}</span>
+                        <span class="att-name"><?php echo e($att['name'] ?? 'N/A'); ?></span>
+                        <span class="att-pill <?php echo e($pillClass); ?>"><?php echo e($pillText); ?></span>
                     </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No attendance data</div>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
         </div>
 
     </div>
 
-    {{-- RIGHT: Target + Retention + Chargebacks --}}
+    
     <div class="col-xl-3 col-lg-4">
 
-        {{-- Monthly Target --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-target-lock"></i> Monthly Target</h6>
@@ -563,13 +561,13 @@
                     <canvas id="monthlyTargetChart"></canvas>
                     <div class="target-info">
                         Target: <strong style="color:var(--bs-gold)">500</strong> &nbsp;|&nbsp;
-                        Achieved: <strong style="color:#1a8754">{{ $total_monthly_sales }}</strong>
+                        Achieved: <strong style="color:#1a8754"><?php echo e($total_monthly_sales); ?></strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Retention --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-refresh"></i> Retention</h6>
@@ -577,32 +575,32 @@
             <div class="sec-body">
                 <div class="ret-row">
                     <div class="ret-block r-cb">
-                        <div class="r-val" id="retCB">{{ $retention_cb }}</div>
+                        <div class="r-val" id="retCB"><?php echo e($retention_cb); ?></div>
                         <div class="r-lbl">CB</div>
                     </div>
                     <div class="ret-block r-ret">
-                        <div class="r-val" id="retRetained">{{ $retention_retained }}</div>
+                        <div class="r-val" id="retRetained"><?php echo e($retention_retained); ?></div>
                         <div class="r-lbl">Retained</div>
                     </div>
                     <div class="ret-block r-pend">
-                        <div class="r-val" id="retPending">{{ $retention_pending }}</div>
+                        <div class="r-val" id="retPending"><?php echo e($retention_pending); ?></div>
                         <div class="r-lbl">Pending</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Chargebacks --}}
+        
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-error"></i> Chargebacks</h6>
-                <a href="{{ route('chargebacks.index') }}" class="link-btn">Details</a>
+                <a href="<?php echo e(route('chargebacks.index')); ?>" class="link-btn">Details</a>
             </div>
             <div class="sec-body">
                 <div class="cb-display">
-                    <div class="cb-big" id="cbThis">{{ $cb_this_count }}</div>
+                    <div class="cb-big" id="cbThis"><?php echo e($cb_this_count); ?></div>
                     <div class="cb-sub">This Month</div>
-                    <div class="cb-amt" id="cbThisAmt">${{ number_format($cb_this_amt, 0) }}</div>
+                    <div class="cb-amt" id="cbThisAmt">$<?php echo e(number_format($cb_this_amt, 0)); ?></div>
                 </div>
             </div>
         </div>
@@ -700,9 +698,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Global dashboard state (defensive against duplicate script loads)
@@ -726,27 +724,30 @@ if (typeof window !== 'undefined') {
 var serverData = (typeof window !== 'undefined' && typeof window.serverData !== 'undefined')
     ? window.serverData
     : {
-        totalSalesToday: {{ $total_sales_today }},
-        done: {{ $done_count }},
-        totalRevenue: {{ $total_revenue }},
-        approved: {{ $approved_count }},
-        underwriting: {{ $underwriting_count }},
-        declined: {{ $declined_count }},
-        salesPerCloser: @json($sales_per_closer),
-        attendance: @json($attendance),
+        totalSalesToday: <?php echo e($total_sales_today); ?>,
+        done: <?php echo e($done_count); ?>,
+        totalRevenue: <?php echo e($total_revenue); ?>,
+        approved: <?php echo e($approved_count); ?>,
+        underwriting: <?php echo e($underwriting_count); ?>,
+        declined: <?php echo e($declined_count); ?>,
+        salesPerCloser: <?php echo json_encode($sales_per_closer, 15, 512) ?>,
+        attendance: <?php echo json_encode($attendance, 15, 512) ?>,
         retention: {
-            cb: {{ $retention_cb }},
-            retained: {{ $retention_retained }},
-            pending: {{ $retention_pending }}
+            cb: <?php echo e($retention_cb); ?>,
+            retained: <?php echo e($retention_retained); ?>,
+            pending: <?php echo e($retention_pending); ?>
+
         },
         chargebacks: {
             thisMonth: {
-                count: {{ $cb_this_count }},
-                amount: {{ $cb_this_amt }}
+                count: <?php echo e($cb_this_count); ?>,
+                amount: <?php echo e($cb_this_amt); ?>
+
             },
             lastMonth: {
-                count: {{ $cb_last_count }},
-                amount: {{ $cb_last_amt }}
+                count: <?php echo e($cb_last_count); ?>,
+                amount: <?php echo e($cb_last_amt); ?>
+
             }
         }
     };
@@ -759,17 +760,23 @@ if (typeof window !== 'undefined') {
 function updateClocks() {
     const now = new Date();
 
-    const opts = { hour: '2-digit', minute: '2-digit', hour12: true };
-    const zones = [
-        { id: 'navEasternTime',  tz: 'America/New_York' },
-        { id: 'navCentralTime',  tz: 'America/Chicago' },
-        { id: 'navMountainTime', tz: 'America/Denver' },
-        { id: 'navPacificTime',  tz: 'America/Los_Angeles' },
-    ];
-    zones.forEach(z => {
-        const el = document.getElementById(z.id);
-        if (el) el.textContent = now.toLocaleTimeString('en-US', { ...opts, timeZone: z.tz });
+    const floridaTime = now.toLocaleTimeString('en-US', {
+        timeZone: 'America/New_York',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
     });
+    const el1 = document.getElementById('navFloridaTime');
+    if (el1) el1.textContent = floridaTime;
+
+    const pakistanTime = now.toLocaleTimeString('en-US', {
+        timeZone: 'Asia/Karachi',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+    const el2 = document.getElementById('navPakistanTime');
+    if (el2) el2.textContent = pakistanTime;
 }
 
 // Load Data
@@ -990,7 +997,7 @@ $(document).ready(function() {
     
     // Poll for KPI data updates every 30 seconds
     setInterval(function() {
-        fetch('{{ route('dashboard.kpi-data') }}')
+        fetch('<?php echo e(route('dashboard.kpi-data')); ?>')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -1001,4 +1008,5 @@ $(document).ready(function() {
     }, 30000); // 30 seconds
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/index.blade.php ENDPATH**/ ?>

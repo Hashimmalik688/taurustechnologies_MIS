@@ -677,7 +677,7 @@ $(document).ready(function() {
         if (confirm('Reset this QA status to Pending?')) {
             button.prop('disabled', true);
             $.ajax({
-                url: `/sales/${leadId}/qa-status/reset`,
+                url: `/qa/${leadId}/qa-status/reset`,
                 method: 'POST',
                 data: { _token: '<?php echo e(csrf_token()); ?>' },
                 success: function(response) {
@@ -699,7 +699,7 @@ $(document).ready(function() {
     function updateQaStatus(leadId, qaStatus, currentStatus, qaReason, element) {
         element.prop('disabled', true);
         $.ajax({
-            url: `/sales/${leadId}/qa-status`,
+            url: `/qa/${leadId}/qa-status`,
             method: 'POST',
             data: {
                 qa_status: qaStatus,

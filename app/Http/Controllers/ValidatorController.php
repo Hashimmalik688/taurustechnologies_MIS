@@ -119,6 +119,13 @@ class ValidatorController extends Controller
             ->where('status', Statuses::LEAD_CLOSED)
             ->findOrFail($id);
 
+        // Ensure critical sale fields are filled before marking as sale
+        $missingFields = $this->getMissingSaleFields($lead);
+        if (!empty($missingFields)) {
+            return redirect()->route('validator.edit', $id)
+                ->with('error', 'Cannot mark as Sale — the following fields are missing: ' . implode(', ', $missingFields) . '. Please fill them in using the edit form.');
+        }
+
         $lead->update([
             'status' => Statuses::LEAD_SALE,
             'validated_by' => Auth::id(),
@@ -185,7 +192,13 @@ class ValidatorController extends Controller
     {
         $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('assigned_validator_id', Auth::id())
-            ->where('status', Statuses::LEAD_CLOSED)
+            ->where(function($q) {
+                $q->where('status', Statuses::LEAD_CLOSED)
+                  ->orWhere(function($q2) {
+                      $q2->where('status', Statuses::LEAD_PENDING)
+                         ->where('pending_reason', 'Pending:Sent to Home Office');
+                  });
+            })
             ->findOrFail($id);
 
         $validators = User::role([Roles::VERIFIER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])->get(['id', 'name']);
@@ -200,7 +213,13 @@ class ValidatorController extends Controller
     {
         $lead = Lead::where('team', Teams::PEREGRINE)
             ->where('assigned_validator_id', Auth::id())
-            ->where('status', Statuses::LEAD_CLOSED)
+            ->where(function($q) {
+                $q->where('status', Statuses::LEAD_CLOSED)
+                  ->orWhere(function($q2) {
+                      $q2->where('status', Statuses::LEAD_PENDING)
+                         ->where('pending_reason', 'Pending:Sent to Home Office');
+                  });
+            })
             ->findOrFail($id);
 
         // For normal validation, require full form data
@@ -323,6 +342,13 @@ class ValidatorController extends Controller
             ->where('pending_reason', 'Pending:Sent to Home Office')
             ->findOrFail($id);
 
+        // Ensure critical sale fields are filled before marking as sale
+        $missingFields = $this->getMissingSaleFields($lead);
+        if (!empty($missingFields)) {
+            return redirect()->route('validator.edit', $id)
+                ->with('error', 'Cannot mark as Sale — the following fields are missing: ' . implode(', ', $missingFields) . '. Please fill them in using the edit form.');
+        }
+
         $lead->update([
             'status' => Statuses::LEAD_SALE,
             'validated_by' => Auth::id(),
@@ -333,6 +359,38 @@ class ValidatorController extends Controller
 
         return redirect()->route('validator.index')
             ->with('success', 'Lead marked as Sale successfully.');
+    }
+
+    /**
+     * Check if a lead has all critical fields required for a sale.
+     * Returns an array of human-readable missing field names, or empty if all present.
+     */
+    private function getMissingSaleFields(Lead $lead): array
+    {
+        $requiredFields = [
+            'cn_name' => 'Client Name',
+            'phone_number' => 'Phone Number',
+            'date_of_birth' => 'Date of Birth',
+            'ssn' => 'SSN',
+            'address' => 'Address',
+            'state' => 'State',
+            'policy_type' => 'Policy Type',
+            'coverage_amount' => 'Coverage Amount',
+            'monthly_premium' => 'Monthly Premium',
+            'beneficiary' => 'Beneficiary',
+            'bank_name' => 'Bank Name',
+            'account_type' => 'Account Type',
+        ];
+
+        $missing = [];
+        foreach ($requiredFields as $field => $label) {
+            $value = $lead->{$field};
+            if (is_null($value) || (is_string($value) && trim($value) === '')) {
+                $missing[] = $label;
+            }
+        }
+
+        return $missing;
     }
 
     /**

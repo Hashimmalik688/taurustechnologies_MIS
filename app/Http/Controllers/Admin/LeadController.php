@@ -226,11 +226,20 @@ class LeadController extends Controller
     {
         // Sales section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
+        // Exclude incomplete leads (verifier-only forms) that lack actual sale data
         $query = Lead::with(['insuranceCarrier', 'qaUser', 'managerUser'])
             ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
+            })
+            ->where(function($q) {
+                // At least one real sale field must be filled (not just verifier basics)
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
             });
         
         // Search functionality
@@ -286,8 +295,15 @@ class LeadController extends Controller
         
         // Get KPI statistics for manager_status in a single query instead of 4 separate COUNT queries
         $statusAgg = Lead::whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+            })
+            ->where(function($q) {
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
             })
             ->selectRaw("
                 SUM(CASE WHEN manager_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
@@ -1083,13 +1099,28 @@ class LeadController extends Controller
     {
         // QA Review section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
+        // Exclude incomplete leads (verifier-only forms) that lack actual sale data
         $query = Lead::with(['insuranceCarrier', 'qaUser'])
             ->whereNotNull('closer_name')
-            ->whereNotNull('sale_at');
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->whereNotNull('sale_at')
+            ->where(function($q) {
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            });
         
         // Build analytics query (no eager loading needed — counts only)
         $analyticsQuery = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at');
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->whereNotNull('sale_at')
+            ->where(function($q) {
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            });
         
         // Apply all filters to analytics query (except qa_status to see breakdown of all statuses)
         if ($request->filled('search')) {

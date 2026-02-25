@@ -263,6 +263,8 @@ Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['aut
 // QA Review — access controlled by role.permission:qa-review,level
 Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/review', [LeadController::class, 'qaReview'])->name('review')->middleware('role.permission:qa-review,view');
+    Route::post('/{id}/qa-status', [LeadController::class, 'updateQaStatus'])->name('updateQaStatus')->middleware('role.permission:qa-review,edit');
+    Route::post('/{id}/qa-status/reset', [LeadController::class, 'resetQaStatus'])->name('resetQaStatus')->middleware('role.permission:qa-review,edit');
 });
 
 // Followup Routes
