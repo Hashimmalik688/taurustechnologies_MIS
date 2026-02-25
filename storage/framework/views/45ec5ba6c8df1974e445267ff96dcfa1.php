@@ -60,7 +60,19 @@
         <?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
+        <?php
+            $canSeeSalesOps = auth()->check() && (
+                auth()->user()->canViewModule('sales') ||
+                auth()->user()->canViewModule('leads') ||
+                auth()->user()->canViewModule('leads-peregrine') ||
+                auth()->user()->canViewModule('qa-review') ||
+                auth()->user()->canViewModule('issuance') ||
+                auth()->user()->canViewModule('bank-verification') ||
+                auth()->user()->canViewModule('revenue-analytics') ||
+                auth()->user()->canViewModule('live-analytics')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeSalesOps): ?>
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
                 <i class="bx bx-briefcase-alt"></i>
                 <span class="menu-text">Sales Operations</span>
@@ -124,10 +136,16 @@
                     </a>
                 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('retention')): ?>
+        <?php
+            $canSeeRetention = auth()->check() && (
+                auth()->user()->canViewModule('retention') ||
+                auth()->user()->canViewModule('chargebacks')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeRetention): ?>
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'retentionDropdown')">
                 <i class="bx bx-refresh"></i>
                 <span class="menu-text">Retention & Chargebacks</span>
@@ -135,15 +153,17 @@
             </a>
 
             <div class="menu-dropdown" id="retentionDropdown">
-                <a href="<?php echo e(route('retention.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('retention-dashboard*') ? 'active' : ''); ?>">
-                    <i class="bx bx-tachometer"></i>
-                    <span class="menu-text">Retention Dashboard</span>
-                </a>
+                <?php if(auth()->check() && auth()->user()->canViewModule('retention')): ?>
+                    <a href="<?php echo e(route('retention.dashboard')); ?>" class="dropdown-item <?php echo e(Request::is('retention-dashboard*') ? 'active' : ''); ?>">
+                        <i class="bx bx-tachometer"></i>
+                        <span class="menu-text">Retention Dashboard</span>
+                    </a>
 
-                <a href="<?php echo e(route('retention.index')); ?>" class="dropdown-item <?php echo e(Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : ''); ?>">
-                    <i class="bx bx-user-check"></i>
-                    <span class="menu-text">Manage Retention</span>
-                </a>
+                    <a href="<?php echo e(route('retention.index')); ?>" class="dropdown-item <?php echo e(Request::is('retention') && !Request::is('retention-dashboard*') ? 'active' : ''); ?>">
+                        <i class="bx bx-user-check"></i>
+                        <span class="menu-text">Manage Retention</span>
+                    </a>
+                <?php endif; ?>
 
                 <?php if(auth()->check() && auth()->user()->canViewModule('chargebacks')): ?>
                     <a href="<?php echo e(route('chargebacks.index')); ?>" class="dropdown-item <?php echo e(Request::is('chargebacks*') ? 'active' : ''); ?>">
@@ -152,10 +172,19 @@
                     </a>
                 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('peregrine')): ?>
+        <?php
+            $canSeePeregrine = auth()->check() && (
+                auth()->user()->canViewModule('peregrine') ||
+                auth()->user()->canViewModule('peregrine-dashboard') ||
+                auth()->user()->canViewModule('peregrine-verifier') ||
+                auth()->user()->canViewModule('peregrine-closers') ||
+                auth()->user()->canViewModule('peregrine-validation')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeePeregrine): ?>
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'peregrineDropdown')">
                 <i class="bx bx-shield-alt"></i>
                 <span class="menu-text">Peregrine Operations</span>
@@ -191,10 +220,19 @@
                     </a>
                 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('ravens')): ?>
+        <?php
+            $canSeeRavens = auth()->check() && (
+                auth()->user()->canViewModule('ravens') ||
+                auth()->user()->canViewModule('ravens-dashboard') ||
+                auth()->user()->canViewModule('ravens-calling') ||
+                auth()->user()->canViewModule('ravens-bad-leads') ||
+                auth()->user()->canViewModule('ravens-followups')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeRavens): ?>
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'ravensDropdown')">
                 <i class="bx bx-phone-call"></i>
                 <span class="menu-text">Ravens Operations</span>
@@ -230,15 +268,24 @@
                     </a>
                 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('hr')): ?>
+        <?php
+            $canSeeHR = auth()->check() && (
+                auth()->user()->canViewModule('hr') ||
+                auth()->user()->canViewModule('ems') ||
+                auth()->user()->canViewModule('attendance') ||
+                auth()->user()->canViewModule('dock') ||
+                auth()->user()->canViewModule('public-holidays')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeHR): ?>
             <a href="<?php echo e(route('hr.hub')); ?>" class="menu-item <?php echo e(Request::is('hr/hub') || Request::is('ems*') || Request::is('attendance*') || Request::is('dock*') || Request::is('admin/public-holidays*') ? 'active' : ''); ?>">
                 <i class="bx bx-user-check"></i>
                 <span class="menu-text">HR Operations</span>
             </a>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
         <?php if(auth()->check() && auth()->user()->canViewModule('epms')): ?>
@@ -263,7 +310,13 @@
         <?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('partners')): ?>
+        <?php
+            $canSeePartners = auth()->check() && (
+                auth()->user()->canViewModule('partners') ||
+                auth()->user()->canViewModule('carriers')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeePartners): ?>
             <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'partnersDropdown')">
                 <i class="bx bx-group"></i>
                 <span class="menu-text">Partner Management</span>
@@ -285,15 +338,25 @@
                     </a>
                 <?php endif; ?>
             </div>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('finance')): ?>
+        <?php
+            $canSeeFinance = auth()->check() && (
+                auth()->user()->canViewModule('finance') ||
+                auth()->user()->canViewModule('chart-of-accounts') ||
+                auth()->user()->canViewModule('general-ledger') ||
+                auth()->user()->canViewModule('petty-cash') ||
+                auth()->user()->canViewModule('payroll') ||
+                auth()->user()->canViewModule('pabs-tickets')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeFinance): ?>
             <a href="<?php echo e(route('finance.hub')); ?>" class="menu-item <?php echo e(Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : ''); ?>">
                 <i class="bx bx-dollar-circle"></i>
                 <span class="menu-text">Finance & Accounts</span>
             </a>
-        <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
         <?php if(auth()->check() && auth()->user()->canViewModule('users')): ?>
@@ -324,14 +387,23 @@
     </nav>
 
     
-    <?php if(auth()->check() && auth()->user()->canViewModule('settings')): ?>
+    <?php
+        $canSeeSettings = auth()->check() && (
+            auth()->user()->canViewModule('settings') ||
+            auth()->user()->canViewModule('reports') ||
+            auth()->user()->canViewModule('duplicate-checker') ||
+            auth()->user()->canViewModule('account-switch-log') ||
+            auth()->user()->hasRole('Super Admin')
+        );
+    ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeSettings): ?>
         <div class="sidebar-bottom">
             <a href="<?php echo e(route('settings.hub')); ?>" class="sidebar-bottom-item <?php echo e(Request::is('settings*') || Request::is('admin/dupe-checker*') || Request::is('admin/account-switching-log*') ? 'active' : ''); ?>">
                 <i class="bx bx-cog"></i>
                 <span class="sidebar-bottom-text">Settings</span>
             </a>
         </div>
-    <?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </div>
 
 <style>

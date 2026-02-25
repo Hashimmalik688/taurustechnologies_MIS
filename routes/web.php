@@ -549,10 +549,22 @@ Route::get('/check-my-ip', function () {
     ]);
 });
 
-// Hub Pages
-Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:settings,view']);
-Route::get('/hr/hub', function () { return view('admin.hr.hub'); })->name('hr.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:hr,view']);
-Route::get('/finance/hub', function () { return view('admin.finance.hub'); })->name('finance.hub')->middleware(['auth', Roles::middleware(...Roles::ALL), 'role.permission:finance,view']);
+// Hub Pages — accessible if user can view ANY child module within the hub
+Route::get('/settings/hub', [SettingsController::class, 'hub'])->name('settings.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
+Route::get('/hr/hub', function () {
+    $user = auth()->user();
+    if (!$user->canViewModule('hr') && !$user->canViewModule('ems') && !$user->canViewModule('attendance') && !$user->canViewModule('dock') && !$user->canViewModule('public-holidays')) {
+        abort(403, "You don't have permission to view any HR module.");
+    }
+    return view('admin.hr.hub');
+})->name('hr.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
+Route::get('/finance/hub', function () {
+    $user = auth()->user();
+    if (!$user->canViewModule('finance') && !$user->canViewModule('chart-of-accounts') && !$user->canViewModule('general-ledger') && !$user->canViewModule('petty-cash') && !$user->canViewModule('payroll') && !$user->canViewModule('pabs-tickets')) {
+        abort(403, "You don't have permission to view any Finance module.");
+    }
+    return view('admin.finance.hub');
+})->name('finance.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
 
 // Settings (access controlled by role.permission:settings,level — Permission Management remains Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {

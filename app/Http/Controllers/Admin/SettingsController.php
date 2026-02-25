@@ -16,6 +16,10 @@ class SettingsController extends Controller
 
     public function hub()
     {
+        $user = auth()->user();
+        if (!$user->canViewModule('settings') && !$user->canViewModule('reports') && !$user->canViewModule('duplicate-checker') && !$user->canViewModule('account-switch-log') && !$user->hasRole('Super Admin')) {
+            abort(403, "You don't have permission to view any Settings module.");
+        }
         return view('admin.settings.hub');
     }
 
