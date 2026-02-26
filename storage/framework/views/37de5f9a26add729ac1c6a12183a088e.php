@@ -760,23 +760,17 @@ if (typeof window !== 'undefined') {
 function updateClocks() {
     const now = new Date();
 
-    const floridaTime = now.toLocaleTimeString('en-US', {
-        timeZone: 'America/New_York',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
+    const opts = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const zones = [
+        { id: 'navEasternTime',  tz: 'America/New_York' },
+        { id: 'navCentralTime',  tz: 'America/Chicago' },
+        { id: 'navMountainTime', tz: 'America/Denver' },
+        { id: 'navPacificTime',  tz: 'America/Los_Angeles' },
+    ];
+    zones.forEach(z => {
+        const el = document.getElementById(z.id);
+        if (el) el.textContent = now.toLocaleTimeString('en-US', { ...opts, timeZone: z.tz });
     });
-    const el1 = document.getElementById('navFloridaTime');
-    if (el1) el1.textContent = floridaTime;
-
-    const pakistanTime = now.toLocaleTimeString('en-US', {
-        timeZone: 'Asia/Karachi',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-    });
-    const el2 = document.getElementById('navPakistanTime');
-    if (el2) el2.textContent = pakistanTime;
 }
 
 // Load Data
