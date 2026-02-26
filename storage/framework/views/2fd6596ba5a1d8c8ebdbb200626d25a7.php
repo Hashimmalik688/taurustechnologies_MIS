@@ -75,9 +75,21 @@
 
     
     <div class="ex-card sec-card">
-        <div class="pipe-hdr" style="color:#c84646;">
-            <i class="bx bx-trash" style="color:#f46a6a;"></i> Disposed Contacts
-            <span class="badge-count"><?php echo e($badLeads->total()); ?></span>
+        <div class="pipe-hdr" style="color:#c84646;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;">
+            <span><i class="bx bx-trash" style="color:#f46a6a;"></i> Disposed Contacts
+            <span class="badge-count"><?php echo e($badLeads->total()); ?></span></span>
+            <form method="GET" action="<?php echo e(route('ravens.bad-leads')); ?>" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:600;color:var(--bs-surface-500);">
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = request()->except('per_page', 'page'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <input type="hidden" name="<?php echo e($key); ?>" value="<?php echo e($value); ?>">
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <label for="perPageSelect">Show</label>
+                <select id="perPageSelect" name="per_page" onchange="this.form.submit()" style="font-size:.7rem;font-weight:700;padding:.2rem .4rem;border-radius:6px;border:1px solid rgba(0,0,0,.1);background:var(--bs-card-bg);color:var(--bs-surface-600);cursor:pointer;">
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = [10, 20, 50, 100, 200, 500, 1000]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $size): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($size); ?>" <?php echo e($badLeads->perPage() == $size ? 'selected' : ''); ?>><?php echo e($size); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </select>
+                <span>entries</span>
+            </form>
         </div>
         <div class="scroll-tbl" style="max-height:500px;">
             <table class="ex-tbl">

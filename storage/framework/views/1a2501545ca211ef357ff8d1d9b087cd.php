@@ -129,7 +129,7 @@
         <input type="text" class="pipe-pill-date sl-pill-date" name="end_date" value="<?php echo e($endDate); ?>" placeholder="End date">
 
         <span class="pipe-pill-lbl" style="margin-left:.5rem">EMPLOYEE</span>
-        <input type="text" class="pipe-pill-date" name="search_name" placeholder="Search name..." value="<?php echo e($searchName ?? ''); ?>" style="min-width:140px">
+        <input type="text" class="pipe-pill" name="search_name" placeholder="Search name..." value="<?php echo e($searchName ?? ''); ?>" style="min-width:140px;border-radius:22px;padding:.32rem .65rem;font-size:.72rem;border:1px solid rgba(0,0,0,.08)">
 
         <span class="pipe-pill-lbl" style="margin-left:.5rem">STATUS</span>
         <select class="sl-pill-select" name="status" style="min-width:90px">

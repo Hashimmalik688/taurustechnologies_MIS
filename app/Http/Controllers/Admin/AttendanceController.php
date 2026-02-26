@@ -437,7 +437,7 @@ class AttendanceController extends Controller
         
         while ($cursor <= $lastDayOfWeek) {
             $dateKey = $cursor->format('Y-m-d');
-            $isCurrentMonth = $cursor->month === $date->month;
+            $isCurrentMonth = $cursor->between($startOfMonth, $endOfMonth);
             
             $week[] = [
                 'date' => $cursor->copy(),

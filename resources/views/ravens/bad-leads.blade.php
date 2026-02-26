@@ -77,9 +77,21 @@
 
     {{-- Bad Leads Table --}}
     <div class="ex-card sec-card">
-        <div class="pipe-hdr" style="color:#c84646;">
-            <i class="bx bx-trash" style="color:#f46a6a;"></i> Disposed Contacts
-            <span class="badge-count">{{ $badLeads->total() }}</span>
+        <div class="pipe-hdr" style="color:#c84646;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;">
+            <span><i class="bx bx-trash" style="color:#f46a6a;"></i> Disposed Contacts
+            <span class="badge-count">{{ $badLeads->total() }}</span></span>
+            <form method="GET" action="{{ route('ravens.bad-leads') }}" style="display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:600;color:var(--bs-surface-500);">
+                @foreach(request()->except('per_page', 'page') as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <label for="perPageSelect">Show</label>
+                <select id="perPageSelect" name="per_page" onchange="this.form.submit()" style="font-size:.7rem;font-weight:700;padding:.2rem .4rem;border-radius:6px;border:1px solid rgba(0,0,0,.1);background:var(--bs-card-bg);color:var(--bs-surface-600);cursor:pointer;">
+                    @foreach([10, 20, 50, 100, 200, 500, 1000] as $size)
+                        <option value="{{ $size }}" {{ $badLeads->perPage() == $size ? 'selected' : '' }}>{{ $size }}</option>
+                    @endforeach
+                </select>
+                <span>entries</span>
+            </form>
         </div>
         <div class="scroll-tbl" style="max-height:500px;">
             <table class="ex-tbl">
