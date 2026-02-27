@@ -86,7 +86,7 @@
                     </a>
                 @endcanViewModule
 
-                @canViewModule('leads')
+                @canViewModule('leads-peregrine')
                     <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
                         <i class="bx bx-briefcase"></i>
                         <span class="menu-text">Raven Leads</span>

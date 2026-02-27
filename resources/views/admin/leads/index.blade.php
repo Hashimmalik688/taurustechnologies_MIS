@@ -102,6 +102,7 @@
             <div class="card">
                 <div class="d-flex justify-content-end align-items-center p-2">
                     <div class="mx-3">
+                        @canEditModule('leads-peregrine')
                         <a href="{{ route('leads.create') }}" class="btn btn-success btn-sm waves-effect waves-light">
                             <i class="fas fa-plus me-1"></i> New Lead
                         </a>
@@ -110,6 +111,7 @@
                             data-bs-target="#leadsImportModal">
                             <i class="fas fa-download me-1"></i> Import Leads
                         </a>
+                        @endcanEditModule
 
                         <div class="modal fade" id="leadsImportModal" tabindex="-1" role="dialog"
                             aria-labelledby="exampleModalLabel" aria-hidden="true">

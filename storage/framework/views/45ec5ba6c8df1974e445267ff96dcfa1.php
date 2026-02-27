@@ -87,7 +87,7 @@
                     </a>
                 <?php endif; ?>
 
-                <?php if(auth()->check() && auth()->user()->canViewModule('leads')): ?>
+                <?php if(auth()->check() && auth()->user()->canViewModule('leads-peregrine')): ?>
                     <a href="<?php echo e(route('leads.index')); ?>" class="dropdown-item <?php echo e(Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : ''); ?>">
                         <i class="bx bx-briefcase"></i>
                         <span class="menu-text">Raven Leads</span>
