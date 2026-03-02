@@ -27,19 +27,21 @@ class RavensDashboardController extends Controller
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
 
-        // Determine date range
+        // Determine date range in MT, then convert to app timezone (Asia/Karachi)
+        // so whereBetween matches the PKT timestamps stored by now().
         $timezone = 'America/Denver';
+        $appTz = config('app.timezone', 'Asia/Karachi');
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {
-                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay();
-                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay();
+                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone($appTz);
+                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay()->setTimezone($appTz);
             } catch (\Exception $e) {
-                $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
-                $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+                $startDate = \Carbon\Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+                $endDate = \Carbon\Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
             }
         } else {
-            $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
-            $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+            $startDate = \Carbon\Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+            $endDate = \Carbon\Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
         }
 
         // Get stats for the Ravens employee (filtered by date range)

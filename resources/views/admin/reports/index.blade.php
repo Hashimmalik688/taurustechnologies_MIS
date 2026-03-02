@@ -161,6 +161,62 @@
         </a>
     </div>
 
+    {{-- ═══════════════ Per-Closer Performance Section ═══════════════ --}}
+    <div class="ex-card sec-card" style="margin-bottom:.65rem">
+        <div class="sec-hdr" id="closerStatsToggle" style="cursor:pointer">
+            <h6><i class="bx bx-phone-call"></i> Per-Closer Performance Summary</h6>
+            <i class="bx bx-chevron-down" id="closerStatsToggleIcon" style="font-size:1rem;opacity:.5;transition:transform .2s"></i>
+        </div>
+        <div class="sec-body" id="closerStatsBody" style="padding:.75rem">
+            <div style="display:flex;gap:.55rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.65rem">
+                <div>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">From <span style="font-weight:400;opacity:.6">(MT)</span></label>
+                    <input type="date" id="csDateFrom" class="sl-pill-date" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff">
+                </div>
+                <div>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">To <span style="font-weight:400;opacity:.6">(MT)</span></label>
+                    <input type="date" id="csDateTo" class="sl-pill-date" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff">
+                </div>
+                <div>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Closer</label>
+                    <select id="csCloserFilter" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;min-width:160px">
+                        <option value="">All Closers</option>
+                        @foreach($closers as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Team</label>
+                    <select id="csTeamFilter" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;min-width:120px">
+                        <option value="">All Teams</option>
+                        <option value="ravens">Ravens</option>
+                        <option value="peregrine">Peregrine</option>
+                    </select>
+                </div>
+                <button type="button" class="pipe-pill-apply" id="csLoadBtn" style="font-size:.72rem;padding:.3rem .75rem">
+                    <i class="bx bx-refresh" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Load
+                </button>
+                <button type="button" class="pipe-pill" id="csTodayBtn" style="font-size:.72rem;padding:.3rem .75rem;font-weight:600">
+                    <i class="bx bx-calendar-check" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Today
+                </button>
+                <button type="button" class="act-btn a-success" id="csExportBtn" style="font-size:.72rem;padding:.3rem .65rem;margin-left:auto;display:none">
+                    <i class="bx bx-download"></i> Export CSV
+                </button>
+            </div>
+            <div class="ex-card sec-card" id="closerStatsCard" style="position:relative;box-shadow:none;border:1px solid rgba(0,0,0,.04)">
+                <div id="closerStatsContent">
+                    <div class="rp-empty" style="padding:2rem 1rem">
+                        <i class="bx bx-phone-call"></i>
+                        <h6>Click "Load" to view per-closer stats</h6>
+                        <p>Defaults to the current month</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ═══════════════ End Per-Closer Section ═══════════════ --}}
+
     {{-- Report Type Pills --}}
     <div class="ex-card pipe-filter-bar" style="margin-bottom:.65rem">
         <span class="pipe-pill-lbl">Type</span>
@@ -384,6 +440,124 @@
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Per-Closer Performance Stats
+    // ═══════════════════════════════════════════════════════════════════
+
+    const csContent   = document.getElementById('closerStatsContent');
+    const csCard      = document.getElementById('closerStatsCard');
+    const csLoadBtn   = document.getElementById('csLoadBtn');
+    const csExportBtn = document.getElementById('csExportBtn');
+    const csDateFrom  = document.getElementById('csDateFrom');
+    const csDateTo    = document.getElementById('csDateTo');
+    const csCloser    = document.getElementById('csCloserFilter');
+    const csTeam      = document.getElementById('csTeamFilter');
+
+    // Toggle closer-stats section
+    document.getElementById('closerStatsToggle').addEventListener('click', function() {
+        const body = document.getElementById('closerStatsBody');
+        const icon = document.getElementById('closerStatsToggleIcon');
+        const isVisible = body.style.display !== 'none';
+        body.style.display = isVisible ? 'none' : 'block';
+        icon.style.transform = isVisible ? 'rotate(-90deg)' : '';
+    });
+
+    csLoadBtn.addEventListener('click', loadCloserStats);
+
+    // "Today" button — sets dates to today in Mountain Time and auto-loads
+    document.getElementById('csTodayBtn').addEventListener('click', function() {
+        const mtNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));
+        const y = mtNow.getFullYear();
+        const m = String(mtNow.getMonth() + 1).padStart(2, '0');
+        const d = String(mtNow.getDate()).padStart(2, '0');
+        const today = y + '-' + m + '-' + d;
+        csDateFrom.value = today;
+        csDateTo.value = today;
+        loadCloserStats();
+    });
+
+    csExportBtn.addEventListener('click', function() {
+        const params = new URLSearchParams();
+        if (csDateFrom.value) params.set('cs_date_from', csDateFrom.value);
+        if (csDateTo.value)   params.set('cs_date_to', csDateTo.value);
+        if (csCloser.value)   params.set('cs_closer', csCloser.value);
+        if (csTeam.value)     params.set('cs_team', csTeam.value);
+        window.location.href = '{{ route("settings.reports.closer-stats.export") }}?' + params.toString();
+    });
+
+    function loadCloserStats() {
+        const loader = document.createElement('div');
+        loader.className = 'loading-overlay';
+        loader.innerHTML = '<div class="spinner-border text-warning"><span class="visually-hidden">Loading…</span></div>';
+        csCard.appendChild(loader);
+
+        const params = new URLSearchParams();
+        if (csDateFrom.value) params.set('cs_date_from', csDateFrom.value);
+        if (csDateTo.value)   params.set('cs_date_to', csDateTo.value);
+        if (csCloser.value)   params.set('cs_closer', csCloser.value);
+        if (csTeam.value)     params.set('cs_team', csTeam.value);
+
+        fetch('{{ route("settings.reports.closer-stats") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            csContent.innerHTML = data.html || '<div class="rp-empty"><i class="bx bx-phone-off"></i><h6>No closer activity found</h6><p>No dial data for the selected date range</p></div>';
+            csExportBtn.style.display = (data.rows && data.rows.length > 0) ? '' : 'none';
+
+            // Enable client-side sorting
+            initCloserStatsSort();
+        })
+        .catch(err => {
+            csContent.innerHTML = '<div class="rp-empty"><i class="bx bx-error-circle"></i><h6>Error loading closer stats</h6><p>' + (err.message || 'Something went wrong') + '</p></div>';
+            csExportBtn.style.display = 'none';
+        })
+        .finally(() => {
+            const o = csCard.querySelector('.loading-overlay');
+            if (o) o.remove();
+        });
+    }
+
+    // Simple client-side column sorting for the closer stats table
+    function initCloserStatsSort() {
+        const table = document.getElementById('closerStatsTable');
+        if (!table) return;
+
+        const headers = table.querySelectorAll('thead th');
+        headers.forEach((th, colIdx) => {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', function() {
+                const tbody = table.querySelector('tbody');
+                const rowsArr = Array.from(tbody.querySelectorAll('tr'));
+                const asc = th.dataset.sortDir !== 'asc';
+                th.dataset.sortDir = asc ? 'asc' : 'desc';
+
+                // Reset other headers
+                headers.forEach(h => { if (h !== th) delete h.dataset.sortDir; });
+
+                rowsArr.sort((a, b) => {
+                    let aVal = a.children[colIdx]?.textContent.trim().replace(/[%,$,]/g, '') || '';
+                    let bVal = b.children[colIdx]?.textContent.trim().replace(/[%,$,]/g, '') || '';
+                    const aNum = parseFloat(aVal);
+                    const bNum = parseFloat(bVal);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return asc ? aNum - bNum : bNum - aNum;
+                    }
+                    return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                });
+
+                rowsArr.forEach(row => tbody.appendChild(row));
+            });
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Existing Report Logic
+    // ═══════════════════════════════════════════════════════════════════
     const form = document.getElementById('reportForm');
     const resultsContent = document.getElementById('resultsContent');
     const resultsCard = document.getElementById('resultsCard');

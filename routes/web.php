@@ -587,6 +587,8 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/', [ReportController::class, 'index'])->name('index')->middleware('role.permission:reports,view');
     Route::get('/generate', [ReportController::class, 'generate'])->name('generate')->middleware('role.permission:reports,view');
     Route::get('/export', [ReportController::class, 'export'])->name('export')->middleware('role.permission:reports,view');
+    Route::get('/closer-stats', [ReportController::class, 'closerStats'])->name('closer-stats')->middleware('role.permission:reports,view');
+    Route::get('/closer-stats/export', [ReportController::class, 'closerStatsExport'])->name('closer-stats.export')->middleware('role.permission:reports,view');
 });
 
 // Permission Management (Super Admin only)

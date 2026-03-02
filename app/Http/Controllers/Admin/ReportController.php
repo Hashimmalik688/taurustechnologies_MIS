@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BadLead;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
+use App\Models\LeadDial;
 use App\Models\Partner;
 use App\Models\User;
 use App\Support\CarrierAliases;
+use App\Support\Roles;
 use App\Support\Statuses;
+use App\Support\Teams;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -434,5 +439,226 @@ class ReportController extends Controller
         if ($request->filled('sale_date_to')) {
             $query->whereDate('leads.sale_date', '<=', $request->sale_date_to);
         }
+    }
+
+    /**
+     * Per-closer performance stats (AJAX endpoint).
+     */
+    public function closerStats(Request $request)
+    {
+        $tz = 'America/Denver';
+        $appTz = config('app.timezone', 'Asia/Karachi');
+
+        // Build MT date range, then convert to app timezone (Asia/Karachi)
+        // so whereBetween matches the PKT timestamps stored by now().
+        $startDate = $request->filled('cs_date_from')
+            ? Carbon::parse($request->cs_date_from, $tz)->startOfDay()->setTimezone($appTz)
+            : Carbon::now($tz)->startOfMonth()->setTimezone($appTz);
+        $endDate = $request->filled('cs_date_to')
+            ? Carbon::parse($request->cs_date_to, $tz)->endOfDay()->setTimezone($appTz)
+            : Carbon::now($tz)->endOfDay()->setTimezone($appTz);
+
+        // Get all closers (users with closer roles)
+        $closerQuery = User::withTrashed()
+            ->whereHas('roles', function ($r) {
+                $r->whereIn('name', [Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER]);
+            });
+
+        // Optional single closer filter
+        if ($request->filled('cs_closer')) {
+            $raw = $request->cs_closer;
+            if (str_starts_with($raw, 'user:')) {
+                $closerQuery->where('id', (int) substr($raw, 5));
+            } elseif (str_starts_with($raw, 'name:')) {
+                $closerQuery->where('name', substr($raw, 5));
+            } else {
+                $closerQuery->where('id', $raw);
+            }
+        }
+
+        // Optional team filter
+        if ($request->filled('cs_team')) {
+            $closerQuery->where('department', $request->cs_team);
+        }
+
+        $closers = $closerQuery->orderBy('name')->get();
+
+        if ($closers->isEmpty()) {
+            return response()->json(['html' => '', 'rows' => []]);
+        }
+
+        $closerIds = $closers->pluck('id')->toArray();
+
+        // ── Aggregate dials from lead_dials ────────────────────────────
+        $dials = LeadDial::select(
+                'user_id',
+                DB::raw('COUNT(*) as total_dialed'),
+                DB::raw("SUM(CASE WHEN outcome = 'connected' THEN 1 ELSE 0 END) as connected")
+            )
+            ->whereIn('user_id', $closerIds)
+            ->whereBetween('dialed_at', [$startDate, $endDate])
+            ->groupBy('user_id')
+            ->get()
+            ->keyBy('user_id');
+
+        // ── Aggregate dispositions from bad_leads ─────────────────────
+        $disposed = BadLead::select(
+                'disposed_by',
+                DB::raw('COUNT(*) as total_disposed')
+            )
+            ->whereIn('disposed_by', $closerIds)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('disposed_by')
+            ->get()
+            ->keyBy('disposed_by');
+
+        // ── Aggregate sales from leads ────────────────────────────────
+        // Match sales the same way the Ravens dashboard does:
+        // check closer_name (text), closer_id, or managed_by FK.
+        $closerNames = $closers->pluck('name', 'id')->toArray();
+
+        $salesRaw = collect();
+        foreach ($closerIds as $cId) {
+            $cName = $closerNames[$cId] ?? '';
+            $count = Lead::where(function ($q) use ($cId, $cName) {
+                    $q->where('managed_by', $cId)
+                      ->orWhere('closer_id', $cId);
+                    if ($cName) {
+                        $q->orWhere('closer_name', $cName);
+                    }
+                })
+                ->whereNotNull('sale_date')
+                ->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('sale_at', [$startDate, $endDate])
+                      ->orWhereBetween('sale_date', [$startDate, $endDate]);
+                })
+                ->count();
+
+            $salesRaw->put($cId, (object) ['total_sales' => $count]);
+        }
+
+        // ── Build rows ────────────────────────────────────────────────
+        $rows = [];
+        $totals = [
+            'dialed'    => 0,
+            'connected' => 0,
+            'disposed'  => 0,
+            'sales'     => 0,
+        ];
+
+        foreach ($closers as $closer) {
+            $id = $closer->id;
+            $dialed    = $dials->get($id)->total_dialed ?? 0;
+            $connected = $dials->get($id)->connected ?? 0;
+            $disposedCount = $disposed->get($id)->total_disposed ?? 0;
+            $sales     = $salesRaw->get($id)->total_sales ?? 0;
+
+            $contactRate    = $dialed > 0 ? round(($connected / $dialed) * 100, 1) : 0;
+            $conversionRate = $connected > 0 ? round(($sales / $connected) * 100, 1) : 0;
+            $disposalRate   = $dialed > 0 ? round(($disposedCount / $dialed) * 100, 1) : 0;
+            $salesRate      = $dialed > 0 ? round(($sales / $dialed) * 100, 1) : 0;
+
+            // Determine team from role
+            $roleNames = $closer->roles->pluck('name')->toArray();
+            $team = in_array(Roles::RAVENS_CLOSER, $roleNames) ? 'Ravens' : 'Peregrine';
+
+            $totals['dialed']    += $dialed;
+            $totals['connected'] += $connected;
+            $totals['disposed']  += $disposedCount;
+            $totals['sales']     += $sales;
+
+            $rows[] = [
+                'id'              => $id,
+                'name'            => $closer->name . ($closer->trashed() ? ' (Terminated)' : ''),
+                'team'            => $team,
+                'dialed'          => $dialed,
+                'connected'       => $connected,
+                'disposed'        => $disposedCount,
+                'sales'           => $sales,
+                'contact_rate'    => $contactRate,
+                'conversion_rate' => $conversionRate,
+                'disposal_rate'   => $disposalRate,
+                'sales_rate'      => $salesRate,
+            ];
+        }
+
+        // Totals row ratios
+        $totals['contact_rate']    = $totals['dialed'] > 0 ? round(($totals['connected'] / $totals['dialed']) * 100, 1) : 0;
+        $totals['conversion_rate'] = $totals['connected'] > 0 ? round(($totals['sales'] / $totals['connected']) * 100, 1) : 0;
+        $totals['disposal_rate']   = $totals['dialed'] > 0 ? round(($totals['disposed'] / $totals['dialed']) * 100, 1) : 0;
+        $totals['sales_rate']      = $totals['dialed'] > 0 ? round(($totals['sales'] / $totals['dialed']) * 100, 1) : 0;
+
+        $html = view('admin.reports._closer_stats', [
+            'rows'      => $rows,
+            'totals'    => $totals,
+            'startDate' => $startDate->copy()->setTimezone($tz)->format('M d, Y'),
+            'endDate'   => $endDate->copy()->setTimezone($tz)->format('M d, Y'),
+        ])->render();
+
+        return response()->json([
+            'html'   => $html,
+            'rows'   => $rows,
+            'totals' => $totals,
+        ]);
+    }
+
+    /**
+     * Export per-closer stats to CSV.
+     */
+    public function closerStatsExport(Request $request)
+    {
+        // Re-use closerStats logic to get the data
+        $data = $this->closerStats($request)->getData(true);
+        $rows = $data['rows'] ?? [];
+        $totals = $data['totals'] ?? [];
+
+        $filename = 'closer_stats_' . now()->format('Y-m-d_His') . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($rows, $totals) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, [
+                'Closer', 'Team', 'Total Dialed', 'Connected', 'Disposed',
+                'Sales', 'Contact Rate %', 'Conversion Rate %',
+                'Disposal Rate %', 'Sales Rate %',
+            ]);
+
+            foreach ($rows as $row) {
+                fputcsv($file, [
+                    $row['name'],
+                    $row['team'],
+                    $row['dialed'],
+                    $row['connected'],
+                    $row['disposed'],
+                    $row['sales'],
+                    $row['contact_rate'] . '%',
+                    $row['conversion_rate'] . '%',
+                    $row['disposal_rate'] . '%',
+                    $row['sales_rate'] . '%',
+                ]);
+            }
+
+            // Totals row
+            fputcsv($file, [
+                'TOTAL', '',
+                $totals['dialed'] ?? 0,
+                $totals['connected'] ?? 0,
+                $totals['disposed'] ?? 0,
+                $totals['sales'] ?? 0,
+                ($totals['contact_rate'] ?? 0) . '%',
+                ($totals['conversion_rate'] ?? 0) . '%',
+                ($totals['disposal_rate'] ?? 0) . '%',
+                ($totals['sales_rate'] ?? 0) . '%',
+            ]);
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
