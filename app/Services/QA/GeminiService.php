@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class GeminiService
 {
     private string $apiKey;
-    private string $model = 'gemini-1.5-flash-latest';
+    private string $model = 'gemini-2.5-flash';
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
     public function __construct()
@@ -25,7 +25,7 @@ class GeminiService
      */
     public function scoreCall(string $prompt): array
     {
-        Log::info('[QA:Gemini] Sending scoring request', [
+        Log::info('[QA:Gemini] FALLBACK — Sending scoring request', [
             'model' => $this->model,
             'prompt_length' => strlen($prompt),
         ]);
@@ -80,7 +80,7 @@ class GeminiService
             throw new \RuntimeException('Gemini returned invalid JSON: ' . substr($text, 0, 200));
         }
 
-        Log::info('[QA:Gemini] Scoring complete', [
+        Log::info('[QA:Gemini] FALLBACK scoring complete', [
             'disposition' => $parsed['disposition'] ?? 'unknown',
             'total_score' => $parsed['total_score'] ?? 0,
         ]);

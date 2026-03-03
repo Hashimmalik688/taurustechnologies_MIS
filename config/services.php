@@ -41,7 +41,7 @@ return [
     'whisper' => [
         'enabled' => env('WHISPER_ENABLED', true),       // true = use free local Whisper, false = use Deepgram API
         'python_bin' => env('WHISPER_PYTHON_BIN', '/usr/bin/python3'),
-        'model' => env('WHISPER_MODEL', 'base'),         // tiny|base|small|medium — base recommended for shared VPS
+        'model' => env('WHISPER_MODEL', 'distil-large-v3'), // distil-large-v3 for best accuracy, medium as fallback
     ],
 
     'deepgram' => [

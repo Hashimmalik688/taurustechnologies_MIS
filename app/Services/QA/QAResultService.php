@@ -15,7 +15,7 @@ class QAResultService
      * Compliance check code → DB column mapping.
      */
     private const COMPLIANCE_MAP = [
-        'C1_recording_disclosure' => 'c1_recording_disclosure',
+        'C1_recording_consent' => 'c1_recording_disclosure',
         'C2_agent_identity' => 'c2_agent_identity',
         'C3_carrier_named' => 'c3_carrier_named',
         'C4_not_government_program' => 'c4_not_government_program',
@@ -51,6 +51,9 @@ class QAResultService
             // Extract score breakdown
             $scores = $aiResponse['score_breakdown'] ?? [];
 
+            // Extract business data (names, sale info) from AI response
+            $extracted = $aiResponse['extracted_data'] ?? [];
+
             // Create the QA result
             $qaResult = QaResult::create(array_merge($complianceData, [
                 'qa_call_id' => $qaCall->id,
@@ -71,6 +74,15 @@ class QAResultService
                 'void_risk_reason' => $aiResponse['void_risk_reason'] ?? null,
                 'compliance_failures' => $aiResponse['compliance_failures'] ?? [],
                 'raw_ai_response' => $aiResponse,
+                // Extracted business data from transcript
+                'customer_name' => $extracted['customer_name'] ?? null,
+                'closer_name_extracted' => $extracted['closer_name'] ?? null,
+                'is_sale' => (bool) ($extracted['is_sale'] ?? false),
+                'sale_amount' => $extracted['sale_amount'] ? floatval($extracted['sale_amount']) : null,
+                'monthly_premium' => $extracted['monthly_premium'] ? floatval($extracted['monthly_premium']) : null,
+                'carrier_name' => $extracted['carrier_name'] ?? null,
+                'policy_type' => $extracted['policy_type'] ?? null,
+                'customer_state' => $extracted['customer_state'] ?? null,
             ]));
 
             // Create individual compliance flag rows for failed items
@@ -87,6 +99,9 @@ class QAResultService
                 'qa_result_id' => $qaResult->id,
                 'disposition' => $qaResult->disposition,
                 'total_score' => $qaResult->total_score,
+                'is_sale' => $qaResult->is_sale,
+                'customer_name' => $qaResult->customer_name,
+                'closer_name_extracted' => $qaResult->closer_name_extracted,
             ]);
 
             return $qaResult;

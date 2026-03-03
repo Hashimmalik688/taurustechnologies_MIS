@@ -15,7 +15,7 @@ class WhisperService
     {
         $this->pythonBin = config('services.whisper.python_bin', '/usr/bin/python3');
         $this->scriptPath = base_path('scripts/whisper_transcribe.py');
-        $this->model = config('services.whisper.model', 'small');
+        $this->model = config('services.whisper.model', 'distil-large-v3');
     }
 
     /**

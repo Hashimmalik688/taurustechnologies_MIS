@@ -42,6 +42,15 @@ class QaResult extends Model
         'void_risk_reason',
         'compliance_failures',
         'raw_ai_response',
+        // Extracted business data from transcript
+        'customer_name',
+        'closer_name_extracted',
+        'is_sale',
+        'sale_amount',
+        'monthly_premium',
+        'carrier_name',
+        'policy_type',
+        'customer_state',
     ];
 
     protected $casts = [
@@ -58,6 +67,9 @@ class QaResult extends Model
         'score_closing' => 'integer',
         'score_soft_skills' => 'integer',
         'score_call_control' => 'integer',
+        'is_sale' => 'boolean',
+        'sale_amount' => 'decimal:2',
+        'monthly_premium' => 'decimal:2',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────

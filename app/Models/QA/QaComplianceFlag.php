@@ -45,7 +45,7 @@ class QaComplianceFlag extends Model
     // ── Constants ──────────────────────────────────────────────────────
 
     public const CHECK_LABELS = [
-        'C1' => 'Recording Disclosure',
+        'C1' => 'Recording Consent',
         'C2' => 'Agent Identity',
         'C3' => 'Carrier Named',
         'C4' => 'Not Government Program',
@@ -60,7 +60,7 @@ class QaComplianceFlag extends Model
     ];
 
     public const CHECK_NAMES = [
-        'C1' => 'recording_disclosure',
+        'C1' => 'recording_consent',
         'C2' => 'agent_identity',
         'C3' => 'carrier_named',
         'C4' => 'not_government_program',

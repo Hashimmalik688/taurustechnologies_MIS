@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Auth;
 class RestrictToOfficeNetwork
 {
     /**
+     * Routes that should be excluded from office network restrictions (webhooks, APIs, etc.)
+     */
+    protected $except = [
+        'zoom/webhook',
+        'api/zoom-webhook',
+    ];
+
+    /**
      * Handle an incoming request.
      *
      * Blocks ALL requests from IPs not in the allowed office networks.
@@ -19,6 +27,13 @@ class RestrictToOfficeNetwork
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Skip office network check for excluded routes (webhooks)
+        foreach ($this->except as $except) {
+            if ($request->is($except)) {
+                return $next($request);
+            }
+        }
+
         $ip = $request->ip();
 
         // Get allowed networks from settings (cached for 1 hour via Setting::get)

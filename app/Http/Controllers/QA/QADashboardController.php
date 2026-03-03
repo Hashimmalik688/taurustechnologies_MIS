@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\QA;
 
 use App\Http\Controllers\Controller;
-use App\Models\Lead;
 use App\Models\QA\QaCall;
 use App\Models\QA\QaComplianceFlag;
 use App\Models\QA\QaDailyStat;
@@ -27,6 +26,8 @@ class QADashboardController extends Controller
     public function overview(Request $request): JsonResponse
     {
         $range = $request->input('range', 'today');
+        $page = $request->input('page', 1);
+        $filter = $request->input('qa_filter', 'all');
 
         // ── Primary Team KPIs ──────────────────────────────────────────
         $teamStats = $this->getTeamStats($range);
@@ -37,21 +38,8 @@ class QADashboardController extends Controller
         // ── Agent leaderboard (all agents, ranked by avg score) ────────
         $leaderboard = $this->getAgentLeaderboard($range);
 
-        // ── Compliance alerts (recent fails) ───────────────────────────
-        $complianceAlerts = QaComplianceFlag::with(['qaCall', 'agent'])
-            ->whereHas('qaCall', fn ($q) => $this->applyRange($q, $range, 'call_start_time'))
-            ->orderByDesc('flagged_at')
-            ->limit(15)
-            ->get()
-            ->map(fn ($flag) => [
-                'id' => $flag->id,
-                'agent_name' => $flag->agent?->name ?? $flag->qaCall?->agent_name,
-                'agent_user_id' => $flag->agent_user_id ?? $flag->qaCall?->agent_user_id,
-                'check_code' => $flag->check_code,
-                'check_label' => $flag->check_label,
-                'qa_call_id' => $flag->qa_call_id,
-                'flagged_at' => $flag->flagged_at->toIso8601String(),
-            ]);
+        // ── Sales summary (from salesQA logic) ─────────────────────────
+        $salesSummary = $this->getSalesSummary($range);
 
         // ── Disposition distribution ───────────────────────────────────
         $dispositionChart = QaResult::join('qa_calls', 'qa_results.qa_call_id', '=', 'qa_calls.id')
@@ -98,14 +86,25 @@ class QADashboardController extends Controller
         // ── Score distribution (histogram buckets) ─────────────────────
         $scoreDistribution = $this->getScoreDistribution($range);
 
-        // ── Recent calls (10) ──────────────────────────────────────────
-        $recentCalls = QaCall::with('qaResult')
+        // ── Paginated calls list with filter ───────────────────────────
+        $baseQuery = QaCall::with('qaResult')
             ->completed()
-            ->when(true, fn ($q) => $this->applyRange($q, $range))
-            ->orderByDesc('call_start_time')
-            ->limit(10)
-            ->get()
-            ->map(fn ($call) => $this->formatCallSummary($call));
+            ->when(true, fn ($q) => $this->applyRange($q, $range));
+
+        if ($filter === 'sales_only') {
+            $baseQuery->whereHas('qaResult', fn ($q) => $q->where('is_sale', true));
+        } elseif ($filter !== 'all') {
+            $disposition = strtoupper($filter);
+            $baseQuery->whereHas('qaResult', fn ($q) => $q->where('disposition', $disposition));
+        }
+
+        $calls = $baseQuery->orderByDesc('call_start_time')
+            ->paginate(20, ['*'], 'page', $page);
+
+        $callItems = collect($calls->items())->map(fn ($call) => $this->formatCallSummary($call));
+
+        // ── Per-closer breakdown ───────────────────────────────────────
+        $closerBreakdown = $this->getCloserBreakdown($range, $filter);
 
         // ── Void risks ─────────────────────────────────────────────────
         $voidRisks = QaCall::with('qaResult')
@@ -127,8 +126,8 @@ class QADashboardController extends Controller
         return response()->json([
             'team_stats' => $teamStats,
             'extended_kpis' => $extendedKpis,
+            'sales_summary' => $salesSummary,
             'agent_leaderboard' => $leaderboard,
-            'compliance_alerts' => $complianceAlerts,
             'disposition_chart' => $dispositionChart,
             'score_trend' => $scoreTrend,
             'compliance_trend' => $complianceTrend,
@@ -136,7 +135,13 @@ class QADashboardController extends Controller
             'compliance_breakdown' => $complianceBreakdown,
             'team_category_averages' => $teamCategoryAverages,
             'score_distribution' => $scoreDistribution,
-            'recent_calls' => $recentCalls,
+            'calls' => $callItems,
+            'calls_pagination' => [
+                'current_page' => $calls->currentPage(),
+                'last_page' => $calls->lastPage(),
+                'total' => $calls->total(),
+            ],
+            'closer_breakdown' => $closerBreakdown,
             'void_risks' => $voidRisks,
             'processing_now' => $processingNow,
             'pending_count' => $pendingCount,
@@ -370,15 +375,20 @@ class QADashboardController extends Controller
             'call' => [
                 'id' => $call->id,
                 'zoom_call_id' => $call->zoom_call_id,
-                'agent_name' => $call->agent_name,
+                'agent_name' => $call->agent?->name ?? $result?->closer_name_extracted ?? $call->agent_name ?? 'Unknown',
                 'agent_email' => $call->agent_email,
                 'agent_user_id' => $call->agent_user_id,
                 'caller_number' => $call->caller_number,
                 'callee_number' => $call->callee_number,
+                'customer_name' => $result?->customer_name ?? null,
                 'duration_seconds' => $call->duration_seconds,
                 'call_start_time' => $call->call_start_time?->toIso8601String(),
                 'scored_by' => $call->scored_by,
                 'processing_status' => $call->processing_status,
+                'is_sale' => (bool) $result?->is_sale,
+                'carrier_name' => $result?->carrier_name,
+                'sale_amount' => $result?->sale_amount,
+                'monthly_premium' => $result?->monthly_premium,
             ],
             'qa_result' => $result ? [
                 'disposition' => $result->disposition,
@@ -600,7 +610,9 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_count,
-                SUM(CASE WHEN compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count
+                SUM(CASE WHEN compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count,
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as sales_count,
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END) as total_coverage
             ')
             ->orderByDesc('avg_score')
             ->limit(30)
@@ -618,6 +630,88 @@ class QADashboardController extends Controller
                     : 0,
                 'void_risks' => $row->void_risks,
                 'excellent_count' => $row->excellent_count,
+                'sales_count' => $row->sales_count ?? 0,
+                'total_coverage' => $row->total_coverage ?? 0,
+            ])
+            ->toArray();
+    }
+
+    /**
+     * Sales summary KPIs (merged from salesQA endpoint).
+     */
+    private function getSalesSummary(string $range): array
+    {
+        $summary = QaCall::where('processing_status', 'completed')
+            ->whereHas('qaResult')
+            ->when(true, fn ($q) => $this->applyRange($q, $range))
+            ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
+            ->selectRaw('
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium,
+                ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE NULL END), 0) as avg_coverage,
+                ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE NULL END), 2) as avg_premium
+            ')
+            ->first();
+
+        return [
+            'total_sales' => $summary->total_sales ?? 0,
+            'total_coverage' => $summary->total_coverage ?? 0,
+            'total_premium' => $summary->total_premium ?? 0,
+            'avg_coverage' => $summary->avg_coverage ?? 0,
+            'avg_premium' => $summary->avg_premium ?? 0,
+        ];
+    }
+
+    /**
+     * Per-closer performance breakdown.
+     */
+    private function getCloserBreakdown(string $range, string $filter = 'all'): array
+    {
+        $baseQuery = QaCall::where('processing_status', 'completed')
+            ->whereHas('qaResult')
+            ->whereNotNull('agent_user_id');
+        $this->applyRange($baseQuery, $range);
+
+        if ($filter === 'sales_only') {
+            $baseQuery->whereHas('qaResult', fn ($q) => $q->where('is_sale', true));
+        } elseif ($filter !== 'all') {
+            $disposition = strtoupper($filter);
+            $baseQuery->whereHas('qaResult', fn ($q) => $q->where('disposition', $disposition));
+        }
+
+        return $baseQuery
+            ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
+            ->join('users', 'qa_calls.agent_user_id', '=', 'users.id')
+            ->groupBy('qa_calls.agent_user_id', 'users.name')
+            ->selectRaw('
+                qa_calls.agent_user_id,
+                users.name as closer_name,
+                COUNT(*) as total_calls,
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
+                ROUND(AVG(qa_results.total_score), 1) as avg_score,
+                SUM(CASE WHEN qa_results.disposition IN ("EXCELLENT","GOOD") THEN 1 ELSE 0 END) as good_calls,
+                SUM(CASE WHEN qa_results.disposition IN ("POOR","COMPLIANCE_FAIL") THEN 1 ELSE 0 END) as bad_calls,
+                SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
+            ')
+            ->orderByDesc('total_calls')
+            ->limit(30)
+            ->get()
+            ->map(fn ($row) => [
+                'closer_id' => $row->agent_user_id,
+                'closer_name' => $row->closer_name,
+                'total_calls' => $row->total_calls,
+                'total_sales' => $row->total_sales,
+                'avg_score' => $row->avg_score,
+                'good_calls' => $row->good_calls,
+                'bad_calls' => $row->bad_calls,
+                'void_risks' => $row->void_risks,
+                'total_coverage' => $row->total_coverage,
+                'total_premium' => $row->total_premium,
+                'sale_rate' => $row->total_calls > 0
+                    ? round(($row->total_sales / $row->total_calls) * 100, 1) : 0,
             ])
             ->toArray();
     }
@@ -627,16 +721,21 @@ class QADashboardController extends Controller
         return [
             'id' => $call->id,
             'zoom_call_id' => $call->zoom_call_id,
-            'agent_name' => $call->agent_name,
+            'agent_name' => $call->agent?->name ?? $call->qaResult?->closer_name_extracted ?? $call->agent_name ?? 'Unknown',
             'agent_user_id' => $call->agent_user_id,
             'caller_number' => $call->caller_number,
             'callee_number' => $call->callee_number,
+            'customer_name' => $call->qaResult?->customer_name ?? null,
             'duration_seconds' => $call->duration_seconds,
             'call_start_time' => $call->call_start_time?->toIso8601String(),
             'disposition' => $call->qaResult?->disposition,
             'total_score' => $call->qaResult?->total_score,
             'compliance_pass' => $call->qaResult?->compliance_pass,
             'scored_by' => $call->scored_by,
+            'is_sale' => (bool) $call->qaResult?->is_sale,
+            'sale_amount' => $call->qaResult?->sale_amount,
+            'monthly_premium' => $call->qaResult?->monthly_premium,
+            'carrier_name' => $call->qaResult?->carrier_name,
         ];
     }
 
@@ -644,132 +743,163 @@ class QADashboardController extends Controller
     {
         return match ($range) {
             'today' => $query->whereDate($column, today()),
-            'week' => $query->where($column, '>=', now()->startOfWeek()),
-            'month' => $query->where($column, '>=', now()->startOfMonth()),
-            default => $query->whereDate($column, today()),
+            'week', '7d' => $query->where($column, '>=', now()->subDays(7)->startOfDay()),
+            'month', '30d' => $query->where($column, '>=', now()->subDays(30)->startOfDay()),
+            '90d' => $query->where($column, '>=', now()->subDays(90)->startOfDay()),
+            'all' => $query, // no date filter
+            default => $query->where($column, '>=', now()->subDays(30)->startOfDay()),
         };
     }
 
     // ── GET /qa/api/sales ──────────────────────────────────────────────
+    // Sales data comes from QA pipeline: when Gemini scores a call and
+    // determines a sale was made, it sets is_sale=true with extracted details.
+    // This is the SINGLE source of truth — no separate sales system.
 
     public function salesQA(Request $request): JsonResponse
     {
         $range = $request->input('range', 'today');
         $page = $request->input('page', 1);
-        $filter = $request->input('qa_filter', 'all'); // all, good, avg, bad, pending
+        $filter = $request->input('qa_filter', 'all'); // all, excellent, good, average, poor, compliance_fail, void_risk, sales_only
 
-        // Query leads that have a sale_at (i.e. actual sales)
-        $query = Lead::whereNotNull('sale_at')
-            ->when($range === 'today', fn ($q) => $q->whereDate('sale_at', today()))
-            ->when($range === 'week', fn ($q) => $q->where('sale_at', '>=', now()->startOfWeek()))
-            ->when($range === 'month', fn ($q) => $q->where('sale_at', '>=', now()->startOfMonth()))
-            ->when($filter !== 'all', fn ($q) => $q->where('qa_status', match ($filter) {
-                'good' => 'Good',
-                'avg' => 'Avg',
-                'bad' => 'Bad',
-                'pending' => 'Pending',
-                'review' => 'In Review',
-                default => $filter,
-            }));
+        // Base: all completed QA calls in range
+        $baseQuery = QaCall::where('processing_status', 'completed')
+            ->whereHas('qaResult');
+        $this->applyRange($baseQuery, $range);
 
-        // Summary KPIs
-        $summaryQuery = Lead::whereNotNull('sale_at')
-            ->when($range === 'today', fn ($q) => $q->whereDate('sale_at', today()))
-            ->when($range === 'week', fn ($q) => $q->where('sale_at', '>=', now()->startOfWeek()))
-            ->when($range === 'month', fn ($q) => $q->where('sale_at', '>=', now()->startOfMonth()));
+        // Summary KPIs across ALL scored calls (not just sales)
+        $summaryBase = QaCall::where('processing_status', 'completed')
+            ->whereHas('qaResult');
+        $this->applyRange($summaryBase, $range);
 
-        $summary = $summaryQuery->selectRaw('
-            COUNT(*) as total_sales,
-            SUM(CASE WHEN qa_status = "Good" THEN 1 ELSE 0 END) as good_sales,
-            SUM(CASE WHEN qa_status = "Avg" THEN 1 ELSE 0 END) as avg_sales,
-            SUM(CASE WHEN qa_status = "Bad" THEN 1 ELSE 0 END) as bad_sales,
-            SUM(CASE WHEN qa_status = "Pending" OR qa_status IS NULL THEN 1 ELSE 0 END) as pending_sales,
-            SUM(CASE WHEN qa_status = "In Review" THEN 1 ELSE 0 END) as review_sales,
-            SUM(CASE WHEN manager_status = "approved" THEN 1 ELSE 0 END) as mgr_approved,
-            SUM(CASE WHEN manager_status = "declined" THEN 1 ELSE 0 END) as mgr_declined,
-            SUM(CASE WHEN status = "chargeback" THEN 1 ELSE 0 END) as chargebacks,
-            ROUND(AVG(CASE WHEN coverage_amount IS NOT NULL THEN coverage_amount ELSE NULL END), 0) as avg_coverage,
-            ROUND(AVG(CASE WHEN monthly_premium IS NOT NULL THEN monthly_premium ELSE NULL END), 2) as avg_premium
-        ')->first();
+        $summary = $summaryBase
+            ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
+            ->selectRaw('
+                COUNT(*) as total_calls,
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "GOOD" THEN 1 ELSE 0 END) as good_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "AVERAGE" THEN 1 ELSE 0 END) as avg_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "POOR" THEN 1 ELSE 0 END) as poor_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risk_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fail_sales,
+                SUM(CASE WHEN qa_results.disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_calls,
+                SUM(CASE WHEN qa_results.disposition = "GOOD" THEN 1 ELSE 0 END) as good_calls,
+                SUM(CASE WHEN qa_results.disposition = "AVERAGE" THEN 1 ELSE 0 END) as avg_calls,
+                SUM(CASE WHEN qa_results.disposition = "POOR" THEN 1 ELSE 0 END) as poor_calls,
+                SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risk_calls,
+                SUM(CASE WHEN qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fail_calls,
+                ROUND(AVG(qa_results.total_score), 1) as avg_score,
+                ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE NULL END), 0) as avg_coverage,
+                ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE NULL END), 2) as avg_premium,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
+            ')
+            ->first();
+
+        // Apply filters for the list/breakdown
+        $filteredQuery = clone $baseQuery;
+        if ($filter === 'sales_only') {
+            $filteredQuery->whereHas('qaResult', fn ($q) => $q->where('is_sale', true));
+        } elseif ($filter !== 'all') {
+            $disposition = strtoupper($filter);
+            $filteredQuery->whereHas('qaResult', fn ($q) => $q->where('disposition', $disposition));
+        }
 
         // Per-closer breakdown
-        $closerBreakdown = Lead::whereNotNull('sale_at')
-            ->whereNotNull('closer_id')
-            ->when($range === 'today', fn ($q) => $q->whereDate('sale_at', today()))
-            ->when($range === 'week', fn ($q) => $q->where('sale_at', '>=', now()->startOfWeek()))
-            ->when($range === 'month', fn ($q) => $q->where('sale_at', '>=', now()->startOfMonth()))
-            ->join('users', 'leads.closer_id', '=', 'users.id')
-            ->groupBy('closer_id', 'users.name')
+        $closerBreakdown = (clone $filteredQuery)
+            ->whereNotNull('agent_user_id')
+            ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
+            ->join('users', 'qa_calls.agent_user_id', '=', 'users.id')
+            ->groupBy('qa_calls.agent_user_id', 'users.name')
             ->selectRaw('
-                closer_id,
+                qa_calls.agent_user_id,
                 users.name as closer_name,
-                COUNT(*) as total_sales,
-                SUM(CASE WHEN leads.qa_status = "Good" THEN 1 ELSE 0 END) as good_sales,
-                SUM(CASE WHEN leads.qa_status = "Avg" THEN 1 ELSE 0 END) as avg_sales,
-                SUM(CASE WHEN leads.qa_status = "Bad" THEN 1 ELSE 0 END) as bad_sales,
-                SUM(CASE WHEN leads.qa_status = "Pending" OR leads.qa_status IS NULL THEN 1 ELSE 0 END) as pending_sales,
-                SUM(CASE WHEN leads.status = "chargeback" THEN 1 ELSE 0 END) as chargebacks
+                COUNT(*) as total_calls,
+                SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
+                ROUND(AVG(qa_results.total_score), 1) as avg_score,
+                SUM(CASE WHEN qa_results.disposition IN ("EXCELLENT","GOOD") THEN 1 ELSE 0 END) as good_calls,
+                SUM(CASE WHEN qa_results.disposition IN ("POOR","COMPLIANCE_FAIL") THEN 1 ELSE 0 END) as bad_calls,
+                SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
+                ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
             ')
-            ->orderByDesc('total_sales')
+            ->orderByDesc('total_calls')
             ->limit(30)
             ->get()
             ->map(fn ($row) => [
-                'closer_id' => $row->closer_id,
+                'closer_id' => $row->agent_user_id,
                 'closer_name' => $row->closer_name,
+                'total_calls' => $row->total_calls,
                 'total_sales' => $row->total_sales,
-                'good_sales' => $row->good_sales,
-                'avg_sales' => $row->avg_sales,
-                'bad_sales' => $row->bad_sales,
-                'pending_sales' => $row->pending_sales,
-                'chargebacks' => $row->chargebacks,
-                'good_rate' => $row->total_sales > 0
-                    ? round(($row->good_sales / $row->total_sales) * 100, 1) : 0,
+                'avg_score' => $row->avg_score,
+                'good_calls' => $row->good_calls,
+                'bad_calls' => $row->bad_calls,
+                'void_risks' => $row->void_risks,
+                'total_coverage' => $row->total_coverage,
+                'total_premium' => $row->total_premium,
+                'sale_rate' => $row->total_calls > 0
+                    ? round(($row->total_sales / $row->total_calls) * 100, 1) : 0,
             ])
             ->toArray();
 
-        // Paginated sales list
-        $sales = (clone $query)
-            ->with(['assignedCloser:id,name,email', 'qaUser:id,name'])
-            ->orderByDesc('sale_at')
+        // Paginated call list with results
+        $calls = (clone $filteredQuery)
+            ->with(['agent:id,name,email', 'qaResult'])
+            ->orderByDesc('call_start_time')
             ->paginate(20, ['*'], 'page', $page);
 
-        $items = collect($sales->items())->map(fn (Lead $lead) => [
-            'id' => $lead->id,
-            'cn_name' => $lead->cn_name,
-            'phone_number' => $lead->phone_number,
-            'closer_name' => $lead->assignedCloser?->name ?? $lead->closer_name ?? 'Unknown',
-            'closer_id' => $lead->closer_id,
-            'sale_date' => $lead->sale_at?->toIso8601String(),
-            'qa_status' => $lead->qa_status ?? 'Pending',
-            'qa_reason' => $lead->qa_reason,
-            'manager_status' => $lead->manager_status ?? 'pending',
-            'lead_status' => $lead->status,
-            'carrier_name' => $lead->carrier_name,
-            'coverage_amount' => $lead->coverage_amount,
-            'monthly_premium' => $lead->monthly_premium,
-            'state' => $lead->state,
+        $items = collect($calls->items())->map(fn (QaCall $call) => [
+            'id' => $call->id,
+            'customer_name' => $call->qaResult?->customer_name ?? 'Unknown',
+            'customer_phone' => $call->callee_number,
+            'closer_name' => $call->agent?->name ?? $call->qaResult?->closer_name_extracted ?? $call->agent_name ?? 'Unknown',
+            'closer_id' => $call->agent_user_id,
+            'call_date' => $call->call_start_time?->toIso8601String(),
+            'duration' => $call->duration_seconds,
+            'disposition' => $call->qaResult?->disposition ?? 'N/A',
+            'total_score' => $call->qaResult?->total_score ?? 0,
+            'is_sale' => (bool) $call->qaResult?->is_sale,
+            'sale_amount' => $call->qaResult?->sale_amount,
+            'monthly_premium' => $call->qaResult?->monthly_premium,
+            'carrier_name' => $call->qaResult?->carrier_name,
+            'policy_type' => $call->qaResult?->policy_type,
+            'customer_state' => $call->qaResult?->customer_state,
+            'compliance_pass' => $call->qaResult?->compliance_pass,
+            'void_risk_reason' => $call->qaResult?->void_risk_reason,
+            'coaching_notes' => $call->qaResult?->coaching_notes,
+            'top_issue' => $call->qaResult?->top_issue,
+            'caller_number' => $call->caller_number,
         ]);
 
         return response()->json([
             'summary' => [
+                'total_calls' => $summary->total_calls ?? 0,
                 'total_sales' => $summary->total_sales ?? 0,
+                'excellent_sales' => $summary->excellent_sales ?? 0,
                 'good_sales' => $summary->good_sales ?? 0,
                 'avg_sales' => $summary->avg_sales ?? 0,
-                'bad_sales' => $summary->bad_sales ?? 0,
-                'pending_sales' => $summary->pending_sales ?? 0,
-                'review_sales' => $summary->review_sales ?? 0,
-                'mgr_approved' => $summary->mgr_approved ?? 0,
-                'mgr_declined' => $summary->mgr_declined ?? 0,
-                'chargebacks' => $summary->chargebacks ?? 0,
+                'poor_sales' => $summary->poor_sales ?? 0,
+                'void_risk_sales' => $summary->void_risk_sales ?? 0,
+                'compliance_fail_sales' => $summary->compliance_fail_sales ?? 0,
+                'excellent_calls' => $summary->excellent_calls ?? 0,
+                'good_calls' => $summary->good_calls ?? 0,
+                'avg_calls' => $summary->avg_calls ?? 0,
+                'poor_calls' => $summary->poor_calls ?? 0,
+                'void_risk_calls' => $summary->void_risk_calls ?? 0,
+                'compliance_fail_calls' => $summary->compliance_fail_calls ?? 0,
+                'avg_score' => $summary->avg_score ?? 0,
                 'avg_coverage' => $summary->avg_coverage ?? 0,
                 'avg_premium' => $summary->avg_premium ?? 0,
+                'total_coverage' => $summary->total_coverage ?? 0,
+                'total_premium' => $summary->total_premium ?? 0,
             ],
             'closer_breakdown' => $closerBreakdown,
-            'sales' => $items,
+            'calls' => $items,
             'pagination' => [
-                'current_page' => $sales->currentPage(),
-                'last_page' => $sales->lastPage(),
-                'total' => $sales->total(),
+                'current_page' => $calls->currentPage(),
+                'last_page' => $calls->lastPage(),
+                'total' => $calls->total(),
             ],
         ]);
     }

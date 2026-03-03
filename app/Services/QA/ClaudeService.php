@@ -25,7 +25,7 @@ class ClaudeService
      */
     public function scoreCall(string $prompt): array
     {
-        Log::info('[QA:Claude] FALLBACK — Sending scoring request', [
+        Log::info('[QA:Claude] PRIMARY — Sending scoring request', [
             'model' => $this->model,
             'prompt_length' => strlen($prompt),
         ]);
@@ -78,7 +78,7 @@ class ClaudeService
             throw new \RuntimeException('Claude returned invalid JSON: ' . substr($text, 0, 200));
         }
 
-        Log::info('[QA:Claude] FALLBACK scoring complete', [
+        Log::info('[QA:Claude] PRIMARY scoring complete', [
             'disposition' => $parsed['disposition'] ?? 'unknown',
             'total_score' => $parsed['total_score'] ?? 0,
         ]);

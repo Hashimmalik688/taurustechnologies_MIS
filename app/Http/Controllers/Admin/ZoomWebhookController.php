@@ -508,15 +508,35 @@ class ZoomWebhookController extends Controller
         ]);
 
         // Extract recording data from payload
-        $zoomCallId = $payload['call_id'] ?? $payload['id'] ?? null;
-        $zoomUserId = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
-        $duration = intval($payload['duration'] ?? $payload['recording_duration'] ?? 0);
-        $downloadUrl = $payload['download_url'] ?? $payload['recording_url'] ?? null;
-        $callerNumber = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
-        $calleeNumber = $payload['callee']['phone_number'] ?? $payload['callee_number'] ?? null;
-        $startTime = $payload['date_time'] ?? $payload['start_time'] ?? $payload['call_start_time'] ?? null;
+        // Zoom Phone v2 sends recordings in a "recordings" array
+        if (isset($payload['recordings']) && is_array($payload['recordings']) && !empty($payload['recordings'])) {
+            $recording = $payload['recordings'][0];
+            $zoomCallId = $recording['call_id'] ?? $recording['id'] ?? null;
+            $zoomUserId = $recording['owner']['id'] ?? $recording['caller']['user_id'] ?? null;
+            $duration = intval($recording['duration'] ?? 0);
+            $downloadUrl = $recording['download_url'] ?? null;
+            $callerNumber = $recording['caller_number'] ?? null;
+            $calleeNumber = $recording['callee_number'] ?? null;
+            $startTime = $recording['date_time'] ?? $recording['start_time'] ?? null;
+            $zoomTranscriptUrl = $recording['transcript_download_url'] ?? null;
+        } else {
+            // Fallback to old structure
+            $zoomCallId = $payload['call_id'] ?? $payload['id'] ?? null;
+            $zoomUserId = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
+            $duration = intval($payload['duration'] ?? $payload['recording_duration'] ?? 0);
+            $downloadUrl = $payload['download_url'] ?? $payload['recording_url'] ?? null;
+            $callerNumber = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
+            $calleeNumber = $payload['callee']['phone_number'] ?? $payload['callee_number'] ?? null;
+            $startTime = $payload['date_time'] ?? $payload['start_time'] ?? $payload['call_start_time'] ?? null;
+            $zoomTranscriptUrl = $payload['transcript_download_url'] ?? $payload['recording_transcript_url'] ?? null;
+        }
+        
+        // Check if Zoom provided transcription (if enabled in Zoom settings)
+        if ($zoomTranscriptUrl) {
+            Log::info('[QA:Webhook] Zoom transcription available', ['transcript_url' => $zoomTranscriptUrl]);
+        }
 
-        // Also check for recording files array (Zoom sometimes nests recordings)
+        // Also check for recording files array (Zoom sometimes nests recordings further)
         if (!$downloadUrl && isset($payload['recording_files']) && is_array($payload['recording_files'])) {
             foreach ($payload['recording_files'] as $file) {
                 if (($file['file_type'] ?? '') === 'MP3' || ($file['recording_type'] ?? '') === 'audio_only') {
@@ -540,9 +560,9 @@ class ZoomWebhookController extends Controller
             return;
         }
 
-        // Skip short calls (< 180 seconds = 3 minutes)
-        if ($duration > 0 && $duration < 180) {
-            Log::info('[QA:Webhook] Skipping short call', [
+        // Skip short calls (< 5 minutes) — not meaningful sales conversations
+        if ($duration > 0 && $duration < 300) {
+            Log::info('[QA:Webhook] Skipping short call (< 5 min)', [
                 'zoom_call_id' => $zoomCallId,
                 'duration' => $duration,
             ]);

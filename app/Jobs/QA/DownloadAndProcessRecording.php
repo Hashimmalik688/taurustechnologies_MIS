@@ -67,11 +67,11 @@ class DownloadAndProcessRecording implements ShouldQueue
             ]);
 
             // ── Step 2: Filter short calls ──────────────────────────────
-            // Double-check duration from file if needed. If duration < 3 min, skip.
-            if ($qaCall->duration_seconds < 180) {
+            // Skip calls under 5 minutes — not meaningful sales conversations
+            if ($qaCall->duration_seconds < 300) {
                 $qaCall->update([
                     'processing_status' => 'skipped',
-                    'failure_reason' => 'Call under 3 minutes (' . $qaCall->duration_seconds . 's) — likely a hang-up',
+                    'failure_reason' => 'Call under 5 minutes (' . $qaCall->duration_seconds . 's) — skipped',
                 ]);
                 $this->cleanupFile($localPath);
                 Log::info('[QA:Job] Skipped short call', ['duration' => $qaCall->duration_seconds]);
@@ -122,24 +122,24 @@ class DownloadAndProcessRecording implements ShouldQueue
             $qaCall->update(['processing_status' => 'scoring']);
 
             $prompt = QAScoringPrompt::build($transcript['diarized'], $qaCall->duration_seconds);
-            $scoredBy = 'gemini';
+            $scoredBy = 'claude';
             $aiResult = null;
 
-            // Try Gemini first (primary)
+            // Try Claude Haiku first (primary — fast, accurate, cost-effective)
             try {
-                $gemini = app(GeminiService::class);
-                $aiResult = $gemini->scoreCall($prompt);
-                $scoredBy = 'gemini';
-            } catch (\Throwable $e) {
-                Log::warning('[QA:Job] Gemini failed, falling back to Claude', [
-                    'qa_call_id' => $qaCall->id,
-                    'gemini_error' => $e->getMessage(),
-                ]);
-
-                // Fallback to Claude
                 $claude = app(ClaudeService::class);
                 $aiResult = $claude->scoreCall($prompt);
                 $scoredBy = 'claude';
+            } catch (\Throwable $e) {
+                Log::warning('[QA:Job] Claude failed, falling back to Gemini', [
+                    'qa_call_id' => $qaCall->id,
+                    'claude_error' => $e->getMessage(),
+                ]);
+
+                // Fallback to Gemini
+                $gemini = app(GeminiService::class);
+                $aiResult = $gemini->scoreCall($prompt);
+                $scoredBy = 'gemini';
             }
 
             $qaCall->update(['scored_by' => $scoredBy]);

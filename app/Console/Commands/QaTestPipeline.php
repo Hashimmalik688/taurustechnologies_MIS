@@ -18,7 +18,7 @@ class QaTestPipeline extends Command
         {audio? : Path to an audio file (mp3/wav/m4a). Optional — uses a built-in sample if omitted}
         {--agent= : User ID of the agent (default: first Employee)}
         {--engine=auto : Transcription engine: whisper, deepgram, or auto}
-        {--scorer=gemini : AI scorer: gemini or claude}
+        {--scorer=claude : AI scorer: claude or gemini}
         {--skip-score : Skip AI scoring (test transcription only)}
         {--dry-run : Show what would happen without saving to DB}';
 
@@ -117,19 +117,19 @@ class QaTestPipeline extends Command
         $this->components->task("Step 2: AI Scoring ({$scorer})", function () use ($transcript, $scorer, &$aiResult, $duration) {
             $prompt = QAScoringPrompt::build($transcript['diarized'], $duration);
 
-            if ($scorer === 'gemini') {
+            if ($scorer === 'claude') {
                 try {
-                    $gemini = app(GeminiService::class);
-                    $aiResult = $gemini->scoreCall($prompt);
-                } catch (\Throwable $e) {
-                    $this->line("    Gemini failed: {$e->getMessage()}");
-                    $this->line("    Falling back to Claude...");
                     $claude = app(ClaudeService::class);
                     $aiResult = $claude->scoreCall($prompt);
+                } catch (\Throwable $e) {
+                    $this->line("    Claude failed: {$e->getMessage()}");
+                    $this->line("    Falling back to Gemini...");
+                    $gemini = app(GeminiService::class);
+                    $aiResult = $gemini->scoreCall($prompt);
                 }
             } else {
-                $claude = app(ClaudeService::class);
-                $aiResult = $claude->scoreCall($prompt);
+                $gemini = app(GeminiService::class);
+                $aiResult = $gemini->scoreCall($prompt);
             }
 
             return $aiResult !== null;
@@ -203,16 +203,16 @@ class QaTestPipeline extends Command
         $this->components->task("AI Scoring ({$scorer})", function () use ($sampleTranscript, $scorer, &$aiResult) {
             $prompt = QAScoringPrompt::build($sampleTranscript, 480);
 
-            if ($scorer === 'gemini') {
+            if ($scorer === 'claude') {
                 try {
-                    $aiResult = app(GeminiService::class)->scoreCall($prompt);
-                } catch (\Throwable $e) {
-                    $this->line("    Gemini failed: {$e->getMessage()}");
-                    $this->line("    Trying Claude...");
                     $aiResult = app(ClaudeService::class)->scoreCall($prompt);
+                } catch (\Throwable $e) {
+                    $this->line("    Claude failed: {$e->getMessage()}");
+                    $this->line("    Trying Gemini...");
+                    $aiResult = app(GeminiService::class)->scoreCall($prompt);
                 }
             } else {
-                $aiResult = app(ClaudeService::class)->scoreCall($prompt);
+                $aiResult = app(GeminiService::class)->scoreCall($prompt);
             }
 
             return $aiResult !== null;

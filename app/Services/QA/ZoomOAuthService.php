@@ -2,44 +2,70 @@
 
 namespace App\Services\QA;
 
-use Illuminate\Support\Facades\Cache;
+use App\Models\ZoomToken;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ZoomOAuthService
 {
     /**
-     * Get a Server-to-Server OAuth access token from Zoom.
-     * Cached for 55 minutes (tokens last 60 minutes).
+     * Get a valid OAuth access token from the zoom_tokens table.
+     * Uses the stored user OAuth tokens (from /zoom/authorize flow).
+     * Automatically refreshes if expired.
      */
     public function getAccessToken(): string
     {
-        return Cache::remember('zoom_s2s_token', 3300, function () {
-            $accountId = config('zoom.s2s.account_id');
-            $clientId = config('zoom.s2s.client_id');
-            $clientSecret = config('zoom.s2s.client_secret');
+        // Get the most recent valid token (any user who authorized the Zoom app)
+        $tokenRecord = ZoomToken::whereNotNull('refresh_token')
+            ->orderBy('updated_at', 'desc')
+            ->first();
 
-            if (!$accountId || !$clientId || !$clientSecret) {
-                throw new \RuntimeException('Zoom S2S credentials not configured');
-            }
+        if (!$tokenRecord) {
+            throw new \RuntimeException(
+                'No Zoom OAuth token found. An admin must authorize the Zoom app first at /zoom/authorize'
+            );
+        }
 
-            $response = Http::withBasicAuth($clientId, $clientSecret)
+        // Check if token is expired — refresh if needed
+        if ($tokenRecord->expires_at && $tokenRecord->expires_at->isPast()) {
+            Log::info('[QA:ZoomOAuth] Token expired, refreshing...', [
+                'user_id' => $tokenRecord->user_id,
+                'expired_at' => $tokenRecord->expires_at,
+            ]);
+
+            $response = Http::timeout(15)
                 ->asForm()
                 ->post('https://zoom.us/oauth/token', [
-                    'grant_type' => 'account_credentials',
-                    'account_id' => $accountId,
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $tokenRecord->refresh_token,
+                    'client_id' => config('zoom.oauth.client_id'),
+                    'client_secret' => config('zoom.oauth.client_secret'),
                 ]);
 
             if (!$response->successful()) {
-                Log::error('[QA:ZoomOAuth] Token fetch failed', [
+                Log::error('[QA:ZoomOAuth] Token refresh failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
-                throw new \RuntimeException('Failed to get Zoom S2S token: ' . $response->body());
+                throw new \RuntimeException(
+                    'Zoom OAuth token refresh failed. Admin may need to re-authorize at /zoom/authorize. Error: ' . $response->body()
+                );
             }
 
-            return $response->json('access_token');
-        });
+            $data = $response->json();
+            $tokenRecord->update([
+                'access_token' => $data['access_token'],
+                'refresh_token' => $data['refresh_token'],
+                'expires_at' => now()->addSeconds($data['expires_in'] ?? 3600),
+            ]);
+
+            Log::info('[QA:ZoomOAuth] Token refreshed successfully', [
+                'user_id' => $tokenRecord->user_id,
+                'new_expires_at' => $tokenRecord->expires_at,
+            ]);
+        }
+
+        return $tokenRecord->access_token;
     }
 
     /**

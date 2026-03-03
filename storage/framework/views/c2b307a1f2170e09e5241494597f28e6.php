@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'QA Scoring Dashboard'); ?>
 
-@section('title', 'QA Scoring Dashboard')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    QA Scoring Dashboard v2 — Unified Single Page
@@ -253,9 +251,9 @@
     .qa-cat-label { width:70px; }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <!-- ═══ Header ═══ -->
 <div class="qa-header">
@@ -352,9 +350,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════
@@ -1043,4 +1041,6 @@ S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDash
 
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/qa/dashboard.blade.php ENDPATH**/ ?>
