@@ -363,10 +363,10 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
-        <?php if(auth()->check() && auth()->user()->canViewModule('users')): ?>
-            <a href="<?php echo e(route('users.index')); ?>" class="menu-item <?php echo e(Request::is('users*') ? 'active' : ''); ?>">
-                <i class="bx bx-user-circle"></i>
-                <span class="menu-text">Users MGMT</span>
+        <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.hub')); ?>" class="menu-item <?php echo e(Request::is('settings/reports*') ? 'active' : ''); ?>">
+                <i class="bx bx-bar-chart-alt-2"></i>
+                <span class="menu-text">Reports</span>
             </a>
         <?php endif; ?>
 

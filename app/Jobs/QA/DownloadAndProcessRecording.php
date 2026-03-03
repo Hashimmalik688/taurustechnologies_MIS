@@ -57,7 +57,12 @@ class DownloadAndProcessRecording implements ShouldQueue
 
             $localPath = storage_path('app/qa_recordings/' . $qaCall->zoom_call_id . '.mp3');
             $zoomOAuth = app(ZoomOAuthService::class);
-            $zoomOAuth->downloadRecording($qaCall->recording_url, $localPath);
+            $zoomOAuth->downloadRecording(
+                $qaCall->recording_url,
+                $localPath,
+                $qaCall->zoom_call_log_id,
+                $qaCall->zoom_user_id
+            );
 
             $qaCall->update(['local_recording_path' => $localPath]);
 

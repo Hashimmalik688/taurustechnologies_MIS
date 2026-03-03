@@ -34,7 +34,9 @@ class QaTestPipeline extends Command
         $agentId = $this->option('agent');
         $agent = $agentId
             ? User::find($agentId)
-            : User::role('Employee')->inRandomOrder()->first() ?? User::first();
+            : User::role('Ravens Closer')->inRandomOrder()->first()
+              ?? User::role('Peregrine Closer')->inRandomOrder()->first()
+              ?? User::first();
 
         if (!$agent) {
             $this->components->error('No users found in the database.');

@@ -49,12 +49,12 @@
 
         <div class="hub-section-label">Tools</div>
         <div class="hub-grid">
-            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
-            <a href="<?php echo e(route('settings.reports.index')); ?>" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-bar-chart-alt-2"></i></div>
+            <?php if(auth()->check() && auth()->user()->canViewModule('users')): ?>
+            <a href="<?php echo e(route('users.index')); ?>" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-user-circle"></i></div>
                 <div class="hub-card-body">
-                    <div class="hub-card-title">Reports</div>
-                    <p class="hub-card-desc">Sales, partner, agent &amp; manager reports with CSV export</p>
+                    <div class="hub-card-title">Users Management</div>
+                    <p class="hub-card-desc">Manage user accounts, roles &amp; access for all staff</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>

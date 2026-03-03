@@ -10,6 +10,7 @@ use App\Models\CallEvent;
 use App\Models\CallLog;
 use App\Models\QA\QaCall;
 use App\Models\User;
+use App\Models\ZoomWebhookLog;
 use App\Traits\SanitizesPhoneNumbers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -100,6 +101,9 @@ class ZoomWebhookController extends Controller
             'callerNumber' => $callerNumber,
             'calleeNumber' => $calleeNumber
         ]);
+
+        // === SAVE TO ZOOM WEBHOOK LOGS TABLE (ALL EVENTS) ===
+        $this->saveWebhookLog($event, $payload, $callerNumber, $calleeNumber, $allWebhookData);
 
         // Process different call events
         switch ($event) {
@@ -513,6 +517,7 @@ class ZoomWebhookController extends Controller
             $recording = $payload['recordings'][0];
             $zoomCallId = $recording['call_id'] ?? $recording['id'] ?? null;
             $zoomUserId = $recording['owner']['id'] ?? $recording['caller']['user_id'] ?? null;
+            $zoomCallLogId = $recording['call_log_id'] ?? $recording['id'] ?? null;
             $duration = intval($recording['duration'] ?? 0);
             $downloadUrl = $recording['download_url'] ?? null;
             $callerNumber = $recording['caller_number'] ?? null;
@@ -523,6 +528,7 @@ class ZoomWebhookController extends Controller
             // Fallback to old structure
             $zoomCallId = $payload['call_id'] ?? $payload['id'] ?? null;
             $zoomUserId = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
+            $zoomCallLogId = $payload['call_log_id'] ?? $payload['id'] ?? null;
             $duration = intval($payload['duration'] ?? $payload['recording_duration'] ?? 0);
             $downloadUrl = $payload['download_url'] ?? $payload['recording_url'] ?? null;
             $callerNumber = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
@@ -577,20 +583,50 @@ class ZoomWebhookController extends Controller
             return;
         }
 
-        // Try to match agent by zoom_user_id → User email or zoom_number
+        // Try to match agent (Ravens Closer) by Zoom user ID, extension, name, or email
         $agentUser = null;
         $agentName = $payload['caller']['name'] ?? $payload['owner']['name'] ?? null;
         $agentEmail = $payload['caller']['email'] ?? $payload['owner']['email'] ?? null;
+        $zoomExtension = $payload['caller']['extension_number']
+            ?? $payload['owner']['extension_number']
+            ?? (isset($payload['recordings'][0]) ? ($payload['recordings'][0]['owner']['extension_number'] ?? null) : null);
 
-        if ($agentEmail) {
+        // Priority 1: Match by Zoom user ID (most reliable)
+        if ($zoomUserId) {
+            $agentUser = User::where('zoom_user_id', $zoomUserId)->first();
+        }
+
+        // Priority 2: Match by Zoom extension number
+        if (!$agentUser && $zoomExtension) {
+            $agentUser = User::where('zoom_extension', (string) $zoomExtension)->first();
+        }
+
+        // Priority 3: Match by name (fuzzy — handles "37524 Abdullah Ayub" → "Abdullah Ayub")
+        if (!$agentUser && $agentName) {
+            $cleanName = preg_replace('/^\d+\s*/', '', $agentName); // Strip leading digits
+            $agentUser = User::where('name', 'like', '%' . $cleanName . '%')->first();
+        }
+
+        // Priority 4: Match by email
+        if (!$agentUser && $agentEmail) {
             $agentUser = User::where('email', $agentEmail)->first();
         }
 
+        // Priority 5: Match by phone/zoom_number
         if (!$agentUser && $callerNumber) {
             $cleanNumber = preg_replace('/[^\d]/', '', $callerNumber);
             $last10 = substr($cleanNumber, -10);
-            $agentUser = User::where('zoom_number', 'like', '%' . $last10 . '%')->first();
+            if (strlen($last10) === 10) {
+                $agentUser = User::where('zoom_number', 'like', '%' . $last10 . '%')->first();
+            }
         }
+
+        Log::info('[QA:Webhook] Agent matching result', [
+            'zoom_user_id' => $zoomUserId,
+            'zoom_extension' => $zoomExtension,
+            'agent_name_from_zoom' => $agentName,
+            'matched_user' => $agentUser ? $agentUser->name . ' (ID ' . $agentUser->id . ')' : 'NONE',
+        ]);
 
         // Try to match existing CallLog
         $callLogId = null;
@@ -612,6 +648,7 @@ class ZoomWebhookController extends Controller
             'agent_name' => $agentUser?->name ?? $agentName ?? 'Unknown Agent',
             'agent_email' => $agentUser?->email ?? $agentEmail,
             'zoom_user_id' => $zoomUserId,
+            'zoom_call_log_id' => $zoomCallLogId ?? null,
             'caller_number' => $callerNumber,
             'callee_number' => $calleeNumber,
             'duration_seconds' => $duration,
@@ -629,6 +666,253 @@ class ZoomWebhookController extends Controller
 
         // Dispatch processing job to qa-processing queue
         DownloadAndProcessRecording::dispatch($qaCall->id);
+    }
+
+    /**
+     * Save all webhook events to zoom_webhook_logs table for standalone reporting.
+     * This captures EVERY call from Zoom Phone, not just MIS-tracked calls.
+     */
+    private function saveWebhookLog($event, $payload, $callerNumber, $calleeNumber, $rawWebhookData)
+    {
+        try {
+            // Extract call logs array (used in history_completed events)
+            $callLogData = null;
+            if (isset($payload['call_logs']) && is_array($payload['call_logs']) && count($payload['call_logs']) > 0) {
+                $callLogData = $payload['call_logs'][0];
+            }
+
+            // Extract recording data if present
+            $recordingData = null;
+            if (isset($payload['recordings']) && is_array($payload['recordings']) && !empty($payload['recordings'])) {
+                $recordingData = $payload['recordings'][0];
+            } elseif (isset($payload['recording_files']) && is_array($payload['recording_files']) && !empty($payload['recording_files'])) {
+                $recordingData = $payload['recording_files'][0];
+            }
+
+            // Determine call ID (try multiple locations where Zoom might put it)
+            $zoomCallId = $callLogData['id'] ?? 
+                         $payload['id'] ?? 
+                         $payload['call_id'] ?? 
+                         $recordingData['call_id'] ?? 
+                         null;
+
+            $callSessionId = $payload['call_session_id'] ?? 
+                            $callLogData['call_session_id'] ?? 
+                            null;
+
+            // Extract caller information
+            $callerInfo = $payload['caller'] ?? [];
+            $callerData = [
+                'caller_number' => $callerNumber ?? $callerInfo['phone_number'] ?? $callLogData['caller_number'] ?? null,
+                'caller_did_number' => $callerInfo['did_number'] ?? $callLogData['caller_did_number'] ?? null,
+                'caller_name' => $callerInfo['name'] ?? $callLogData['caller_name'] ?? null,
+                'caller_email' => $callerInfo['email'] ?? null,
+                'caller_user_id' => $callerInfo['user_id'] ?? $callerInfo['id'] ?? null,
+                'caller_extension' => $callerInfo['extension_number'] ?? $callerInfo['extension'] ?? null,
+            ];
+
+            // Extract callee information
+            $calleeInfo = $payload['callee'] ?? [];
+            $calleeData = [
+                'callee_number' => $calleeNumber ?? $calleeInfo['phone_number'] ?? $callLogData['callee_number'] ?? null,
+                'callee_did_number' => $calleeInfo['did_number'] ?? $callLogData['callee_did_number'] ?? null,
+                'callee_name' => $calleeInfo['name'] ?? $callLogData['callee_name'] ?? null,
+                'callee_email' => $calleeInfo['email'] ?? null,
+                'callee_user_id' => $calleeInfo['user_id'] ?? $calleeInfo['id'] ?? null,
+                'callee_extension' => $calleeInfo['extension_number'] ?? $calleeInfo['extension'] ?? null,
+            ];
+
+            // Determine call type
+            $callType = 'outbound'; // default
+            if (str_contains($event, 'callin')) {
+                $callType = 'inbound';
+            } elseif ($callLogData && isset($callLogData['direction'])) {
+                $callType = strtolower($callLogData['direction']);
+            }
+
+            // Extract call status/result
+            $callStatus = $callLogData['status'] ?? $payload['status'] ?? null;
+            $callResult = $callLogData['result'] ?? $payload['result'] ?? null;
+
+            // Extract timestamps
+            $callStartTime = $callLogData['date_time'] ?? 
+                            $callLogData['start_time'] ?? 
+                            $payload['date_time'] ?? 
+                            $payload['start_time'] ?? 
+                            $payload['call_start_time'] ?? 
+                            $rawWebhookData['event_ts'] ?? // Zoom event timestamp
+                            null;
+            
+            // For real-time events without call_start_time, use current time
+            // This ensures events like caller_connected, caller_ended get timestamps
+            if (!$callStartTime) {
+                $callStartTime = now();
+            }
+
+            $callEndTime = $callLogData['end_time'] ?? 
+                          $payload['end_time'] ?? 
+                          $payload['call_end_time'] ?? 
+                          null;
+
+            $answerTime = $callLogData['answer_time'] ?? $payload['answer_time'] ?? null;
+            $ringingStartTime = $callLogData['ringing_start_time'] ?? $payload['ringing_start_time'] ?? null;
+
+            // Extract duration
+            $duration = $callLogData['duration'] ?? 
+                       $payload['duration'] ?? 
+                       $recordingData['duration'] ?? 
+                       0;
+
+            // Extract recording information
+            $recordingUrl = $recordingData['download_url'] ?? 
+                           $payload['download_url'] ?? 
+                           $payload['recording_url'] ?? 
+                           null;
+
+            $recordingId = $recordingData['id'] ?? $payload['recording_id'] ?? null;
+            $recordingFilePath = $recordingData['file_path'] ?? null;
+            $recordingFileSize = $recordingData['file_size'] ?? null;
+            $recordingType = $recordingData['recording_type'] ?? $payload['recording_type'] ?? null;
+            $recordingStartTime = $recordingData['start_time'] ?? $recordingData['date_time'] ?? null;
+            $recordingEndTime = $recordingData['end_time'] ?? null;
+
+            // Extract transcript information
+            $transcriptText = $recordingData['transcript'] ?? 
+                             $payload['transcript'] ?? 
+                             $payload['transcript_text'] ?? 
+                             null;
+            $transcriptUrl = $recordingData['transcript_download_url'] ?? 
+                            $payload['transcript_download_url'] ?? 
+                            null;
+            $transcriptFilePath = $recordingData['transcript_file_path'] ?? null;
+
+            // Extract cost/billing (if available)
+            $callCost = $callLogData['cost'] ?? $payload['cost'] ?? null;
+            $callRate = $callLogData['rate'] ?? $payload['rate'] ?? null;
+
+            // Try to match with MIS data
+            $leadId = null;
+            $agentId = null;
+            $matchedCallLogId = null;
+
+            // Try to find lead by phone number
+            $phoneToMatch = $calleeData['callee_number'] ?? $callerData['caller_number'];
+            if ($phoneToMatch) {
+                $cleanPhone = preg_replace('/[^\d]/', '', $phoneToMatch);
+                $last10Digits = substr($cleanPhone, -10);
+                $lead = Lead::where('phone_number', 'like', '%' . $last10Digits . '%')->first();
+                if ($lead) {
+                    $leadId = $lead->id;
+                }
+            }
+
+            // Try to find agent by email or zoom number
+            $agentEmail = $callerData['caller_email'] ?? $calleeData['callee_email'];
+            if ($agentEmail) {
+                $agent = User::where('email', $agentEmail)->first();
+                if ($agent) {
+                    $agentId = $agent->id;
+                }
+            }
+
+            if (!$agentId && $callerData['caller_number']) {
+                $cleanCaller = preg_replace('/[^\d]/', '', $callerData['caller_number']);
+                $last10Caller = substr($cleanCaller, -10);
+                $agent = User::where('zoom_number', 'like', '%' . $last10Caller . '%')->first();
+                if ($agent) {
+                    $agentId = $agent->id;
+                }
+            }
+
+            // Try to match with existing CallLog
+            if ($zoomCallId) {
+                $matchedCallLog = CallLog::where('zoom_call_id', $zoomCallId)->first();
+                if ($matchedCallLog) {
+                    $matchedCallLogId = $matchedCallLog->id;
+                    if (!$leadId) $leadId = $matchedCallLog->lead_id;
+                    if (!$agentId) $agentId = $matchedCallLog->agent_id;
+                }
+            }
+
+            // Create the webhook log record
+            $webhookLog = ZoomWebhookLog::create([
+                'event_type' => $event,
+                'zoom_call_id' => $zoomCallId,
+                'call_session_id' => $callSessionId,
+                
+                // Caller data
+                'caller_number' => $callerData['caller_number'],
+                'caller_did_number' => $callerData['caller_did_number'],
+                'caller_name' => $callerData['caller_name'],
+                'caller_email' => $callerData['caller_email'],
+                'caller_user_id' => $callerData['caller_user_id'],
+                'caller_extension' => $callerData['caller_extension'],
+                
+                // Callee data
+                'callee_number' => $calleeData['callee_number'],
+                'callee_did_number' => $calleeData['callee_did_number'],
+                'callee_name' => $calleeData['callee_name'],
+                'callee_email' => $calleeData['callee_email'],
+                'callee_user_id' => $calleeData['callee_user_id'],
+                'callee_extension' => $calleeData['callee_extension'],
+                
+                // Call details
+                'call_type' => $callType,
+                'call_status' => $callStatus,
+                'call_result' => $callResult,
+                'call_start_time' => $callStartTime ? \Carbon\Carbon::parse($callStartTime) : null,
+                'call_end_time' => $callEndTime ? \Carbon\Carbon::parse($callEndTime) : null,
+                'duration_seconds' => intval($duration),
+                'answer_time' => $answerTime ? \Carbon\Carbon::parse($answerTime) : null,
+                'ringing_start_time' => $ringingStartTime ? \Carbon\Carbon::parse($ringingStartTime) : null,
+                
+                // Recording
+                'recording_url' => $recordingUrl,
+                'recording_id' => $recordingId,
+                'recording_file_path' => $recordingFilePath,
+                'recording_file_size' => $recordingFileSize,
+                'recording_type' => $recordingType,
+                'recording_start_time' => $recordingStartTime ? \Carbon\Carbon::parse($recordingStartTime) : null,
+                'recording_end_time' => $recordingEndTime ? \Carbon\Carbon::parse($recordingEndTime) : null,
+                
+                // Transcript
+                'transcript_text' => $transcriptText,
+                'transcript_url' => $transcriptUrl,
+                'transcript_file_path' => $transcriptFilePath,
+                
+                // Cost
+                'call_cost' => $callCost,
+                'call_rate' => $callRate,
+                
+                // MIS integration
+                'lead_id' => $leadId,
+                'agent_id' => $agentId,
+                'matched_call_log_id' => $matchedCallLogId,
+                
+                // Raw payload
+                'raw_payload' => $rawWebhookData,
+                
+                // Processing
+                'is_processed' => true,
+                'processed_at' => now(),
+            ]);
+
+            Log::info('✅ Webhook event saved to zoom_webhook_logs', [
+                'log_id' => $webhookLog->id,
+                'event' => $event,
+                'zoom_call_id' => $zoomCallId,
+                'linked_to_lead' => $leadId ? 'yes' : 'no',
+                'linked_to_agent' => $agentId ? 'yes' : 'no',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Failed to save webhook log', [
+                'event' => $event,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Don't throw - we don't want to fail the webhook processing
+        }
     }
 
     private function broadcastWebhookData($eventType, $rawWebhookData, $phoneNumber = null)

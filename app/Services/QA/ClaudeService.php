@@ -38,7 +38,7 @@ class ClaudeService
             ])
             ->post($this->baseUrl . '/messages', [
                 'model' => $this->model,
-                'max_tokens' => 4096,
+                'max_tokens' => 8192,
                 'temperature' => 0.1,
                 'messages' => [
                     [

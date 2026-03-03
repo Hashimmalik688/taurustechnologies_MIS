@@ -20,6 +20,7 @@ class QaCall extends Model
         'agent_name',
         'agent_email',
         'zoom_user_id',
+        'zoom_call_log_id',
         'caller_number',
         'callee_number',
         'duration_seconds',

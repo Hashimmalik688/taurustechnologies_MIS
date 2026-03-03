@@ -584,7 +584,11 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
 
 // Reports — access controlled by role.permission:reports,level
 Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
-    Route::get('/', [ReportController::class, 'index'])->name('index')->middleware('role.permission:reports,view');
+    Route::get('/', [ReportController::class, 'hub'])->name('hub')->middleware('role.permission:reports,view');
+    Route::get('/sales', [ReportController::class, 'index'])->name('index')->middleware('role.permission:reports,view');
+    Route::get('/per-closer', [ReportController::class, 'perCloser'])->name('per-closer')->middleware('role.permission:reports,view');
+    Route::get('/zoom-logs', [ReportController::class, 'zoomLogs'])->name('zoom-logs')->middleware('role.permission:reports,view');
+    Route::get('/zoom-diagnostics', [ReportController::class, 'zoomDiagnostics'])->name('zoom-diagnostics')->middleware('role.permission:reports,view');
     Route::get('/generate', [ReportController::class, 'generate'])->name('generate')->middleware('role.permission:reports,view');
     Route::get('/export', [ReportController::class, 'export'])->name('export')->middleware('role.permission:reports,view');
     Route::get('/closer-stats', [ReportController::class, 'closerStats'])->name('closer-stats')->middleware('role.permission:reports,view');

@@ -20,6 +20,259 @@ use Illuminate\Support\Facades\DB;
 class ReportController extends Controller
 {
     /**
+     * Reports hub landing page.
+     */
+    public function hub()
+    {
+        return view('admin.reports.hub');
+    }
+
+    /**
+     * Standalone per-closer performance page.
+     */
+    public function perCloser()
+    {
+        $closerIdsFromLeads = Lead::whereNotNull('managed_by')
+            ->distinct()
+            ->pluck('managed_by');
+
+        $closerUsers = User::withTrashed()
+            ->where(function ($q) use ($closerIdsFromLeads) {
+                $q->whereHas('roles', function ($r) {
+                        $r->whereIn('name', [Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER]);
+                    })
+                  ->orWhereIn('id', $closerIdsFromLeads);
+            })
+            ->orderByRaw('deleted_at IS NOT NULL')
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($user) {
+                $label = $user->trashed() ? $user->name . ' (Terminated)' : $user->name;
+                return ['user:' . $user->id => $label];
+            });
+
+        $userNames = $closerUsers->values()->map(fn ($v) => preg_replace('/ \(Terminated\)$/', '', $v));
+        $textOnlyClosers = Lead::select('closer_name')
+            ->whereNotNull('closer_name')
+            ->where('closer_name', '!=', '')
+            ->whereNull('managed_by')
+            ->distinct()
+            ->orderBy('closer_name')
+            ->pluck('closer_name')
+            ->filter(fn ($name) => !$userNames->contains($name))
+            ->mapWithKeys(fn ($name) => ['name:' . $name => $name]);
+
+        $closers = $closerUsers->union($textOnlyClosers);
+
+        return view('admin.reports.per-closer', compact('closers'));
+    }
+
+    /**
+     * Zoom logs page with call history from Zoom Phone webhooks.
+     * This shows ALL calls captured from Zoom webhooks, not just MIS-tracked calls.
+     */
+    public function zoomLogs(Request $request)
+    {
+        // Build query showing ALL call events (matches Zoom's dashboard view)
+        $query = \App\Models\ZoomWebhookLog::query()
+            ->with(['lead:id,cn_name,phone_number,state', 'agent:id,name,email'])
+            ->orderBy('call_start_time', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        // Apply filters
+        if ($request->filled('user_filter')) {
+            $userSearch = $request->user_filter;
+            $query->where(function($q) use ($userSearch) {
+                $q->where('caller_number', 'like', "%{$userSearch}%")
+                  ->orWhere('callee_number', 'like', "%{$userSearch}%")
+                  ->orWhere('caller_name', 'like', "%{$userSearch}%")
+                  ->orWhere('callee_name', 'like', "%{$userSearch}%")
+                  ->orWhere('caller_extension', 'like', "%{$userSearch}%")
+                  ->orWhere('callee_extension', 'like', "%{$userSearch}%");
+            });
+        }
+
+        if ($request->filled('call_status')) {
+            $query->where(function($q) use ($request) {
+                $q->where('call_status', $request->call_status)
+                  ->orWhere('call_result', 'like', '%' . $request->call_status . '%');
+            });
+        }
+
+        if ($request->filled('call_type')) {
+            $query->where('call_type', $request->call_type);
+        }
+
+        if ($request->filled('event_type')) {
+            $query->where('event_type', $request->event_type);
+        }
+
+        if ($request->filled('has_recording')) {
+            if ($request->has_recording === 'yes') {
+                $query->whereNotNull('recording_url');
+            } else {
+                $query->whereNull('recording_url');
+            }
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('call_start_time', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('call_start_time', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('caller_number', 'like', "%{$search}%")
+                  ->orWhere('callee_number', 'like', "%{$search}%")
+                  ->orWhere('caller_name', 'like', "%{$search}%")
+                  ->orWhere('callee_name', 'like', "%{$search}%")
+                  ->orWhere('zoom_call_id', 'like', "%{$search}%");
+            });
+        }
+
+        // Paginate results
+        $callLogs = $query->paginate(50)->appends($request->all());
+
+        // Calculate personalized stats if filtering by user
+        $userStats = null;
+        if ($request->filled('user_filter')) {
+            $userSearch = $request->user_filter;
+            $userQuery = \App\Models\ZoomWebhookLog::query()
+                ->where(function($q) use ($userSearch) {
+                    $q->where('caller_number', 'like', "%{$userSearch}%")
+                      ->orWhere('callee_number', 'like', "%{$userSearch}%")
+                      ->orWhere('caller_name', 'like', "%{$userSearch}%")
+                      ->orWhere('callee_name', 'like', "%{$userSearch}%")
+                      ->orWhere('caller_extension', 'like', "%{$userSearch}%")
+                      ->orWhere('callee_extension', 'like', "%{$userSearch}%");
+                });
+
+            // Apply same date filters
+            if ($request->filled('date_from')) {
+                $userQuery->whereDate('call_start_time', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $userQuery->whereDate('call_start_time', '<=', $request->date_to);
+            }
+
+            $userStats = [
+                'total_dialed' => (clone $userQuery)->whereIn('event_type', [
+                    'phone.caller_connected', 
+                    'phone.caller_ended', 
+                    'phone.caller_call_log_completed',
+                    'phone.callout.started'
+                ])->count(),
+                
+                'connected' => (clone $userQuery)->whereIn('call_result', [
+                    'Connected', 
+                    'answered', 
+                    'Answered', 
+                    'Call connected'
+                ])->orWhereIn('event_type', ['phone.caller_connected', 'phone.callee_answered'])->count(),
+                
+                'failed' => (clone $userQuery)->where(function($q) {
+                    $q->whereIn('call_result', ['No Answer', 'Missed', 'Rejected', 'Busy', 'Failed', 'Declined'])
+                      ->orWhereIn('call_status', ['missed', 'rejected', 'busy', 'failed', 'no_answer']);
+                })->count(),
+                
+                'with_recording' => (clone $userQuery)->whereNotNull('recording_url')->count(),
+                
+                'recordings_over_5min' => (clone $userQuery)
+                    ->whereNotNull('recording_url')
+                    ->where('duration_seconds', '>', 300)
+                    ->count(),
+                
+                'total_talk_time' => (clone $userQuery)
+                    ->whereIn('event_type', ['phone.caller_call_log_completed', 'phone.callee_call_log_completed'])
+                    ->sum('duration_seconds'),
+            ];
+        }
+
+        // Get filter options
+        $callStatuses = [
+            'answered' => 'Answered',
+            'connected' => 'Connected',
+            'completed' => 'Completed',
+            'no answer' => 'No Answer',
+            'missed' => 'Missed',
+            'rejected' => 'Rejected',
+            'busy' => 'Busy',
+            'voicemail' => 'Voicemail',
+            'Call connected' => 'Call Connected',
+        ];
+
+        $callTypes = [
+            'inbound' => 'Inbound',
+            'outbound' => 'Outbound',
+            'internal' => 'Internal',
+        ];
+
+        $eventTypes = \App\Models\ZoomWebhookLog::select('event_type')
+            ->distinct()
+            ->orderBy('event_type')
+            ->pluck('event_type', 'event_type');
+
+        // Calculate statistics (counting ALL events like Zoom dashboard)
+        $stats = [
+            'total_calls' => \App\Models\ZoomWebhookLog::count(),
+            'total_duration' => \App\Models\ZoomWebhookLog::sum('duration_seconds'),
+            'calls_with_recording' => \App\Models\ZoomWebhookLog::whereNotNull('recording_url')->count(),
+            'today_calls' => \App\Models\ZoomWebhookLog::whereDate('call_start_time', today())->count(),
+            'answered_calls' => \App\Models\ZoomWebhookLog::whereIn('call_result', ['Connected', 'answered', 'Answered', 'Call connected'])->count(),
+        ];
+
+        return view('admin.reports.zoom-logs', compact(
+            'callLogs',
+            'callStatuses',
+            'callTypes',
+            'eventTypes',
+            'stats',
+            'userStats'
+        ));
+    }
+
+    /**
+     * Zoom webhook diagnostics - shows what events are captured vs missing
+     */
+    public function zoomDiagnostics()
+    {
+        // Get current event counts
+        $current_events = \App\Models\ZoomWebhookLog::select('event_type')
+            ->selectRaw('COUNT(*) as count')
+            ->whereDate('call_start_time', '>=', today()->subDays(7))
+            ->groupBy('event_type')
+            ->orderBy('count', 'desc')
+            ->pluck('count', 'event_type')
+            ->toArray();
+
+        // Calculate stats
+        $crm_total = array_sum($current_events);
+        $unique_calls = \App\Models\ZoomWebhookLog::distinct('zoom_call_id')
+            ->whereNotNull('zoom_call_id')
+            ->whereDate('call_start_time', '>=', today()->subDays(7))
+            ->count('zoom_call_id');
+
+        // Estimate missing events
+        // Each call typically generates 2-3 events if all webhooks enabled
+        // We're seeing ~2 events per call, but should see closer to 3-4
+        $estimated_zoom_total = ceil($crm_total * 1.5); // Conservative estimate
+        $coverage_percent = $crm_total > 0 ? round(($crm_total / $estimated_zoom_total) * 100) : 0;
+
+        $stats = [
+            'crm_events' => $crm_total,
+            'unique_calls' => $unique_calls,
+            'estimated_zoom' => $estimated_zoom_total,
+            'coverage_percent' => $coverage_percent,
+        ];
+
+        return view('admin.reports.zoom-diagnostics', compact('current_events', 'stats'));
+    }
+
+    /**
      * Show the reports hub page.
      */
     public function index()

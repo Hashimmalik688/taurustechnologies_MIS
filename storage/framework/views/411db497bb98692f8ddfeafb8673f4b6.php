@@ -1,12 +1,10 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Reports
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    @include('partials.pipeline-dashboard-styles')
-    @include('partials.sl-filter-assets')
+<?php $__env->startSection('css'); ?>
+    <?php echo $__env->make('partials.pipeline-dashboard-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <?php echo $__env->make('partials.sl-filter-assets', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <style>
         .rp-page-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem }
         .rp-page-hdr h5 { margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.4rem }
@@ -148,20 +146,20 @@
             @page { size:landscape;margin:10mm }
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="rp-page-hdr">
         <h5>
             <i class="bx bx-bar-chart-alt-2"></i> Sales Reports
             <span class="rp-sub">Generate &amp; export</span>
         </h5>
-        <a href="{{ route('settings.reports.hub') }}" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
+        <a href="<?php echo e(route('settings.reports.hub')); ?>" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
             <i class="bx bx-arrow-back"></i> Reports
         </a>
     </div>
 
-    {{-- Report Type Pills --}}
+    
     <div class="ex-card pipe-filter-bar" style="margin-bottom:.65rem">
         <span class="pipe-pill-lbl">Type</span>
         <button class="pipe-pill" data-type="all">All Records</button>
@@ -173,7 +171,7 @@
         <button class="pipe-pill" data-type="issuance">Issuance</button>
     </div>
 
-    {{-- Filters --}}
+    
     <div class="ex-card sec-card" style="margin-bottom:.65rem">
         <div class="sec-hdr" id="filterToggle" style="cursor:pointer">
             <h6><i class="bx bx-filter-alt"></i> Filters</h6>
@@ -188,27 +186,27 @@
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Closer</label>
                         <select name="closer_id" id="closerFilter" class="sl-pill-select">
                             <option value="">All Closers</option>
-                            @foreach($closers as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $closers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Manager</label>
                         <select name="manager_id" id="managerFilter" class="sl-pill-select">
                             <option value="">All Managers</option>
-                            @foreach($managers as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $managers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Carrier</label>
                         <select name="carrier_id" id="carrierFilter" class="sl-pill-select">
                             <option value="">All Carriers</option>
-                            @foreach($carriers as $id => $name)
-                                <option value="{{ $name }}">{{ $name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($name); ?>"><?php echo e($name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <option value="__other__">Other</option>
                         </select>
                     </div>
@@ -216,54 +214,54 @@
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Partner</label>
                         <select name="partner_id" id="partnerFilter" class="sl-pill-select">
                             <option value="">All Partners</option>
-                            @foreach($partners as $partner)
-                                <option value="{{ $partner }}">{{ $partner }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $partners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $partner): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($partner); ?>"><?php echo e($partner); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Verifier</label>
                         <select name="verifier_id" id="verifierFilter" class="sl-pill-select">
                             <option value="">All Verifiers</option>
-                            @foreach($verifiers as $id => $name)
-                                <option value="{{ $id }}">{{ $name }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $verifiers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Lead Status</label>
                         <select name="status" id="statusFilter" class="sl-pill-select">
                             <option value="">All Statuses</option>
-                            @foreach($statuses as $key => $label)
-                                <option value="{{ $key }}">{{ $label }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $statuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($key); ?>"><?php echo e($label); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Team</label>
                         <select name="team" id="teamFilter" class="sl-pill-select">
                             <option value="">All Teams</option>
-                            @foreach($teams as $team)
-                                <option value="{{ $team }}">{{ $team }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $teams; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $team): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($team); ?>"><?php echo e($team); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Source</label>
                         <select name="source" id="sourceFilter" class="sl-pill-select">
                             <option value="">All Sources</option>
-                            @foreach($sources as $source)
-                                <option value="{{ $source }}">{{ $source }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $sources; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $source): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($source); ?>"><?php echo e($source); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">State</label>
                         <select name="state" id="stateFilter" class="sl-pill-select">
                             <option value="">All States</option>
-                            @foreach($states as $state)
-                                <option value="{{ $state }}">{{ $state }}</option>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $states; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $state): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($state); ?>"><?php echo e($state); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                     <div>
@@ -324,7 +322,7 @@
         </div>
     </div>
 
-    {{-- Summary KPIs --}}
+    
     <div class="kpi-row" id="summaryRow" style="display:none">
         <div class="ex-card kpi-card k-gold">
             <i class="bx bx-file k-icon"></i>
@@ -353,11 +351,11 @@
         </div>
     </div>
 
-    {{-- Results (wrapped in print area) --}}
+    
     <div class="rp-print-area" id="printArea">
         <div class="rp-print-header" style="display:none">
             <h4>Taurus MIS — Report</h4>
-            <p id="printSubtitle">Generated on {{ now()->format('M d, Y h:i A') }}</p>
+            <p id="printSubtitle">Generated on <?php echo e(now()->format('M d, Y h:i A')); ?></p>
         </div>
         <div class="rp-print-kpis" style="display:none" id="printKpis">
             <div><strong id="printTotal">0</strong>Records</div>
@@ -376,12 +374,13 @@
             </div>
         </div>
         <div class="rp-print-footer" style="display:none">
-            Taurus Technologies — Confidential Report — Printed {{ now()->format('M d, Y') }}
+            Taurus Technologies — Confidential Report — Printed <?php echo e(now()->format('M d, Y')); ?>
+
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -441,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Export CSV
     document.getElementById('exportCsv').addEventListener('click', function() {
         const params = new URLSearchParams(new FormData(form));
-        window.location.href = '{{ route("settings.reports.export") }}?' + params.toString();
+        window.location.href = '<?php echo e(route("settings.reports.export")); ?>?' + params.toString();
     });
 
     // Pagination
@@ -451,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function loadReport(url) {
-        url = url || '{{ route("settings.reports.generate") }}';
+        url = url || '<?php echo e(route("settings.reports.generate")); ?>';
         const loader = document.createElement('div');
         loader.className = 'loading-overlay';
         loader.innerHTML = '<div class="spinner-border text-warning"><span class="visually-hidden">Loading...</span></div>';
@@ -517,4 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/reports/index.blade.php ENDPATH**/ ?>

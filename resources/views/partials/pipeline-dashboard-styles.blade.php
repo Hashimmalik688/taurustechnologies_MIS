@@ -286,6 +286,10 @@ select.pipe-pill {
 .act-btn.a-warn:hover { background: rgba(241,180,76,.15); }
 .act-btn.a-info { border-color: rgba(80,165,241,.3); background: rgba(80,165,241,.06); color: #2b81c9; }
 .act-btn.a-info:hover { background: rgba(80,165,241,.15); }
+.act-btn.a-gold { border-color: rgba(212,175,55,.3); background: rgba(212,175,55,.06); color: #d4af37; }
+.act-btn.a-gold:hover { background: rgba(212,175,55,.15); }
+.act-btn.a-secondary { border-color: rgba(108,117,125,.3); background: rgba(108,117,125,.06); color: #6c757d; }
+.act-btn.a-secondary:hover { background: rgba(108,117,125,.15); }
 
 /* ── Section header stripe ── */
 .pipe-hdr {

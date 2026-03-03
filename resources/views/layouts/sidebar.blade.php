@@ -361,11 +361,11 @@
             </a>
         @endif
 
-        {{-- USERS MANAGEMENT --}}
-        @canViewModule('users')
-            <a href="{{ route('users.index') }}" class="menu-item {{ Request::is('users*') ? 'active' : '' }}">
-                <i class="bx bx-user-circle"></i>
-                <span class="menu-text">Users MGMT</span>
+        {{-- REPORTS --}}
+        @canViewModule('reports')
+            <a href="{{ route('settings.reports.hub') }}" class="menu-item {{ Request::is('settings/reports*') ? 'active' : '' }}">
+                <i class="bx bx-bar-chart-alt-2"></i>
+                <span class="menu-text">Reports</span>
             </a>
         @endcanViewModule
 
