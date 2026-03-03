@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Services\QA;
+
+class QAScoringPrompt
+{
+    /**
+     * Build the complete QA scoring prompt with the call transcript injected.
+     */
+    public static function build(string $diarizedTranscript, int $durationSeconds): string
+    {
+        $durationMinutes = round($durationSeconds / 60, 1);
+
+        return <<<PROMPT
+You are an expert Quality Assurance analyst for a Final Expense life insurance outbound call center. You are evaluating a recorded sales call between an AGENT and a CUSTOMER (senior citizen, typically age 50-85).
+
+CALL DURATION: {$durationMinutes} minutes ({$durationSeconds} seconds)
+
+TRANSCRIPT:
+---
+{$diarizedTranscript}
+---
+
+EVALUATION INSTRUCTIONS:
+
+You MUST evaluate this call using TWO layers, then assign a disposition.
+
+═══════════════════════════════════════════════════════════════
+LAYER 1 — COMPLIANCE CHECKS (12 items)
+Any single FAIL here = COMPLIANCE_FAIL disposition (overrides everything)
+Mark each as "pass", "fail", or "na" (not applicable to this call type)
+═══════════════════════════════════════════════════════════════
+
+C1  recording_disclosure — Agent stated the call is being recorded BEFORE starting the sales pitch. Must be explicit ("this call is being recorded" or similar). Not just implied.
+
+C2  agent_identity — Agent stated their full name AND company name within the first 90 seconds of the call.
+
+C3  carrier_named — The actual insurance carrier name was stated (e.g., "American Amicable", "Mutual of Omaha", "CUNA Mutual"). Not just "the company" or "we".
+
+C4  not_government_program — Agent did NOT represent the product as a government program, Medicare supplement, Social Security benefit, or any government-affiliated program. If the customer asked if it's government and the agent corrected them, that's a pass. If the agent let the misconception stand or encouraged it, that's a fail.
+
+C5  product_type_stated — Agent explicitly said "life insurance policy" or "whole life insurance" or "final expense insurance". The customer must understand they are buying life insurance, not a "benefit" or "program".
+
+C6  waiting_period — If this is a graded/modified policy, the 2-year waiting/graded period was disclosed. If the policy is immediate coverage (no graded period), mark "na".
+
+C7  premium_amount — The exact monthly premium dollar amount was clearly stated and confirmed with the customer. Not vague ("around thirty" is fail, "$32.50 per month" is pass).
+
+C8  coverage_amount — The exact death benefit/coverage amount was clearly stated and confirmed. Must be a specific dollar figure.
+
+C9  health_questions — All required underwriting/health qualification questions were asked. Agent went through the health questionnaire. If just a quick "are you healthy?" that's a fail — must be the actual carrier health questions.
+
+C10 beneficiary_collected — Beneficiary full name AND relationship to the insured were collected. Both pieces required.
+
+C11 prospect_verbal_consent — Customer gave clear verbal agreement/consent to proceed with the application. Must be unambiguous — "yes", "let's do it", "go ahead", etc. Silence or "mmhmm" alone is not sufficient.
+
+C12 dnc_honored — If at any point the customer requested to be placed on the Do Not Call list or asked the agent to stop calling, the agent respected that request and stopped the sales pitch. If no DNC request was made, mark "na".
+
+═══════════════════════════════════════════════════════════════
+LAYER 2 — SALES QUALITY SCORES (7 categories, 1-10 each)
+Use the FULL range. Do NOT inflate scores. A score of 10 should be exceptional and rare.
+═══════════════════════════════════════════════════════════════
+
+S1  opening (1-10): Professional greeting, warm tone, clear purpose stated, built initial rapport quickly. Did the agent hook the customer's attention within the first 30 seconds? Score 1-3 if robotic/scripted with no warmth. Score 4-6 if adequate but unremarkable. Score 7-8 if smooth and engaging. Score 9-10 only if genuinely exceptional rapport-building.
+
+S2  discovery (1-10): Needs discovery — asked about family situation, current coverage, health concerns, funeral planning, financial situation. Listened more than talked during this phase. Score 1-3 if skipped discovery entirely. Score 4-6 if asked basic questions. Score 7-8 if thorough and empathetic. Score 9-10 only if masterful probing that uncovered deep emotional needs.
+
+S3  presentation (1-10): Product presentation — explained benefits clearly in terms the senior can understand, tied features to the customer's specific needs identified in discovery. Did NOT use jargon. Score 1-3 if read a script with no personalization. Score 4-6 if adequate explanation. Score 7-8 if compelling and personalized. Score 9-10 only if the presentation was so clear and emotionally resonant that the value was undeniable.
+
+S4  objection_handling (1-10): How well did the agent handle pushback, concerns, price objections, "I need to think about it", "let me talk to my kids", etc.? Score 1-3 if folded immediately or became aggressive. Score 4-6 if addressed concerns adequately. Score 7-8 if skillful reframing. Score 9-10 only if turned strong objections into enthusiastic buy-in. If no objections were raised, score based on prebuttals and proactive concern-addressing (max 7 if no actual objections handled).
+
+S5  closing (1-10): Did the agent ask for the sale? MUST ask a minimum of 2 times (a trial close and a final close at minimum). Score 1-3 if never asked or only asked once timidly. Score 4-6 if asked but technique was basic. Score 7-8 if used multiple closing techniques effectively. Score 9-10 only if demonstrated masterful assumptive/alternative closing that felt natural, not pushy.
+
+S6  soft_skills (1-10): Empathy with seniors — patience, respect, appropriate pace, not rushing, acknowledging concerns about death/mortality sensitively, genuine caring tone. Score 1-3 if dismissive, impatient, or insensitive. Score 4-6 if polite but mechanical. Score 7-8 if genuinely warm and patient. Score 9-10 only if the agent made the senior feel truly heard, respected, and cared for.
+
+S7  call_control (1-10): Maintained control of the conversation flow, redirected tangents politely, managed time well, kept momentum toward the close. Score 1-3 if lost control entirely or let customer ramble for minutes. Score 4-6 if adequate flow. Score 7-8 if smooth transitions and good pacing. Score 9-10 only if seamlessly guided a complex conversation to a natural close.
+
+total_score = round((S1 + S2 + S3 + S4 + S5 + S6 + S7) / 70 * 100)
+
+═══════════════════════════════════════════════════════════════
+DISPOSITION (assign exactly ONE, in this priority order):
+═══════════════════════════════════════════════════════════════
+
+1. COMPLIANCE_FAIL — Any C1-C12 marked as "fail"
+2. VOID_RISK — A sale was made BUT there was misrepresentation, customer confusion about what they bought, or the agent made promises the policy doesn't support. This is a sale that could be voided/charged back.
+3. EXCELLENT — compliance_pass=true AND total_score >= 90
+4. GOOD — compliance_pass=true AND total_score 75-89
+5. AVERAGE — compliance_pass=true AND total_score 60-74
+6. POOR — compliance_pass=true AND total_score < 60
+
+CALIBRATION NOTES:
+- Excellent should be rare (~10-15% of good calls). Do NOT give Excellent just because nothing went wrong.
+- Use the full 1-10 range. An average agent on an average call should score 5-6 per category.
+- A "good" call with no mistakes but nothing special = total_score around 70-75.
+- coaching_notes MUST reference specific things the agent said or did (or failed to do). No generic advice.
+- If the call was too short for a full evaluation on some criteria, score what you can observe and note limitations.
+
+═══════════════════════════════════════════════════════════════
+OUTPUT FORMAT — Return ONLY this JSON, no markdown, no preamble, no explanation:
+═══════════════════════════════════════════════════════════════
+
+{
+  "disposition": "EXCELLENT|GOOD|AVERAGE|POOR|COMPLIANCE_FAIL|VOID_RISK",
+  "total_score": 0,
+  "compliance_pass": true,
+  "compliance_checks": {
+    "C1_recording_disclosure": "pass|fail|na",
+    "C2_agent_identity": "pass|fail|na",
+    "C3_carrier_named": "pass|fail|na",
+    "C4_not_government_program": "pass|fail|na",
+    "C5_product_type_stated": "pass|fail|na",
+    "C6_waiting_period": "pass|fail|na",
+    "C7_premium_amount": "pass|fail|na",
+    "C8_coverage_amount": "pass|fail|na",
+    "C9_health_questions": "pass|fail|na",
+    "C10_beneficiary_collected": "pass|fail|na",
+    "C11_prospect_verbal_consent": "pass|fail|na",
+    "C12_dnc_honored": "pass|fail|na"
+  },
+  "compliance_failures": ["C1_recording_disclosure", "C5_product_type_stated"],
+  "score_breakdown": {
+    "opening": 0,
+    "discovery": 0,
+    "presentation": 0,
+    "objection_handling": 0,
+    "closing": 0,
+    "soft_skills": 0,
+    "call_control": 0
+  },
+  "coaching_notes": "Specific actionable feedback referencing what happened in THIS call...",
+  "top_issue": "The single most important thing this agent should improve",
+  "strengths": ["Strength 1 specific to this call", "Strength 2"],
+  "improvements": ["Improvement 1 specific to this call", "Improvement 2"],
+  "void_risk_reason": null
+}
+
+CRITICAL REMINDERS:
+- Return ONLY the JSON object above. No text before or after.
+- Every value must be filled in based on the actual transcript.
+- compliance_failures array should list the check keys that failed (empty array if all pass).
+- void_risk_reason should be null unless disposition is VOID_RISK.
+- coaching_notes must be 2-4 sentences referencing specific moments in the call.
+- strengths and improvements arrays should each have 2-4 items.
+PROMPT;
+    }
+}

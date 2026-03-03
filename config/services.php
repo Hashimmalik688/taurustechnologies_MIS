@@ -36,4 +36,24 @@ return [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 
+    // ── QA Scoring AI Services ─────────────────────────────────────────
+
+    'whisper' => [
+        'enabled' => env('WHISPER_ENABLED', true),       // true = use free local Whisper, false = use Deepgram API
+        'python_bin' => env('WHISPER_PYTHON_BIN', '/usr/bin/python3'),
+        'model' => env('WHISPER_MODEL', 'base'),         // tiny|base|small|medium — base recommended for shared VPS
+    ],
+
+    'deepgram' => [
+        'api_key' => env('DEEPGRAM_API_KEY'),            // Fallback if Whisper fails
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+    ],
+
 ];

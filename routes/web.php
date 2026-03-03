@@ -840,5 +840,19 @@ Route::middleware(['auth'])->prefix('sticky-notes')->as('sticky-notes.')->group(
     Route::delete('/{stickyNote}', [App\Http\Controllers\StickyNoteController::class, 'destroy'])->name('destroy');
 });
 
+// ═══════ QA SCORING SYSTEM ═══════════════════════════════════════════════════
+// AI-powered call quality assurance dashboard
+Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
+    // Dashboard page (serves the SPA frontend)
+    Route::get('/scoring', [\App\Http\Controllers\QA\QADashboardController::class, 'index'])->name('qa.scoring');
+
+    // API endpoints
+    Route::get('/api/overview', [\App\Http\Controllers\QA\QADashboardController::class, 'overview'])->name('qa.api.overview');
+    Route::get('/api/agents/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'agentDetail'])->name('qa.api.agent');
+    Route::get('/api/calls', [\App\Http\Controllers\QA\QADashboardController::class, 'calls'])->name('qa.api.calls');
+    Route::get('/api/calls/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'callDetail'])->name('qa.api.call');
+    Route::get('/api/sales', [\App\Http\Controllers\QA\QADashboardController::class, 'salesQA'])->name('qa.api.sales');
+});
+
 // Catch-all route - MUST BE LAST
 Route::get('{any}', [DashboardController::class, 'index'])->where('any', '.*')->name('index');

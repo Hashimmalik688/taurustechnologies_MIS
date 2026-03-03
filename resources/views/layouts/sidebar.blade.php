@@ -94,9 +94,13 @@
                 @endcanViewModule
 
                 @canViewModule('qa-review')
-                    <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa*') ? 'active' : '' }}">
+                    <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa/review*') ? 'active' : '' }}">
                         <i class="bx bx-check-circle"></i>
                         <span class="menu-text">QA Review</span>
+                    </a>
+                    <a href="{{ route('qa.scoring') }}" class="dropdown-item {{ Request::is('qa/scoring*') ? 'active' : '' }}">
+                        <i class="bx bx-shield-quarter"></i>
+                        <span class="menu-text">QA Scoring</span>
                     </a>
                 @endcanViewModule
 
