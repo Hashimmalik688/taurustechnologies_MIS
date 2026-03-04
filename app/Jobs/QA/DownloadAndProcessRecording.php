@@ -4,7 +4,6 @@ namespace App\Jobs\QA;
 
 use App\Models\QA\QaCall;
 use App\Services\QA\ClaudeService;
-use App\Services\QA\DeepgramService;
 use App\Services\QA\GeminiService;
 use App\Services\QA\QAResultService;
 use App\Services\QA\QAScoringPrompt;
@@ -23,7 +22,7 @@ class DownloadAndProcessRecording implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-    public int $timeout = 600;
+    public int $timeout = 1800; // 30 min — WhisperX + diarization on CPU needs time
     public int $backoff = 60;
 
     private int $qaCallId;
@@ -83,33 +82,13 @@ class DownloadAndProcessRecording implements ShouldQueue
                 return;
             }
 
-            // ── Step 3: Transcribe ──────────────────────────────────────
-            // Primary: Local Whisper (free, no API cost)
-            // Fallback: Deepgram API (if Whisper fails or is disabled)
+            // ── Step 3: Transcribe (WhisperX — local, free) ─────────────
             $qaCall->update(['processing_status' => 'transcribing']);
 
-            $transcriptionEngine = config('services.whisper.enabled', true) ? 'whisper' : 'deepgram';
-            $transcript = null;
-
-            if ($transcriptionEngine === 'whisper') {
-                try {
-                    $whisper = app(WhisperService::class);
-                    $transcript = $whisper->transcribe($localPath);
-                    Log::info('[QA:Job] Whisper transcription succeeded', ['qa_call_id' => $qaCall->id]);
-                } catch (\Throwable $e) {
-                    Log::warning('[QA:Job] Whisper failed, falling back to Deepgram', [
-                        'qa_call_id' => $qaCall->id,
-                        'whisper_error' => $e->getMessage(),
-                    ]);
-                    $transcriptionEngine = 'deepgram';
-                }
-            }
-
-            if (!$transcript) {
-                $deepgram = app(DeepgramService::class);
-                $transcript = $deepgram->transcribe($localPath);
-                Log::info('[QA:Job] Deepgram transcription succeeded', ['qa_call_id' => $qaCall->id]);
-            }
+            $transcriptionEngine = 'whisperx';
+            $whisper = app(WhisperService::class);
+            $transcript = $whisper->transcribe($localPath);
+            Log::info('[QA:Job] WhisperX transcription succeeded', ['qa_call_id' => $qaCall->id]);
 
             $qaCall->update([
                 'transcript_plain' => $transcript['plain'],

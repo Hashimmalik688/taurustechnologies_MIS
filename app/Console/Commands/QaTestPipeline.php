@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\QA\QaCall;
 use App\Models\User;
 use App\Services\QA\ClaudeService;
-use App\Services\QA\DeepgramService;
 use App\Services\QA\GeminiService;
 use App\Services\QA\QAResultService;
 use App\Services\QA\QAScoringPrompt;
@@ -17,7 +16,7 @@ class QaTestPipeline extends Command
     protected $signature = 'qa:test
         {audio? : Path to an audio file (mp3/wav/m4a). Optional — uses a built-in sample if omitted}
         {--agent= : User ID of the agent (default: first Employee)}
-        {--engine=auto : Transcription engine: whisper, deepgram, or auto}
+        {--engine=whisper : Transcription engine: whisper (WhisperX local)}
         {--scorer=claude : AI scorer: claude or gemini}
         {--skip-score : Skip AI scoring (test transcription only)}
         {--dry-run : Show what would happen without saving to DB}';
@@ -68,21 +67,9 @@ class QaTestPipeline extends Command
         $this->newLine();
         $this->components->task('Step 1: Transcription', function () use ($audioPath, $engine, &$transcript) {
             if ($engine === 'whisper' || $engine === 'auto') {
-                try {
-                    $whisper = app(WhisperService::class);
-                    $transcript = $whisper->transcribe($audioPath);
-                    $this->line("    Engine: <fg=green>Whisper (local, free)</>");
-                    return true;
-                } catch (\Throwable $e) {
-                    if ($engine === 'whisper') throw $e;
-                    $this->line("    Whisper failed: {$e->getMessage()}");
-                }
-            }
-
-            if ($engine === 'deepgram' || ($engine === 'auto' && !$transcript)) {
-                $deepgram = app(DeepgramService::class);
-                $transcript = $deepgram->transcribe($audioPath);
-                $this->line("    Engine: <fg=yellow>Deepgram (API, paid)</>");
+                $whisper = app(WhisperService::class);
+                $transcript = $whisper->transcribe($audioPath);
+                $this->line("    Engine: <fg=green>WhisperX (local, free)</>");
                 return true;
             }
 

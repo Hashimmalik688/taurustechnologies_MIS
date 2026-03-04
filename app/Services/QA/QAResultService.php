@@ -15,18 +15,26 @@ class QAResultService
      * Compliance check code → DB column mapping.
      */
     private const COMPLIANCE_MAP = [
-        'C1_recording_consent' => 'c1_recording_disclosure',
+        // Call Handling
+        'C1_closer_consent' => 'c1_closer_consent',
         'C2_agent_identity' => 'c2_agent_identity',
         'C3_carrier_named' => 'c3_carrier_named',
-        'C4_not_government_program' => 'c4_not_government_program',
-        'C5_product_type_stated' => 'c5_product_type_stated',
-        'C6_waiting_period' => 'c6_waiting_period',
-        'C7_premium_amount' => 'c7_premium_amount',
-        'C8_coverage_amount' => 'c8_coverage_amount',
-        'C9_health_questions' => 'c9_health_questions',
-        'C10_beneficiary_collected' => 'c10_beneficiary_collected',
-        'C11_prospect_verbal_consent' => 'c11_prospect_verbal_consent',
-        'C12_dnc_honored' => 'c12_dnc_honored',
+        'C4_product_type_stated' => 'c4_product_type_stated',
+        'C5_health_questions_complete' => 'c5_health_questions_complete',
+        'C6_proper_quote' => 'c6_proper_quote',
+        'C7_coverage_amount' => 'c7_coverage_amount',
+        'C8_draft_date_confirmed' => 'c8_draft_date_confirmed',
+        'C9_end_of_call_consent' => 'c9_end_of_call_consent',
+        'C10_waiting_period' => 'c10_waiting_period',
+        // Application Requirements
+        'C11_application_info_collected' => 'c11_application_info_collected',
+        // Behavioral Compliance
+        'C12_customer_not_on_dnc' => 'c12_customer_not_on_dnc',
+        'C13_customer_not_aggressive' => 'c13_customer_not_aggressive',
+        'C14_customer_not_disinterested' => 'c14_customer_not_disinterested',
+        'C15_no_pushy_sale' => 'c15_no_pushy_sale',
+        'C16_appropriate_language' => 'c16_appropriate_language',
+        'C17_customer_not_abusive' => 'c17_customer_not_abusive',
     ];
 
     /**

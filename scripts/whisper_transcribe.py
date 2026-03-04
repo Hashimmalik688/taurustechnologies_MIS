@@ -1,90 +1,266 @@
 #!/usr/bin/env python3
 """
-Local Whisper Transcription for QA System.
-Uses faster-whisper (CTranslate2) for CPU-based speech-to-text with
-improved speaker diarization via energy + pause analysis.
+WhisperX Transcription + Diarization for QA System.
+Uses WhisperX (faster-whisper + wav2vec2 alignment + pyannote diarization)
+for accurate speech-to-text with real speaker labels.
+
+Optimized for 12-core / 48GB RAM CPU server.
+
+Pipeline:
+  1. Transcribe with faster-whisper (batched inference)
+  2. Align words with wav2vec2 for precise timestamps
+  3. Diarize speakers with pyannote-audio
+  4. Assign speaker labels to each word/segment
 
 Usage:
-    python3 whisper_transcribe.py <audio_file_path> [--model medium] [--language en]
+    python3 whisper_transcribe.py <audio_file_path> [--model large-v2] [--language en]
 
 Output: JSON to stdout with keys: plain, diarized
 """
 
+import os
 import sys
 import json
+import gc
 import argparse
-from faster_whisper import WhisperModel
+import warnings
+import logging
+
+# Suppress non-critical warnings to keep stdout clean for JSON output
+warnings.filterwarnings("ignore")
+
+# Force ALL Python loggers to write to stderr ONLY (never stdout)
+# This is critical because WhisperX's internal loggers (whisperx.vads, whisperx.diarize)
+# would otherwise pollute stdout and corrupt our JSON output
+_stderr_handler = logging.StreamHandler(sys.stderr)
+_stderr_handler.setLevel(logging.WARNING)
+logging.basicConfig(level=logging.WARNING, handlers=[_stderr_handler], force=True)
+
+# Also suppress known noisy loggers from whisperx internals
+for _logger_name in ["whisperx", "whisperx.vads", "whisperx.vads.pyannote",
+                     "whisperx.diarize", "faster_whisper", "pyannote",
+                     "pytorch_lightning", "lightning", "torch"]:
+    _logger = logging.getLogger(_logger_name)
+    _logger.handlers.clear()
+    _logger.addHandler(_stderr_handler)
+    _logger.setLevel(logging.WARNING)
+    _logger.propagate = False
+
+import whisperx
 
 
-def transcribe(file_path: str, model_size: str = "distil-large-v3", language: str = "en") -> dict:
+def transcribe(
+    file_path: str,
+    model_size: str = "large-v2",
+    language: str = "en",
+    hf_token: str | None = None,
+    batch_size: int = 16,
+    cpu_threads: int = 10,
+) -> dict:
     """
-    Transcribe audio file using faster-whisper with improved settings.
-    Uses distil-large-v3 by default for best accuracy.
+    Full WhisperX pipeline: Transcribe -> Align -> Diarize.
+
+    Optimized for CPU with 12 cores / 48GB RAM:
+    - compute_type=float32 (required for CPU, float16 not supported)
+    - batch_size=16 (larger batches, 48GB RAM can handle it)
+    - cpu_threads=10 (leaves 2 cores for web server + system)
     """
 
-    model = WhisperModel(model_size, device="cpu", compute_type="int8")
+    device = "cpu"
+    compute_type = "float32"  # WhisperX requires float32 on CPU
 
-    segments, info = model.transcribe(
-        file_path,
+    # Set torch thread count for optimal CPU utilization
+    try:
+        import torch
+        torch.set_num_threads(cpu_threads)
+    except Exception:
+        pass
+
+    # ── Step 1: Transcribe with faster-whisper (batched) ─────────────
+    sys.stderr.write(f"[WhisperX] Loading model: {model_size} ({compute_type})...\n")
+
+    model = whisperx.load_model(
+        model_size,
+        device,
+        compute_type=compute_type,
         language=language,
-        beam_size=5,
-        best_of=3,
-        word_timestamps=True,
-        vad_filter=True,
-        vad_parameters=dict(
-            min_silence_duration_ms=400,
-            speech_pad_ms=250,
-            threshold=0.35,
-        ),
-        condition_on_previous_text=True,
-        no_speech_threshold=0.5,
-        compression_ratio_threshold=2.2,
-        temperature=[0.0, 0.2, 0.4],
+        threads=cpu_threads,
     )
 
-    plain_parts = []
-    all_words = []
+    sys.stderr.write(f"[WhisperX] Transcribing: {os.path.basename(file_path)}...\n")
 
-    for segment in segments:
-        text = segment.text.strip()
-        if text:
-            plain_parts.append(text)
-        if segment.words:
-            for word in segment.words:
-                w_text = word.word.strip()
-                if w_text:
-                    all_words.append({
-                        "text": w_text,
-                        "start": word.start,
-                        "end": word.end,
-                    })
+    audio = whisperx.load_audio(file_path)
+    result = model.transcribe(audio, batch_size=batch_size, language=language)
 
-    plain_text = " ".join(plain_parts)
+    sys.stderr.write(f"[WhisperX] Transcription done. {len(result.get('segments', []))} segments.\n")
 
-    diarized = build_diarized(all_words)
+    # Free transcription model memory before loading alignment model
+    del model
+    gc.collect()
+
+    # ── Step 2: Align with wav2vec2 for precise word timestamps ──────
+    sys.stderr.write("[WhisperX] Aligning words with wav2vec2...\n")
+
+    try:
+        model_a, metadata = whisperx.load_align_model(
+            language_code=language,
+            device=device,
+        )
+        result = whisperx.align(
+            result["segments"],
+            model_a,
+            metadata,
+            audio,
+            device,
+            return_char_alignments=False,
+        )
+        sys.stderr.write("[WhisperX] Alignment done.\n")
+
+        # Free alignment model
+        del model_a
+        gc.collect()
+    except Exception as e:
+        sys.stderr.write(f"[WhisperX] Alignment failed (continuing without): {e}\n")
+
+    # ── Step 3: Diarize speakers with pyannote-audio ─────────────────
+    diarized_text = ""
+
+    if hf_token:
+        sys.stderr.write("[WhisperX] Running speaker diarization (pyannote)...\n")
+        try:
+            from whisperx.diarize import DiarizationPipeline
+
+            diarize_model = DiarizationPipeline(
+                token=hf_token,
+                device=device,
+            )
+
+            # For phone calls: exactly 2 speakers (agent + customer)
+            diarize_segments = diarize_model(
+                audio,
+                min_speakers=2,
+                max_speakers=2,
+            )
+
+            # Assign speaker labels to words/segments
+            result = whisperx.assign_word_speakers(diarize_segments, result)
+
+            sys.stderr.write("[WhisperX] Diarization complete.\n")
+
+            # Free diarization model
+            del diarize_model
+            gc.collect()
+
+            # Build diarized transcript with real speaker labels
+            diarized_text = build_diarized_from_whisperx(result["segments"])
+
+        except Exception as e:
+            sys.stderr.write(f"[WhisperX] Diarization failed: {e}\n")
+            # Fall back to pause-based heuristic
+            diarized_text = build_diarized_heuristic(result["segments"])
+    else:
+        sys.stderr.write("[WhisperX] No HF token — using pause-based diarization heuristic.\n")
+        diarized_text = build_diarized_heuristic(result["segments"])
+
+    # ── Build plain transcript ───────────────────────────────────────
+    plain_text = " ".join(
+        seg["text"].strip()
+        for seg in result.get("segments", [])
+        if seg.get("text", "").strip()
+    )
 
     return {
         "plain": plain_text,
-        "diarized": diarized,
+        "diarized": diarized_text,
     }
 
 
-def build_diarized(words: list) -> str:
+def build_diarized_from_whisperx(segments: list) -> str:
     """
-    Build AGENT:/CUSTOMER: labeled transcript using improved pause-based heuristic.
+    Build AGENT:/CUSTOMER: labeled transcript from WhisperX diarized segments.
 
+    WhisperX assigns speaker labels like SPEAKER_00, SPEAKER_01, etc.
     For outbound Final Expense calls:
-    - First speaker is always AGENT (they initiate the call)
-    - Speaker switch on gaps using adaptive threshold
-    - Merges very short consecutive segments from same speaker
+    - The first speaker detected is AGENT (they initiate the call)
+    - The second speaker is CUSTOMER
     """
-    if not words:
+    if not segments:
         return ""
+
+    # Map WhisperX speaker IDs to AGENT/CUSTOMER
+    speaker_map = {}
+    speaker_order = []
+
+    for seg in segments:
+        spk = seg.get("speaker", "UNKNOWN")
+        if spk not in speaker_map and spk != "UNKNOWN":
+            speaker_order.append(spk)
+            # First speaker = AGENT (outbound call), second = CUSTOMER
+            if len(speaker_order) == 1:
+                speaker_map[spk] = "AGENT"
+            elif len(speaker_order) == 2:
+                speaker_map[spk] = "CUSTOMER"
+            else:
+                speaker_map[spk] = f"SPEAKER_{len(speaker_order)}"
+
+    # Group consecutive segments by the same speaker
+    merged = []
+    for seg in segments:
+        text = seg.get("text", "").strip()
+        if not text:
+            continue
+
+        spk_raw = seg.get("speaker", "UNKNOWN")
+        speaker = speaker_map.get(spk_raw, "UNKNOWN")
+
+        if merged and merged[-1]["speaker"] == speaker:
+            merged[-1]["text"] += " " + text
+        else:
+            merged.append({"speaker": speaker, "text": text})
+
+    # Filter out noise segments (< 2 words and < 10 chars)
+    final = []
+    for seg in merged:
+        word_count = len(seg["text"].split())
+        if word_count >= 2 or len(seg["text"]) >= 10:
+            final.append(seg)
+        elif final:
+            final[-1]["text"] += " " + seg["text"]
+
+    lines = [f"{seg['speaker']}: {seg['text']}" for seg in final]
+    return "\n".join(lines)
+
+
+def build_diarized_heuristic(segments: list) -> str:
+    """
+    Fallback: Build AGENT:/CUSTOMER: transcript using pause-based heuristic.
+    Used when diarization model is unavailable.
+    """
+    if not segments:
+        return ""
+
+    # Collect all words with timestamps
+    all_words = []
+    for seg in segments:
+        words = seg.get("words", [])
+        for w in words:
+            text = w.get("word", "").strip()
+            if text:
+                all_words.append({
+                    "text": text,
+                    "start": w.get("start", 0),
+                    "end": w.get("end", 0),
+                })
+
+    if not all_words:
+        # No word-level timestamps, use segment text
+        text = " ".join(s.get("text", "").strip() for s in segments if s.get("text", "").strip())
+        return f"AGENT: {text}" if text else ""
 
     # Calculate adaptive pause threshold
     gaps = []
-    for i in range(1, len(words)):
-        gap = words[i]["start"] - words[i - 1]["end"]
+    for i in range(1, len(all_words)):
+        gap = all_words[i]["start"] - all_words[i - 1]["end"]
         if gap > 0:
             gaps.append(gap)
 
@@ -100,7 +276,7 @@ def build_diarized(words: list) -> str:
     current_text = ""
     prev_end = 0.0
 
-    for w in words:
+    for w in all_words:
         gap = w["start"] - prev_end if prev_end > 0 else 0
 
         if gap > pause_threshold and current_text.strip():
@@ -121,7 +297,7 @@ def build_diarized(words: list) -> str:
             "text": current_text.strip(),
         })
 
-    # Merge consecutive segments from same speaker
+    # Merge consecutive same-speaker segments
     merged = []
     for seg in raw_segments:
         if merged and merged[-1]["speaker"] == seg["speaker"]:
@@ -129,7 +305,7 @@ def build_diarized(words: list) -> str:
         else:
             merged.append(dict(seg))
 
-    # Filter out very short noise segments (< 2 words and < 10 chars)
+    # Filter noise
     final = []
     for seg in merged:
         word_count = len(seg["text"].split())
@@ -143,14 +319,27 @@ def build_diarized(words: list) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Whisper local transcription for QA")
+    parser = argparse.ArgumentParser(description="WhisperX transcription + diarization for QA")
     parser.add_argument("file", help="Path to audio file")
-    parser.add_argument("--model", default="distil-large-v3", help="Whisper model size")
+    parser.add_argument("--model", default=None, help="Whisper model size (default: from WHISPER_MODEL env or large-v2)")
     parser.add_argument("--language", default="en", help="Language code")
     args = parser.parse_args()
 
+    # Configuration from environment (set by systemd service / .env)
+    model_size = args.model or os.environ.get("WHISPER_MODEL", "large-v2")
+    hf_token = os.environ.get("HF_TOKEN", None)
+    cpu_threads = int(os.environ.get("WHISPER_CPU_THREADS", "8"))
+    batch_size = int(os.environ.get("WHISPER_BATCH_SIZE", "8"))
+
     try:
-        result = transcribe(args.file, args.model, args.language)
+        result = transcribe(
+            file_path=args.file,
+            model_size=model_size,
+            language=args.language,
+            hf_token=hf_token,
+            batch_size=batch_size,
+            cpu_threads=cpu_threads,
+        )
         print(json.dumps(result))
     except Exception as e:
         print(json.dumps({"error": str(e)}), file=sys.stderr)

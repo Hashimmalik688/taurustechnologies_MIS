@@ -10,16 +10,22 @@ class WhisperService
     private string $pythonBin;
     private string $scriptPath;
     private string $model;
+    private ?string $hfToken;
+    private int $cpuThreads;
+    private int $batchSize;
 
     public function __construct()
     {
-        $this->pythonBin = config('services.whisper.python_bin', '/usr/bin/python3');
+        $this->pythonBin = config('services.whisper.python_bin', '/opt/whisperx-env/bin/python');
         $this->scriptPath = base_path('scripts/whisper_transcribe.py');
-        $this->model = config('services.whisper.model', 'distil-large-v3');
+        $this->model = config('services.whisper.model', 'large-v2');
+        $this->hfToken = config('services.whisper.hf_token');
+        $this->cpuThreads = (int) config('services.whisper.cpu_threads', 8);
+        $this->batchSize = (int) config('services.whisper.batch_size', 8);
     }
 
     /**
-     * Transcribe an audio file using local Whisper (faster-whisper).
+     * Transcribe an audio file using WhisperX (faster-whisper + wav2vec2 alignment + pyannote diarization).
      *
      * @param string $filePath Absolute path to the audio file
      * @return array{plain: string, diarized: string}
@@ -35,19 +41,32 @@ class WhisperService
             throw new \RuntimeException("Whisper script not found: {$this->scriptPath}");
         }
 
-        Log::info('[QA:Whisper] Starting local transcription', [
+        Log::info('[QA:WhisperX] Starting transcription + diarization', [
             'file' => basename($filePath),
             'model' => $this->model,
+            'diarization' => $this->hfToken ? 'pyannote' : 'heuristic',
         ]);
 
         $startTime = microtime(true);
 
-        // Run with nice (low priority) so it doesn't starve live calls/web server.
-        // nice -n 15 = low CPU priority; ionice -c3 = idle-only disk I/O
-        $result = Process::timeout(900)
+        // Build environment variables for the Python script
+        $env = [
+            'WHISPER_MODEL' => $this->model,
+            'WHISPER_CPU_THREADS' => (string) $this->cpuThreads,
+            'WHISPER_BATCH_SIZE' => (string) $this->batchSize,
+            'HF_HOME' => storage_path('app/.cache'),
+            'TORCH_HOME' => storage_path('app/.cache/torch'),
+        ];
+
+        if ($this->hfToken) {
+            $env['HF_TOKEN'] = $this->hfToken;
+        }
+
+        // WhisperX pipeline: transcribe -> align -> diarize (needs CPU power, no throttling)
+        // Timeout: 1800s (30 min) — large-v2 + diarization on CPU can take time for long calls
+        $result = Process::timeout(1800)
+            ->env($env)
             ->run([
-                'nice', '-n', '15',
-                'ionice', '-c3',
                 $this->pythonBin,
                 $this->scriptPath,
                 $filePath,
@@ -58,23 +77,23 @@ class WhisperService
         $elapsed = round(microtime(true) - $startTime, 1);
 
         if (!$result->successful()) {
-            Log::error('[QA:Whisper] Transcription failed', [
+            Log::error('[QA:WhisperX] Transcription failed', [
                 'exit_code' => $result->exitCode(),
-                'stderr' => $result->errorOutput(),
+                'stderr' => substr($result->errorOutput(), -2000),
                 'elapsed' => $elapsed . 's',
             ]);
-            throw new \RuntimeException('Whisper transcription failed: ' . $result->errorOutput());
+            throw new \RuntimeException('WhisperX transcription failed: ' . $result->errorOutput());
         }
 
         $output = trim($result->output());
         $data = json_decode($output, true);
 
         if (!$data || !isset($data['plain'])) {
-            Log::error('[QA:Whisper] Invalid JSON output', ['raw' => substr($output, 0, 500)]);
-            throw new \RuntimeException('Whisper returned invalid output');
+            Log::error('[QA:WhisperX] Invalid JSON output', ['raw' => substr($output, 0, 500)]);
+            throw new \RuntimeException('WhisperX returned invalid output');
         }
 
-        Log::info('[QA:Whisper] Transcription complete', [
+        Log::info('[QA:WhisperX] Transcription + diarization complete', [
             'file' => basename($filePath),
             'model' => $this->model,
             'elapsed' => $elapsed . 's',

@@ -293,35 +293,45 @@
 
         <div class="qa-info-section">
             <h6><i class="ri-robot-2-line"></i> AI-Powered Quality Assurance</h6>
-            <p>Every recorded sales call is automatically transcribed using OpenAI Whisper and scored by AI against <strong>12 compliance codes</strong> and <strong>5 quality categories</strong>. Calls are graded on a 100-point scale with automatic disposition assignment.</p>
+            <p>Every recorded sales call is automatically transcribed using WhisperX (with speaker diarization) and scored by AI against <strong>17 compliance codes</strong> and <strong>7 quality categories</strong>. Calls are graded on a 100-point scale with automatic disposition assignment.</p>
         </div>
 
         <div class="qa-info-section">
-            <h6><i class="ri-shield-check-line"></i> 12 Compliance Codes</h6>
+            <h6><i class="ri-shield-check-line"></i> 17 Compliance Codes</h6>
             <table class="qa-info-tbl">
-                <tr><td><strong>C1</strong> Recording Consent</td><td>Closer obtains verbal consent to record the call</td></tr>
+                <tr><td colspan="2"><strong style="color:var(--bs-primary)">Call Handling</strong></td></tr>
+                <tr><td><strong>C1</strong> Closer Consent</td><td>Closer takes proper verbal consent from the customer</td></tr>
                 <tr><td><strong>C2</strong> Agent Identity</td><td>Closer states full name and company</td></tr>
                 <tr><td><strong>C3</strong> Carrier Named</td><td>Insurance carrier name clearly stated</td></tr>
-                <tr><td><strong>C4</strong> Not Government</td><td>Clarifies no government/Medicare affiliation</td></tr>
-                <tr><td><strong>C5</strong> Product Type</td><td>Identifies product as final expense / whole life</td></tr>
-                <tr><td><strong>C6</strong> Waiting Period</td><td>Graded/modified benefit period explained</td></tr>
-                <tr><td><strong>C7</strong> Premium Amount</td><td>Monthly premium clearly stated and confirmed</td></tr>
-                <tr><td><strong>C8</strong> Coverage Amount</td><td>Death benefit / face amount stated</td></tr>
-                <tr><td><strong>C9</strong> Health Questions</td><td>Medical/health qualification questions asked</td></tr>
-                <tr><td><strong>C10</strong> Beneficiary</td><td>Beneficiary designation discussed</td></tr>
-                <tr><td><strong>C11</strong> Verbal Consent</td><td>Explicit agreement to proceed with application</td></tr>
+                <tr><td><strong>C4</strong> Product Type</td><td>Identifies product as final expense / whole life</td></tr>
+                <tr><td><strong>C5</strong> Health Questions</td><td>Complete and accurate health questions + medications asked</td></tr>
+                <tr><td><strong>C6</strong> Proper Quote</td><td>Quote provided according to customer's health conditions</td></tr>
+                <tr><td><strong>C7</strong> Coverage Amount</td><td>Death benefit / face amount stated and confirmed</td></tr>
+                <tr><td><strong>C8</strong> Draft Date</td><td>Payment draft date confirmed with customer</td></tr>
+                <tr><td><strong>C9</strong> End-of-Call Consent</td><td>Confirms date, full name, DOB, and SSN at end of call</td></tr>
+                <tr><td><strong>C10</strong> Waiting Period</td><td>Graded/modified benefit period disclosed (if applicable)</td></tr>
+                <tr><td colspan="2"><strong style="color:var(--bs-primary)">Application Requirements</strong></td></tr>
+                <tr><td><strong>C11</strong> Application Info</td><td>Collects name, DOB, payment info, address, doctor, beneficiary, etc.</td></tr>
+                <tr><td colspan="2"><strong style="color:var(--bs-primary)">Behavioral Compliance</strong></td></tr>
                 <tr><td><strong>C12</strong> DNC Honored</td><td>Do-Not-Call requests honored immediately</td></tr>
+                <tr><td><strong>C13</strong> No Aggression</td><td>Customer not aggressive during the call</td></tr>
+                <tr><td><strong>C14</strong> Customer Interest</td><td>Customer not disinterested or deferring decision</td></tr>
+                <tr><td><strong>C15</strong> No Pushy Sale</td><td>Agent does not pressure or confuse the customer</td></tr>
+                <tr><td><strong>C16</strong> Appropriate Language</td><td>No inappropriate or unprofessional language used</td></tr>
+                <tr><td><strong>C17</strong> No Abuse</td><td>Customer not abusive toward agent</td></tr>
             </table>
         </div>
 
         <div class="qa-info-section">
-            <h6><i class="ri-bar-chart-grouped-line"></i> 5 Quality Categories (100pts)</h6>
+            <h6><i class="ri-bar-chart-grouped-line"></i> 7 Quality Categories (100pts)</h6>
             <table class="qa-info-tbl">
-                <tr><td><strong>Compliance</strong> (35pts)</td><td>All 12 regulatory codes evaluated</td></tr>
-                <tr><td><strong>Sales Skill</strong> (25pts)</td><td>Rapport, needs discovery, objection handling, closing</td></tr>
-                <tr><td><strong>Product Knowledge</strong> (15pts)</td><td>Accuracy of policy details, carrier info, benefits</td></tr>
-                <tr><td><strong>Communication</strong> (15pts)</td><td>Tone, clarity, professionalism, active listening</td></tr>
-                <tr><td><strong>Process</strong> (10pts)</td><td>CRM usage, call structure, follow-up procedures</td></tr>
+                <tr><td><strong>Opening</strong></td><td>Professional greeting, tone, rapport building (1-10)</td></tr>
+                <tr><td><strong>Discovery</strong></td><td>Needs assessment, health/family questions, listening (1-10)</td></tr>
+                <tr><td><strong>Presentation</strong></td><td>Product explanation, personalization, proper quote (1-10)</td></tr>
+                <tr><td><strong>Objection Handling</strong></td><td>Pushback handling, reframing without pressure (1-10)</td></tr>
+                <tr><td><strong>Closing</strong></td><td>Asking for sale, consent, application completion (1-10)</td></tr>
+                <tr><td><strong>Soft Skills</strong></td><td>Empathy, patience, respect, sensitivity with seniors (1-10)</td></tr>
+                <tr><td><strong>Call Control</strong></td><td>Conversation flow, redirecting tangents, pacing (1-10)</td></tr>
             </table>
         </div>
 
@@ -331,9 +341,9 @@
                 <tr><td><span class="qa-disp d-excellent">EXCELLENT</span></td><td>90-100 — Exceptional call, exceeds all standards</td></tr>
                 <tr><td><span class="qa-disp d-good">GOOD</span></td><td>75-89 — Solid performance, minor improvements possible</td></tr>
                 <tr><td><span class="qa-disp d-average">AVERAGE</span></td><td>60-74 — Meets basic standards, needs coaching</td></tr>
-                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>40-59 — Below standard, immediate coaching required</td></tr>
-                <tr><td><span class="qa-disp d-comp-fail">COMPLIANCE FAIL</span></td><td>&lt;40 or critical compliance violation</td></tr>
-                <tr><td><span class="qa-disp d-void-risk">VOID RISK</span></td><td>Multiple compliance failures, policy may be voided</td></tr>
+                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>&lt;60 — Below standard, immediate coaching required</td></tr>
+                <tr><td><span class="qa-disp d-comp-fail">COMPLIANCE FAIL</span></td><td>Any C1-C17 compliance check failed</td></tr>
+                <tr><td><span class="qa-disp d-void-risk">VOID RISK</span></td><td>Misrepresentation, confusion, or pressured sale</td></tr>
             </table>
         </div>
 
@@ -341,8 +351,8 @@
             <h6><i class="ri-lightbulb-line"></i> How It Works</h6>
             <ol>
                 <li><strong>Recording captured</strong> — Zoom webhook triggers automatic download</li>
-                <li><strong>Whisper transcription</strong> — Audio transcribed with speaker diarization</li>
-                <li><strong>AI analysis</strong> — Gemini 2.5 Flash scores against all criteria</li>
+                <li><strong>WhisperX transcription</strong> — Audio transcribed with speaker diarization (pyannote)</li>
+                <li><strong>AI analysis</strong> — Claude / Gemini scores against 17 compliance codes + 7 quality categories</li>
                 <li><strong>Results saved</strong> — Scores, compliance flags, and coaching notes stored</li>
                 <li><strong>Dashboard updated</strong> — Real-time metrics and agent performance tracking</li>
             </ol>

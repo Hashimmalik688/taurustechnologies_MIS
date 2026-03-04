@@ -39,13 +39,12 @@ return [
     // ── QA Scoring AI Services ─────────────────────────────────────────
 
     'whisper' => [
-        'enabled' => env('WHISPER_ENABLED', true),       // true = use free local Whisper, false = use Deepgram API
-        'python_bin' => env('WHISPER_PYTHON_BIN', '/usr/bin/python3'),
-        'model' => env('WHISPER_MODEL', 'distil-large-v3'), // distil-large-v3 for best accuracy, medium as fallback
-    ],
-
-    'deepgram' => [
-        'api_key' => env('DEEPGRAM_API_KEY'),            // Fallback if Whisper fails
+        'enabled' => env('WHISPER_ENABLED', true),
+        'python_bin' => env('WHISPER_PYTHON_BIN', '/opt/whisperx-env/bin/python'),
+        'model' => env('WHISPER_MODEL', 'large-v2'),     // large-v2 for best accuracy with WhisperX
+        'hf_token' => env('HF_TOKEN'),                   // HuggingFace token for pyannote diarization
+        'cpu_threads' => env('WHISPER_CPU_THREADS', 8),  // CPU threads per transcription job
+        'batch_size' => env('WHISPER_BATCH_SIZE', 8),    // WhisperX batch size for inference
     ],
 
     'gemini' => [
