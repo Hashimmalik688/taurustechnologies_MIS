@@ -2,7 +2,7 @@
     <div class="rp-results-hdr">
         <h6><i class="bx bx-phone-call"></i> Per-Closer Performance <span>({{ count($rows) }} closers &bull; {{ $startDate }} &ndash; {{ $endDate }} MT)</span></h6>
     </div>
-    <div class="table-responsive">
+    <div class="table-responsive" style="padding-bottom:.25rem">
         <table class="rp-table" id="closerStatsTable">
             <thead>
                 <tr>

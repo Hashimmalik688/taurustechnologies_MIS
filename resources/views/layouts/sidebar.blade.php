@@ -369,6 +369,12 @@
             </a>
         @endcanViewModule
 
+        {{-- ZOOM PHONE --}}
+        <a href="{{ route('zoom.phone') }}" class="menu-item {{ Request::is('zoom/phone*') ? 'active' : '' }}">
+            <i class="bx bx-phone-call"></i>
+            <span class="menu-text">Zoom Phone</span>
+        </a>
+
         {{-- PERSONAL RECORDS SECTION (ALL USERS) --}}
         <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'myRecordsDropdown')">
             <i class="bx bx-user"></i>

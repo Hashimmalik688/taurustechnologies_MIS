@@ -371,6 +371,12 @@
         <?php endif; ?>
 
         
+        <a href="<?php echo e(route('zoom.phone')); ?>" class="menu-item <?php echo e(Request::is('zoom/phone*') ? 'active' : ''); ?>">
+            <i class="bx bx-phone-call"></i>
+            <span class="menu-text">Zoom Phone</span>
+        </a>
+
+        
         <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'myRecordsDropdown')">
             <i class="bx bx-user"></i>
             <span class="menu-text">My Records</span>

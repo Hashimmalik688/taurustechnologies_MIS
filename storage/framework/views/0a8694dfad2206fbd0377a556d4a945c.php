@@ -1,11 +1,9 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Per-Closer Performance
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-    @include('partials.pipeline-dashboard-styles')
+<?php $__env->startSection('css'); ?>
+    <?php echo $__env->make('partials.pipeline-dashboard-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     <style>
         .rp-page-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem }
         .rp-page-hdr h5 { margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.4rem }
@@ -78,20 +76,20 @@
             background:rgba(15,23,42,.8);
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="rp-page-hdr">
         <h5>
             <i class="bx bx-phone-call"></i> Per-Closer Performance
             <span class="rp-sub">Dialed &bull; Connected &bull; Disposed &bull; Sales</span>
         </h5>
-        <a href="{{ route('settings.reports.hub') }}" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
+        <a href="<?php echo e(route('settings.reports.hub')); ?>" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
             <i class="bx bx-arrow-back"></i> Reports
         </a>
     </div>
 
-    {{-- Filters --}}
+    
     <div class="ex-card sec-card" style="margin-bottom:.65rem">
         <div class="sec-body" style="padding:.75rem">
             <div style="display:flex;gap:.55rem;align-items:flex-end;flex-wrap:wrap">
@@ -107,9 +105,9 @@
                     <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Closer</label>
                     <select id="csCloserFilter" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;min-width:180px">
                         <option value="">All Closers</option>
-                        @foreach($closers as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $closers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($id); ?>"><?php echo e($name); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </select>
                 </div>
                 <div>
@@ -133,7 +131,7 @@
         </div>
     </div>
 
-    {{-- Results --}}
+    
     <div class="ex-card sec-card" id="closerStatsCard" style="position:relative">
         <div id="closerStatsContent">
             <div class="rp-empty">
@@ -143,9 +141,9 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const csContent   = document.getElementById('closerStatsContent');
@@ -176,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (csDateTo.value)   params.set('cs_date_to', csDateTo.value);
         if (csCloser.value)   params.set('cs_closer', csCloser.value);
         if (csTeam.value)     params.set('cs_team', csTeam.value);
-        window.location.href = '{{ route("settings.reports.closer-stats.export") }}?' + params.toString();
+        window.location.href = '<?php echo e(route("settings.reports.closer-stats.export")); ?>?' + params.toString();
     });
 
     function loadCloserStats() {
@@ -191,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (csCloser.value)   params.set('cs_closer', csCloser.value);
         if (csTeam.value)     params.set('cs_team', csTeam.value);
 
-        fetch('{{ route("settings.reports.closer-stats") }}?' + params.toString(), {
+        fetch('<?php echo e(route("settings.reports.closer-stats")); ?>?' + params.toString(), {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -239,4 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/reports/per-closer.blade.php ENDPATH**/ ?>

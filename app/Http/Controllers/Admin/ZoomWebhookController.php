@@ -722,32 +722,38 @@ class ZoomWebhookController extends Controller
                 'callee_extension' => $calleeInfo['extension_number'] ?? $calleeInfo['extension'] ?? null,
             ];
 
-            // Determine call type
-            $callType = 'outbound'; // default
-            if (str_contains($event, 'callin')) {
-                $callType = 'inbound';
-            } elseif ($callLogData && isset($callLogData['direction'])) {
+            // Determine call type: event name is the most reliable indicator.
+            // call_logs[].direction can be wrong (e.g. voicemail shows 'outbound').
+            $callType = null;
+            
+            // Event name takes priority — it's always correct
+            if (str_contains($event, 'callee') || str_contains($event, 'voicemail')) {
+                $callType = 'inbound'; // callee events = our user received the call
+            } elseif (str_contains($event, 'caller') || str_contains($event, 'callout')) {
+                $callType = 'outbound'; // caller events = our user made the call
+            }
+            
+            // Fallback to call_logs direction only for ambiguous events
+            if (!$callType && $callLogData && isset($callLogData['direction'])) {
                 $callType = strtolower($callLogData['direction']);
+            }
+            
+            // Final fallback
+            if (!$callType) {
+                $callType = 'outbound';
             }
 
             // Extract call status/result
             $callStatus = $callLogData['status'] ?? $payload['status'] ?? null;
             $callResult = $callLogData['result'] ?? $payload['result'] ?? null;
 
-            // Extract timestamps
+            // Extract timestamps — order: call_logs date_time → payload fields → ringing_start → call_end → event_ts (ms epoch)
             $callStartTime = $callLogData['date_time'] ?? 
                             $callLogData['start_time'] ?? 
                             $payload['date_time'] ?? 
                             $payload['start_time'] ?? 
                             $payload['call_start_time'] ?? 
-                            $rawWebhookData['event_ts'] ?? // Zoom event timestamp
                             null;
-            
-            // For real-time events without call_start_time, use current time
-            // This ensures events like caller_connected, caller_ended get timestamps
-            if (!$callStartTime) {
-                $callStartTime = now();
-            }
 
             $callEndTime = $callLogData['end_time'] ?? 
                           $payload['end_time'] ?? 
@@ -756,6 +762,30 @@ class ZoomWebhookController extends Controller
 
             $answerTime = $callLogData['answer_time'] ?? $payload['answer_time'] ?? null;
             $ringingStartTime = $callLogData['ringing_start_time'] ?? $payload['ringing_start_time'] ?? null;
+
+            // Fallback chain for call_start_time: use ringing_start or call_end if available
+            if (!$callStartTime && $ringingStartTime) {
+                $callStartTime = $ringingStartTime;
+            }
+            if (!$callStartTime && $callEndTime) {
+                $callStartTime = $callEndTime;
+            }
+
+            // Last resort: Zoom's event_ts is MILLISECOND epoch — must use createFromTimestampMs
+            if (!$callStartTime && isset($rawWebhookData['event_ts'])) {
+                $eventTs = $rawWebhookData['event_ts'];
+                try {
+                    $callStartTime = \Carbon\Carbon::createFromTimestampMs($eventTs)->utc();
+                } catch (\Exception $e) {
+                    Log::warning('Failed to parse event_ts', ['event_ts' => $eventTs, 'error' => $e->getMessage()]);
+                    $callStartTime = now()->utc();
+                }
+            }
+            
+            // Final fallback: use current UTC time
+            if (!$callStartTime) {
+                $callStartTime = now()->utc();
+            }
 
             // Extract duration
             $duration = $callLogData['duration'] ?? 
@@ -860,11 +890,12 @@ class ZoomWebhookController extends Controller
                 'call_type' => $callType,
                 'call_status' => $callStatus,
                 'call_result' => $callResult,
-                'call_start_time' => $callStartTime ? \Carbon\Carbon::parse($callStartTime) : null,
-                'call_end_time' => $callEndTime ? \Carbon\Carbon::parse($callEndTime) : null,
+                // Zoom sends timestamps in UTC (Z suffix). Store as UTC consistently.
+                'call_start_time' => $callStartTime ? \Carbon\Carbon::parse($callStartTime)->utc() : null,
+                'call_end_time' => $callEndTime ? \Carbon\Carbon::parse($callEndTime)->utc() : null,
                 'duration_seconds' => intval($duration),
-                'answer_time' => $answerTime ? \Carbon\Carbon::parse($answerTime) : null,
-                'ringing_start_time' => $ringingStartTime ? \Carbon\Carbon::parse($ringingStartTime) : null,
+                'answer_time' => $answerTime ? \Carbon\Carbon::parse($answerTime)->utc() : null,
+                'ringing_start_time' => $ringingStartTime ? \Carbon\Carbon::parse($ringingStartTime)->utc() : null,
                 
                 // Recording
                 'recording_url' => $recordingUrl,
@@ -872,8 +903,8 @@ class ZoomWebhookController extends Controller
                 'recording_file_path' => $recordingFilePath,
                 'recording_file_size' => $recordingFileSize,
                 'recording_type' => $recordingType,
-                'recording_start_time' => $recordingStartTime ? \Carbon\Carbon::parse($recordingStartTime) : null,
-                'recording_end_time' => $recordingEndTime ? \Carbon\Carbon::parse($recordingEndTime) : null,
+                'recording_start_time' => $recordingStartTime ? \Carbon\Carbon::parse($recordingStartTime)->utc() : null,
+                'recording_end_time' => $recordingEndTime ? \Carbon\Carbon::parse($recordingEndTime)->utc() : null,
                 
                 // Transcript
                 'transcript_text' => $transcriptText,

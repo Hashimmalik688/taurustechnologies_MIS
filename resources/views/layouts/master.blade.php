@@ -1085,6 +1085,9 @@
         <i class="bx bx-bell"></i>
     </button>
 
+    <!-- Include Zoom Phone Floating Widget -->
+    @include('components.zoom-phone-widget')
+
     <!-- Include Sticky Notes Component -->
     @include('components.sticky-notes')
 

@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\MarkAbsent::class,
         \App\Console\Commands\AutoCheckoutAttendance::class,
+        \App\Console\Commands\SyncZoomCallLogs::class,
     ];
 
     /**
@@ -35,6 +36,12 @@ class Kernel extends ConsoleKernel
         // $schedule->command('attendance:auto-checkout')
         //     ->dailyAt('05:10')
         //     ->timezone('Asia/Karachi');
+
+        // Sync Zoom Phone call logs every 5 minutes for 100% accuracy
+        $schedule->command('zoom:sync-call-logs --hours=1')
+            ->everyFiveMinutes()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**

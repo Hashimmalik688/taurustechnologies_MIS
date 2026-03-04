@@ -773,6 +773,13 @@ Route::group(['prefix' => 'zoom', 'as' => 'zoom.', 'middleware' => ['auth']], fu
 // Zoom Webhook (public, no auth required)
 Route::post('/zoom/webhook', [App\Http\Controllers\Admin\ZoomWebhookController::class, 'handleWebhook'])->name('zoom.webhook');
 
+// Zoom Phone Smart Embed Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/zoom/phone', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'index'])->name('zoom.phone');
+    Route::post('/zoom/phone/token', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'generateToken'])->name('zoom.phone.token');
+    Route::get('/zoom/phone/search-leads', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'searchLeads'])->name('zoom.phone.search-leads');
+});
+
 // Zoom API Testing Routes (for proper development)
 Route::middleware(['auth'])->group(function () {
     Route::get('/zoom/test-api', [App\Http\Controllers\ZoomController::class, 'testApiCapabilities'])->name('zoom.test-api');

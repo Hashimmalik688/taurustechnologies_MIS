@@ -7,7 +7,7 @@
     .disp-pill { display:inline-block;padding:.15rem .45rem;border-radius:10px;font-size:.62rem;font-weight:700; }
     .disp-no-answer { background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.15); }
     .disp-wrong-number { background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.15); }
-    .disp-not-interested { background:rgba(107,114,128,.1);color:#4b5563;border:1px solid rgba(107,114,128,.15); }
+    .disp-wrong-details { background:rgba(245,158,11,.06);color:#b45309;border:1px solid rgba(245,158,11,.12); }
     .disp-other { background:rgba(99,102,241,.1);color:#6366f1;border:1px solid rgba(99,102,241,.15); }
     /* Search input in filter bar */
     .pipe-search {
@@ -62,9 +62,9 @@
             <div class="k-lbl">Wrong Number</div>
         </div>
         <div class="kpi-card k-gray ex-card">
-            <i class="bx bx-block k-icon"></i>
-            <div class="k-val"><?php echo e($badStats['not_interested'] ?? 0); ?></div>
-            <div class="k-lbl">Not Interested</div>
+            <i class="bx bx-error k-icon"></i>
+            <div class="k-val"><?php echo e($badStats['wrong_details'] ?? 0); ?></div>
+            <div class="k-lbl">Wrong Details</div>
         </div>
         <div class="kpi-card k-blue ex-card">
             <i class="bx bx-dots-horizontal-rounded k-icon"></i>
@@ -116,7 +116,7 @@
                                     $dispClass = match($badLead->disposition) {
                                         'no_answer' => 'disp-no-answer',
                                         'wrong_number' => 'disp-wrong-number',
-                                        'not_interested' => 'disp-not-interested',
+                                        'wrong_details' => 'disp-wrong-details',
                                         default => 'disp-other',
                                     };
                                 ?>

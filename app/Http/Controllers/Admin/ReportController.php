@@ -73,6 +73,9 @@ class ReportController extends Controller
      */
     public function zoomLogs(Request $request)
     {
+        // Zoom Phone operates in US Mountain Time — all display & filters use this
+        $displayTz = 'America/Denver';
+
         // Build query showing ALL call events (matches Zoom's dashboard view)
         $query = \App\Models\ZoomWebhookLog::query()
             ->with(['lead:id,cn_name,phone_number,state', 'agent:id,name,email'])
@@ -80,27 +83,57 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc');
 
         // Apply filters
-        if ($request->filled('user_filter')) {
-            $userSearch = $request->user_filter;
-            $query->where(function($q) use ($userSearch) {
-                $q->where('caller_number', 'like', "%{$userSearch}%")
-                  ->orWhere('callee_number', 'like', "%{$userSearch}%")
-                  ->orWhere('caller_name', 'like', "%{$userSearch}%")
-                  ->orWhere('callee_name', 'like', "%{$userSearch}%")
-                  ->orWhere('caller_extension', 'like', "%{$userSearch}%")
-                  ->orWhere('callee_extension', 'like', "%{$userSearch}%");
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('caller_number', 'like', "%{$search}%")
+                  ->orWhere('callee_number', 'like', "%{$search}%")
+                  ->orWhere('caller_name', 'like', "%{$search}%")
+                  ->orWhere('callee_name', 'like', "%{$search}%")
+                  ->orWhere('caller_email', 'like', "%{$search}%")
+                  ->orWhere('callee_email', 'like', "%{$search}%")
+                  ->orWhere('zoom_call_id', 'like', "%{$search}%");
             });
         }
 
-        if ($request->filled('call_status')) {
-            $query->where(function($q) use ($request) {
-                $q->where('call_status', $request->call_status)
-                  ->orWhere('call_result', 'like', '%' . $request->call_status . '%');
+        // Agent filter - match by agent_id or name/email/extension
+        if ($request->filled('agent_filter')) {
+            $agentVal = $request->agent_filter;
+            if (is_numeric($agentVal)) {
+                // Agent selected from dropdown (user ID)
+                $query->where('agent_id', $agentVal);
+            } else {
+                // Free text agent search
+                $query->where(function($q) use ($agentVal) {
+                    $q->where('caller_name', 'like', "%{$agentVal}%")
+                      ->orWhere('callee_name', 'like', "%{$agentVal}%")
+                      ->orWhere('caller_extension', 'like', "%{$agentVal}%")
+                      ->orWhere('callee_extension', 'like', "%{$agentVal}%")
+                      ->orWhere('caller_email', 'like', "%{$agentVal}%")
+                      ->orWhere('callee_email', 'like', "%{$agentVal}%");
+                });
+            }
+        }
+
+        // Status/Result filter — call_status is always null in webhooks,
+        // so we filter on call_result which has the actual data
+        if ($request->filled('call_result')) {
+            $resultSearch = $request->call_result;
+            $withUnderscores = str_replace(' ', '_', $resultSearch);
+            $withSpaces = str_replace('_', ' ', $resultSearch);
+            $query->where(function($q) use ($resultSearch, $withUnderscores, $withSpaces) {
+                $q->where('call_result', $resultSearch)
+                  ->orWhere('call_result', $withUnderscores)
+                  ->orWhere('call_result', $withSpaces)
+                  ->orWhereRaw('LOWER(call_result) = ?', [strtolower($resultSearch)]);
             });
         }
 
         if ($request->filled('call_type')) {
-            $query->where('call_type', $request->call_type);
+            $typeSearch = strtolower($request->call_type);
+            $query->where(function($q) use ($typeSearch) {
+                $q->whereRaw('LOWER(call_type) = ?', [$typeSearch]);
+            });
         }
 
         if ($request->filled('event_type')) {
@@ -115,68 +148,80 @@ class ReportController extends Controller
             }
         }
 
+        // Date filters: user picks dates in Mountain Time, but DB stores UTC.
+        // Convert MT date boundaries → UTC for correct querying.
         if ($request->filled('date_from')) {
-            $query->whereDate('call_start_time', '>=', $request->date_from);
+            $fromUtc = \Carbon\Carbon::parse($request->date_from, $displayTz)->startOfDay()->utc();
+            $query->where('call_start_time', '>=', $fromUtc);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('call_start_time', '<=', $request->date_to);
+            $toUtc = \Carbon\Carbon::parse($request->date_to, $displayTz)->endOfDay()->utc();
+            $query->where('call_start_time', '<=', $toUtc);
         }
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('caller_number', 'like', "%{$search}%")
-                  ->orWhere('callee_number', 'like', "%{$search}%")
-                  ->orWhere('caller_name', 'like', "%{$search}%")
-                  ->orWhere('callee_name', 'like', "%{$search}%")
-                  ->orWhere('zoom_call_id', 'like', "%{$search}%");
-            });
-        }
+        // Clone query BEFORE pagination for aggregate stats
+        $statsQuery = clone $query;
+        $hasDateFilter = $request->filled('date_from') || $request->filled('date_to');
+        $hasAnyFilter = $request->hasAny(['search', 'agent_filter', 'call_result', 'call_type', 'event_type', 'has_recording', 'date_from', 'date_to']);
 
         // Paginate results
-        $callLogs = $query->paginate(50)->appends($request->all());
+        $callLogs = $query->paginate(50)->appends($request->except('page'));
 
-        // Calculate personalized stats if filtering by user
+        // Calculate statistics from the FILTERED query (all KPIs reflect current filters including date)
+        $connectedResults = ['connected', 'Call connected'];
+        $answeredResults = ['connected', 'Recorded', 'Auto Recorded', 'answered', 'Call connected'];
+        $declinedResults = ['Rejected', 'Busy'];
+        $missedResults = ['No Answer', 'no_answer', 'Call Cancel', 'canceled', 'call_failed', 'abandoned'];
+
+        $stats = [
+            'total_calls' => (clone $statsQuery)->count(),
+            'total_duration' => (clone $statsQuery)->sum('duration_seconds'),
+            'connected_calls' => (clone $statsQuery)->whereIn('call_result', $connectedResults)->count(),
+            'answered_calls' => (clone $statsQuery)->whereIn('call_result', $answeredResults)->count(),
+            'declined_calls' => (clone $statsQuery)->whereIn('call_result', $declinedResults)->count(),
+            'missed_calls' => (clone $statsQuery)->whereIn('call_result', $missedResults)->count(),
+            'voicemail_calls' => (clone $statsQuery)->where(function($q) {
+                $q->where('event_type', 'phone.voicemail_received')
+                  ->orWhere('call_result', 'Voicemail');
+            })->count(),
+            'auto_recorded' => (clone $statsQuery)->where('call_result', 'Auto Recorded')->count(),
+            'recorded_calls' => (clone $statsQuery)->where('call_result', 'Recorded')->count(),
+            'outbound_calls' => (clone $statsQuery)->whereRaw('LOWER(call_type) = ?', ['outbound'])->count(),
+            'inbound_calls' => (clone $statsQuery)->whereRaw('LOWER(call_type) = ?', ['inbound'])->count(),
+            'has_date_filter' => $hasDateFilter,
+            'has_any_filter' => $hasAnyFilter,
+            'date_from' => $request->date_from,
+            'date_to' => $request->date_to,
+        ];
+
+        // Today's calls in Mountain Time (only meaningful without date filter)
+        if (!$hasDateFilter) {
+            $todayStartUtc = \Carbon\Carbon::now($displayTz)->startOfDay()->utc();
+            $todayEndUtc = \Carbon\Carbon::now($displayTz)->endOfDay()->utc();
+            $stats['today_calls'] = (clone $statsQuery)->whereBetween('call_start_time', [$todayStartUtc, $todayEndUtc])->count();
+        }
+
+        // Calculate personalized stats if filtering by agent
         $userStats = null;
-        if ($request->filled('user_filter')) {
-            $userSearch = $request->user_filter;
-            $userQuery = \App\Models\ZoomWebhookLog::query()
-                ->where(function($q) use ($userSearch) {
-                    $q->where('caller_number', 'like', "%{$userSearch}%")
-                      ->orWhere('callee_number', 'like', "%{$userSearch}%")
-                      ->orWhere('caller_name', 'like', "%{$userSearch}%")
-                      ->orWhere('callee_name', 'like', "%{$userSearch}%")
-                      ->orWhere('caller_extension', 'like', "%{$userSearch}%")
-                      ->orWhere('callee_extension', 'like', "%{$userSearch}%");
-                });
-
-            // Apply same date filters
-            if ($request->filled('date_from')) {
-                $userQuery->whereDate('call_start_time', '>=', $request->date_from);
-            }
-            if ($request->filled('date_to')) {
-                $userQuery->whereDate('call_start_time', '<=', $request->date_to);
-            }
+        if ($request->filled('agent_filter')) {
+            $agentVal = $request->agent_filter;
+            $userQuery = clone $statsQuery; // Already filtered by agent + date
 
             $userStats = [
                 'total_dialed' => (clone $userQuery)->whereIn('event_type', [
                     'phone.caller_connected', 
                     'phone.caller_ended', 
                     'phone.caller_call_log_completed',
-                    'phone.callout.started'
+                    'phone.caller_call_history_completed',
                 ])->count(),
                 
-                'connected' => (clone $userQuery)->whereIn('call_result', [
-                    'Connected', 
-                    'answered', 
-                    'Answered', 
-                    'Call connected'
-                ])->orWhereIn('event_type', ['phone.caller_connected', 'phone.callee_answered'])->count(),
+                'connected' => (clone $userQuery)->where(function($q) use ($answeredResults) {
+                    $q->whereIn('call_result', $answeredResults);
+                })->count(),
                 
-                'failed' => (clone $userQuery)->where(function($q) {
-                    $q->whereIn('call_result', ['No Answer', 'Missed', 'Rejected', 'Busy', 'Failed', 'Declined'])
-                      ->orWhereIn('call_status', ['missed', 'rejected', 'busy', 'failed', 'no_answer']);
+                'failed' => (clone $userQuery)->where(function($q) use ($missedResults) {
+                    $q->whereIn('call_result', $missedResults);
                 })->count(),
                 
                 'with_recording' => (clone $userQuery)->whereNotNull('recording_url')->count(),
@@ -189,26 +234,26 @@ class ReportController extends Controller
                 'total_talk_time' => (clone $userQuery)
                     ->whereIn('event_type', ['phone.caller_call_log_completed', 'phone.callee_call_log_completed'])
                     ->sum('duration_seconds'),
+                
+                'avg_call_duration' => (clone $userQuery)
+                    ->where('duration_seconds', '>', 0)
+                    ->whereIn('event_type', ['phone.caller_call_log_completed', 'phone.callee_call_log_completed'])
+                    ->avg('duration_seconds'),
             ];
         }
 
-        // Get filter options
-        $callStatuses = [
-            'answered' => 'Answered',
-            'connected' => 'Connected',
-            'completed' => 'Completed',
-            'no answer' => 'No Answer',
-            'missed' => 'Missed',
-            'rejected' => 'Rejected',
-            'busy' => 'Busy',
-            'voicemail' => 'Voicemail',
-            'Call connected' => 'Call Connected',
-        ];
+        // Get filter options — dynamically from actual DB values
+        $callResults = \App\Models\ZoomWebhookLog::select('call_result')
+            ->whereNotNull('call_result')
+            ->where('call_result', '!=', '')
+            ->distinct()
+            ->orderBy('call_result')
+            ->pluck('call_result')
+            ->mapWithKeys(fn($v) => [$v => ucwords(str_replace('_', ' ', $v))]);
 
         $callTypes = [
             'inbound' => 'Inbound',
             'outbound' => 'Outbound',
-            'internal' => 'Internal',
         ];
 
         $eventTypes = \App\Models\ZoomWebhookLog::select('event_type')
@@ -216,22 +261,22 @@ class ReportController extends Controller
             ->orderBy('event_type')
             ->pluck('event_type', 'event_type');
 
-        // Calculate statistics (counting ALL events like Zoom dashboard)
-        $stats = [
-            'total_calls' => \App\Models\ZoomWebhookLog::count(),
-            'total_duration' => \App\Models\ZoomWebhookLog::sum('duration_seconds'),
-            'calls_with_recording' => \App\Models\ZoomWebhookLog::whereNotNull('recording_url')->count(),
-            'today_calls' => \App\Models\ZoomWebhookLog::whereDate('call_start_time', today())->count(),
-            'answered_calls' => \App\Models\ZoomWebhookLog::whereIn('call_result', ['Connected', 'answered', 'Answered', 'Call connected'])->count(),
-        ];
+        // Agent dropdown: users who appear in zoom webhook logs
+        $agents = User::whereIn('id', function($q) {
+                $q->select('agent_id')->from('zoom_webhook_logs')->whereNotNull('agent_id')->distinct();
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         return view('admin.reports.zoom-logs', compact(
             'callLogs',
-            'callStatuses',
+            'callResults',
             'callTypes',
             'eventTypes',
+            'agents',
             'stats',
-            'userStats'
+            'userStats',
+            'displayTz'
         ));
     }
 
@@ -729,9 +774,12 @@ class ReportController extends Controller
             }
         }
 
-        // Optional team filter
+        // Optional team filter — team is derived from role, not the department column
         if ($request->filled('cs_team')) {
-            $closerQuery->where('department', $request->cs_team);
+            $teamRole = strtolower($request->cs_team) === 'ravens'
+                ? Roles::RAVENS_CLOSER
+                : Roles::PEREGRINE_CLOSER;
+            $closerQuery->whereHas('roles', fn ($r) => $r->where('name', $teamRole));
         }
 
         $closers = $closerQuery->orderBy('name')->get();

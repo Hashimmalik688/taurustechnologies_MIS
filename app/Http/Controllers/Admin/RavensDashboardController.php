@@ -984,18 +984,19 @@ class RavensDashboardController extends Controller
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
         $timezone = 'America/Denver';
+        $appTz = config('app.timezone', 'Asia/Karachi');
 
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {
-                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay();
-                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay();
+                $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone($appTz);
+                $endDate = \Carbon\Carbon::parse($customEnd, $timezone)->endOfDay()->setTimezone($appTz);
             } catch (\Exception $e) {
-                $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
-                $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+                $startDate = \Carbon\Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+                $endDate = \Carbon\Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
             }
         } else {
-            $startDate = \Carbon\Carbon::today($timezone)->startOfDay();
-            $endDate = \Carbon\Carbon::today($timezone)->endOfDay();
+            $startDate = \Carbon\Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+            $endDate = \Carbon\Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
         }
 
         $query = BadLead::with(['lead', 'disposedBy'])
@@ -1028,8 +1029,8 @@ class RavensDashboardController extends Controller
             'total' => $totalBad,
             'no_answer' => $dispositionCounts['no_answer'] ?? 0,
             'wrong_number' => $dispositionCounts['wrong_number'] ?? 0,
-            'not_interested' => $dispositionCounts['not_interested'] ?? 0,
-            'other' => $totalBad - ($dispositionCounts['no_answer'] ?? 0) - ($dispositionCounts['wrong_number'] ?? 0) - ($dispositionCounts['not_interested'] ?? 0),
+            'wrong_details' => $dispositionCounts['wrong_details'] ?? 0,
+            'other' => $totalBad - ($dispositionCounts['no_answer'] ?? 0) - ($dispositionCounts['wrong_number'] ?? 0) - ($dispositionCounts['wrong_details'] ?? 0),
         ];
 
         return view('ravens.bad-leads', compact('badLeads', 'badStats', 'filter', 'search'));

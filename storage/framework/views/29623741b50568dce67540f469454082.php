@@ -1086,6 +1086,9 @@
         <i class="bx bx-bell"></i>
     </button>
 
+    <!-- Include Zoom Phone Floating Widget -->
+    <?php echo $__env->make('components.zoom-phone-widget', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
     <!-- Include Sticky Notes Component -->
     <?php echo $__env->make('components.sticky-notes', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
