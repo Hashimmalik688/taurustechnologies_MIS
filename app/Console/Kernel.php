@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\MarkAbsent::class,
         \App\Console\Commands\AutoCheckoutAttendance::class,
         \App\Console\Commands\SyncZoomCallLogs::class,
+        \App\Console\Commands\SyncZoomRecordings::class,
     ];
 
     /**

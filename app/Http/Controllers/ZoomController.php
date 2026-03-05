@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\User;
 use App\Models\ZoomToken;
+use App\Models\ZoomWebhookLog;
+use App\Services\ZoomPhoneApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -71,7 +73,113 @@ class ZoomController extends Controller
         Log::error('Zoom OAuth failed', ['response' => $response->body()]);
         return redirect()->route('root')->with('error', 'Failed to connect Zoom Phone');
     }
-    
+
+    // ─── Admin-Managed App OAuth ─────────────────────────────────────────────
+
+    /**
+     * Redirect to Zoom OAuth for the admin-managed app (call logs only).
+     * Only needs to be done once by the account admin (Hashim).
+     */
+    public function startAdminAuthorization()
+    {
+        $clientId    = config('zoom.admin_app.client_id');
+        $redirectUri = config('zoom.admin_app.redirect_uri');
+
+        if (! $clientId) {
+            return redirect()->route('root')->with('error', 'Admin Zoom app not configured. Set ZOOM_ADMIN_CLIENT_ID in .env');
+        }
+
+        $url = "https://zoom.us/oauth/authorize?response_type=code&client_id={$clientId}&redirect_uri=" . urlencode($redirectUri);
+        return redirect($url);
+    }
+
+    /**
+     * Handle OAuth callback for the admin-managed app.
+     * Saves the token with app_type='admin' so it's used for account-level call log sync.
+     */
+    public function adminCallback(Request $request)
+    {
+        $code = $request->get('code');
+        if (! $code) {
+            return redirect()->route('root')->with('error', 'Admin Zoom authorization failed — no code returned.');
+        }
+
+        try {
+            $response = Http::timeout(15)->asForm()->post('https://zoom.us/oauth/token', [
+                'grant_type'   => 'authorization_code',
+                'code'         => $code,
+                'redirect_uri' => config('zoom.admin_app.redirect_uri'),
+                'client_id'    => config('zoom.admin_app.client_id'),
+                'client_secret'=> config('zoom.admin_app.client_secret'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Admin Zoom OAuth token exchange failed', ['error' => $e->getMessage()]);
+            return redirect()->route('root')->with('error', 'Could not connect to Zoom servers.');
+        }
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            // Store as a special admin-app token (user_id = admin's CRM id, or 1 if session lost)
+            ZoomToken::updateOrCreate(
+                ['app_type' => 'admin'],
+                [
+                    'user_id'       => Auth::id() ?? 1,
+                    'account_id'    => 'admin_app_' . config('zoom.account_id', 'default'),
+                    'access_token'  => $data['access_token'],
+                    'refresh_token' => $data['refresh_token'] ?? null,
+                    'expires_at'    => now()->addSeconds($data['expires_in'] ?? 3600),
+                    'auth_type'     => 'oauth',
+                    'app_type'      => 'admin',
+                ]
+            );
+
+            Log::info('[ZoomAdmin] Admin app authorized successfully', ['user_id' => Auth::id() ?? 1]);
+            return redirect(config('app.url') . '/dashboard')->with('success', '✅ Zoom Admin App authorized! Call log sync will now cover all 19 extensions.');
+        }
+
+        Log::error('Admin Zoom OAuth callback failed', ['response' => $response->body()]);
+        return redirect()->route('root')->with('error', 'Failed to authorize Admin Zoom app: ' . $response->json('message', 'Unknown error'));
+    }
+
+    /**
+     * Proxy a Zoom Phone recording for QA/admin playback.
+     * Fetches a fresh signed download URL using the admin token so the URL
+     * never leaks to the frontend and always stays valid.
+     * Access: any authenticated user with the zoom-logs report permission.
+     */
+    public function playRecording(Request $request, int $logId)
+    {
+        $log = ZoomWebhookLog::find($logId);
+
+        if (! $log) {
+            abort(404, 'Recording not found.');
+        }
+
+        if (! $log->zoom_call_id && ! $log->recording_id) {
+            return back()->with('error', 'No Zoom call ID linked to this log — cannot fetch recording.');
+        }
+
+        $service = app(ZoomPhoneApiService::class);
+        $url     = $service->getRecordingUrl($log);
+
+        if (! $url) {
+            // Mark as definitively unavailable so the UI shows a proper icon
+            if ($log->recording_url === 'pending_api_fetch') {
+                $log->update(['recording_url' => 'not_available']);
+            }
+            return back()->with('error', 'Recording is not available from Zoom. It may have been deleted or the scope is missing.');
+        }
+
+        // Persist the URL so future plays skip the API lookup (it's a long-lived signed URL)
+        if (! in_array($log->recording_url, [$url]) || $log->recording_url === 'pending_api_fetch') {
+            $log->update(['recording_url' => $url]);
+        }
+
+        // Redirect to Zoom's signed download URL — works directly in audio players
+        return redirect($url);
+    }
+
     /**
      * Make a call to a lead using desktop app (webhooks will fire if configured)
      */

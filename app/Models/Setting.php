@@ -30,10 +30,14 @@ class Setting extends Model
     // Set setting value
     public static function set($key, $value, $type = 'string', $description = null, $group = 'general')
     {
+        if (is_array($value)) {
+            $value = $type === 'array' ? implode(',', array_filter($value)) : json_encode($value);
+        }
+
         $setting = self::updateOrCreate(
             ['key' => $key],
             [
-                'value' => is_array($value) ? json_encode($value) : $value,
+                'value' => $value,
                 'type' => $type,
                 'description' => $description,
                 'group' => $group,

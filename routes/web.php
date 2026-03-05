@@ -588,6 +588,7 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/sales', [ReportController::class, 'index'])->name('index')->middleware('role.permission:reports,view');
     Route::get('/per-closer', [ReportController::class, 'perCloser'])->name('per-closer')->middleware('role.permission:reports,view');
     Route::get('/zoom-logs', [ReportController::class, 'zoomLogs'])->name('zoom-logs')->middleware('role.permission:reports,view');
+    Route::get('/zoom-agent-performance', [ReportController::class, 'zoomAgentPerformance'])->name('zoom-agent-performance')->middleware('role.permission:reports,view');
     Route::get('/zoom-diagnostics', [ReportController::class, 'zoomDiagnostics'])->name('zoom-diagnostics')->middleware('role.permission:reports,view');
     Route::get('/generate', [ReportController::class, 'generate'])->name('generate')->middleware('role.permission:reports,view');
     Route::get('/export', [ReportController::class, 'export'])->name('export')->middleware('role.permission:reports,view');
@@ -752,6 +753,12 @@ Route::group(['middleware' => ['auth']], function () {
 Route::group(['prefix' => 'zoom', 'as' => 'zoom.', 'middleware' => ['auth']], function () {
     Route::get('/authorize', [App\Http\Controllers\ZoomController::class, 'startAuthorization'])->name('authorize');
     Route::get('/callback', [App\Http\Controllers\ZoomController::class, 'callback'])->name('callback');
+
+    // Admin-managed app (call logs — all extensions)
+    Route::get('/admin-authorize', [App\Http\Controllers\ZoomController::class, 'startAdminAuthorization'])->name('admin.authorize');
+
+    // Recording proxy — fetches fresh signed URL from Zoom using admin token
+    Route::get('/recording/{id}/play', [App\Http\Controllers\ZoomController::class, 'playRecording'])->name('recording.play');
     Route::post('/dial/{leadId}', [App\Http\Controllers\ZoomController::class, 'makeCall'])->name('dial');
     Route::get('/call-status/{leadId}', [App\Http\Controllers\ZoomController::class, 'getCallStatusByLead'])->name('call.status');    
     // Test endpoint to simulate webhook call connected
@@ -772,6 +779,9 @@ Route::group(['prefix' => 'zoom', 'as' => 'zoom.', 'middleware' => ['auth']], fu
 
 // Zoom Webhook (public, no auth required)
 Route::post('/zoom/webhook', [App\Http\Controllers\Admin\ZoomWebhookController::class, 'handleWebhook'])->name('zoom.webhook');
+
+// Admin OAuth callback — must be public (session can drop during Zoom round-trip)
+Route::get('/zoom/admin-callback', [App\Http\Controllers\ZoomController::class, 'adminCallback'])->name('zoom.admin.callback');
 
 // Zoom Phone Smart Embed Routes
 Route::middleware(['auth'])->group(function () {

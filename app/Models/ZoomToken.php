@@ -20,6 +20,11 @@ class ZoomToken extends Model
         'token_type',
         'scopes',
         'auth_type',
+        'app_type',   // 'user' = per-user managed app | 'admin' = admin-managed app
+        'zoom_email',
+        'zoom_name',
+        'zoom_user_id',
+        'zoom_extension',
     ];
 
     protected $casts = [
@@ -46,6 +51,24 @@ class ZoomToken extends Model
         return $query->where(function ($q) {
             $q->whereNull('expires_at')
               ->orWhere('expires_at', '>', now());
+        });
+    }
+
+    /**
+     * Scope for admin-managed app tokens only.
+     */
+    public function scopeAdminApp($query)
+    {
+        return $query->where('app_type', 'admin');
+    }
+
+    /**
+     * Scope for user-managed app tokens only.
+     */
+    public function scopeUserApp($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('app_type', 'user')->orWhereNull('app_type');
         });
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLeadRequest;
 use App\Http\Requests\UpdateLeadRequest;
 use App\Imports\LeadsImport;
+use App\Models\AuditLog;
 use App\Models\Lead;
 use App\Events\LeadCreated;
 use App\Events\SaleCreated;
@@ -596,11 +597,47 @@ class LeadController extends Controller
     public function update(UpdateLeadRequest $request, $id)
     {
         $lead = Lead::findOrFail($id);
-        $lead->update($request->validated());
+
+        $identityFields = ['cn_name', 'phone_number', 'ssn', 'date_of_birth', 'address',
+            'carrier_name', 'coverage_amount', 'monthly_premium', 'bank_name',
+            'routing_number', 'acc_number', 'beneficiary', 'status'];
+        $before = $lead->only($identityFields);
+
+        $validated = $request->validated();
+
+        // Prominently log any change to name or phone on an established lead
+        if (!empty($lead->cn_name) && !empty($lead->phone_number)) {
+            if (isset($validated['cn_name']) && $validated['cn_name'] !== $lead->cn_name) {
+                AuditLog::logAction('lead_identity_change', auth()->user(), 'Lead', (int) $lead->id, [
+                    'field'  => 'cn_name',
+                    'before' => $lead->cn_name,
+                    'after'  => $validated['cn_name'],
+                ], 'Lead name changed on an established lead');
+            }
+            if (isset($validated['phone_number']) && $validated['phone_number'] !== $lead->phone_number) {
+                AuditLog::logAction('lead_identity_change', auth()->user(), 'Lead', (int) $lead->id, [
+                    'field'  => 'phone_number',
+                    'before' => $lead->phone_number,
+                    'after'  => $validated['phone_number'],
+                ], 'Lead phone changed on an established lead');
+            }
+        }
+
+        $lead->update($validated);
+
+        $after   = $lead->fresh()->only($identityFields);
+        $changed = array_filter($after, fn($v, $k) => $v !== $before[$k], ARRAY_FILTER_USE_BOTH);
+
+        if (!empty($changed)) {
+            AuditLog::logAction('lead_updated', auth()->user(), 'Lead', (int) $lead->id, [
+                'before' => array_intersect_key($before, $changed),
+                'after'  => $changed,
+            ], 'Lead fields updated via edit form');
+        }
 
         // Redirect back to the appropriate page based on the current route
         $redirectRoute = request()->route()->getName() === 'sales.update' ? 'sales.index' : 'leads.index';
-        
+
         return redirect()->route($redirectRoute)->with('success', 'Lead updated successfully.');
     }
 
@@ -799,12 +836,24 @@ class LeadController extends Controller
 
         try {
             $beforeCount = Lead::count();
-            
+
+            AuditLog::logAction('lead_import_started', auth()->user(), null, null, [
+                'file_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+            ], 'CSV lead import started');
+
             // Import the file using the LeadsImport class
             Excel::import(new LeadsImport, $request->file('import_file'));
 
             $afterCount = Lead::count();
             $imported = $afterCount - $beforeCount;
+
+            AuditLog::logAction('lead_import_completed', auth()->user(), null, null, [
+                'file_name'    => $file->getClientOriginalName(),
+                'leads_before' => $beforeCount,
+                'leads_after'  => $afterCount,
+                'new_leads'    => $imported,
+            ], "CSV import created {$imported} new leads");
 
             \Log::info('=== WEB IMPORT COMPLETED ===', [
                 'before' => $beforeCount,

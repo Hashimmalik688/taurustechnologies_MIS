@@ -33,29 +33,45 @@
         .rp-table tbody tr:last-child td { border-bottom:none }
         .rp-td-num { text-align:right;font-variant-numeric:tabular-nums }
 
-        /* Status Badges */
+        /* Status Badges — Zoom-normalized values */
         .status-badge {
             font-size:.6rem;font-weight:700;padding:.2rem .5rem;border-radius:10px;
-            display:inline-block;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;
+            display:inline-block;text-transform:capitalize;letter-spacing:.4px;white-space:nowrap;
         }
+        /* Connected / Auto Recorded / Recorded = green */
         .status-connected,
-        .status-answered,
-        .status-call_connected  { background:rgba(52,195,143,.12);color:#1a8754 }
-        .status-completed  { background:rgba(80,165,241,.12);color:#2b81c9 }
-        .status-no_answer,
-        .status-no_one_answered  { background:rgba(241,180,76,.12);color:#b87a14 }
-        .status-missed     { background:rgba(244,106,106,.12);color:#c84646 }
-        .status-voicemail  { background:rgba(108,117,125,.12);color:#6c757d }
-        .status-rejected   { background:rgba(244,106,106,.12);color:#c84646 }
-        .status-busy       { background:rgba(241,180,76,.12);color:#b87a14 }
-        .status-cancelled,
-        .status-declined   { background:rgba(244,106,106,.12);color:#c84646 }
+        .status-auto_recorded,
+        .status-recorded         { background:rgba(52,195,143,.12);color:#1a8754 }
+        /* Call Failed = red */
+        .status-call_failed      { background:rgba(244,106,106,.12);color:#c84646 }
+        /* Cancelled = orange */
+        .status-cancelled        { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* No Answer = orange */
+        .status-no_answer        { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* Busy = orange */
+        .status-busy             { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* Declined / Rejected = red */
+        .status-declined         { background:rgba(244,106,106,.12);color:#c84646 }
+        /* Abandoned = grey-red */
+        .status-abandoned        { background:rgba(244,106,106,.08);color:#c84646 }
+        /* Voicemail = grey */
+        .status-voicemail        { background:rgba(108,117,125,.12);color:#6c757d }
+        /* Recording icon in duration cell */
+        .dur-recorded { color:var(--bs-gold,#d4af37);text-decoration:none;font-weight:600 }
+        .dur-pending  { color:#94a3b8;text-decoration:none }
 
         /* Empty State */
         .rp-empty { text-align:center;padding:3rem 1rem;color:var(--bs-surface-500) }
         .rp-empty i { font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.25 }
         .rp-empty h6 { font-size:.85rem;font-weight:700;margin-bottom:.25rem }
         .rp-empty p { font-size:.72rem }
+
+        /* Tab Pills (match account-switching-log style) */
+        .tab-row{display:flex;gap:.35rem;margin-bottom:.65rem;flex-wrap:wrap}
+        .tab-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:20px;font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid var(--bs-surface-200,#e2e8f0);color:var(--bs-surface-500,#64748b);background:transparent;transition:all .15s}
+        .tab-pill:hover{border-color:rgba(212,175,55,.3);color:#b89730}
+        .tab-pill.active{background:linear-gradient(135deg,#d4af37,#c9a227);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(212,175,55,.25)}
+        .tab-pill i{font-size:.85rem}
 
         /* Pagination */
         .pagination { display:flex;gap:.25rem;justify-content:center;padding:1rem;flex-wrap:wrap }
@@ -86,7 +102,7 @@
     <div class="rp-page-hdr">
         <h5>
             <i class="bx bx-video"></i> Zoom Call Logs
-            <span class="rp-sub">All Zoom Phone webhook events &bull; Times shown in Mountain Time (MT)</span>
+            <span class="rp-sub">One row per call &bull; Times shown in Pacific Time (PT) to match Zoom dashboard</span>
         </h5>
         <div style="display:flex;gap:.5rem">
             <a href="<?php echo e(route('settings.reports.zoom-diagnostics')); ?>" class="act-btn a-warn" style="font-size:.72rem;padding:.3rem .65rem" title="View webhook diagnostics">
@@ -186,8 +202,13 @@
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
             <i class="bx bx-user-circle" style="color:var(--bs-gold,#d4af37);font-size:1.3rem"></i>
             <h6 style="margin:0;font-size:.85rem;font-weight:700;color:var(--bs-surface-700)">
-                <?php $selectedAgent = $agents->firstWhere('id', request('agent_filter')); ?>
-                <?php echo e($selectedAgent ? $selectedAgent->name : request('agent_filter')); ?> - Performance Breakdown
+                <?php
+                    $selectedAgentOption = $agentOptions->firstWhere('extension', request('agent_filter'));
+                    $selectedAgentLabel = $selectedAgentOption
+                        ? $selectedAgentOption['name'] . ' (Ext. ' . $selectedAgentOption['extension'] . ')'
+                        : request('agent_filter');
+                ?>
+                <?php echo e($selectedAgentLabel); ?> - Performance Breakdown
             </h6>
         </div>
         
@@ -268,6 +289,16 @@
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     
+    <div class="tab-row" style="margin-bottom:.65rem">
+        <a href="<?php echo e(route('settings.reports.zoom-logs')); ?>" class="tab-pill active">
+            <i class="bx bx-list-ul"></i> Call Logs
+        </a>
+        <a href="<?php echo e(route('settings.reports.zoom-agent-performance')); ?>" class="tab-pill">
+            <i class="bx bx-bar-chart-alt-2"></i> Agent Performance
+        </a>
+    </div>
+
+    
     <div class="ex-card sec-card" style="margin-bottom:.65rem">
         <div class="sec-body" style="padding:.75rem">
             <form method="GET" action="<?php echo e(route('settings.reports.zoom-logs')); ?>" id="filterForm">
@@ -282,10 +313,9 @@
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Agent</label>
                         <select name="agent_filter" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;min-width:150px">
                             <option value="">All Agents</option>
-                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $agent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <option value="<?php echo e($agent->id); ?>" <?php echo e(request('agent_filter') == $agent->id ? 'selected' : ''); ?>>
-                                    <?php echo e($agent->name); ?>
-
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $agentOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($opt['extension']); ?>" <?php echo e(request('agent_filter') == $opt['extension'] ? 'selected' : ''); ?>>
+                                    <?php echo e($opt['name']); ?> (Ext. <?php echo e($opt['extension']); ?>)
                                 </option>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
@@ -362,14 +392,12 @@
                 <table class="rp-table">
                     <thead>
                         <tr>
-                            <th>Date/Time</th>
+                            <th>Date/Time (PT)</th>
                             <th>Direction</th>
                             <th>Agent</th>
                             <th>Contact</th>
-                            <th>Event</th>
-                            <th>Status/Result</th>
+                            <th>Call Result</th>
                             <th>Duration</th>
-                            <th>Recording</th>
                             <th>Lead</th>
                             <th>Actions</th>
                         </tr>
@@ -377,6 +405,40 @@
                     <tbody>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $callLogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <?php
+                                // ── Call Result normalization (raw DB → Zoom-style labels) ──
+                                $resultNorm = [
+                                    // Connected variants
+                                    'connected'      => ['label' => 'Connected',    'css' => 'connected'],
+                                    'Call connected' => ['label' => 'Connected',    'css' => 'connected'],
+                                    'answered'       => ['label' => 'Connected',    'css' => 'connected'],
+                                    'Recorded'       => ['label' => 'Auto Recorded','css' => 'auto_recorded'],
+                                    'Auto Recorded'  => ['label' => 'Auto Recorded','css' => 'auto_recorded'],
+                                    // Failed variants
+                                    'call_failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    'Call failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    'Call Failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    // Cancelled variants
+                                    'Call Cancel'    => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    'canceled'       => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    'Cancelled'      => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    // No Answer
+                                    'No Answer'      => ['label' => 'No Answer',    'css' => 'no_answer'],
+                                    'no_answer'      => ['label' => 'No Answer',    'css' => 'no_answer'],
+                                    // Busy / Declined
+                                    'Busy'           => ['label' => 'Busy',         'css' => 'busy'],
+                                    'Rejected'       => ['label' => 'Declined',     'css' => 'declined'],
+                                    'rejected'       => ['label' => 'Declined',     'css' => 'declined'],
+                                    // Abandoned / Voicemail
+                                    'abandoned'      => ['label' => 'Abandoned',    'css' => 'abandoned'],
+                                    'Abandoned'      => ['label' => 'Abandoned',    'css' => 'abandoned'],
+                                    'voicemail'      => ['label' => 'Voicemail',    'css' => 'voicemail'],
+                                    'Voicemail'      => ['label' => 'Voicemail',    'css' => 'voicemail'],
+                                ];
+                                $rawResult  = $log->call_result;
+                                $resultInfo = isset($resultNorm[$rawResult]) ? $resultNorm[$rawResult] : null;
+                                $resultLabel = $resultInfo ? $resultInfo['label'] : ($rawResult ? ucwords(str_replace(['_','-'], ' ', $rawResult)) : null);
+                                $resultCss   = $resultInfo ? $resultInfo['css']  : ($rawResult ? strtolower(str_replace([' ','-'], '_', $rawResult)) : null);
+
                                 // Smart direction detection: use stored call_type but correct from event name
                                 $eventType = $log->event_type ?? '';
                                 $isCalleeEvent = str_contains($eventType, 'callee') || str_contains($eventType, 'voicemail');
@@ -408,7 +470,7 @@
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($log->call_start_time): ?>
                                         <?php $mt = $log->call_start_time->copy()->shiftTimezone('UTC')->setTimezone($displayTz); ?>
                                         <div style="font-weight:600"><?php echo e($mt->format('m/d/Y')); ?></div>
-                                        <div style="font-size:.65rem;color:var(--bs-surface-500)"><?php echo e($mt->format('g:i A')); ?> MT</div>
+                                        <div style="font-size:.65rem;color:var(--bs-surface-500)"><?php echo e($mt->format('g:i A')); ?> PT</div>
                                     <?php else: ?>
                                         <div style="font-size:.65rem;color:var(--bs-surface-400)"><?php echo e($log->created_at->format('m/d/Y g:i A')); ?></div>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -453,12 +515,9 @@
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                                 <td>
-                                    <span style="font-size:.6rem;color:var(--bs-surface-600)"><?php echo e($log->event_type); ?></span>
-                                </td>
-                                <td>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($log->call_result): ?>
-                                        <span class="status-badge status-<?php echo e(strtolower(str_replace(' ', '_', $log->call_result))); ?>">
-                                            <?php echo e($log->call_result); ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($resultLabel): ?>
+                                        <span class="status-badge status-<?php echo e($resultCss); ?>">
+                                            <?php echo e($resultLabel); ?>
 
                                         </span>
                                     <?php elseif($log->call_status): ?>
@@ -470,35 +529,38 @@
                                         <span style="color:var(--bs-surface-400)">—</span>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
-                                <td class="rp-td-num">
-                                    <?php if($log->duration_seconds > 0): ?>
-                                        <?php
-                                            $dur = $log->duration_seconds;
-                                            $dH = floor($dur / 3600);
-                                            $dM = floor(($dur % 3600) / 60);
-                                            $dS = $dur % 60;
-                                        ?>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dH > 0): ?>
-                                            <?php echo e(sprintf('%d:%02d:%02d', $dH, $dM, $dS)); ?>
+                                <td class="rp-td-num" style="white-space:nowrap">
+                                    <?php
+                                        $dur = $log->duration_seconds ?? 0;
+                                        $dH  = floor($dur / 3600);
+                                        $dM  = floor(($dur % 3600) / 60);
+                                        $dS  = $dur % 60;
+                                        $durFmt = $dH > 0
+                                            ? sprintf('%d:%02d:%02d', $dH, $dM, $dS)
+                                            : sprintf('%02d:%02d', $dM, $dS);
+                                        $hasRealUrl = $log->recording_url
+                                            && !in_array($log->recording_url, ['pending_api_fetch','not_available']);
+                                        $hasPending = $log->recording_url === 'pending_api_fetch';
+                                    ?>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasRealUrl): ?>
+                                        <a href="<?php echo e(route('zoom.recording.play', $log->id)); ?>" target="_blank"
+                                           class="dur-recorded" title="Play recording">
+                                            <i class="bx bx-play-circle" style="font-size:.9rem;vertical-align:middle"></i>
+                                            <?php echo e($dur > 0 ? $durFmt : '—'); ?>
 
-                                        <?php else: ?>
-                                            <?php echo e(sprintf('%02d:%02d', $dM, $dS)); ?>
+                                        </a>
+                                    <?php elseif($hasPending): ?>
+                                        <a href="<?php echo e(route('zoom.recording.play', $log->id)); ?>" target="_blank"
+                                           class="dur-pending" title="Recording available — click to load">
+                                            <i class="bx bx-cloud-download" style="font-size:.9rem;vertical-align:middle"></i>
+                                            <?php echo e($dur > 0 ? $durFmt : '—'); ?>
 
-                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                        </a>
+                                    <?php elseif($dur > 0): ?>
+                                        <?php echo e($durFmt); ?>
+
                                     <?php else: ?>
                                         <span style="color:var(--bs-surface-400)">—</span>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                </td>
-                                <td style="text-align:center">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($log->recording_url): ?>
-                                        <a href="<?php echo e($log->recording_url); ?>" target="_blank" title="Play Recording">
-                                            <i class="bx bx-play-circle" style="font-size:1.2rem;color:var(--bs-gold,#d4af37)"></i>
-                                        </a>
-                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($log->duration_seconds > 300): ?>
-                                            <i class="bx bxs-star" style="font-size:.55rem;color:var(--bs-gold,#d4af37);vertical-align:super" title="Quality call (>5min)"></i>
-                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                    <?php else: ?>
-                                        <span style="color:var(--bs-surface-300)">—</span>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                                 <td>

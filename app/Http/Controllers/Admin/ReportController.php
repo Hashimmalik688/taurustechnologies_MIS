@@ -73,14 +73,79 @@ class ReportController extends Controller
      */
     public function zoomLogs(Request $request)
     {
-        // Zoom Phone operates in US Mountain Time — all display & filters use this
-        $displayTz = 'America/Denver';
+        // Zoom Phone account timezone = Pacific Time (America/Los_Angeles)
+        // Confirmed: Zoom dashboard shows 12:18 PM for calls that are 2:18 PM CT — that's PT, not CT
+        $displayTz = 'America/Los_Angeles';
 
-        // Build query showing ALL call events (matches Zoom's dashboard view)
+        // Internal Zoom system events that carry no human caller data — hidden by default
+        $systemEvents = [
+            'phone.recording_started',
+            'phone.recording_completed',
+            'phone.recording_completed_for_access_member',
+            'phone.caller_call_element_completed',
+            'phone.callee_call_element_completed',
+            'test',
+        ];
+
+        // ── One-row-per-call strategy ─────────────────────────────────────────
+        // Zoom shows 1 row per call. We achieve this by preferring:
+        //   1. phone.api_call_log     — from admin sync, guaranteed 1 per call
+        //   2. phone.caller_call_log_completed / caller_call_history_completed
+        //      for real-time calls not yet picked up by the 5-min sync
+        //   3. Any other terminal events (voicemail, callee_missed/rejected)
+        // When a user explicitly picks an event_type filter we skip deduplication.
+        $terminalEvents = [
+            'phone.api_call_log',
+            'phone.caller_call_log_completed',
+            'phone.caller_call_history_completed',
+            'phone.callee_call_log_completed',
+            'phone.callee_call_history_completed',
+            'phone.callee_missed',
+            'phone.callee_rejected',
+            'phone.voicemail_received',
+        ];
+
         $query = \App\Models\ZoomWebhookLog::query()
             ->with(['lead:id,cn_name,phone_number,state', 'agent:id,name,email'])
             ->orderBy('call_start_time', 'desc')
             ->orderBy('created_at', 'desc');
+
+        // Default: one-row-per-call (matches Zoom's 1-per-call count)
+        // Strategy (cascading priority):
+        //   1st choice: phone.api_call_log  — admin sync, guaranteed 1 per call
+        //   2nd choice: caller_call_history_completed — for live calls not yet in admin sync
+        //   3rd choice: voicemail / missed / rejected for calls with none of the above
+        // When a user explicitly picks an event_type filter we show raw events instead.
+        if (! $request->filled('event_type')) {
+            $query->where(function ($q) {
+                // Always include admin sync rows (one per call, definitive)
+                $q->where('event_type', 'phone.api_call_log')
+
+                  // Include caller_call_history_completed ONLY for calls with no api_call_log
+                  ->orWhere(function ($q2) {
+                      $q2->where('event_type', 'phone.caller_call_history_completed')
+                         ->whereNotNull('zoom_call_id')
+                         ->whereNotIn('zoom_call_id', function ($sub) {
+                             $sub->select('zoom_call_id')
+                                 ->from('zoom_webhook_logs')
+                                 ->where('event_type', 'phone.api_call_log')
+                                 ->whereNotNull('zoom_call_id');
+                         });
+                  })
+
+                  // Include voicemail/missed/rejected ONLY for calls with neither of the above
+                  ->orWhere(function ($q2) {
+                      $q2->whereIn('event_type', ['phone.voicemail_received', 'phone.callee_missed', 'phone.callee_rejected'])
+                         ->whereNotNull('zoom_call_id')
+                         ->whereNotIn('zoom_call_id', function ($sub) {
+                             $sub->select('zoom_call_id')
+                                 ->from('zoom_webhook_logs')
+                                 ->whereIn('event_type', ['phone.api_call_log', 'phone.caller_call_history_completed'])
+                                 ->whereNotNull('zoom_call_id');
+                         });
+                  });
+            });
+        }
 
         // Apply filters
         if ($request->filled('search')) {
@@ -96,37 +161,34 @@ class ReportController extends Controller
             });
         }
 
-        // Agent filter - match by agent_id or name/email/extension
+        // Agent filter — filter by extension (unique per Zoom Phone user).
+        // We don't require CRM user IDs here; call logs are tracked independently.
         if ($request->filled('agent_filter')) {
             $agentVal = $request->agent_filter;
-            if (is_numeric($agentVal)) {
-                // Agent selected from dropdown (user ID)
-                $query->where('agent_id', $agentVal);
-            } else {
-                // Free text agent search
-                $query->where(function($q) use ($agentVal) {
-                    $q->where('caller_name', 'like', "%{$agentVal}%")
-                      ->orWhere('callee_name', 'like', "%{$agentVal}%")
-                      ->orWhere('caller_extension', 'like', "%{$agentVal}%")
-                      ->orWhere('callee_extension', 'like', "%{$agentVal}%")
-                      ->orWhere('caller_email', 'like', "%{$agentVal}%")
-                      ->orWhere('callee_email', 'like', "%{$agentVal}%");
-                });
-            }
+            $query->where(function($q) use ($agentVal) {
+                $q->where('caller_extension', $agentVal)
+                  ->orWhere('callee_extension', $agentVal);
+            });
         }
 
-        // Status/Result filter — call_status is always null in webhooks,
-        // so we filter on call_result which has the actual data
+        // Call Result filter — maps Zoom-style normalized keys to all raw DB variants
         if ($request->filled('call_result')) {
-            $resultSearch = $request->call_result;
-            $withUnderscores = str_replace(' ', '_', $resultSearch);
-            $withSpaces = str_replace('_', ' ', $resultSearch);
-            $query->where(function($q) use ($resultSearch, $withUnderscores, $withSpaces) {
-                $q->where('call_result', $resultSearch)
-                  ->orWhere('call_result', $withUnderscores)
-                  ->orWhere('call_result', $withSpaces)
-                  ->orWhereRaw('LOWER(call_result) = ?', [strtolower($resultSearch)]);
-            });
+            $resultGroups = [
+                'connected'  => ['connected', 'Call connected', 'answered', 'Recorded', 'Auto Recorded'],
+                'call_failed'=> ['call_failed', 'Call failed', 'Call Failed'],
+                'no_answer'  => ['No Answer', 'no_answer'],
+                'cancelled'  => ['Call Cancel', 'canceled', 'Cancelled'],
+                'busy'       => ['Busy'],
+                'declined'   => ['Rejected', 'rejected'],
+                'abandoned'  => ['abandoned', 'Abandoned'],
+                'voicemail'  => ['voicemail', 'Voicemail'],
+            ];
+            $key = $request->call_result;
+            if (isset($resultGroups[$key])) {
+                $query->whereIn('call_result', $resultGroups[$key]);
+            } else {
+                $query->where('call_result', $key);
+            }
         }
 
         if ($request->filled('call_type')) {
@@ -148,8 +210,8 @@ class ReportController extends Controller
             }
         }
 
-        // Date filters: user picks dates in Mountain Time, but DB stores UTC.
-        // Convert MT date boundaries → UTC for correct querying.
+        // Date filters: user picks dates in Central Time (CT), but DB stores UTC.
+        // Convert CT date boundaries → UTC for correct querying.
         if ($request->filled('date_from')) {
             $fromUtc = \Carbon\Carbon::parse($request->date_from, $displayTz)->startOfDay()->utc();
             $query->where('call_start_time', '>=', $fromUtc);
@@ -242,14 +304,17 @@ class ReportController extends Controller
             ];
         }
 
-        // Get filter options — dynamically from actual DB values
-        $callResults = \App\Models\ZoomWebhookLog::select('call_result')
-            ->whereNotNull('call_result')
-            ->where('call_result', '!=', '')
-            ->distinct()
-            ->orderBy('call_result')
-            ->pluck('call_result')
-            ->mapWithKeys(fn($v) => [$v => ucwords(str_replace('_', ' ', $v))]);
+        // Zoom-normalized call result filter options (normalized keys → display labels)
+        $callResults = collect([
+            'connected'   => 'Connected',
+            'call_failed' => 'Call Failed',
+            'no_answer'   => 'No Answer',
+            'cancelled'   => 'Cancelled',
+            'busy'        => 'Busy',
+            'declined'    => 'Declined',
+            'abandoned'   => 'Abandoned',
+            'voicemail'   => 'Voicemail',
+        ]);
 
         $callTypes = [
             'inbound' => 'Inbound',
@@ -261,21 +326,214 @@ class ReportController extends Controller
             ->orderBy('event_type')
             ->pluck('event_type', 'event_type');
 
-        // Agent dropdown: users who appear in zoom webhook logs
-        $agents = User::whereIn('id', function($q) {
-                $q->select('agent_id')->from('zoom_webhook_logs')->whereNotNull('agent_id')->distinct();
+        // Agent dropdown: built directly from webhook log caller data.
+        // Uses extension number as key (unique per Zoom Phone user).
+        // Intentionally NOT linked to CRM user IDs — all closers tracked here
+        // even if they haven't been added to the CRM yet.
+        $agentOptions = \App\Models\ZoomWebhookLog::query()
+            ->whereNotNull('caller_extension')
+            ->where('caller_extension', '!=', '')
+            ->whereNotNull('caller_name')
+            ->where('caller_name', '!=', '')
+            ->select('caller_name', 'caller_email', 'caller_extension')
+            ->get()
+            ->groupBy('caller_extension')
+            ->map(function ($entries) {
+                $first = $entries->first();
+                return [
+                    'extension' => $first->caller_extension,
+                    'name'      => $first->caller_name ?? $first->caller_email ?? ('Ext. ' . $first->caller_extension),
+                    'email'     => $first->caller_email,
+                ];
             })
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
+            ->sortBy('name')
+            ->values();
+
+        // ── Per-agent KPI breakdown ───────────────────────────────────────────
+        // Pull a lightweight flat list of all matching log rows (same filtered
+        // query as the call-logs table, just without pagination or eager-loads)
+        // then aggregate per-agent entirely in PHP.
+        $answeredResults = ['connected', 'Call connected', 'answered', 'Recorded', 'Auto Recorded'];
+        $missedKpi       = ['No Answer', 'no_answer', 'Call Cancel', 'canceled', 'call_failed', 'abandoned'];
+        $declinedKpi     = ['Rejected', 'Busy'];
+        $recordedKpi     = ['Auto Recorded', 'Recorded'];
+
+        $allLogs = (clone $statsQuery)
+            ->withoutEagerLoads()
+            ->reorder()
+            ->get([
+                'caller_name', 'caller_extension',
+                'callee_name', 'callee_extension',
+                'call_type', 'call_result', 'event_type',
+                'duration_seconds', 'recording_url',
+            ]);
+
+        $agentKpisArr = [];
+
+        foreach ($allLogs as $log) {
+            $direction = strtolower($log->call_type ?? '');
+            // Mirror same direction detection logic used in the view
+            $ev = $log->event_type ?? '';
+            if (str_contains($ev, 'callee') || str_contains($ev, 'voicemail')) $direction = 'inbound';
+            elseif (str_contains($ev, 'caller') || str_contains($ev, 'callout')) $direction = 'outbound';
+
+            if ($direction === 'inbound') {
+                $ext  = $log->callee_extension ?? '';
+                $name = $log->callee_name ?? ('Ext. ' . $ext);
+            } else {
+                $ext  = $log->caller_extension ?? '';
+                $name = $log->caller_name ?? ('Ext. ' . $ext);
+            }
+
+            if (!$ext) continue;
+
+            if (!isset($agentKpisArr[$ext])) {
+                $agentKpisArr[$ext] = [
+                    'name'           => $name,
+                    'extension'      => $ext,
+                    'outbound'       => 0,
+                    'inbound'        => 0,
+                    'total_calls'    => 0,
+                    'total_duration' => 0,
+                    'answered'       => 0,
+                    'missed'         => 0,
+                    'declined'       => 0,
+                    'recorded'       => 0,
+                    'voicemail'      => 0,
+                ];
+            }
+
+            $res = $log->call_result ?? '';
+            $agentKpisArr[$ext]['total_calls']++;
+            $agentKpisArr[$ext]['total_duration'] += (int) ($log->duration_seconds ?? 0);
+            if ($direction === 'outbound') $agentKpisArr[$ext]['outbound']++;
+            else                           $agentKpisArr[$ext]['inbound']++;
+            if (in_array($res, $answeredResults, true)) $agentKpisArr[$ext]['answered']++;
+            if (in_array($res, $missedKpi, true))       $agentKpisArr[$ext]['missed']++;
+            if (in_array($res, $declinedKpi, true))     $agentKpisArr[$ext]['declined']++;
+            if (in_array($res, $recordedKpi, true))     $agentKpisArr[$ext]['recorded']++;
+            if ($ev === 'phone.voicemail_received' || $res === 'Voicemail') $agentKpisArr[$ext]['voicemail']++;
+        }
+
+        $agentKpis = collect($agentKpisArr)->sortByDesc('total_calls')->values();
 
         return view('admin.reports.zoom-logs', compact(
             'callLogs',
             'callResults',
             'callTypes',
             'eventTypes',
-            'agents',
+            'agentOptions',
             'stats',
             'userStats',
+            'agentKpis',
+            'displayTz'
+        ));
+    }
+
+    /**
+     * Zoom Agent Performance — per-agent KPI breakdown (outbound calls only).
+     * Groups by caller_name since caller_extension is often absent in webhook data.
+     */
+    public function zoomAgentPerformance(Request $request)
+    {
+        $displayTz = 'America/Los_Angeles';
+
+        // Outbound calls only — inbound go through queue/reception (ext 833 etc.)
+        // and are not meaningful for per-agent performance.
+        $query = \App\Models\ZoomWebhookLog::query()
+            ->where('call_type', 'outbound')
+            ->whereNotNull('caller_name')
+            ->where('caller_name', '!=', '')
+            ->where(function ($q) {
+                // Same dedup logic as zoom-logs: prefer api_call_log, fallback to call_history
+                $q->where('event_type', 'phone.api_call_log')
+                  ->orWhere(function ($q2) {
+                      $q2->where('event_type', 'phone.caller_call_history_completed')
+                         ->whereNotNull('zoom_call_id')
+                         ->whereNotIn('zoom_call_id', function ($sub) {
+                             $sub->select('zoom_call_id')->from('zoom_webhook_logs')
+                                 ->where('event_type', 'phone.api_call_log')
+                                 ->whereNotNull('zoom_call_id');
+                         });
+                  });
+            });
+
+        // Date filter — when not provided no restriction (Clear = all time)
+        $dateFrom = $request->filled('date_from') ? $request->date_from : null;
+        $dateTo   = $request->filled('date_to')   ? $request->date_to   : null;
+
+        if ($dateFrom) {
+            $query->where('call_start_time', '>=',
+                \Carbon\Carbon::parse($dateFrom, $displayTz)->startOfDay()->utc());
+        }
+        if ($dateTo) {
+            $query->where('call_start_time', '<=',
+                \Carbon\Carbon::parse($dateTo, $displayTz)->endOfDay()->utc());
+        }
+
+        $todayPt = \Carbon\Carbon::now($displayTz)->toDateString();
+
+        $answeredResults = ['connected', 'Call connected', 'answered', 'Recorded', 'Auto Recorded'];
+        $missedKpi       = ['No Answer', 'no_answer', 'Call Cancel', 'canceled', 'call_failed', 'abandoned'];
+        $declinedKpi     = ['Rejected', 'Busy'];
+        $recordedKpi     = ['Auto Recorded', 'Recorded'];
+
+        $allLogs = $query->orderBy('call_start_time', 'desc')->get([
+            'caller_name', 'caller_extension',
+            'call_result', 'event_type',
+            'duration_seconds',
+        ]);
+
+        // Group by caller_name (extension is often empty; name is reliable)
+        $agentKpisArr = [];
+        foreach ($allLogs as $log) {
+            $name = $log->caller_name;
+            $ext  = (string) ($log->caller_extension ?? '');
+
+            if (!isset($agentKpisArr[$name])) {
+                $agentKpisArr[$name] = [
+                    'name'           => $name,
+                    'extension'      => $ext,
+                    'total_calls'    => 0,
+                    'total_duration' => 0,
+                    'answered'       => 0,
+                    'missed'         => 0,
+                    'declined'       => 0,
+                    'recorded'       => 0,
+                    'voicemail'      => 0,
+                ];
+            } elseif (!$agentKpisArr[$name]['extension'] && $ext && strlen($ext) <= 6) {
+                // Backfill extension if we encounter it in a later row
+                $agentKpisArr[$name]['extension'] = $ext;
+            }
+
+            $res = $log->call_result ?? '';
+            $ev  = $log->event_type  ?? '';
+            $agentKpisArr[$name]['total_calls']++;
+            $agentKpisArr[$name]['total_duration'] += (int) ($log->duration_seconds ?? 0);
+            if (in_array($res, $answeredResults, true)) $agentKpisArr[$name]['answered']++;
+            if (in_array($res, $missedKpi, true))       $agentKpisArr[$name]['missed']++;
+            if (in_array($res, $declinedKpi, true))     $agentKpisArr[$name]['declined']++;
+            if (in_array($res, $recordedKpi, true))     $agentKpisArr[$name]['recorded']++;
+            if ($ev === 'phone.voicemail_received' || $res === 'Voicemail') $agentKpisArr[$name]['voicemail']++;
+        }
+
+        $agentKpis = collect($agentKpisArr)->sortByDesc('total_calls')->values();
+
+        $summaryTotalCalls    = $allLogs->count();
+        $summaryTotalDuration = $allLogs->sum('duration_seconds');
+        $summaryAnswered      = $allLogs->filter(
+            fn($l) => in_array($l->call_result ?? '', $answeredResults, true)
+        )->count();
+
+        return view('admin.reports.zoom-agent-performance', compact(
+            'agentKpis',
+            'summaryTotalCalls',
+            'summaryTotalDuration',
+            'summaryAnswered',
+            'dateFrom',
+            'dateTo',
+            'todayPt',
             'displayTz'
         ));
     }

@@ -35,29 +35,45 @@
         .rp-table tbody tr:last-child td { border-bottom:none }
         .rp-td-num { text-align:right;font-variant-numeric:tabular-nums }
 
-        /* Status Badges */
+        /* Status Badges — Zoom-normalized values */
         .status-badge {
             font-size:.6rem;font-weight:700;padding:.2rem .5rem;border-radius:10px;
-            display:inline-block;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;
+            display:inline-block;text-transform:capitalize;letter-spacing:.4px;white-space:nowrap;
         }
+        /* Connected / Auto Recorded / Recorded = green */
         .status-connected,
-        .status-answered,
-        .status-call_connected  { background:rgba(52,195,143,.12);color:#1a8754 }
-        .status-completed  { background:rgba(80,165,241,.12);color:#2b81c9 }
-        .status-no_answer,
-        .status-no_one_answered  { background:rgba(241,180,76,.12);color:#b87a14 }
-        .status-missed     { background:rgba(244,106,106,.12);color:#c84646 }
-        .status-voicemail  { background:rgba(108,117,125,.12);color:#6c757d }
-        .status-rejected   { background:rgba(244,106,106,.12);color:#c84646 }
-        .status-busy       { background:rgba(241,180,76,.12);color:#b87a14 }
-        .status-cancelled,
-        .status-declined   { background:rgba(244,106,106,.12);color:#c84646 }
+        .status-auto_recorded,
+        .status-recorded         { background:rgba(52,195,143,.12);color:#1a8754 }
+        /* Call Failed = red */
+        .status-call_failed      { background:rgba(244,106,106,.12);color:#c84646 }
+        /* Cancelled = orange */
+        .status-cancelled        { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* No Answer = orange */
+        .status-no_answer        { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* Busy = orange */
+        .status-busy             { background:rgba(241,180,76,.12);color:#b87a14 }
+        /* Declined / Rejected = red */
+        .status-declined         { background:rgba(244,106,106,.12);color:#c84646 }
+        /* Abandoned = grey-red */
+        .status-abandoned        { background:rgba(244,106,106,.08);color:#c84646 }
+        /* Voicemail = grey */
+        .status-voicemail        { background:rgba(108,117,125,.12);color:#6c757d }
+        /* Recording icon in duration cell */
+        .dur-recorded { color:var(--bs-gold,#d4af37);text-decoration:none;font-weight:600 }
+        .dur-pending  { color:#94a3b8;text-decoration:none }
 
         /* Empty State */
         .rp-empty { text-align:center;padding:3rem 1rem;color:var(--bs-surface-500) }
         .rp-empty i { font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.25 }
         .rp-empty h6 { font-size:.85rem;font-weight:700;margin-bottom:.25rem }
         .rp-empty p { font-size:.72rem }
+
+        /* Tab Pills (match account-switching-log style) */
+        .tab-row{display:flex;gap:.35rem;margin-bottom:.65rem;flex-wrap:wrap}
+        .tab-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:20px;font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid var(--bs-surface-200,#e2e8f0);color:var(--bs-surface-500,#64748b);background:transparent;transition:all .15s}
+        .tab-pill:hover{border-color:rgba(212,175,55,.3);color:#b89730}
+        .tab-pill.active{background:linear-gradient(135deg,#d4af37,#c9a227);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(212,175,55,.25)}
+        .tab-pill i{font-size:.85rem}
 
         /* Pagination */
         .pagination { display:flex;gap:.25rem;justify-content:center;padding:1rem;flex-wrap:wrap }
@@ -88,7 +104,7 @@
     <div class="rp-page-hdr">
         <h5>
             <i class="bx bx-video"></i> Zoom Call Logs
-            <span class="rp-sub">All Zoom Phone webhook events &bull; Times shown in Mountain Time (MT)</span>
+            <span class="rp-sub">One row per call &bull; Times shown in Pacific Time (PT) to match Zoom dashboard</span>
         </h5>
         <div style="display:flex;gap:.5rem">
             <a href="{{ route('settings.reports.zoom-diagnostics') }}" class="act-btn a-warn" style="font-size:.72rem;padding:.3rem .65rem" title="View webhook diagnostics">
@@ -187,8 +203,13 @@
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">
             <i class="bx bx-user-circle" style="color:var(--bs-gold,#d4af37);font-size:1.3rem"></i>
             <h6 style="margin:0;font-size:.85rem;font-weight:700;color:var(--bs-surface-700)">
-                @php $selectedAgent = $agents->firstWhere('id', request('agent_filter')); @endphp
-                {{ $selectedAgent ? $selectedAgent->name : request('agent_filter') }} - Performance Breakdown
+                @php
+                    $selectedAgentOption = $agentOptions->firstWhere('extension', request('agent_filter'));
+                    $selectedAgentLabel = $selectedAgentOption
+                        ? $selectedAgentOption['name'] . ' (Ext. ' . $selectedAgentOption['extension'] . ')'
+                        : request('agent_filter');
+                @endphp
+                {{ $selectedAgentLabel }} - Performance Breakdown
             </h6>
         </div>
         
@@ -267,6 +288,16 @@
     </div>
     @endif
 
+    {{-- Tab Pills --}}
+    <div class="tab-row" style="margin-bottom:.65rem">
+        <a href="{{ route('settings.reports.zoom-logs') }}" class="tab-pill active">
+            <i class="bx bx-list-ul"></i> Call Logs
+        </a>
+        <a href="{{ route('settings.reports.zoom-agent-performance') }}" class="tab-pill">
+            <i class="bx bx-bar-chart-alt-2"></i> Agent Performance
+        </a>
+    </div>
+
     {{-- Filters --}}
     <div class="ex-card sec-card" style="margin-bottom:.65rem">
         <div class="sec-body" style="padding:.75rem">
@@ -282,9 +313,9 @@
                         <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Agent</label>
                         <select name="agent_filter" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff;min-width:150px">
                             <option value="">All Agents</option>
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" {{ request('agent_filter') == $agent->id ? 'selected' : '' }}>
-                                    {{ $agent->name }}
+                            @foreach($agentOptions as $opt)
+                                <option value="{{ $opt['extension'] }}" {{ request('agent_filter') == $opt['extension'] ? 'selected' : '' }}>
+                                    {{ $opt['name'] }} (Ext. {{ $opt['extension'] }})
                                 </option>
                             @endforeach
                         </select>
@@ -358,14 +389,12 @@
                 <table class="rp-table">
                     <thead>
                         <tr>
-                            <th>Date/Time</th>
+                            <th>Date/Time (PT)</th>
                             <th>Direction</th>
                             <th>Agent</th>
                             <th>Contact</th>
-                            <th>Event</th>
-                            <th>Status/Result</th>
+                            <th>Call Result</th>
                             <th>Duration</th>
-                            <th>Recording</th>
                             <th>Lead</th>
                             <th>Actions</th>
                         </tr>
@@ -373,6 +402,40 @@
                     <tbody>
                         @foreach($callLogs as $log)
                             @php
+                                // ── Call Result normalization (raw DB → Zoom-style labels) ──
+                                $resultNorm = [
+                                    // Connected variants
+                                    'connected'      => ['label' => 'Connected',    'css' => 'connected'],
+                                    'Call connected' => ['label' => 'Connected',    'css' => 'connected'],
+                                    'answered'       => ['label' => 'Connected',    'css' => 'connected'],
+                                    'Recorded'       => ['label' => 'Auto Recorded','css' => 'auto_recorded'],
+                                    'Auto Recorded'  => ['label' => 'Auto Recorded','css' => 'auto_recorded'],
+                                    // Failed variants
+                                    'call_failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    'Call failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    'Call Failed'    => ['label' => 'Call Failed',  'css' => 'call_failed'],
+                                    // Cancelled variants
+                                    'Call Cancel'    => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    'canceled'       => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    'Cancelled'      => ['label' => 'Cancelled',    'css' => 'cancelled'],
+                                    // No Answer
+                                    'No Answer'      => ['label' => 'No Answer',    'css' => 'no_answer'],
+                                    'no_answer'      => ['label' => 'No Answer',    'css' => 'no_answer'],
+                                    // Busy / Declined
+                                    'Busy'           => ['label' => 'Busy',         'css' => 'busy'],
+                                    'Rejected'       => ['label' => 'Declined',     'css' => 'declined'],
+                                    'rejected'       => ['label' => 'Declined',     'css' => 'declined'],
+                                    // Abandoned / Voicemail
+                                    'abandoned'      => ['label' => 'Abandoned',    'css' => 'abandoned'],
+                                    'Abandoned'      => ['label' => 'Abandoned',    'css' => 'abandoned'],
+                                    'voicemail'      => ['label' => 'Voicemail',    'css' => 'voicemail'],
+                                    'Voicemail'      => ['label' => 'Voicemail',    'css' => 'voicemail'],
+                                ];
+                                $rawResult  = $log->call_result;
+                                $resultInfo = isset($resultNorm[$rawResult]) ? $resultNorm[$rawResult] : null;
+                                $resultLabel = $resultInfo ? $resultInfo['label'] : ($rawResult ? ucwords(str_replace(['_','-'], ' ', $rawResult)) : null);
+                                $resultCss   = $resultInfo ? $resultInfo['css']  : ($rawResult ? strtolower(str_replace([' ','-'], '_', $rawResult)) : null);
+
                                 // Smart direction detection: use stored call_type but correct from event name
                                 $eventType = $log->event_type ?? '';
                                 $isCalleeEvent = str_contains($eventType, 'callee') || str_contains($eventType, 'voicemail');
@@ -404,7 +467,7 @@
                                     @if($log->call_start_time)
                                         @php $mt = $log->call_start_time->copy()->shiftTimezone('UTC')->setTimezone($displayTz); @endphp
                                         <div style="font-weight:600">{{ $mt->format('m/d/Y') }}</div>
-                                        <div style="font-size:.65rem;color:var(--bs-surface-500)">{{ $mt->format('g:i A') }} MT</div>
+                                        <div style="font-size:.65rem;color:var(--bs-surface-500)">{{ $mt->format('g:i A') }} PT</div>
                                     @else
                                         <div style="font-size:.65rem;color:var(--bs-surface-400)">{{ $log->created_at->format('m/d/Y g:i A') }}</div>
                                     @endif
@@ -449,12 +512,9 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span style="font-size:.6rem;color:var(--bs-surface-600)">{{ $log->event_type }}</span>
-                                </td>
-                                <td>
-                                    @if($log->call_result)
-                                        <span class="status-badge status-{{ strtolower(str_replace(' ', '_', $log->call_result)) }}">
-                                            {{ $log->call_result }}
+                                    @if($resultLabel)
+                                        <span class="status-badge status-{{ $resultCss }}">
+                                            {{ $resultLabel }}
                                         </span>
                                     @elseif($log->call_status)
                                         <span class="status-badge status-{{ $log->call_status }}">
@@ -464,33 +524,35 @@
                                         <span style="color:var(--bs-surface-400)">—</span>
                                     @endif
                                 </td>
-                                <td class="rp-td-num">
-                                    @if($log->duration_seconds > 0)
-                                        @php
-                                            $dur = $log->duration_seconds;
-                                            $dH = floor($dur / 3600);
-                                            $dM = floor(($dur % 3600) / 60);
-                                            $dS = $dur % 60;
-                                        @endphp
-                                        @if($dH > 0)
-                                            {{ sprintf('%d:%02d:%02d', $dH, $dM, $dS) }}
-                                        @else
-                                            {{ sprintf('%02d:%02d', $dM, $dS) }}
-                                        @endif
+                                <td class="rp-td-num" style="white-space:nowrap">
+                                    @php
+                                        $dur = $log->duration_seconds ?? 0;
+                                        $dH  = floor($dur / 3600);
+                                        $dM  = floor(($dur % 3600) / 60);
+                                        $dS  = $dur % 60;
+                                        $durFmt = $dH > 0
+                                            ? sprintf('%d:%02d:%02d', $dH, $dM, $dS)
+                                            : sprintf('%02d:%02d', $dM, $dS);
+                                        $hasRealUrl = $log->recording_url
+                                            && !in_array($log->recording_url, ['pending_api_fetch','not_available']);
+                                        $hasPending = $log->recording_url === 'pending_api_fetch';
+                                    @endphp
+                                    @if($hasRealUrl)
+                                        <a href="{{ route('zoom.recording.play', $log->id) }}" target="_blank"
+                                           class="dur-recorded" title="Play recording">
+                                            <i class="bx bx-play-circle" style="font-size:.9rem;vertical-align:middle"></i>
+                                            {{ $dur > 0 ? $durFmt : '—' }}
+                                        </a>
+                                    @elseif($hasPending)
+                                        <a href="{{ route('zoom.recording.play', $log->id) }}" target="_blank"
+                                           class="dur-pending" title="Recording available — click to load">
+                                            <i class="bx bx-cloud-download" style="font-size:.9rem;vertical-align:middle"></i>
+                                            {{ $dur > 0 ? $durFmt : '—' }}
+                                        </a>
+                                    @elseif($dur > 0)
+                                        {{ $durFmt }}
                                     @else
                                         <span style="color:var(--bs-surface-400)">—</span>
-                                    @endif
-                                </td>
-                                <td style="text-align:center">
-                                    @if($log->recording_url)
-                                        <a href="{{ $log->recording_url }}" target="_blank" title="Play Recording">
-                                            <i class="bx bx-play-circle" style="font-size:1.2rem;color:var(--bs-gold,#d4af37)"></i>
-                                        </a>
-                                        @if($log->duration_seconds > 300)
-                                            <i class="bx bxs-star" style="font-size:.55rem;color:var(--bs-gold,#d4af37);vertical-align:super" title="Quality call (>5min)"></i>
-                                        @endif
-                                    @else
-                                        <span style="color:var(--bs-surface-300)">—</span>
                                     @endif
                                 </td>
                                 <td>

@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Lead;
+use App\Models\AuditLog;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use App\Support\ImportSanitizer;
@@ -15,7 +16,12 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
 {
     public function collection(Collection $rows)
     {
-        Log::info('Starting lead import', ['total_rows' => $rows->count()]);
+        $importingUser = auth()->user();
+        Log::info('Starting lead import', [
+            'total_rows'     => $rows->count(),
+            'imported_by'    => $importingUser?->email ?? 'system',
+            'imported_by_id' => $importingUser?->id,
+        ]);
         $createdCount = 0;
         $updatedCount = 0;
 
@@ -165,9 +171,15 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                     if (!empty($updateData)) {
                         $existingLead->update($updateData);
                         Log::info('Merged missing fields into existing lead', [
-                            'lead_id' => $existingLead->id,
-                            'merged_fields' => array_keys($updateData),
+                            'lead_id'        => $existingLead->id,
+                            'merged_fields'  => array_keys($updateData),
+                            'imported_by'    => $importingUser?->email ?? 'system',
                         ]);
+                        AuditLog::logAction('lead_import_merge', $importingUser, 'Lead', (int) $existingLead->id, [
+                            'merged_fields' => array_keys($updateData),
+                            'import_name'   => $customerName,
+                            'import_phone'  => $normalizedPhoneNumber,
+                        ], 'CSV import merged missing fields into existing lead');
                     }
                     
                     // Add carrier details
@@ -259,10 +271,15 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
 
                     $createdCount++;
                     Log::info('Created new lead with carrier', [
-                        'lead_id' => $lead->id,
-                        'phone_number' => $normalizedPhoneNumber,
-                        'customer_name' => $lead->cn_name,
+                        'lead_id'        => $lead->id,
+                        'phone_number'   => $normalizedPhoneNumber,
+                        'customer_name'  => $lead->cn_name,
+                        'imported_by'    => $importingUser?->email ?? 'system',
                     ]);
+                    AuditLog::logAction('lead_import_created', $importingUser, 'Lead', (int) $lead->id, [
+                        'cn_name'      => $lead->cn_name,
+                        'phone_number' => $normalizedPhoneNumber,
+                    ], 'New lead created via CSV import');
                 }
 
             } catch (\Exception $e) {

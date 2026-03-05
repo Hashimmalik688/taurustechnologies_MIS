@@ -32,6 +32,27 @@ return [
         'redirect_uri' => env('ZOOM_OAUTH_REDIRECT_URI', env('APP_URL') . '/zoom/callback'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin-Managed App (Call Logs — Account-Level Access)
+    |--------------------------------------------------------------------------
+    | Separate admin-managed Zoom app used solely for GET /phone/call_logs.
+    | Returns ALL extensions' history with a single admin authorization.
+    | Required scope: phone:read:list_call_logs:admin
+    |
+    | Setup:
+    |  1. Create new Admin-managed app in Zoom Marketplace
+    |  2. Add scope: phone:read:list_call_logs:admin
+    |  3. Set ZOOM_ADMIN_CLIENT_ID + ZOOM_ADMIN_CLIENT_SECRET in .env
+    |  4. Visit /zoom/admin-authorize once (as Hashim/admin) to authorize
+    |
+    */
+    'admin_app' => [
+        'client_id'     => env('ZOOM_ADMIN_CLIENT_ID'),
+        'client_secret' => env('ZOOM_ADMIN_CLIENT_SECRET'),
+        'redirect_uri'  => env('ZOOM_ADMIN_REDIRECT_URI', env('APP_URL') . '/zoom/admin-callback'),
+    ],
+
     // API Base URL
     'base_url' => env('ZOOM_API_URL', 'https://api.zoom.us/v2'),
     'oauth_url' => env('ZOOM_OAUTH_URL', 'https://zoom.us/oauth/token'),
