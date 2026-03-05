@@ -59,9 +59,11 @@ class SyncZoomCallLogs extends Command
 
         // Output results
         $this->newLine();
+        $mode = $result['sync_mode'] ?? 'unknown';
         $this->info('═══════════════════════════════════');
         $this->info('  Zoom Call Log Sync Results');
         $this->info('═══════════════════════════════════');
+        $this->info("  Mode:                 {$mode}");
         $this->info("  Users synced:         {$result['users_synced']}");
         $this->info("  Users failed:         {$result['users_failed']}");
         $this->info("  API records fetched:  {$result['total_api']}");

@@ -262,17 +262,66 @@ class ZoomPhoneApiService
 
     /**
      * Sync Zoom API call logs into zoom_webhook_logs table.
-     * 
-     * Strategy: Since admin endpoint requires unavailable scope,
-     * iterate over all OAuth tokens in zoom_tokens and call the
-     * user-level /phone/users/me/call_logs for each user.
-     * Deduplicates by zoom_call_id.
+     *
+     * Strategy:
+     *   1. PRIMARY — Use the admin account-level endpoint GET /phone/call_logs with the
+     *      admin's OAuth token. This returns ALL users' call history across every extension,
+     *      including historically deleted CRM users. Only one token is required (admin's).
+     *   2. FALLBACK — If the admin endpoint returns 403 (missing phone:read:admin scope),
+     *      fall back to iterating per-user tokens (legacy behaviour).
      *
      * @return array  ['synced' => int, 'skipped' => int, 'errors' => int, 'total_api' => int, 'users_synced' => int, 'users_failed' => int]
      */
     public function syncCallLogs(Carbon $from, Carbon $to): array
     {
-        $result = ['synced' => 0, 'skipped' => 0, 'errors' => 0, 'total_api' => 0, 'users_synced' => 0, 'users_failed' => 0];
+        $result = ['sync_mode' => 'unknown', 'synced' => 0, 'skipped' => 0, 'errors' => 0, 'total_api' => 0, 'users_synced' => 0, 'users_failed' => 0];
+
+        // ── Step 1: Try the admin account-level endpoint ─────────────────
+        // GET /phone/call_logs returns ALL users' logs when called with an admin token.
+        // This is the correct approach when the main admin account has authorised the app.
+        Log::info('[ZoomAPI] Attempting account-level call log sync (admin endpoint)', [
+            'from' => $from->toDateTimeString(),
+            'to'   => $to->toDateTimeString(),
+        ]);
+
+        $adminLogs = $this->fetchAccountCallLogs($from, $to);
+
+        if ($adminLogs !== null) {
+            // Admin endpoint succeeded — process all logs
+            Log::info('[ZoomAPI] Account-level endpoint returned ' . count($adminLogs) . ' call log(s)');
+            $result['total_api']  = count($adminLogs);
+            $result['users_synced'] = 1; // One admin token served all users
+            $result['sync_mode']    = 'account-level (admin)';
+
+            $seenCallIds = [];
+            foreach ($adminLogs as $log) {
+                $callId = $log['id'] ?? null;
+                if (! $callId) {
+                    $result['errors']++;
+                    continue;
+                }
+                if (isset($seenCallIds[$callId])) {
+                    continue;
+                }
+                $seenCallIds[$callId] = true;
+
+                try {
+                    $this->upsertCallLog($log, $result);
+                } catch (\Exception $e) {
+                    Log::error('[ZoomAPI] Sync error for call: ' . $callId, ['error' => $e->getMessage()]);
+                    $result['errors']++;
+                }
+            }
+
+            Log::info('[ZoomAPI] Account-level sync complete', $result);
+            return $result;
+        }
+
+        // ── Step 2: Fallback — per-user token iteration ──────────────────
+        // Reached only if the admin endpoint returned 403 (scope not granted yet).
+        Log::warning('[ZoomAPI] Admin account endpoint failed — falling back to per-user token iteration. '
+            . 'Grant phone:read:admin scope to the admin OAuth app to fix this.');
+        $result['sync_mode'] = 'per-user (fallback)';
 
         // Get all tokens with refresh_tokens (we can try to refresh expired ones)
         $tokens = ZoomToken::whereNotNull('refresh_token')
@@ -284,10 +333,7 @@ class ZoomPhoneApiService
             return $result;
         }
 
-        Log::info("[ZoomAPI] Starting multi-user sync across {$tokens->count()} token(s)", [
-            'from' => $from->toDateTimeString(),
-            'to'   => $to->toDateTimeString(),
-        ]);
+        Log::info("[ZoomAPI] Starting per-user sync across {$tokens->count()} token(s)");
 
         // Track seen call IDs to avoid duplicate processing
         $seenCallIds = [];
@@ -335,8 +381,77 @@ class ZoomPhoneApiService
             }
         }
 
-        Log::info('[ZoomAPI] Multi-user sync complete', $result);
+        Log::info('[ZoomAPI] Per-user fallback sync complete', $result);
         return $result;
+    }
+
+    /**
+     * Fetch ALL account call logs via the admin endpoint GET /phone/call_logs.
+     * Requires phone:read:admin (or phone:read:call_log:admin) scope on the OAuth app.
+     * Returns null if the endpoint is unavailable (e.g. 403 — scope not granted).
+     */
+    private function fetchAccountCallLogs(Carbon $from, Carbon $to): ?array
+    {
+        $token = $this->getAccessToken();
+        if (! $token) {
+            return null;
+        }
+
+        $allLogs       = [];
+        $nextPageToken = null;
+        $page          = 0;
+        $pageSize      = config('zoom.call_logs.max_page_size', 300);
+
+        do {
+            $page++;
+            try {
+                $query = [
+                    'from'      => $from->format('Y-m-d'),
+                    'to'        => $to->format('Y-m-d'),
+                    'page_size' => $pageSize,
+                    'type'      => 'all',
+                ];
+
+                if ($nextPageToken) {
+                    $query['next_page_token'] = $nextPageToken;
+                }
+
+                $response = Http::timeout(30)
+                    ->withToken($token)
+                    ->get('https://api.zoom.us/v2/phone/call_logs', $query);
+
+                if ($response->status() === 403) {
+                    // Scope not granted — signal caller to use fallback
+                    Log::warning('[ZoomAPI] Account-level call logs returned 403. '.
+                        'The OAuth app needs phone:read:admin scope. Falling back to per-user.');
+                    return null;
+                }
+
+                if (! $response->successful()) {
+                    Log::error('[ZoomAPI] Account call logs fetch failed', [
+                        'status' => $response->status(),
+                        'body'   => substr($response->body(), 0, 300),
+                        'page'   => $page,
+                    ]);
+                    return $page === 1 ? null : $allLogs;
+                }
+
+                $data          = $response->json();
+                $logs          = $data['call_logs'] ?? [];
+                $allLogs       = array_merge($allLogs, $logs);
+                $nextPageToken = $data['next_page_token'] ?? null;
+
+                Log::info("[ZoomAPI] Account call_logs page {$page}: " . count($logs) . ' record(s)');
+
+            } catch (\Exception $e) {
+                Log::error('[ZoomAPI] Account call logs exception page ' . $page . ': ' . $e->getMessage());
+                return $page === 1 ? null : $allLogs;
+            }
+
+            // Safety: max 50 pages (15 000 records per sync window)
+        } while ($nextPageToken && $page < 50);
+
+        return $allLogs;
     }
 
     /**
