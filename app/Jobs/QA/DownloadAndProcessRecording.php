@@ -71,11 +71,11 @@ class DownloadAndProcessRecording implements ShouldQueue
             ]);
 
             // ── Step 2: Filter short calls ──────────────────────────────
-            // Skip calls under 5 minutes — not meaningful sales conversations
-            if ($qaCall->duration_seconds < 300) {
+            // Skip calls under 8 minutes — not meaningful sales conversations
+            if ($qaCall->duration_seconds < 480) {
                 $qaCall->update([
                     'processing_status' => 'skipped',
-                    'failure_reason' => 'Call under 5 minutes (' . $qaCall->duration_seconds . 's) — skipped',
+                    'failure_reason' => 'Call under 8 minutes (' . $qaCall->duration_seconds . 's) — skipped',
                 ]);
                 $this->cleanupFile($localPath);
                 Log::info('[QA:Job] Skipped short call', ['duration' => $qaCall->duration_seconds]);

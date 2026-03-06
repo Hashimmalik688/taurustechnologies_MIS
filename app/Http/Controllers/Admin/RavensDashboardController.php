@@ -409,23 +409,47 @@ class RavensDashboardController extends Controller
 
             // Prepare update data - only update fields that are provided and not empty
             $updateData = [];
-            
-            // Handle all possible fields from phase 2 and phase 3
-            if ($request->filled('cn_name')) {
-                $updateData['cn_name'] = $request->input('cn_name');
+
+            // ── IDENTITY FIELDS ────────────────────────────────────────────────────
+            // These fields uniquely identify a person. The auto-save form pre-fills
+            // them from the loaded lead, but a JavaScript race-condition (opening a
+            // different lead while the timer has the old lead_id) can send the WRONG
+            // person's data. Rule: only write an identity field when the lead's
+            // current value is EMPTY (i.e. we're filling in missing info), or when
+            // the incoming value exactly matches what's already stored (idempotent).
+            // Never silently replace a non-empty identity field with a different value.
+            $identityFields = ['cn_name', 'phone_number', 'ssn', 'date_of_birth'];
+
+            foreach ($identityFields as $field) {
+                if (!$request->filled($field)) {
+                    continue; // nothing sent, skip
+                }
+                $incoming = $request->input($field);
+                $existing = $lead->$field;
+
+                if (empty($existing)) {
+                    // Field is blank on the lead – safe to fill it in
+                    $updateData[$field] = $incoming;
+                } elseif ((string) $incoming === (string) $existing) {
+                    // Same value – idempotent, no change needed
+                } else {
+                    // Different value on an established lead – log and reject
+                    AuditLog::logAction(
+                        'lead_identity_conflict',
+                        Auth::user(),
+                        'Lead',
+                        (int) $lead->id,
+                        [
+                            'field'    => $field,
+                            'existing' => $existing,
+                            'incoming' => $incoming,
+                            'source'   => 'ravens_autosave',
+                        ],
+                        "Auto-save attempted to overwrite {$field} – rejected to protect lead identity"
+                    );
+                }
             }
-            
-            if ($request->filled('phone_number')) {
-                $updateData['phone_number'] = $request->input('phone_number');
-            }
-            
-            if ($request->filled('date_of_birth')) {
-                $updateData['date_of_birth'] = $request->input('date_of_birth');
-            }
-            
-            if ($request->filled('ssn')) {
-                $updateData['ssn'] = $request->input('ssn');
-            }
+            // ── END IDENTITY FIELDS ────────────────────────────────────────────────
             
             if ($request->filled('gender')) {
                 $updateData['gender'] = $request->input('gender');
@@ -570,11 +594,20 @@ class RavensDashboardController extends Controller
 
             if (!empty($updateData)) {
                 $lead->update($updateData);
-                
+
+                AuditLog::logAction(
+                    'lead_updated',
+                    Auth::user(),
+                    'Lead',
+                    (int) $lead->id,
+                    ['updated_fields' => array_keys($updateData)],
+                    'Ravens dashboard auto-save'
+                );
+
                 \Log::info('Ravens lead saved', [
-                    'lead_id' => $leadId,
+                    'lead_id'        => $leadId,
                     'updated_fields' => array_keys($updateData),
-                    'user_id' => Auth::id()
+                    'user_id'        => Auth::id()
                 ]);
             }
 
@@ -627,27 +660,32 @@ class RavensDashboardController extends Controller
 
             // Update lead with all form data
             $updateData = [];
-            
-            if ($request->filled('cn_name')) {
-                $updateData['cn_name'] = $request->input('cn_name');
+
+            // Identity fields – same protection as saveLead: only fill if empty
+            foreach (['cn_name', 'phone_number', 'ssn', 'date_of_birth'] as $field) {
+                if (!$request->filled($field)) {
+                    continue;
+                }
+                $incoming = $request->input($field);
+                $existing = $lead->$field;
+                if (empty($existing)) {
+                    $updateData[$field] = $incoming;
+                } elseif ((string) $incoming !== (string) $existing) {
+                    AuditLog::logAction(
+                        'lead_identity_conflict',
+                        Auth::user(),
+                        'Lead',
+                        (int) $lead->id,
+                        ['field' => $field, 'existing' => $existing, 'incoming' => $incoming, 'source' => 'submit_sale'],
+                        "submitSale attempted to overwrite {$field} – rejected"
+                    );
+                }
             }
-            
-            if ($request->filled('phone_number')) {
-                $updateData['phone_number'] = $request->input('phone_number');
-            }
-            
-            if ($request->filled('date_of_birth')) {
-                $updateData['date_of_birth'] = $request->input('date_of_birth');
-            }
-            
-            if ($request->filled('ssn')) {
-                $updateData['ssn'] = $request->input('ssn');
-            }
-            
+
             if ($request->filled('gender')) {
                 $updateData['gender'] = $request->input('gender');
             }
-            
+
             if ($request->filled('address')) {
                 $updateData['address'] = $request->input('address');
             }

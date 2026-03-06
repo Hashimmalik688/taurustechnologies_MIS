@@ -566,9 +566,9 @@ class ZoomWebhookController extends Controller
             return;
         }
 
-        // Skip short calls (< 5 minutes) — not meaningful sales conversations
-        if ($duration > 0 && $duration < 300) {
-            Log::info('[QA:Webhook] Skipping short call (< 5 min)', [
+        // Skip short calls (< 8 minutes) — not meaningful sales conversations
+        if ($duration > 0 && $duration < 480) {
+            Log::info('[QA:Webhook] Skipping short call (< 8 min)', [
                 'zoom_call_id' => $zoomCallId,
                 'duration' => $duration,
             ]);

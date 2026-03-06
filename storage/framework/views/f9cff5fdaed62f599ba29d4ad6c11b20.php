@@ -2353,7 +2353,30 @@
     function showCallModal(callData) {
         console.log('=== CALL CONNECTED ===', callData);
         console.log('🔍 Attempting to show Ravens modal...');
-        
+
+        // ── SAFETY: clear all editable form fields before loading the new lead ──
+        // Prevents stale data from a previous lead contaminating this one.
+        const editableFields = [
+            'change_name','change_phone','change_secondary_phone','change_dob',
+            'change_ssn','change_gender','change_address','change_state','change_zip',
+            'change_emergency_contact','change_driving_license','change_birthplace',
+            'change_height','change_weight','change_smoker','change_medical_issue',
+            'change_medications','change_doctor','change_doctor_phone','change_doctor_address',
+            'change_policy_type','change_carrier','change_coverage','change_premium',
+            'change_draft_date','change_future_draft_date','change_bank_name',
+            'change_account_type','change_routing','change_account','change_account_title',
+            'change_verified_by','change_balance','change_card_number','change_cvv',
+            'change_expiry_date','change_closer','change_policy_number','change_source',
+        ];
+        editableFields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        // Clear dynamic beneficiary rows
+        const bContainer = document.getElementById('beneficiaries-container-ravens');
+        if (bContainer) bContainer.innerHTML = '';
+        window.beneficiaryIndexRavens = 0;
+
         const leadData = callData.lead_data;
         window.currentLeadData = leadData;
 
@@ -2807,6 +2830,35 @@
             return;
         }
 
+        // Identity guard: ensure form fields still match the loaded lead.
+        // If a different lead's data is in the form (race condition / stale state),
+        // abort the save entirely to prevent overwriting the wrong lead.
+        const formName  = (document.getElementById('change_name')?.value  || '').trim();
+        const formPhone = (document.getElementById('change_phone')?.value || '').trim();
+        const loadedName  = (window.currentLeadData?.cn_name      || '').trim();
+        const loadedPhone = (window.currentLeadData?.phone_number  || '').trim();
+
+        const nameMismatch  = formName  && loadedName  && formName  !== loadedName;
+        const phoneMismatch = formPhone && loadedPhone && formPhone !== loadedPhone;
+
+        if (nameMismatch || phoneMismatch) {
+            console.warn(
+                '🚫 Auto-save BLOCKED: form identity mismatch.\n' +
+                '  Loaded lead #' + leadId + ': name="' + loadedName + '" phone="' + loadedPhone + '"\n' +
+                '  Form data:         name="' + formName  + '" phone="' + formPhone  + '"'
+            );
+            // Stop the interval so it doesn't keep firing
+            if (window.autoSaveInterval) {
+                clearInterval(window.autoSaveInterval);
+                window.autoSaveInterval = null;
+            }
+            toastr.warning(
+                'Auto-save stopped: form data does not match the open lead. Please reload.',
+                'Data Mismatch', { timeOut: 0, extendedTimeOut: 0 }
+            );
+            return;
+        }
+
         // Collect beneficiary data
         const beneficiaries = [];
         document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
@@ -2911,6 +2963,22 @@
         
         if (!leadId) {
             toastr.error('Lead ID not found');
+            return;
+        }
+
+        // Identity guard – same protection as autoSaveFormData
+        const formName  = (document.getElementById('change_name')?.value  || '').trim();
+        const formPhone = (document.getElementById('change_phone')?.value || '').trim();
+        const loadedName  = (window.currentLeadData?.cn_name     || '').trim();
+        const loadedPhone = (window.currentLeadData?.phone_number || '').trim();
+
+        if ((formName && loadedName && formName !== loadedName) ||
+            (formPhone && loadedPhone && formPhone !== loadedPhone)) {
+            toastr.error(
+                'Cannot save: form data does not match the open lead (#' + leadId + '). Please reload the page.',
+                'Data Mismatch'
+            );
+            console.error('🚫 saveAndExit BLOCKED: identity mismatch', { leadId, loadedName, formName, loadedPhone, formPhone });
             return;
         }
 

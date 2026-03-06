@@ -9,260 +9,156 @@ use Illuminate\Support\Facades\Log;
 class ZoomOAuthService
 {
     /**
-     * Get a valid OAuth access token from the zoom_tokens table.
-     * Uses the stored user OAuth tokens (from /zoom/authorize flow).
-     * Automatically refreshes if expired.
+     * Get a valid access token from the admin-managed app (app_type = 'admin').
+     * Requires scope: phone:read:call_recording:admin
+     * Admin must have authorized once via /zoom/admin-authorize.
      */
     public function getAccessToken(): string
     {
-        // Get the most recent valid token (any user who authorized the Zoom app)
-        $tokenRecord = ZoomToken::whereNotNull('refresh_token')
-            ->orderBy('updated_at', 'desc')
+        $tokenRecord = ZoomToken::adminApp()
+            ->whereNotNull('refresh_token')
+            ->orderByDesc('updated_at')
             ->first();
 
         if (!$tokenRecord) {
             throw new \RuntimeException(
-                'No Zoom OAuth token found. An admin must authorize the Zoom app first at /zoom/authorize'
+                'No admin Zoom app token found. Authorize the admin app at /zoom/admin-authorize'
             );
         }
 
-        // Check if token is expired — refresh if needed
         if ($tokenRecord->expires_at && $tokenRecord->expires_at->isPast()) {
-            Log::info('[QA:ZoomOAuth] Token expired, refreshing...', [
+            Log::info('[QA:ZoomOAuth] Admin token expired, refreshing...', [
                 'user_id' => $tokenRecord->user_id,
-                'expired_at' => $tokenRecord->expires_at,
             ]);
 
             $response = Http::timeout(15)
                 ->asForm()
                 ->post('https://zoom.us/oauth/token', [
-                    'grant_type' => 'refresh_token',
+                    'grant_type'    => 'refresh_token',
                     'refresh_token' => $tokenRecord->refresh_token,
-                    'client_id' => config('zoom.oauth.client_id'),
-                    'client_secret' => config('zoom.oauth.client_secret'),
+                    'client_id'     => config('zoom.admin_app.client_id'),
+                    'client_secret' => config('zoom.admin_app.client_secret'),
                 ]);
 
             if (!$response->successful()) {
-                Log::error('[QA:ZoomOAuth] Token refresh failed', [
+                Log::error('[QA:ZoomOAuth] Admin token refresh failed', [
                     'status' => $response->status(),
-                    'body' => $response->body(),
+                    'body'   => $response->body(),
                 ]);
                 throw new \RuntimeException(
-                    'Zoom OAuth token refresh failed. Admin may need to re-authorize at /zoom/authorize. Error: ' . $response->body()
+                    'Zoom admin token refresh failed. Re-authorize at /zoom/admin-authorize. Error: ' . $response->body()
                 );
             }
 
             $data = $response->json();
             $tokenRecord->update([
-                'access_token' => $data['access_token'],
+                'access_token'  => $data['access_token'],
                 'refresh_token' => $data['refresh_token'],
-                'expires_at' => now()->addSeconds($data['expires_in'] ?? 3600),
+                'expires_at'    => now()->addSeconds($data['expires_in'] ?? 3600),
             ]);
 
-            Log::info('[QA:ZoomOAuth] Token refreshed successfully', [
-                'user_id' => $tokenRecord->user_id,
-                'new_expires_at' => $tokenRecord->expires_at,
-            ]);
+            Log::info('[QA:ZoomOAuth] Admin token refreshed successfully');
         }
 
         return $tokenRecord->access_token;
     }
 
     /**
-     * Download a recording file from Zoom to local storage.
-     * Tries the direct download_url first (Bearer token), then falls back
-     * to fetching the signed file_url via the call_logs recordings API.
+     * Download a recording MP3 from Zoom to local storage using the admin app token.
      *
-     * @param string $downloadUrl The Zoom recording download URL
-     * @param string $localPath The local file path to save to
-     * @param string|null $callLogId Optional call_log_id for file_url fallback
-     * @param string|null $zoomUserId Optional Zoom user ID for user-level fallback
+     * Strategy:
+     *  1. GET /phone/call_logs/{callLogId}/recordings  → fetch fresh signed download_url
+     *  2. Stream the signed download_url to disk
+     *
+     * Requires scope: phone:read:call_recording:admin on the admin-managed app.
+     *
+     * @param string $downloadUrl  Webhook-provided download URL (used as fallback if API fetch fails)
+     * @param string $localPath    Full path to save the MP3 file
+     * @param string|null $callLogId  Zoom call_log_id — used to fetch a fresh signed URL (preferred)
+     * @param string|null $zoomUserId Unused — kept for backward-compatible call signature
      * @throws \RuntimeException
      */
     public function downloadRecording(string $downloadUrl, string $localPath, ?string $callLogId = null, ?string $zoomUserId = null): void
     {
         $token = $this->getAccessToken();
 
-        Log::info('[QA:ZoomOAuth] Downloading recording', [
-            'url' => $downloadUrl,
-            'call_log_id' => $callLogId,
-        ]);
-
-        // Ensure directory exists
         $dir = dirname($localPath);
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
-        // ── Method 1: Direct download_url with Bearer token ─────────────
+        Log::info('[QA:ZoomOAuth] Starting recording download', [
+            'call_log_id' => $callLogId,
+            'local_path'  => $localPath,
+        ]);
+
+        // ── Step 1: Fetch a fresh signed URL from the admin recordings API ──
+        // The webhook download_url expires quickly; the API always returns a fresh URL.
+        $signedUrl = null;
+        if ($callLogId) {
+            $signedUrl = $this->fetchSignedUrlFromApi($callLogId, $token);
+        }
+
+        // ── Step 2: Download the file ────────────────────────────────────────
+        // Prefer the fresh signed URL, fall back to original webhook URL
+        $urlToDownload = $signedUrl ?? $downloadUrl;
+
         $response = Http::timeout(300)
             ->withToken($token)
             ->withOptions(['sink' => $localPath])
-            ->get($downloadUrl);
+            ->get($urlToDownload);
 
         if ($response->successful() && file_exists($localPath) && filesize($localPath) > 1000) {
-            $this->logDownloadSuccess($localPath, 'download_url');
+            $size = filesize($localPath);
+            Log::info('[QA:ZoomOAuth] Recording downloaded successfully', [
+                'call_log_id' => $callLogId,
+                'size_mb'     => round($size / 1048576, 2),
+                'method'      => $signedUrl ? 'admin_api_signed_url' : 'webhook_url_fallback',
+            ]);
             return;
         }
 
-        // Clean up failed attempt
         if (file_exists($localPath)) {
             @unlink($localPath);
         }
 
-        Log::warning('[QA:ZoomOAuth] Direct download_url failed (HTTP ' . $response->status() . '), trying file_url fallback', [
-            'download_url' => $downloadUrl,
-            'call_log_id' => $callLogId,
-        ]);
-
-        // ── Method 2: Fetch file_url via call_logs recordings API ───────
-        // The call_logs/{callLogId}/recordings endpoint returns a signed
-        // file_url that works without the phone:read:call_recording scope.
-        if ($callLogId) {
-            $fileUrl = $this->getFileUrlFromCallLog($callLogId, $token);
-
-            if ($fileUrl) {
-                $response = Http::timeout(300)
-                    ->withOptions(['sink' => $localPath])
-                    ->get($fileUrl);
-
-                if ($response->successful() && file_exists($localPath) && filesize($localPath) > 1000) {
-                    $this->logDownloadSuccess($localPath, 'file_url (call_log_id)');
-                    return;
-                }
-
-                if (file_exists($localPath)) {
-                    @unlink($localPath);
-                }
-
-                Log::warning('[QA:ZoomOAuth] file_url via call_log_id also failed', [
-                    'status' => $response->status(),
-                ]);
-            }
-        }
-
-        // ── Method 3: Search user's recordings for matching call ────────
-        if ($zoomUserId) {
-            $fileUrl = $this->getFileUrlFromUserRecordings($zoomUserId, $downloadUrl, $token);
-
-            if ($fileUrl) {
-                $response = Http::timeout(300)
-                    ->withOptions(['sink' => $localPath])
-                    ->get($fileUrl);
-
-                if ($response->successful() && file_exists($localPath) && filesize($localPath) > 1000) {
-                    $this->logDownloadSuccess($localPath, 'file_url (user recordings)');
-                    return;
-                }
-
-                if (file_exists($localPath)) {
-                    @unlink($localPath);
-                }
-            }
-        }
-
         throw new \RuntimeException(
-            'Failed to download recording: HTTP ' . $response->status()
-            . '. All download methods exhausted (download_url, file_url fallbacks).'
+            'Failed to download recording (HTTP ' . $response->status() . '). '
+            . 'Ensure phone:read:call_recording:admin scope is active on the admin app and /zoom/admin-authorize has been completed.'
         );
     }
 
     /**
-     * Get a signed file_url from the call_logs recordings API.
+     * Fetch a fresh signed download URL from the admin call-log recordings API.
+     * GET /phone/call_logs/{callLogId}/recordings
+     * Requires: phone:read:call_recording:admin
      */
-    private function getFileUrlFromCallLog(string $callLogId, string $token): ?string
-    {
-        try {
-            // The call_log_id may or may not have dashes — try both formats
-            $ids = [$callLogId];
-            $noDashes = str_replace('-', '', $callLogId);
-            $withDashes = strlen($noDashes) === 32
-                ? substr($noDashes, 0, 8) . '-' . substr($noDashes, 8, 4) . '-' . substr($noDashes, 12, 4)
-                  . '-' . substr($noDashes, 16, 4) . '-' . substr($noDashes, 20)
-                : null;
-
-            if ($withDashes && $withDashes !== $callLogId) {
-                $ids[] = $withDashes;
-            }
-            if ($noDashes !== $callLogId) {
-                $ids[] = $noDashes;
-            }
-
-            foreach ($ids as $id) {
-                $response = Http::timeout(15)
-                    ->withToken($token)
-                    ->get("https://api.zoom.us/v2/phone/call_logs/{$id}/recordings");
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                    $fileUrl = $data['file_url'] ?? null;
-
-                    if ($fileUrl) {
-                        Log::info('[QA:ZoomOAuth] Got file_url from call_log recordings API', [
-                            'call_log_id' => $id,
-                        ]);
-                        return $fileUrl;
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::warning('[QA:ZoomOAuth] Failed to fetch file_url from call_logs API', [
-                'call_log_id' => $callLogId,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        return null;
-    }
-
-    /**
-     * Search a user's recordings to find a matching file_url by download_url.
-     */
-    private function getFileUrlFromUserRecordings(string $zoomUserId, string $downloadUrl, string $token): ?string
+    private function fetchSignedUrlFromApi(string $callLogId, string $token): ?string
     {
         try {
             $response = Http::timeout(15)
                 ->withToken($token)
-                ->get("https://api.zoom.us/v2/phone/users/{$zoomUserId}/recordings", [
-                    'from' => now()->subDays(7)->format('Y-m-d'),
-                    'to' => now()->format('Y-m-d'),
-                    'page_size' => 100,
-                ]);
+                ->get("https://api.zoom.us/v2/phone/call_logs/{$callLogId}/recordings");
 
             if ($response->successful()) {
-                $recordings = $response->json()['recordings'] ?? [];
-
-                foreach ($recordings as $rec) {
-                    if (($rec['download_url'] ?? '') === $downloadUrl) {
-                        // Found a match — fetch full recording detail using call_log_id
-                        $recCallLogId = $rec['call_log_id'] ?? null;
-                        if ($recCallLogId) {
-                            return $this->getFileUrlFromCallLog($recCallLogId, $token);
-                        }
-                    }
+                $recordings = $response->json('recordings') ?? [];
+                $url = $recordings[0]['download_url'] ?? $recordings[0]['file_url'] ?? null;
+                if ($url) {
+                    Log::info('[QA:ZoomOAuth] Got fresh signed URL from admin API', ['call_log_id' => $callLogId]);
                 }
+                return $url;
             }
+
+            Log::warning('[QA:ZoomOAuth] Admin recordings API returned HTTP ' . $response->status(), [
+                'call_log_id' => $callLogId,
+                'body'        => substr($response->body(), 0, 200),
+            ]);
         } catch (\Throwable $e) {
-            Log::warning('[QA:ZoomOAuth] Failed to search user recordings for file_url', [
-                'zoom_user_id' => $zoomUserId,
-                'error' => $e->getMessage(),
+            Log::warning('[QA:ZoomOAuth] Admin recordings API exception: ' . $e->getMessage(), [
+                'call_log_id' => $callLogId,
             ]);
         }
 
         return null;
-    }
-
-    /**
-     * Log a successful download.
-     */
-    private function logDownloadSuccess(string $localPath, string $method): void
-    {
-        $fileSize = filesize($localPath);
-        Log::info('[QA:ZoomOAuth] Recording downloaded', [
-            'path' => $localPath,
-            'method' => $method,
-            'size_bytes' => $fileSize,
-            'size_mb' => round($fileSize / 1048576, 2),
-        ]);
     }
 }
