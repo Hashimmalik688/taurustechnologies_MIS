@@ -97,7 +97,51 @@ class RavensDashboardController extends Controller
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        return view('ravens.dashboard', compact('stats', 'mySales', 'declinedChargebacks', 'filter', 'search'));
+        // Carrier and state data for "Add Sale" modal
+        $carrierPartnerData = \App\Models\AgentCarrierState::with(['insuranceCarrier', 'partner'])
+            ->whereHas('insuranceCarrier', function($q) { $q->where('is_active', true); })
+            ->whereHas('partner', function($q) { $q->where('is_active', true); })
+            ->get()
+            ->groupBy(function($item) {
+                return $item->insurance_carrier_id . '_' . $item->partner_id;
+            })
+            ->map(function($group) {
+                $first = $group->first();
+                return [
+                    'carrier_id'   => $first->insurance_carrier_id,
+                    'carrier_name' => $first->insuranceCarrier->name,
+                    'partner_id'   => $first->partner_id,
+                    'partner_name' => $first->partner->name,
+                    'partner_code' => $first->partner->code,
+                    'display_name' => $first->insuranceCarrier->name . ' (' . $first->partner->code . ')',
+                    'states'       => $group->pluck('state')->unique()->toArray(),
+                ];
+            })
+            ->values();
+
+        $insuranceCarriers = \App\Models\InsuranceCarrier::where('is_active', true)
+            ->orderBy('name')->pluck('name', 'name')->toArray();
+
+        $usStates = [
+            'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
+            'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
+            'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii', 'ID' => 'Idaho',
+            'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa', 'KS' => 'Kansas',
+            'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine', 'MD' => 'Maryland',
+            'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota', 'MS' => 'Mississippi',
+            'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska', 'NV' => 'Nevada',
+            'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico', 'NY' => 'New York',
+            'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio', 'OK' => 'Oklahoma',
+            'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island', 'SC' => 'South Carolina',
+            'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas', 'UT' => 'Utah',
+            'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington', 'WV' => 'West Virginia',
+            'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia',
+        ];
+
+        return view('ravens.dashboard', compact(
+            'stats', 'mySales', 'declinedChargebacks', 'filter', 'search',
+            'carrierPartnerData', 'insuranceCarriers', 'usStates'
+        ));
     }
 
     public function calling(Request $request)
@@ -866,6 +910,153 @@ class RavensDashboardController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to submit sale: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Create a brand-new lead directly as a sale (used by "Add Sale" on dashboard).
+     * No existing lead_id — a fresh Lead record is created and immediately marked sold.
+     */
+    public function createSale(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            // Require at minimum a customer name or phone number
+            if (!$request->filled('cn_name') && !$request->filled('phone_number')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Customer name or phone number is required.',
+                ], 422);
+            }
+
+            // Check for repeat sales by phone/SSN (no existing lead to exclude)
+            $phone = $request->input('phone_number');
+            $ssn   = $request->input('ssn');
+
+            $repeatSale = null;
+            if ($phone || $ssn) {
+                $threeMonthsAgo = now()->subMonths(3);
+                $q = Lead::whereNotNull('sale_at')->where('sale_at', '>=', $threeMonthsAgo);
+                $q->where(function($sub) use ($phone, $ssn) {
+                    if ($phone) $sub->where('phone_number', $phone);
+                    if ($ssn)   $sub->orWhere('ssn', $ssn);
+                });
+                $repeatSale = $q->first();
+            }
+
+            // Build the new lead record
+            $data = array_filter([
+                'cn_name'               => $request->input('cn_name'),
+                'phone_number'          => $request->input('phone_number'),
+                'secondary_phone_number'=> $request->input('secondary_phone_number'),
+                'date_of_birth'         => $request->input('date_of_birth'),
+                'ssn'                   => $request->input('ssn'),
+                'gender'                => $request->input('gender'),
+                'state'                 => $request->input('state'),
+                'zip_code'              => $request->input('zip_code'),
+                'address'               => $request->input('address'),
+                'emergency_contact'     => $request->input('emergency_contact'),
+                'birth_place'           => $request->input('birth_place'),
+                'height'                => $request->input('height'),
+                'weight'                => $request->input('weight'),
+                'smoker'                => $request->filled('smoker') ? ($request->input('smoker') ? 'yes' : 'no') : null,
+                'driving_license'       => $request->input('driving_license'),
+                'medical_issue'         => $request->input('medical_issue'),
+                'medications'           => $request->input('medications'),
+                'doctor_name'           => $request->input('doctor_name'),
+                'doctor_number'         => $request->input('doctor_number'),
+                'doctor_address'        => $request->input('doctor_address'),
+                'policy_type'           => $request->input('policy_type'),
+                'policy_number'         => $request->input('policy_number'),
+                'carrier_name'          => $request->input('carrier_name'),
+                'insurance_carrier_id'  => $request->input('insurance_carrier_id'),
+                'coverage_amount'       => $request->input('coverage_amount'),
+                'monthly_premium'       => $request->input('monthly_premium'),
+                'initial_draft_date'    => $request->input('initial_draft_date'),
+                'future_draft_date'     => $request->input('future_draft_date'),
+                'bank_name'             => $request->input('bank_name'),
+                'account_title'         => $request->input('account_title'),
+                'account_type'          => $request->input('account_type'),
+                'routing_number'        => $request->input('routing_number'),
+                'acc_number'            => $request->input('account_number'),
+                'account_verified_by'   => $request->input('account_verified_by'),
+                'bank_balance'          => $request->input('bank_balance'),
+                'card_number'           => $request->input('card_number'),
+                'cvv'                   => $request->input('cvv'),
+                'expiry_date'           => $request->input('expiry_date'),
+                'source'                => $request->input('source'),
+                'assigned_partner'      => $request->input('assigned_partner'),
+                'partner_id'            => $request->input('partner_id'),
+            ], fn($v) => !is_null($v) && $v !== '');
+
+            // Handle beneficiaries
+            if ($request->has('beneficiaries') && is_array($request->input('beneficiaries'))) {
+                $data['beneficiaries'] = json_encode($request->input('beneficiaries'));
+            }
+
+            // Sale markers
+            $data['status']      = 'pending';
+            $data['sale_at']     = now();
+            $data['sale_date']   = now()->format('Y-m-d');
+            $data['team']        = Teams::RAVENS;
+            $data['closer_id']   = $user->id;
+            $data['closer_name'] = $user->name;
+            $data['date']        = now()->format('Y-m-d');
+
+            $lead = Lead::create($data);
+
+            // Repeat-sale audit log (if applicable)
+            if ($repeatSale) {
+                AuditLog::create([
+                    'user_id'    => $user->id,
+                    'action'     => 'repeat_sale_detected',
+                    'model'      => 'Lead',
+                    'model_id'   => $lead->id,
+                    'changes'    => json_encode([
+                        'message'            => 'Repeat sale detected within 3 months',
+                        'previous_sale_id'   => $repeatSale->id,
+                        'previous_sale_date' => $repeatSale->sale_at,
+                        'previous_closer'    => $repeatSale->closer_name,
+                        'phone'              => $phone,
+                        'ssn'                => $ssn,
+                    ]),
+                    'ip_address' => $request->ip(),
+                ]);
+            }
+
+            // Send notifications to QA and Managers
+            $this->sendSaleNotifications($lead);
+
+            AuditLog::create([
+                'user_id'    => $user->id,
+                'action'     => 'sale_created',
+                'model'      => 'Lead',
+                'model_id'   => $lead->id,
+                'changes'    => json_encode([
+                    'closer_name'   => $user->name,
+                    'sale_at'       => $lead->sale_at,
+                    'customer_name' => $lead->cn_name,
+                    'source'        => 'ravens_dashboard_add_sale',
+                ]),
+                'ip_address' => $request->ip(),
+            ]);
+
+            return response()->json([
+                'success'              => true,
+                'message'              => 'Sale added successfully! Notifications sent to QA and Managers.',
+                'lead_id'              => $lead->id,
+                'is_repeat_sale'       => !is_null($repeatSale),
+                'repeat_sale_message'  => $repeatSale
+                    ? "Warning: This customer had a previous sale on " . $repeatSale->sale_at->format('M d, Y') . " by " . $repeatSale->closer_name
+                    : null,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error creating sale from dashboard: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add sale: ' . $e->getMessage(),
             ], 500);
         }
     }

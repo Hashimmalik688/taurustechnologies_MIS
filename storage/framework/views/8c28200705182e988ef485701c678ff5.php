@@ -9,6 +9,28 @@
 .page-hdr h5 i{color:var(--bs-gold,#d4af37)}
 .page-hdr .ph-sub{font-size:.72rem;color:var(--bs-surface-500);margin-left:.15rem}
 
+/* ── Live indicator ── */
+.live-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:.2rem .55rem;border-radius:20px;background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.25)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:livePulse 1.4s ease-in-out infinite}
+.live-badge.paused{background:rgba(100,116,139,.1);color:#64748b;border-color:rgba(100,116,139,.2)}
+.live-badge.paused .live-dot{background:#94a3b8;animation:none}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+/* ── Last updated row ── */
+.lu-row{display:flex;align-items:center;gap:1rem;padding:.45rem .75rem;font-size:.65rem;color:var(--bs-surface-500);border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap}
+.lu-row .lu-time{font-weight:600;color:var(--bs-surface-700)}
+.lu-countdown{display:inline-flex;align-items:center;gap:.25rem}
+.lu-bar-wrap{width:80px;height:3px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:.3rem}
+.lu-bar{height:100%;background:var(--bs-gold,#d4af37);border-radius:3px;transition:width .95s linear}
+.lu-manual{cursor:pointer;color:var(--bs-gold,#d4af37);text-decoration:underline;text-underline-offset:2px}
+
+/* ── Flash animation on cell update ── */
+@keyframes flashUp{0%{background:rgba(34,197,94,.18)}100%{background:transparent}}
+@keyframes flashDown{0%{background:rgba(239,68,68,.12)}100%{background:transparent}}
+.flash-up{animation:flashUp .9s ease-out}
+.flash-down{animation:flashDown .9s ease-out}
+.flash-new{animation:flashUp 1.2s ease-out}
+
 /* ── Tab Pills ── */
 .tab-row{display:flex;gap:.35rem;margin-bottom:.65rem;flex-wrap:wrap}
 .tab-pill{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .75rem;border-radius:20px;font-size:.72rem;font-weight:600;text-decoration:none;border:1px solid var(--bs-surface-200,#e2e8f0);color:var(--bs-surface-500,#64748b);background:transparent;transition:all .15s}
@@ -18,9 +40,9 @@
 
 /* ── Summary Cards ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.65rem;margin-bottom:.65rem}
-.stat-card{background:#fff;padding:.75rem 1rem;border-radius:.55rem;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.stat-card{background:#fff;padding:.75rem 1rem;border-radius:.55rem;border:1px solid rgba(0,0,0,.06);box-shadow:0 1px 3px rgba(0,0,0,.03);transition:box-shadow .2s}
 .stat-card-label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-surface-500);margin-bottom:.25rem}
-.stat-card-value{font-size:1.5rem;font-weight:700;color:var(--bs-surface-900);font-variant-numeric:tabular-nums}
+.stat-card-value{font-size:1.5rem;font-weight:700;color:var(--bs-surface-900);font-variant-numeric:tabular-nums;transition:color .3s}
 .stat-card-icon{float:right;font-size:1.8rem;opacity:.15;margin-top:-.2rem}
 
 /* ── Agent Table ── */
@@ -37,7 +59,7 @@
 .ap-table thead th.s-asc .si::after{content:'▲';opacity:1}
 .ap-table thead th.s-desc .si::after{content:'▼';opacity:1}
 .ap-table thead th:not(.s-asc):not(.s-desc) .si::after{content:'⇅'}
-.ap-table tbody td{padding:.5rem .65rem;border-bottom:1px solid rgba(0,0,0,.035);color:var(--bs-surface-900,#1e293b);vertical-align:middle}
+.ap-table tbody td{padding:.5rem .65rem;border-bottom:1px solid rgba(0,0,0,.035);color:var(--bs-surface-900,#1e293b);vertical-align:middle;transition:background .15s}
 .ap-table tbody tr:hover td{background:rgba(212,175,55,.04)}
 .ap-table tbody tr:last-child td{border-bottom:none}
 .ap-num{text-align:right;font-variant-numeric:tabular-nums}
@@ -45,7 +67,7 @@
 
 /* ── Rate bar ── */
 .rate-bar{display:inline-block;width:44px;height:5px;background:rgba(0,0,0,.08);border-radius:3px;margin-left:5px;vertical-align:middle}
-.rate-fill{height:100%;border-radius:3px;background:var(--bs-gold,#d4af37);display:block}
+.rate-fill{height:100%;border-radius:3px;background:var(--bs-gold,#d4af37);display:block;transition:width .6s ease}
 
 /* ── Date filter ── */
 .df-row{display:flex;gap:.5rem;align-items:flex-end;flex-wrap:wrap;padding:.7rem;border-bottom:1px solid rgba(0,0,0,.06)}
@@ -57,6 +79,10 @@
 .ap-empty i{font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.25}
 .ap-empty h6{font-size:.85rem;font-weight:700;margin-bottom:.25rem}
 .ap-empty p{font-size:.72rem}
+
+/* ── Spinner (refresh loading) ── */
+.ap-spinner{display:none;width:12px;height:12px;border:2px solid rgba(212,175,55,.3);border-top-color:#d4af37;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Dark themes ── */
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .stat-card{
@@ -82,6 +108,10 @@
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .df-row input[type=date]{
     background:rgba(15,23,42,.6);color:#e2e8f0;border-color:rgba(255,255,255,.1);
 }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .lu-row{
+    color:#94a3b8;border-bottom-color:rgba(255,255,255,.04);
+}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .lu-row .lu-time{color:#e2e8f0}
 </style>
 <?php $__env->stopSection(); ?>
 
@@ -93,7 +123,12 @@
         <i class="bx bx-video"></i> Zoom Call Logs
         <span class="ph-sub">Agent Performance</span>
     </h5>
-    <div style="display:flex;gap:.5rem">
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+        
+        <span class="live-badge" id="liveBadge" title="Click to pause auto-refresh" style="cursor:pointer" onclick="toggleLive()">
+            <span class="live-dot"></span>
+            <span id="liveBadgeText">LIVE</span>
+        </span>
         <a href="<?php echo e(route('settings.reports.zoom-diagnostics')); ?>" class="act-btn a-warn" style="font-size:.72rem;padding:.3rem .65rem" title="Diagnostics">
             <i class="bx bx-pulse"></i> Diagnostics
         </a>
@@ -126,27 +161,27 @@
     <div class="stat-card">
         <i class="bx bx-phone-outgoing stat-card-icon"></i>
         <div class="stat-card-label">Outbound Calls</div>
-        <div class="stat-card-value"><?php echo e(number_format($summaryTotalCalls)); ?></div>
+        <div class="stat-card-value" id="sc-total"><?php echo e(number_format($summaryTotalCalls)); ?></div>
     </div>
     <div class="stat-card">
         <i class="bx bx-time stat-card-icon"></i>
         <div class="stat-card-label">Total Talk Time</div>
-        <div class="stat-card-value" style="font-size:1.3rem"><?php echo e($totalDurFmt); ?></div>
+        <div class="stat-card-value" id="sc-duration" style="font-size:1.3rem"><?php echo e($totalDurFmt); ?></div>
     </div>
     <div class="stat-card">
         <i class="bx bx-phone-call stat-card-icon"></i>
         <div class="stat-card-label">Answered</div>
-        <div class="stat-card-value"><?php echo e(number_format($summaryAnswered)); ?></div>
+        <div class="stat-card-value" id="sc-answered"><?php echo e(number_format($summaryAnswered)); ?></div>
     </div>
     <div class="stat-card">
         <i class="bx bx-user-check stat-card-icon"></i>
         <div class="stat-card-label">Connect Rate</div>
-        <div class="stat-card-value"><?php echo e($connectRate); ?>%</div>
+        <div class="stat-card-value" id="sc-rate"><?php echo e($connectRate); ?>%</div>
     </div>
     <div class="stat-card">
         <i class="bx bx-group stat-card-icon"></i>
         <div class="stat-card-label">Agents Tracked</div>
-        <div class="stat-card-value"><?php echo e($agentKpis->count()); ?></div>
+        <div class="stat-card-value" id="sc-agents"><?php echo e($agentKpis->count()); ?></div>
     </div>
 </div>
 
@@ -181,6 +216,17 @@
         </div>
     </form>
 
+    
+    <div class="lu-row" id="luRow">
+        <span class="ap-spinner" id="apSpinner"></span>
+        <span>Updated <span class="lu-time" id="luTime">just now</span></span>
+        <span class="lu-countdown">
+            Next refresh in <strong id="luCountdown">30</strong>s
+            <span class="lu-bar-wrap"><span class="lu-bar" id="luBar" style="width:100%"></span></span>
+        </span>
+        <span class="lu-manual" onclick="doRefresh()"><i class="bx bx-refresh" style="font-size:.75rem;vertical-align:middle"></i> Refresh now</span>
+    </div>
+
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($agentKpis->count() > 0): ?>
 
     
@@ -213,6 +259,7 @@
                     $avgFmt  = sprintf('%02d:%02d', $aM, $aS);
                 ?>
                 <tr
+                    data-key="<?php echo e($agent['extension'] ?: $agent['name']); ?>"
                     data-name="<?php echo e($agent['name']); ?>"
                     data-total_calls="<?php echo e($agent['total_calls']); ?>"
                     data-answered="<?php echo e($agent['answered']); ?>"
@@ -263,14 +310,13 @@
                 $taM = floor($totAvg / 60); $taS = $totAvg % 60;
                 $totAvgFmt = sprintf('%02d:%02d', $taM, $taS);
             ?>
-            <tfoot>
+            <tfoot id="apFoot">
                 <tr>
                     <td>
                         TOTAL
-                        <span style="font-size:.6rem;font-weight:400;color:var(--bs-surface-500)">(<?php echo e($agentKpis->count()); ?> agents)</span>
+                        <span style="font-size:.6rem;font-weight:400;color:var(--bs-surface-500)" id="agentCount">(<?php echo e($agentKpis->count()); ?> agents)</span>
                     </td>
                     <td class="ap-num"><?php echo e(number_format($tot['total_calls'])); ?></td>
-
                     <td class="ap-num"><span style="color:#1a8754"><?php echo e(number_format($tot['answered'])); ?></span></td>
                     <td class="ap-num"><span style="color:#b87a14"><?php echo e(number_format($tot['missed'])); ?></span></td>
                     <td class="ap-num"><span style="color:#c84646"><?php echo e(number_format($tot['declined'])); ?></span></td>
@@ -286,7 +332,7 @@
     </div>
 
     <?php else: ?>
-    <div class="ap-empty">
+    <div class="ap-empty" id="apEmpty">
         <i class="bx bx-user-x"></i>
         <h6>No Agent Data</h6>
         <p>
@@ -304,6 +350,14 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmtDuration(secs) {
+    const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtNum(n) { return n.toLocaleString(); }
+
 function setToday() {
     const ptDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
     document.getElementById('apDateFrom').value = ptDate;
@@ -311,38 +365,303 @@ function setToday() {
     document.getElementById('apFilterForm').submit();
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const tbl = document.getElementById('apTable');
-    if (!tbl) return;
+// ── Sort ─────────────────────────────────────────────────────────────────────
+let sortCol = 'total_calls', sortDir = 'desc';
+function renderIcons() {
+    document.querySelectorAll('#apTable thead th[data-sort]').forEach(th => {
+        th.classList.remove('s-asc','s-desc');
+        if (th.dataset.sort === sortCol) th.classList.add(sortDir === 'asc' ? 's-asc' : 's-desc');
+    });
+}
+function doSort(col) {
+    sortDir = (sortCol === col && sortDir === 'desc') ? 'asc' : 'desc';
+    sortCol = col;
     const tbody = document.getElementById('apBody');
-    let sortCol = 'total_calls', sortDir = 'desc';
-
-    function renderIcons() {
-        tbl.querySelectorAll('thead th[data-sort]').forEach(th => {
-            th.classList.remove('s-asc', 's-desc');
-            if (th.dataset.sort === sortCol) th.classList.add(sortDir === 'asc' ? 's-asc' : 's-desc');
-        });
-    }
-
-    function doSort(col) {
-        sortDir = (sortCol === col && sortDir === 'desc') ? 'asc' : 'desc';
-        sortCol = col;
-        Array.from(tbody.querySelectorAll('tr'))
-            .sort((a, b) => {
-                const va = a.dataset[col] ?? '', vb = b.dataset[col] ?? '';
-                const na = parseFloat(va), nb = parseFloat(vb);
-                const cmp = isNaN(na) ? va.localeCompare(vb) : na - nb;
-                return sortDir === 'asc' ? cmp : -cmp;
-            })
-            .forEach(r => tbody.appendChild(r));
-        renderIcons();
-    }
-
-    tbl.querySelectorAll('thead th[data-sort]').forEach(th => {
+    if (!tbody) return;
+    Array.from(tbody.querySelectorAll('tr'))
+        .sort((a, b) => {
+            const va = a.dataset[col] ?? '', vb = b.dataset[col] ?? '';
+            const na = parseFloat(va), nb = parseFloat(vb);
+            const cmp = isNaN(na) ? va.localeCompare(vb) : na - nb;
+            return sortDir === 'asc' ? cmp : -cmp;
+        })
+        .forEach(r => tbody.appendChild(r));
+    renderIcons();
+}
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('#apTable thead th[data-sort]').forEach(th => {
         th.addEventListener('click', () => doSort(th.dataset.sort));
     });
-
     renderIcons();
+});
+
+// ── Live polling ──────────────────────────────────────────────────────────────
+const REFRESH_SEC = 30;
+const DATA_URL    = '<?php echo e(route('settings.reports.zoom-agent-performance.data')); ?>' +
+                    window.location.search;
+
+let liveActive  = true;
+let countdownVal = REFRESH_SEC;
+let countdownInterval = null;
+let refreshTimeout    = null;
+
+function toggleLive() {
+    liveActive = !liveActive;
+    const badge = document.getElementById('liveBadge');
+    const text  = document.getElementById('liveBadgeText');
+    if (liveActive) {
+        badge.classList.remove('paused');
+        text.textContent = 'LIVE';
+        badge.title = 'Click to pause auto-refresh';
+        scheduleNext();
+    } else {
+        badge.classList.add('paused');
+        text.textContent = 'PAUSED';
+        badge.title = 'Click to resume auto-refresh';
+        clearTimeout(refreshTimeout);
+        clearInterval(countdownInterval);
+        document.getElementById('luBar').style.width = '0%';
+        document.getElementById('luCountdown').textContent = '—';
+    }
+}
+
+function startCountdown() {
+    clearInterval(countdownInterval);
+    countdownVal = REFRESH_SEC;
+    const bar = document.getElementById('luBar');
+    const cd  = document.getElementById('luCountdown');
+    bar.style.transition = 'none';
+    bar.style.width = '100%';
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            bar.style.transition = `width ${REFRESH_SEC}s linear`;
+            bar.style.width = '0%';
+        });
+    });
+    countdownInterval = setInterval(() => {
+        countdownVal--;
+        cd.textContent = countdownVal > 0 ? countdownVal : '…';
+        if (countdownVal <= 0) clearInterval(countdownInterval);
+    }, 1000);
+}
+
+function scheduleNext() {
+    clearTimeout(refreshTimeout);
+    startCountdown();
+    refreshTimeout = setTimeout(() => { if (liveActive) doRefresh(); }, REFRESH_SEC * 1000);
+}
+
+function doRefresh() {
+    const spinner = document.getElementById('apSpinner');
+    spinner.style.display = 'inline-block';
+
+    fetch(DATA_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            applyUpdate(data);
+            updateLastUpdated(data.generated_at);
+            spinner.style.display = 'none';
+            if (liveActive) scheduleNext();
+        })
+        .catch(() => {
+            spinner.style.display = 'none';
+            if (liveActive) scheduleNext();
+        });
+}
+
+function updateLastUpdated(iso) {
+    const d = new Date(iso);
+    const fmt = new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric', minute: '2-digit', second: '2-digit',
+        hour12: true, timeZone: 'America/Los_Angeles'
+    });
+    document.getElementById('luTime').textContent = fmt.format(d) + ' PT';
+}
+
+function flash(el, cls) {
+    el.classList.remove('flash-up','flash-down','flash-new');
+    void el.offsetWidth;
+    el.classList.add(cls);
+    el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+}
+
+function applyUpdate(data) {
+    // ── Summary cards ────────────────────────────────────────────
+    const sTotal    = document.getElementById('sc-total');
+    const sAnswered = document.getElementById('sc-answered');
+    const sDuration = document.getElementById('sc-duration');
+    const sRate     = document.getElementById('sc-rate');
+    const sAgents   = document.getElementById('sc-agents');
+
+    const newTotal = data.total_calls;
+    const oldTotal = parseInt(sTotal.textContent.replace(/,/g,'')) || 0;
+    if (newTotal !== oldTotal) { sTotal.textContent = fmtNum(newTotal); flash(sTotal, newTotal > oldTotal ? 'flash-up' : 'flash-down'); }
+
+    const newAns = data.answered;
+    const oldAns = parseInt(sAnswered.textContent.replace(/,/g,'')) || 0;
+    if (newAns !== oldAns) { sAnswered.textContent = fmtNum(newAns); flash(sAnswered, newAns > oldAns ? 'flash-up' : 'flash-down'); }
+
+    sDuration.textContent = fmtDuration(data.total_duration);
+
+    const newRate = newTotal > 0 ? Math.round((newAns / newTotal) * 1000) / 10 : 0;
+    sRate.textContent = newRate + '%';
+
+    const newAgentCount = data.agents.length;
+    sAgents.textContent = fmtNum(newAgentCount);
+
+    // ── Agent table rows ─────────────────────────────────────────
+    const tbody = document.getElementById('apBody');
+    if (!tbody) return;
+
+    const existingRows = {};
+    tbody.querySelectorAll('tr[data-key]').forEach(r => { existingRows[r.dataset.key] = r; });
+
+    const seenKeys = new Set();
+
+    data.agents.forEach(agent => {
+        const avgSec = agent.total_calls > 0 ? Math.round(agent.total_duration / agent.total_calls) : 0;
+        const cr     = agent.total_calls > 0 ? Math.round((agent.answered / agent.total_calls) * 1000) / 10 : 0;
+        const key    = agent.extension || agent.name;
+        seenKeys.add(key);
+
+        if (existingRows[key]) {
+            // Update existing row — flash changed cells
+            const row = existingRows[key];
+            const cells = row.querySelectorAll('td');
+
+            function setCellNum(idx, newVal, color) {
+                const old = parseInt(row.dataset[Object.keys(row.dataset)[idx - 1]] ?? '0');
+                const span = cells[idx].querySelector('span') || cells[idx];
+                const fmtd = fmtNum(newVal);
+                if (newVal !== old) {
+                    if (color) span.textContent = fmtd;
+                    else cells[idx].querySelector('strong') ? cells[idx].querySelector('strong').textContent = fmtd : (span.textContent = fmtd);
+                    flash(cells[idx], newVal > old ? 'flash-up' : 'flash-down');
+                }
+            }
+
+            const prev = {
+                total_calls: parseInt(row.dataset.total_calls ?? 0),
+                answered:    parseInt(row.dataset.answered ?? 0),
+                missed:      parseInt(row.dataset.missed ?? 0),
+                declined:    parseInt(row.dataset.declined ?? 0),
+                voicemail:   parseInt(row.dataset.voicemail ?? 0),
+                recorded:    parseInt(row.dataset.recorded ?? 0),
+                total_duration: parseInt(row.dataset.total_duration ?? 0),
+            };
+
+            // Update data attrs
+            row.dataset.total_calls    = agent.total_calls;
+            row.dataset.answered       = agent.answered;
+            row.dataset.missed         = agent.missed;
+            row.dataset.declined       = agent.declined;
+            row.dataset.voicemail      = agent.voicemail;
+            row.dataset.recorded       = agent.recorded;
+            row.dataset.total_duration = agent.total_duration;
+            row.dataset.avg_duration   = avgSec;
+            row.dataset.connect_rate   = cr;
+
+            function updateCell(td, newVal, oldVal, fmt) {
+                if (newVal === oldVal) return;
+                const inner = td.querySelector('strong') || td.querySelector('span') || td;
+                inner.textContent = fmt(newVal);
+                flash(td, newVal > oldVal ? 'flash-up' : 'flash-down');
+            }
+
+            updateCell(cells[1], agent.total_calls, prev.total_calls, fmtNum);
+            updateCell(cells[2], agent.answered, prev.answered, fmtNum);
+            updateCell(cells[3], agent.missed, prev.missed, fmtNum);
+            updateCell(cells[4], agent.declined, prev.declined, fmtNum);
+            updateCell(cells[5], agent.voicemail, prev.voicemail, fmtNum);
+            updateCell(cells[6], agent.recorded, prev.recorded, fmtNum);
+
+            if (agent.total_duration !== prev.total_duration) {
+                cells[7].textContent = fmtDuration(agent.total_duration);
+            }
+            cells[8].textContent = fmtDuration(avgSec);
+
+            const crStrong = cells[9].querySelector('strong');
+            const crFill   = cells[9].querySelector('.rate-fill');
+            if (crStrong) crStrong.textContent = cr + '%';
+            if (crFill)   crFill.style.width   = Math.min(cr, 100) + '%';
+
+        } else {
+            // New agent — insert row
+            const talkFmt = fmtDuration(agent.total_duration);
+            const avgFmt  = fmtDuration(avgSec);
+            const tr = document.createElement('tr');
+            tr.dataset.key          = key;
+            tr.dataset.name         = agent.name;
+            tr.dataset.total_calls  = agent.total_calls;
+            tr.dataset.answered     = agent.answered;
+            tr.dataset.missed       = agent.missed;
+            tr.dataset.declined     = agent.declined;
+            tr.dataset.voicemail    = agent.voicemail;
+            tr.dataset.recorded     = agent.recorded;
+            tr.dataset.total_duration = agent.total_duration;
+            tr.dataset.avg_duration = avgSec;
+            tr.dataset.connect_rate = cr;
+            tr.innerHTML = `
+                <td><div style="font-weight:600">${agent.name}</div><div style="font-size:.6rem;color:var(--bs-surface-500)">Ext. ${agent.extension}</div></td>
+                <td class="ap-num"><strong>${fmtNum(agent.total_calls)}</strong></td>
+                <td class="ap-num"><span style="color:#1a8754;font-weight:600">${fmtNum(agent.answered)}</span></td>
+                <td class="ap-num"><span style="color:#b87a14">${fmtNum(agent.missed)}</span></td>
+                <td class="ap-num"><span style="color:#c84646">${fmtNum(agent.declined)}</span></td>
+                <td class="ap-num"><span style="color:#6c757d">${fmtNum(agent.voicemail)}</span></td>
+                <td class="ap-num"><span style="color:var(--bs-gold,#d4af37)">${fmtNum(agent.recorded)}</span></td>
+                <td class="ap-num" style="white-space:nowrap;font-family:monospace;font-size:.7rem">${talkFmt}</td>
+                <td class="ap-num" style="white-space:nowrap;font-family:monospace;font-size:.7rem">${avgFmt}</td>
+                <td class="ap-num" style="white-space:nowrap"><strong>${cr}%</strong><span class="rate-bar"><span class="rate-fill" style="width:${Math.min(cr,100)}%"></span></span></td>
+            `;
+            tbody.appendChild(tr);
+            Array.from(tr.querySelectorAll('td')).forEach(td => flash(td, 'flash-new'));
+        }
+    });
+
+    // Re-sort after update
+    doSort(sortCol);
+
+    // Update footer total row
+    const foot = document.getElementById('apFoot');
+    if (foot) {
+        const totCalls    = data.agents.reduce((s,a) => s + a.total_calls, 0);
+        const totAnswered = data.agents.reduce((s,a) => s + a.answered, 0);
+        const totMissed   = data.agents.reduce((s,a) => s + a.missed, 0);
+        const totDeclined = data.agents.reduce((s,a) => s + a.declined, 0);
+        const totVoice    = data.agents.reduce((s,a) => s + a.voicemail, 0);
+        const totRecord   = data.agents.reduce((s,a) => s + a.recorded, 0);
+        const totDur      = data.agents.reduce((s,a) => s + a.total_duration, 0);
+        const totAvg      = totCalls > 0 ? Math.round(totDur / totCalls) : 0;
+        const totCR       = totCalls > 0 ? Math.round((totAnswered / totCalls) * 1000) / 10 : 0;
+        const cells = foot.querySelectorAll('td');
+        cells[0].querySelector('#agentCount') && (foot.querySelector('#agentCount').textContent = `(${newAgentCount} agents)`);
+        cells[1].textContent = fmtNum(totCalls);
+        cells[2].innerHTML   = `<span style="color:#1a8754">${fmtNum(totAnswered)}</span>`;
+        cells[3].innerHTML   = `<span style="color:#b87a14">${fmtNum(totMissed)}</span>`;
+        cells[4].innerHTML   = `<span style="color:#c84646">${fmtNum(totDeclined)}</span>`;
+        cells[5].innerHTML   = `<span style="color:#6c757d">${fmtNum(totVoice)}</span>`;
+        cells[6].innerHTML   = `<span style="color:var(--bs-gold,#d4af37)">${fmtNum(totRecord)}</span>`;
+        cells[7].textContent = fmtDuration(totDur);
+        cells[8].textContent = fmtDuration(totAvg);
+        cells[9].textContent = totCR + '%';
+    }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    renderIcons();
+    // Set initial "last updated" to page load time
+    updateLastUpdated(new Date().toISOString());
+    // Auto-pause if a non-today date range is selected (historical view)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo): ?>
+    <?php
+        $isToday = $todayPt === ($dateFrom ?? '') && $todayPt === ($dateTo ?? '');
+    ?>
+    <?php if(!$isToday): ?>
+    toggleLive(); // pause — historical date range, no need to live-poll
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    scheduleNext();
 });
 </script>
 <?php $__env->stopPush(); ?>

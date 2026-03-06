@@ -29,7 +29,7 @@ class QaStatus extends Command
         $this->newLine();
         $this->line("Recent {$limit} calls:");
 
-        $calls = QaCall::with('result')
+        $calls = QaCall::with('qaResult')
             ->latest()
             ->limit($limit)
             ->get(['id','zoom_call_id','agent_name','caller_number','callee_number',
@@ -37,8 +37,8 @@ class QaStatus extends Command
 
         $rows = $calls->map(function ($c) {
             $min    = round($c->duration_seconds / 60, 1);
-            $score  = $c->result?->total_score ?? '-';
-            $disp   = $c->result?->disposition ?? '-';
+            $score  = $c->qaResult?->total_score ?? '-';
+            $disp   = $c->qaResult?->disposition ?? '-';
             $status = $c->processing_status;
             if ($status === 'failed' && $c->failure_reason) {
                 $status .= ' — ' . substr($c->failure_reason, 0, 40);

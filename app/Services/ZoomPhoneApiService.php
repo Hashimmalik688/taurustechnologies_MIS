@@ -690,7 +690,7 @@ class ZoomPhoneApiService
                                     : null,
             'duration_seconds' => $log['duration'] ?? 0,
             'recording_id'     => $log['recording_id'] ?? null,
-            'recording_url'    => ($log['has_recording'] ?? false) ? 'pending_api_fetch' : null,
+            'recording_url'    => (($log['has_recording'] ?? false) || !empty($log['recording_id'])) ? 'pending_api_fetch' : null,
             'lead_id'          => $leadId,
             'agent_id'         => $agentId,
             'raw_payload'      => $log,

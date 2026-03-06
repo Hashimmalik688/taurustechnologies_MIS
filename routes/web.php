@@ -589,6 +589,7 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/per-closer', [ReportController::class, 'perCloser'])->name('per-closer')->middleware('role.permission:reports,view');
     Route::get('/zoom-logs', [ReportController::class, 'zoomLogs'])->name('zoom-logs')->middleware('role.permission:reports,view');
     Route::get('/zoom-agent-performance', [ReportController::class, 'zoomAgentPerformance'])->name('zoom-agent-performance')->middleware('role.permission:reports,view');
+    Route::get('/zoom-agent-performance/data', [ReportController::class, 'zoomAgentPerformanceData'])->name('zoom-agent-performance.data')->middleware('role.permission:reports,view');
     Route::get('/zoom-diagnostics', [ReportController::class, 'zoomDiagnostics'])->name('zoom-diagnostics')->middleware('role.permission:reports,view');
     Route::get('/generate', [ReportController::class, 'generate'])->name('generate')->middleware('role.permission:reports,view');
     Route::get('/export', [ReportController::class, 'export'])->name('export')->middleware('role.permission:reports,view');
@@ -736,6 +737,7 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
     Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');
     Route::get('/leads/dial-status', [RavensDashboardController::class, 'getDialStatus'])->name('leads.dial-status');
+    Route::post('/leads/create-sale', [RavensDashboardController::class, 'createSale'])->name('leads.create-sale')->middleware('role.permission:ravens,edit');
     Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads')->middleware('role.permission:ravens-bad-leads,view');
 });
 

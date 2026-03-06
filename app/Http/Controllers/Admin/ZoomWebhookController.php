@@ -713,13 +713,15 @@ class ZoomWebhookController extends Controller
 
             // Extract callee information
             $calleeInfo = $payload['callee'] ?? [];
+            // For voicemail_received, Zoom puts callee fields at the top level of the payload object
+            // (not nested under 'callee'), so we fall back to those directly.
             $calleeData = [
-                'callee_number' => $calleeNumber ?? $calleeInfo['phone_number'] ?? $callLogData['callee_number'] ?? null,
+                'callee_number' => $calleeNumber ?? $calleeInfo['phone_number'] ?? $callLogData['callee_number'] ?? $payload['callee_number'] ?? null,
                 'callee_did_number' => $calleeInfo['did_number'] ?? $callLogData['callee_did_number'] ?? null,
-                'callee_name' => $calleeInfo['name'] ?? $callLogData['callee_name'] ?? null,
+                'callee_name' => $calleeInfo['name'] ?? $callLogData['callee_name'] ?? $payload['callee_name'] ?? null,
                 'callee_email' => $calleeInfo['email'] ?? null,
-                'callee_user_id' => $calleeInfo['user_id'] ?? $calleeInfo['id'] ?? null,
-                'callee_extension' => $calleeInfo['extension_number'] ?? $calleeInfo['extension'] ?? null,
+                'callee_user_id' => $calleeInfo['user_id'] ?? $calleeInfo['id'] ?? $payload['callee_user_id'] ?? null,
+                'callee_extension' => $calleeInfo['extension_number'] ?? $calleeInfo['extension'] ?? $payload['callee_number'] ?? null,
             ];
 
             // Determine call type: event name is the most reliable indicator.

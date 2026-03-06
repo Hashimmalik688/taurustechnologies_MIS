@@ -63,8 +63,8 @@ class WhisperService
         }
 
         // WhisperX pipeline: transcribe -> align -> diarize (needs CPU power, no throttling)
-        // Timeout: 1800s (30 min) — large-v2 + diarization on CPU can take time for long calls
-        $result = Process::timeout(1800)
+        // Timeout: 7200s (2 hours) — large-v2 + diarization on CPU for very long calls
+        $result = Process::timeout(7200)
             ->env($env)
             ->run([
                 $this->pythonBin,

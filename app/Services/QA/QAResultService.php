@@ -62,8 +62,10 @@ class QAResultService
             // Extract business data (names, sale info) from AI response
             $extracted = $aiResponse['extracted_data'] ?? [];
 
-            // Create the QA result
-            $qaResult = QaResult::create(array_merge($complianceData, [
+            // Create or update the QA result (handles retries gracefully)
+            $qaResult = QaResult::updateOrCreate(
+                ['qa_call_id' => $qaCall->id],
+                array_merge($complianceData, [
                 'qa_call_id' => $qaCall->id,
                 'disposition' => $this->validateDisposition($aiResponse['disposition'] ?? 'POOR'),
                 'total_score' => floatval($aiResponse['total_score'] ?? 0),
@@ -121,6 +123,9 @@ class QAResultService
      */
     private function createComplianceFlags(QaCall $qaCall, QaResult $qaResult, array $complianceChecks): void
     {
+        // Delete existing flags so retries produce a clean set
+        QaComplianceFlag::where('qa_call_id', $qaCall->id)->delete();
+
         foreach ($complianceChecks as $aiKey => $value) {
             if ($value !== 'fail') continue;
 

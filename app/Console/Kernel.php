@@ -38,9 +38,9 @@ class Kernel extends ConsoleKernel
         //     ->dailyAt('05:10')
         //     ->timezone('Asia/Karachi');
 
-        // Sync Zoom Phone call logs every 5 minutes for 100% accuracy
-        $schedule->command('zoom:sync-call-logs --hours=1')
-            ->everyFiveMinutes()
+        // Sync Zoom Phone call logs every minute for near-real-time accuracy
+        $schedule->command('zoom:sync-call-logs --hours=2')
+            ->everyMinute()
             ->withoutOverlapping()
             ->runInBackground();
     }
