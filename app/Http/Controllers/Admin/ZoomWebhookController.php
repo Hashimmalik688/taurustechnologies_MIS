@@ -654,6 +654,7 @@ class ZoomWebhookController extends Controller
             'duration_seconds' => $duration,
             'call_start_time' => $startTime ? \Carbon\Carbon::parse($startTime) : now(),
             'recording_url' => $downloadUrl,
+            'zoom_transcript_url' => $zoomTranscriptUrl,
             'processing_status' => 'pending',
         ]);
 

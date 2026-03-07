@@ -262,6 +262,78 @@ PROMPT;
     }
 
     /**
+     * Score a pre-labeled transcript from Zoom (scoring only — no diarization).
+     *
+     * Used when Zoom's built-in transcription already produced AGENT:/CUSTOMER: labels.
+     * Skips the speaker-identification step and goes straight to QA evaluation,
+     * saving ~40% of the token budget vs analyzeCall().
+     *
+     * @param string $labeledTranscript  Transcript already labeled with AGENT:/CUSTOMER: prefixes
+     * @param int    $durationSeconds    Call duration
+     * @return array Standard QA result array (no 'diarized_transcript' key)
+     */
+    public function analyzePreLabeledCall(string $labeledTranscript, int $durationSeconds): array
+    {
+        $prompt = QAScoringPrompt::build($labeledTranscript, $durationSeconds);
+
+        Log::info('[QA:Gemini] PRIMARY analyzePreLabeledCall — score only (Zoom transcript)', [
+            'model'         => $this->model,
+            'prompt_length' => strlen($prompt),
+            'duration_min'  => round($durationSeconds / 60, 1),
+        ]);
+
+        $url = "{$this->baseUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
+
+        $response = Http::timeout(300)
+            ->withHeaders(['Content-Type' => 'application/json'])
+            ->post($url, [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt],
+                        ],
+                    ],
+                ],
+                'generationConfig' => [
+                    'temperature'     => 0.1,
+                    'maxOutputTokens' => 8192,
+                    'responseMimeType' => 'application/json',
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            Log::error('[QA:Gemini] analyzePreLabeledCall API error', [
+                'status' => $response->status(),
+                'body'   => substr($response->body(), 0, 500),
+            ]);
+            throw new \RuntimeException('Gemini analyzePreLabeledCall error: ' . $response->status() . ' - ' . $response->body());
+        }
+
+        $text = $response->json('candidates.0.content.parts.0.text') ?? null;
+
+        if (!$text) {
+            throw new \RuntimeException('Gemini analyzePreLabeledCall returned empty response');
+        }
+
+        $parsed = json_decode($text, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $parsed = $this->extractJsonFromText($text);
+        }
+
+        if (!$parsed) {
+            Log::error('[QA:Gemini] analyzePreLabeledCall invalid JSON', ['text' => substr($text, 0, 500)]);
+            throw new \RuntimeException('Gemini analyzePreLabeledCall returned invalid JSON');
+        }
+
+        Log::info('[QA:Gemini] analyzePreLabeledCall complete', [
+            'disposition' => $parsed['disposition'] ?? 'unknown',
+            'total_score' => $parsed['total_score'] ?? 0,
+        ]);
+
+        return $parsed;
+    }
+
+    /**
      * Try to extract JSON from text that may have markdown code blocks or preamble.
      */
     private function extractJsonFromText(string $text): ?array

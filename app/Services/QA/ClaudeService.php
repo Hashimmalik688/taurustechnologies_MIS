@@ -251,6 +251,75 @@ PROMPT;
     }
 
     /**
+     * Score a pre-labeled transcript from Zoom (scoring only — no diarization).
+     *
+     * Fallback for when Gemini analyzePreLabeledCall fails. Same logic.
+     *
+     * @param string $labeledTranscript  Transcript with AGENT:/CUSTOMER: prefixes
+     * @param int    $durationSeconds    Call duration
+     * @return array Standard QA result array
+     */
+    public function analyzePreLabeledCall(string $labeledTranscript, int $durationSeconds): array
+    {
+        $prompt = QAScoringPrompt::build($labeledTranscript, $durationSeconds);
+
+        Log::info('[QA:Claude] FALLBACK analyzePreLabeledCall — score only (Zoom transcript)', [
+            'model'         => $this->model,
+            'prompt_length' => strlen($prompt),
+            'duration_min'  => round($durationSeconds / 60, 1),
+        ]);
+
+        $response = Http::timeout(300)
+            ->withHeaders([
+                'x-api-key'         => $this->apiKey,
+                'anthropic-version' => '2023-06-01',
+                'Content-Type'      => 'application/json',
+            ])
+            ->post($this->baseUrl . '/messages', [
+                'model'       => $this->model,
+                'max_tokens'  => 8192,
+                'temperature' => 0.1,
+                'messages' => [
+                    [
+                        'role'    => 'user',
+                        'content' => $prompt,
+                    ],
+                ],
+            ]);
+
+        if (!$response->successful()) {
+            Log::error('[QA:Claude] analyzePreLabeledCall API error', [
+                'status' => $response->status(),
+                'body'   => substr($response->body(), 0, 500),
+            ]);
+            throw new \RuntimeException('Claude analyzePreLabeledCall error: ' . $response->status() . ' - ' . $response->body());
+        }
+
+        $text = $response->json('content.0.text') ?? null;
+
+        if (!$text) {
+            throw new \RuntimeException('Claude analyzePreLabeledCall returned empty response');
+        }
+
+        $parsed = json_decode($text, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $parsed = $this->extractJsonFromText($text);
+        }
+
+        if (!$parsed) {
+            Log::error('[QA:Claude] analyzePreLabeledCall invalid JSON', ['text' => substr($text, 0, 500)]);
+            throw new \RuntimeException('Claude analyzePreLabeledCall returned invalid JSON');
+        }
+
+        Log::info('[QA:Claude] analyzePreLabeledCall complete', [
+            'disposition' => $parsed['disposition'] ?? 'unknown',
+            'total_score' => $parsed['total_score'] ?? 0,
+        ]);
+
+        return $parsed;
+    }
+
+    /**
      * Try to extract JSON from text that may have markdown or preamble.
      */
     private function extractJsonFromText(string $text): ?array

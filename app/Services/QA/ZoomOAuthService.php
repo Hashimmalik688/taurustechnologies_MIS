@@ -161,4 +161,175 @@ class ZoomOAuthService
 
         return null;
     }
+
+    /**
+     * Fetch a Zoom-generated transcript for a call as plain text.
+     *
+     * Strategy:
+     *  1. Call GET /phone/call_logs/{callLogId}/recordings to get transcript_download_url
+     *  2. Download the VTT file using the admin token
+     *  3. Map VTT speaker names → AGENT: / CUSTOMER: labels using $agentName
+     *
+     * Returns labeled transcript string (AGENT:/CUSTOMER: prefixed lines), or
+     * null if Zoom transcription is unavailable for this call.
+     * Requires: phone:read:call_recording:admin
+     */
+    public function fetchZoomTranscript(string $callLogId, string $agentName = ''): ?string
+    {
+        try {
+            $token = $this->getAccessToken();
+
+            // Step 1: Get transcript_download_url from recordings API
+            $response = Http::timeout(15)
+                ->withToken($token)
+                ->get("https://api.zoom.us/v2/phone/call_logs/{$callLogId}/recordings");
+
+            if (!$response->successful()) {
+                Log::warning('[QA:ZoomOAuth] Recordings API failed when fetching transcript URL', [
+                    'call_log_id' => $callLogId,
+                    'status'      => $response->status(),
+                ]);
+                return null;
+            }
+
+            $recordings = $response->json('recordings') ?? [];
+            $transcriptUrl = null;
+
+            // Format A: { "recordings": [ { "transcript_download_url": "..." } ] }
+            foreach ($recordings as $rec) {
+                if (!empty($rec['transcript_download_url'])) {
+                    $transcriptUrl = $rec['transcript_download_url'];
+                    break;
+                }
+            }
+
+            // Format B: flat root-level object { "transcript_download_url": "..." }
+            if (!$transcriptUrl) {
+                $transcriptUrl = $response->json('transcript_download_url') ?? null;
+            }
+
+            if (!$transcriptUrl) {
+                Log::info('[QA:ZoomOAuth] No transcript_download_url in recordings', [
+                    'call_log_id'     => $callLogId,
+                    'recording_count' => count($recordings),
+                    'response_keys'   => array_keys($response->json() ?? []),
+                ]);
+                return null;
+            }
+
+            // Step 2: Download the VTT transcript file
+            $vttResponse = Http::timeout(30)
+                ->withToken($token)
+                ->get($transcriptUrl);
+
+            if (!$vttResponse->successful()) {
+                Log::warning('[QA:ZoomOAuth] Transcript VTT download failed', [
+                    'call_log_id' => $callLogId,
+                    'status'      => $vttResponse->status(),
+                ]);
+                return null;
+            }
+
+            $vttContent = $vttResponse->body();
+            if (empty(trim($vttContent))) {
+                return null;
+            }
+
+            // Step 3: Parse VTT → AGENT:/CUSTOMER: labeled transcript
+            $labeled = $this->parseVttToLabeledText($vttContent, $agentName);
+
+            Log::info('[QA:ZoomOAuth] Zoom transcript fetched and labeled', [
+                'call_log_id'    => $callLogId,
+                'chars'          => strlen($labeled),
+                'agent_turns'    => substr_count($labeled, "\nAGENT:") + (str_starts_with($labeled, 'AGENT:') ? 1 : 0),
+                'customer_turns' => substr_count($labeled, "\nCUSTOMER:"),
+            ]);
+
+            return $labeled ?: null;
+
+        } catch (\Throwable $e) {
+            Log::warning('[QA:ZoomOAuth] fetchZoomTranscript exception: ' . $e->getMessage(), [
+                'call_log_id' => $callLogId,
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Parse a WebVTT string into an AGENT:/CUSTOMER: labeled transcript.
+     *
+     * Zoom VTT files embed speaker names via <v SpeakerName> tags on each cue.
+     * We map the cue whose speaker name matches $agentName to "AGENT:",
+     * and all other speakers to "CUSTOMER:".
+     *
+     * Falls back to plain text (no labels) if the VTT has no <v> speaker tags.
+     */
+    private function parseVttToLabeledText(string $vtt, string $agentName = ''): string
+    {
+        $lines = preg_split('/\r?\n/', $vtt);
+
+        // Collect segments: [['speaker' => string, 'text' => string], ...]
+        $segments = [];
+        $currentSpeaker = '';
+        $currentParts   = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line === '' || $line === 'WEBVTT') continue;
+            if (preg_match('/^\d+$/', $line)) continue;            // cue sequence number
+            if (str_contains($line, ' --> ')) continue;            // timestamp line
+            if (preg_match('/^(NOTE|STYLE|REGION)/', $line)) continue;
+
+            // Detect speaker change via <v SpeakerName> tag
+            if (preg_match('/<v ([^>]+)>(.*)/', $line, $m)) {
+                // Flush current segment
+                if ($currentParts) {
+                    $segments[] = ['speaker' => $currentSpeaker, 'text' => implode(' ', $currentParts)];
+                    $currentParts = [];
+                }
+                $currentSpeaker = trim($m[1]);
+                $text = trim(preg_replace('/<[^>]+>/', '', $m[2]));
+                if ($text !== '') $currentParts[] = $text;
+            } else {
+                // Continuation line — strip any remaining inline tags
+                $text = trim(preg_replace('/<[^>]+>/', '', $line));
+                if ($text !== '') $currentParts[] = $text;
+            }
+        }
+
+        // Flush final segment
+        if ($currentParts) {
+            $segments[] = ['speaker' => $currentSpeaker, 'text' => implode(' ', $currentParts)];
+        }
+
+        // If no speaker tags were present, return plain joined text
+        $hasSpeakers = !empty(array_filter($segments, fn($s) => $s['speaker'] !== ''));
+        if (!$hasSpeakers) {
+            return implode(' ', array_column($segments, 'text'));
+        }
+
+        // Map speaker names → AGENT / CUSTOMER
+        $agentNorm = strtolower(trim($agentName));
+
+        $labeledLines = [];
+        foreach ($segments as $seg) {
+            if (empty($seg['text'])) continue;
+
+            $speakerNorm = strtolower(trim($seg['speaker']));
+
+            if ($agentNorm !== '' && (
+                str_contains($speakerNorm, $agentNorm) ||
+                str_contains($agentNorm, $speakerNorm)
+            )) {
+                $label = 'AGENT';
+            } else {
+                $label = 'CUSTOMER';
+            }
+
+            $labeledLines[] = $label . ': ' . $seg['text'];
+        }
+
+        return implode("\n", $labeledLines);
+    }
 }

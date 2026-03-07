@@ -54,7 +54,43 @@ class DownloadAndProcessRecording implements ShouldQueue
         $needsDownload      = !$hasPlainTranscript && !file_exists($localPath);
 
         try {
-            // ── Step 1: Download Recording ──────────────────────────────
+            // ── Step 1: Try Zoom's built-in transcript (free, instant, no GPU needed) ──
+            // If Zoom transcription is enabled and a transcript_download_url was captured
+            // via the webhook, fetch and use it — skip download + WhisperX entirely.
+            if (!$hasPlainTranscript && $qaCall->zoom_call_log_id) {
+                $qaCall->update(['processing_status' => 'transcribing']);
+
+                $zoomOAuth = app(ZoomOAuthService::class);
+                $zoomTranscript = $zoomOAuth->fetchZoomTranscript(
+                    $qaCall->zoom_call_log_id,
+                    $qaCall->agent_name ?? ''
+                );
+
+                if ($zoomTranscript) {
+                    // Store the Zoom-labeled transcript as both plain and diarized.
+                    // The VTT parser already produced AGENT:/CUSTOMER: labels,
+                    // so AI only needs to score — no re-labeling needed.
+                    $qaCall->update([
+                        'transcript_plain'    => $zoomTranscript,
+                        'transcript_diarized' => $zoomTranscript,
+                        'transcript_source'   => 'zoom',
+                    ]);
+                    $hasPlainTranscript = true;
+                    $needsDownload = false;
+
+                    Log::info('[QA:Job] Using Zoom built-in transcript (WhisperX skipped)', [
+                        'qa_call_id' => $qaCall->id,
+                        'chars'      => strlen($zoomTranscript),
+                    ]);
+                } else {
+                    Log::info('[QA:Job] No Zoom transcript available — will use WhisperX', [
+                        'qa_call_id' => $qaCall->id,
+                    ]);
+                    $needsDownload = !file_exists($localPath);
+                }
+            }
+
+            // ── Step 2: Download Recording (WhisperX fallback path only) ───────────
             if ($needsDownload) {
                 $qaCall->update(['processing_status' => 'downloading']);
 
@@ -78,7 +114,7 @@ class DownloadAndProcessRecording implements ShouldQueue
                 ]);
             }
 
-            // ── Step 2: Filter short calls ──────────────────────────────
+            // ── Step 3: Filter short calls ──────────────────────────────
             // Skip calls under 8 minutes — not meaningful sales conversations
             if ($qaCall->duration_seconds < 480) {
                 $qaCall->update([
@@ -90,7 +126,7 @@ class DownloadAndProcessRecording implements ShouldQueue
                 return;
             }
 
-            // ── Step 3: Transcribe (WhisperX — local, free) ─────────────
+            // ── Step 4: Transcribe via WhisperX (fallback when Zoom transcript unavailable) ─
             if ($hasPlainTranscript) {
                 Log::info('[QA:Job] Skipping transcription (transcript already stored)', [
                     'qa_call_id' => $qaCall->id,
@@ -112,6 +148,7 @@ class DownloadAndProcessRecording implements ShouldQueue
                 $qaCall->update([
                     'transcript_plain'    => $rawTranscript['plain'],
                     'transcript_diarized' => '', // will be filled by Gemini analyzeCall below
+                    'transcript_source'   => 'whisper',
                 ]);
 
                 Log::info('[QA:Job] Transcription complete', [
@@ -120,60 +157,75 @@ class DownloadAndProcessRecording implements ShouldQueue
                 ]);
             }
 
-            // ── Step 4: One-shot AI Analysis (diarize + score together) ────────
-            // Gemini reads the plain transcript, identifies speakers, and scores
-            // the call in a SINGLE API call.
+            // ── Step 5: AI Scoring ───────────────────────────────────────────────
+            // TWO paths depending on transcript source:
             //
-            // Benefits vs old two-step approach:
-            //   - ~40% fewer tokens (transcript sent once, not twice)
-            //   - One full API round-trip saved (~30-60 seconds)
-            //   - Better speaker attribution (AI understands context while scoring)
+            // ▶ Zoom transcript (transcript_source = 'zoom'):
+            //   VTT already has AGENT:/CUSTOMER: labels — AI only SCORES, no diarization.
+            //   Uses QAScoringPrompt::build() via analyzePreLabeledCall().
             //
-            // Fallback: if Gemini fails, Claude does the same single-shot analysis.
+            // ▶ WhisperX transcript (transcript_source = 'whisper' or null):
+            //   Raw unlabeled text — AI diarizes + scores in one shot.
+            //   Uses QAScoringPrompt::buildCombined() via analyzeCall().
             $qaCall->update(['processing_status' => 'scoring']);
 
-            $plainTranscript = $qaCall->transcript_plain;
+            $transcriptForAi   = $qaCall->transcript_plain;
+            $isZoomTranscript  = $qaCall->transcript_source === 'zoom';
             $aiResult = null;
             $scoredBy = 'gemini';
 
             try {
                 $gemini = app(GeminiService::class);
-                $aiResult = $gemini->analyzeCall($plainTranscript, $qaCall->duration_seconds);
+                if ($isZoomTranscript) {
+                    $aiResult = $gemini->analyzePreLabeledCall($transcriptForAi, $qaCall->duration_seconds);
+                } else {
+                    $aiResult = $gemini->analyzeCall($transcriptForAi, $qaCall->duration_seconds);
+                }
                 $scoredBy = 'gemini';
             } catch (\Throwable $e) {
-                Log::warning('[QA:Job] Gemini analyzeCall failed, falling back to Claude', [
-                    'qa_call_id' => $qaCall->id,
-                    'error'      => $e->getMessage(),
+                Log::warning('[QA:Job] Gemini failed, falling back to Claude', [
+                    'qa_call_id'      => $qaCall->id,
+                    'transcript_source' => $qaCall->transcript_source,
+                    'error'           => $e->getMessage(),
                 ]);
 
                 $claude = app(ClaudeService::class);
-                $aiResult = $claude->analyzeCall($plainTranscript, $qaCall->duration_seconds);
+                if ($isZoomTranscript) {
+                    $aiResult = $claude->analyzePreLabeledCall($transcriptForAi, $qaCall->duration_seconds);
+                } else {
+                    $aiResult = $claude->analyzeCall($transcriptForAi, $qaCall->duration_seconds);
+                }
                 $scoredBy = 'claude';
             }
 
-            // Store the labeled transcript from the AI response (for display in UI)
-            $diarizedTranscript = $aiResult['diarized_transcript'] ?? '';
-            if (!empty($diarizedTranscript)) {
-                $qaCall->update([
-                    'transcript_diarized' => $diarizedTranscript,
-                    'scored_by'           => $scoredBy,
-                ]);
+            // For WhisperX calls: store the diarized transcript produced by the AI.
+            // For Zoom calls: transcript_diarized was already stored from VTT — just update scored_by.
+            if (!$isZoomTranscript) {
+                $diarizedTranscript = $aiResult['diarized_transcript'] ?? '';
+                if (!empty($diarizedTranscript)) {
+                    $qaCall->update([
+                        'transcript_diarized' => $diarizedTranscript,
+                        'scored_by'           => $scoredBy,
+                    ]);
+                } else {
+                    $qaCall->update(['scored_by' => $scoredBy]);
+                    Log::warning('[QA:Job] AI returned empty diarized_transcript', ['qa_call_id' => $qaCall->id]);
+                }
             } else {
                 $qaCall->update(['scored_by' => $scoredBy]);
-                Log::warning('[QA:Job] AI returned empty diarized_transcript', ['qa_call_id' => $qaCall->id]);
             }
 
             Log::info('[QA:Job] AI analysis complete', [
-                'qa_call_id'     => $qaCall->id,
-                'scored_by'      => $scoredBy,
-                'disposition'    => $aiResult['disposition'] ?? 'unknown',
-                'total_score'    => $aiResult['total_score'] ?? 0,
-                'agent_turns'    => substr_count($diarizedTranscript, 'AGENT:'),
-                'customer_turns' => substr_count($diarizedTranscript, 'CUSTOMER:'),
-                'bank_ivr_turns' => substr_count($diarizedTranscript, '[BANK IVR]'),
+                'qa_call_id'       => $qaCall->id,
+                'scored_by'        => $scoredBy,
+                'transcript_source'=> $qaCall->transcript_source,
+                'disposition'      => $aiResult['disposition'] ?? 'unknown',
+                'total_score'      => $aiResult['total_score'] ?? 0,
+                'agent_turns'      => substr_count($qaCall->fresh()->transcript_diarized ?? '', 'AGENT:'),
+                'customer_turns'   => substr_count($qaCall->fresh()->transcript_diarized ?? '', 'CUSTOMER:'),
             ]);
 
-            // ── Step 5: Save Results ────────────────────────────────────
+            // ── Step 6: Save Results ────────────────────────────────────
             $resultService = app(QAResultService::class);
             $resultService->saveResult($qaCall, $aiResult);
 
