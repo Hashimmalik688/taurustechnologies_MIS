@@ -405,6 +405,9 @@ class LeadController extends Controller
         $user = Auth::user();
         if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
             $leadData['source_type'] = Teams::PEREGRINE;
+            $leadData['team'] = Teams::PEREGRINE;
+        } elseif ($user->hasAnyRole([Roles::RAVENS_CLOSER])) {
+            $leadData['team'] = Teams::RAVENS;
         }
 
         // Set proper status and closer name for manually created leads

@@ -425,7 +425,7 @@ class AnalyticsService
                 'status' => $statusLabel,
                 'status_raw' => $lead->status,
                 'submitted_at' => $lead->verified_at
-                    ? $lead->verified_at->setTimezone('America/Denver')->format('M d, h:i A')
+                    ? $lead->verified_at->setTimezone(config('app.timezone'))->format('M d, g:i A')
                     : '—',
             ];
         })->values();

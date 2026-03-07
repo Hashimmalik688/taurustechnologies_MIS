@@ -320,6 +320,14 @@
                                     <label class="f-label">Zoom Number</label>
                                     <input type="text" class="f-input" name="zoom_number" value="{{ $user->zoom_number ?? '' }}">
                                 </div>
+                                <div>
+                                    <label class="f-label">Zoom User ID</label>
+                                    <input type="text" class="f-input" name="zoom_user_id" value="{{ $user->zoom_user_id ?? '' }}" placeholder="From Zoom admin panel">
+                                </div>
+                                <div>
+                                    <label class="f-label">Zoom Extension</label>
+                                    <input type="text" class="f-input" name="zoom_extension" value="{{ $user->zoom_extension ?? '' }}" placeholder="e.g. 1234">
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer" style="border-top:1px solid rgba(0,0,0,.05);padding:.65rem 1.25rem">

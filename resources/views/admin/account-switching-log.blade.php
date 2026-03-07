@@ -97,7 +97,7 @@
                         <td><span class="s-pill" style="font-size:.62rem">{{ $log->ip_address }}</span></td>
                         <td style="font-size:.68rem;color:var(--bs-surface-500)">
                             <i class="bx bx-time" style="font-size:.72rem;vertical-align:middle;opacity:.5"></i>
-                            {{ $log->created_at->format('Y-m-d H:i:s') }}
+                            {{ $log->created_at->format('Y-m-d h:i A') }}
                         </td>
                     </tr>
                     @empty

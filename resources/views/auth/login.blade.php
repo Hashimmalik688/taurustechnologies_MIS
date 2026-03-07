@@ -456,11 +456,6 @@ a.link-gold:hover {
               Remember me
             </label>
           </div>
-          @if (Route::has('password.request'))
-            <a class="small link-gold" href="{{ route('password.request') }}">
-              Forgot password?
-            </a>
-          @endif
         </div>
 
         <div class="d-grid mb-3">

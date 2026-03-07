@@ -26,17 +26,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Mark absent users daily at 7:30 PM (19:30) PKT - 30 minutes after night shift start
-        // Office hours: Monday 7 PM - Saturday 5 AM (night shift)
-        $schedule->command('attendance:mark-absent --cutoff=19:30')
-            ->dailyAt('19:30')
-            ->timezone('Asia/Karachi');
+        // Mark absent users daily at 9:30 AM MT - 30 minutes after office start
+        // Office hours: Monday–Friday 9 AM–5:30 PM (Mountain Time)
+        $schedule->command('attendance:mark-absent --cutoff=09:30')
+            ->dailyAt('09:30')
+            ->timezone('America/Denver');
         
         // Auto-checkout disabled - checkout is now fully manual
         // Days without checkout will be marked as unpaid manually by Super Admin
         // $schedule->command('attendance:auto-checkout')
-        //     ->dailyAt('05:10')
-        //     ->timezone('Asia/Karachi');
+        //     ->dailyAt('17:30')
+        //     ->timezone('America/Denver');
 
         // Sync Zoom Phone call logs every minute for near-real-time accuracy
         $schedule->command('zoom:sync-call-logs --hours=2')

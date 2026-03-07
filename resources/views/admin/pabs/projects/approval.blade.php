@@ -46,7 +46,7 @@
                         </div>
                         <div class="col-md-6">
                             <h6>Created Date</h6>
-                            <p>{{ $project->created_at->format('M d, Y H:i') }}</p>
+                            <p>{{ $project->created_at->format('M d, Y g:i A') }}</p>
                         </div>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                             <div class="alert alert-{{ $approval->action === 'APPROVED' ? 'success' : ($approval->action === 'REJECTED' ? 'danger' : 'warning') }} py-2 mb-2">
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <strong>{{ $approval->action }}</strong> - {{ $approval->approved_at->format('M d, Y H:i') }}
+                                        <strong>{{ $approval->action }}</strong> - {{ $approval->approved_at->format('M d, Y g:i A') }}
                                         <br><small class="text-muted">By: {{ $approval->approver->name }}</small>
                                     </div>
                                     <div class="col-md-4 text-end">

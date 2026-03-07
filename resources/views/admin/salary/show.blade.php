@@ -127,7 +127,7 @@
                                         <div class="timeline-content">
                                             <h6 class="mb-1">Calculated</h6>
                                             <small class="text-muted">
-                                                {{ $salaryRecord->calculated_at ? $salaryRecord->calculated_at->format('M d, Y H:i') : 'Pending' }}
+                                                {{ $salaryRecord->calculated_at ? $salaryRecord->calculated_at->format('M d, Y g:i A') : 'Pending' }}
                                             </small>
                                         </div>
                                     </div>
@@ -139,7 +139,7 @@
                                         <div class="timeline-content">
                                             <h6 class="mb-1">Approved</h6>
                                             <small class="text-muted">
-                                                {{ $salaryRecord->approved_at ? $salaryRecord->approved_at->format('M d, Y H:i') : 'Pending' }}
+                                                {{ $salaryRecord->approved_at ? $salaryRecord->approved_at->format('M d, Y g:i A') : 'Pending' }}
                                             </small>
                                         </div>
                                     </div>
@@ -151,7 +151,7 @@
                                         <div class="timeline-content">
                                             <h6 class="mb-1">Paid</h6>
                                             <small class="text-muted">
-                                                {{ $salaryRecord->paid_at ? $salaryRecord->paid_at->format('M d, Y H:i') : 'Pending' }}
+                                                {{ $salaryRecord->paid_at ? $salaryRecord->paid_at->format('M d, Y g:i A') : 'Pending' }}
                                             </small>
                                         </div>
                                     </div>

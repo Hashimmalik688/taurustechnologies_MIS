@@ -621,12 +621,9 @@
             })
         });
 
-        // Clean phone number and create Zoom URL
-        const cleanPhone = phoneNumber.replace(/[^\d\+]/g, '');
-        const zoomUrl = 'zoomphonecall://' + encodeURIComponent(cleanPhone);
-
-        // Open Zoom Phone
-        window.location.href = zoomUrl;
+        // Dial via Zoom Phone Smart Embed
+        const cleanPhone = phoneNumber.replace(/[^\d+]/g, '');
+        window.zoomDial(cleanPhone);
 
         // Mark lead as dialed
         dialedLeads.add(leadId);

@@ -395,10 +395,9 @@
                             <td class="sl-sticky-col sl-col-4">
                                 @php
                                     $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
-                                    $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
                                 @endphp
                                 <div class="sl-act-group">
-                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-secondary" title="Call">
+                                    <button onclick="zoomDial('{{ $zoomNumber }}')" class="btn btn-secondary" title="Call">
                                         <i class="fas fa-phone"></i>
                                     </button>
                                     <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View">

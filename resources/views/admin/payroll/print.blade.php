@@ -224,7 +224,7 @@
 
     <div class="footer">
         <p><strong>This is a system-generated document. Please verify all figures before processing.</strong></p>
-        <p style="margin-top:6px">Generated: {{ now()->format('F d, Y H:i:s') }}</p>
+        <p style="margin-top:6px">Generated: {{ now()->format('F d, Y h:i A') }}</p>
         <p style="margin-top:4px;font-style:italic">Taurus Technologies — Management Information System</p>
     </div>
 </body>

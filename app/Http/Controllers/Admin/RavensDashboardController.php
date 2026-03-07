@@ -27,10 +27,9 @@ class RavensDashboardController extends Controller
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
 
-        // Determine date range in MT, then convert to app timezone (Asia/Karachi)
-        // so whereBetween matches the PKT timestamps stored by now().
+        // Determine date range in Mountain Time (MT)
         $timezone = 'America/Denver';
-        $appTz = config('app.timezone', 'Asia/Karachi');
+        $appTz = config('app.timezone', 'America/Denver');
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {
                 $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone($appTz);
@@ -636,6 +635,10 @@ class RavensDashboardController extends Controller
                 $updateData['zip_code'] = $request->input('zip_code');
             }
 
+            if ($request->has('closer_qna') && is_array($request->input('closer_qna'))) {
+                $updateData['closer_qna'] = json_encode($request->input('closer_qna'));
+            }
+
             if (!empty($updateData)) {
                 $lead->update($updateData);
 
@@ -989,11 +992,18 @@ class RavensDashboardController extends Controller
                 'source'                => $request->input('source'),
                 'assigned_partner'      => $request->input('assigned_partner'),
                 'partner_id'            => $request->input('partner_id'),
+                'followup_required'     => $request->filled('followup_required') ? (bool) $request->input('followup_required') : null,
+                'followup_scheduled_at' => $request->input('followup_scheduled_at') ?: null,
             ], fn($v) => !is_null($v) && $v !== '');
 
             // Handle beneficiaries
             if ($request->has('beneficiaries') && is_array($request->input('beneficiaries'))) {
                 $data['beneficiaries'] = json_encode($request->input('beneficiaries'));
+            }
+
+            // Handle Q&A pairs
+            if ($request->has('closer_qna') && is_array($request->input('closer_qna'))) {
+                $data['closer_qna'] = json_encode($request->input('closer_qna'));
             }
 
             // Sale markers
@@ -1213,7 +1223,7 @@ class RavensDashboardController extends Controller
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
         $timezone = 'America/Denver';
-        $appTz = config('app.timezone', 'Asia/Karachi');
+        $appTz = config('app.timezone', 'America/Denver');
 
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {

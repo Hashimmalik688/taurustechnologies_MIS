@@ -231,7 +231,7 @@
                         <div class="workflow-step-content">
                             <strong>Step 1: Initiation (DRAFT)</strong>
                             <small class="d-block text-muted">Project created with job title and justification</small>
-                            <small class="d-block">{{ $project->created_at->format('M d, Y H:i') }} by {{ $project->creator->name }}</small>
+                            <small class="d-block">{{ $project->created_at->format('M d, Y g:i A') }} by {{ $project->creator->name }}</small>
                         </div>
                     </div>
 
@@ -242,7 +242,7 @@
                             <strong>Step 2: Scoping</strong>
                             <small class="d-block text-muted">Survey conducted and requirements document uploaded</small>
                             @if($project->scoping_completed_at)
-                                <small class="d-block">{{ $project->scoping_completed_at->format('M d, Y H:i') }} by {{ $project->scopingLead->name ?? 'N/A' }}</small>
+                                <small class="d-block">{{ $project->scoping_completed_at->format('M d, Y g:i A') }} by {{ $project->scopingLead->name ?? 'N/A' }}</small>
                                 @if($project->scoping_document_path)
                                     <small><a href="{{ asset('storage/' . $project->scoping_document_path) }}" target="_blank" class="text-decoration-none">
                                         <i class="bx bx-download"></i> View Document
@@ -283,7 +283,7 @@
                             <strong>Step 4: Executive Review (CEO Approval)</strong>
                             <small class="d-block text-muted">CEO approves with budget and deadline</small>
                             @if($project->approved_at)
-                                <small class="d-block">{{ $project->approved_at->format('M d, Y H:i') }} by {{ $project->approver->name ?? 'N/A' }}</small>
+                                <small class="d-block">{{ $project->approved_at->format('M d, Y g:i A') }} by {{ $project->approver->name ?? 'N/A' }}</small>
                             @endif
                         </div>
                     </div>
@@ -295,7 +295,7 @@
                             <strong>Step 5: Allocation (Finance Lock)</strong>
                             <small class="d-block text-muted">Accounts confirms funds available</small>
                             @if($project->allocated_at)
-                                <small class="d-block">{{ $project->allocated_at->format('M d, Y H:i') }} by {{ $project->allocatedBy->name ?? 'N/A' }}</small>
+                                <small class="d-block">{{ $project->allocated_at->format('M d, Y g:i A') }} by {{ $project->allocatedBy->name ?? 'N/A' }}</small>
                             @endif
                         </div>
                     </div>
@@ -319,7 +319,7 @@
                             <strong>Step 7: Verification & Closure</strong>
                             <small class="d-block text-muted">Final invoice submitted; completion marked</small>
                             @if($project->completed_at)
-                                <small class="d-block">{{ $project->completed_at->format('M d, Y H:i') }}</small>
+                                <small class="d-block">{{ $project->completed_at->format('M d, Y g:i A') }}</small>
                             @endif
                         </div>
                     </div>
@@ -409,7 +409,7 @@
                         @forelse($project->comments as $comment)
                             <div class="comment-item">
                                 <div class="comment-meta">
-                                    <strong>{{ $comment->user->name }}</strong> - {{ $comment->created_at->format('M d, Y H:i') }}
+                                    <strong>{{ $comment->user->name }}</strong> - {{ $comment->created_at->format('M d, Y g:i A') }}
                                 </div>
                                 <p class="mb-0">{{ $comment->comment }}</p>
                             </div>

@@ -36,7 +36,7 @@ class SalaryController extends Controller
 
     // Punctuality Rules:
     // - 1 off OR 2 half days OR 4+ late arrivals = NO punctuality bonus
-    // - Late threshold: 7:15 AM (configured in settings)
+    // - Late threshold: 9:15 AM (configured in settings via Setting::get('late_time'))
     const PUNCTUALITY_DISQUALIFY_OFFS = 1;
     const PUNCTUALITY_DISQUALIFY_HALF_DAYS = 2;
     const PUNCTUALITY_DISQUALIFY_LATE_DAYS = 4;
@@ -750,7 +750,7 @@ class SalaryController extends Controller
 
         // Summary notes
         if ($lateDays > 0) {
-            $notes[] = "{$lateDays} late arrival(s) after 7:15 AM";
+            $notes[] = "{$lateDays} late arrival(s) after " . \App\Models\Setting::get('late_time', '09:15');
         }
 
         return [
@@ -1167,7 +1167,7 @@ class SalaryController extends Controller
             'success' => true,
             'data' => $attendanceData,
             'settings' => [
-                'late_threshold' => '07:15',
+                'late_threshold' => \App\Models\Setting::get('late_time', '09:15'),
                 'working_days' => self::WORKING_DAYS_PER_MONTH,
                 'punctuality_rules' => [
                     'max_offs' => self::PUNCTUALITY_DISQUALIFY_OFFS - 1,

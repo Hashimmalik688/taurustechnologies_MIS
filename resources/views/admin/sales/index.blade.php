@@ -628,12 +628,11 @@
                                                 <div class="sl-act-group">
                                                     @php
                                                         $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
-                                                        $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
                                                     @endphp
                                                     <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                     </a>
-                                                    <button onclick="window.location.href='{{ $callUrl }}'" class="btn btn-warning btn-sm" title="Call">
+                                                    <button onclick="zoomDial('{{ $zoomNumber }}')" class="btn btn-warning btn-sm" title="Call">
                                                         <i class="fas fa-phone-alt"></i>
                                                     </button>
                                                     <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white" title="View">
@@ -645,7 +644,11 @@
                                                     </a>
                                                     @endcanEditModule
                                                     @canDeleteInModule('sales')
-                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete-{{ $lead->id }}" title="Delete">
+                                                    <button type="button" class="btn btn-danger btn-sm sl-delete-lead-btn"
+                                                        data-lead-id="{{ $lead->id }}"
+                                                        data-lead-name="{{ addslashes($lead->cn_name) }}"
+                                                        data-delete-url="{{ route('sales.delete', $lead->id) }}"
+                                                        title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                     @endcanDeleteInModule
@@ -841,30 +844,7 @@
                                         @endif
                                     </tr>
 
-                                    @if(!auth()->user()->hasRole(Roles::QA))
-                                        <!-- Delete Modal -->
-                                        <div class="modal fade" id="delete-{{ $lead->id }}" tabindex="-1">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title text-gold">Confirm Delete</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Are you sure you want to delete <strong>{{ $lead->cn_name }}</strong>?
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
- <form class="d-inline" action="{{ route('sales.delete', $lead->id) }}" method="POST" >
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
+
                                 @empty
                                     <tr>
                                         <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '7' : '19' }}" class="text-center" style="padding: 3rem 1rem; color: #94a3b8;">
@@ -882,6 +862,31 @@
                         {{ $leads->appends(request()->query())->links() }}
                     </div>
     </div>
+
+    <!-- Shared Delete Confirmation Modal -->
+    @canDeleteInModule('sales')
+    <div class="modal fade" id="sharedDeleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-gold">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="sharedDeleteLeadName"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <form id="sharedDeleteForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endcanDeleteInModule
 
     <!-- Import Old Data Modal -->
     <div class="modal fade" id="importOldDataModal" tabindex="-1" aria-labelledby="importOldDataModalLabel" aria-hidden="true">
@@ -936,6 +941,17 @@
 
 @section('script')
 <script>
+/* ── Shared Delete Modal ── */
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.sl-delete-lead-btn');
+    if (!btn) return;
+    const modal = document.getElementById('sharedDeleteModal');
+    if (!modal) return;
+    document.getElementById('sharedDeleteLeadName').textContent = btn.dataset.leadName;
+    document.getElementById('sharedDeleteForm').action = btn.dataset.deleteUrl;
+    bootstrap.Modal.getOrCreateInstance(modal).show();
+});
+
 /* ── Custom Dropdown Init ── */
 (function() {
     const chevronSvg = '<svg class="sl-cdd-chevron" viewBox="0 0 10 6" xmlns="http://www.w3.org/2000/svg"><path d="M0 0l5 6 5-6z" fill="#94a3b8"/></svg>';

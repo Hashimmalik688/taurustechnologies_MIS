@@ -176,7 +176,7 @@
                         <i class="bx bx-info-circle me-2"></i>
                         <strong>Created by:</strong> {{ $announcement->createdBy->name }} 
                         <br>
-                        <strong>Published:</strong> {{ $announcement->published_at->format('M d, Y H:i') }}
+                        <strong>Published:</strong> {{ $announcement->published_at->format('M d, Y g:i A') }}
                     </div>
 
                     <!-- Form Actions -->

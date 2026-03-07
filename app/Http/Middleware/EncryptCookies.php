@@ -8,12 +8,7 @@ class EncryptCookies extends Middleware
 {
     /**
      * The names of the cookies that should not be encrypted.
-     *
-     * @var array
+     * Empty: all cookies (including our device token) are encrypted by default.
      */
-    protected $except = [
-        'device_fingerprint',
-        'device_id',
-        'device_name',
-    ];
+    protected $except = [];
 }

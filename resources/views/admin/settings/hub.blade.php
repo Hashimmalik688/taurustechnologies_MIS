@@ -37,6 +37,8 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
+
+
             @endhasrole
 
             <a href="{{ route('settings.themes') }}" class="hub-card">

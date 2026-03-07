@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\AllowedDevice;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -30,9 +31,15 @@ class SettingsController extends Controller
 
     public function index()
     {
-        $settings = Setting::orderBy('group')->orderBy('key')->get()->groupBy('group');
+        $keyOrder = ['office_start_time','office_end_time','late_time','shift_duration_hours','attendance_buffer_hours','attendance_enabled','allow_weekend_attendance','office_networks','late_threshold_minutes'];
+        $settings = Setting::orderBy('group')->get()
+            ->sortBy(fn($s) => array_search($s->key, $keyOrder) !== false ? array_search($s->key, $keyOrder) : 99)
+            ->groupBy('group');
+        $pending  = AllowedDevice::where('status', 'pending')->latest()->get();
+        $approved = AllowedDevice::where('status', 'approved')->latest()->get();
+        $disabled = AllowedDevice::where('status', 'disabled')->latest()->get();
 
-        return view('admin.settings.index', compact('settings'));
+        return view('admin.settings.index', compact('settings', 'pending', 'approved', 'disabled'));
     }
 
     public function update(Request $request)
@@ -57,66 +64,5 @@ class SettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Settings updated successfully!');
-    }
-
-    public function testNetwork(Request $request)
-    {
-        $ipService = new \App\Services\IpDetectionService;
-        $allIps = $ipService->getAllIpAddresses();
-        $bestIp = $ipService->getBestIpForAttendance();
-        $networks = Setting::get('office_networks', []);
-
-        if (is_string($networks)) {
-            $networks = explode(',', $networks);
-        }
-
-        $isInNetwork = false;
-        $matchedNetwork = null;
-
-        foreach ($networks as $network) {
-            $network = trim($network);
-            if ($this->ipInRange($bestIp, $network)) {
-                $isInNetwork = true;
-                $matchedNetwork = $network;
-                break;
-            }
-        }
-
-        $message = $isInNetwork ?
-            "✅ Your IP ({$bestIp}) matches office network: {$matchedNetwork}" :
-            "❌ Your IP ({$bestIp}) is NOT in any configured office network.";
-
-        // Add helpful hints for localhost
-        if ($allIps['is_localhost']) {
-            $message .= "\n\n⚠️ You're on localhost. To get your real office IP:\n";
-            $message .= "1. Deploy to your server, OR\n";
-            $message .= "2. Visit whatismyipaddress.com from office, OR\n";
-            $message .= "3. For testing, add '127.0.0.1' to allowed networks.";
-        }
-
-        return response()->json([
-            'current_ip' => $bestIp,
-            'all_detected_ips' => $allIps,
-            'configured_networks' => $networks,
-            'is_in_office_network' => $isInNetwork,
-            'matched_network' => $matchedNetwork,
-            'message' => $message,
-            'is_localhost' => $allIps['is_localhost'],
-        ]);
-    }
-
-    private function ipInRange($ip, $range)
-    {
-        if (strpos($range, '/') === false) {
-            return $ip === $range;
-        }
-
-        [$subnet, $bits] = explode('/', $range);
-        $ip = ip2long($ip);
-        $subnet = ip2long($subnet);
-        $mask = -1 << (32 - $bits);
-        $subnet &= $mask;
-
-        return ($ip & $mask) === $subnet;
     }
 }

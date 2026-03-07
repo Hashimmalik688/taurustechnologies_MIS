@@ -485,8 +485,8 @@
                                     {{ strtoupper($attendance->status) }}
                                 </span>
                             </td>
-                            <td>{{ $attendance->check_in ? $attendance->check_in->format('H:i') : '-' }}</td>
-                            <td>{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '-' }}</td>
+                            <td>{{ $attendance->check_in ? $attendance->check_in->format('g:i A') : '-' }}</td>
+                            <td>{{ $attendance->check_out ? $attendance->check_out->format('g:i A') : '-' }}</td>
                             <td>{{ $attendance->working_hours ?? '-' }}h</td>
                         </tr>
                     @endforeach

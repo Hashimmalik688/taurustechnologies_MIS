@@ -160,7 +160,7 @@
 
     <div class="footer">
         <p>This is a computer-generated report. No signature required.</p>
-        <p>Printed on {{ date('F d, Y \a\t H:i:s') }}</p>
+        <p>Printed on {{ date('F d, Y \a\t h:i A') }}</p>
     </div>
 </body>
 </html>

@@ -349,7 +349,7 @@
                                         <li><strong>Working Days:</strong> 22 days per month</li>
                                         <li><strong>Daily Salary:</strong> Basic Salary ÷ 22</li>
                                         <li><strong>Leave Deduction:</strong> Full day = 1 day salary, Half day = 0.5 day salary</li>
-                                        <li><strong>Punctuality Rules:</strong> No bonus if ≥1 off OR ≥2 half days OR ≥4 late days (after 7:15 AM)</li>
+                                        <li><strong>Punctuality Rules:</strong> No bonus if ≥1 off OR ≥2 half days OR ≥4 late days (after 9:15 AM)</li>
                                         <li><strong>Sales Bonus:</strong> Only paid for sales above target (if sales employee)</li>
                                     </ul>
                                 </div>

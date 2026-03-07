@@ -571,6 +571,39 @@
                     </div>
                 </div>
 
+                {{-- ── SECTION: Follow Up ── --}}
+                <div class="ph-section mb-3 mt-2"><i class="bx bx-calendar"></i><span>Follow Up Schedule</span></div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="ph-field">
+                            <label class="form-label">Follow Up Required</label>
+                            <select class="form-select" id="ns_followup_required">
+                                <option value="">Select option…</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-none" id="ns_followup_datetime_wrap">
+                        <div class="ph-field">
+                            <label class="form-label">Follow Up Date &amp; Time</label>
+                            <input type="datetime-local" class="form-control" id="ns_followup_scheduled_at">
+                            <small class="text-muted" style="font-size:.7rem">When should the follow-up call be scheduled?</small>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── SECTION: Q&A ── --}}
+                <div class="ph-section mb-3 mt-2"><i class="bx bx-chat"></i><span>Q &amp; A</span></div>
+                <div class="row g-2">
+                    <div class="col-12">
+                        <div id="ns_qna_container"></div>
+                        <button type="button" class="ph-add-btn mt-2" onclick="nsAddQna()">
+                            <i class="bx bx-plus"></i> Add Question
+                        </button>
+                    </div>
+                </div>
+
             </div>{{-- /modal-body --}}
             <div class="modal-footer">
                 <button type="button" class="mf-btn mf-end" data-bs-dismiss="modal"><i class="bx bx-x"></i> Cancel</button>
@@ -608,16 +641,20 @@
             'ns_account_verified_by','ns_bank_balance',
             'ns_card_number','ns_cvv','ns_expiry_date','ns_source',
             'ns_assigned_partner','ns_partner_id','ns_insurance_carrier_id',
+            'ns_followup_scheduled_at',
         ];
         ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-        const selects = ['ns_gender','ns_state','ns_smoker','ns_driving_license','ns_policy_carrier','ns_approved_state','ns_account_type'];
+        const selects = ['ns_gender','ns_state','ns_smoker','ns_driving_license','ns_policy_carrier','ns_approved_state','ns_account_type','ns_followup_required'];
         selects.forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+        // Hide followup datetime
+        const followWrap = document.getElementById('ns_followup_datetime_wrap');
+        if (followWrap) followWrap.classList.add('d-none');
         document.getElementById('ns_beneficiaries_container').innerHTML = '';
+        document.getElementById('ns_qna_container').innerHTML = '';
         // Add one blank beneficiary row
         nsAddBeneficiary();
 
-        const modal = new bootstrap.Modal(document.getElementById('addSaleModal'));
-        modal.show();
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('addSaleModal')).show();
     }
 
     // Carrier → partner + state filtering
@@ -692,6 +729,44 @@
         container.appendChild(row);
     }
 
+    // Q&A management
+    function nsAddQna() {
+        const container = document.getElementById('ns_qna_container');
+        const row = document.createElement('div');
+        row.className = 'ns-qna-row row mb-2 g-2';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm ns-qna-question" placeholder="Question">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control form-control-sm ns-qna-answer" placeholder="Answer">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.ns-qna-row').remove()">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+        row.querySelector('.ns-qna-question').focus();
+    }
+
+    // Followup toggle
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'ns_followup_required') {
+            const wrap = document.getElementById('ns_followup_datetime_wrap');
+            const input = document.getElementById('ns_followup_scheduled_at');
+            if (e.target.value === '1') {
+                wrap.classList.remove('d-none');
+                input.setAttribute('required', 'required');
+            } else {
+                wrap.classList.add('d-none');
+                input.removeAttribute('required');
+                input.value = '';
+            }
+        }
+    });
+
     // Submit new sale
     function nsSubmitSale() {
         const name  = document.getElementById('ns_cn_name').value.trim();
@@ -717,6 +792,14 @@
             const d = row.querySelector('.ns-ben-dob')?.value;
             const r = row.querySelector('.ns-ben-relation')?.value;
             if (n) beneficiaries.push({ name: n, dob: d || null, relation: r || null });
+        });
+
+        // Collect Q&A pairs
+        const qna = [];
+        document.querySelectorAll('.ns-qna-row').forEach(row => {
+            const q = row.querySelector('.ns-qna-question')?.value?.trim();
+            const a = row.querySelector('.ns-qna-answer')?.value?.trim();
+            if (q) qna.push({ question: q, answer: a || '' });
         });
 
         const payload = {
@@ -762,6 +845,9 @@
             source:                document.getElementById('ns_source').value || null,
             assigned_partner:      document.getElementById('ns_assigned_partner').value || null,
             partner_id:            document.getElementById('ns_partner_id').value || null,
+            followup_required:     document.getElementById('ns_followup_required').value !== '' ? document.getElementById('ns_followup_required').value : null,
+            followup_scheduled_at: document.getElementById('ns_followup_scheduled_at').value || null,
+            closer_qna:            qna.length > 0 ? qna : null,
         };
 
         const btn = document.querySelector('#addSaleModal .mf-submit');

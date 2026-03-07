@@ -268,9 +268,7 @@
                                     </td>
                                     <td>
                                         @php
-                                            // Clean phone number (remove spaces, parentheses, and special chars except + and digits)
                                             $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
-                                            $callUrl = 'zoomphonecall://' . urlencode($zoomNumber);
                                         @endphp
 
                                         @if (auth()->user()->zoom_number === null)
@@ -283,7 +281,7 @@
                                                 </button>
                                             </span>
                                         @else
-                                            <button onclick="window.location.href='{{ $callUrl }}'"
+                                            <button onclick="zoomDial('{{ $zoomNumber }}')"
                                                 class="btn btn-warning btn-sm">
                                                 <i class="fas fa-phone"></i>
                                             </button>

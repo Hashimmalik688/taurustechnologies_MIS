@@ -85,7 +85,7 @@
                                             <small>{{ $announcement->createdBy->name ?? 'N/A' }}</small>
                                         </td>
                                         <td>
-                                            <small class="text-muted">{{ $announcement->published_at->format('M d, Y H:i') ?? '-' }}</small>
+                                            <small class="text-muted">{{ $announcement->published_at->format('M d, Y g:i A') ?? '-' }}</small>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">

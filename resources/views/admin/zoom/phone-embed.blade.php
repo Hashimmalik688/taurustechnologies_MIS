@@ -204,29 +204,48 @@
             document.getElementById('zoomStatus').textContent = 'Ready';
         });
 
-        // ── Dial Number ─────────────────────────────────────────────────
-        function dialNumber(number) {
-            number = number || document.getElementById('dialNumber').value;
+        // ── Override global zoomDial on this page to use the full-page iframe ─
+        window.zoomDial = function(number) {
+            number = (number || document.getElementById('dialNumber').value || '').replace(/[^\d+]/g, '');
             if (!number) return;
 
-            // Clean the number
-            number = number.replace(/[^\d+]/g, '');
-            if (!number) return;
+            document.getElementById('dialNumber').value = number;
 
-            // Update status
             const statusEl = document.getElementById('zoomStatus');
             statusEl.className = 'zp-status zp-status-warn';
             statusEl.textContent = 'Dialing…';
 
-            // Open Zoom Phone desktop/web app with the number
-            window.location.href = 'zoomphonecall://' + number;
+            const frame = document.getElementById('zoomPhoneFrame');
+            if (frame) {
+                const sendDial = () => {
+                    frame.contentWindow.postMessage({ type: 'dial', number: number }, 'https://app.zoom.us');
+                };
+                if (frame.dataset.zpwReady === 'true') {
+                    sendDial();
+                } else {
+                    frame.addEventListener('load', () => {
+                        frame.dataset.zpwReady = 'true';
+                        setTimeout(sendDial, 600);
+                    }, { once: true });
+                }
+            }
 
-            // Reset status after a moment
             setTimeout(() => {
                 statusEl.className = 'zp-status zp-status-ok';
                 statusEl.textContent = 'Ready';
             }, 3000);
-        }
+        };
+
+        // ── Convenience alias ────────────────────────────────────────────
+        function dialNumber(number) { window.zoomDial(number); }
+
+        // ── Mark iframe as ready when it loads ───────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const frame = document.getElementById('zoomPhoneFrame');
+            if (frame) {
+                frame.addEventListener('load', () => { frame.dataset.zpwReady = 'true'; });
+            }
+        });
 
         // ── Lead Search ─────────────────────────────────────────────────
         let searchTimeout;

@@ -49,8 +49,8 @@
                                                 <span class="text-muted">No record</span>
                                             @endif
                                         </td>
-                                        <td>{{ $a ? ($a->formatted_login_time ?? ($a->login_time?->format('H:i') ?? 'N/A')) : '-' }}</td>
-                                        <td>{{ $a ? ($a->formatted_logout_time ?? ($a->logout_time?->format('H:i') ?? 'N/A')) : '-' }}</td>
+                                        <td>{{ $a ? ($a->formatted_login_time ?? ($a->login_time?->format('g:i A') ?? 'N/A')) : '-' }}</td>
+                                        <td>{{ $a ? ($a->formatted_logout_time ?? ($a->logout_time?->format('g:i A') ?? 'N/A')) : '-' }}</td>
                                         <td>
                                             @if ($a)
                                                 @if ($a->isStillWorking())

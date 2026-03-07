@@ -107,7 +107,7 @@ class AnalyticsController extends Controller
             'ravensManagerBreakdown' => $ravensManagerBreakdown,
             'peregrineQABreakdown' => $peregrineQABreakdown,
             'ravensQABreakdown' => $ravensQABreakdown,
-            'timestamp' => now('America/Denver')->format('M d, Y h:i A') . ' MT',
+            'timestamp' => now()->format('M d, Y h:i A') . ' MT',
             'filter' => $filter,
         ]);
     }

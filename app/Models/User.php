@@ -57,6 +57,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'full_days',
         'half_days',
         'late_days',
+        'zoom_number',
+        'zoom_user_id',
+        'zoom_extension',
     ];
 
     /**

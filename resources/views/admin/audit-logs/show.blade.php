@@ -68,7 +68,7 @@
                     <span class="kv-label">Date & Time</span>
                     <span class="kv-value">
                         <i class="bx bx-time" style="font-size:.72rem;opacity:.4;vertical-align:middle"></i>
-                        {{ $auditLog->created_at->format('M d, Y H:i:s') }}
+                        {{ $auditLog->created_at->format('M d, Y h:i A') }}
                     </span>
                 </div>
                 <div class="kv-row">

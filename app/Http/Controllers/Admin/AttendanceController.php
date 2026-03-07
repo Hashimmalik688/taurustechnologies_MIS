@@ -53,8 +53,8 @@ class AttendanceController extends Controller
                 'id' => $attendance->id,
                 'user_name' => $attendance->user->name,
                 'date' => $attendance->date ? $attendance->date->format('Y-m-d') : '',
-                'login_time' => $attendance->login_time ? \Carbon\Carbon::parse($attendance->login_time)->format('H:i') : '',
-                'logout_time' => $attendance->logout_time ? \Carbon\Carbon::parse($attendance->logout_time)->format('H:i') : '',
+                'login_time' => $attendance->login_time ? \Carbon\Carbon::parse($attendance->login_time)->format('h:i A') : '',
+                'logout_time' => $attendance->logout_time ? \Carbon\Carbon::parse($attendance->logout_time)->format('h:i A') : '',
                 'status' => $attendance->status,
             ]
         ]);
@@ -93,17 +93,8 @@ class AttendanceController extends Controller
             }
             
             // Combine date with time for logout_time datetime field
-            // Handle night shift: if logout time is earlier than login time, add 1 day
             if ($logoutTime) {
-                $logoutDateTime = \Carbon\Carbon::parse("$date $logoutTime");
-                $loginDateTime = \Carbon\Carbon::parse("$date $loginTime");
-                
-                // If logout is before login (e.g., login 22:00, logout 05:00), it's next day
-                if ($logoutDateTime->lt($loginDateTime)) {
-                    $logoutDateTime->addDay();
-                }
-                
-                $attendance->logout_time = $logoutDateTime;
+                $attendance->logout_time = \Carbon\Carbon::parse("$date $logoutTime");
             } else {
                 $attendance->logout_time = null;
             }
@@ -317,19 +308,14 @@ class AttendanceController extends Controller
         $totalWorkingHours = 0;
         foreach ($attendances as $attendance) {
             if ($attendance->login_time && $attendance->logout_time) {
-                // Use the actual attendance date for proper night shift calculation
+                // Use the actual attendance date for working hours calculation
                 $attendanceDate = $attendance->date ?? Carbon::today();
                 
                 // Parse login and logout times with the actual attendance date
                 $loginTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->login_time->format('H:i:s'));
                 $logoutTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->logout_time->format('H:i:s'));
                 
-                // Handle night shift - if logout is before login, add a day
-                if ($logoutTime->lt($loginTime)) {
-                    $logoutTime->addDay();
-                }
-                
-                $totalWorkingHours += $loginTime->diffInHours($logoutTime, true);
+                $totalWorkingHours += round($loginTime->diffInHours($logoutTime, true), 1);
             }
         }
 
@@ -473,13 +459,12 @@ class AttendanceController extends Controller
         $paid_leave = 0;
         $totalHours = 0;
         $attendanceByDate = $monthAttendances->keyBy(function($a) { return Carbon::parse($a->date)->toDateString(); });
-        $now = Carbon::now('Asia/Karachi');
-        // Get office start time from settings (default 19:00)
-        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '19:00');
+        $now = Carbon::now();
+        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '09:00');
         try {
-            $shiftStart = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $shiftStart = Carbon::createFromFormat('H:i', $officeStartTimeRaw);
         } catch (\Exception $e) {
-            $shiftStart = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $shiftStart = Carbon::createFromFormat('h:i A', $officeStartTimeRaw);
         }
         for ($date = $startOfMonth->copy(); $date->lte($endOfMonth); $date->addDay()) {
             if ($date->lt($crmStartDate)) continue;
@@ -516,25 +501,17 @@ class AttendanceController extends Controller
             'avg_hours' => $totalDays > 0 ? round($totalHours / $totalDays, 1) : 0,
         ];
         
-        // Today's attendance - for night shift, if before 6am, show yesterday's attendance
-        $now = Carbon::now('Asia/Karachi');
-        $attendanceDate = $now->copy();
-        if ($now->hour < 6) {
-            // We're still in previous day's shift (cutoff is 6am, 1 hour after shift ends)
-            $attendanceDate->subDay();
-        }
+        // Today's attendance
+        $now = Carbon::now();
         
         $todayAttendance = Attendance::where('user_id', $user->id)
-            ->whereDate('date', $attendanceDate)
+            ->whereDate('date', Carbon::today())
             ->first();
         
-        // Checkout allowed during active shift hours: 7 PM (hour 19) through 5:59 AM (hour < 6)
-        // Blocked during daytime non-shift window: 6 AM to 6:59 PM
-        $isShiftHours = $now->hour < 6 || $now->hour >= 19;
+        // Checkout allowed when there is an open attendance record for today
         $canCheckout = $todayAttendance && 
                        !$todayAttendance->logout_time && 
-                       $todayAttendance->login_time && 
-                       $isShiftHours;
+                       $todayAttendance->login_time;
         
         // Format pay period label for display
         $payPeriodLabel = $startOfMonth->format('M d, Y') . ' - ' . $endOfMonth->format('M d, Y');
@@ -569,7 +546,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Manual Attendance Entry - Handles Night Shifts Correctly
+     * Manual Attendance Entry
      * Automatically discovers and uses existing table schema
      */
     public function markManual(Request $request)
@@ -586,28 +563,17 @@ class AttendanceController extends Controller
         ]);
 
         try {
-            // Parse the shift date (date when shift STARTED)
             $shiftDate = Carbon::parse($request->date);
             $shiftDateString = $shiftDate->format('Y-m-d');
             
-            // Parse login and logout times
             $loginTime = $request->login_time;
             $logoutTime = $request->logout_time;
             
-            // Create full datetime objects for calculation
             $loginDateTime = Carbon::parse($shiftDateString . ' ' . $loginTime);
             
-            // Handle night shift: if logout time is provided
             $logoutDateTime = null;
             if ($logoutTime) {
-                // Parse logout as same day initially
                 $logoutDateTime = Carbon::parse($shiftDateString . ' ' . $logoutTime);
-                
-                // Night shift logic: If logout is BEFORE login time, it's next day
-                // Example: 22:00 start, 06:00 end means 06:00 is next morning
-                if ($logoutDateTime->lt($loginDateTime)) {
-                    $logoutDateTime->addDay();
-                }
             }
             
             // Automatically discover existing field names from Attendance model

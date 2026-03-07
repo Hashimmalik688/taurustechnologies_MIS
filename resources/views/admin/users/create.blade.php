@@ -88,6 +88,22 @@
 
                             <div class="col-md-4">
                                 <div class="mb-3">
+                                    <label for="zoomUserId" class="form-label">Zoom User ID <small class="text-muted">(from Zoom admin panel)</small></label>
+                                    <input type="text" class="form-control" id="zoomUserId" name="zoom_user_id"
+                                        placeholder="e.g. ABC123xyz">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="zoomExtension" class="form-label">Zoom Extension</label>
+                                    <input type="text" class="form-control" id="zoomExtension" name="zoom_extension"
+                                        placeholder="e.g. 1234">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
                                     <label for="plain_password" class="form-label">Password (Plaintext Reference)</label>
                                     <input type="text" class="form-control" id="plain_password" name="plain_password"
                                         placeholder="Enter password for reference">

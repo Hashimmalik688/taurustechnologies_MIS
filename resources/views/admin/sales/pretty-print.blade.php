@@ -180,6 +180,14 @@ Comments: {{ $lead->comments }}
 Staff Notes: {{ $lead->staff_notes }}
 
 @endif
+@if(!empty($lead->closer_qna))
+Closer Q&A:
+@foreach($lead->closer_qna as $i => $pair)
+  Q{{ $i + 1 }}: {{ $pair['question'] ?? '' }}
+  A{{ $i + 1 }}: {{ $pair['answer'] ?? '' }}
+@endforeach
+
+@endif
 Generated: {{ now()->format('F j, Y \a\t g:i A') }}</div>
 </body>
 </html>

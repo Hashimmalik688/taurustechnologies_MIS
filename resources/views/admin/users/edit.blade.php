@@ -85,8 +85,26 @@
                                 <div class="mb-3">
                                     <label for="zoomNumber" class="form-label">Zoom Number</label>
                                     <input type="text" class="form-control" id="zoomNumber" name="zoom_number"
-                                        value="{{ old('zoom_number', $user->userDetail->zoom_number ?? '') }}"
+                                        value="{{ old('zoom_number', $user->zoom_number ?? '') }}"
                                         placeholder="Enter Zoom number">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="zoomUserId" class="form-label">Zoom User ID <small class="text-muted">(from Zoom admin panel)</small></label>
+                                    <input type="text" class="form-control" id="zoomUserId" name="zoom_user_id"
+                                        value="{{ old('zoom_user_id', $user->zoom_user_id ?? '') }}"
+                                        placeholder="e.g. ABC123xyz">
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="zoomExtension" class="form-label">Zoom Extension</label>
+                                    <input type="text" class="form-control" id="zoomExtension" name="zoom_extension"
+                                        value="{{ old('zoom_extension', $user->zoom_extension ?? '') }}"
+                                        placeholder="e.g. 1234">
                                 </div>
                             </div>
 

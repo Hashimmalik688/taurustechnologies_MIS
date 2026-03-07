@@ -73,9 +73,8 @@ class ReportController extends Controller
      */
     public function zoomLogs(Request $request)
     {
-        // Zoom Phone account timezone = Pacific Time (America/Los_Angeles)
-        // Confirmed: Zoom dashboard shows 12:18 PM for calls that are 2:18 PM CT — that's PT, not CT
-        $displayTz = 'America/Los_Angeles';
+        // All call times are displayed in Mountain Time (America/Denver)
+        $displayTz = 'America/Denver';
 
         // Internal Zoom system events that carry no human caller data — hidden by default
         $systemEvents = [
@@ -210,8 +209,8 @@ class ReportController extends Controller
             }
         }
 
-        // Date filters: user picks dates in Central Time (CT), but DB stores UTC.
-        // Convert CT date boundaries → UTC for correct querying.
+        // Date filters: user picks dates in Mountain Time (MT), but DB stores UTC.
+        // Convert MT date boundaries → UTC for correct querying.
         if ($request->filled('date_from')) {
             $fromUtc = \Carbon\Carbon::parse($request->date_from, $displayTz)->startOfDay()->utc();
             $query->where('call_start_time', '>=', $fromUtc);
@@ -449,7 +448,7 @@ class ReportController extends Controller
      */
     public function zoomAgentPerformance(Request $request)
     {
-        $displayTz = 'America/Los_Angeles';
+        $displayTz = 'America/Denver';
         $dateFrom  = $request->filled('date_from') ? $request->date_from : null;
         $dateTo    = $request->filled('date_to')   ? $request->date_to   : null;
         $todayPt   = \Carbon\Carbon::now($displayTz)->toDateString();
@@ -469,7 +468,7 @@ class ReportController extends Controller
      */
     public function zoomAgentPerformanceData(Request $request)
     {
-        $displayTz = 'America/Los_Angeles';
+        $displayTz = 'America/Denver';
         $dateFrom  = $request->filled('date_from') ? $request->date_from : null;
         $dateTo    = $request->filled('date_to')   ? $request->date_to   : null;
 
@@ -1105,10 +1104,9 @@ class ReportController extends Controller
     public function closerStats(Request $request)
     {
         $tz = 'America/Denver';
-        $appTz = config('app.timezone', 'Asia/Karachi');
+        $appTz = config('app.timezone', 'America/Denver');
 
-        // Build MT date range, then convert to app timezone (Asia/Karachi)
-        // so whereBetween matches the PKT timestamps stored by now().
+        // Build MT date range for whereBetween queries
         $startDate = $request->filled('cs_date_from')
             ? Carbon::parse($request->cs_date_from, $tz)->startOfDay()->setTimezone($appTz)
             : Carbon::now($tz)->startOfMonth()->setTimezone($appTz);

@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RetentionController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\ChatShadowController;
 use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
@@ -47,7 +48,7 @@ use App\Support\Roles;
 */
 
 // Authentication routes (without registration)
-Auth::routes(['register' => false]);
+Auth::routes(['register' => false, 'reset' => false, 'confirm' => false, 'verify' => false]);
 
 // Partner Authentication Routes
 Route::prefix('partner')->group(function () {
@@ -572,7 +573,6 @@ Route::get('/finance/hub', function () {
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
     Route::post('/', [SettingsController::class, 'update'])->name('update')->middleware('role.permission:settings,edit');
-    Route::post('/test-network', [SettingsController::class, 'testNetwork'])->name('test-network')->middleware('role.permission:settings,edit');
     Route::get('/themes', [SettingsController::class, 'themes'])->name('themes')->middleware('role.permission:themes,view');
 
     // Chat Shadowing — access controlled by role.permission:chat-shadow,level
@@ -580,6 +580,17 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/chat-shadow/conversations', [ChatShadowController::class, 'getConversations'])->name('chat-shadow.conversations')->middleware('role.permission:chat-shadow,view');
     Route::get('/chat-shadow/conversations/{id}/messages', [ChatShadowController::class, 'getMessages'])->name('chat-shadow.messages')->middleware('role.permission:chat-shadow,view');
     Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes')->middleware('role.permission:chat-shadow,view');
+});
+
+// Allowed Devices Management (Super Admin only)
+Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
+    Route::get('/', [DeviceController::class, 'index'])->name('index');
+    Route::post('/', [DeviceController::class, 'store'])->name('store');
+    Route::post('/{device}/approve', [DeviceController::class, 'approve'])->name('approve');
+    Route::put('/{device}', [DeviceController::class, 'update'])->name('update');
+    Route::post('/{device}/disable', [DeviceController::class, 'disable'])->name('disable');
+    Route::post('/{device}/enable', [DeviceController::class, 'enable'])->name('enable');
+    Route::delete('/{device}', [DeviceController::class, 'destroy'])->name('destroy');
 });
 
 // Reports — access controlled by role.permission:reports,level

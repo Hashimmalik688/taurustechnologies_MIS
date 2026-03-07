@@ -42,9 +42,9 @@ class UserController extends Controller
         $user->email = strtolower($request->email); // Convert to lowercase
         $user->password = Hash::make($request->password);
         $user->zoom_number = $request->zoom_number;
+        $user->zoom_user_id = $request->zoom_user_id;
+        $user->zoom_extension = $request->zoom_extension;
         $user->save();
-
-        // Assign roles - detach all first then attach new ones
         $roles = $request->roles ?? [];
         try {
             // Detach all existing roles first
@@ -146,6 +146,8 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = strtolower($request->email); // Convert to lowercase
         $user->zoom_number = $request->zoom_number;
+        $user->zoom_user_id = $request->zoom_user_id;
+        $user->zoom_extension = $request->zoom_extension;
         $user->status = $request->status ?? 'active';
 
         // Update password only if provided and not blank

@@ -154,7 +154,7 @@
                         @forelse($ticket->comments as $comment)
                             <div class="cmt-item">
                                 <div class="cmt-meta">
-                                    <strong>{{ $comment->user->name }}</strong> — {{ $comment->created_at->format('M d, Y H:i') }}
+                                    <strong>{{ $comment->user->name }}</strong> — {{ $comment->created_at->format('M d, Y g:i A') }}
                                 </div>
                                 <p style="margin:0">{{ $comment->comment }}</p>
                             </div>
@@ -245,7 +245,7 @@
                     </div>
                     <div class="detail-row">
                         <div class="detail-lbl">Created</div>
-                        <div class="detail-val">{{ $ticket->created_at->format('M d, Y H:i') }}</div>
+                        <div class="detail-val">{{ $ticket->created_at->format('M d, Y g:i A') }}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-lbl">Created By</div>
@@ -270,7 +270,7 @@
                     @if($ticket->resolved_at)
                         <div class="detail-row">
                             <div class="detail-lbl">Resolved</div>
-                            <div class="detail-val">{{ $ticket->resolved_at->format('M d, Y H:i') }}</div>
+                            <div class="detail-val">{{ $ticket->resolved_at->format('M d, Y g:i A') }}</div>
                         </div>
                     @endif
                 </div>

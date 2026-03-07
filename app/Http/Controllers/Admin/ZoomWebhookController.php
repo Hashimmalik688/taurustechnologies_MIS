@@ -196,22 +196,33 @@ class ZoomWebhookController extends Controller
         if (!$lead) {
             $user = null;
             
-            // Try to find user by email first
-            if ($zoomUserEmail) {
+            // Priority 1: zoom_user_id — works regardless of which number they dialed from
+            if ($zoomUserId) {
+                $user = User::where('zoom_user_id', $zoomUserId)->first();
+            }
+            
+            // Priority 2: email
+            if (!$user && $zoomUserEmail) {
                 $user = User::where('email', $zoomUserEmail)->first();
             }
             
-            // If no email or user not found, try by caller's zoom_number
+            // Priority 3: zoom_extension
+            if (!$user && $zoomExtNumber) {
+                $user = User::where('zoom_extension', (string) $zoomExtNumber)->first();
+            }
+            
+            // Priority 4: zoom_number (legacy fallback)
             if (!$user && $callerNumber) {
                 $cleanCaller = preg_replace('/[^\d]/', '', $callerNumber);
                 $last10Caller = substr($cleanCaller, -10);
                 $user = User::where('zoom_number', 'like', '%' . $last10Caller . '%')->first();
-                Log::info('🔍 FALLBACK: Searching user by zoom_number', [
-                    'caller' => $callerNumber,
-                    'last_10' => $last10Caller,
-                    'found' => $user ? 'yes' : 'no'
-                ]);
             }
+            
+            Log::info('🔍 FALLBACK: User matching result', [
+                'zoom_user_id' => $zoomUserId,
+                'zoom_email' => $zoomUserEmail,
+                'found' => $user ? $user->name : 'NONE'
+            ]);
             
             if ($user) {
                 // Find most recent pending call log from this user (within last 5 minutes)
@@ -285,9 +296,15 @@ class ZoomWebhookController extends Controller
                 ]);
             }
             
-            // Also store in CallEvent for legacy support
+            // Also store in CallEvent — identify user by zoom_user_id first
             $user = null;
-            if ($callerNumber) {
+            if ($zoomUserId) {
+                $user = User::where('zoom_user_id', $zoomUserId)->first();
+            }
+            if (!$user && $zoomUserEmail) {
+                $user = User::where('email', $zoomUserEmail)->first();
+            }
+            if (!$user && $callerNumber) {
                 $cleanCaller = preg_replace('/[^\d]/', '', $callerNumber);
                 $user = User::where('zoom_number', 'like', '%' . substr($cleanCaller, -10) . '%')->first();
             }
@@ -354,8 +371,20 @@ class ZoomWebhookController extends Controller
                 Log::warning('⚠️ No active CallLog found to mark as ended (or too recent)', ['lead_id' => $lead->id]);
             }
         } else {
-            // Try to find by caller's zoom number
-            $user = User::where('zoom_number', 'like', '%'.substr($phoneNumber, -10).'%')->first();
+            // Try to find user by zoom_user_id first (works for all numbers), then fallback to email/phone
+            $endPayload = $rawWebhookData['payload']['object'] ?? [];
+            $endZoomUserId = $endPayload['caller']['user_id'] ?? $endPayload['callee']['user_id'] ?? null;
+            $endZoomEmail  = $endPayload['caller']['email'] ?? $endPayload['callee']['email'] ?? null;
+            $user = null;
+            if ($endZoomUserId) {
+                $user = User::where('zoom_user_id', $endZoomUserId)->first();
+            }
+            if (!$user && $endZoomEmail) {
+                $user = User::where('email', $endZoomEmail)->first();
+            }
+            if (!$user) {
+                $user = User::where('zoom_number', 'like', '%'.substr($phoneNumber, -10).'%')->first();
+            }
             if ($user) {
                 $callLog = \App\Models\CallLog::where('agent_id', $user->id)
                     ->whereIn('call_status', ['connected', 'no_answer', 'ringing'])
@@ -839,9 +868,18 @@ class ZoomWebhookController extends Controller
                 }
             }
 
-            // Try to find agent by email or zoom number
+            // Try to find agent — Priority 1: zoom_user_id, Priority 2: email, Priority 3: zoom_number
             $agentEmail = $callerData['caller_email'] ?? $calleeData['callee_email'];
-            if ($agentEmail) {
+            $agentZoomUserId = $rawWebhookData['payload']['object']['caller']['user_id']
+                ?? $rawWebhookData['payload']['object']['callee']['user_id']
+                ?? null;
+            if ($agentZoomUserId) {
+                $agent = User::where('zoom_user_id', $agentZoomUserId)->first();
+                if ($agent) {
+                    $agentId = $agent->id;
+                }
+            }
+            if (!$agentId && $agentEmail) {
                 $agent = User::where('email', $agentEmail)->first();
                 if ($agent) {
                     $agentId = $agent->id;
@@ -928,7 +966,7 @@ class ZoomWebhookController extends Controller
                 
                 // Processing
                 'is_processed' => true,
-                'processed_at' => now(),
+                'processed_at' => now()->utc(),
             ]);
 
             Log::info('✅ Webhook event saved to zoom_webhook_logs', [

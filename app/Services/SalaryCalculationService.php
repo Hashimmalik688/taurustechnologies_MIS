@@ -147,7 +147,7 @@ class SalaryCalculationService
         $leaveDays = 0;
         $halfDays = 0;
         $lateDays = 0;
-        $lateThreshold = Carbon::parse('07:15:00');
+        $lateThreshold = Carbon::parse(\App\Models\Setting::get('late_time', '09:15') . ':00');
         
         foreach ($attendances as $attendance) {
             if ($attendance->status === Statuses::ATTENDANCE_PRESENT) {

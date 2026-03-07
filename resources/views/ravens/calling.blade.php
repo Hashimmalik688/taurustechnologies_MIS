@@ -895,9 +895,20 @@
                                 </div>
                                 <div class="col-md-12 d-none" id="followup_datetime_field">
                                     <div class="ph-field">
-                                        <label>Follow Up Date & Time</label>
+                                        <label>Follow Up Date & Time (MT)</label>
                                         <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
-                                        <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">When should the follow-up call be scheduled?</small>
+                                        <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">Enter in Mountain Time (MT)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Q&A -->
+                                <div class="col-12"><div class="ph-section"><i class="bx bx-chat"></i><span>Q &amp; A</span></div></div>
+                                <div class="col-12">
+                                    <div class="ph-field">
+                                        <div id="phase3_qna_container"></div>
+                                        <button type="button" class="ph-add-btn mt-2" onclick="callingAddQna()">
+                                            <i class="bx bx-plus"></i> Add Question
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1135,7 +1146,7 @@
         
         if (modalElement) {
             try {
-                const modal = new bootstrap.Modal(modalElement);
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                 console.log('✅ Bootstrap modal object created successfully');
                 modal.show();
                 console.log('✅ Modal.show() called - modal should be visible');
@@ -1296,19 +1307,10 @@
             console.log('Zoom API response:', data);
             
             if (data.success) {
-                console.log('✅ Desktop call initiated - Zoom will fire webhooks when call connects');
-                
-                // Open Zoom Phone desktop app using an invisible link click
-                // This prevents page navigation and keeps polling active
-                if (data.zoom_url) {
-                    const link = document.createElement('a');
-                    link.href = data.zoom_url;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    console.log('📞 Zoom Phone link clicked:', data.zoom_url);
-                }
+                console.log('✅ Call record created — dialling via Zoom Phone Smart Embed');
+
+                // Dial via Smart Embed (no desktop app needed)
+                window.zoomDial(phoneNumber);
                 
                 // Mark lead as dialed
                 window.dialedLeads.add(leadId);
@@ -1343,11 +1345,13 @@
         .catch(error => {
             console.error('API request failed:', error);
             if (error.message === 'ZOOM_NOT_AUTHORIZED') {
-                if (confirm('⚠️ Zoom Phone Not Connected\n\nYou need to connect your Zoom Phone account to make calls.\n\nClick OK to connect now.')) {
-                    window.location.href = '/zoom/authorize';
-                }
+                toastr.warning(
+                    'Your Zoom Phone account is not connected. Redirecting to connect now...',
+                    '⚠️ Zoom Not Connected',
+                    { timeOut: 4000, onHidden: function() { window.location.href = '/zoom/authorize'; } }
+                );
             } else {
-                alert('❌ Connection failed: ' + error.message + '\n\nPlease try again or contact support.');
+                toastr.error('❌ Connection failed: ' + error.message + '. Please try again or contact support.', 'Call Failed');
             }
         })
         .finally(() => {
@@ -1441,51 +1445,15 @@
         alert('All leads have been dialed!');
     }
 
-    // Test function for Zoom protocol
+    // Test function for Zoom Smart Embed dial
     function testZoomProtocol() {
-        console.log('Testing Zoom protocol...');
-        
         const testNumber = '2393871921'; // Hashim's number
-        const zoomUrl = 'zoomphonecall://' + testNumber;
-        
-        console.log('Test Zoom URL:', zoomUrl);
-        
-        // Show confirmation
-        const confirmed = confirm(`Testing Zoom Phone protocol with number: ${testNumber}\n\nThis will attempt to dial Hashim Shabbir.\n\nClick OK to test, Cancel to abort.`);
-        
+
+        const confirmed = confirm(`Testing Zoom Phone Smart Embed with number: ${testNumber}\n\nThis will dial via the embedded Zoom Phone widget.\n\nClick OK to test, Cancel to abort.`);
+
         if (confirmed) {
-            toastr.info('Testing Zoom Phone protocol...', 'Test Mode');
-            
-            try {
-                // Try multiple methods
-                console.log('Method 1: window.location.href');
-                window.location.href = zoomUrl;
-                
-                setTimeout(() => {
-                    console.log('Method 2: Creating a link and clicking it');
-                    const link = document.createElement('a');
-                    link.href = zoomUrl;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }, 500);
-                
-                setTimeout(() => {
-                    console.log('Method 3: Using iframe');
-                    const iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    iframe.src = zoomUrl;
-                    document.body.appendChild(iframe);
-                    
-                    setTimeout(() => {
-                        document.body.removeChild(iframe);
-                    }, 1000);
-                }, 1000);
-                
-            } catch (error) {
-                console.error('Error testing Zoom:', error);
-                alert('Error: ' + error.message);
-            }
+            toastr.info('Testing Zoom Phone Smart Embed...', 'Test Mode');
+            window.zoomDial(testNumber);
         }
     }
 
@@ -1611,6 +1579,11 @@
                 modal.hide();
             }
         }
+        // Remove any orphaned modal backdrops and body classes that can lock the page
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
         window.currentCallInfo = null;
         window.currentLeadData = null;
     }
@@ -2375,6 +2348,9 @@
         const bContainer = document.getElementById('beneficiaries-container-ravens');
         if (bContainer) bContainer.innerHTML = '';
         window.beneficiaryIndexRavens = 0;
+        // Clear Q&A rows
+        const qnaContainer = document.getElementById('phase3_qna_container');
+        if (qnaContainer) qnaContainer.innerHTML = '';
 
         const leadData = callData.lead_data;
         window.currentLeadData = leadData;
@@ -2594,7 +2570,7 @@
                 throw new Error('Bootstrap not available');
             }
             
-            const modal = new bootstrap.Modal(modalElement);
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
             console.log('🎭 Bootstrap modal created:', modal);
             
             // CRITICAL: Show the modal first, then make sure phase1 is visible
@@ -2821,6 +2797,27 @@
     /**
      * Auto-save form data silently (called every 30 seconds and on form close)
      */
+    function callingAddQna() {
+        const container = document.getElementById('phase3_qna_container');
+        const row = document.createElement('div');
+        row.className = 'calling-qna-row row mb-2 g-2';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" class="form-control form-control-sm calling-qna-question" placeholder="Question">
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control form-control-sm calling-qna-answer" placeholder="Answer">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm w-100" onclick="this.closest('.calling-qna-row').remove()">
+                    <i class="bx bx-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(row);
+        row.querySelector('.calling-qna-question').focus();
+    }
+
     function autoSaveFormData(isSilent = false) {
         const leadId = window.currentLeadData?.id;
         
@@ -2911,6 +2908,15 @@
             policy_number: document.getElementById('change_policy_number')?.value || null,
             account_title: document.getElementById('change_account_title')?.value || null,
             source: document.getElementById('change_source')?.value || null,
+            closer_qna: (() => {
+                const pairs = [];
+                document.querySelectorAll('.calling-qna-row').forEach(r => {
+                    const q = r.querySelector('.calling-qna-question')?.value?.trim();
+                    const a = r.querySelector('.calling-qna-answer')?.value?.trim();
+                    if (q) pairs.push({ question: q, answer: a || '' });
+                });
+                return pairs.length > 0 ? pairs : null;
+            })(),
         };
         
         // Check if any data has actually been entered (besides default values)
@@ -3034,6 +3040,15 @@
             policy_number: document.getElementById('change_policy_number')?.value || null,
             account_title: document.getElementById('change_account_title')?.value || null,
             source: document.getElementById('change_source')?.value || null,
+            closer_qna: (() => {
+                const pairs = [];
+                document.querySelectorAll('.calling-qna-row').forEach(r => {
+                    const q = r.querySelector('.calling-qna-question')?.value?.trim();
+                    const a = r.querySelector('.calling-qna-answer')?.value?.trim();
+                    if (q) pairs.push({ question: q, answer: a || '' });
+                });
+                return pairs.length > 0 ? pairs : null;
+            })(),
         };
         
         // Send to server
@@ -3142,6 +3157,15 @@
             
             followup_required: document.getElementById('phase3_followup_required')?.value || null,
             followup_scheduled_at: document.getElementById('phase3_followup_scheduled_at')?.value || null,
+            closer_qna: (() => {
+                const pairs = [];
+                document.querySelectorAll('.calling-qna-row').forEach(r => {
+                    const q = r.querySelector('.calling-qna-question')?.value?.trim();
+                    const a = r.querySelector('.calling-qna-answer')?.value?.trim();
+                    if (q) pairs.push({ question: q, answer: a || '' });
+                });
+                return pairs.length > 0 ? pairs : null;
+            })(),
         };
         
         // Confirm submission

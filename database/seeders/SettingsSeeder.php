@@ -36,9 +36,9 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'late_time',
-                'value' => '19:15',
+                'value' => '09:15',
                 'type' => 'string',
-                'description' => 'Fixed time after which attendance is marked late (e.g., 19:15 or 07:15 PM)',
+                'description' => 'Fixed time after which attendance is marked late (e.g., 09:15 or 09:15 AM)',
                 'group' => 'attendance',
             ],
             [
@@ -50,9 +50,9 @@ class SettingsSeeder extends Seeder
             ],
             [
                 'key' => 'shift_duration_hours',
-                'value' => '10',
+                'value' => '8',
                 'type' => 'string',
-                'description' => 'Standard shift duration in hours (e.g., 10 for night shift)',
+                'description' => 'Standard shift duration in hours (e.g., 8 for a standard day shift)',
                 'group' => 'attendance',
             ],
             [

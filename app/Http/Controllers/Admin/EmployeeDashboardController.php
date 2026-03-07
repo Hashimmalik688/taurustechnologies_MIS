@@ -43,13 +43,9 @@ class EmployeeDashboardController extends Controller
         $totalHours = 0;
         
         $cursor = $periodStart->copy();
-        $now = \Carbon\Carbon::now('Asia/Karachi');
+        $now = \Carbon\Carbon::now();
         
-        // For night shift: if before 5am, we're still in previous day's shift
         $effectiveToday = $now->copy();
-        if ($now->hour < 5) {
-            $effectiveToday->subDay();
-        }
         
         while ($cursor->lte($periodEnd)) {
             // Skip if future date (only check if viewing current period)

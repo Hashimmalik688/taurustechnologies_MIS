@@ -829,6 +829,24 @@
             @endif
             @endhasanyrole
 
+            {{-- Closer Q&A --}}
+            @if(!empty($insurance->closer_qna))
+            <div class="ld-card">
+                <div class="ld-card-hdr"><h5><i class="mdi mdi-chat-question"></i> Closer Q &amp; A</h5></div>
+                <div class="ld-card-body">
+                    @foreach($insurance->closer_qna as $i => $pair)
+                    <div class="ld-f" style="align-items:flex-start;margin-bottom:.6rem">
+                        <span class="ld-fl" style="padding-top:.15rem">Q{{ $i + 1 }}</span>
+                        <span class="ld-fv" style="display:flex;flex-direction:column;gap:.25rem">
+                            <strong>{{ $pair['question'] ?? '' }}</strong>
+                            <span style="color:var(--bs-secondary-color)">{{ $pair['answer'] ?? '—' }}</span>
+                        </span>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             {{-- Follow-Up --}}
             @if($insurance->followup_required || $insurance->followup_scheduled_at)
             <div class="ld-card">

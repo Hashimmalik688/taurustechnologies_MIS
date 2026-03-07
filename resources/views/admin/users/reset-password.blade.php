@@ -118,7 +118,7 @@
                         <dt class="col-sm-4">Last Login:</dt>
                         <dd class="col-sm-8">
                             @if ($user->last_login_at)
-                                {{ $user->last_login_at->format('M d, Y H:i') }}
+                                {{ $user->last_login_at->format('M d, Y g:i A') }}
                             @else
                                 <em>Never logged in</em>
                             @endif

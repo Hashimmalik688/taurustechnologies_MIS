@@ -16,7 +16,7 @@ class MarkAbsent extends Command
      *
      * @var string
      */
-    protected $signature = 'attendance:mark-absent {--roles=* : Roles to include (comma separated or multiple options) } {--cutoff=19:30 : Cutoff time (H:i) to consider absence}';
+    protected $signature = 'attendance:mark-absent {--roles=* : Roles to include (comma separated or multiple options) } {--cutoff=09:30 : Cutoff time (H:i) to consider absence}';
 
     /**
      * The console command description.
@@ -56,7 +56,7 @@ class MarkAbsent extends Command
             ];
         }
 
-        $cutoff = $this->option('cutoff') ?: '19:30';
+        $cutoff = $this->option('cutoff') ?: '09:30';
 
         $today = Carbon::today();
 

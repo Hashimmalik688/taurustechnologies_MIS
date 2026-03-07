@@ -1337,10 +1337,9 @@ function dialLead(leadId, phone, customerName, daysAgo, button) {
         })
     });
 
-    // Clean phone and initiate Zoom call
-    const cleanPhone = phone.replace(/[^\d\+]/g, '');
-    const zoomUrl = 'zoomphonecall://' + encodeURIComponent(cleanPhone);
-    window.location.href = zoomUrl;
+    // Dial via Zoom Phone Smart Embed
+    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    window.zoomDial(cleanPhone);
 
     toastr.info('Initiating call to ' + customerName + '...', 'Dialing');
 }

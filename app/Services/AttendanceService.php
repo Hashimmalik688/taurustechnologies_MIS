@@ -13,9 +13,6 @@ use Illuminate\Support\Facades\Request;
 
 class AttendanceService
 {
-    /** Office timezone used for all attendance time calculations */
-    public const TIMEZONE = 'Asia/Karachi';
-
     public function isInOfficeNetwork($ipAddress = null)
     {
         // Check if attendance is enabled
@@ -23,13 +20,19 @@ class AttendanceService
             return false;
         }
 
-        $ip = $ipAddress ?: Request::ip();
         $allowedNetworks = Setting::get('office_networks', []);
 
         // If it's an array string from database, convert it
         if (is_string($allowedNetworks)) {
-            $allowedNetworks = explode(',', $allowedNetworks);
+            $allowedNetworks = array_filter(array_map('trim', explode(',', $allowedNetworks)));
         }
+
+        // No networks configured → no IP restriction; allow from any device
+        if (empty($allowedNetworks)) {
+            return true;
+        }
+
+        $ip = $ipAddress ?: Request::ip();
 
         foreach ($allowedNetworks as $network) {
             $network = trim($network);
@@ -58,54 +61,44 @@ class AttendanceService
 
     public function markAttendance($userId, $forceOffice = false)
     {
-        // Always use internet-based PKT (Asia/Karachi) time for attendance
-        $currentTime = Carbon::now(self::TIMEZONE);
-        // Allow marking attendance only at or after Office Start Time
-        $officeStartTimeRaw = Setting::get('office_start_time', '19:00');
+        $currentTime = Carbon::now();
+
+        // Get office start time and late time from settings
+        $officeStartTimeRaw = Setting::get('office_start_time', '09:00');
+        $lateTimeRaw = Setting::get('late_time', '09:15');
+
+        // Accept both '09:00' and '09:00 AM' formats
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw);
         }
+
+        try {
+            $lateTime = Carbon::createFromFormat('H:i', $lateTimeRaw);
+        } catch (\Exception $e) {
+            $lateTime = Carbon::createFromFormat('h:i A', $lateTimeRaw);
+        }
+
+        // Allow marking attendance only at or after Office Start Time
         if ($currentTime->lessThan($startTime)) {
             return [
                 'success' => false,
                 'message' => 'Attendance cannot be marked before office start time (' . $startTime->format('g:i A') . ').',
             ];
         }
-        // Always use internet-based PKT (Asia/Karachi) time for attendance
-        $currentTime = Carbon::now(self::TIMEZONE);
-        $currentHour = $currentTime->hour;
-
-        // Get office start time and late time from settings
-        $officeStartTimeRaw = Setting::get('office_start_time', '19:00');
-        $lateTimeRaw = Setting::get('late_time', '19:15'); // e.g., '19:15' or '07:15 PM'
-
-        // Accept both '19:00' and '07:00 PM' formats for office start
-        try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
-        } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
-        }
-
-        // Accept both '19:15' and '07:15 PM' formats for late time
-        try {
-            $lateTime = Carbon::createFromFormat('H:i', $lateTimeRaw, self::TIMEZONE);
-        } catch (\Exception $e) {
-            $lateTime = Carbon::createFromFormat('h:i A', $lateTimeRaw, self::TIMEZONE);
-        }
 
         // Get configurable attendance window settings
         $bufferHours = (int) Setting::get('attendance_buffer_hours', '1');
-        $shiftDurationHours = (int) Setting::get('shift_duration_hours', '10');
-        
+        $shiftDurationHours = (int) Setting::get('shift_duration_hours', '8');
+
         // Calculate allowed attendance window based on settings
         $windowStart = $startTime->copy()->subHours($bufferHours);
         $windowEnd = $startTime->copy()->addHours($shiftDurationHours + $bufferHours);
-        
+
         // Check if current time is within the attendance window
         $isWithinOfficeHours = $currentTime->between($windowStart, $windowEnd, true);
-        
+
         if (!$isWithinOfficeHours && !$forceOffice) {
             return [
                 'success' => false,
@@ -113,8 +106,7 @@ class AttendanceService
             ];
         }
 
-        // For night shift (7 PM - 5 AM), if current time is before 5 AM, attendance belongs to previous day's shift
-        $shiftDate = $currentTime->hour < 5 ? Carbon::yesterday() : Carbon::today();
+        $shiftDate = Carbon::today();
 
         // Check if it's a public holiday
         if (PublicHoliday::isHoliday($shiftDate)) {
@@ -144,7 +136,7 @@ class AttendanceService
             ];
         }
 
-        // Check if attendance already exists for this shift
+        // Check if attendance already exists for today
         $attendance = Attendance::where('user_id', $userId)
             ->where('date', $shiftDate)
             ->first();
@@ -152,47 +144,21 @@ class AttendanceService
         if ($attendance) {
             return [
                 'success' => false,
-                'message' => 'Attendance already marked for this shift.',
+                'message' => 'Attendance already marked for today.',
                 'attendance' => $attendance,
             ];
         }
 
-        // (late_threshold_minutes logic removed, only late_time is used)
-
-        // Night shift logic: if office start is in evening (e.g., 19:00/7pm), attendance window is 7pm today to 5am next day
-        $nightShift = $startTime->hour >= 12; // 12:00 or later is night shift
-        $attendanceDate = $currentTime->copy()->setTimezone(self::TIMEZONE)->toDateString();
-
-        if ($nightShift) {
-            // Attendance window: 7pm today to 5am next day
-            $shiftEnd = $startTime->copy()->addHours(10); // 7pm + 10h = 5am next day
-            if ($currentTime->between($startTime, $shiftEnd, true)) {
-                // If after midnight but before 5am (early morning), assign attendance to previous date
-                if ($currentTime->hour < 5) {
-                    $attendanceDate = $currentTime->copy()->subDay()->toDateString();
-                }
-                // Late if after fixed late time (e.g., 7:15pm), but before 5am
-                $status = $currentTime->lessThanOrEqualTo($lateTime) ? Statuses::ATTENDANCE_PRESENT : Statuses::ATTENDANCE_LATE;
-            } else {
-                // Outside attendance window
-                $status = Statuses::ATTENDANCE_ABSENT;
-            }
-        } else {
-            // Day shift logic (default)
-            $status = $currentTime->lessThanOrEqualTo($lateTime) ? Statuses::ATTENDANCE_PRESENT : Statuses::ATTENDANCE_LATE;
-        }
+        // Day shift: present if on time, late if past late threshold
+        $status = $currentTime->lessThanOrEqualTo($lateTime) ? Statuses::ATTENDANCE_PRESENT : Statuses::ATTENDANCE_LATE;
 
         $attendance = Attendance::create([
             'user_id' => $userId,
             'date' => $shiftDate,
             'login_time' => $currentTime,
             'ip_address' => Request::ip(),
-            'device_fingerprint' => Request::header('X-Device-Fingerprint')
-                ?: Request::cookie('device_fingerprint')
-                ?: Request::header('X-Device-ID')
-                ?: Request::cookie('device_id'),
-            'device_name' => Request::header('X-Device-Name')
-                ?: Request::cookie('device_name'),
+            'device_fingerprint' => Request::cookie(\App\Http\Middleware\RestrictToAllowedDevice::COOKIE),
+            'device_name' => null,
             'status' => $status,
         ]);
 
@@ -206,26 +172,8 @@ class AttendanceService
 
     public function markLogout($userId)
     {
-        $currentTime = Carbon::now(self::TIMEZONE);
-        
-        // Night shift runs ~7 PM to 5 AM, checkout cutoff is 6 AM
-        // Checkout is allowed during shift hours: 7 PM (hour 19) through 5:59 AM (hour < 6)
-        // Blocked during daytime non-shift window: 6 AM to 6:59 PM (hour >= 6 && hour < 19)
-        if ($currentTime->hour >= 6 && $currentTime->hour < 19) {
-            return [
-                'success' => false,
-                'message' => 'Checkout window has closed. Cutoff time is 6:00 AM.',
-            ];
-        }
-        
-        // For night shift (7 PM - 6 AM), if current time is before 6 AM,
-        // the attendance belongs to previous day's shift
-        $shiftDate = $currentTime->hour < 6 
-            ? Carbon::yesterday(self::TIMEZONE) 
-            : Carbon::today(self::TIMEZONE);
-
         $attendance = Attendance::where('user_id', $userId)
-            ->where('date', $shiftDate)
+            ->where('date', Carbon::today())
             ->whereNotNull('login_time')
             ->whereNull('logout_time')
             ->first();
@@ -251,39 +199,35 @@ class AttendanceService
     // New method to check and mark attendance on dashboard visits
     public function checkAndMarkDailyAttendance($userId)
     {
-        $currentTime = Carbon::now(self::TIMEZONE);
-        
+        $currentTime = Carbon::now();
+
         // Get office start time from settings
-        $officeStartTimeRaw = Setting::get('office_start_time', '19:00');
+        $officeStartTimeRaw = Setting::get('office_start_time', '09:00');
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, self::TIMEZONE);
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, self::TIMEZONE);
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw);
         }
-        
+
         // Calculate allowed attendance window with 1-hour buffer
         $bufferHours = (int) Setting::get('attendance_buffer_hours', '1');
-        $shiftDurationHours = (int) Setting::get('shift_duration_hours', '10');
+        $shiftDurationHours = (int) Setting::get('shift_duration_hours', '8');
         $windowStart = $startTime->copy()->subHours($bufferHours);
         $windowEnd = $startTime->copy()->addHours($shiftDurationHours + $bufferHours);
-        
+
         // Check if within allowed office hours
         $isWithinOfficeHours = $currentTime->between($windowStart, $windowEnd, true);
-        
+
         if (!$isWithinOfficeHours) {
             return [
                 'success' => false,
                 'message' => 'Attendance can only be marked between ' . $windowStart->format('g:i A') . ' and ' . $windowEnd->format('g:i A') . '.',
             ];
         }
-        
-        // For night shift (7 PM - 5 AM), if current time is before 5 AM,
-        // the attendance belongs to previous day's shift
-        $shiftDate = $currentTime->hour < 5 
-            ? Carbon::yesterday() 
-            : Carbon::today();
 
-        // Check if attendance already exists for this shift
+        $shiftDate = Carbon::today();
+
+        // Check if attendance already exists for today
         $existingAttendance = Attendance::where('user_id', $userId)
             ->where('date', $shiftDate)
             ->first();
@@ -291,7 +235,7 @@ class AttendanceService
         if ($existingAttendance) {
             return [
                 'success' => false,
-                'message' => 'Attendance already marked for this shift.',
+                'message' => 'Attendance already marked for today.',
                 'attendance' => $existingAttendance,
             ];
         }
@@ -309,42 +253,34 @@ class AttendanceService
     }
     
     /**
-     * Auto-checkout employees who haven't checked out after 6 AM
-     * Should be run via scheduled command
+     * Auto-checkout employees who haven't checked out by end of day.
+     * Should be run via scheduled command.
      */
     public function autoCheckoutOverdueAttendances()
     {
         $currentTime = Carbon::now();
-        
-        // Only run this between 5:00 AM and 5:30 AM
-        if ($currentTime->hour !== 5) {
+
+        // Only run shortly after the end of the shift (e.g., around 5:30 PM MT)
+        if ($currentTime->hour < 17 || $currentTime->hour > 18) {
             return [
                 'success' => false,
-                'message' => 'Auto-checkout only runs between 5:00 AM and 5:30 AM.',
+                'message' => 'Auto-checkout only runs between 5:00 PM and 6:59 PM MT.',
             ];
         }
-        
-        // Get previous shift date (yesterday since we're after 5 AM)
-        $shiftDate = Carbon::yesterday();
-        
-        // Find all attendance records from previous shift without logout
+
+        $shiftDate = Carbon::today();
+
+        // Find all attendance records from today without logout
         $overdueAttendances = Attendance::where('date', $shiftDate)
             ->whereNull('logout_time')
             ->get();
-        
+
         $checkedOutCount = 0;
-        
+
         foreach ($overdueAttendances as $attendance) {
-            // Set logout time to 5:00 AM
-            $checkoutTime = Carbon::create(
-                $shiftDate->year,
-                $shiftDate->month,
-                $shiftDate->day,
-                5,
-                0,
-                0
-            )->addDay(); // Next day 5 AM
-            
+            // Set logout time to 5:30 PM MT
+            $checkoutTime = Carbon::today()->setTime(17, 30, 0);
+
             $attendance->update([
                 'logout_time' => $checkoutTime,
                 'auto_checkout' => true,

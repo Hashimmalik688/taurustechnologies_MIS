@@ -177,8 +177,7 @@ class DashboardController extends Controller
             ->count();
 
         // Attendance - Use local database instead of external API
-        // Use USA Eastern Time for consistency
-        $usaToday = now()->setTimezone('America/New_York')->toDateString();
+        $usaToday = now()->toDateString();
         $trackableRoles = [Roles::EMPLOYEE, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RAVENS_CLOSER];
         $todayAttendances = \App\Models\Attendance::with('user')
             ->whereDate('date', $usaToday)
@@ -370,7 +369,7 @@ class DashboardController extends Controller
             ->count();
 
         // Attendance - Use local database
-        $usaToday = now()->setTimezone('America/New_York')->toDateString();
+        $usaToday = now()->toDateString();
         $todayAttendances = \App\Models\Attendance::with('user')
             ->whereDate('date', $usaToday)
             ->get();

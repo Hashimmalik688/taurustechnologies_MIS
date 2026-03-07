@@ -46,11 +46,6 @@ class Attendance extends Model
                     $loginTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->login_time->format('H:i:s'));
                     $logoutTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->logout_time->format('H:i:s'));
                     
-                    // Handle night shift - if logout is before login, add a day
-                    if ($logoutTime->lt($loginTime)) {
-                        $logoutTime->addDay();
-                    }
-                    
                     $attendance->working_hours = round($loginTime->diffInHours($logoutTime, true), 1);
                 } catch (\Exception $e) {
                     // If parsing fails, set working hours to 0
@@ -68,56 +63,25 @@ class Attendance extends Model
         return $this->belongsTo(User::class)->withTrashed();
     }
 
-    // Check if user is late (assuming office starts at 9 AM)
+    // Check if user is late based on office start time setting
     public function isLate()
     {
         if (! $this->login_time) {
             return false;
         }
 
-        // Get office start time and late threshold from settings
-        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '19:00');
+        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '09:00');
         $lateThreshold = (int) \App\Models\Setting::get('late_threshold_minutes', 15);
 
-        // Accept both '19:00' and '07:00 PM' formats
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw);
         }
-        $lateTime = $startTime->copy()->addMinutes($lateThreshold);
+        $lateTime = Carbon::parse($this->date->format('Y-m-d') . ' ' . $startTime->copy()->addMinutes($lateThreshold)->format('H:i:s'));
+        $loginTime = Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->login_time->format('H:i:s'));
 
-        // Night shift logic: if office start is in evening (e.g., 19:00/7pm), attendance window is 7pm today to 5am next day
-        $nightShift = $startTime->hour >= 12;
-        $loginTime = $this->login_time->copy()->setTimezone('Asia/Karachi');
-
-        if ($nightShift) {
-            // If login is after midnight but before 5am, treat as previous day
-            if ($loginTime->hour < 5) {
-                $shiftDate = $loginTime->copy()->subDay()->toDateString();
-            } else {
-                $shiftDate = $loginTime->toDateString();
-            }
-            // Late if login after late threshold (7:15pm)
-            $lateTime = Carbon::parse($shiftDate . ' ' . $lateTime->format('H:i:s'), 'Asia/Karachi');
-            $isLate = $loginTime->greaterThan($lateTime);
-            \Log::debug('[Attendance isLate NIGHT]', [
-                'login_time' => $loginTime->format('Y-m-d H:i:s'),
-                'late_time' => $lateTime->format('Y-m-d H:i:s'),
-                'is_late' => $isLate,
-            ]);
-            return $isLate;
-        } else {
-            // Day shift logic (default)
-            $lateTime = Carbon::parse($this->date->format('Y-m-d') . ' ' . $lateTime->format('H:i:s'), 'Asia/Karachi');
-            $isLate = $loginTime->greaterThan($lateTime);
-            \Log::debug('[Attendance isLate DAY]', [
-                'login_time' => $loginTime->format('Y-m-d H:i:s'),
-                'late_time' => $lateTime->format('Y-m-d H:i:s'),
-                'is_late' => $isLate,
-            ]);
-            return $isLate;
-        }
+        return $loginTime->greaterThan($lateTime);
     }
 
     // Calculate working hours
@@ -144,11 +108,6 @@ class Attendance extends Model
         $loginTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $loginTimeStr);
         $logoutTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $logoutTimeStr);
         
-        // Handle night shift - if logout is before login, add a day
-        if ($logoutTime->lt($loginTime)) {
-            $logoutTime->addDay();
-        }
-
         return round($loginTime->diffInHours($logoutTime, true), 1);
     }
 
@@ -167,11 +126,6 @@ class Attendance extends Model
             $endTime = Carbon::parse($this->logout_time);
             $startTime = Carbon::parse($this->login_time);
 
-            // Handle night shift - if end time is before start time, add a day
-            if ($endTime->lt($startTime)) {
-                $endTime->addDay();
-            }
-
             return round($startTime->diffInHours($endTime, true), 1);
         }
 
@@ -181,13 +135,8 @@ class Attendance extends Model
             return 0;
         }
 
-        $endTime = Carbon::now('Asia/Karachi');
+        $endTime = Carbon::now();
         $startTime = Carbon::parse($this->login_time);
-
-        // Handle night shift - if end time is before start time, add a day
-        if ($endTime->lt($startTime)) {
-            $endTime->addDay();
-        }
 
         return round($startTime->diffInHours($endTime, true), 1);
     }
@@ -206,11 +155,6 @@ class Attendance extends Model
             $endTime = Carbon::parse($this->logout_time);
             $startTime = Carbon::parse($this->login_time);
 
-            // Handle night shift - if end time is before start time, add a day
-            if ($endTime->lt($startTime)) {
-                $endTime->addDay();
-            }
-
             $totalMinutes = $startTime->diffInMinutes($endTime);
             $hours = floor($totalMinutes / 60);
             $minutes = $totalMinutes % 60;
@@ -224,13 +168,8 @@ class Attendance extends Model
             return 'Incomplete';
         }
 
-        $endTime = Carbon::now('Asia/Karachi');
+        $endTime = Carbon::now();
         $startTime = Carbon::parse($this->login_time);
-
-        // Handle night shift - if end time is before start time, add a day
-        if ($endTime->lt($startTime)) {
-            $endTime->addDay();
-        }
 
         $totalMinutes = $startTime->diffInMinutes($endTime);
         $hours = floor($totalMinutes / 60);
@@ -278,28 +217,17 @@ class Attendance extends Model
 
     public function scopeLate($query)
     {
-        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '19:00');
+        $officeStartTimeRaw = \App\Models\Setting::get('office_start_time', '09:00');
         $lateThreshold = (int) \App\Models\Setting::get('late_threshold_minutes', 15);
 
-        // Accept both '19:00' and '07:00 PM' formats
         try {
-            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('H:i', $officeStartTimeRaw);
         } catch (\Exception $e) {
-            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw, 'Asia/Karachi');
+            $startTime = Carbon::createFromFormat('h:i A', $officeStartTimeRaw);
         }
-        $lateTime = $startTime->copy()->addMinutes($lateThreshold);
-        $lateTimeStr = $lateTime->format('H:i:s');
+        $lateTimeStr = $startTime->copy()->addMinutes($lateThreshold)->format('H:i:s');
 
-        // Night shift: late if login after late threshold (7:15pm) for night shift
-        if ($startTime->hour >= 12) {
-            return $query->whereRaw("(
-                (HOUR(login_time) >= 18 AND TIME(login_time) > '$lateTimeStr') OR
-                (HOUR(login_time) < 5 AND TIME(login_time) > '$lateTimeStr')
-            )");
-        } else {
-            // Day shift
-            return $query->whereRaw("TIME(login_time) > '$lateTimeStr'");
-        }
+        return $query->whereRaw("TIME(login_time) > '$lateTimeStr'");
     }
 
     public function scopeForMonth($query, $month, $year)
@@ -328,7 +256,7 @@ class Attendance extends Model
         $totalHours = 0;
         
         $cursor = $startOfMonth->copy();
-        $now = \Carbon\Carbon::now('Asia/Karachi');
+        $now = \Carbon\Carbon::now();
         
         while ($cursor->lte($endOfMonth)) {
             // Skip if future date

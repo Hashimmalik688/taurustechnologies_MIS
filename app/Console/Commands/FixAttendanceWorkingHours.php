@@ -58,11 +58,6 @@ class FixAttendanceWorkingHours extends Command
                 $loginTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->login_time->format('H:i:s'));
                 $logoutTime = Carbon::parse($attendanceDate->format('Y-m-d') . ' ' . $attendance->logout_time->format('H:i:s'));
                 
-                // Handle night shift - if logout is before login, add a day
-                if ($logoutTime->lt($loginTime)) {
-                    $logoutTime->addDay();
-                }
-                
                 $correctWorkingHours = round($loginTime->diffInHours($logoutTime, true), 1);
                 $currentWorkingHours = $attendance->working_hours ?? 0;
                 

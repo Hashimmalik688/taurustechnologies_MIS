@@ -194,15 +194,15 @@
     <form method="GET" action="{{ route('settings.reports.zoom-agent-performance') }}" id="apFilterForm">
         <div class="df-row">
             <div>
-                <label>From (PT)</label>
+                <label>From (MT)</label>
                 <input type="date" name="date_from" id="apDateFrom" value="{{ $dateFrom ?? '' }}">
             </div>
             <div>
-                <label>To (PT)</label>
+                <label>To (MT)</label>
                 <input type="date" name="date_to" id="apDateTo" value="{{ $dateTo ?? '' }}">
             </div>
             <button type="button" class="pipe-pill" style="font-size:.72rem;padding:.3rem .75rem;border:none;cursor:pointer" onclick="setToday()">
-                <i class="bx bx-calendar-check" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Today (PT)
+                <i class="bx bx-calendar-check" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Today (MT)
             </button>
             <button type="submit" class="pipe-pill-apply" style="font-size:.72rem;padding:.3rem .75rem">
                 <i class="bx bx-filter-alt" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Apply
@@ -212,7 +212,7 @@
             </a>
             @if($dateFrom || $dateTo)
             <span style="font-size:.65rem;color:var(--bs-surface-400);align-self:center">
-                Showing {{ ($dateFrom && $dateTo && $dateFrom !== $dateTo) ? $dateFrom . ' → ' . $dateTo : ($dateFrom ?: $dateTo) }} (PT)
+                Showing {{ ($dateFrom && $dateTo && $dateFrom !== $dateTo) ? $dateFrom . ' → ' . $dateTo : ($dateFrom ?: $dateTo) }} (MT)
             </span>
             @endif
         </div>
@@ -361,7 +361,7 @@ function fmtDuration(secs) {
 function fmtNum(n) { return n.toLocaleString(); }
 
 function setToday() {
-    const ptDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
+    const ptDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Denver' }).format(new Date());
     document.getElementById('apDateFrom').value = ptDate;
     document.getElementById('apDateTo').value   = ptDate;
     document.getElementById('apFilterForm').submit();
@@ -475,9 +475,9 @@ function updateLastUpdated(iso) {
     const d = new Date(iso);
     const fmt = new Intl.DateTimeFormat('en-US', {
         hour: 'numeric', minute: '2-digit', second: '2-digit',
-        hour12: true, timeZone: 'America/Los_Angeles'
+        hour12: true, timeZone: 'America/Denver'
     });
-    document.getElementById('luTime').textContent = fmt.format(d) + ' PT';
+    document.getElementById('luTime').textContent = fmt.format(d) + ' MT';
 }
 
 function flash(el, cls) {
