@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\LeadDial;
+use App\Models\LeadLock;
 use App\Models\BadLead;
 use App\Models\CallLog;
 use App\Services\NotificationService;
@@ -1477,9 +1478,23 @@ class RavensDashboardController extends Controller
                 $dialMap[$entry['lead_id']][] = $entry;
             }
 
+            // Include active (non-expired) call locks so the frontend can disable buttons
+            $locks = LeadLock::with('user:id,name')
+                ->where('locked_at', '>=', now()->subMinutes(LeadLock::TTL_MINUTES))
+                ->get()
+                ->mapWithKeys(fn ($lock) => [
+                    (string) $lock->lead_id => [
+                        'user_id'   => $lock->user_id,
+                        'user_name' => $lock->user->name ?? 'Another closer',
+                        'is_mine'   => $lock->user_id === $currentUserId,
+                        'since'     => $lock->locked_at->diffForHumans(),
+                    ],
+                ]);
+
             return response()->json([
                 'success' => true,
                 'dials' => $dialMap,
+                'locks' => $locks,
                 'current_user_id' => $currentUserId,
                 'user_colors' => $userColors,
             ]);
@@ -1489,6 +1504,137 @@ class RavensDashboardController extends Controller
                 'success' => false,
                 'message' => 'Failed to get dial status'
             ], 500);
+        }
+    }
+
+    /**
+     * Attempt to acquire an exclusive call-lock on a lead.
+     * Returns 409 if another (non-expired) lock already exists for a different user.
+     */
+    public function acquireLock(Request $request)
+    {
+        $request->validate(['lead_id' => 'required|exists:leads,id']);
+
+        $leadId = (int) $request->input('lead_id');
+        $userId = Auth::id();
+
+        DB::beginTransaction();
+        try {
+            $existing = LeadLock::where('lead_id', $leadId)->lockForUpdate()->first();
+
+            if ($existing) {
+                $ageMinutes = $existing->locked_at->diffInMinutes(now());
+
+                if ($ageMinutes < LeadLock::TTL_MINUTES) {
+                    if ($existing->user_id !== $userId) {
+                        DB::rollBack();
+                        $lockedBy = User::find($existing->user_id)?->name ?? 'Another closer';
+                        return response()->json([
+                            'success'   => false,
+                            'locked_by' => $lockedBy,
+                            'message'   => $lockedBy . ' is currently calling this lead.',
+                        ], 409);
+                    }
+                    // Same user refreshes the lock
+                    $existing->update(['locked_at' => now()]);
+                    DB::commit();
+                    return response()->json(['success' => true]);
+                }
+
+                // Stale lock — take it over
+                $existing->update(['user_id' => $userId, 'locked_at' => now()]);
+            } else {
+                LeadLock::create([
+                    'lead_id'   => $leadId,
+                    'user_id'   => $userId,
+                    'locked_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('acquireLock error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to acquire lock'], 500);
+        }
+    }
+
+    /**
+     * Find a lead by phone number (last 10 digits match) — used for inbound callback detection.
+     */
+    public function findByPhone(Request $request)
+    {
+        $phone = preg_replace('/\D/', '', $request->query('phone', ''));
+        $phone = substr($phone, -10);
+
+        if (strlen($phone) < 1) {
+            return response()->json(null);
+        }
+
+        if (strlen($phone) < 1) {
+            return response()->json(null);
+        }
+
+        // For short numbers (extensions < 7 digits): exact stripped match
+        //   "(846" stripped → "846" == "846" ✓  but "6156001846" stripped ≠ "846" ✗
+        // For full numbers (≥ 7 digits): suffix LIKE match handles formatted "(289) 287-1293"
+        if (strlen($phone) < 7) {
+            $lead = Lead::whereRaw("REGEXP_REPLACE(phone_number, '[^0-9]', '') = ?", [$phone])
+                ->orWhereRaw("REGEXP_REPLACE(secondary_phone_number, '[^0-9]', '') = ?", [$phone])
+                ->orderByDesc('id')
+                ->first(['id', 'cn_name', 'phone_number']);
+        } else {
+            $lead = Lead::whereRaw("REGEXP_REPLACE(phone_number, '[^0-9]', '') LIKE ?", ['%' . $phone])
+                ->orWhereRaw("REGEXP_REPLACE(secondary_phone_number, '[^0-9]', '') LIKE ?", ['%' . $phone])
+                ->orderByDesc('id')
+                ->first(['id', 'cn_name', 'phone_number']);
+        }
+
+        return response()->json($lead);
+    }
+
+    /**
+     * Release the call-lock on a lead.
+     * Only the user who owns the lock may release it.
+     */
+    public function releaseLock(Request $request)
+    {
+        $request->validate(['lead_id' => 'required|exists:leads,id']);
+
+        LeadLock::where('lead_id', $request->input('lead_id'))
+            ->where('user_id', Auth::id())
+            ->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Return today's dial log for the current user ("My Calls Today" panel).
+     */
+    public function myCallsToday()
+    {
+        try {
+            $dials = LeadDial::with('lead:id,cn_name,phone_number')
+                ->where('user_id', Auth::id())
+                ->whereDate('dialed_at', today())
+                ->orderByDesc('dialed_at')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'dials'   => $dials->map(fn ($d) => [
+                    'lead_id' => $d->lead_id,
+                    'name'    => $d->lead?->cn_name ?? 'Unknown',
+                    'phone'   => $d->lead?->phone_number ?? '',
+                    'outcome' => $d->outcome,
+                    'time'    => $d->dialed_at->format('g:i A'),
+                ]),
+                'total'   => $dials->count(),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('myCallsToday error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to load call log'], 500);
         }
     }
 }

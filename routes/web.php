@@ -2,6 +2,7 @@
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ChargebackController;
@@ -86,6 +87,9 @@ Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Role
     
     // API endpoint to fetch fresh KPI data for live updates
     Route::get('/dashboard/kpi-data', [DashboardController::class, 'getKpiData'])->name('dashboard.kpi-data');
+
+    // Freeloaders topbar widget — Ravens Closers without a sale today
+    Route::get('/api/freeloaders', [DashboardController::class, 'freeloaders'])->name('api.freeloaders');
 });
 
 // Team Dashboards — access controlled by role.permission:team-dashboards,level
@@ -156,6 +160,11 @@ Route::group(['prefix' => 'admin/dupe-checker', 'as' => 'admin.dupe-checker.', '
     Route::post('/run-deduplication', [DupeCheckerController::class, 'runDeduplication'])->name('run-deduplication')->middleware('role.permission:duplicate-checker,full');
 });
 
+// Security suspect reporting (screenshot, devtools, print) — all authenticated users
+Route::post('/api/security/report-suspect', [SecurityController::class, 'reportSuspect'])
+    ->name('security.report-suspect')
+    ->middleware(['auth', 'throttle:30,1']);
+
 // Account Switching Log & Audit Logs — access controlled by role.permission:account-switch-log,level
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/account-switching-log', [AuditLogController::class, 'accountSwitchingLog'])->name('admin.account-switching-log')->middleware('role.permission:account-switch-log,view');
@@ -214,6 +223,7 @@ Route::group(['prefix' => 'admin/insurance-carriers', 'as' => 'admin.insurance-c
 // Leads Management — access controlled by role.permission:leads/leads-peregrine,level
 Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LeadController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
+    Route::get('/duplicates', [LeadController::class, 'duplicates'])->name('duplicates')->middleware('role.permission:leads-peregrine,view');
     Route::get('/peregrine', [LeadController::class, 'peregrineLeads'])->name('peregrine')->middleware('role.permission:leads-peregrine,view');
     Route::get('/create', [LeadController::class, 'create'])->name('create')->middleware('role.permission:leads-peregrine,edit');
     Route::post('/store', [LeadController::class, 'store'])->name('store')->middleware('role.permission:leads-peregrine,edit');
@@ -695,7 +705,7 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     
     Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
     Route::post('/messages', [ChatController::class, 'sendMessage']);
-    Route::delete('/messages/{id}', [ChatController::class, 'deleteMessage']);
+    Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
     Route::get('/users', [ChatController::class, 'getUsers']);
     Route::get('/search', [ChatController::class, 'search']);
 });
@@ -748,6 +758,10 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
     Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');
     Route::get('/leads/dial-status', [RavensDashboardController::class, 'getDialStatus'])->name('leads.dial-status');
+    Route::post('/leads/acquire-lock', [RavensDashboardController::class, 'acquireLock'])->name('leads.acquire-lock');
+    Route::post('/leads/release-lock', [RavensDashboardController::class, 'releaseLock'])->name('leads.release-lock');
+    Route::get('/leads/my-calls-today', [RavensDashboardController::class, 'myCallsToday'])->name('leads.my-calls-today');
+    Route::get('/leads/find-by-phone', [RavensDashboardController::class, 'findByPhone'])->name('leads.find-by-phone');
     Route::post('/leads/create-sale', [RavensDashboardController::class, 'createSale'])->name('leads.create-sale')->middleware('role.permission:ravens,edit');
     Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads')->middleware('role.permission:ravens-bad-leads,view');
 });
@@ -801,6 +815,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/zoom/phone', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'index'])->name('zoom.phone');
     Route::post('/zoom/phone/token', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'generateToken'])->name('zoom.phone.token');
     Route::get('/zoom/phone/search-leads', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'searchLeads'])->name('zoom.phone.search-leads');
+    Route::post('/zoom/phone/match-contacts', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'matchContacts'])->name('zoom.phone.match-contacts');
+    Route::post('/zoom/phone/auto-log', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'autoLog'])->name('zoom.phone.auto-log');
+    Route::get('/zoom/phone/my-calls', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'myCallLogs'])->name('zoom.phone.my-calls');
+    Route::get('/zoom/phone/recording/{id}', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'getCallLogRecording'])->name('zoom.phone.call-recording');
 });
 
 // Zoom API Testing Routes (for proper development)

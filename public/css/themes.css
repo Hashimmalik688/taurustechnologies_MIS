@@ -387,7 +387,7 @@ body,
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item i { opacity:.6; }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item:hover { background: rgba(var(--accent-rgb),.08) !important; color: var(--accent, var(--gold)) !important; }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item:hover i { color: var(--accent, var(--gold)) !important; opacity:1; }
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item.active { background: rgba(var(--accent-rgb),.12) !important; color: var(--accent, var(--gold)) !important; }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item.active { background: linear-gradient(90deg, rgba(var(--accent-rgb),.16) 0%, rgba(var(--accent-rgb),.04) 100%) !important; color: var(--accent, var(--gold)) !important; border-left: 3px solid var(--accent, var(--gold)) !important; box-shadow: 0 2px 12px rgba(var(--accent-rgb),.1) !important; }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item.active i { color: var(--accent, var(--gold)) !important; opacity:1; }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .menu-item.active::before { background: var(--accent, var(--gold)) !important; }
 
@@ -400,7 +400,8 @@ body,
 /* =================== TOP HEADER =================== */
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .top-header {
     background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%) !important;
-    border-bottom: 1px solid var(--border-color) !important;
+    border-bottom: 1px solid rgba(var(--accent-rgb),.2) !important;
+    box-shadow: 0 1px 0 rgba(var(--accent-rgb),.08), 0 2px 12px rgba(0,0,0,.2) !important;
 }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .th-brand-name { color: var(--text-primary) !important; }
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .th-clocks { background: rgba(var(--accent-rgb),.05); border-color: var(--border-color); }

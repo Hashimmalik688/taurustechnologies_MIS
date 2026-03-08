@@ -24,6 +24,7 @@
 
 /* ── Action pill ── */
 .action-pill{display:inline-flex;align-items:center;gap:.2rem;padding:.15rem .45rem;border-radius:10px;font-size:.62rem;font-weight:600;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.12);color:#3b82f6}
+.action-pill.security{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.22);color:#ef4444}
 
 /* ── DataTable override ── */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current{background:linear-gradient(135deg,#d4af37,#c9a227)!important;color:#fff!important;border:none!important;border-radius:6px!important;font-weight:600}
@@ -49,8 +50,17 @@
     <a href="{{ route('admin.account-switching-log') }}" class="tab-pill">
         <i class="bx bx-shield-x"></i> Suspicious Devices
     </a>
-    <a href="{{ route('admin.audit-logs.index') }}" class="tab-pill active">
+    <a href="{{ route('admin.audit-logs.index') }}" class="tab-pill {{ !request('action') ? 'active' : '' }}">
         <i class="bx bx-list-ul"></i> All Activity Logs
+    </a>
+    <a href="{{ route('admin.audit-logs.index', ['action' => 'security_suspect']) }}" class="tab-pill {{ request('action') === 'security_suspect' ? 'active' : '' }}" style="{{ request('action') === 'security_suspect' ? '' : 'border-color:rgba(239,68,68,.3);color:#ef4444' }}">
+        <i class="bx bx-shield-quarter"></i> Security Events
+        @php
+            $secCount = \App\Models\AuditLog::where('action','security_suspect')->whereDate('created_at', today())->count();
+        @endphp
+        @if($secCount > 0)
+            <span style="background:#ef4444;color:#fff;border-radius:99px;font-size:.58rem;font-weight:700;padding:1px 5px;line-height:1.4;min-width:16px;text-align:center">{{ $secCount }}</span>
+        @endif
     </a>
 </div>
 
@@ -88,7 +98,7 @@
                         <th>ID</th>
                         <th>User</th>
                         <th>Action</th>
-                        <th>Model</th>
+                        <th>Reason / Detail</th>
                         <th>IP Address</th>
                         <th>Date / Time</th>
                         <th style="width:60px">View</th>
@@ -96,7 +106,7 @@
                 </thead>
                 <tbody>
                     @forelse ($auditLogs as $log)
-                    <tr>
+                    <tr {{ $log->action === 'security_suspect' ? 'style=background:rgba(239,68,68,.04);border-left:3px solid rgba(239,68,68,.35)' : '' }}>
                         <td style="font-size:.7rem;font-weight:700;color:var(--bs-surface-400)">#{{ $log->id }}</td>
                         <td>
                             @if ($log->user)
@@ -106,14 +116,48 @@
                             @endif
                         </td>
                         <td>
-                            <span class="action-pill">{{ ucfirst(str_replace('_', ' ', $log->action)) }}</span>
+                            <span class="action-pill {{ $log->action === 'security_suspect' ? 'security' : '' }}">
+                                @if($log->action === 'security_suspect') 🚨 @endif
+                                {{ ucfirst(str_replace('_', ' ', $log->action)) }}
+                            </span>
                         </td>
                         <td>
-                            @if ($log->model)
+                            @if ($log->action === 'security_suspect')
+                                @php
+                                    $triggerLabels = [
+                                        'printscreen_key'    => ['📸', 'Screenshot (PrtScn)'],
+                                        'devtools_opened'    => ['🔍', 'DevTools opened'],
+                                        'ctrl_p'             => ['🖨️', 'Print (Ctrl+P)'],
+                                        'copy_attempt'       => ['📋', 'Copy attempt'],
+                                        'cut_attempt'        => ['✂️', 'Cut attempt'],
+                                        'rightclick_attempt' => ['🖱️', 'Right-click'],
+                                        'drag_attempt'       => ['↔️', 'Drag content'],
+                                        'f12_key'            => ['🔒', 'F12 (DevTools)'],
+                                        'devtools_shortcut'  => ['🔒', 'DevTools shortcut'],
+                                        'view_source'        => ['🔒', 'View Source (Ctrl+U)'],
+                                        'save_page'          => ['💾', 'Save Page (Ctrl+S)'],
+                                        'ctrl_c'             => ['📋', 'Ctrl+C (Copy)'],
+                                        'ctrl_x'             => ['✂️', 'Ctrl+X (Cut)'],
+                                        'ctrl_a'             => ['🔠', 'Ctrl+A (Select All)'],
+                                    ];
+                                    $trigger = $log->changes['trigger'] ?? 'unknown';
+                                    [$icon, $label] = $triggerLabels[$trigger] ?? ['⚠️', ucfirst(str_replace('_', ' ', $trigger))];
+                                    $pageUrl = $log->changes['page_url'] ?? null;
+                                    $pagePath = $pageUrl ? parse_url($pageUrl, PHP_URL_PATH) : null;
+                                @endphp
+                                <div style="display:flex;flex-direction:column;gap:2px">
+                                    <span style="font-size:.72rem;font-weight:700;color:#ef4444">{{ $icon }} {{ $label }}</span>
+                                    @if($pagePath)
+                                        <span style="font-size:.62rem;color:var(--bs-surface-400);font-family:monospace">{{ $pagePath }}</span>
+                                    @endif
+                                </div>
+                            @elseif ($log->model)
                                 <span style="font-size:.7rem;font-weight:600">{{ class_basename($log->model) }}</span>
                                 @if ($log->model_id)
                                     <span style="font-size:.6rem;color:var(--bs-surface-400);margin-left:.15rem">#{{ $log->model_id }}</span>
                                 @endif
+                            @elseif($log->description)
+                                <span style="font-size:.7rem;color:var(--bs-surface-500)">{{ $log->description }}</span>
                             @else
                                 <span style="font-size:.68rem;color:var(--bs-surface-400)">—</span>
                             @endif

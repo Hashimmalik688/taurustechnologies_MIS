@@ -255,7 +255,8 @@
                                                 <select name="status" class="f-input" style="margin:0">
                                                     <option value="approved" {{ $d->status === 'approved' ? 'selected' : '' }}>Approved</option>
                                                     <option value="disabled" {{ $d->status === 'disabled' ? 'selected' : '' }}>Disabled</option>
-                                                    <option value="pending" {{ $d->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="pending"  {{ $d->status === 'pending'  ? 'selected' : '' }}>Pending</option>
+                                                    <option value="rejected" {{ $d->status === 'rejected' ? 'selected' : '' }}>Rejected (permanent block)</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -323,7 +324,8 @@
                                                 <select name="status" class="f-input" style="margin:0">
                                                     <option value="approved" {{ $d->status === 'approved' ? 'selected' : '' }}>Approved</option>
                                                     <option value="disabled" {{ $d->status === 'disabled' ? 'selected' : '' }}>Disabled</option>
-                                                    <option value="pending" {{ $d->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="pending"  {{ $d->status === 'pending'  ? 'selected' : '' }}>Pending</option>
+                                                    <option value="rejected" {{ $d->status === 'rejected' ? 'selected' : '' }}>Rejected (permanent block)</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -339,6 +341,35 @@
                                                 <i class="bx bx-x" style="font-size:.85rem;vertical-align:middle"></i> Cancel
                                             </button>
                                         </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            {{-- Rejected (permanently blocked) --}}
+            @if($rejected->count())
+                <p class="f-label" style="margin-bottom:.4rem;color:#dc3545">Rejected Devices <span style="font-weight:400;font-size:.7rem;color:var(--bs-surface-500)">(permanently blocked — these tokens cannot log in ever again)</span></p>
+                <div class="table-responsive" style="margin-bottom:1rem">
+                    <table class="table table-sm" style="font-size:.75rem">
+                        <thead><tr><th>Person</th><th>Label</th><th>Token</th><th style="width:1px"></th></tr></thead>
+                        <tbody>
+                            @foreach($rejected as $d)
+                            <tr style="opacity:.7">
+                                <td>{{ $d->name ?? '—' }}</td>
+                                <td>{{ $d->label }}</td>
+                                <td style="font-family:monospace;font-size:.68rem">{{ $d->device_token }}</td>
+                                <td style="white-space:nowrap;text-align:right">
+                                    <form action="{{ route('settings.devices.update', $d) }}" method="POST" style="display:inline" onsubmit="return confirm('Restore this device to Approved?')">
+                                        @csrf @method('PUT')
+                                        <input type="hidden" name="name" value="{{ $d->name }}">
+                                        <input type="hidden" name="label" value="{{ $d->label }}">
+                                        <input type="hidden" name="status" value="approved">
+                                        <input type="hidden" name="device_token" value="{{ $d->device_token }}">
+                                        <button class="act-btn a-success" style="font-size:.68rem;padding:.2rem .5rem">Restore</button>
                                     </form>
                                 </td>
                             </tr>

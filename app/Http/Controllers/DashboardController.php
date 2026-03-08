@@ -574,4 +574,30 @@ class DashboardController extends Controller
 
         return view('admin.revenue.index', compact('monthlyRevenue', 'ytdRevenue', 'topPerformers', 'year', 'month'));
     }
+
+    /**
+     * Freeloaders API — Ravens Closers who haven't made a sale today.
+     * Used by the topbar "Freeloaders" widget.
+     */
+    public function freeloaders()
+    {
+        $allRavensClosers = User::role(Roles::RAVENS_CLOSER)
+            ->where('status', '!=', Statuses::USER_INACTIVE)
+            ->pluck('name');
+
+        $closersWithSaleToday = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_date')
+            ->whereDate('sale_date', today())
+            ->whereIn('closer_name', $allRavensClosers)
+            ->pluck('closer_name')
+            ->unique();
+
+        $freeloaders = $allRavensClosers->diff($closersWithSaleToday)->values()->sort()->values();
+
+        return response()->json([
+            'freeloaders' => $freeloaders,
+            'count'       => $freeloaders->count(),
+            'total'       => $allRavensClosers->count(),
+        ]);
+    }
 }

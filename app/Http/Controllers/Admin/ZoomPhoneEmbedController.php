@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\CallLog;
 use App\Models\Lead;
 use App\Models\ZoomToken;
 use App\Models\ZoomWebhookLog;
@@ -19,22 +20,107 @@ class ZoomPhoneEmbedController extends Controller
     }
 
     /**
-     * Zoom Phone Embed page — full dialer + lead search + recent calls.
+     * Zoom Phone Embed page — full dialer + per-user call history.
      */
     public function index()
     {
-        $recentCalls = ZoomWebhookLog::whereIn('event_type', [
-                'phone.caller_call_log_completed',
-                'phone.callee_call_log_completed',
-                'phone.call_log_completed',
-            ])
-            ->orderByDesc('call_start_time')
-            ->limit(20)
-            ->get();
-
         $hasToken = $this->hasValidToken();
+        $dids     = $this->getCompanyDids();
+        return view('admin.zoom.phone-embed', compact('hasToken', 'dids'));
+    }
 
-        return view('admin.zoom.phone-embed', compact('recentCalls', 'hasToken'));
+    /**
+     * Return list of company DIDs from settings (auto-seeds main line if none exist).
+     */
+    private function getCompanyDids(): array
+    {
+        $setting = \DB::table('settings')->where('key', 'zoom_dids')->first();
+        if ($setting) {
+            return json_decode($setting->value, true) ?? [];
+        }
+        $default = [
+            ['number' => '+18884278933', 'label' => 'Main Line'],
+            ['number' => '+12393871921', 'label' => 'Direct Number'],
+        ];
+        \DB::table('settings')->insert([
+            'key'         => 'zoom_dids',
+            'value'       => json_encode($default),
+            'type'        => 'json',
+            'description' => 'Company Zoom Phone DIDs — outbound caller IDs for agents',
+            'group'       => 'zoom',
+            'created_at'  => now(),
+            'updated_at'  => now(),
+        ]);
+        return $default;
+    }
+
+    /**
+     * Return JSON of the current user's call logs (for the sidebar history panel).
+     */
+    public function myCallLogs(Request $request)
+    {
+        $period = $request->get('period', 'today');
+        $userId = Auth::id();
+
+        $query = CallLog::where('agent_id', $userId)
+            ->with('lead:id,cn_name,phone_number')
+            ->orderByDesc('call_start_time')
+            ->orderByDesc('created_at');
+
+        if ($period === 'today') {
+            $query->whereDate('created_at', today());
+        } elseif ($period === 'week') {
+            $query->where('created_at', '>=', now()->startOfWeek());
+        }
+
+        $logs = $query->limit(200)->get()->map(function ($log) {
+            $hasRecording = $log->recording_url && str_starts_with($log->recording_url, 'https://');
+            return [
+                'id'            => $log->id,
+                'lead_name'     => $log->lead?->cn_name ?? 'Unknown Contact',
+                'lead_id'       => $log->lead_id,
+                'phone'         => $log->lead?->phone_number ?? $log->phone_number,
+                'status'        => $log->call_status ?? 'completed',
+                'duration'      => $log->duration_seconds,
+                'time'          => ($log->call_start_time ?? $log->created_at)->diffForHumans(),
+                'time_full'     => ($log->call_start_time ?? $log->created_at)->format('M j, g:i A'),
+                'has_recording' => $hasRecording,
+                'zoom_call_id'  => $log->zoom_call_id,
+                'recording_id'  => $log->id,
+            ];
+        });
+
+        return response()->json($logs);
+    }
+
+    /**
+     * Fetch and redirect to the recording for a specific CallLog.
+     * Checks CallLog.recording_url first, then ZoomWebhookLog by zoom_call_id.
+     */
+    public function getCallLogRecording($id)
+    {
+        $callLog = CallLog::where('id', $id)
+            ->where('agent_id', Auth::id())
+            ->firstOrFail();
+
+        // Case 1: CallLog already has a valid direct URL
+        if ($callLog->recording_url && str_starts_with($callLog->recording_url, 'https://')) {
+            return redirect($callLog->recording_url);
+        }
+
+        // Case 2: Find via ZoomWebhookLog using the shared zoom_call_id
+        if ($callLog->zoom_call_id) {
+            $webhookLog = ZoomWebhookLog::where('zoom_call_id', $callLog->zoom_call_id)->first();
+            if ($webhookLog) {
+                if ($webhookLog->recording_url && str_starts_with($webhookLog->recording_url, 'https://')) {
+                    return redirect($webhookLog->recording_url);
+                }
+                // Delegate to existing recording.play which calls Zoom API
+                return redirect()->route('recording.play', $webhookLog->id);
+            }
+        }
+
+        return back()->with('error', 'Recording not available — no Zoom call log found for this call.');
     }
 
     /**
@@ -86,6 +172,77 @@ class ZoomPhoneEmbedController extends Controller
             ->get();
 
         return response()->json($leads);
+    }
+
+    /**
+     * Match an array of phone numbers to CRM leads (for Smart Embed contact matching).
+     * POST /zoom/phone/match-contacts
+     */
+    public function matchContacts(Request $request)
+    {
+        $numbers = $request->input('numbers', []);
+        if (empty($numbers)) {
+            return response()->json([]);
+        }
+
+        $contacts = [];
+        foreach ($numbers as $number) {
+            $clean = preg_replace('/[^\d+]/', '', $number);
+            $lead = Lead::where('phone_number', 'like', "%{$clean}%")
+                ->orWhere('secondary_phone_number', 'like', "%{$clean}%")
+                ->select('id', 'cn_name')
+                ->first();
+            if ($lead) {
+                $contacts[$number] = [
+                    'id'   => (string) $lead->id,
+                    'name' => $lead->cn_name ?? 'Unknown',
+                ];
+            }
+        }
+
+        return response()->json($contacts);
+    }
+
+    /**
+     * Auto-log a completed Zoom call to the CRM call_logs table.
+     * POST /zoom/phone/auto-log
+     */
+    public function autoLog(Request $request)
+    {
+        $data = $request->all();
+        try {
+            $callerNum = $data['caller']['number'] ?? null;
+            $calleeNum = $data['callee']['number'] ?? null;
+            $direction = $data['direction'] ?? 'outbound';
+            $phoneNum  = $direction === 'inbound' ? $callerNum : $calleeNum;
+
+            // Try to find matching lead
+            $leadId = null;
+            if ($phoneNum) {
+                $clean = preg_replace('/[^\d+]/', '', $phoneNum);
+                $lead = Lead::where('phone_number', 'like', "%{$clean}%")
+                    ->orWhere('secondary_phone_number', 'like', "%{$clean}%")
+                    ->first();
+                $leadId = $lead?->id;
+            }
+
+            CallLog::create([
+                'agent_id'        => Auth::id(),
+                'lead_id'         => $leadId,
+                'phone_number'    => $phoneNum,
+                'direction'       => $direction,
+                'status'          => strtolower($data['result'] ?? 'completed'),
+                'duration'        => $data['duration'] ?? 0,
+                'zoom_call_id'    => $data['callLogId'] ?? null,
+                'call_start_time' => isset($data['dateTime']) ? \Carbon\Carbon::parse($data['dateTime']) : now(),
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('zoom auto-log failed: ' . $e->getMessage());
+        }
+
+        return response()->json(['ok' => true]);
     }
 
     // ─── Token Helpers ──────────────────────────────────────────────────

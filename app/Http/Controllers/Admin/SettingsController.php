@@ -38,8 +38,9 @@ class SettingsController extends Controller
         $pending  = AllowedDevice::where('status', 'pending')->latest()->get();
         $approved = AllowedDevice::where('status', 'approved')->latest()->get();
         $disabled = AllowedDevice::where('status', 'disabled')->latest()->get();
+        $rejected = AllowedDevice::where('status', 'rejected')->latest()->get();
 
-        return view('admin.settings.index', compact('settings', 'pending', 'approved', 'disabled'));
+        return view('admin.settings.index', compact('settings', 'pending', 'approved', 'disabled', 'rejected'));
     }
 
     public function update(Request $request)

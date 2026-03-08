@@ -15,6 +15,15 @@ class RetentionController extends Controller
      */
     public function index(Request $request)
     {
+        // Default to current month/year if no date filter is applied
+        if (!$request->filled('month') && !$request->filled('year')
+            && !$request->filled('date_from') && !$request->filled('date_to')) {
+            $request->merge([
+                'month' => now()->month,
+                'year'  => now()->year,
+            ]);
+        }
+
         // Get search and filter parameters
         $search = $request->get('search');
         $month = $request->get('month');

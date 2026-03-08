@@ -29,4 +29,5 @@ class AllowedDevice extends Model
     public function isApproved(): bool  { return $this->status === 'approved'; }
     public function isPending(): bool   { return $this->status === 'pending'; }
     public function isDisabled(): bool  { return $this->status === 'disabled'; }
+    public function isRejected(): bool  { return $this->status === 'rejected'; }
 }

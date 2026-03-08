@@ -204,6 +204,9 @@
                 </div>
 
                 
+                <?php echo $__env->make('components.freeloaders-widget', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+                
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">
                         <i class="bx bx-bell"></i>
@@ -1091,6 +1094,9 @@
 
     <!-- Include Sticky Notes Component -->
     <?php echo $__env->make('components.sticky-notes', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+    <!-- CRM Security Layer: copy/paste protection, right-click, DevTools detection, blur overlay -->
+    <script src="<?php echo e(URL::asset('js/crm-security.js')); ?>?v=<?php echo e(filemtime(public_path('js/crm-security.js'))); ?>"></script>
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
 

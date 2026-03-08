@@ -114,18 +114,6 @@ class DownloadAndProcessRecording implements ShouldQueue
                 ]);
             }
 
-            // ── Step 3: Filter short calls ──────────────────────────────
-            // Skip calls under 8 minutes — not meaningful sales conversations
-            if ($qaCall->duration_seconds < 480) {
-                $qaCall->update([
-                    'processing_status' => 'skipped',
-                    'failure_reason' => 'Call under 8 minutes (' . $qaCall->duration_seconds . 's) — skipped',
-                ]);
-                $this->cleanupFile($localPath);
-                Log::info('[QA:Job] Skipped short call', ['duration' => $qaCall->duration_seconds]);
-                return;
-            }
-
             // ── Step 4: Transcribe via WhisperX (fallback when Zoom transcript unavailable) ─
             if ($hasPlainTranscript) {
                 Log::info('[QA:Job] Skipping transcription (transcript already stored)', [

@@ -51,43 +51,27 @@ class LeadController extends Controller
 
     public function index(Request $request)
     {
-        // Raven Leads section - Shows all closed and accepted leads from Ravens team
-        // Verifier forms (pending) and declined/transferred leads are excluded
-        $query = Lead::query();
-        
-        // Only show closed and accepted leads
-        $query->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED]);
-        
-        // Exclude leads where BOTH cn_name AND phone_number are N/A/empty (verifier-submitted forms)
+        // Raven Leads — deduplicates by phone (latest entry wins)
+        $query = Lead::where('team', Teams::RAVENS);
+
+        // Deduplication: for leads with a valid phone number, only show the latest (max id) per phone.
+        // Leads with no/empty/N/A phone are always shown (cannot be deduplicated).
         $query->where(function($q) {
-            $q->where(function($subQ) {
-                // Has valid cn_name
-                $subQ->whereNotNull('cn_name')
-                     ->where('cn_name', '!=', 'N/A')
-                     ->where('cn_name', '!=', '');
-            })->orWhere(function($subQ) {
-                // Has valid phone_number
-                $subQ->whereNotNull('phone_number')
-                     ->where('phone_number', '!=', 'N/A')
-                     ->where('phone_number', '!=', '');
-            });
+            $q->whereIn('id', function($sub) {
+                $sub->selectRaw('MAX(id)')
+                    ->from('leads')
+                    ->where('team', Teams::RAVENS)
+                    ->whereNotNull('phone_number')
+                    ->where('phone_number', '!=', '')
+                    ->where('phone_number', '!=', 'N/A')
+                    ->groupBy('phone_number');
+            })
+            ->orWhereNull('phone_number')
+            ->orWhere('phone_number', '')
+            ->orWhere('phone_number', 'N/A');
         });
-        
-        // Exclude leads submitted by verifiers (basic info only)
-        $query->whereNull('verified_by');
-        
-        // Deduplicate: only show the latest lead per phone number (prevents CSV import duplicates)
-        $query->whereIn('id', function($subquery) {
-            $subquery->selectRaw('MAX(id)')
-                ->from('leads')
-                ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED])
-                ->whereNotNull('phone_number')
-                ->where('phone_number', '!=', '')
-                ->where('phone_number', '!=', 'N/A')
-                ->groupBy('phone_number');
-        });
-        
-        // Instant search filter (no button needed)
+
+        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -99,22 +83,27 @@ class LeadController extends Controller
                   ->orWhere('ssn', 'like', "%{$search}%");
             });
         }
-        
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
         // Carrier filter
         if ($request->filled('carrier')) {
             $query->where('carrier_name', $request->carrier);
         }
-        
+
         // State filter
         if ($request->filled('state')) {
             $query->where('state', $request->state);
         }
-        
+
         // Closer filter
         if ($request->filled('closer')) {
             $query->where('closer_name', $request->closer);
         }
-        
+
         // Date range filter
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
@@ -122,24 +111,84 @@ class LeadController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
-        
+
         $leads = $query->orderBy('created_at', 'desc')->paginate(50);
-        
+
+        // Count of duplicate leads (for tab badge)
+        $duplicateCount = Lead::where('team', Teams::RAVENS)
+            ->whereNotNull('phone_number')->where('phone_number', '!=', '')->where('phone_number', '!=', 'N/A')
+            ->whereNotIn('id', function($sub) {
+                $sub->selectRaw('MAX(id)')->from('leads')
+                    ->where('team', Teams::RAVENS)
+                    ->whereNotNull('phone_number')->where('phone_number', '!=', '')->where('phone_number', '!=', 'N/A')
+                    ->groupBy('phone_number');
+            })
+            ->count();
+
         // Get Peregrine closer names for tagging
         $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
-        
+
         // Get filter options
         $carriers = \App\Models\InsuranceCarrier::whereHas('agentStates')->orderBy('name')->pluck('name');
         if ($carriers->isEmpty()) {
             $carriers = \App\Models\InsuranceCarrier::orderBy('name')->pluck('name');
         }
         $states = Lead::whereNotNull('state')->where('state', '!=', '')->where('state', '!=', 'N/A')->distinct()->orderBy('state')->pluck('state');
-        $closerNames = Lead::whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_ACCEPTED])
-            ->whereNull('verified_by')
-            ->whereNotNull('closer_name')->where('closer_name', '!=', '')
+        $closerNames = Lead::whereNotNull('closer_name')->where('closer_name', '!=', '')
             ->distinct()->orderBy('closer_name')->pluck('closer_name');
-        
-        return view('admin.leads.index_simple', compact('leads', 'peregrineClosers', 'carriers', 'states', 'closerNames'));
+        $allStatuses = Lead::where('team', Teams::RAVENS)
+            ->whereNotNull('status')->distinct()->orderBy('status')->pluck('status');
+
+        return view('admin.leads.index_simple', compact('leads', 'peregrineClosers', 'carriers', 'states', 'closerNames', 'allStatuses', 'duplicateCount'));
+    }
+
+    /**
+     * Show duplicate leads — entries that share a phone number with a newer record.
+     * The main index shows only the latest entry per phone; this shows what was hidden.
+     */
+    public function duplicates(Request $request)
+    {
+        // The canonical set: MAX(id) per phone in Raven scope
+        $latestIdSubquery = function($sub) {
+            $sub->selectRaw('MAX(id)')->from('leads')
+                ->where('team', Teams::RAVENS)
+                ->whereNotNull('phone_number')->where('phone_number', '!=', '')->where('phone_number', '!=', 'N/A')
+                ->groupBy('phone_number');
+        };
+
+        // Duplicates: Raven leads with a valid phone that are NOT the latest entry
+        $query = Lead::where('team', Teams::RAVENS)
+            ->whereNotNull('phone_number')->where('phone_number', '!=', '')->where('phone_number', '!=', 'N/A')
+            ->whereNotIn('id', $latestIdSubquery);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('cn_name', 'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%")
+                  ->orWhere('carrier_name', 'like', "%{$search}%")
+                  ->orWhere('closer_name', 'like', "%{$search}%")
+                  ->orWhere('ssn', 'like', "%{$search}%");
+            });
+        }
+
+        $duplicates = $query->orderBy('phone_number')->orderBy('id', 'asc')->paginate(50);
+
+        // For each phone on this page, fetch the canonical (current) lead to link back to
+        $phones = $duplicates->pluck('phone_number')->unique()->filter()->values();
+        $canonicalLeads = Lead::whereIn('phone_number', $phones)
+            ->where('team', Teams::RAVENS)
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('phone_number')
+            ->map(fn($group) => $group->first()); // first = highest id (ordered desc)
+
+        $duplicateCount = Lead::where('team', Teams::RAVENS)
+            ->whereNotNull('phone_number')->where('phone_number', '!=', '')->where('phone_number', '!=', 'N/A')
+            ->whereNotIn('id', $latestIdSubquery)
+            ->count();
+
+        return view('admin.leads.duplicates', compact('duplicates', 'canonicalLeads', 'duplicateCount'));
     }
 
     /**
@@ -147,15 +196,8 @@ class LeadController extends Controller
      */
     public function peregrineLeads(Request $request)
     {
-        // Show leads from Peregrine team (verifier, peregrine closer, peregrine validator)
-        $query = Lead::query();
-        
-        // Filter for Peregrine leads - those WITH verified_by, validated_by, or source_type = Teams::PEREGRINE
-        $query->where(function($q) {
-            $q->whereNotNull('verified_by')
-              ->orWhereNotNull('validated_by')
-              ->orWhere('source_type', Teams::PEREGRINE);
-        });
+        // Show leads from Peregrine team
+        $query = Lead::where('team', Teams::PEREGRINE);
         
         // Search functionality
         if ($request->filled('search')) {
@@ -207,17 +249,11 @@ class LeadController extends Controller
         if ($carriers->isEmpty()) {
             $carriers = \App\Models\InsuranceCarrier::orderBy('name')->pluck('name');
         }
-        $closerNames = Lead::where(function($q) {
-                $q->whereNotNull('verified_by')
-                  ->orWhereNotNull('validated_by')
-                  ->orWhere('source_type', Teams::PEREGRINE);
-            })->whereNotNull('closer_name')->where('closer_name', '!=', '')
+        $closerNames = Lead::where('team', Teams::PEREGRINE)
+            ->whereNotNull('closer_name')->where('closer_name', '!=', '')
             ->distinct()->orderBy('closer_name')->pluck('closer_name');
-        $states = Lead::where(function($q) {
-                $q->whereNotNull('verified_by')
-                  ->orWhereNotNull('validated_by')
-                  ->orWhere('source_type', Teams::PEREGRINE);
-            })->whereNotNull('state')->where('state', '!=', '')->where('state', '!=', 'N/A')
+        $states = Lead::where('team', Teams::PEREGRINE)
+            ->whereNotNull('state')->where('state', '!=', '')->where('state', '!=', 'N/A')
             ->distinct()->orderBy('state')->pluck('state');
         
         return view('admin.leads.peregrine', compact('leads', 'peregrineClosers', 'carriers', 'closerNames', 'states'));
@@ -225,6 +261,14 @@ class LeadController extends Controller
 
     public function sales(Request $request)
     {
+        // Default to current month if no date filter is applied
+        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+            $request->merge([
+                'date_from' => now()->startOfMonth()->toDateString(),
+                'date_to'   => now()->endOfMonth()->toDateString(),
+            ]);
+        }
+
         // Sales section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
         // Exclude incomplete leads (verifier-only forms) that lack actual sale data
@@ -306,6 +350,8 @@ class LeadController extends Controller
                   ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
                   ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
             })
+            ->when($request->filled('date_from'), fn($q) => $q->whereDate('sale_date', '>=', $request->date_from))
+            ->when($request->filled('date_to'),   fn($q) => $q->whereDate('sale_date', '<=', $request->date_to))
             ->selectRaw("
                 SUM(CASE WHEN manager_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
                 SUM(CASE WHEN manager_status = 'approved' THEN 1 ELSE 0 END) as accepted_count,
@@ -960,6 +1006,14 @@ class LeadController extends Controller
      */
     public function issuance(Request $request)
     {
+        // Default to current month if no date filter is applied
+        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+            $request->merge([
+                'date_from' => now()->startOfMonth()->toDateString(),
+                'date_to'   => now()->endOfMonth()->toDateString(),
+            ]);
+        }
+
         // Issuance section - show all sales that have been approved by manager
         // These are leads ready to be issued
         $query = Lead::with(['insuranceCarrier', 'partner', 'issuedByUser', 'followupAssignedByUser'])
@@ -1149,6 +1203,14 @@ class LeadController extends Controller
      */
     public function qaReview(Request $request)
     {
+        // Default to current month if no date filter is applied
+        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+            $request->merge([
+                'date_from' => now()->startOfMonth()->toDateString(),
+                'date_to'   => now()->endOfMonth()->toDateString(),
+            ]);
+        }
+
         // QA Review section - show all sales that have been made by closers
         // Sales are leads that have a closer assigned and sale timestamp
         // Exclude incomplete leads (verifier-only forms) that lack actual sale data
@@ -1188,12 +1250,12 @@ class LeadController extends Controller
         if ($request->filled('carrier')) {
             $analyticsQuery->where('carrier_name', $request->carrier);
         }
-        
-        if ($request->filled('month')) {
-            $analyticsQuery->whereMonth('sale_date', $request->month);
+
+        if ($request->filled('date_from')) {
+            $analyticsQuery->whereDate('sale_date', '>=', $request->date_from);
         }
-        if ($request->filled('year')) {
-            $analyticsQuery->whereYear('sale_date', $request->year);
+        if ($request->filled('date_to')) {
+            $analyticsQuery->whereDate('sale_date', '<=', $request->date_to);
         }
         
         // Single query for all QA analytics counts instead of 5 separate COUNT queries

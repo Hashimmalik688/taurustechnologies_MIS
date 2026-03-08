@@ -203,6 +203,9 @@
                     </button>
                 </div>
 
+                {{-- Freeloaders (Ravens Closers with no sale today) --}}
+                @include('components.freeloaders-widget')
+
                 {{-- Notifications --}}
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">
@@ -1090,6 +1093,9 @@
 
     <!-- Include Sticky Notes Component -->
     @include('components.sticky-notes')
+
+    <!-- CRM Security Layer: copy/paste protection, right-click, DevTools detection, blur overlay -->
+    <script src="{{ URL::asset('js/crm-security.js') }}?v={{ filemtime(public_path('js/crm-security.js')) }}"></script>
 
     @stack('scripts')
 

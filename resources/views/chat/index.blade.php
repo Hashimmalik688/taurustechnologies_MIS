@@ -1903,7 +1903,7 @@ function renderConversations(conversations) {
 // Select conversation
 async function selectConversation(conversationId, conversationName, element) {
     window.currentConversationId = conversationId;
-    window.lastMessagesHash = null; // Reset hash to force render when switching conversations
+    window.lastRenderedMessageId = 0; // Reset so refreshMessages re-renders for new conversation
 
     // Update active state
     document.querySelectorAll('.conversation-item').forEach(item => {
@@ -2027,6 +2027,9 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
         const messagesEl = document.getElementById('chatMessages');
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }, 100);
+
+    // Track the last rendered message ID so refreshMessages won't re-render on first poll
+    window.lastRenderedMessageId = messages.length > 0 ? messages[messages.length - 1].id : 0;
 
     // Add event listeners
     document.getElementById('sendButton').addEventListener('click', sendMessage);
@@ -2190,10 +2193,11 @@ function renderMessages(messages) {
                         }).join('')}
                     </div>
                 ` : ''}
-                <div class="message-actions">
-                    <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
-                </div>
             </div>
+            ${isSender ? `
+            <div class="message-actions">
+                <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
+            </div>` : ''}
         </div>
     `;
     }).join('');
@@ -2210,43 +2214,69 @@ async function refreshMessages() {
         const messages = data.messages || data.data || [];
         
         const messagesEl = document.getElementById('chatMessages');
-        
-        // Smart comparison: Only update if messages changed
-        // Track message count and last message ID to prevent unnecessary re-renders
-        if (typeof window.lastMessagesHash === 'undefined') {
-            window.lastMessagesHash = null;
+
+        // Append-only refresh: only new messages animate in; existing messages are untouched
+        if (typeof window.lastRenderedMessageId === 'undefined') {
+            window.lastRenderedMessageId = 0;
         }
-        
-        // Create a simple hash from message count and last message ID
-        const currentHash = messages.length > 0 
-            ? `${messages.length}-${messages[messages.length - 1].id}`
-            : '0-0';
-        
-        // Only update DOM if messages actually changed
-        if (window.lastMessagesHash !== currentHash) {
-            const scrolledToBottom = messagesEl.scrollHeight - messagesEl.scrollTop === messagesEl.clientHeight;
 
-            messagesEl.innerHTML = renderMessages(messages);
-
-            if (scrolledToBottom) {
-                messagesEl.scrollTop = messagesEl.scrollHeight;
+        const silentRender = (msgs) => {
+            // Temporarily suppress the msgIn animation so bulk renders don't flash
+            let styleEl = document.getElementById('no-msg-anim');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'no-msg-anim';
+                styleEl.textContent = '.message-item { animation: none !important; }';
+                document.head.appendChild(styleEl);
             }
-            
-            window.lastMessagesHash = currentHash;
+            messagesEl.innerHTML = renderMessages(msgs);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const s = document.getElementById('no-msg-anim');
+                    if (s) s.remove();
+                });
+            });
+        };
+
+        if (messages.length === 0) {
+            if (!messagesEl.querySelector('.message-item')) {
+                messagesEl.innerHTML = '<div class="no-messages"><i class="bx bx-message-dots"></i><p>No messages yet. Start the conversation!</p></div>';
+            }
+            return;
         }
-        
-        // Track last message ID for notifications
-        if (typeof window.lastMessageId === 'undefined') {
-            window.lastMessageId = 0;
-        }
-        
-        // Check for new messages and mentions
-        if (messages.length > 0) {
-            const latest = messages[messages.length - 1];
-            if (latest.id > window.lastMessageId) {
-                window.lastMessageId = latest.id;
-                // Only notify if looking at a different conversation or window hidden
-                checkAndNotifyMentions(latest);
+
+        if (window.lastRenderedMessageId === 0) {
+            // Initial load: render all silently then scroll to bottom
+            silentRender(messages);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            window.lastRenderedMessageId = messages[messages.length - 1].id;
+        } else {
+            // Check for deletions: rendered count vs actual
+            const renderedCount = messagesEl.querySelectorAll('.message-item[data-message-id]').length;
+            if (renderedCount !== messages.length) {
+                // A message was deleted — silent full re-render
+                const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
+                silentRender(messages);
+                if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+                window.lastRenderedMessageId = messages[messages.length - 1].id;
+            } else {
+                // Append only new messages (these will animate in naturally)
+                const newMessages = messages.filter(m => m.id > window.lastRenderedMessageId);
+                if (newMessages.length > 0) {
+                    const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
+                    const frag = document.createRange().createContextualFragment(renderMessages(newMessages));
+                    messagesEl.appendChild(frag);
+                    if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+                    window.lastRenderedMessageId = newMessages[newMessages.length - 1].id;
+
+                    // Notify for new messages
+                    if (typeof window.lastMessageId === 'undefined') window.lastMessageId = 0;
+                    const latest = newMessages[newMessages.length - 1];
+                    if (latest.id > window.lastMessageId) {
+                        window.lastMessageId = latest.id;
+                        checkAndNotifyMentions(latest);
+                    }
+                }
             }
         }
     } catch (error) {

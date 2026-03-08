@@ -52,10 +52,10 @@ class DeviceController extends Controller
 
     public function update(AllowedDevice $device)
     {
-        request()->validate([
+        $request->validate([
             'name'         => ['nullable', 'string', 'max:255'],
             'label'        => ['required', 'string', 'max:255'],
-            'status'       => ['required', 'in:approved,pending,disabled'],
+            'status'       => ['required', 'in:approved,pending,disabled,rejected'],
             'device_token' => ['required', 'string', 'max:100', 'unique:allowed_devices,device_token,' . $device->id],
         ]);
 

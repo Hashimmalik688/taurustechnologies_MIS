@@ -100,9 +100,14 @@ body {
 }
 
 .menu-item.active {
-    background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%) !important;
+    background: linear-gradient(90deg, rgba(212,175,55,.2) 0%, rgba(212,175,55,.05) 100%) !important;
     color: var(--gold-dark) !important;
     border-left-color: var(--gold) !important;
+    box-shadow: 0 2px 10px rgba(212,175,55,.12) !important;
+}
+
+.menu-item.active i {
+    color: var(--gold-dark) !important;
 }
 
 /* Header / Topbar */

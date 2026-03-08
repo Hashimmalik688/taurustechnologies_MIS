@@ -1,10 +1,8 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Raven Leads
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
     /* ── Leads Page Design System (.sl-* namespace, matching Sales) ── */
 
@@ -291,49 +289,51 @@
         .sl-search-input { width: 100% !important; }
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-    @if (session('success'))
+<?php $__env->startSection('content'); ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show alert-soft-success" role="alert">
             <i class="mdi mdi-check-all me-2"></i>
-            <strong>Success!</strong> {{ session('success') }}
+            <strong>Success!</strong> <?php echo e(session('success')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @if (session('error'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="mdi mdi-block-helper me-2"></i>
-            <strong>Error!</strong> {{ session('error') }}
+            <strong>Error!</strong> <?php echo e(session('error')); ?>
+
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    @if ($errors->any())
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($errors->any()): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="mdi mdi-alert-circle-outline me-2"></i>
             <strong>Validation Error!</strong>
             <ul class="mb-0 mt-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- View Tabs -->
     <div class="sl-view-tabs">
-        <a href="{{ route('leads.index') }}" class="sl-view-tab active">
+        <a href="<?php echo e(route('leads.index')); ?>" class="sl-view-tab active">
             <i class="bx bx-data"></i> Raven Leads
-            <span class="sl-tab-count">{{ $leads->total() }}</span>
+            <span class="sl-tab-count"><?php echo e($leads->total()); ?></span>
         </a>
-        <a href="{{ route('leads.duplicates') }}" class="sl-view-tab">
+        <a href="<?php echo e(route('leads.duplicates')); ?>" class="sl-view-tab">
             <i class="bx bx-copy-alt"></i> Duplicates
-            @if($duplicateCount > 0)
-                <span class="sl-tab-count sl-tab-warn">{{ $duplicateCount }}</span>
-            @endif
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($duplicateCount > 0): ?>
+                <span class="sl-tab-count sl-tab-warn"><?php echo e($duplicateCount); ?></span>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </a>
     </div>
 
@@ -345,9 +345,9 @@
         <div class="sl-topbar-right">
             <div class="sl-search-wrap">
                 <i class="bx bx-search sl-search-icon"></i>
-                <input type="text" id="leadsSearch" class="sl-search-input" placeholder="Search name, phone, SSN, carrier, state..." value="{{ request('search') }}">
+                <input type="text" id="leadsSearch" class="sl-search-input" placeholder="Search name, phone, SSN, carrier, state..." value="<?php echo e(request('search')); ?>">
             </div>
-            <a href="{{ route('leads.create') }}" class="sl-btn sl-btn-add">
+            <a href="<?php echo e(route('leads.create')); ?>" class="sl-btn sl-btn-add">
                 <i class="bx bx-plus"></i> New Lead
             </a>
             <button type="button" class="sl-btn sl-btn-import" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -359,39 +359,39 @@
     <!-- Leads Card -->
     <div class="sl-card">
         <!-- Filter Pills -->
-        <form method="GET" action="{{ route('leads.index') }}" id="leadsFilterForm" class="sl-filter-pills">
+        <form method="GET" action="<?php echo e(route('leads.index')); ?>" id="leadsFilterForm" class="sl-filter-pills">
             <select name="status" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All Statuses</option>
-                @foreach($allStatuses as $status)
-                    <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $allStatuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($status); ?>" <?php echo e(request('status') == $status ? 'selected' : ''); ?>><?php echo e(ucfirst($status)); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
             <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All Carriers</option>
-                @foreach($carriers as $carrier)
-                    <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($carrier); ?>" <?php echo e(request('carrier') == $carrier ? 'selected' : ''); ?>><?php echo e($carrier); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
             <select name="closer" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All Closers</option>
-                @foreach($closerNames as $closer)
-                    <option value="{{ $closer }}" {{ request('closer') == $closer ? 'selected' : '' }}>{{ $closer }}</option>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $closerNames; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $closer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($closer); ?>" <?php echo e(request('closer') == $closer ? 'selected' : ''); ?>><?php echo e($closer); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
             <select name="state" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All States</option>
-                @foreach($states as $state)
-                    <option value="{{ $state }}" {{ request('state') == $state ? 'selected' : '' }}>{{ $state }}</option>
-                @endforeach
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $states; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $state): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($state); ?>" <?php echo e(request('state') == $state ? 'selected' : ''); ?>><?php echo e($state); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
             <span class="sl-pill-label">FROM</span>
-            <input type="date" name="date_from" class="sl-pill-date" value="{{ request('date_from') }}" onchange="this.form.submit()">
+            <input type="date" name="date_from" class="sl-pill-date" value="<?php echo e(request('date_from')); ?>" onchange="this.form.submit()">
             <span class="sl-pill-label">TO</span>
-            <input type="date" name="date_to" class="sl-pill-date" value="{{ request('date_to') }}" onchange="this.form.submit()">
-            @if(request()->hasAny(['carrier','closer','state','date_from','date_to','search','status']))
-                <a href="{{ route('leads.index') }}" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
-            @endif
-            <span class="sl-result-count">{{ $leads->total() }} leads</span>
+            <input type="date" name="date_to" class="sl-pill-date" value="<?php echo e(request('date_to')); ?>" onchange="this.form.submit()">
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['carrier','closer','state','date_from','date_to','search','status'])): ?>
+                <a href="<?php echo e(route('leads.index')); ?>" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <span class="sl-result-count"><?php echo e($leads->total()); ?> leads</span>
         </form>
 
         <!-- Table -->
@@ -439,94 +439,96 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($leads as $index => $lead)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
-                            <td class="sl-sticky-col sl-col-1"><strong>{{ $leads->firstItem() + $index }}</strong></td>
-                            <td class="sl-sticky-col sl-col-3"><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
+                            <td class="sl-sticky-col sl-col-1"><strong><?php echo e($leads->firstItem() + $index); ?></strong></td>
+                            <td class="sl-sticky-col sl-col-3"><strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong></td>
                             <td class="sl-sticky-col sl-col-4">
-                                @php
+                                <?php
                                     $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
-                                @endphp
+                                ?>
                                 <div class="sl-act-group">
-                                    <button onclick="zoomDial('{{ $zoomNumber }}')" class="btn btn-secondary" title="Call">
+                                    <button onclick="zoomDial('<?php echo e($zoomNumber); ?>')" class="btn btn-secondary" title="Call">
                                         <i class="fas fa-phone"></i>
                                     </button>
-                                    <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View">
+                                    <a href="<?php echo e(route('leads.show', $lead->id)); ?>" class="btn btn-info" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @canEditModule('leads')
-                                    <a href="{{ route('leads.edit', $lead->id) }}" class="btn btn-primary" title="Edit">
+                                    <?php if(auth()->check() && auth()->user()->canEditModule('leads')): ?>
+                                    <a href="<?php echo e(route('leads.edit', $lead->id)); ?>" class="btn btn-primary" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    @endcanEditModule
-                                    @canDeleteInModule('leads')
-                                    <form class="d-inline" action="{{ route('leads.delete', $lead->id) }}" method="POST" onsubmit="return confirm('Delete {{ addslashes($lead->cn_name) }}?');">
-                                        @csrf
-                                        @method('DELETE')
+                                    <?php endif; ?>
+                                    <?php if(auth()->check() && auth()->user()->canDeleteInModule('leads')): ?>
+                                    <form class="d-inline" action="<?php echo e(route('leads.delete', $lead->id)); ?>" method="POST" onsubmit="return confirm('Delete <?php echo e(addslashes($lead->cn_name)); ?>?');">
+                                        <?php echo csrf_field(); ?>
+                                        <?php echo method_field('DELETE'); ?>
                                         <button type="submit" class="btn btn-danger" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
-                                    @endcanDeleteInModule
+                                    <?php endif; ?>
                                 </div>
                             </td>
-                            <td>{{ $lead->phone_number ?? 'N/A' }}</td>
-                            <td>{{ $lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A' }}</td>
-                            <td>{{ $lead->smoker ? 'Yes' : 'No' }}</td>
-                            <td>{{ $lead->driving_license_number ?? 'N/A' }}</td>
-                            <td>{{ $lead->height ?? 'N/A' }}</td>
-                            <td>{{ $lead->weight ?? 'N/A' }}</td>
-                            <td>{{ $lead->birth_place ?? 'N/A' }}</td>
-                            <td>{{ Str::limit($lead->medical_issue ?? 'N/A', 30) }}</td>
-                            <td>{{ Str::limit($lead->medications ?? 'N/A', 30) }}</td>
-                            <td>{{ $lead->doctor_name ?? 'N/A' }}</td>
-                            <td>{{ $lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A' }}</td>
-                            <td>{{ Str::limit($lead->address ?? 'N/A', 40) }}</td>
-                            <td>{{ $lead->state ?? 'N/A' }}</td>
-                            <td>{{ $lead->zip_code ?? 'N/A' }}</td>
-                            <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
-                            <td>${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
-                            <td>${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
-                            <td>{{ $lead->beneficiary ?? 'N/A' }}</td>
-                            <td>{{ $lead->emergency_contact ?? 'N/A' }}</td>
-                            <td>{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A' }}</td>
-                            <td>{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A' }}</td>
-                            <td>{{ $lead->bank_name ?? 'N/A' }}</td>
-                            <td>{{ $lead->account_type ?? 'N/A' }}</td>
-                            <td>{{ $lead->routing_number ?? 'N/A' }}</td>
-                            <td>{{ $lead->acc_number ?? 'N/A' }}</td>
-                            <td>{{ $lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A' }}</td>
-                            <td>{{ $lead->policy_type ?? 'N/A' }}</td>
-                            <td>{{ $lead->source ?? 'N/A' }}</td>
+                            <td><?php echo e($lead->phone_number ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->date_of_birth ? \Carbon\Carbon::parse($lead->date_of_birth)->format('M d, Y') : 'N/A'); ?></td>
+                            <td><?php echo e($lead->smoker ? 'Yes' : 'No'); ?></td>
+                            <td><?php echo e($lead->driving_license_number ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->height ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->weight ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->birth_place ?? 'N/A'); ?></td>
+                            <td><?php echo e(Str::limit($lead->medical_issue ?? 'N/A', 30)); ?></td>
+                            <td><?php echo e(Str::limit($lead->medications ?? 'N/A', 30)); ?></td>
+                            <td><?php echo e($lead->doctor_name ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->ssn ? '***-**-' . substr($lead->ssn, -4) : 'N/A'); ?></td>
+                            <td><?php echo e(Str::limit($lead->address ?? 'N/A', 40)); ?></td>
+                            <td><?php echo e($lead->state ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->zip_code ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->carrier_name ?? 'N/A'); ?></td>
+                            <td>$<?php echo e(number_format($lead->coverage_amount ?? 0, 0)); ?></td>
+                            <td>$<?php echo e(number_format($lead->monthly_premium ?? 0, 2)); ?></td>
+                            <td><?php echo e($lead->beneficiary ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->emergency_contact ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A'); ?></td>
+                            <td><?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A'); ?></td>
+                            <td><?php echo e($lead->bank_name ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->account_type ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->routing_number ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->acc_number ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->card_number ? '****' . substr($lead->card_number, -4) : 'N/A'); ?></td>
+                            <td><?php echo e($lead->policy_type ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->source ?? 'N/A'); ?></td>
                             <td>
-                                {{ $lead->closer_name ?? 'N/A' }}
-                                @if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers))
+                                <?php echo e($lead->closer_name ?? 'N/A'); ?>
+
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name && isset($peregrineClosers) && in_array($lead->closer_name, $peregrineClosers)): ?>
                                     <span class="badge bg-purple ms-1">Peregrine</span>
-                                @endif
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
-                            <td>{{ $lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A') }}</td>
-                            <td>{{ $lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A' }}</td>
-                            <td>{{ $lead->preset_line ?? 'N/A' }}</td>
+                            <td><?php echo e($lead->account_verified_by ?? 'N/A'); ?></td>
+                            <td><?php echo e($lead->bank_balance ? '$' . number_format($lead->bank_balance, 2) : ($lead->ss_amount ? '$' . number_format($lead->ss_amount, 2) : 'N/A')); ?></td>
+                            <td><?php echo e($lead->ss_date ? \Carbon\Carbon::parse($lead->ss_date)->format('M d, Y') : 'N/A'); ?></td>
+                            <td><?php echo e($lead->preset_line ?? 'N/A'); ?></td>
                             <td>
-                                <div contenteditable="true" class="sl-editable-comment" data-lead-id="{{ $lead->id }}">{{ $lead->comments ?? 'Click to add...' }}</div>
+                                <div contenteditable="true" class="sl-editable-comment" data-lead-id="<?php echo e($lead->id); ?>"><?php echo e($lead->comments ?? 'Click to add...'); ?></div>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="38" class="text-center py-4">
                                 <i class="bx bx-user-plus" style="font-size:2rem;color:#94a3b8"></i>
                                 <p class="mb-0 text-muted" style="font-size:.82rem">No leads found. Add or import leads to get started.</p>
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <!-- Pagination -->
         <div class="mt-3">
-            {{ $leads->appends(request()->query())->links() }}
+            <?php echo e($leads->appends(request()->query())->links()); ?>
+
         </div>
     </div>
 
@@ -538,8 +540,8 @@
                     <h5 class="modal-title">Import Leads</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('leads.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
-                    @csrf
+                <form action="<?php echo e(route('leads.import')); ?>" method="POST" enctype="multipart/form-data" id="importForm">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Upload Excel File</label>
@@ -575,10 +577,10 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-@include('partials.sl-filter-assets')
+<?php $__env->startSection('script'); ?>
+<?php echo $__env->make('partials.sl-filter-assets', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Instant search with debounce
@@ -668,4 +670,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/leads/index_simple.blade.php ENDPATH**/ ?>

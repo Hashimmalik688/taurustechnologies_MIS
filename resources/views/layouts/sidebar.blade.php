@@ -963,6 +963,41 @@
     #sidebar.collapsed .sidebar-bottom-text {
         display: none;
     }
+
+    /* ── All icons: gold, consistent brand colour ── */
+    .menu-item i,
+    .dropdown-item i,
+    .sidebar-bottom-item i {
+        color: var(--gold, #d4af37) !important;
+        opacity: .65;
+        transition: opacity .15s, transform .15s;
+    }
+
+    /* Hover: full opacity + slight lift */
+    .menu-item:hover i,
+    .dropdown-item:hover i,
+    .sidebar-bottom-item:hover i {
+        opacity: 1 !important;
+        transform: scale(1.12);
+    }
+
+    /* Active: full opacity */
+    .menu-item.active i,
+    .dropdown-item.active i { opacity: 1 !important; }
+
+    /* ── Active item: gradient background + left glow bar ── */
+    .menu-item.active,
+    .dropdown-item.active {
+        background: linear-gradient(90deg, rgba(212,175,55,.18) 0%, rgba(212,175,55,.04) 100%) !important;
+        border-left: 3px solid var(--gold, #d4af37) !important;
+        box-shadow: inset 4px 0 12px rgba(212,175,55,.08) !important;
+    }
+
+    /* ── Hover: warm gradient ── */
+    .menu-item:hover,
+    .dropdown-item:hover {
+        background: linear-gradient(90deg, rgba(212,175,55,.1) 0%, rgba(212,175,55,.02) 100%) !important;
+    }
 </style>
 
 <script>

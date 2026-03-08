@@ -13,6 +13,14 @@ class BankVerificationController extends Controller
 {
     public function index(Request $request)
     {
+        // Default to current month/year if no date filter is applied
+        if (!$request->filled('month') && !$request->filled('year')) {
+            $request->merge([
+                'month' => now()->month,
+                'year'  => now()->year,
+            ]);
+        }
+
         // Get all approved sales that are also issued
         $query = Lead::where('status', Statuses::LEAD_ACCEPTED)
             ->where('manager_status', Statuses::MGR_APPROVED)
@@ -50,6 +58,8 @@ class BankVerificationController extends Controller
         $bvAgg = Lead::where('status', Statuses::LEAD_ACCEPTED)
             ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+            ->when($request->filled('month'), fn($q) => $q->whereMonth('issuance_date', $request->month))
+            ->when($request->filled('year'),  fn($q) => $q->whereYear('issuance_date', $request->year))
             ->selectRaw("
                 SUM(CASE WHEN bank_verification_status = 'Good' THEN 1 ELSE 0 END) as good_count,
                 SUM(CASE WHEN bank_verification_status = 'Average' THEN 1 ELSE 0 END) as average_count,

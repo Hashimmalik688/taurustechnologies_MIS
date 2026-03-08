@@ -253,7 +253,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'cvv' => $this->getValueFromRow($lowercaseRow, ['cvv']),
                         'expiry_date' => $this->getValueFromRow($lowercaseRow, ['expiry date', 'expiry']),
                         'source' => $this->getValueFromRow($lowercaseRow, ['source']),
-                        'team' => $this->getValueFromRow($lowercaseRow, ['team']),
+                        'team' => $this->getValueFromRow($lowercaseRow, ['team']) ?? \App\Support\Teams::RAVENS,
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
                         'assigned_partner' => $this->getValueFromRow($lowercaseRow, ['assigned partner', 'partner']),
                         'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line', 'preset']),
