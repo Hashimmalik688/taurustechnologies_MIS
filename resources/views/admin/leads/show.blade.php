@@ -834,7 +834,7 @@
             <div class="ld-card">
                 <div class="ld-card-hdr"><h5><i class="mdi mdi-chat-question"></i> Closer Q &amp; A</h5></div>
                 <div class="ld-card-body">
-                    @foreach($insurance->closer_qna as $i => $pair)
+                    @foreach((is_string($insurance->closer_qna) ? json_decode($insurance->closer_qna, true) : $insurance->closer_qna) as $i => $pair)
                     <div class="ld-f" style="align-items:flex-start;margin-bottom:.6rem">
                         <span class="ld-fl" style="padding-top:.15rem">Q{{ $i + 1 }}</span>
                         <span class="ld-fv" style="display:flex;flex-direction:column;gap:.25rem">

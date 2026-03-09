@@ -50,7 +50,7 @@ class DeviceController extends Controller
         return redirect()->back()->with('success', 'Device approved.');
     }
 
-    public function update(AllowedDevice $device)
+    public function update(Request $request, AllowedDevice $device)
     {
         $request->validate([
             'name'         => ['nullable', 'string', 'max:255'],
