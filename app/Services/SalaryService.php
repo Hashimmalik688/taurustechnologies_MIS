@@ -15,7 +15,7 @@ class SalaryService
 
     const WORKING_DAYS_PER_MONTH = 22;
     const PUNCTUALITY_DISQUALIFY_OFFS = 1;
-    const PUNCTUALITY_DISQUALIFY_HALF_DAYS = 3;
+    const PUNCTUALITY_DISQUALIFY_HALF_DAYS = 2;
     const PUNCTUALITY_DISQUALIFY_LATE_DAYS = 4;
 
     public function __construct(AttendanceService $attendanceService)

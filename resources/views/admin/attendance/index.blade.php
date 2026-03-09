@@ -88,9 +88,10 @@
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('attendance.history') }}" class="act-btn a-primary"><i class="mdi mdi-history"></i> History</a>
             <a href="{{ route('attendance.print-view') }}" class="act-btn a-success" target="_blank"><i class="mdi mdi-printer"></i> Print</a>
-            @if(auth()->user()->hasAnyRole([Roles::SUPER_ADMIN, Roles::COORDINATOR, Roles::HR]))
+            @canEditModule('attendance')
             <button type="button" class="act-btn a-warn" data-bs-toggle="modal" data-bs-target="#manualEntryModal"><i class="mdi mdi-plus"></i> Manual Entry</button>
-            @endif
+            <button type="button" class="act-btn a-primary" data-bs-toggle="modal" data-bs-target="#bulkAttendanceModal"><i class="mdi mdi-calendar-edit"></i> Bulk Mark</button>
+            @endcanEditModule
         </div>
     </div>
 
@@ -276,7 +277,9 @@
                     <div class="absent-row">
                         <div class="abs-avatar">{{ substr($employee->name, 0, 1) }}</div>
                         <span class="abs-name">{{ $employee->name }}</span>
+                        @canEditModule('attendance')
                         <a href="#" class="act-btn a-success" onclick="markManualAttendance({{ $employee->id }})" style="font-size:.58rem"><i class="mdi mdi-plus"></i></a>
+                        @endcanEditModule
                     </div>
                     @empty
                     <div class="text-center py-2">
@@ -315,6 +318,7 @@
         </div>
     </div>
 
+    @canEditModule('attendance')
     <!-- Manual Entry Modal -->
     <div class="modal fade" id="manualEntryModal" tabindex="-1">
         <div class="modal-dialog">
@@ -403,6 +407,81 @@
             </div>
         </div>
     </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         BULK ATTENDANCE CALENDAR MODAL
+         ══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="bulkAttendanceModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header modal-header-glass">
+                    <h5 class="modal-title" style="font-size:.92rem"><i class="mdi mdi-calendar-edit me-1"></i> Bulk Attendance — Calendar Marking</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" id="bulkModalCloseBtn"></button>
+                </div>
+                <div class="modal-body" style="padding:1rem">
+
+                    <!-- Top controls -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" style="font-size:.75rem">Employee</label>
+                            <select class="form-select form-select-sm" id="bulk_employee_id">
+                                <option value="">— Select Employee —</option>
+                                @foreach($allEmployees as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" style="font-size:.75rem">Month</label>
+                            <input type="month" class="form-control form-control-sm" id="bulk_month" value="{{ date('Y-m') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold" style="font-size:.75rem">Default Login Time</label>
+                            <input type="time" class="form-control form-control-sm" id="bulk_login_time" value="09:00">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="act-btn a-primary w-100" id="loadCalendarBtn" style="height:31px"><i class="mdi mdi-calendar-search"></i> Load</button>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="d-flex gap-2 flex-wrap mb-2 align-items-center" id="bulk_legend" style="font-size:.67rem">
+                        <span style="background:#e8f5e9;color:#1a8754;padding:2px 8px;border-radius:10px;border:1px solid #c3e6cb">● Present</span>
+                        <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:10px;border:1px solid #ffe69c">● Late</span>
+                        <span style="background:#fff0e0;color:#c07000;padding:2px 8px;border-radius:10px;border:1px solid #ffd16a">● Half Day</span>
+                        <span style="background:#e8f0fe;color:#3d5afe;padding:2px 8px;border-radius:10px;border:1px solid #b8c8ff">● Paid Leave</span>
+                        <span style="background:#fdecea;color:#c62828;padding:2px 8px;border-radius:10px;border:1px solid #f9c4c4">● Absent</span>
+                        <span style="background:#f5f5f5;color:#888;padding:2px 8px;border-radius:10px;border:1px solid #ddd">— Weekend/Holiday</span>
+                        <div class="ms-auto d-flex gap-1 flex-wrap">
+                            <button type="button" class="act-btn a-success" style="font-size:.6rem;padding:2px 7px" onclick="bulkQuickMark('present')" title="Mark all workdays as Present"><i class="mdi mdi-check-all"></i> All Present</button>
+                            <button type="button" class="act-btn a-warn" style="font-size:.6rem;padding:2px 7px" onclick="bulkQuickMark('late')" title="Mark all workdays as Late"><i class="mdi mdi-alarm-check"></i> All Late</button>
+                            <button type="button" class="act-btn a-danger" style="font-size:.6rem;padding:2px 7px" onclick="bulkQuickMark(null)" title="Clear all markings"><i class="mdi mdi-close-circle"></i> Clear All</button>
+                        </div>
+                    </div>
+
+                    <!-- Info bar -->
+                    <div id="bulk_info_bar" class="mb-2" style="font-size:.72rem;color:var(--bs-surface-500)">
+                        Select an employee and month, then click <strong>Load</strong>.
+                    </div>
+
+                    <!-- Calendar grid -->
+                    <div id="bulk_calendar_wrap" style="overflow-x:auto">
+                        <div id="bulk_calendar_grid" style="min-width:580px"></div>
+                    </div>
+
+                    <!-- Summary counts -->
+                    <div id="bulk_summary" class="d-flex gap-3 flex-wrap mt-2" style="font-size:.72rem;display:none!important"></div>
+
+                </div>
+                <div class="modal-footer border-top" style="background:rgba(212,175,55,.03)">
+                    <div style="font-size:.7rem;color:var(--bs-surface-400)" id="bulk_change_count"></div>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="act-btn a-success" id="saveBulkAttendanceBtn" disabled><i class="mdi mdi-content-save"></i> Save All Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endcanEditModule
 @endsection
 
 @section('script')
@@ -427,9 +506,8 @@ $(document).ready(function() {
     } catch(e) { console.error('DataTable error:', e); }
 });
 
-function checkOvernightShift() {
-    var l = document.getElementById('login_time').value, o = document.getElementById('logout_time').value;
-    var a = document.getElementById('overnight_shift_alert'), d = document.getElementById('shift_duration_display');
+@canEditModule('attendance')
+function checkOvernightShift() {    var l = document.getElementById('login_time').value, o = document.getElementById('logout_time').value;    var a = document.getElementById('overnight_shift_alert'), d = document.getElementById('shift_duration_display');
     if (l && o) {
         var lh = parseInt(l.split(':')[0]), oh = parseInt(o.split(':')[0]);
         if (lh >= 12 && oh < 12) {
@@ -500,6 +578,7 @@ function deleteAttendance(id, name, date) {
     .then(r => r.json()).then(data => { if (data.success) { alert('Deleted'); location.reload(); } else alert('Error: ' + (data.message || 'Failed')); })
     .catch(err => alert('Error: ' + err.message));
 }
+@endcanEditModule
 
 document.getElementById('prevDayBtn')?.addEventListener('click', function() {
     var s = document.querySelector('input[name="start_date"]'), e = document.querySelector('input[name="end_date"]');
@@ -522,5 +601,295 @@ document.getElementById('nextDayBtn')?.addEventListener('click', function() {
         } else alert('Cannot navigate to future');
     }
 });
+
+// ═══════════════════════════════════════════════════════
+// BULK ATTENDANCE CALENDAR
+// ═══════════════════════════════════════════════════════
+@canEditModule('attendance')
+(function() {
+    var bulkDays = {};
+    var bulkPeriodStart = null, bulkPeriodEnd = null;
+    var STATUS_CYCLE = [null, 'present', 'late', 'half_day', 'paid_leave', 'absent'];
+    var STATUS_STYLE = {
+        present:    { bg: '#e8f5e9', color: '#1a8754', border: '#c3e6cb' },
+        late:       { bg: '#fff3cd', color: '#856404', border: '#ffe69c' },
+        half_day:   { bg: '#fff0e0', color: '#c07000', border: '#ffd16a' },
+        paid_leave: { bg: '#e8f0fe', color: '#3d5afe', border: '#b8c8ff' },
+        absent:     { bg: '#fdecea', color: '#c62828', border: '#f9c4c4' },
+    };
+
+    function getStatusLabel(st) {
+        return { present: 'Present', late: 'Late', half_day: 'Half Day', paid_leave: 'Paid Leave', absent: 'Absent' }[st] || (st || '—');
+    }
+
+    function formatDate(d) {
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function formatMonthLabel(mon) {
+        var d = new Date(mon + '-01');
+        return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function loadCalendar() {
+        var uid = document.getElementById('bulk_employee_id').value;
+        var mon = document.getElementById('bulk_month').value;
+        if (!uid || !mon) { alert('Please select an employee and a month.'); return; }
+        var btn = document.getElementById('loadCalendarBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Loading...';
+        fetch('/attendance/bulk-month-data?user_id=' + encodeURIComponent(uid) + '&month=' + encodeURIComponent(mon), {
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false; btn.innerHTML = '<i class="mdi mdi-calendar-search"></i> Load';
+            if (!data.success) { alert(data.message || 'Failed to load.'); return; }
+            renderCalendar(data);
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="mdi mdi-calendar-search"></i> Load'; alert('Error: ' + err.message); });
+    }
+
+    function renderCalendar(data) {
+        bulkDays = {};
+        bulkPeriodStart = data.period_start || null;
+        bulkPeriodEnd   = data.period_end   || null;
+        data.days.forEach(function(d) {
+            bulkDays[d.date] = Object.assign({}, d, { current_status: d.status, original_status: d.status });
+        });
+        var periodLbl = data.period_label || formatMonthLabel(data.month);
+        document.getElementById('bulk_info_bar').innerHTML =
+            '<i class="mdi mdi-account me-1"></i><strong>' + (data.employee_name || '') + '</strong>' +
+            ' &nbsp;<span style="color:#d4af37;font-weight:600">&#128197; ' + periodLbl + '</span>' +
+            ' &nbsp;<span class="text-muted" style="font-size:.63rem">Click to cycle &nbsp;|&nbsp; Dbl-click to clear</span>';
+        buildCalendarGrid(data.period_start, data.period_end);
+        updateSummary();
+        document.getElementById('saveBulkAttendanceBtn').disabled = true;
+    }
+
+    function buildCalendarGrid(periodStartStr, periodEndStr) {
+        var grid = document.getElementById('bulk_calendar_grid');
+        var dates = Object.keys(bulkDays).sort();
+        if (!dates.length) { grid.innerHTML = '<p class="text-muted text-center p-3">No days found.</p>'; return; }
+
+        // Use the exact pay period boundaries provided by the server
+        var firstDate = periodStartStr ? new Date(periodStartStr + 'T00:00:00') : new Date(dates[0] + 'T00:00:00');
+        var lastDate  = periodEndStr   ? new Date(periodEndStr   + 'T00:00:00') : new Date(dates[dates.length-1] + 'T00:00:00');
+
+        // Pad to nearest Monday / Sunday
+        var start = new Date(firstDate);
+        var dow = start.getDay(); start.setDate(start.getDate() - (dow === 0 ? 6 : dow - 1));
+        var end = new Date(lastDate);
+        var endDow = end.getDay(); if (endDow !== 0) end.setDate(end.getDate() + (7 - endDow));
+
+        var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+        // Month-header groups: find first day of each month inside the period for column spanning
+        var html = '<table style="width:100%;border-collapse:separate;border-spacing:3px" id="bulk_cal_table">';
+
+        // Month label row — scan rows to find month boundaries
+        // Build rows first so we know spans, then prepend a header
+        var rows = [];
+        var cur = new Date(start);
+        while (cur <= end) {
+            var week = [];
+            for (var i = 0; i < 7; i++) {
+                week.push(new Date(cur));
+                cur.setDate(cur.getDate() + 1);
+            }
+            rows.push(week);
+        }
+
+        // Month label spanning row
+        html += '<thead>';
+        // Weekday names row
+        html += '<tr>';
+        dayNames.forEach(function(d, idx) {
+            var isWeekend = idx >= 5;
+            html += '<th style="text-align:center;font-size:.65rem;padding:4px 0;color:' + (isWeekend ? '#c0b090':'var(--bs-surface-500)') + ';font-weight:700;">' + d + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+
+        rows.forEach(function(week) {
+            html += '<tr>';
+            week.forEach(function(day) {
+                var dk = formatDate(day);
+                var inPeriod = day >= firstDate && day <= lastDate;
+                if (!inPeriod) {
+                    // Out-of-period padding cell — show day number greyed
+                    html += '<td style="height:70px"><div style="height:66px;border-radius:6px;background:transparent;display:flex;align-items:center;justify-content:center"><span style="font-size:.65rem;color:#d0d0d0">' + day.getDate() + '</span></div></td>';
+                } else {
+                    var dayData = bulkDays[dk];
+                    html += dayData ? buildDayCell(dayData, dk, day.getDate()) : '<td style="height:70px"></td>';
+                }
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        grid.innerHTML = html;
+        attachCellHandlers();
+    }
+
+    function buildDayCell(day, dateKey, dayNum) {
+        if (day.is_weekend || day.is_holiday) {
+            var lbl = day.is_holiday ? 'Holiday' : 'Weekend';
+            return '<td style="height:70px"><div style="height:66px;background:#f8f9fa;border-radius:6px;border:1px solid #eee;display:flex;flex-direction:column;align-items:center;justify-content:center">' +
+                   '<span style="font-size:.75rem;color:#bbb;font-weight:700">' + dayNum + '</span>' +
+                   '<span style="font-size:.55rem;color:#ccc;margin-top:1px">' + lbl + '</span></div></td>';
+        }
+        var st = day.current_status;
+        // Safe fallback — if status is unrecognised or null, use neutral style
+        var sty = (st && STATUS_STYLE[st]) ? STATUS_STYLE[st] : { bg: '#fff', color: '#999', border: '#dee2e6' };
+        var modified = st !== day.original_status;
+        var badge = st
+            ? '<span style="font-size:.62rem;font-weight:700;color:' + sty.color + ';display:block;margin-top:2px;line-height:1.2">' + getStatusLabel(st) + '</span>'
+            : '<span style="font-size:.6rem;color:#ccc;display:block;margin-top:3px">tap</span>';
+        var dot = modified ? '<span style="position:absolute;top:4px;right:5px;width:6px;height:6px;background:#d4af37;border-radius:50%;display:inline-block"></span>' : '';
+        return '<td style="height:70px;position:relative">' +
+               '<div class="bulk-day-cell" data-date="' + dateKey + '" style="cursor:pointer;height:66px;border-radius:6px;text-align:center;padding:8px 3px;' +
+               'border:1.5px solid ' + sty.border + ';background:' + sty.bg + ';position:relative;transition:box-shadow .12s" ' +
+               'title="' + dateKey + (st ? ' — ' + getStatusLabel(st) : '') + '">' +
+               dot +
+               '<div style="font-size:.72rem;color:' + sty.color + ';font-weight:700">' + dayNum + '</div>' +
+               badge +
+               '</div></td>';
+    }
+
+    function attachCellHandlers() {
+        document.querySelectorAll('#bulk_cal_table .bulk-day-cell').forEach(function(cell) {
+            cell.addEventListener('click', function() { cycleStatus(this.dataset.date); });
+            cell.addEventListener('dblclick', function(e) { e.preventDefault(); clearStatus(this.dataset.date); });
+        });
+    }
+
+    function cycleStatus(dateKey) {
+        var day = bulkDays[dateKey];
+        if (!day || day.is_weekend || day.is_holiday) return;
+        var idx = STATUS_CYCLE.indexOf(day.current_status);
+        day.current_status = STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
+        if (day.current_status && !day.login_time) {
+            day.login_time = document.getElementById('bulk_login_time').value || '09:00';
+        }
+        refreshCell(dateKey);
+        updateSummary();
+    }
+
+    function clearStatus(dateKey) {
+        var day = bulkDays[dateKey];
+        if (!day || day.is_weekend || day.is_holiday) return;
+        day.current_status = null;
+        refreshCell(dateKey);
+        updateSummary();
+    }
+
+    function refreshCell(dateKey) {
+        var day = bulkDays[dateKey];
+        var cell = document.querySelector('.bulk-day-cell[data-date="' + dateKey + '"]');
+        if (!cell) return;
+        var td = cell.closest('td');
+        if (!td) return;
+        var d = new Date(dateKey + 'T00:00:00');
+        var newHtml = buildDayCell(day, dateKey, d.getDate());
+        var tmp = document.createElement('table'); tmp.innerHTML = '<tbody><tr>' + newHtml + '</tr></tbody>';
+        var newTd = tmp.querySelector('td');
+        td.parentNode.replaceChild(newTd, td);
+        // Re-attach event on new cell
+        var nc = newTd.querySelector('.bulk-day-cell');
+        if (nc) {
+            nc.addEventListener('click', function() { cycleStatus(this.dataset.date); });
+            nc.addEventListener('dblclick', function(e) { e.preventDefault(); clearStatus(this.dataset.date); });
+        }
+    }
+
+    function updateSummary() {
+        var counts = {}, changes = 0;
+        Object.values(bulkDays).forEach(function(d) {
+            if (d.is_weekend || d.is_holiday) return;
+            if (d.current_status) counts[d.current_status] = (counts[d.current_status] || 0) + 1;
+            if (d.current_status !== d.original_status) changes++;
+        });
+        var sum = document.getElementById('bulk_summary');
+        sum.style.cssText = 'display:flex!important';
+        var parts = Object.entries(counts).filter(([,v]) => v > 0).map(function([k,v]) {
+            var s = STATUS_STYLE[k] || {};
+            return '<span style="background:' + (s.bg||'#f0f0f0') + ';color:' + (s.color||'#333') + ';padding:2px 10px;border-radius:10px;border:1px solid ' + (s.border||'#ddd') + '">' + getStatusLabel(k) + ': <strong>' + v + '</strong></span>';
+        });
+        sum.innerHTML = parts.join('') || '<span class="text-muted">No days marked yet.</span>';
+        document.getElementById('bulk_change_count').textContent = changes > 0 ? changes + ' pending change(s)' : '';
+        document.getElementById('saveBulkAttendanceBtn').disabled = changes === 0;
+    }
+
+    function saveBulkAttendance() {
+        var uid = document.getElementById('bulk_employee_id').value;
+        if (!uid) { alert('No employee selected.'); return; }
+        var entries = [];
+        Object.values(bulkDays).forEach(function(d) {
+            if (d.is_weekend || d.is_holiday) return;
+            if (d.current_status !== d.original_status && d.current_status) {
+                entries.push({ date: d.date, status: d.current_status, login_time: d.login_time || document.getElementById('bulk_login_time').value || '09:00', logout_time: d.logout_time || null });
+            }
+        });
+        if (!entries.length) { alert('No changes to save.'); return; }
+        var btn = document.getElementById('saveBulkAttendanceBtn');
+        btn.disabled = true; btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Saving...';
+        fetch('{{ route("attendance.bulk-mark.post") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({ user_id: uid, entries: entries })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false; btn.innerHTML = '<i class="mdi mdi-content-save"></i> Save All Changes';
+            if (data.success) {
+                // Mark saved entries as original so diff resets
+                entries.forEach(function(e) { if (bulkDays[e.date]) { bulkDays[e.date].original_status = e.status; } });
+                updateSummary();
+                // Show toast / re-fetch calendar silently
+                document.getElementById('bulk_info_bar').innerHTML += ' &nbsp;<span style="color:#1a8754;font-weight:600"><i class="mdi mdi-check-circle"></i> ' + (data.message || 'Saved!') + '</span>';
+                // Reload from server to confirm
+                var uid2 = document.getElementById('bulk_employee_id').value, mon2 = document.getElementById('bulk_month').value;
+                if (uid2 && mon2) {
+                    fetch('/attendance/bulk-month-data?user_id=' + encodeURIComponent(uid2) + '&month=' + encodeURIComponent(mon2), {
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+                    }).then(r => r.json()).then(function(d2) { if (d2.success) renderCalendar(d2); });
+                }
+            } else {
+                var errMsg = Array.isArray(data.errors) && data.errors.length ? data.errors.join('\n') : (data.message || 'Save failed.');
+                alert('Some errors occurred:\n' + errMsg);
+            }
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="mdi mdi-content-save"></i> Save All Changes'; alert('Error: ' + err.message); });
+    }
+
+    // Quick-mark all workdays in current view
+    function quickMarkAll(status) {
+        Object.keys(bulkDays).forEach(function(dk) {
+            var d = bulkDays[dk];
+            if (!d.is_weekend && !d.is_holiday) {
+                d.current_status = status;
+                if (status && !d.login_time) d.login_time = document.getElementById('bulk_login_time').value || '09:00';
+            }
+        });
+        buildCalendarGrid(bulkPeriodStart, bulkPeriodEnd);
+        updateSummary();
+    }
+
+    document.getElementById('loadCalendarBtn')?.addEventListener('click', loadCalendar);
+    document.getElementById('saveBulkAttendanceBtn')?.addEventListener('click', saveBulkAttendance);
+
+    // Expose quick-mark for optional buttons
+    window.bulkQuickMark = quickMarkAll;
+
+    document.getElementById('bulkAttendanceModal')?.addEventListener('hidden.bs.modal', function() {
+        bulkDays = {};
+        bulkPeriodStart = null; bulkPeriodEnd = null;
+        document.getElementById('bulk_calendar_grid').innerHTML = '';
+        document.getElementById('bulk_info_bar').innerHTML = 'Select an employee and month, then click <strong>Load</strong>.';
+        document.getElementById('bulk_summary').style.cssText = 'display:none!important';
+        document.getElementById('bulk_change_count').textContent = '';
+        document.getElementById('saveBulkAttendanceBtn').disabled = true;
+    });
+})();
+@endcanEditModule
 </script>
 @endsection

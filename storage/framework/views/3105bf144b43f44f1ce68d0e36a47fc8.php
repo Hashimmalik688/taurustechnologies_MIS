@@ -138,6 +138,14 @@
         transition: all .15s;
     }
     .sl-pill-clear:hover { background: rgba(239,68,68,.08); color: #dc2626; }
+    .sl-pill-today {
+        font-size: .68rem; font-weight: 600; color: #0ea5e9;
+        background: transparent; padding: .25rem .6rem;
+        border-radius: 20px; border: 1px solid rgba(14,165,233,.3);
+        cursor: pointer; display: inline-flex; align-items: center;
+        transition: all .15s;
+    }
+    .sl-pill-today:hover { background: rgba(14,165,233,.1); border-color: #0ea5e9; }
 
     /* Table area */
     .sl-tbl-wrap {
@@ -398,6 +406,7 @@
         color-scheme: dark;
     }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-pill-clear { border-color: rgba(239,68,68,.3); }
+    :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-pill-today { border-color: rgba(14,165,233,.3); color: #38bdf8; }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-tbl thead th {
         background: linear-gradient(180deg, rgba(15,23,42,.95), rgba(15,23,42,.9));
         color: #94a3b8; border-color: rgba(212,175,55,.12);
@@ -532,9 +541,10 @@
                 <option value="Modified" <?php echo e(request('policy_type') == 'Modified' ? 'selected' : ''); ?>>Modified</option>
             </select>
             <span class="sl-pill-label">FROM</span>
-            <input type="date" name="date_from" class="sl-pill-date" value="<?php echo e(request('date_from')); ?>" onchange="this.form.submit()">
+            <input type="date" name="date_from" id="filter_date_from" class="sl-pill-date" value="<?php echo e(request('date_from')); ?>" onchange="this.form.submit()">
             <span class="sl-pill-label">TO</span>
-            <input type="date" name="date_to" class="sl-pill-date" value="<?php echo e(request('date_to')); ?>" onchange="this.form.submit()">
+            <input type="date" name="date_to" id="filter_date_to" class="sl-pill-date" value="<?php echo e(request('date_to')); ?>" onchange="this.form.submit()">
+            <button type="button" class="sl-pill-today" onclick="setTodayFilter()" title="Show today's sales">Today</button>
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['carrier','status','policy_type','date_from','date_to'])): ?>
                 <a href="<?php echo e(route('sales.index')); ?>" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -1432,6 +1442,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+function setTodayFilter() {
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('filter_date_from').value = today;
+    document.getElementById('filter_date_to').value = today;
+    document.getElementById('salesFilterForm').submit();
+}
 </script>
 
 <!-- Manual Sales Entry Modal -->

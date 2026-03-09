@@ -141,10 +141,27 @@ class ZoomOAuthService
                 ->get("https://api.zoom.us/v2/phone/call_logs/{$callLogId}/recordings");
 
             if ($response->successful()) {
-                $recordings = $response->json('recordings') ?? [];
-                $url = $recordings[0]['download_url'] ?? $recordings[0]['file_url'] ?? null;
+                $body       = $response->json() ?? [];
+                $recordings = $body['recordings'] ?? [];
+
+                // Format A: { "recordings": [ { "download_url": "...", ... } ] }
+                if (!empty($recordings)) {
+                    $url = $recordings[0]['download_url'] ?? $recordings[0]['file_url'] ?? null;
+                } else {
+                    // Format B: flat root-level object { "download_url": "...", "file_url": "..." }
+                    $url = $body['download_url'] ?? $body['file_url'] ?? null;
+                }
+
                 if ($url) {
-                    Log::info('[QA:ZoomOAuth] Got fresh signed URL from admin API', ['call_log_id' => $callLogId]);
+                    Log::info('[QA:ZoomOAuth] Got fresh signed URL from admin API', [
+                        'call_log_id' => $callLogId,
+                        'format'      => empty($recordings) ? 'flat' : 'array',
+                    ]);
+                } else {
+                    Log::info('[QA:ZoomOAuth] No audio download_url found in recordings API', [
+                        'call_log_id'  => $callLogId,
+                        'response_keys' => array_keys($body),
+                    ]);
                 }
                 return $url;
             }
@@ -160,6 +177,49 @@ class ZoomOAuthService
         }
 
         return null;
+    }
+
+    /**
+     * Download and parse a Zoom VTT transcript directly from a known URL.
+     * Used when the URL has already been captured from the
+     * phone.recording_transcript_completed webhook payload.
+     */
+    public function downloadTranscriptFromUrl(string $transcriptUrl, string $agentName = ''): ?string
+    {
+        try {
+            $token = $this->getAccessToken();
+
+            $response = Http::timeout(30)
+                ->withToken($token)
+                ->get($transcriptUrl);
+
+            if (!$response->successful()) {
+                Log::warning('[QA:ZoomOAuth] Direct transcript URL download failed', [
+                    'status' => $response->status(),
+                    'url'    => substr($transcriptUrl, 0, 80),
+                ]);
+                return null;
+            }
+
+            $vttContent = $response->body();
+            if (empty(trim($vttContent))) {
+                return null;
+            }
+
+            $labeled = $this->parseVttToLabeledText($vttContent, $agentName);
+
+            Log::info('[QA:ZoomOAuth] Downloaded transcript from direct URL', [
+                'chars'          => strlen($labeled),
+                'agent_turns'    => substr_count($labeled, "\nAGENT:") + (str_starts_with($labeled, 'AGENT:') ? 1 : 0),
+                'customer_turns' => substr_count($labeled, "\nCUSTOMER:"),
+            ]);
+
+            return $labeled ?: null;
+
+        } catch (\Throwable $e) {
+            Log::warning('[QA:ZoomOAuth] downloadTranscriptFromUrl exception: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -192,10 +252,34 @@ class ZoomOAuthService
                 return null;
             }
 
-            $recordings = $response->json('recordings') ?? [];
+            $body       = $response->json() ?? [];
+            $recordings = $body['recordings'] ?? [];
+
+            // The API can return either an array under 'recordings' or a flat single-recording object.
+            // Normalise to a single recording object for metadata extraction.
+            $recMeta = !empty($recordings) ? (array) $recordings[0] : $body;
+
+            // Auto-detect agent name from the recording's direction + caller/callee names.
+            // This is more reliable than the stored agent_name which may be 'Unknown Agent'.
+            $direction  = $recMeta['direction'] ?? 'outbound';
+            $calleeName = $recMeta['callee_name'] ?? '';
+            $callerName = $recMeta['caller_name'] ?? '';
+            $agentNameFromApi = ($direction === 'inbound') ? $calleeName : $callerName;
+
+            // Override agentName when the passed value is unhelpful
+            $agentNormCheck = strtolower(trim($agentName));
+            if (in_array($agentNormCheck, ['', 'unknown agent', 'unknown', 'n/a']) && $agentNameFromApi !== '') {
+                $agentName = $agentNameFromApi;
+                Log::info('[QA:ZoomOAuth] Using API-derived agent name for VTT parsing', [
+                    'call_log_id' => $callLogId,
+                    'direction'   => $direction,
+                    'agent_name'  => $agentName,
+                ]);
+            }
+
             $transcriptUrl = null;
 
-            // Format A: { "recordings": [ { "transcript_download_url": "..." } ] }
+            // Format A: recordings array
             foreach ($recordings as $rec) {
                 if (!empty($rec['transcript_download_url'])) {
                     $transcriptUrl = $rec['transcript_download_url'];
@@ -205,7 +289,7 @@ class ZoomOAuthService
 
             // Format B: flat root-level object { "transcript_download_url": "..." }
             if (!$transcriptUrl) {
-                $transcriptUrl = $response->json('transcript_download_url') ?? null;
+                $transcriptUrl = $body['transcript_download_url'] ?? null;
             }
 
             if (!$transcriptUrl) {
@@ -312,20 +396,30 @@ class ZoomOAuthService
         // Map speaker names → AGENT / CUSTOMER
         $agentNorm = strtolower(trim($agentName));
 
+        // Treat generic/uninformative agent names as unknown to avoid false matches.
+        // e.g. 'unknown agent' contains 'agent', which would incorrectly match a
+        // VTT speaker literally named "Agent".
+        if (in_array($agentNorm, ['', 'unknown agent', 'unknown', 'n/a', 'agent', 'customer'])) {
+            $agentNorm = '';
+        }
+
         $labeledLines = [];
         foreach ($segments as $seg) {
             if (empty($seg['text'])) continue;
 
             $speakerNorm = strtolower(trim($seg['speaker']));
 
-            if ($agentNorm !== '' && (
-                str_contains($speakerNorm, $agentNorm) ||
-                str_contains($agentNorm, $speakerNorm)
-            )) {
-                $label = 'AGENT';
-            } else {
-                $label = 'CUSTOMER';
+            $isAgent = false;
+            if ($agentNorm !== '') {
+                // Check if either name is a substring of the other (handles partial matches
+                // like "James" matching "James Hooper"), but only when the shorter string
+                // is at least 4 chars to avoid false positives on short common words.
+                $longer  = strlen($speakerNorm) >= strlen($agentNorm) ? $speakerNorm : $agentNorm;
+                $shorter = strlen($speakerNorm) <  strlen($agentNorm) ? $speakerNorm : $agentNorm;
+                $isAgent = strlen($shorter) >= 4 && str_contains($longer, $shorter);
             }
+
+            $label = $isAgent ? 'AGENT' : 'CUSTOMER';
 
             $labeledLines[] = $label . ': ' . $seg['text'];
         }

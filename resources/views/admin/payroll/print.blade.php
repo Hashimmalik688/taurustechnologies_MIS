@@ -14,6 +14,7 @@
             text-decoration:none;display:inline-flex;align-items:center;gap:6px;color:#fff
         }
         .print-buttons .btn-print{background:linear-gradient(135deg,#b8860b,#d4a843)}
+        .print-buttons .btn-xlsx{background:linear-gradient(135deg,#1a7a3a,#28a758)}
         .print-buttons .btn-back{background:#6b7280}
         .print-buttons button:hover,.print-buttons a:hover{opacity:.9}
 
@@ -68,6 +69,7 @@
 <body>
     <div class="print-buttons no-print">
         <button class="btn-print" onclick="window.print()">🖨️ Print This Page</button>
+        <a href="{{ route('payroll.export', ['month' => $month, 'year' => $year]) }}" class="btn-xlsx">⬇️ Export XLSX</a>
         <a href="{{ route('payroll.index') }}" class="btn-back">← Back to Payroll</a>
     </div>
 

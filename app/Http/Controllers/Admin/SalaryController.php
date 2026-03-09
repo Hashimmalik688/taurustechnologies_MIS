@@ -21,6 +21,7 @@ use App\Traits\PayrollMonthCalculation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SalaryController extends Controller
@@ -252,15 +253,16 @@ class SalaryController extends Controller
         // Statuses in DB: present, late, half_day, absent, holiday
         // full_days = present + late (worked the full shift)
         // half_days = half_day
-        // full_days = 'present' only, half_days = 'half_day', late_days = 'late'
-        // All three are additive: Full + Half + Late = total days worked
+        // full_days = 'present' only, half_days = 'half_day', late_days = 'late', absent_days = 'absent' or 'leave'
+        // All are tracked separately for punctuality calculations
         $attendanceSummaries = [];
         $attendanceRecords = Attendance::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
             ->whereIn('user_id', $employees->pluck('id'))
             ->selectRaw("user_id,
                 SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as full_days,
                 SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_days,
-                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days")
+                SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days,
+                SUM(CASE WHEN status IN ('absent', 'leave') THEN 1 ELSE 0 END) as absent_days")
             ->groupBy('user_id')
             ->get()
             ->keyBy('user_id');
@@ -271,6 +273,7 @@ class SalaryController extends Controller
                 'full_days' => $rec ? (int) $rec->full_days : 0,
                 'half_days' => $rec ? (int) $rec->half_days : 0,
                 'late_days' => $rec ? (int) $rec->late_days : 0,
+                'absent_days' => $rec ? (int) $rec->absent_days : 0,
             ];
         }
 
@@ -1251,13 +1254,14 @@ class SalaryController extends Controller
             $qualifiedForBonus = 0;
 
             // ── Auto-calculate attendance from attendance records ──
-            // full = 'present', half = 'half_day', late = 'late' (all additive)
+            // full = 'present', half = 'half_day', late = 'late', absent = 'absent' or 'leave'
             $attendanceRecords = Attendance::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
                 ->whereIn('user_id', $employees->pluck('id'))
                 ->selectRaw("user_id,
                     SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as full_days,
                     SUM(CASE WHEN status = 'half_day' THEN 1 ELSE 0 END) as half_days,
-                    SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days")
+                    SUM(CASE WHEN status = 'late' THEN 1 ELSE 0 END) as late_days,
+                    SUM(CASE WHEN status IN ('absent', 'leave') THEN 1 ELSE 0 END) as absent_days")
                 ->groupBy('user_id')
                 ->get()
                 ->keyBy('user_id');
@@ -1275,6 +1279,7 @@ class SalaryController extends Controller
                 $fullDays = $attRec ? (int) $attRec->full_days : 0;
                 $halfDays = $attRec ? (int) $attRec->half_days : 0;
                 $lateDays = $attRec ? (int) $attRec->late_days : 0;
+                $absentDays = $attRec ? (int) $attRec->absent_days : 0;
                 $eligibleDays = $fullDays + $halfDays + $lateDays;
                 
                 // Handle join date
@@ -1298,18 +1303,21 @@ class SalaryController extends Controller
                 $earnedSalary = $eligibleDays * $perDayWage;
                 
                 // Punctuality qualification check
+                // Rules: No bonus if 1+ absences OR 2+ half days OR 4+ late days
                 $isQualified = true;
-                if ($halfDays >= 2) {
+                if ($absentDays >= 1) {
+                    $isQualified = false;
+                } elseif ($halfDays >= 2) {
                     $isQualified = false;
                 } elseif ($lateDays >= 4) {
                     $isQualified = false;
                 } else {
                     if ($halfDays == 1) {
                         $requiredFullDays = $totalWorkingDays - 1;
-                        $isQualified = ($fullDays >= $requiredFullDays);
+                        $isQualified = (($fullDays + $lateDays) >= $requiredFullDays);
                     } elseif ($halfDays == 0) {
                         $requiredFullDays = $totalWorkingDays;
-                        $isQualified = ($fullDays >= $requiredFullDays);
+                        $isQualified = (($fullDays + $lateDays) >= $requiredFullDays);
                     }
                 }
                 
@@ -1434,7 +1442,7 @@ class SalaryController extends Controller
                 $totalPayable += $payable;
             }
             
-            return view('admin.payroll.print', [
+            $data = [
                 'payrollData' => $payrollData,
                 'month' => $month,
                 'year' => $year,
@@ -1450,10 +1458,349 @@ class SalaryController extends Controller
                 'totalPayable' => $totalPayable,
                 'qualifiedForBonus' => $qualifiedForBonus,
                 'totalEmployees' => $employees->count() + $manualEntries->count(),
-            ]);
+            ];
+
+            return view('admin.payroll.print', $data);
         } catch (\Exception $e) {
             \Log::error('Payroll print error: ' . $e->getMessage());
             return back()->with('error', 'Error generating payroll print: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export the payroll data for the selected month/year as an XLSX file.
+     * Uses the same data calculation logic as printPayroll.
+     */
+    public function exportXlsx(Request $request)
+    {
+        try {
+            $month = (int) $request->get('month', now()->month);
+            $year  = (int) $request->get('year',  now()->year);
+
+            // ── Re-compute the same payroll data as the print view ──────
+            $payrollPeriod    = $this->getPayrollPeriod($month, $year);
+            $startDate        = $payrollPeriod['start'];
+            $endDate          = $payrollPeriod['end'];
+            $periodLabel      = $this->formatPayrollPeriod($month, $year);
+            $totalWorkingDays = PayrollSetting::getTotalWorkingDays($month, $year);
+
+            $employees = User::with(['roles', 'userDetail'])
+                ->withTrashed()
+                ->where('name', '!=', 'Shawn')
+                ->where(function ($q) use ($endDate) {
+                    $q->where(function ($q2) {
+                        $q2->where('status', Statuses::USER_ACTIVE)->whereNull('deleted_at');
+                    })->orWhere(function ($q2) use ($endDate) {
+                        $q2->whereNotNull('deleted_at')->where('deleted_at', '>', $endDate);
+                    });
+                })
+                ->orderByRaw('deleted_at IS NOT NULL, name')
+                ->get();
+
+            $manualEntries = ManualPayrollEntry::where('payroll_month', $month)
+                ->where('payroll_year', $year)
+                ->orderBy('employee_name')
+                ->get();
+
+            $attendanceRecords = Attendance::whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                ->whereIn('user_id', $employees->pluck('id'))
+                ->selectRaw("user_id,
+                    SUM(CASE WHEN status = 'present'               THEN 1 ELSE 0 END) as full_days,
+                    SUM(CASE WHEN status = 'half_day'              THEN 1 ELSE 0 END) as half_days,
+                    SUM(CASE WHEN status = 'late'                  THEN 1 ELSE 0 END) as late_days,
+                    SUM(CASE WHEN status IN ('absent', 'leave')    THEN 1 ELSE 0 END) as absent_days")
+                ->groupBy('user_id')
+                ->get()
+                ->keyBy('user_id');
+
+            $payrollData       = [];
+            $totalBasicSalary  = 0;
+            $totalPunctuality  = 0;
+            $totalTotal        = 0;
+            $totalDock         = 0;
+            $totalDeductions   = 0;
+            $totalNetSalary    = 0;
+            $totalAdvance      = 0;
+            $totalPayable      = 0;
+            $qualifiedForBonus = 0;
+
+            foreach ($employees as $employee) {
+                $basicSalary  = $employee->basic_salary ?? 0;
+                $joinDate     = $employee->userDetail && $employee->userDetail->join_date
+                    ? \Carbon\Carbon::parse($employee->userDetail->join_date)->format('d M Y') : 'N/A';
+                $joiningDate  = $employee->userDetail && $employee->userDetail->join_date
+                    ? \Carbon\Carbon::parse($employee->userDetail->join_date) : null;
+                $perDayWage   = $basicSalary / max($totalWorkingDays, 1);
+                $attRec       = $attendanceRecords->get($employee->id);
+                $fullDays     = $attRec ? (int) $attRec->full_days  : 0;
+                $halfDays     = $attRec ? (int) $attRec->half_days  : 0;
+                $lateDays     = $attRec ? (int) $attRec->late_days  : 0;
+                $absentDays   = $attRec ? (int) $attRec->absent_days : 0;
+                $eligibleDays = $fullDays + $halfDays + $lateDays;
+
+                if ($joiningDate) {
+                    if ($joiningDate->gt($endDate)) {
+                        $eligibleDays = 0;
+                    } elseif ($joiningDate->between($startDate, $endDate)) {
+                        $maxAllowed = 0;
+                        $cur = $joiningDate->copy();
+                        while ($cur->lte($endDate)) {
+                            if ($cur->dayOfWeek !== 0 && $cur->dayOfWeek !== 6) $maxAllowed++;
+                            $cur->addDay();
+                        }
+                        $eligibleDays = min($eligibleDays, $maxAllowed);
+                    }
+                }
+
+                $earnedSalary = $eligibleDays * $perDayWage;
+                $isQualified  = true;
+                if ($absentDays >= 1)      { $isQualified = false; }
+                elseif ($halfDays >= 2)    { $isQualified = false; }
+                elseif ($lateDays >= 4)    { $isQualified = false; }
+                else {
+                    $requiredFull = $totalWorkingDays - ($halfDays == 1 ? 1 : 0);
+                    $isQualified  = (($fullDays + $lateDays) >= $requiredFull);
+                }
+
+                $punctualityBonus = 0;
+                if ($isQualified && $employee->punctuality_bonus > 0)          $punctualityBonus = $employee->punctuality_bonus;
+                if ($employee->override_punctuality_bonus > 0) { $punctualityBonus = $employee->override_punctuality_bonus; $isQualified = true; }
+
+                $otherAllowances = $employee->other_allowances ?? 0;
+                $total           = $earnedSalary + $punctualityBonus + $otherAllowances;
+                $dockAmount      = \App\Models\DockRecord::where('user_id', $employee->id)
+                    ->whereDate('dock_date', '>=', $startDate->format('Y-m-d'))
+                    ->whereDate('dock_date', '<=', $endDate->format('Y-m-d'))
+                    ->where('status', 'active')->sum('amount');
+                $taxDeduction      = $employee->tax_deduction  ?? 0;
+                $otherDeductionAmt = $employee->other_deductions ?? 0;
+                $totalDedEmp       = $taxDeduction + $otherDeductionAmt + $dockAmount;
+                $netSalary         = $total - $totalDedEmp;
+                $advance           = $employee->salary_advance ?? 0;
+                $payable           = $netSalary - $advance;
+
+                $payrollData[] = [
+                    'employee' => $employee, 'isTerminated' => $employee->trashed(),
+                    'joinDate' => $joinDate, 'basicSalary' => $basicSalary, 'perDayWage' => $perDayWage,
+                    'punctualityBonus' => $punctualityBonus, 'total' => $total,
+                    'fullDays' => $fullDays, 'halfDays' => $halfDays, 'lateDays' => $lateDays,
+                    'isQualified' => $isQualified, 'dockAmount' => $dockAmount,
+                    'otherDeductions' => $taxDeduction + $otherDeductionAmt,
+                    'netSalary' => $netSalary, 'advance' => $advance, 'payable' => $payable,
+                ];
+                $totalBasicSalary += $basicSalary; $totalPunctuality += $punctualityBonus;
+                $totalTotal += $total; if ($punctualityBonus > 0) $qualifiedForBonus++;
+                $totalDock += $dockAmount; $totalDeductions += $totalDedEmp;
+                $totalNetSalary += $netSalary; $totalAdvance += $advance; $totalPayable += $payable;
+            }
+
+            foreach ($manualEntries as $entry) {
+                $basicSalary     = $entry->basic_salary ?? 0;
+                $joinDate        = $entry->join_date ? \Carbon\Carbon::parse($entry->join_date)->format('d M Y') : 'N/A';
+                $perDayWage      = $basicSalary / max($totalWorkingDays, 1);
+                $fullDays        = $entry->full_days ?? 0;
+                $halfDays        = $entry->half_days ?? 0;
+                $lateDays        = $entry->late_days ?? 0;
+                $eligibleDays    = $fullDays + $halfDays + $lateDays;
+                $earnedSalary    = $eligibleDays * $perDayWage;
+                $punctualityBonus = ($entry->is_qualified && $entry->punctuality_bonus) ? $entry->punctuality_bonus : 0;
+                $otherAllowances = $entry->other_allowances ?? 0;
+                $total           = $earnedSalary + $punctualityBonus + $otherAllowances;
+                $dockAmount      = $entry->dock_amount ?? 0;
+                $otherDeductionAmt = $entry->other_deductions ?? 0;
+                $netSalary       = $total - $dockAmount - $otherDeductionAmt;
+                $advance         = $entry->salary_advance ?? 0;
+                $payable         = $netSalary - $advance;
+
+                $payrollData[] = [
+                    'isManual' => true, 'employeeName' => $entry->employee_name,
+                    'joinDate' => $joinDate, 'basicSalary' => $basicSalary, 'perDayWage' => $perDayWage,
+                    'punctualityBonus' => $punctualityBonus, 'total' => $total,
+                    'fullDays' => $fullDays, 'halfDays' => $halfDays, 'lateDays' => $lateDays,
+                    'isQualified' => $entry->is_qualified, 'dockAmount' => $dockAmount,
+                    'otherDeductions' => $otherDeductionAmt,
+                    'netSalary' => $netSalary, 'advance' => $advance, 'payable' => $payable,
+                ];
+                $totalBasicSalary += $basicSalary; $totalPunctuality += $punctualityBonus;
+                $totalTotal += $total; if ($punctualityBonus > 0) $qualifiedForBonus++;
+                $totalDock += $dockAmount; $totalDeductions += ($dockAmount + $otherDeductionAmt);
+                $totalNetSalary += $netSalary; $totalAdvance += $advance; $totalPayable += $payable;
+            }
+
+            // ── Build XLSX with PhpSpreadsheet ───────────────────────────
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet       = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Payroll');
+
+            // Title / meta rows
+            $sheet->setCellValue('A1', 'TAURUS TECHNOLOGIES');
+            $sheet->setCellValue('A2', 'Payroll Report — ' . $periodLabel);
+            $sheet->setCellValue('A3', 'Generated: ' . now()->format('d M Y h:i A') . '   |   By: ' . Auth::user()->name);
+            foreach (['A1:P1', 'A2:P2', 'A3:P3'] as $merge) {
+                $sheet->mergeCells($merge);
+            }
+            $sheet->getStyle('A1')->applyFromArray([
+                'font'      => ['bold' => true, 'size' => 15, 'color' => ['rgb' => 'FFFFFF']],
+                'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A1A2E']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            ]);
+            $sheet->getStyle('A2')->applyFromArray([
+                'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
+                'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '2D2D3F']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            ]);
+            $sheet->getStyle('A3')->applyFromArray([
+                'font'      => ['size' => 9, 'italic' => true, 'color' => ['rgb' => '555555']],
+                'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F8F9FA']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            ]);
+            $sheet->getRowDimension(1)->setRowHeight(22);
+            $sheet->getRowDimension(2)->setRowHeight(18);
+
+            // Header row
+            $headerRow = 5;
+            $headers = [
+                'A' => 'Sr#',      'B' => 'Employee Name', 'C' => 'Join Date',
+                'D' => 'Basic Salary', 'E' => 'Per Day Wage', 'F' => 'Punctuality',
+                'G' => 'Total',    'H' => 'Full Days',    'I' => 'Half Days',
+                'J' => 'Late Days','K' => 'Qualified',    'L' => 'Dock',
+                'M' => 'Deductions','N' => 'Net Salary',  'O' => 'Advance', 'P' => 'Payable',
+            ];
+            foreach ($headers as $col => $label) {
+                $sheet->setCellValue($col . $headerRow, $label);
+            }
+            $sheet->getStyle('A' . $headerRow . ':P' . $headerRow)->applyFromArray([
+                'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '2D2D3F']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                                'wrapText'   => true],
+                'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                                 'color'       => ['rgb' => '1A1A2E']]],
+            ]);
+            $sheet->getRowDimension($headerRow)->setRowHeight(18);
+
+            // Data rows
+            $numFmt   = '#,##0.00';
+            $currRow  = $headerRow + 1;
+            $currCols = ['D', 'E', 'F', 'G', 'L', 'M', 'N', 'O', 'P'];
+            $ctrCols  = ['A', 'C', 'H', 'I', 'J', 'K'];
+
+            foreach ($payrollData as $i => $row) {
+                $bgColor  = ($i % 2 === 0) ? 'FFFFFF' : 'F8F9FA';
+                $isManual = isset($row['isManual']) && $row['isManual'];
+                $name     = $isManual ? ($row['employeeName'] . ' [MANUAL]') : $row['employee']->name;
+                if (!$isManual && !empty($row['isTerminated'])) $name .= ' [TERMINATED]';
+
+                $sheet->setCellValue('A' . $currRow, $i + 1);
+                $sheet->setCellValue('B' . $currRow, $name);
+                $sheet->setCellValue('C' . $currRow, $row['joinDate']);
+                $sheet->setCellValue('D' . $currRow, $row['basicSalary']);
+                $sheet->setCellValue('E' . $currRow, $row['perDayWage']);
+                $sheet->setCellValue('F' . $currRow, $row['punctualityBonus']);
+                $sheet->setCellValue('G' . $currRow, $row['total']);
+                $sheet->setCellValue('H' . $currRow, $row['fullDays']);
+                $sheet->setCellValue('I' . $currRow, $row['halfDays']);
+                $sheet->setCellValue('J' . $currRow, $row['lateDays']);
+                $sheet->setCellValue('K' . $currRow, $row['isQualified'] ? 'Yes' : 'No');
+                $sheet->setCellValue('L' . $currRow, $row['dockAmount']);
+                $sheet->setCellValue('M' . $currRow, $row['otherDeductions']);
+                $sheet->setCellValue('N' . $currRow, $row['netSalary']);
+                $sheet->setCellValue('O' . $currRow, $row['advance']);
+                $sheet->setCellValue('P' . $currRow, $row['payable']);
+
+                foreach ($currCols as $col) {
+                    $sheet->getStyle($col . $currRow)->getNumberFormat()->setFormatCode($numFmt);
+                }
+                $sheet->getStyle('A' . $currRow . ':P' . $currRow)->applyFromArray([
+                    'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
+                    'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                                   'color'       => ['rgb' => 'ADB5BD']]],
+                ]);
+                foreach ($ctrCols as $col) {
+                    $sheet->getStyle($col . $currRow)->getAlignment()
+                          ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                }
+                $currRow++;
+            }
+
+            // Totals row
+            $sheet->setCellValue('C' . $currRow, 'TOTALS');
+            $sheet->setCellValue('D' . $currRow, $totalBasicSalary);
+            $sheet->setCellValue('F' . $currRow, $totalPunctuality);
+            $sheet->setCellValue('G' . $currRow, $totalTotal);
+            $sheet->setCellValue('L' . $currRow, $totalDock);
+            $sheet->setCellValue('M' . $currRow, $totalDeductions - $totalDock);
+            $sheet->setCellValue('N' . $currRow, $totalNetSalary);
+            $sheet->setCellValue('O' . $currRow, $totalAdvance);
+            $sheet->setCellValue('P' . $currRow, $totalPayable);
+            $sheet->getStyle('A' . $currRow . ':P' . $currRow)->applyFromArray([
+                'font'    => ['bold' => true],
+                'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E9ECEF']],
+                'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
+                                               'color'       => ['rgb' => '1A1A2E']]],
+            ]);
+            $sheet->getStyle('C' . $currRow)->getAlignment()
+                  ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+            foreach (['D', 'F', 'G', 'L', 'M', 'N', 'O', 'P'] as $col) {
+                $sheet->getStyle($col . $currRow)->getNumberFormat()->setFormatCode($numFmt);
+            }
+            $currRow += 2;
+
+            // Summary section
+            $sheet->setCellValue('A' . $currRow, 'PAYROLL SUMMARY');
+            $sheet->mergeCells('A' . $currRow . ':P' . $currRow);
+            $sheet->getStyle('A' . $currRow)->applyFromArray([
+                'font'      => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+                'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A1A2E']],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            ]);
+            $currRow++;
+            $summaryItems = [
+                ['Total Employees',         count($payrollData)],
+                ['Total Basic Salary',      $totalBasicSalary],
+                ['Total Punctuality Bonus', $totalPunctuality],
+                ['Total Dock Amount',       $totalDock],
+                ['Total Deductions',        $totalDeductions],
+                ['Total Net Salary',        $totalNetSalary],
+                ['Total Advance',           $totalAdvance],
+                ['Total Payable',           $totalPayable],
+                ['Qualified for Bonus',     $qualifiedForBonus . ' of ' . count($payrollData)],
+            ];
+            foreach ($summaryItems as [$label, $value]) {
+                $sheet->setCellValue('A' . $currRow, $label);
+                $sheet->getStyle('A' . $currRow)->getFont()->setBold(true);
+                $sheet->setCellValue('B' . $currRow, $value);
+                if (is_numeric($value)) {
+                    $sheet->getStyle('B' . $currRow)->getNumberFormat()->setFormatCode($numFmt);
+                }
+                $currRow++;
+            }
+
+            // Column widths & freeze
+            $colWidths = [
+                'A' => 5, 'B' => 28, 'C' => 13, 'D' => 13, 'E' => 12,
+                'F' => 12, 'G' => 13, 'H' => 9,  'I' => 9,  'J' => 9,
+                'K' => 9, 'L' => 11, 'M' => 11,  'N' => 13, 'O' => 11, 'P' => 13,
+            ];
+            foreach ($colWidths as $col => $width) {
+                $sheet->getColumnDimension($col)->setWidth($width);
+            }
+            $sheet->freezePane('A' . ($headerRow + 1));
+
+            $writer   = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $filename = 'Payroll_' . \Carbon\Carbon::createFromFormat('!m', $month)->format('F') . '_' . $year . '.xlsx';
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, $filename, [
+                'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control'       => 'max-age=0',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Payroll XLSX export error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return back()->with('error', 'Error exporting payroll: ' . $e->getMessage());
         }
     }
 }

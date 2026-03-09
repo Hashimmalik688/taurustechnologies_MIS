@@ -135,6 +135,10 @@ class ZoomWebhookController extends Controller
                 $this->handleRecordingCompleted($allWebhookData, $payload);
                 break;
 
+            case 'phone.recording_transcript_completed':
+                $this->handleTranscriptCompleted($payload);
+                break;
+
             default:
                 Log::info('Unhandled event type', ['event' => $event, 'data' => $allWebhookData]);
                 // Still broadcast unknown events for debugging
@@ -544,27 +548,38 @@ class ZoomWebhookController extends Controller
         // Zoom Phone v2 sends recordings in a "recordings" array
         if (isset($payload['recordings']) && is_array($payload['recordings']) && !empty($payload['recordings'])) {
             $recording = $payload['recordings'][0];
-            $zoomCallId = $recording['call_id'] ?? $recording['id'] ?? null;
-            $zoomUserId = $recording['owner']['id'] ?? $recording['caller']['user_id'] ?? null;
-            $zoomCallLogId = $recording['call_log_id'] ?? $recording['id'] ?? null;
-            $duration = intval($recording['duration'] ?? 0);
-            $downloadUrl = $recording['download_url'] ?? null;
-            $callerNumber = $recording['caller_number'] ?? null;
-            $calleeNumber = $recording['callee_number'] ?? null;
-            $startTime = $recording['date_time'] ?? $recording['start_time'] ?? null;
+            $zoomCallId      = $recording['call_id'] ?? $recording['id'] ?? null;
+            $zoomUserId      = $recording['owner']['id'] ?? $recording['caller']['user_id'] ?? null;
+            $zoomCallLogId   = $recording['call_log_id'] ?? $recording['id'] ?? null;
+            $duration        = intval($recording['duration'] ?? 0);
+            $downloadUrl     = $recording['download_url'] ?? null;
+            $callerNumber    = $recording['caller_number'] ?? null;
+            $calleeNumber    = $recording['callee_number'] ?? null;
+            $callerName      = $recording['caller_name'] ?? null;
+            $calleeName      = $recording['callee_name'] ?? null;
+            $callDirection   = $recording['direction'] ?? 'outbound';
+            $startTime       = $recording['date_time'] ?? $recording['start_time'] ?? null;
             $zoomTranscriptUrl = $recording['transcript_download_url'] ?? null;
         } else {
             // Fallback to old structure
-            $zoomCallId = $payload['call_id'] ?? $payload['id'] ?? null;
-            $zoomUserId = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
-            $zoomCallLogId = $payload['call_log_id'] ?? $payload['id'] ?? null;
-            $duration = intval($payload['duration'] ?? $payload['recording_duration'] ?? 0);
-            $downloadUrl = $payload['download_url'] ?? $payload['recording_url'] ?? null;
-            $callerNumber = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
-            $calleeNumber = $payload['callee']['phone_number'] ?? $payload['callee_number'] ?? null;
-            $startTime = $payload['date_time'] ?? $payload['start_time'] ?? $payload['call_start_time'] ?? null;
+            $zoomCallId      = $payload['call_id'] ?? $payload['id'] ?? null;
+            $zoomUserId      = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
+            $zoomCallLogId   = $payload['call_log_id'] ?? $payload['id'] ?? null;
+            $duration        = intval($payload['duration'] ?? $payload['recording_duration'] ?? 0);
+            $downloadUrl     = $payload['download_url'] ?? $payload['recording_url'] ?? null;
+            $callerNumber    = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
+            $calleeNumber    = $payload['callee']['phone_number'] ?? $payload['callee_number'] ?? null;
+            $callerName      = $payload['caller']['name'] ?? $payload['caller_name'] ?? null;
+            $calleeName      = $payload['callee']['name'] ?? $payload['callee_name'] ?? null;
+            $callDirection   = $payload['direction'] ?? 'outbound';
+            $startTime       = $payload['date_time'] ?? $payload['start_time'] ?? $payload['call_start_time'] ?? null;
             $zoomTranscriptUrl = $payload['transcript_download_url'] ?? $payload['recording_transcript_url'] ?? null;
         }
+
+        // Determine which speaker is the AGENT based on call direction:
+        // inbound  = external customer called us → callee  is our agent (extension owner)
+        // outbound = we called the customer      → caller  is our agent (extension owner)
+        $agentNameFromRecording = ($callDirection === 'inbound') ? $calleeName : $callerName;
         
         // Check if Zoom provided transcription (if enabled in Zoom settings)
         if ($zoomTranscriptUrl) {
@@ -595,9 +610,9 @@ class ZoomWebhookController extends Controller
             return;
         }
 
-        // Skip short calls (< 8 minutes) — not meaningful sales conversations
-        if ($duration > 0 && $duration < 480) {
-            Log::info('[QA:Webhook] Skipping short call (< 8 min)', [
+        // Skip short calls (< 7 minutes) — not meaningful sales conversations
+        if ($duration > 0 && $duration < 420) {
+            Log::info('[QA:Webhook] Skipping short call (< 7 min)', [
                 'zoom_call_id' => $zoomCallId,
                 'duration' => $duration,
             ]);
@@ -613,8 +628,7 @@ class ZoomWebhookController extends Controller
         }
 
         // Try to match agent (Ravens Closer) by Zoom user ID, extension, name, or email
-        $agentUser = null;
-        $agentName = $payload['caller']['name'] ?? $payload['owner']['name'] ?? null;
+        $agentUser  = null;
         $agentEmail = $payload['caller']['email'] ?? $payload['owner']['email'] ?? null;
         $zoomExtension = $payload['caller']['extension_number']
             ?? $payload['owner']['extension_number']
@@ -630,9 +644,9 @@ class ZoomWebhookController extends Controller
             $agentUser = User::where('zoom_extension', (string) $zoomExtension)->first();
         }
 
-        // Priority 3: Match by name (fuzzy — handles "37524 Abdullah Ayub" → "Abdullah Ayub")
-        if (!$agentUser && $agentName) {
-            $cleanName = preg_replace('/^\d+\s*/', '', $agentName); // Strip leading digits
+        // Priority 3: Match by agent name from recording direction (fuzzy)
+        if (!$agentUser && $agentNameFromRecording) {
+            $cleanName = preg_replace('/^\d+\s*/', '', $agentNameFromRecording);
             $agentUser = User::where('name', 'like', '%' . $cleanName . '%')->first();
         }
 
@@ -641,9 +655,10 @@ class ZoomWebhookController extends Controller
             $agentUser = User::where('email', $agentEmail)->first();
         }
 
-        // Priority 5: Match by phone/zoom_number
-        if (!$agentUser && $callerNumber) {
-            $cleanNumber = preg_replace('/[^\d]/', '', $callerNumber);
+        // Priority 5: Match by zoom_number (using the agent's side number)
+        $agentSideNumber = ($callDirection === 'outbound') ? $callerNumber : $calleeNumber;
+        if (!$agentUser && $agentSideNumber) {
+            $cleanNumber = preg_replace('/[^\d]/', '', $agentSideNumber);
             $last10 = substr($cleanNumber, -10);
             if (strlen($last10) === 10) {
                 $agentUser = User::where('zoom_number', 'like', '%' . $last10 . '%')->first();
@@ -651,10 +666,11 @@ class ZoomWebhookController extends Controller
         }
 
         Log::info('[QA:Webhook] Agent matching result', [
-            'zoom_user_id' => $zoomUserId,
-            'zoom_extension' => $zoomExtension,
-            'agent_name_from_zoom' => $agentName,
-            'matched_user' => $agentUser ? $agentUser->name . ' (ID ' . $agentUser->id . ')' : 'NONE',
+            'zoom_user_id'           => $zoomUserId,
+            'zoom_extension'         => $zoomExtension,
+            'direction'              => $callDirection,
+            'agent_name_from_recording' => $agentNameFromRecording,
+            'matched_user'           => $agentUser ? $agentUser->name . ' (ID ' . $agentUser->id . ')' : 'NONE',
         ]);
 
         // Try to match existing CallLog
@@ -669,22 +685,26 @@ class ZoomWebhookController extends Controller
             }
         }
 
+        // Use the recording-derived name as fallback (much better than 'Unknown Agent')
+        // This is the actual speaker name Zoom uses in the VTT transcript
+        $resolvedAgentName = $agentUser?->name ?? $agentNameFromRecording ?? 'Unknown Agent';
+
         // Create qa_call record
         $qaCall = QaCall::create([
-            'zoom_call_id' => $zoomCallId,
-            'call_log_id' => $callLogId,
-            'agent_user_id' => $agentUser?->id,
-            'agent_name' => $agentUser?->name ?? $agentName ?? 'Unknown Agent',
-            'agent_email' => $agentUser?->email ?? $agentEmail,
-            'zoom_user_id' => $zoomUserId,
-            'zoom_call_log_id' => $zoomCallLogId ?? null,
-            'caller_number' => $callerNumber,
-            'callee_number' => $calleeNumber,
-            'duration_seconds' => $duration,
-            'call_start_time' => $startTime ? \Carbon\Carbon::parse($startTime) : now(),
-            'recording_url' => $downloadUrl,
+            'zoom_call_id'       => $zoomCallId,
+            'call_log_id'        => $callLogId,
+            'agent_user_id'      => $agentUser?->id,
+            'agent_name'         => $resolvedAgentName,
+            'agent_email'        => $agentUser?->email ?? $agentEmail,
+            'zoom_user_id'       => $zoomUserId,
+            'zoom_call_log_id'   => $zoomCallLogId ?? null,
+            'caller_number'      => $callerNumber,
+            'callee_number'      => $calleeNumber,
+            'duration_seconds'   => $duration,
+            'call_start_time'    => $startTime ? \Carbon\Carbon::parse($startTime) : now(),
+            'recording_url'      => $downloadUrl,
             'zoom_transcript_url' => $zoomTranscriptUrl,
-            'processing_status' => 'pending',
+            'processing_status'  => 'pending',
         ]);
 
         Log::info('[QA:Webhook] QaCall created, dispatching job', [
@@ -696,6 +716,133 @@ class ZoomWebhookController extends Controller
 
         // Dispatch processing job to qa-processing queue
         DownloadAndProcessRecording::dispatch($qaCall->id);
+    }
+
+    /**
+     * Handle phone.recording_transcript_completed webhook.
+     * Fired when Zoom Phone finishes generating the transcript for a recording.
+     * This often comes minutes after phone.recording_completed.
+     * We update the stored transcript URL and re-queue the call for processing.
+     */
+    private function handleTranscriptCompleted(array $payload): void
+    {
+        Log::info('[QA:Webhook] phone.recording_transcript_completed received', [
+            'payload_keys' => array_keys($payload),
+        ]);
+
+        // Extract from recordings array or flat payload (same structure as recording_completed)
+        if (isset($payload['recordings'][0])) {
+            $rec = $payload['recordings'][0];
+            $zoomCallId       = $rec['call_id'] ?? $rec['id'] ?? null;
+            $zoomCallLogId    = $rec['call_log_id'] ?? null;
+            $transcriptUrl    = $rec['transcript_download_url'] ?? null;
+            $callerNumber     = $rec['caller_number'] ?? null;
+            $calleeNumber     = $rec['callee_number'] ?? null;
+            $callerName       = $rec['caller_name'] ?? null;
+            $calleeName       = $rec['callee_name'] ?? null;
+            $callDirection    = $rec['direction'] ?? 'outbound';
+            $startTime        = $rec['date_time'] ?? $rec['start_time'] ?? null;
+            $duration         = intval($rec['duration'] ?? 0);
+            $downloadUrl      = $rec['download_url'] ?? null;
+        } else {
+            $zoomCallId       = $payload['call_id'] ?? $payload['id'] ?? null;
+            $zoomCallLogId    = $payload['call_log_id'] ?? null;
+            $transcriptUrl    = $payload['transcript_download_url'] ?? null;
+            $callerNumber     = $payload['caller']['phone_number'] ?? $payload['caller_number'] ?? null;
+            $calleeNumber     = $payload['callee']['phone_number'] ?? $payload['callee_number'] ?? null;
+            $callerName       = $payload['caller']['name'] ?? $payload['caller_name'] ?? null;
+            $calleeName       = $payload['callee']['name'] ?? $payload['callee_name'] ?? null;
+            $callDirection    = $payload['direction'] ?? 'outbound';
+            $startTime        = $payload['date_time'] ?? $payload['start_time'] ?? null;
+            $duration         = intval($payload['duration'] ?? 0);
+            $downloadUrl      = $payload['download_url'] ?? null;
+        }
+
+        // Determine agent name from call direction (same logic as handleRecordingCompleted)
+        $agentNameFromRecording = ($callDirection === 'inbound') ? $calleeName : $callerName;
+
+        if (!$transcriptUrl) {
+            Log::warning('[QA:Webhook] transcript_completed — no transcript_download_url in payload');
+            return;
+        }
+
+        Log::info('[QA:Webhook] transcript_completed parsed', [
+            'zoom_call_id'   => $zoomCallId,
+            'transcript_url' => substr($transcriptUrl, 0, 80) . '...',
+        ]);
+
+        // Find or create the QaCall record
+        $qaCall = $zoomCallId ? QaCall::where('zoom_call_id', $zoomCallId)->first() : null;
+
+        if ($qaCall) {
+            // Update the transcript URL; also fix agent_name if it was unresolved before
+            $updates = ['zoom_transcript_url' => $transcriptUrl];
+            if (empty($qaCall->agent_name) || $qaCall->agent_name === 'Unknown Agent') {
+                if ($agentNameFromRecording) {
+                    $updates['agent_name'] = $agentNameFromRecording;
+                }
+            }
+            $qaCall->update($updates);
+
+            // Only re-queue if not already scored
+            if (!in_array($qaCall->processing_status, ['completed', 'scoring'])) {
+                Log::info('[QA:Webhook] Re-queuing call with transcript URL', [
+                    'qa_call_id' => $qaCall->id,
+                ]);
+                DownloadAndProcessRecording::dispatch($qaCall->id);
+            } else {
+                Log::info('[QA:Webhook] Call already scored, skipping re-queue', [
+                    'qa_call_id' => $qaCall->id,
+                    'status'     => $qaCall->processing_status,
+                ]);
+            }
+        } elseif ($zoomCallId && $downloadUrl && $duration >= 420) {
+            // The transcript event arrived before/without the recording event — create a new QaCall
+            Log::info('[QA:Webhook] transcript_completed — no existing QaCall, creating one', [
+                'zoom_call_id' => $zoomCallId,
+            ]);
+
+            $agentEmail = $payload['caller']['email'] ?? $payload['owner']['email'] ?? null;
+            $zoomUserId = $payload['caller']['user_id'] ?? $payload['owner']['id'] ?? null;
+            $zoomExtNum = $payload['recordings'][0]['owner']['extension_number'] ?? null;
+
+            $agentUser = null;
+            if ($zoomUserId) {
+                $agentUser = User::where('zoom_user_id', $zoomUserId)->first();
+            }
+            if (!$agentUser && $zoomExtNum) {
+                $agentUser = User::where('zoom_extension', (string) $zoomExtNum)->first();
+            }
+            if (!$agentUser && $agentNameFromRecording) {
+                $cleanName = preg_replace('/^\d+\s*/', '', $agentNameFromRecording);
+                $agentUser = User::where('name', 'like', '%' . $cleanName . '%')->first();
+            }
+
+            $resolvedAgentName = $agentUser?->name ?? $agentNameFromRecording ?? 'Unknown Agent';
+
+            $qaCall = QaCall::create([
+                'zoom_call_id'       => $zoomCallId,
+                'zoom_call_log_id'   => $zoomCallLogId,
+                'agent_user_id'      => $agentUser?->id,
+                'agent_name'         => $resolvedAgentName,
+                'agent_email'        => $agentUser?->email ?? $agentEmail,
+                'zoom_user_id'       => $zoomUserId,
+                'caller_number'      => $callerNumber,
+                'callee_number'      => $calleeNumber,
+                'duration_seconds'   => $duration,
+                'call_start_time'    => $startTime ? \Carbon\Carbon::parse($startTime) : now(),
+                'recording_url'      => $downloadUrl,
+                'zoom_transcript_url' => $transcriptUrl,
+                'processing_status'  => 'pending',
+            ]);
+
+            DownloadAndProcessRecording::dispatch($qaCall->id);
+        } else {
+            Log::info('[QA:Webhook] transcript_completed — skipping (no existing call, or too short/missing data)', [
+                'zoom_call_id' => $zoomCallId,
+                'duration'     => $duration,
+            ]);
+        }
     }
 
     /**

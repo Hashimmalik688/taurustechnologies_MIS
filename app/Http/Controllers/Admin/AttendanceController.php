@@ -671,6 +671,117 @@ class AttendanceController extends Controller
     }
 
     /**
+     * AJAX: Return a user's attendance records for a given month (for bulk calendar)
+     */
+    public function getUserMonthAttendance(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'month'   => 'required|date_format:Y-m',
+        ]);
+
+        // Pay period: 26th of previous month → 25th of selected month (same as payroll/dashboard)
+        $monthDate    = Carbon::parse($request->month . '-01');
+        $periodStart  = $monthDate->copy()->subMonth()->day(26);
+        $periodEnd    = $monthDate->copy()->day(25);
+
+        $records = Attendance::where('user_id', $request->user_id)
+            ->whereBetween('date', [$periodStart->format('Y-m-d'), $periodEnd->format('Y-m-d')])
+            ->get()
+            ->keyBy(fn($a) => $a->date->format('Y-m-d'));
+
+        // Build per-day info
+        $days = [];
+        $cursor = $periodStart->copy();
+        while ($cursor->lte($periodEnd)) {
+            $key = $cursor->format('Y-m-d');
+            $rec = $records->get($key);
+            $days[$key] = [
+                'date'        => $key,
+                'status'      => $rec ? $rec->status : null,
+                'login_time'  => $rec && $rec->login_time  ? $rec->login_time->format('H:i') : null,
+                'logout_time' => $rec && $rec->logout_time ? $rec->logout_time->format('H:i') : null,
+                'is_weekend'  => in_array($cursor->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY]),
+                'is_holiday'  => PublicHoliday::isHoliday($cursor),
+            ];
+            $cursor->addDay();
+        }
+
+        $employee = User::withTrashed()->find($request->user_id);
+
+        return response()->json([
+            'success'        => true,
+            'employee_name'  => $employee?->name,
+            'month'          => $request->month,
+            'period_start'   => $periodStart->format('Y-m-d'),
+            'period_end'     => $periodEnd->format('Y-m-d'),
+            'period_label'   => $periodStart->format('M d, Y') . ' – ' . $periodEnd->format('M d, Y'),
+            'days'           => array_values($days),
+        ]);
+    }
+
+    /**
+     * AJAX: Bulk-mark attendance for a single employee across multiple dates
+     */
+    public function bulkMarkAttendance(Request $request)
+    {
+        $request->validate([
+            'user_id'       => 'required|exists:users,id',
+            'entries'       => 'required|array|min:1',
+            'entries.*.date'   => 'required|date',
+            'entries.*.status' => 'required|in:present,late,half_day,paid_leave,absent',
+            'entries.*.login_time'  => 'nullable',
+            'entries.*.logout_time' => 'nullable',
+        ]);
+
+        $adminName   = auth()->check() ? auth()->user()->name : 'Admin';
+        $saved       = 0;
+        $errors      = [];
+
+        $officeLoginDefault = Setting::get('office_start_time', '09:00');
+        $officeLogoutDefault = '18:00';
+
+        foreach ($request->entries as $entry) {
+            try {
+                $dateStr    = Carbon::parse($entry['date'])->format('Y-m-d');
+                $loginRaw   = $entry['login_time']  ?? $officeLoginDefault;
+                $logoutRaw  = $entry['logout_time'] ?? null;
+
+                $loginDT  = Carbon::parse("$dateStr $loginRaw");
+                $logoutDT = $logoutRaw ? Carbon::parse("$dateStr $logoutRaw") : null;
+
+                Attendance::updateOrCreate(
+                    ['user_id' => $request->user_id, 'date' => $dateStr],
+                    [
+                        'login_time'  => $loginDT,
+                        'logout_time' => $logoutDT,
+                        'status'      => $entry['status'],
+                        'ip_address'  => 'Bulk Entry by ' . $adminName,
+                    ]
+                );
+                $saved++;
+            } catch (\Exception $e) {
+                $errors[] = "Date {$entry['date']}: " . $e->getMessage();
+                \Log::warning('Bulk attendance entry error', ['date' => $entry['date'], 'error' => $e->getMessage()]);
+            }
+        }
+
+        \Log::info('Bulk Attendance Saved', [
+            'admin'     => $adminName,
+            'user_id'   => $request->user_id,
+            'saved'     => $saved,
+            'errors'    => count($errors),
+        ]);
+
+        return response()->json([
+            'success' => $saved > 0,
+            'saved'   => $saved,
+            'errors'  => $errors,
+            'message' => "$saved attendance record(s) saved successfully." . (count($errors) ? ' ' . count($errors) . ' failed.' : ''),
+        ]);
+    }
+
+    /**
      * Delete attendance record
      */
     public function delete($id)

@@ -21,12 +21,11 @@ TRANSCRIPT:
 {$diarizedTranscript}
 ---
 
-IMPORTANT NOTE ON SPEAKER LABELS:
-The transcript uses three labels: AGENT, CUSTOMER, and [BANK IVR].
-- AGENT: the insurance sales rep making the call
-- CUSTOMER: the senior citizen being called
-- [BANK IVR]: automated bank phone system audio that plays during a three-way bank verification call. These lines are NOT the customer speaking — treat them as evidence that a bank verification was performed.
-If any AGENT/CUSTOMER labels appear swapped, mentally correct them using context before scoring.
+SPEAKER LABEL DEFINITIONS:
+- AGENT: the insurance sales representative making the outbound call. They introduce themselves by name and company, present the insurance product, ask health questions, collect personal and banking information, and request the sale.
+- CUSTOMER: the senior citizen (typically age 50-85) who received the call. They respond to the agent's questions, give short replies, and may share personal stories or concerns.
+- [BANK IVR]: automated bank phone system audio during a three-way bank verification call. These lines are NOT the customer speaking — treat them as evidence that a bank verification was performed.
+TRUST the AGENT/CUSTOMER labels as written. Score based on what the AGENT lines say and how the CUSTOMER responds.
 
 EXPECTED CALL PROCESS (use this as your scoring reference):
 The standard Final Expense sales call follows this sequence:
@@ -52,7 +51,7 @@ Mark each as "pass", "fail", or "na" (not applicable to this call type)
 
 --- Call Handling Compliance ---
 
-C1  closer_consent — The closer (agent) takes proper verbal consent from the customer at any point during the call. The agent asks something like "do you give your consent to proceed?" or "do you agree?" and the customer clearly agrees. Recording consent is NOT required (calls are auto-recorded). This is about application/verbal consent only. Mark "na" if the call is too short to reach this point.
+C1  closer_consent — The closer (agent) obtains verbal consent of sale from the customer. The customer must verbally confirm all THREE of the following on the call: (1) say YES — a clear verbal agreement to purchase, (2) state their full name, and (3) state today's date. All three elements are required for a "pass". If any of the three is missing, mark "fail". This is NOT about recording disclosure — it is about the customer's spoken consent to the sale itself. Mark "na" only if no sale was reached on the call.
 
 C2  agent_identity — Agent stated their full name AND company name within the first 90 seconds of the call. Agent gives a proper introduction at the beginning of the call.
 
@@ -286,9 +285,9 @@ SPEAKER C — [BANK IVR] (automated bank phone system — only present during ba
 - Is NEVER the customer speaking, even though it comes from the customer's bank
 
 SPEAKER LABELING RULES:
-1. AGENT always speaks first on the call
-2. Short acknowledgements ("Yes", "Okay", "Uh-huh", "Yeah", "Right", "Mm-hmm") → CUSTOMER
-3. Long explanatory sentences about insurance, health questions, banking → AGENT
+1. IDENTIFY the AGENT first — the agent introduces themselves by name and company ("My name is [NAME] calling from...", "This is [NAME] from Taurus...", "Am I speaking with [NAME]?"). This is the most reliable signal. Note: the customer may say "Hello?" or "Yes?" when they first answer the phone BEFORE the agent's introduction — that short response is CUSTOMER, not AGENT.
+2. Short acknowledgements ("Hello?", "Yes", "Okay", "Uh-huh", "Yeah", "Right", "Mm-hmm", "Who is this?") → CUSTOMER
+3. Long explanatory sentences about insurance, health questions, banking, reading back application details → AGENT
 4. Anything that sounds like an automated phone system during a bank call → [BANK IVR]
 5. Do NOT change, add, or remove any words from the transcript
 6. Start a new labeled segment whenever the speaker changes
@@ -319,7 +318,7 @@ Any single FAIL here = COMPLIANCE_FAIL disposition (overrides everything)
 Mark each as "pass", "fail", or "na" (not applicable to this call type)
 ═══════════════════════════════════════════════════════════════
 
-C1  closer_consent — The closer (agent) takes proper verbal consent from the customer at any point during the call. The agent asks something like "do you give your consent to proceed?" or "do you agree?" and the customer clearly agrees. Recording consent is NOT required (calls are auto-recorded). This is about application/verbal consent only. Mark "na" if the call is too short to reach this point.
+C1  closer_consent — The closer (agent) obtains verbal consent of sale from the customer. The customer must verbally confirm all THREE of the following on the call: (1) say YES — a clear verbal agreement to purchase, (2) state their full name, and (3) state today's date. All three elements are required for a "pass". If any of the three is missing, mark "fail". This is NOT about recording disclosure — it is about the customer's spoken consent to the sale itself. Mark "na" only if no sale was reached on the call.
 
 C2  agent_identity — Agent stated their full name AND company name within the first 90 seconds of the call. Agent gives a proper introduction at the beginning of the call.
 

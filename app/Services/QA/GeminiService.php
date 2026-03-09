@@ -50,9 +50,9 @@ THREE SPEAKER LABELS (use exactly these):
 RULES:
 1. Do NOT change, add, or remove any words from the transcript
 2. Start a new line whenever the speaker changes
-3. The AGENT always speaks first
-4. Short responses ("Yes", "No", "Okay", "Yeah", "Uh-huh", "Mm-hmm", "Right", "I don't know", "I can't", "I don't have it") → almost always CUSTOMER
-5. Long selling sentences, health questions, policy details, banking instructions → almost always AGENT
+3. IDENTIFY the AGENT by: they introduce themselves by name ("My name is [NAME]", "This is [NAME] calling from..."), mention a company, ask "Am I speaking with [NAME]?" or address the customer as Mr./Mrs. — this is the most reliable signal. The customer may say "Hello?" or "Yes?" when answering BEFORE the agent speaks their first full sentence.
+4. Short responses ("Yes", "No", "Okay", "Yeah", "Uh-huh", "Mm-hmm", "Right", "I don't know", "I can't", "Hello?", "Who is this?") → almost always CUSTOMER
+5. Long selling sentences, health questions, policy details, banking instructions, reading back account numbers → almost always AGENT
 6. ANY automated bank system audio (hold music narration, IVR prompts, "Welcome to Bank of America", "Please hold", "For quality purposes", etc.) → always [BANK IVR]
 7. When the agent is reading bank account numbers or routing numbers BACK to the customer to confirm, that is still AGENT
 8. If the agent says something like "here we go" or "just stay with me" while conferencing the bank, those words are AGENT; the bank audio that follows is [BANK IVR]

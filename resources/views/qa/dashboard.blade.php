@@ -265,13 +265,21 @@
         </button>
     </h5>
     <div class="qa-controls">
-        <select id="qaRange" onchange="QA.rangeChanged()">
-            <option value="7d">Last 7 Days</option>
-            <option value="30d" selected>Last 30 Days</option>
-            <option value="90d">Last 90 Days</option>
-            <option value="all">All Time</option>
-        </select>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="qaRangePreset" onchange="QA.presetChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit; cursor:pointer;">
+                <option value="">Custom Range</option>
+                <option value="today">Today</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+                <option value="all">All Time</option>
+            </select>
+            <input type="date" id="qaStartDate" onchange="QA.rangeChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit;">
+            <span style="color:var(--bs-surface-500); font-size:.7rem;">to</span>
+            <input type="date" id="qaEndDate" onchange="QA.rangeChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit;">
+        </div>
         <button class="qa-btn qa-btn-gold" onclick="QA.refresh()"><i class="ri-refresh-line"></i> Refresh</button>
+        <button class="qa-btn" id="rerunTodayBtn" onclick="QA.rerunToday()" style="background:rgba(220,38,38,.12);color:#c84646;border:1px solid rgba(220,38,38,.25);" title="Re-score today&apos;s calls with the latest AI prompt"><i class="ri-restart-line"></i> Rerun Today</button>
     </div>
 </div>
 
@@ -295,7 +303,12 @@
 
         <div class="qa-info-section">
             <h6><i class="ri-robot-2-line"></i> AI-Powered Quality Assurance</h6>
-            <p>Every recorded sales call is automatically transcribed using WhisperX (with speaker diarization) and scored by AI against <strong>17 compliance codes</strong> and <strong>7 quality categories</strong>. Calls are graded on a 100-point scale with automatic disposition assignment.</p>
+            <p>Every recorded sales call is automatically transcribed via Zoom's built-in transcription service and scored by AI against <strong>17 compliance codes</strong> and <strong>7 quality categories</strong>. Calls are graded on a 100-point scale with automatic disposition assignment.</p>
+        </div>
+
+        <div class="qa-info-section">
+            <h6><i class="ri-timer-flash-line"></i> Call Eligibility</h6>
+            <p><strong>Minimum duration: 7 minutes</strong> — Calls shorter than 7 minutes are automatically skipped as they do not represent meaningful sales conversations. Only calls with Zoom transcripts are scored.</p>
         </div>
 
         <div class="qa-info-section">
@@ -352,8 +365,8 @@
         <div class="qa-info-section">
             <h6><i class="ri-lightbulb-line"></i> How It Works</h6>
             <ol>
-                <li><strong>Recording captured</strong> — Zoom webhook triggers automatic download</li>
-                <li><strong>WhisperX transcription</strong> — Audio transcribed with speaker diarization (pyannote)</li>
+                <li><strong>Recording captured</strong> — Zoom webhook triggers automatic capture</li>
+                <li><strong>Transcription fetched</strong> — Zoom's built-in transcript with speaker labels (AGENT:/CUSTOMER:)</li>
                 <li><strong>AI analysis</strong> — Claude / Gemini scores against 17 compliance codes + 7 quality categories</li>
                 <li><strong>Results saved</strong> — Scores, compliance flags, and coaching notes stored</li>
                 <li><strong>Dashboard updated</strong> — Real-time metrics and agent performance tracking</li>
@@ -394,7 +407,43 @@ function api(url) {
 
 /* ── Public API ── */
 window.QA = {
-    rangeChanged() { S.currentRange = $('#qaRange').value; S.currentPage = 1; S.currentFilter = 'all'; this.load(); },
+    presetChanged() { 
+        const preset = $('#qaRangePreset').value;
+        const startEl = $('#qaStartDate');
+        const endEl = $('#qaEndDate');
+        
+        if (preset) {
+            S.currentRange = preset;
+            // Clear custom date inputs when using preset
+            startEl.value = '';
+            endEl.value = '';
+        }
+        S.currentPage = 1; 
+        S.currentFilter = 'all'; 
+        this.load(); 
+    },
+    rangeChanged() { 
+        const startEl = $('#qaStartDate');
+        const endEl = $('#qaEndDate');
+        const startDate = startEl.value;
+        const endDate = endEl.value;
+        
+        if (startDate && endDate) {
+            // Custom date range format: "YYYY-MM-DD,YYYY-MM-DD"
+            S.currentRange = `${startDate},${endDate}`;
+            $('#qaRangePreset').value = ''; // Clear preset selection
+        } else if (startDate || endDate) {
+            alert('Please select both start and end dates');
+            return;
+        } else {
+            // Fall back to preset if no dates selected
+            return;
+        }
+        
+        S.currentPage = 1; 
+        S.currentFilter = 'all'; 
+        this.load(); 
+    },
     refresh()      { this.load(); },
     load()         { S.currentView === 'dashboard' ? loadDashboard() : loadAgentDetail(S.agentId); },
     viewAgent(id)  { S.agentId = id; S.currentView = 'agent-detail'; loadAgentDetail(id); },
@@ -402,7 +451,30 @@ window.QA = {
     filterCalls(f) { S.currentFilter = f; S.currentPage = 1; loadDashboard(); },
     goPage(p)      { S.currentPage = p; loadDashboard(); },
     openDetail(id) { openCallDetail(id); },
-    closeDetail()  { $('#qaOverlay').classList.remove('show'); document.body.style.overflow=''; }
+    closeDetail()  { $('#qaOverlay').classList.remove('show'); document.body.style.overflow=''; },
+    rerunToday() {
+        if (!confirm("Re-score all of today's completed calls with the latest AI prompt?\n\nThis resets their results and re-queues them. It may take several minutes.")) return;
+        const btn = $('#rerunTodayBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin" style="border-top-color:#c84646;display:inline-block;width:12px;height:12px;border:2px solid rgba(200,70,70,.3);border-top-color:#c84646;border-radius:50%;animation:qaSpin .7s linear infinite;vertical-align:middle;"></span> Queueing...';
+        fetch('/qa/api/rerun-today', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+        }).then(r => r.json()).then(d => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-restart-line"></i> Rerun Today';
+            if (d.success) {
+                alert(`✅ Queued ${d.count} call(s) for re-scoring. Refresh in a few minutes to see updated results.`);
+                this.refresh();
+            } else {
+                alert('Error: ' + (d.error || 'Unknown error'));
+            }
+        }).catch(e => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-restart-line"></i> Rerun Today';
+            alert('Request failed: ' + e.message);
+        });
+    }
 };
 
 
@@ -759,7 +831,7 @@ function renderCallsTable(calls) {
         <th>Score</th><th>Disposition</th><th>Sale</th><th>Carrier</th><th>Coverage</th><th>Premium</th>
     </tr></thead><tbody>${calls.map(c => `<tr style="cursor:pointer" onclick="QA.openDetail(${c.id})">
         <td><strong>${esc(c.customer_name||'Unknown')}</strong></td>
-        <td>${fmtPhone(c.caller_number)}</td>
+        <td>${fmtPhone(c.callee_number)}</td>
         <td>${esc(c.agent_name||'Unknown')}</td>
         <td>${fmtTime(c.call_start_time)}</td>
         <td>${fmtDuration(c.duration_seconds)}</td>
@@ -1042,7 +1114,7 @@ function scoreClass(s) { s=parseFloat(s); if(isNaN(s)) return ''; return s>=90?'
 function dispClass(d) { return 'd-'+(d||'').toLowerCase().replace(/_/g,'-'); }
 function dispLabel(d) { return (d||'N/A').replace(/_/g,' '); }
 function fmtPhone(p) { if(!p) return '—'; p=String(p).replace(/\D/g,''); return p.length===10?`(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}`:p.length===11?`+${p[0]} (${p.slice(1,4)}) ${p.slice(4,7)}-${p.slice(7)}`:esc(String(p)); }
-function fmtTime(t) { if(!t) return '—'; const d=new Date(t); return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
+function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Denver'}; return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' MT'; }
 function fmtDuration(s) { if(!s&&s!==0) return '—'; s=parseInt(s); const m=Math.floor(s/60); const sec=s%60; return m>0?m+'m '+sec+'s':sec+'s'; }
 function formatNum(n) { if(!n&&n!==0) return '0'; n=parseFloat(n); return n>=1000?(n/1000).toFixed(1)+'k':n.toFixed(0); }
 function esc(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }

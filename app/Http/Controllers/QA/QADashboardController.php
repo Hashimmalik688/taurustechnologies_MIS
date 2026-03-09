@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class QADashboardController extends Controller
 {
@@ -475,12 +476,12 @@ class QADashboardController extends Controller
             ->distinct('agent_user_id')
             ->count('agent_user_id');
 
-        // Short calls (<3 min) — skipped — from all calls processed (including failed)
+        // Short calls (<7 min) — skipped — from all calls processed (including failed)
         $shortCallsSkipped = QaCall::where('processing_status', 'completed')
             ->when(true, fn ($q) => $this->applyRange($q, $range))
             ->where(function ($q) {
                 $q->whereNull('duration_seconds')
-                    ->orWhere('duration_seconds', '<', 180);
+                    ->orWhere('duration_seconds', '<', 420);
             })
             ->count();
 
@@ -739,8 +740,55 @@ class QADashboardController extends Controller
         ];
     }
 
+    /**
+     * POST /qa/api/rerun-today
+     *
+     * Resets all of today's completed QA calls back to 'pending' and re-queues
+     * them for AI scoring with the latest prompt. Transcripts are already stored,
+     * so only the AI scoring step (and diarization for Whisper calls) is rerun.
+     */
+    public function rerunToday(): JsonResponse
+    {
+        $calls = QaCall::whereDate('call_start_time', today())
+            ->where('processing_status', 'completed')
+            ->get();
+
+        if ($calls->isEmpty()) {
+            return response()->json(['success' => true, 'count' => 0, 'message' => 'No completed calls found for today.']);
+        }
+
+        $count = 0;
+        foreach ($calls as $call) {
+            // Delete existing QA result so it gets re-created fresh
+            $call->qaResult()->delete();
+
+            // For Whisper calls, also clear the stale diarized transcript so the AI
+            // re-diarizes with the fixed speaker identification prompt.
+            $update = ['processing_status' => 'pending', 'failure_reason' => null, 'retry_count' => 0];
+            if ($call->transcript_source !== 'zoom') {
+                $update['transcript_diarized'] = '';
+            }
+            $call->update($update);
+
+            \App\Jobs\QA\DownloadAndProcessRecording::dispatch($call->id);
+            $count++;
+        }
+
+        Log::info('[QA:RerunToday] Re-queued today\'s calls', ['count' => $count, 'date' => today()->toDateString()]);
+
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
     private function applyRange($query, string $range, string $column = 'call_start_time')
     {
+        // Handle custom date ranges: range format can be "startDate,endDate" (ISO 8601)
+        if (strpos($range, ',') !== false) {
+            [$startStr, $endStr] = explode(',', $range, 2);
+            $startDate = \Carbon\Carbon::parse($startStr)->startOfDay();
+            $endDate = \Carbon\Carbon::parse($endStr)->endOfDay();
+            return $query->whereBetween($column, [$startDate, $endDate]);
+        }
+
         return match ($range) {
             'today' => $query->whereDate($column, today()),
             'week', '7d' => $query->where($column, '>=', now()->subDays(7)->startOfDay()),

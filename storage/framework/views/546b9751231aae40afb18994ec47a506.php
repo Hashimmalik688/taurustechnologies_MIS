@@ -185,10 +185,11 @@
                             $joiningDate = $employee->userDetail && $employee->userDetail->join_date ? \Carbon\Carbon::parse($employee->userDetail->join_date) : null;
                             $workingDaysInPeriod = $totalWorkingDays;
                             $perDayWage = $basicSalary / max($workingDaysInPeriod, 1);
-                            $attSummary = $attendanceSummaries[$employee->id] ?? ['full_days' => 0, 'half_days' => 0, 'late_days' => 0];
+                            $attSummary = $attendanceSummaries[$employee->id] ?? ['full_days' => 0, 'half_days' => 0, 'late_days' => 0, 'absent_days' => 0];
                             $fullDays = $attSummary['full_days'];
                             $halfDays = $attSummary['half_days'];
                             $lateDays = $attSummary['late_days'];
+                            $absentDays = $attSummary['absent_days'];
                             $eligibleDays = $fullDays + $halfDays + $lateDays;
                             if ($joiningDate) {
                                 if ($joiningDate->gt($endDate)) { $eligibleDays = 0; }
@@ -200,9 +201,10 @@
                             }
                             $earnedSalary = $eligibleDays * $perDayWage;
                             $isQualified = true;
-                            if ($halfDays >= 2) { $isQualified = false; }
+                            if ($absentDays >= 1) { $isQualified = false; }
+                            elseif ($halfDays >= 2) { $isQualified = false; }
                             elseif ($lateDays >= 4) { $isQualified = false; }
-                            else { if ($halfDays == 1) { $isQualified = ($fullDays >= $workingDaysInPeriod - 1); } elseif ($halfDays == 0) { $isQualified = ($fullDays >= $workingDaysInPeriod); } }
+                            else { if ($halfDays == 1) { $isQualified = (($fullDays + $lateDays) >= $workingDaysInPeriod - 1); } elseif ($halfDays == 0) { $isQualified = (($fullDays + $lateDays) >= $workingDaysInPeriod); } }
                             $punctualityBonus = 0;
                             if ($isQualified && $employee->punctuality_bonus && $employee->punctuality_bonus > 0) { $punctualityBonus = $employee->punctuality_bonus; }
                             if ($employee->override_punctuality_bonus && $employee->override_punctuality_bonus > 0) { $punctualityBonus = $employee->override_punctuality_bonus; $isQualified = true; }

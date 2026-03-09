@@ -394,6 +394,9 @@ Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => [
     Route::post('/mark-manual', [AttendanceController::class, 'markManual'])->name('mark-manual.post')->middleware('role.permission:attendance,edit');
     Route::post('/{id}/update', [AttendanceController::class, 'updateAjax'])->name('update')->middleware('role.permission:attendance,edit');
     Route::delete('/{id}', [AttendanceController::class, 'delete'])->name('delete')->middleware('role.permission:attendance,full');
+    // Bulk calendar attendance marking
+    Route::get('/bulk-month-data', [AttendanceController::class, 'getUserMonthAttendance'])->name('bulk-month-data')->middleware('role.permission:attendance,edit');
+    Route::post('/bulk-mark', [AttendanceController::class, 'bulkMarkAttendance'])->name('bulk-mark.post')->middleware('role.permission:attendance,edit');
 });
 
 // Notifications
@@ -498,6 +501,7 @@ Route::group(['prefix' => 'epms', 'as' => 'epms.', 'middleware' => ['auth', Role
 Route::group(['prefix' => 'payroll', 'as' => 'payroll.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SalaryController::class, 'payroll'])->name('index')->middleware('role.permission:payroll,view');
     Route::get('/print', [SalaryController::class, 'printPayroll'])->name('print')->middleware('role.permission:payroll,view');
+    Route::get('/export', [SalaryController::class, 'exportXlsx'])->name('export')->middleware('role.permission:payroll,view');
     Route::post('/working-days', [SalaryController::class, 'updateWorkingDays'])->name('working-days.update')->middleware('role.permission:payroll,edit');
     
     // Manual Payroll Entries (for non-system users like ex-employees)
@@ -904,6 +908,7 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     Route::get('/api/calls', [\App\Http\Controllers\QA\QADashboardController::class, 'calls'])->name('qa.api.calls');
     Route::get('/api/calls/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'callDetail'])->name('qa.api.call');
     Route::get('/api/sales', [\App\Http\Controllers\QA\QADashboardController::class, 'salesQA'])->name('qa.api.sales');
+    Route::post('/api/rerun-today', [\App\Http\Controllers\QA\QADashboardController::class, 'rerunToday'])->name('qa.api.rerun-today');
 });
 
 // Catch-all route - MUST BE LAST
