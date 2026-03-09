@@ -163,20 +163,6 @@ class DownloadAndProcessRecording implements ShouldQueue
             $scoredBy = 'gemini';
 
             try {
-                $gemini = app(GeminiService::class);
-                if ($isZoomTranscript) {
-                    $aiResult = $gemini->analyzePreLabeledCall($transcriptForAi, $qaCall->duration_seconds);
-                } else {
-                    $aiResult = $gemini->analyzeCall($transcriptForAi, $qaCall->duration_seconds);
-                }
-                $scoredBy = 'gemini';
-            } catch (\Throwable $e) {
-                Log::warning('[QA:Job] Gemini failed, falling back to Claude', [
-                    'qa_call_id'      => $qaCall->id,
-                    'transcript_source' => $qaCall->transcript_source,
-                    'error'           => $e->getMessage(),
-                ]);
-
                 $claude = app(ClaudeService::class);
                 if ($isZoomTranscript) {
                     $aiResult = $claude->analyzePreLabeledCall($transcriptForAi, $qaCall->duration_seconds);
@@ -184,6 +170,20 @@ class DownloadAndProcessRecording implements ShouldQueue
                     $aiResult = $claude->analyzeCall($transcriptForAi, $qaCall->duration_seconds);
                 }
                 $scoredBy = 'claude';
+            } catch (\Throwable $e) {
+                Log::warning('[QA:Job] Claude failed, falling back to Gemini', [
+                    'qa_call_id'      => $qaCall->id,
+                    'transcript_source' => $qaCall->transcript_source,
+                    'error'           => $e->getMessage(),
+                ]);
+
+                $gemini = app(GeminiService::class);
+                if ($isZoomTranscript) {
+                    $aiResult = $gemini->analyzePreLabeledCall($transcriptForAi, $qaCall->duration_seconds);
+                } else {
+                    $aiResult = $gemini->analyzeCall($transcriptForAi, $qaCall->duration_seconds);
+                }
+                $scoredBy = 'gemini';
             }
 
             // For WhisperX calls: store the diarized transcript produced by the AI.

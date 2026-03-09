@@ -43,6 +43,12 @@ class Kernel extends ConsoleKernel
             ->everyMinute()
             ->withoutOverlapping()
             ->runInBackground();
+            
+        // Fallback: Dispatch QA jobs for any un-scored transcripts every 5 minutes
+        $schedule->command('qa:score-transcribed --reset-stuck')
+            ->everyFiveMinutes()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     /**
