@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             RolePermissionSeeder::class,
             EmployeeEMSDataSeeder::class, // <-- Add EMS data seeder
+            SystemAccountsSeeder::class,  // System COA + accounting module
         ]);
     }
 }

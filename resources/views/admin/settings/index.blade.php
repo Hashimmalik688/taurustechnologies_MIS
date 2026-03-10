@@ -141,7 +141,7 @@
     </form>
 
     {{-- ── Allowed Devices ─────────────────────────────────────────── --}}
-    @hasanyrole('Super Admin|Co-ordinator')
+    @if(auth()->user()->canViewModule('allowed-devices'))
     <div class="ex-card sec-card" style="margin-top:.65rem">
         <div class="sec-hdr">
             <h6><i class="bx bx-devices"></i> Allowed Devices
@@ -381,7 +381,7 @@
 
         </div>
     </div>
-    @endhasanyrole
+    @endif
 @endsection
 
 @section('script')

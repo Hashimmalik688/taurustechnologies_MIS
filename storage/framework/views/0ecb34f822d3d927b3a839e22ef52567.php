@@ -143,7 +143,7 @@
     </form>
 
     
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('role', 'Super Admin')): ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->canViewModule('allowed-devices')): ?>
     <div class="ex-card sec-card" style="margin-top:.65rem">
         <div class="sec-hdr">
             <h6><i class="bx bx-devices"></i> Allowed Devices

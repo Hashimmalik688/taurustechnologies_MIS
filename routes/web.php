@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\Admin\LedgerController;
+use App\Http\Controllers\Admin\LedgerJournalController;
 use App\Http\Controllers\Admin\ChartOfAccountController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RetentionController;
@@ -544,6 +545,41 @@ Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => [
     Route::get('/export', [LedgerController::class, 'pettyCashExport'])->name('export')->middleware('role.permission:petty-cash,view');
 });
 
+// Accounting Ledger (Double-Entry) — access controlled by role.permission:accounting,level
+Route::group(['prefix' => 'admin/accounting', 'as' => 'admin.accounting.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+
+    // Journal Entries list + detail
+    Route::get('/journal', [LedgerJournalController::class, 'index'])->name('journal.index')->middleware('role.permission:accounting,view');
+    Route::get('/journal/create', [LedgerJournalController::class, 'createGeneral'])->name('journal.create')->middleware('role.permission:accounting,edit');
+    Route::post('/journal/store', [LedgerJournalController::class, 'storeGeneral'])->name('journal.store')->middleware('role.permission:accounting,edit');
+    Route::get('/journal/{id}/print', [LedgerJournalController::class, 'printEntry'])->name('journal.print')->middleware('role.permission:accounting,view');
+    Route::get('/journal/{id}', [LedgerJournalController::class, 'show'])->name('journal.show')->middleware('role.permission:accounting,view');
+
+    // Quick Entry: Sale
+    Route::get('/record-sale', [LedgerJournalController::class, 'recordSaleForm'])->name('record-sale')->middleware('role.permission:accounting,edit');
+    Route::post('/record-sale', [LedgerJournalController::class, 'storeSale'])->name('record-sale.store')->middleware('role.permission:accounting,edit');
+
+    // Quick Entry: Payment Received
+    Route::get('/record-payment', [LedgerJournalController::class, 'recordPaymentForm'])->name('record-payment')->middleware('role.permission:accounting,edit');
+    Route::post('/record-payment', [LedgerJournalController::class, 'storePayment'])->name('record-payment.store')->middleware('role.permission:accounting,edit');
+
+    // ChargeBack / Sales Return
+    Route::get('/record-chargeback', [LedgerJournalController::class, 'recordChargebackForm'])->name('record-chargeback')->middleware('role.permission:accounting,edit');
+    Route::post('/record-chargeback', [LedgerJournalController::class, 'storeChargeback'])->name('record-chargeback.store')->middleware('role.permission:accounting,edit');
+
+    // Quick Entry: Opening Balance
+    Route::get('/opening-balance', [LedgerJournalController::class, 'openingBalanceForm'])->name('opening-balance')->middleware('role.permission:accounting,edit');
+    Route::post('/opening-balance', [LedgerJournalController::class, 'storeOpeningBalance'])->name('opening-balance.store')->middleware('role.permission:accounting,edit');
+
+    // Partner Ledger Report
+    Route::get('/partner-ledger', [LedgerJournalController::class, 'partnerLedgerSelect'])->name('partner-ledger')->middleware('role.permission:accounting,view');
+    Route::get('/partner-ledger/{partnerId}', [LedgerJournalController::class, 'partnerLedgerShow'])->name('partner-ledger.show')->middleware('role.permission:accounting,view');
+    Route::get('/partner-ledger/{partnerId}/carrier/{carrierId}', [LedgerJournalController::class, 'partnerCarrierLedgerShow'])->name('partner-ledger.carrier.show')->middleware('role.permission:accounting,view');
+
+    // AJAX: fetch carriers for a partner
+    Route::get('/partner/{partnerId}/carriers', [LedgerJournalController::class, 'getPartnerCarriers'])->name('partner.carriers');
+});
+
 // Revenue Analytics — access controlled by role.permission:revenue-analytics,level
 Route::get('/revenue', [DashboardController::class, 'revenue'])
     ->name('revenue.index')
@@ -596,15 +632,15 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes')->middleware('role.permission:chat-shadow,view');
 });
 
-// Allowed Devices Management (Super Admin + Co-ordinator)
-Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
-    Route::get('/', [DeviceController::class, 'index'])->name('index');
-    Route::post('/', [DeviceController::class, 'store'])->name('store');
-    Route::post('/{device}/approve', [DeviceController::class, 'approve'])->name('approve');
-    Route::put('/{device}', [DeviceController::class, 'update'])->name('update');
-    Route::post('/{device}/disable', [DeviceController::class, 'disable'])->name('disable');
-    Route::post('/{device}/enable', [DeviceController::class, 'enable'])->name('enable');
-    Route::delete('/{device}', [DeviceController::class, 'destroy'])->name('destroy');
+// Allowed Devices Management — access controlled by role.permission:allowed-devices,level
+Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [DeviceController::class, 'index'])->name('index')->middleware('role.permission:allowed-devices,view');
+    Route::post('/', [DeviceController::class, 'store'])->name('store')->middleware('role.permission:allowed-devices,full');
+    Route::post('/{device}/approve', [DeviceController::class, 'approve'])->name('approve')->middleware('role.permission:allowed-devices,full');
+    Route::put('/{device}', [DeviceController::class, 'update'])->name('update')->middleware('role.permission:allowed-devices,edit');
+    Route::post('/{device}/disable', [DeviceController::class, 'disable'])->name('disable')->middleware('role.permission:allowed-devices,edit');
+    Route::post('/{device}/enable', [DeviceController::class, 'enable'])->name('enable')->middleware('role.permission:allowed-devices,edit');
+    Route::delete('/{device}', [DeviceController::class, 'destroy'])->name('destroy')->middleware('role.permission:allowed-devices,full');
 });
 
 // Reports — access controlled by role.permission:reports,level

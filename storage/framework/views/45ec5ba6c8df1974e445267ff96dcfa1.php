@@ -363,6 +363,14 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
+        <?php if(auth()->check() && auth()->user()->canViewModule('accounting')): ?>
+        <a href="<?php echo e(route('admin.accounting.journal.index')); ?>" class="menu-item <?php echo e(Request::is('admin/accounting*') ? 'active' : ''); ?>">
+            <i class="bx bx-book-open"></i>
+            <span class="menu-text">Accounting</span>
+        </a>
+        <?php endif; ?>
+
+        
         <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
             <a href="<?php echo e(route('settings.reports.hub')); ?>" class="menu-item <?php echo e(Request::is('settings/reports*') ? 'active' : ''); ?>">
                 <i class="bx bx-bar-chart-alt-2"></i>

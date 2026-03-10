@@ -323,6 +323,13 @@ class ModuleSeeder extends Seeder
                 'category' => 'Settings',
                 'sort_order' => 226,
             ],
+            [
+                'name' => 'Allowed Devices',
+                'slug' => 'allowed-devices',
+                'description' => 'Approve, reject, and manage trusted devices for system access',
+                'category' => 'Settings',
+                'sort_order' => 227,
+            ],
 
             // 12. Communication
             [
