@@ -62,13 +62,28 @@ class QAResultService
             // Extract business data (names, sale info) from AI response
             $extracted = $aiResponse['extracted_data'] ?? [];
 
+            // Recalculate total_score from sub-scores if AI returned 0 but sub-scores exist.
+            // Claude sometimes zeroes total_score on COMPLIANCE_FAIL despite having valid sub-scores.
+            $totalScore = floatval($aiResponse['total_score'] ?? 0);
+            if ($totalScore == 0 && !empty($scores)) {
+                $subScoreSum = array_sum(array_values($scores));
+                if ($subScoreSum > 0) {
+                    $totalScore = round($subScoreSum / 70 * 100, 2);
+                    Log::info('[QA:Result] Recalculated total_score from sub-scores', [
+                        'qa_call_id'   => $qaCall->id,
+                        'sub_sum'      => $subScoreSum,
+                        'total_score'  => $totalScore,
+                    ]);
+                }
+            }
+
             // Create or update the QA result (handles retries gracefully)
             $qaResult = QaResult::updateOrCreate(
                 ['qa_call_id' => $qaCall->id],
                 array_merge($complianceData, [
                 'qa_call_id' => $qaCall->id,
                 'disposition' => $this->validateDisposition($aiResponse['disposition'] ?? 'POOR'),
-                'total_score' => floatval($aiResponse['total_score'] ?? 0),
+                'total_score' => $totalScore,
                 'compliance_pass' => (bool) ($aiResponse['compliance_pass'] ?? false),
                 'score_opening' => $this->clampScore($scores['opening'] ?? 0),
                 'score_discovery' => $this->clampScore($scores['discovery'] ?? 0),

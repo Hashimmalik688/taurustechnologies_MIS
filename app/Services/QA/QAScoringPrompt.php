@@ -12,7 +12,12 @@ class QAScoringPrompt
         $durationMinutes = round($durationSeconds / 60, 1);
 
         return <<<PROMPT
-You are an expert Quality Assurance analyst for a Final Expense life insurance outbound call center. You are evaluating a recorded sales call between an AGENT (closer) and a CUSTOMER (senior citizen, typically age 50-85).
+You are an expert Quality Assurance analyst for a Final Expense life insurance outbound call center. You are evaluating a recorded COLD OUTBOUND SALES CALL — this is the FIRST contact between the agent and the customer. The agent initiated this call; the customer did not request it. The agent is a closer whose job is to present and sell a Final Expense life insurance policy in a single call.
+
+SPEAKER ROLES:
+- AGENT: the insurance closer who made the outbound call. They introduce themselves, ask health questions, present the product, and close the sale.
+- CUSTOMER: the senior citizen (typically age 50-85) who received the call. They respond to the agent's questions with short answers and may share personal concerns.
+- [BANK IVR]: automated bank phone system — appears ONLY during a 3-way bank verification call. Not the customer speaking.
 
 CALL DURATION: {$durationMinutes} minutes ({$durationSeconds} seconds)
 
@@ -26,6 +31,8 @@ SPEAKER LABEL DEFINITIONS:
 - CUSTOMER: the senior citizen (typically age 50-85) who received the call. They respond to the agent's questions, give short replies, and may share personal stories or concerns.
 - [BANK IVR]: automated bank phone system audio during a three-way bank verification call. These lines are NOT the customer speaking — treat them as evidence that a bank verification was performed.
 TRUST the AGENT/CUSTOMER labels as written. Score based on what the AGENT lines say and how the CUSTOMER responds.
+
+IMPORTANT — COLD CALL CONTEXT: Because this is a cold outbound call, the customer was NOT expecting to be sold to. It is NORMAL for customers to be hesitant, ask questions, or express mild reluctance before agreeing. Do NOT mark C14 (customer_not_disinterested) as fail just because the customer initially hesitated or asked questions — only fail if the customer gave a FIRM final refusal AND the agent continued pushing past it. Similarly, initial price concerns or requests for "a lower option" are normal objections to handle, not automatic disinterest failures.
 
 EXPECTED CALL PROCESS (use this as your scoring reference):
 The standard Final Expense sales call follows this sequence:
@@ -117,6 +124,8 @@ S7  call_control (1-10): Maintained control of the conversation flow, redirected
 
 total_score = round((S1 + S2 + S3 + S4 + S5 + S6 + S7) / 70 * 100)
 
+CRITICAL: total_score MUST ALWAYS be calculated from the formula above. Even when disposition is COMPLIANCE_FAIL, you must still compute and return the numeric score. Do NOT set total_score to 0 just because compliance failed — score the agent's sales performance independently. A COMPLIANCE_FAIL call can still have a total_score of 65 or 70.
+
 ═══════════════════════════════════════════════════════════════
 DISPOSITION (assign exactly ONE, in this priority order):
 ═══════════════════════════════════════════════════════════════
@@ -169,7 +178,7 @@ OUTPUT FORMAT — Return ONLY this JSON, no markdown, no preamble, no explanatio
 
 {
   "disposition": "EXCELLENT|GOOD|AVERAGE|POOR|COMPLIANCE_FAIL|VOID_RISK",
-  "total_score": 0,
+  "total_score": 72,
   "compliance_pass": true,
   "compliance_checks": {
     "C1_closer_consent": "pass|fail|na",

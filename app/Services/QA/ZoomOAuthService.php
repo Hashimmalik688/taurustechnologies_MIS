@@ -201,12 +201,19 @@ class ZoomOAuthService
                 return null;
             }
 
-            $vttContent = $response->body();
-            if (empty(trim($vttContent))) {
+            $body = $response->body();
+            if (empty(trim($body))) {
                 return null;
             }
 
-            $labeled = $this->parseVttToLabeledText($vttContent, $agentName);
+            // Detect Zoom JSON transcript format vs WebVTT
+            $jsonData = null;
+            if (str_starts_with(ltrim($body), '{')) {
+                $jsonData = json_decode($body, true);
+            }
+            $labeled = ($jsonData !== null)
+                ? $this->parseJsonTranscriptToLabeledText($jsonData, $agentName)
+                : $this->parseVttToLabeledText($body, $agentName);
 
             Log::info('[QA:ZoomOAuth] Downloaded transcript from direct URL', [
                 'chars'          => strlen($labeled),
@@ -319,8 +326,15 @@ class ZoomOAuthService
                 return null;
             }
 
-            // Step 3: Parse VTT → AGENT:/CUSTOMER: labeled transcript
-            $labeled = $this->parseVttToLabeledText($vttContent, $agentName);
+            // Step 3: Parse transcript → AGENT:/CUSTOMER: labeled text
+            // Zoom now returns JSON (type=zoom_transcript) instead of WebVTT
+            $jsonData = null;
+            if (str_starts_with(ltrim($vttContent), '{')) {
+                $jsonData = json_decode($vttContent, true);
+            }
+            $labeled = ($jsonData !== null)
+                ? $this->parseJsonTranscriptToLabeledText($jsonData, $agentName)
+                : $this->parseVttToLabeledText($vttContent, $agentName);
 
             Log::info('[QA:ZoomOAuth] Zoom transcript fetched and labeled', [
                 'call_log_id'    => $callLogId,
@@ -425,5 +439,52 @@ class ZoomOAuthService
         }
 
         return implode("\n", $labeledLines);
+    }
+
+    /**
+     * Parse Zoom's JSON transcript format (type=zoom_transcript) into
+     * AGENT:/CUSTOMER: labeled plain text.
+     *
+     * Structure: { "timeline": [ { "text": "...", "userId": "828", "users": [{"username": "Phil Anderson"}] }, ... ] }
+     *
+     * Speaker identification:
+     *  - userId is a phone number (10+ digits) → CUSTOMER
+     *  - userId is a short extension / Zoom UUID → AGENT
+     */
+    private function parseJsonTranscriptToLabeledText(array $data, string $agentName = ''): string
+    {
+        $timeline = $data['timeline'] ?? [];
+        if (empty($timeline)) {
+            return '';
+        }
+
+        $agentNorm = strtolower(trim($agentName));
+        if (in_array($agentNorm, ['', 'unknown agent', 'unknown', 'n/a', 'agent', 'customer'])) {
+            $agentNorm = '';
+        }
+
+        $lines = [];
+
+        foreach ($timeline as $item) {
+            $text = trim($item['text'] ?? '');
+            if ($text === '') continue;
+
+            $userId   = (string) ($item['userId'] ?? '');
+            $username = trim($item['users'][0]['username'] ?? '');
+
+            // Phone numbers (10+ consecutive digits) → CUSTOMER
+            // Short extensions and Zoom UUIDs → AGENT
+            $digitsOnly = preg_replace('/\D/', '', $userId);
+            $isCustomer = strlen($digitsOnly) >= 10;
+
+            // If agentName given, let username match override the digits heuristic
+            if ($agentNorm !== '' && str_contains(strtolower($username), $agentNorm)) {
+                $isCustomer = false;
+            }
+
+            $lines[] = ($isCustomer ? 'CUSTOMER' : 'AGENT') . ': ' . $text;
+        }
+
+        return implode("\n", $lines);
     }
 }
