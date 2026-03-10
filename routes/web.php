@@ -596,8 +596,8 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes')->middleware('role.permission:chat-shadow,view');
 });
 
-// Allowed Devices Management (Super Admin only)
-Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
+// Allowed Devices Management (Super Admin + Co-ordinator)
+Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::COORDINATOR)]], function () {
     Route::get('/', [DeviceController::class, 'index'])->name('index');
     Route::post('/', [DeviceController::class, 'store'])->name('store');
     Route::post('/{device}/approve', [DeviceController::class, 'approve'])->name('approve');

@@ -141,7 +141,7 @@
     </form>
 
     {{-- ── Allowed Devices ─────────────────────────────────────────── --}}
-    @role('Super Admin')
+    @hasanyrole('Super Admin|Co-ordinator')
     <div class="ex-card sec-card" style="margin-top:.65rem">
         <div class="sec-hdr">
             <h6><i class="bx bx-devices"></i> Allowed Devices
@@ -381,7 +381,7 @@
 
         </div>
     </div>
-    @endrole
+    @endhasanyrole
 @endsection
 
 @section('script')
