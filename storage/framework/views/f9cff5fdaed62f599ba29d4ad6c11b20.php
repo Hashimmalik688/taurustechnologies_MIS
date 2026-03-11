@@ -947,9 +947,9 @@
                                 </div>
                                 <div class="col-md-12 d-none" id="followup_datetime_field">
                                     <div class="ph-field">
-                                        <label>Follow Up Date & Time (MT)</label>
+                                        <label>Follow Up Date & Time (PT)</label>
                                         <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
-                                        <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">Enter in Mountain Time (MT)</small>
+                                        <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">Enter in Pacific Time (PT)</small>
                                     </div>
                                 </div>
 

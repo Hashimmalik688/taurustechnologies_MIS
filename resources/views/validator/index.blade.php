@@ -129,7 +129,7 @@
                                 @endif
                             </td>
                             <td class="text-end">${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
-                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                             <td class="text-center">
                                 <button type="button" class="act-btn a-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ $lead->id }}"><i class="bx bx-edit"></i> Review</button>
                             </td>
@@ -254,7 +254,7 @@
                             </td>
                             <td>{{ $lead->verifier->name ?? 'N/A' }}</td>
                             <td class="text-end">${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
-                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                             <td class="text-center">
                                 <div class="act-group">
                                     <form method="POST" action="{{ route('validator.mark-home-office-sale', $lead->id) }}" class="d-inline">

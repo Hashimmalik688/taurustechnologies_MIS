@@ -28,9 +28,9 @@ class RavensDashboardController extends Controller
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
 
-        // Determine date range in Mountain Time (MT)
-        $timezone = 'America/Denver';
-        $appTz = config('app.timezone', 'America/Denver');
+        // Determine date range in Pacific Time (PT)
+        $timezone = 'America/Los_Angeles';
+        $appTz = config('app.timezone', 'America/Los_Angeles');
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {
                 $startDate = \Carbon\Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone($appTz);
@@ -1223,8 +1223,8 @@ class RavensDashboardController extends Controller
         $customStart = $request->input('start_date');
         $customEnd = $request->input('end_date');
         $search = $request->input('search');
-        $timezone = 'America/Denver';
-        $appTz = config('app.timezone', 'America/Denver');
+        $timezone = 'America/Los_Angeles';
+        $appTz = config('app.timezone', 'America/Los_Angeles');
 
         if ($filter === 'custom' && $customStart && $customEnd) {
             try {

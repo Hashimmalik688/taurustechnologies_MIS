@@ -497,8 +497,8 @@
                                 <span class="bd-mini bd-blue">${{ number_format($lead->monthly_premium ?? 0, 0) }}</span>
                             </td>
                             <td style="font-size:.68rem;">
-                                <div>I: {{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('m/d/y') : '—' }}</div>
-                                <div>F: {{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('m/d/y') : '—' }}</div>
+                                <div>I: {{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M j, Y') : '—' }}</div>
+                                <div>F: {{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M j, Y') : '—' }}</div>
                             </td>
                             <td class="text-center">
                                 @php

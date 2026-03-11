@@ -76,6 +76,16 @@
 .df-row label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);display:block;margin-bottom:.2rem}
 .df-row input[type=date]{font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff}
 
+/* ── MOS badge ── */
+.mos-badge{display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:.15rem .4rem;border-radius:4px;font-size:.68rem;font-weight:700;font-variant-numeric:tabular-nums}
+.mos-good{background:rgba(26,135,84,.12);color:#1a8754}
+.mos-fair{background:rgba(212,175,55,.12);color:#b89730}
+.mos-poor{background:rgba(200,70,70,.12);color:#c84646}
+.mos-none{color:var(--bs-surface-400);font-size:.6rem}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .mos-good{background:rgba(26,135,84,.2)}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .mos-fair{background:rgba(212,175,55,.2)}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .mos-poor{background:rgba(200,70,70,.2)}
+
 /* ── Empty state ── */
 .ap-empty{text-align:center;padding:3rem 1rem;color:var(--bs-surface-500)}
 .ap-empty i{font-size:2.5rem;display:block;margin-bottom:.5rem;opacity:.25}
@@ -172,7 +182,7 @@
     </div>
     <div class="stat-card">
         <i class="bx bx-phone-call stat-card-icon"></i>
-        <div class="stat-card-label">Answered</div>
+        <div class="stat-card-label">Connected</div>
         <div class="stat-card-value" id="sc-answered">{{ number_format($summaryAnswered) }}</div>
     </div>
     <div class="stat-card">
@@ -194,15 +204,15 @@
     <form method="GET" action="{{ route('settings.reports.zoom-agent-performance') }}" id="apFilterForm">
         <div class="df-row">
             <div>
-                <label>From (MT)</label>
+                <label>From (PT)</label>
                 <input type="date" name="date_from" id="apDateFrom" value="{{ $dateFrom ?? '' }}">
             </div>
             <div>
-                <label>To (MT)</label>
+                <label>To (PT)</label>
                 <input type="date" name="date_to" id="apDateTo" value="{{ $dateTo ?? '' }}">
             </div>
             <button type="button" class="pipe-pill" style="font-size:.72rem;padding:.3rem .75rem;border:none;cursor:pointer" onclick="setToday()">
-                <i class="bx bx-calendar-check" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Today (MT)
+                <i class="bx bx-calendar-check" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Today (PT)
             </button>
             <button type="submit" class="pipe-pill-apply" style="font-size:.72rem;padding:.3rem .75rem">
                 <i class="bx bx-filter-alt" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Apply
@@ -212,7 +222,7 @@
             </a>
             @if($dateFrom || $dateTo)
             <span style="font-size:.65rem;color:var(--bs-surface-400);align-self:center">
-                Showing {{ ($dateFrom && $dateTo && $dateFrom !== $dateTo) ? $dateFrom . ' → ' . $dateTo : ($dateFrom ?: $dateTo) }} (MT)
+                Showing {{ ($dateFrom && $dateTo && $dateFrom !== $dateTo) ? $dateFrom . ' → ' . $dateTo : ($dateFrom ?: $dateTo) }} (PT)
             </span>
             @endif
         </div>
@@ -238,14 +248,15 @@
                 <tr>
                     <th data-sort="name">Agent <span class="si"></span></th>
                     <th class="ap-num" data-sort="total_calls">Total <span class="si"></span></th>
-                    <th class="ap-num" data-sort="answered">Answered <span class="si"></span></th>
-                    <th class="ap-num" data-sort="missed">No Answer <span class="si"></span></th>
+                    <th class="ap-num" data-sort="answered" title="Calls where the lead actually picked up (talk time ≥10 s)">Connected <span class="si"></span></th>
+                    <th class="ap-num" data-sort="missed" title="No answer + voicemail system drops (talk time &lt;10 s)">No Pickup <span class="si"></span></th>
                     <th class="ap-num" data-sort="declined">Declined <span class="si"></span></th>
                     <th class="ap-num" data-sort="voicemail">Voicemail <span class="si"></span></th>
                     <th class="ap-num" data-sort="recorded">Recorded <span class="si"></span></th>
                     <th class="ap-num" data-sort="total_duration">Talk Time <span class="si"></span></th>
                     <th class="ap-num" data-sort="avg_duration">Avg Duration <span class="si"></span></th>
                     <th class="ap-num" data-sort="connect_rate">Connect Rate <span class="si"></span></th>
+                    <th class="ap-num" data-sort="avg_mos" title="Mean Opinion Score — voice call quality (1.0–5.0)">Avg MOS <span class="si"></span></th>
                 </tr>
             </thead>
             <tbody id="apBody">
@@ -272,6 +283,7 @@
                     data-total_duration="{{ $agent['total_duration'] }}"
                     data-avg_duration="{{ $avgSec }}"
                     data-connect_rate="{{ $cr }}"
+                    data-avg_mos="{{ $agent['avg_mos'] ?? '' }}"
                 >
                     <td>
                         <div style="font-weight:600">{{ $agent['name'] }}</div>
@@ -289,6 +301,16 @@
                         <strong>{{ $cr }}%</strong>
                         <span class="rate-bar"><span class="rate-fill" style="width:{{ min($cr, 100) }}%"></span></span>
                     </td>
+                    <td class="ap-num">
+                        @if($agent['avg_mos'] !== null)
+                            @php
+                                $mosClass = $agent['avg_mos'] >= 4.0 ? 'mos-good' : ($agent['avg_mos'] >= 3.6 ? 'mos-fair' : 'mos-poor');
+                            @endphp
+                            <span class="mos-badge {{ $mosClass }}">{{ $agent['avg_mos'] }}</span>
+                        @else
+                            <span class="mos-none">&ndash;</span>
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -303,6 +325,11 @@
                     'recorded'       => $agentKpis->sum('recorded'),
                     'total_duration' => $agentKpis->sum('total_duration'),
                 ];
+                // Weighted avg MOS across all agents that have MOS data
+                $mosAgents = $agentKpis->filter(fn($a) => $a['avg_mos'] !== null);
+                $totAvgMos = $mosAgents->count() > 0
+                    ? round($mosAgents->avg('avg_mos'), 1)
+                    : null;
                 $totCR  = $tot['total_calls'] > 0 ? round(($tot['answered'] / $tot['total_calls']) * 100, 1) : 0;
                 $totAvg = $tot['total_calls'] > 0 ? round($tot['total_duration'] / $tot['total_calls']) : 0;
                 $fH = floor($tot['total_duration'] / 3600);
@@ -327,6 +354,14 @@
                     <td class="ap-num" style="font-family:monospace;font-size:.7rem">{{ $totTalk }}</td>
                     <td class="ap-num" style="font-family:monospace;font-size:.7rem">{{ $totAvgFmt }}</td>
                     <td class="ap-num">{{ $totCR }}%</td>
+                    <td class="ap-num">
+                        @if($totAvgMos !== null)
+                            @php $mosClass = $totAvgMos >= 4.0 ? 'mos-good' : ($totAvgMos >= 3.6 ? 'mos-fair' : 'mos-poor'); @endphp
+                            <span class="mos-badge {{ $mosClass }}">{{ $totAvgMos }}</span>
+                        @else
+                            <span class="mos-none">&ndash;</span>
+                        @endif
+                    </td>
                 </tr>
             </tfoot>
             @endif
@@ -361,7 +396,7 @@ function fmtDuration(secs) {
 function fmtNum(n) { return n.toLocaleString(); }
 
 function setToday() {
-    const ptDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Denver' }).format(new Date());
+    const ptDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles' }).format(new Date());
     document.getElementById('apDateFrom').value = ptDate;
     document.getElementById('apDateTo').value   = ptDate;
     document.getElementById('apFilterForm').submit();
@@ -475,9 +510,9 @@ function updateLastUpdated(iso) {
     const d = new Date(iso);
     const fmt = new Intl.DateTimeFormat('en-US', {
         hour: 'numeric', minute: '2-digit', second: '2-digit',
-        hour12: true, timeZone: 'America/Denver'
+        hour12: true, timeZone: 'America/Los_Angeles'
     });
-    document.getElementById('luTime').textContent = fmt.format(d) + ' MT';
+    document.getElementById('luTime').textContent = fmt.format(d) + ' PT';
 }
 
 function flash(el, cls) {
@@ -562,6 +597,7 @@ function applyUpdate(data) {
             row.dataset.total_duration = agent.total_duration;
             row.dataset.avg_duration   = avgSec;
             row.dataset.connect_rate   = cr;
+            row.dataset.avg_mos        = agent.avg_mos ?? '';
 
             function updateCell(td, newVal, oldVal, fmt) {
                 if (newVal === oldVal) return;
@@ -587,6 +623,17 @@ function applyUpdate(data) {
             if (crStrong) crStrong.textContent = cr + '%';
             if (crFill)   crFill.style.width   = Math.min(cr, 100) + '%';
 
+            // MOS cell (cells[10])
+            if (cells[10]) {
+                const mos = agent.avg_mos;
+                if (mos !== null && mos !== undefined) {
+                    const cls = mos >= 4.0 ? 'mos-good' : (mos >= 3.6 ? 'mos-fair' : 'mos-poor');
+                    cells[10].innerHTML = `<span class="mos-badge ${cls}">${mos}</span>`;
+                } else {
+                    cells[10].innerHTML = '<span class="mos-none">&ndash;</span>';
+                }
+            }
+
         } else {
             // New agent — insert row
             const talkFmt = fmtDuration(agent.total_duration);
@@ -603,6 +650,15 @@ function applyUpdate(data) {
             tr.dataset.total_duration = agent.total_duration;
             tr.dataset.avg_duration = avgSec;
             tr.dataset.connect_rate = cr;
+            tr.dataset.avg_mos      = agent.avg_mos ?? '';
+            const mosTd = () => {
+                const mos = agent.avg_mos;
+                if (mos !== null && mos !== undefined) {
+                    const cls = mos >= 4.0 ? 'mos-good' : (mos >= 3.6 ? 'mos-fair' : 'mos-poor');
+                    return `<td class="ap-num"><span class="mos-badge ${cls}">${mos}</span></td>`;
+                }
+                return '<td class="ap-num"><span class="mos-none">&ndash;</span></td>';
+            };
             tr.innerHTML = `
                 <td><div style="font-weight:600">${agent.name}</div><div style="font-size:.6rem;color:var(--bs-surface-500)">Ext. ${agent.extension}</div></td>
                 <td class="ap-num"><strong>${fmtNum(agent.total_calls)}</strong></td>
@@ -614,6 +670,7 @@ function applyUpdate(data) {
                 <td class="ap-num" style="white-space:nowrap;font-family:monospace;font-size:.7rem">${talkFmt}</td>
                 <td class="ap-num" style="white-space:nowrap;font-family:monospace;font-size:.7rem">${avgFmt}</td>
                 <td class="ap-num" style="white-space:nowrap"><strong>${cr}%</strong><span class="rate-bar"><span class="rate-fill" style="width:${Math.min(cr,100)}%"></span></span></td>
+                ${mosTd()}
             `;
             tbody.appendChild(tr);
             Array.from(tr.querySelectorAll('td')).forEach(td => flash(td, 'flash-new'));
@@ -646,6 +703,17 @@ function applyUpdate(data) {
         cells[7].textContent = fmtDuration(totDur);
         cells[8].textContent = fmtDuration(totAvg);
         cells[9].textContent = totCR + '%';
+        // MOS footer — simple avg of agents with MOS data
+        if (cells[10]) {
+            const mosAgents = data.agents.filter(a => a.avg_mos !== null && a.avg_mos !== undefined);
+            if (mosAgents.length > 0) {
+                const avgMos = Math.round((mosAgents.reduce((s,a) => s + a.avg_mos, 0) / mosAgents.length) * 10) / 10;
+                const cls = avgMos >= 4.0 ? 'mos-good' : (avgMos >= 3.6 ? 'mos-fair' : 'mos-poor');
+                cells[10].innerHTML = `<span class="mos-badge ${cls}">${avgMos}</span>`;
+            } else {
+                cells[10].innerHTML = '<span class="mos-none">&ndash;</span>';
+            }
+        }
     }
 }
 

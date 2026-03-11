@@ -251,8 +251,8 @@
                                     </div>
                                 @elseif($attendance->date->isToday())
                                     @php
-                                        $now = \Carbon\Carbon::now('America/Denver');
-                                        $loginTime = $attendance->login_time->copy()->setTimezone('America/Denver');
+                                        $now = \Carbon\Carbon::now('America/Los_Angeles');
+                                        $loginTime = $attendance->login_time->copy()->setTimezone('America/Los_Angeles');
                                         $currentMinutes = abs($loginTime->diffInMinutes($now));
                                         $currentHours = floor($currentMinutes / 60);
                                         $currentMins = $currentMinutes % 60;

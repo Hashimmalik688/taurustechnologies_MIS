@@ -45,6 +45,7 @@ class ZoomWebhookLog extends Model
         'transcript_file_path',
         'call_cost',
         'call_rate',
+        'mos',
         'lead_id',
         'agent_id',
         'matched_call_log_id',
@@ -67,6 +68,7 @@ class ZoomWebhookLog extends Model
         'duration_seconds' => 'integer',
         'recording_file_size' => 'integer',
         'call_cost' => 'decimal:4',
+        'mos'       => 'float',
     ];
 
     /**

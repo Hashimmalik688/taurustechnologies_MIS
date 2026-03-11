@@ -260,11 +260,11 @@ class AttendanceService
     {
         $currentTime = Carbon::now();
 
-        // Only run shortly after the end of the shift (e.g., around 5:30 PM MT)
+        // Only run shortly after the end of the shift (e.g., around 5:30 PM PT)
         if ($currentTime->hour < 17 || $currentTime->hour > 18) {
             return [
                 'success' => false,
-                'message' => 'Auto-checkout only runs between 5:00 PM and 6:59 PM MT.',
+                'message' => 'Auto-checkout only runs between 5:00 PM and 6:59 PM PT.',
             ];
         }
 
@@ -278,7 +278,7 @@ class AttendanceService
         $checkedOutCount = 0;
 
         foreach ($overdueAttendances as $attendance) {
-            // Set logout time to 5:30 PM MT
+            // Set logout time to 5:30 PM PT
             $checkoutTime = Carbon::today()->setTime(17, 30, 0);
 
             $attendance->update([

@@ -701,4 +701,98 @@ class ZoomPhoneApiService
 
         $result['synced']++;
     }
+
+    // ─── MOS Sync ───────────────────────────────────────────────────
+
+    /**
+     * Fetch MOS (Mean Opinion Score) quality data from GET /phone/metrics/call_logs
+     * and update the `mos` column on matching zoom_webhook_logs rows.
+     *
+     * Requires scope: phone:read:list_call_logs:admin (same as call log sync).
+     *
+     * @return array ['updated' => int, 'skipped' => int, 'pages' => int]
+     */
+    public function syncMosData(Carbon $from, Carbon $to): array
+    {
+        $result = ['updated' => 0, 'skipped' => 0, 'pages' => 0];
+
+        $adminToken = ZoomToken::adminApp()->active()->orderByDesc('expires_at')->first()
+                   ?? ZoomToken::adminApp()->orderByDesc('expires_at')->first();
+
+        if (! $adminToken) {
+            Log::warning('[ZoomAPI][MOS] No admin token available — skipping MOS sync');
+            return $result;
+        }
+
+        $token = $this->getAccessTokenForRecord($adminToken);
+        if (! $token) {
+            Log::warning('[ZoomAPI][MOS] Could not refresh admin token — skipping MOS sync');
+            return $result;
+        }
+
+        $nextPageToken = null;
+
+        do {
+            $result['pages']++;
+            $query = [
+                'from'      => $from->format('Y-m-d'),
+                'to'        => $to->format('Y-m-d'),
+                'page_size' => 300,
+                'type'      => 2, // by users
+            ];
+            if ($nextPageToken) {
+                $query['next_page_token'] = $nextPageToken;
+            }
+
+            try {
+                $response = Http::withToken($token)
+                    ->timeout(30)
+                    ->get('https://api.zoom.us/v2/phone/metrics/call_logs', $query);
+
+                if (! $response->successful()) {
+                    Log::warning('[ZoomAPI][MOS] metrics/call_logs failed', [
+                        'status' => $response->status(),
+                        'body'   => $response->body(),
+                    ]);
+                    break;
+                }
+
+                $data = $response->json();
+                $logs = $data['call_logs'] ?? [];
+
+                foreach ($logs as $log) {
+                    $callId = $log['call_id'] ?? null;
+                    $mos    = isset($log['mos']) ? floatval($log['mos']) : null;
+
+                    if (! $callId || $mos === null || $mos <= 0) {
+                        $result['skipped']++;
+                        continue;
+                    }
+
+                    $updated = \App\Models\ZoomWebhookLog::where(function ($q) use ($callId) {
+                            $q->where('zoom_call_id', $callId)
+                              ->orWhere('call_session_id', $callId);
+                        })
+                        ->whereNull('mos')
+                        ->update(['mos' => $mos]);
+
+                    if ($updated > 0) {
+                        $result['updated'] += $updated;
+                    } else {
+                        $result['skipped']++;
+                    }
+                }
+
+                $nextPageToken = $data['next_page_token'] ?? null;
+
+            } catch (\Exception $e) {
+                Log::error('[ZoomAPI][MOS] Exception on page ' . $result['pages'] . ': ' . $e->getMessage());
+                break;
+            }
+
+        } while ($nextPageToken && $result['pages'] < 50);
+
+        Log::info('[ZoomAPI][MOS] Sync complete', $result);
+        return $result;
+    }
 }

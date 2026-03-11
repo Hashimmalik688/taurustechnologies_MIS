@@ -73,8 +73,8 @@ class ReportController extends Controller
      */
     public function zoomLogs(Request $request)
     {
-        // All call times are displayed in Mountain Time (America/Denver)
-        $displayTz = 'America/Denver';
+        // All call times are displayed in Pacific Time (America/Los_Angeles)
+        $displayTz = 'America/Los_Angeles';
 
         // Internal Zoom system events that carry no human caller data — hidden by default
         $systemEvents = [
@@ -209,8 +209,8 @@ class ReportController extends Controller
             }
         }
 
-        // Date filters: user picks dates in Mountain Time (MT), but DB stores UTC.
-        // Convert MT date boundaries → UTC for correct querying.
+        // Date filters: user picks dates in Pacific Time (PT), but DB stores UTC.
+        // Convert PT date boundaries → UTC for correct querying.
         if ($request->filled('date_from')) {
             $fromUtc = \Carbon\Carbon::parse($request->date_from, $displayTz)->startOfDay()->utc();
             $query->where('call_start_time', '>=', $fromUtc);
@@ -256,7 +256,7 @@ class ReportController extends Controller
             'date_to' => $request->date_to,
         ];
 
-        // Today's calls in Mountain Time (only meaningful without date filter)
+        // Today's calls in Pacific Time (only meaningful without date filter)
         if (!$hasDateFilter) {
             $todayStartUtc = \Carbon\Carbon::now($displayTz)->startOfDay()->utc();
             $todayEndUtc = \Carbon\Carbon::now($displayTz)->endOfDay()->utc();
@@ -448,7 +448,7 @@ class ReportController extends Controller
      */
     public function zoomAgentPerformance(Request $request)
     {
-        $displayTz = 'America/Denver';
+        $displayTz = 'America/Los_Angeles';
         $dateFrom  = $request->filled('date_from') ? $request->date_from : null;
         $dateTo    = $request->filled('date_to')   ? $request->date_to   : null;
         $todayPt   = \Carbon\Carbon::now($displayTz)->toDateString();
@@ -468,7 +468,7 @@ class ReportController extends Controller
      */
     public function zoomAgentPerformanceData(Request $request)
     {
-        $displayTz = 'America/Denver';
+        $displayTz = 'America/Los_Angeles';
         $dateFrom  = $request->filled('date_from') ? $request->date_from : null;
         $dateTo    = $request->filled('date_to')   ? $request->date_to   : null;
 
@@ -532,12 +532,15 @@ class ReportController extends Controller
         $missedKpi       = ['No Answer', 'no_answer', 'Call Cancel', 'canceled', 'call_failed', 'abandoned'];
         $declinedKpi     = ['Rejected', 'Busy'];
         $recordedKpi     = ['Auto Recorded', 'Recorded'];
+        // Minimum talk-time to count as a real human connection.
+        // 'Call connected' at 1-4 s = voicemail system picked up; ≥10 s = human.
+        $connectedMinDuration = 10;
 
         $allLogs = $query->orderBy('call_start_time', 'desc')->get([
             'caller_name', 'caller_extension',
             'callee_name', 'callee_extension',
             'call_result', 'call_type', 'event_type',
-            'duration_seconds', 'raw_payload',
+            'duration_seconds', 'raw_payload', 'mos', 'call_session_id',
         ]);
 
         // Name alias map — maps any Zoom display name to the canonical agent name.
@@ -575,6 +578,9 @@ class ReportController extends Controller
                     'declined'       => 0,
                     'recorded'       => 0,
                     'voicemail'      => 0,
+                    'mos_sum'        => 0.0,
+                    'mos_count'      => 0,
+                    '_mosHexIds'     => [],
                 ];
             } elseif ($ext && strlen($ext) <= 6 && !in_array($ext, $agentKpisArr[$key]['_extensions'], true)) {
                 $agentKpisArr[$key]['_extensions'][] = $ext;
@@ -591,7 +597,7 @@ class ReportController extends Controller
                 // callee_name may be NULL in DB for older records — fall back to raw_payload
                 $calleeName = $log->callee_name;
                 if (!$calleeName && $log->raw_payload) {
-                    $pl = json_decode($log->raw_payload, true);
+                    $pl = is_array($log->raw_payload) ? $log->raw_payload : json_decode($log->raw_payload, true);
                     $calleeName = $pl['payload']['object']['callee_name'] ?? null;
                 }
                 if (!$calleeName) continue;
@@ -616,18 +622,80 @@ class ReportController extends Controller
 
             $ensureAgent($name, $name, $ext);
 
-            $res = $log->call_result ?? '';
+            $res      = $log->call_result ?? '';
+            $dur      = (int) ($log->duration_seconds ?? 0);
+            $isConnResult = in_array($res, $answeredResults, true);
+            // A call counts as "connected" only when it had a real connection result AND
+            // lasted at least $connectedMinDuration seconds — filters voicemail-system pickups.
+            $isConnected  = $isConnResult && $dur >= $connectedMinDuration;
+            // A call was a "no-pickup" if it explicitly wasn't answered OR it connected
+            // for only a few seconds (voicemail / immediate hang-up).
+            $isNoPickup   = in_array($res, $missedKpi, true)
+                         || ($isConnResult && $dur < $connectedMinDuration);
+
             $agentKpisArr[$name]['total_calls']++;
-            $agentKpisArr[$name]['total_duration'] += (int) ($log->duration_seconds ?? 0);
-            if (in_array($res, $answeredResults, true)) $agentKpisArr[$name]['answered']++;
-            if (in_array($res, $missedKpi, true))       $agentKpisArr[$name]['missed']++;
+            $agentKpisArr[$name]['total_duration'] += $dur;
+            if ($isConnected)                           $agentKpisArr[$name]['answered']++;
+            if ($isNoPickup)                            $agentKpisArr[$name]['missed']++;
             if (in_array($res, $declinedKpi, true))     $agentKpisArr[$name]['declined']++;
-            if (in_array($res, $recordedKpi, true))     $agentKpisArr[$name]['recorded']++;
+            if (in_array($res, $recordedKpi, true) && $isConnected) $agentKpisArr[$name]['recorded']++;
+
+            // MOS: use the value on this record if present; otherwise queue a raw_payload lookup.
+            $logMos = isset($log->mos) && $log->mos > 0 ? (float) $log->mos : null;
+            if ($logMos) {
+                $agentKpisArr[$name]['mos_sum']   += $logMos;
+                $agentKpisArr[$name]['mos_count'] += 1;
+                $agentKpisArr[$name]['_mosHexIds'] = $agentKpisArr[$name]['_mosHexIds'] ?? [];
+            } else {
+                // caller_call_log_completed stores the log UUID as zoom_call_id;
+                // the real hex session call_id lives in call_logs[0].call_id in raw_payload.
+                $agentKpisArr[$name]['_mosHexIds'] = $agentKpisArr[$name]['_mosHexIds'] ?? [];
+                $hexId = null;
+                if ($log->call_session_id) {
+                    $hexId = $log->call_session_id;
+                } elseif ($log->raw_payload && $ev === 'phone.caller_call_log_completed') {
+                    $pl = is_array($log->raw_payload) ? $log->raw_payload : json_decode($log->raw_payload, true);
+                    $hexId = $pl['payload']['object']['call_logs'][0]['call_id'] ?? null;
+                }
+                if ($hexId) {
+                    $agentKpisArr[$name]['_mosHexIds'][$hexId] = true;
+                }
+            }
         }
 
-        // Strip internal _extensions tracking key before returning
+        // ── MOS second-pass: batch-fetch for records that couldn't self-resolve ──
+        $allHexIds = [];
+        foreach ($agentKpisArr as &$kpi) {
+            if (!empty($kpi['_mosHexIds'])) {
+                foreach (array_keys($kpi['_mosHexIds']) as $hid) {
+                    $allHexIds[$hid] = true;
+                }
+            }
+        }
+        unset($kpi);
+        if (!empty($allHexIds)) {
+            $hexMosMap = \App\Models\ZoomWebhookLog::whereIn('zoom_call_id', array_keys($allHexIds))
+                ->where('mos', '>', 0)
+                ->whereNotNull('mos')
+                ->pluck('mos', 'zoom_call_id');
+            foreach ($agentKpisArr as $aKey => &$kpi) {
+                foreach (array_keys($kpi['_mosHexIds'] ?? []) as $hid) {
+                    if (isset($hexMosMap[$hid]) && $hexMosMap[$hid] > 0) {
+                        $kpi['mos_sum']   += (float) $hexMosMap[$hid];
+                        $kpi['mos_count'] += 1;
+                    }
+                }
+            }
+            unset($kpi);
+        }
+
+        // Strip internal tracking keys and compute derived fields
         $agentKpis = collect($agentKpisArr)
-            ->map(fn($a) => array_diff_key($a, ['_extensions' => true]))
+            ->map(function ($a) {
+                $avgMos = $a['mos_count'] > 0 ? round($a['mos_sum'] / $a['mos_count'], 1) : null;
+                return array_diff_key($a, ['_extensions' => true, 'mos_sum' => true, 'mos_count' => true, '_mosHexIds' => true])
+                    + ['avg_mos' => $avgMos];
+            })
             ->sortByDesc('total_calls')
             ->values();
 
@@ -1103,10 +1171,10 @@ class ReportController extends Controller
      */
     public function closerStats(Request $request)
     {
-        $tz = 'America/Denver';
-        $appTz = config('app.timezone', 'America/Denver');
+        $tz = 'America/Los_Angeles';
+        $appTz = config('app.timezone', 'America/Los_Angeles');
 
-        // Build MT date range for whereBetween queries
+        // Build PT date range for whereBetween queries
         $startDate = $request->filled('cs_date_from')
             ? Carbon::parse($request->cs_date_from, $tz)->startOfDay()->setTimezone($appTz)
             : Carbon::now($tz)->startOfMonth()->setTimezone($appTz);

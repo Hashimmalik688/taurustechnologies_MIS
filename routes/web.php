@@ -285,6 +285,7 @@ Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['aut
     
     // View and update followups - only shows leads assigned to the user
     Route::get('/my-followups', [\App\Http\Controllers\Admin\FollowupController::class, 'myFollowups'])->name('my-followups');
+    Route::get('/report', [\App\Http\Controllers\Admin\FollowupController::class, 'report'])->name('report')->middleware('role.permission:issuance,view');
     Route::post('/{id}/update-status', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupStatus'])->name('updateStatus');
     Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification');
 });
@@ -618,6 +619,14 @@ Route::get('/finance/hub', function () {
     }
     return view('admin.finance.hub');
 })->name('finance.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
+
+Route::get('/leads/hub', function () {
+    $user = auth()->user();
+    if (!$user->canViewModule('leads-peregrine') && !$user->canViewModule('leads') && !$user->canViewModule('ravens-bad-leads')) {
+        abort(403, "You don't have permission to view any Leads module.");
+    }
+    return view('admin.leads.hub');
+})->name('leads.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
 
 // Settings (access controlled by role.permission:settings,level — Permission Management remains Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {

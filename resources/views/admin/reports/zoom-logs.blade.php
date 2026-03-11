@@ -104,7 +104,7 @@
     <div class="rp-page-hdr">
         <h5>
             <i class="bx bx-video"></i> Zoom Call Logs
-            <span class="rp-sub">One row per call &bull; Times shown in Mountain Time (MT)</span>
+            <span class="rp-sub">One row per call &bull; Times shown in Pacific Time (PT)</span>
         </h5>
         <div style="display:flex;gap:.5rem">
             <a href="{{ route('settings.reports.zoom-diagnostics') }}" class="act-btn a-warn" style="font-size:.72rem;padding:.3rem .65rem" title="View webhook diagnostics">
@@ -389,7 +389,7 @@
                 <table class="rp-table">
                     <thead>
                         <tr>
-                            <th>Date/Time (MT)</th>
+                            <th>Date/Time (PT)</th>
                             <th>Direction</th>
                             <th>Agent</th>
                             <th>Contact</th>
@@ -467,7 +467,7 @@
                                     @if($log->call_start_time)
                                         @php $mt = $log->call_start_time->copy()->shiftTimezone('UTC')->setTimezone($displayTz); @endphp
                                         <div style="font-weight:600">{{ $mt->format('m/d/Y') }}</div>
-                                        <div style="font-size:.65rem;color:var(--bs-surface-500)">{{ $mt->format('g:i A') }} MT</div>
+                                        <div style="font-size:.65rem;color:var(--bs-surface-500)">{{ $mt->format('g:i A') }} PT</div>
                                     @else
                                         <div style="font-size:.65rem;color:var(--bs-surface-400)">{{ $log->created_at->format('m/d/Y g:i A') }}</div>
                                     @endif

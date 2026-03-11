@@ -416,22 +416,25 @@
 
 @section('script')
 @if($totalCarriers > 0)
+@php
+    $carriersChartData = $groupedCarrierStates->map(function($states, $carrierId) {
+        $carrier = $states->first()->insuranceCarrier;
+        return [
+            'name'     => $carrier->name ?? 'Unknown',
+            'level'    => round($states->avg('settlement_level_pct') ?? 0, 1),
+            'graded'   => round($states->avg('settlement_graded_pct') ?? 0, 1),
+            'gi'       => round($states->avg('settlement_gi_pct') ?? 0, 1),
+            'modified' => round($states->avg('settlement_modified_pct') ?? 0, 1),
+        ];
+    })->values();
+@endphp
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('settlementChart');
     if (!ctx) return;
 
-    const carriers = @json($groupedCarrierStates->map(function($states, $carrierId) {
-        $carrier = $states->first()->insuranceCarrier;
-        return [
-            'name' => $carrier->name ?? 'Unknown',
-            'level' => round($states->avg('settlement_level_pct') ?? 0, 1),
-            'graded' => round($states->avg('settlement_graded_pct') ?? 0, 1),
-            'gi' => round($states->avg('settlement_gi_pct') ?? 0, 1),
-            'modified' => round($states->avg('settlement_modified_pct') ?? 0, 1),
-        ];
-    })->values());
+    const carriers = @json($carriersChartData);
 
     new Chart(ctx, {
         type: 'bar',

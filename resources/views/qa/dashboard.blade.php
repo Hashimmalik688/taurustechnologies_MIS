@@ -1114,7 +1114,7 @@ function scoreClass(s) { s=parseFloat(s); if(isNaN(s)) return ''; return s>=90?'
 function dispClass(d) { return 'd-'+(d||'').toLowerCase().replace(/_/g,'-'); }
 function dispLabel(d) { return (d||'N/A').replace(/_/g,' '); }
 function fmtPhone(p) { if(!p) return '—'; p=String(p).replace(/\D/g,''); return p.length===10?`(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}`:p.length===11?`+${p[0]} (${p.slice(1,4)}) ${p.slice(4,7)}-${p.slice(7)}`:esc(String(p)); }
-function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Denver'}; return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' MT'; }
+function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Los_Angeles'}; return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' PT'; }
 function fmtDuration(s) { if(!s&&s!==0) return '—'; s=parseInt(s); const m=Math.floor(s/60); const sec=s%60; return m>0?m+'m '+sec+'s':sec+'s'; }
 function formatNum(n) { if(!n&&n!==0) return '0'; n=parseFloat(n); return n>=1000?(n/1000).toFixed(1)+'k':n.toFixed(0); }
 function esc(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }

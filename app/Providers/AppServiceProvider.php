@@ -32,6 +32,9 @@ class AppServiceProvider extends ServiceProvider
         // Register UserObserver
         \App\Models\User::observe(\App\Observers\UserObserver::class);
 
+        // Register LeadObserver — auto-recalculates agent_revenue when monthly_premium changes
+        \App\Models\Lead::observe(\App\Observers\LeadObserver::class);
+
         // Force HTTPS in production
         if (config('app.env') === 'production') {
             URL::forceScheme('https');

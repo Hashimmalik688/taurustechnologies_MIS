@@ -96,11 +96,11 @@
         <div class="sec-body" style="padding:.75rem">
             <div style="display:flex;gap:.55rem;align-items:flex-end;flex-wrap:wrap">
                 <div>
-                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">From <span style="font-weight:400;opacity:.6">(MT)</span></label>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">From <span style="font-weight:400;opacity:.6">(PT)</span></label>
                     <input type="date" id="csDateFrom" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff">
                 </div>
                 <div>
-                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">To <span style="font-weight:400;opacity:.6">(MT)</span></label>
+                    <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">To <span style="font-weight:400;opacity:.6">(PT)</span></label>
                     <input type="date" id="csDateTo" style="font-size:.72rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff">
                 </div>
                 <div>
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
     csLoadBtn.addEventListener('click', loadCloserStats);
 
     document.getElementById('csTodayBtn').addEventListener('click', function() {
-        const mtNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Denver' }));
+        const mtNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
         const y = mtNow.getFullYear();
         const m = String(mtNow.getMonth() + 1).padStart(2, '0');
         const d = String(mtNow.getDate()).padStart(2, '0');

@@ -1,0 +1,46 @@
+{
+    "next_page_token": "NIiKAt2YFterBHImXwZlJwxikGzlBNP4Xm2",
+    "page_size": 2,
+    "total_records": 471,
+    "from": "2026-03-11",
+    "to": "2026-03-11",
+    "call_logs": [
+        {
+            "call_id": "069b1a97ac54703ad80",
+            "duration": 1,
+            "direction": "outbound",
+            "date_time": "2026-03-11T17:42:20Z",
+            "mos": "4.4",
+            "caller": {
+                "phone_number": "+12542373545",
+                "extension_number": "841",
+                "codec": "Opus",
+                "microphone": "Microphone (High Definition Audio Device)",
+                "headset": "Speakers (High Definition Audio Device)",
+                "isp": "Nayatel Pvt",
+                "device_type": "Windows_Client 6.7.5.30439"
+            },
+            "callee": {
+                "phone_number": "+19102746121"
+            }
+        },
+        {
+            "call_id": "069b1a935c548176c42",
+            "duration": 0,
+            "direction": "outbound",
+            "date_time": "2026-03-11T17:41:10Z",
+            "mos": "-1.0",
+            "caller": {
+                "phone_number": "+14792792779",
+                "extension_number": "818",
+                "microphone": "Microphone (2- USB Audio Device)",
+                "headset": "Speakers (2- USB Audio Device)",
+                "isp": "Nayatel Pvt",
+                "device_type": "Windows_Client 6.7.2.26346"
+            },
+            "callee": {
+                "phone_number": "+13172907158"
+            }
+        }
+    ]
+}[90m⏎[39m

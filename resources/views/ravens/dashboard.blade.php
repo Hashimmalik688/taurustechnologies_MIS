@@ -147,7 +147,7 @@
                                         <br><span style="font-size:.62rem;color:var(--bs-surface-400);">{{ $sale->phone_number }}</span>
                                     @endif
                                 </td>
-                                <td style="white-space:nowrap;">{{ $sale->sale_at ? $sale->sale_at->setTimezone('America/Denver')->format('M d, h:i A') : ($sale->sale_date ? $sale->sale_date->format('M d, Y') : 'N/A') }}</td>
+                                <td style="white-space:nowrap;">{{ $sale->sale_at ? $sale->sale_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : ($sale->sale_date ? $sale->sale_date->format('M d, Y') : 'N/A') }}</td>
                                 <td class="text-center">
                                     @php $stClass = 'st-'.($sale->status ?? 'pending'); @endphp
                                     <span class="st-pill {{ $stClass }}">{{ ucfirst($sale->status ?? 'pending') }}</span>
@@ -234,7 +234,7 @@
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 @endif
                             </td>
-                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="6" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-smile"></i> No declined or chargebacks</td></tr>

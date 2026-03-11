@@ -22,62 +22,71 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 10,
             ],
 
-            // 2. Sales Operations
+            // 2. Leads Hub
             [
                 'name' => 'Peregrine Leads',
                 'slug' => 'leads-peregrine',
                 'description' => 'Manage Peregrine team leads',
-                'category' => 'Sales Operations',
-                'sort_order' => 20,
+                'category' => 'Leads Hub',
+                'sort_order' => 15,
             ],
             [
                 'name' => 'Raven Leads',
                 'slug' => 'leads',
                 'description' => 'Manage Ravens team leads and follow-ups',
+                'category' => 'Leads Hub',
+                'sort_order' => 16,
+            ],
+            [
+                'name' => 'Bad Leads',
+                'slug' => 'ravens-bad-leads',
+                'description' => 'Manage and review rejected or unqualified leads',
+                'category' => 'Leads Hub',
+                'sort_order' => 17,
+            ],
+
+            // 3. Sales Operations
+            [
+                'name' => 'Sales Records',
+                'slug' => 'sales',
+                'description' => 'View and manage sales records and transactions',
                 'category' => 'Sales Operations',
-                'sort_order' => 30,
+                'sort_order' => 20,
             ],
             [
                 'name' => 'QA Review',
                 'slug' => 'qa-review',
                 'description' => 'Quality assurance review of sales and applications',
                 'category' => 'Sales Operations',
-                'sort_order' => 40,
-            ],
-            [
-                'name' => 'Sales Records',
-                'slug' => 'sales',
-                'description' => 'View and manage sales records and transactions',
-                'category' => 'Sales Operations',
-                'sort_order' => 50,
+                'sort_order' => 30,
             ],
             [
                 'name' => 'Policy Submission',
                 'slug' => 'issuance',
                 'description' => 'Manage policy issuance, submissions, and status updates',
                 'category' => 'Sales Operations',
-                'sort_order' => 60,
+                'sort_order' => 40,
             ],
             [
                 'name' => 'Bank Verification',
                 'slug' => 'bank-verification',
                 'description' => 'Verify and manage bank account information',
                 'category' => 'Sales Operations',
-                'sort_order' => 70,
+                'sort_order' => 50,
             ],
             [
                 'name' => 'Revenue Analytics',
                 'slug' => 'revenue-analytics',
                 'description' => 'View revenue reports and analytics',
                 'category' => 'Sales Operations',
-                'sort_order' => 80,
+                'sort_order' => 60,
             ],
             [
                 'name' => 'Live Analytics',
                 'slug' => 'live-analytics',
                 'description' => 'Real-time business analytics dashboard',
                 'category' => 'Sales Operations',
-                'sort_order' => 90,
+                'sort_order' => 70,
             ],
 
             // 3. Retention & Chargebacks
@@ -154,13 +163,6 @@ class ModuleSeeder extends Seeder
                 'description' => 'Ravens outbound calling interface',
                 'category' => 'Ravens Operations',
                 'sort_order' => 132,
-            ],
-            [
-                'name' => 'Bad Leads',
-                'slug' => 'ravens-bad-leads',
-                'description' => 'Manage and review bad/rejected leads',
-                'category' => 'Ravens Operations',
-                'sort_order' => 133,
             ],
             [
                 'name' => 'Followups & Bank Verification',

@@ -768,8 +768,36 @@
                                                     <span class="text-muted">—</span>
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
-                                            <td><?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : 'N/A'); ?></td>
-                                            <td><?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : 'N/A'); ?></td>
+                                            <td>
+                                                <div class="sl-edit-cell">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->initial_draft_date): ?>
+                                                        <small class="text-muted fw-semibold">Current: <?php echo e(\Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y')); ?></small>
+                                                    <?php else: ?>
+                                                        <small class="text-danger">Not set</small>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    <div class="sl-edit-row">
+                                                        <input type="date" class="form-control form-control-sm editable-initial-draft" data-lead-id="<?php echo e($lead->id); ?>" value="<?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : ''); ?>">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="initial_draft" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="sl-edit-cell">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->future_draft_date): ?>
+                                                        <small class="text-muted fw-semibold">Current: <?php echo e(\Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y')); ?></small>
+                                                    <?php else: ?>
+                                                        <small class="text-danger">Not set</small>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    <div class="sl-edit-row">
+                                                        <input type="date" class="form-control form-control-sm editable-future-draft" data-lead-id="<?php echo e($lead->id); ?>" value="<?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d') : ''); ?>">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="future_draft" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
                                             <td>
                                                 <select class="sl-bubble-select qa-status-dropdown" data-lead-id="<?php echo e($lead->id); ?>" data-current-status="<?php echo e($lead->qa_status ?? 'Pending'); ?>">
                                                     <option value="Pending" <?php echo e(($lead->qa_status ?? Statuses::QA_PENDING) == Statuses::QA_PENDING ? 'selected' : ''); ?>>Pending</option>
@@ -1086,7 +1114,7 @@ $(document).ready(function() {
         });
     });
 
-    // Handle inline field updates (carrier, policy_type, coverage, premium)
+    // Handle inline field updates (carrier, policy_type, coverage, premium, draft dates)
     $('.save-field-btn').click(function() {
         const button = $(this);
         const leadId = button.data('lead-id');
@@ -1110,6 +1138,14 @@ $(document).ready(function() {
                 break;
             case 'premium':
                 fieldInput = $(`.editable-premium[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'initial_draft':
+                fieldInput = $(`.editable-initial-draft[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'future_draft':
+                fieldInput = $(`.editable-future-draft[data-lead-id="${leadId}"]`);
                 value = fieldInput.val();
                 break;
         }

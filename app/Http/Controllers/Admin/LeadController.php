@@ -701,7 +701,7 @@ class LeadController extends Controller
         $value = $request->value;
         
         // Validate based on field type
-        $validFields = ['carrier', 'policy_type', 'coverage', 'premium'];
+        $validFields = ['carrier', 'policy_type', 'coverage', 'premium', 'initial_draft', 'future_draft'];
         if (!in_array($field, $validFields)) {
             return response()->json([
                 'success' => false,
@@ -714,7 +714,9 @@ class LeadController extends Controller
             'carrier' => 'carrier_name',
             'policy_type' => 'policy_type',
             'coverage' => 'coverage_amount',
-            'premium' => 'monthly_premium'
+            'premium' => 'monthly_premium',
+            'initial_draft' => 'initial_draft_date',
+            'future_draft' => 'future_draft_date',
         ];
         
         $dbField = $fieldMap[$field];
@@ -725,6 +727,16 @@ class LeadController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Value must be a positive number'
+                ], 400);
+            }
+        }
+
+        // Validate date fields
+        if (in_array($field, ['initial_draft', 'future_draft'])) {
+            if (!strtotime($value)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid date value'
                 ], 400);
             }
         }
@@ -1706,7 +1718,7 @@ class LeadController extends Controller
         $failed = 0;
         
         Lead::where('issuance_status', Statuses::ISSUANCE_ISSUED)
-            ->whereNotNull('assigned_agent_id')
+            ->whereNotNull('partner_id')
             ->where('monthly_premium', '>', 0)
             ->chunk(100, function ($leads) use ($commissionService, $carrierMap, &$processed, &$failed) {
                 foreach ($leads as $lead) {
@@ -1723,7 +1735,7 @@ class LeadController extends Controller
                         $settlementType = $this->getSettlementType($lead->settlement_type ?? $lead->policy_type);
                         
                         $commissionResult = $commissionService->calculateCommission(
-                            agentId: $lead->assigned_agent_id,
+                            partnerId: (int) $lead->partner_id,
                             carrierId: $carrierId,
                             state: $lead->state ?? 'Unknown',
                             settlementType: $settlementType,

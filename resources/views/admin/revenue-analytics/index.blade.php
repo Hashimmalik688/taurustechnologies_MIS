@@ -229,12 +229,104 @@
     .kpi-card .k-val { font-size: 1.1rem; }
     .kpi-card .k-lbl { font-size: 0.52rem; }
 }
+
+/* ── Period nav bar ── */
+.period-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.65rem;
+    padding: 0.45rem 0.75rem;
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 0.6rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.period-nav .pn-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--bs-surface-700);
+    margin-right: 0.25rem;
+}
+.pn-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.28rem 0.6rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--bs-surface-300);
+    background: transparent;
+    color: var(--bs-surface-600);
+    text-decoration: none;
+    transition: all .15s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.pn-btn:hover { border-color: #d4af37; color: #b89730; }
+.pn-btn.active { background: rgba(212,175,55,.1); border-color: #d4af37; color: #b89730; }
+.pn-sep { color: var(--bs-surface-300); font-size: 0.75rem; }
+.pn-custom { display: flex; align-items: center; gap: 0.3rem; margin-left: auto; }
+.pn-custom input[type=date] {
+    font-size: 0.68rem;
+    padding: 0.25rem 0.45rem;
+    border: 1px solid var(--bs-surface-300);
+    border-radius: 0.35rem;
+    background: var(--bs-card-bg);
+    color: var(--bs-surface-700);
+}
+.pn-custom input[type=date]:focus { outline: none; border-color: #d4af37; }
 </style>
 @endsection
 
 @section('content')
 
-{{-- KPI Row 1 — Revenue Totals --}}
+{{-- Period Navigation Bar --}}
+<div class="period-nav">
+    <span class="pn-title"><i class="bx bx-calendar" style="font-size:.9rem;opacity:.6;"></i> {{ $periodLabel }}</span>
+    <span class="pn-sep">|</span>
+    <a href="{{ route('revenue-analytics.index', ['month' => $prevMonth]) }}" class="pn-btn">
+        <i class="bx bx-chevron-left"></i> {{ \Carbon\Carbon::parse($prevMonth.'-01')->format('M Y') }}
+    </a>
+    <a href="{{ route('revenue-analytics.index', ['month' => $currentMonth]) }}" class="pn-btn {{ $activeMonth === $currentMonth ? 'active' : '' }}">
+        <i class="bx bx-radio-circle-marked"></i> This Month
+    </a>
+    @if($activeMonth < $currentMonth)
+    <a href="{{ route('revenue-analytics.index', ['month' => $nextMonth]) }}" class="pn-btn">
+        {{ \Carbon\Carbon::parse($nextMonth.'-01')->format('M Y') }} <i class="bx bx-chevron-right"></i>
+    </a>
+    @endif
+
+    {{-- Quick past months --}}
+    @php
+        $quickMonths = collect();
+        for ($i = 1; $i <= 3; $i++) {
+            $m = \Carbon\Carbon::now()->subMonths($i)->format('Y-m');
+            if ($m !== $prevMonth) $quickMonths->push($m);
+        }
+    @endphp
+    @foreach($quickMonths as $qm)
+    <a href="{{ route('revenue-analytics.index', ['month' => $qm]) }}" class="pn-btn {{ $activeMonth === $qm ? 'active' : '' }}" style="font-size:.65rem;">
+        {{ \Carbon\Carbon::parse($qm.'-01')->format('M Y') }}
+    </a>
+    @endforeach
+
+    {{-- Showing period label --}}
+    <span style="font-size:0.62rem;color:var(--bs-surface-400);margin-left:0.25rem;">
+        {{ $periodStart->format('M d') }} &ndash; {{ $periodEnd->format('M d, Y') }}
+    </span>
+
+    {{-- Custom range form --}}
+    <form method="GET" action="{{ route('revenue-analytics.index') }}" class="pn-custom">
+        <span style="font-size:0.65rem;color:var(--bs-surface-500);">Custom:</span>
+        <input type="date" name="start" value="{{ request('start', $periodStart->toDateString()) }}">
+        <span style="font-size:0.65rem;color:var(--bs-surface-400);">to</span>
+        <input type="date" name="end" value="{{ request('end', $periodEnd->toDateString()) }}">
+        <button type="submit" class="pn-btn" style="border-color:#556ee6;color:#556ee6;"><i class="bx bx-filter-alt"></i> Apply</button>
+    </form>
+</div>
 <div class="kpi-row">
     <div class="kpi-card k-gold ex-card">
         <i class="bx bx-dollar-circle k-icon"></i>
@@ -445,6 +537,81 @@
         </div>
 
     </div>
+</div>
+
+{{-- Partner × Carrier Revenue Breakdown --}}
+<div class="ex-card sec-card" style="margin-bottom:0.65rem;">
+    <div class="sec-hdr">
+        <h6><i class="bx bx-buildings"></i> Revenue by Partner &amp; Carrier</h6>
+        <span style="font-size:0.62rem;color:var(--bs-surface-400);">Issued sales grouped by assigned partner → carrier</span>
+    </div>
+
+    @forelse($partner_carrier_breakdown as $pb)
+    <div style="border-bottom:1px solid rgba(0,0,0,.04);padding:0.55rem 0.75rem;">
+
+        {{-- Partner header row --}}
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;flex-wrap:wrap;">
+            <span style="font-size:0.72rem;font-weight:700;color:var(--bs-surface-700);">
+                <i class="bx bx-user-circle" style="font-size:0.85rem;opacity:.6;"></i>
+                {{ $pb['partner_name'] }}
+                @if($pb['partner_code'] !== '—')
+                    <span style="font-size:0.6rem;font-weight:600;padding:.1rem .35rem;border-radius:.2rem;background:rgba(102,126,234,.1);color:var(--bs-gradient-start);margin-left:.3rem;">{{ $pb['partner_code'] }}</span>
+                @endif
+            </span>
+            <span class="bd-mini bd-gold ms-auto">{{ $pb['total_count'] }} sales</span>
+            <span class="bd-mini bd-green">${{ number_format($pb['total_revenue'], 0) }}</span>
+        </div>
+
+        {{-- Carriers sub-table --}}
+        <div class="scroll-tbl" style="max-height:180px;">
+            <table class="ex-tbl">
+                <thead>
+                    <tr>
+                        <th>Carrier</th>
+                        <th class="text-center">Sales</th>
+                        <th class="text-center">Total Premium</th>
+                        <th class="text-center">Revenue (commission)</th>
+                        <th class="text-center">% of Partner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($pb['carriers'] as $cb)
+                    @php
+                        $pct = $pb['total_revenue'] > 0 ? ($cb['revenue'] / $pb['total_revenue']) * 100 : 0;
+                    @endphp
+                    <tr>
+                        <td>
+                            <span style="font-weight:600;">{{ $cb['carrier'] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="bd-mini bd-blue">{{ $cb['count'] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="bd-mini bd-teal">${{ number_format($cb['premium'], 0) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="bd-mini bd-gold">${{ number_format($cb['revenue'], 0) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div style="display:flex;align-items:center;gap:0.3rem;">
+                                <div style="flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden;">
+                                    <div style="width:{{ number_format($pct, 1) }}%;height:100%;border-radius:3px;background:linear-gradient(90deg,#d4af37,#e8c84a);"></div>
+                                </div>
+                                <span style="font-size:0.62rem;font-weight:700;color:var(--bs-surface-600);min-width:32px;text-align:right;">{{ number_format($pct, 1) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @empty
+    <div style="text-align:center;padding:2rem;color:var(--bs-surface-400);">
+        <i class="bx bx-buildings" style="font-size:1.5rem;opacity:.3;display:block;margin-bottom:.4rem;"></i>
+        <span style="font-size:0.75rem;">No issued sales with partner assignments yet</span>
+    </div>
+    @endforelse
 </div>
 
 @endsection

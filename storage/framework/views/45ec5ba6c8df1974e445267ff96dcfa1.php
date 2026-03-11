@@ -61,10 +61,23 @@
 
         
         <?php
+            $canSeeLeads = auth()->check() && (
+                auth()->user()->canViewModule('leads-peregrine') ||
+                auth()->user()->canViewModule('leads') ||
+                auth()->user()->canViewModule('ravens-bad-leads')
+            );
+        ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeLeads): ?>
+            <a href="<?php echo e(route('leads.hub')); ?>" class="menu-item <?php echo e(Request::is('leads/hub') || Request::is('leads') || Request::is('leads/peregrine*') || Request::is('ravens/bad-leads*') ? 'active' : ''); ?>">
+                <i class="bx bx-clipboard"></i>
+                <span class="menu-text">Leads</span>
+            </a>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+        
+        <?php
             $canSeeSalesOps = auth()->check() && (
                 auth()->user()->canViewModule('sales') ||
-                auth()->user()->canViewModule('leads') ||
-                auth()->user()->canViewModule('leads-peregrine') ||
                 auth()->user()->canViewModule('qa-review') ||
                 auth()->user()->canViewModule('issuance') ||
                 auth()->user()->canViewModule('bank-verification') ||
@@ -80,17 +93,10 @@
             </a>
 
             <div class="menu-dropdown" id="misDropdown">
-                <?php if(auth()->check() && auth()->user()->canViewModule('leads-peregrine')): ?>
-                    <a href="<?php echo e(route('leads.peregrine')); ?>" class="dropdown-item <?php echo e(Request::is('leads/peregrine*') ? 'active' : ''); ?>">
-                        <i class="bx bx-user-voice"></i>
-                        <span class="menu-text">Peregrine Leads</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('leads-peregrine')): ?>
-                    <a href="<?php echo e(route('leads.index')); ?>" class="dropdown-item <?php echo e(Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : ''); ?>">
-                        <i class="bx bx-briefcase"></i>
-                        <span class="menu-text">Raven Leads</span>
+                <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
+                    <a href="<?php echo e(route('sales.index')); ?>" class="dropdown-item <?php echo e(Request::is('sales*') ? 'active' : ''); ?>">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span class="menu-text">Sales Records</span>
                     </a>
                 <?php endif; ?>
 
@@ -99,17 +105,6 @@
                         <i class="bx bx-check-circle"></i>
                         <span class="menu-text">QA Review</span>
                     </a>
-                    <a href="<?php echo e(route('qa.scoring')); ?>" class="dropdown-item <?php echo e(Request::is('qa/scoring*') ? 'active' : ''); ?>">
-                        <i class="bx bx-shield-quarter"></i>
-                        <span class="menu-text">QA Scoring</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
-                    <a href="<?php echo e(route('sales.index')); ?>" class="dropdown-item <?php echo e(Request::is('sales*') ? 'active' : ''); ?>">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
                 <?php endif; ?>
 
                 <?php if(auth()->check() && auth()->user()->canViewModule('issuance')): ?>
@@ -117,12 +112,23 @@
                         <i class="bx bx-send"></i>
                         <span class="menu-text">Policy Submission</span>
                     </a>
+                    <a href="<?php echo e(route('followup.report')); ?>" class="dropdown-item <?php echo e(Request::is('followup/report*') ? 'active' : ''); ?>">
+                        <i class="bx bx-bar-chart-alt-2"></i>
+                        <span class="menu-text">Followup Report</span>
+                    </a>
                 <?php endif; ?>
 
                 <?php if(auth()->check() && auth()->user()->canViewModule('bank-verification')): ?>
                     <a href="<?php echo e(route('bank-verification.index')); ?>" class="dropdown-item <?php echo e(Request::is('bank-verification*') ? 'active' : ''); ?>">
                         <i class="bx bx-check-shield"></i>
                         <span class="menu-text">Bank Verification</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('qa-review')): ?>
+                    <a href="<?php echo e(route('qa.scoring')); ?>" class="dropdown-item <?php echo e(Request::is('qa/scoring*') ? 'active' : ''); ?>">
+                        <i class="bx bx-shield-quarter"></i>
+                        <span class="menu-text">QA Scoring</span>
                     </a>
                 <?php endif; ?>
 
@@ -232,7 +238,6 @@
                 auth()->user()->canViewModule('ravens') ||
                 auth()->user()->canViewModule('ravens-dashboard') ||
                 auth()->user()->canViewModule('ravens-calling') ||
-                auth()->user()->canViewModule('ravens-bad-leads') ||
                 auth()->user()->canViewModule('ravens-followups')
             );
         ?>
@@ -255,13 +260,6 @@
                     <a href="<?php echo e(route('ravens.calling')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/calling*') ? 'active' : ''); ?>">
                         <i class="bx bx-phone"></i>
                         <span class="menu-text">Ravens Calling</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-bad-leads')): ?>
-                    <a href="<?php echo e(route('ravens.bad-leads')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/bad-leads*') ? 'active' : ''); ?>">
-                        <i class="bx bx-x-circle"></i>
-                        <span class="menu-text">Bad Leads</span>
                     </a>
                 <?php endif; ?>
 

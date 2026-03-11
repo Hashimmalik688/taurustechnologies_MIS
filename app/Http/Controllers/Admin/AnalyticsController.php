@@ -107,7 +107,7 @@ class AnalyticsController extends Controller
             'ravensManagerBreakdown' => $ravensManagerBreakdown,
             'peregrineQABreakdown' => $peregrineQABreakdown,
             'ravensQABreakdown' => $ravensQABreakdown,
-            'timestamp' => now()->format('M d, Y h:i A') . ' MT',
+            'timestamp' => now()->format('M d, Y h:i A') . ' PT',
             'filter' => $filter,
         ]);
     }
@@ -164,8 +164,8 @@ class AnalyticsController extends Controller
 
     /**
      * Helper method to get date range based on filter
-     * Office hours: 7pm PKT to 5am PKT = 7am MT to 5pm MT
-     * So "Jan 1" business day = Jan 1 7am MT to Jan 1 5pm MT
+     * Office hours: 8pm PKT to 6am PKT = 7am PT to 5pm PT
+     * So "Jan 1" business day = Jan 1 7am PT to Jan 1 5pm PT
      *
      * @param string $filter
      * @param string|null $customStart
@@ -174,13 +174,13 @@ class AnalyticsController extends Controller
      */
     private function getDateRange($filter, $customStart = null, $customEnd = null)
     {
-        // Use Mountain timezone - office shift is 7pm PKT to 5am PKT (7am MT to 5pm MT)
-        $timezone = 'America/Denver';
+        // Use Pacific timezone - office shift is 8pm PKT to 6am PKT (7am PT to 5pm PT)
+        $timezone = 'America/Los_Angeles';
         
         switch ($filter) {
             case 'today':
-                // Today's business day: 7am MT to current time
-                // If before 7am MT, show previous business day (yesterday 7am to now)
+                // Today's business day: 7am PT to current time
+                // If before 7am PT, show previous business day (yesterday 7am to now)
                 $now = Carbon::now($timezone);
                 if ($now->hour < 7) {
                     $start = Carbon::yesterday($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
@@ -193,7 +193,7 @@ class AnalyticsController extends Controller
             case 'custom':
                 if ($customStart && $customEnd) {
                     try {
-                        // Parse dates with Mountain timezone - start at midnight, end at end of day
+                        // Parse dates with Pacific timezone - start at midnight, end at end of day
                         $start = Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone('UTC');
                         $end = Carbon::parse($customEnd, $timezone)->endOfDay()->setTimezone('UTC');
                         return [$start, $end];

@@ -23,7 +23,7 @@ class ValidatorController extends Controller
         $customEnd = $request->get('end_date');
         $showAllPending = $request->get('show_all_pending', false);
 
-        // Get date range based on office hours (7am-5pm MT)
+        // Get date range based on office hours (7am-5pm PT)
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
 
         // Get leads assigned to this validator that need validation
@@ -447,11 +447,11 @@ class ValidatorController extends Controller
 
     /**
      * Helper method to get date range based on filter
-     * Office hours: 7pm PKT to 5am PKT = 7am MT to 5pm MT
+     * Office hours: 8pm PKT to 6am PKT = 7am PT to 5pm PT
      */
     private function getDateRange($filter, $customStart = null, $customEnd = null)
     {
-        $timezone = 'America/Denver';
+        $timezone = 'America/Los_Angeles';
         
         switch ($filter) {
             case 'today':

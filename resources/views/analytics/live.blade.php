@@ -115,7 +115,7 @@
                 <i class="bx bx-wifi"></i> Live <span id="countdown" style="font-weight:600;min-width:20px;display:inline-block;">30s</span>
                 <span style="margin:0 .3rem;">|</span>
                 <i class="bx bx-time-five"></i>
-                <span id="last-updated">{{ now('America/Denver')->format('M d, Y h:i A') }} MT</span>
+                <span id="last-updated">{{ now('America/Los_Angeles')->format('M d, Y h:i A') }} PT</span>
             </span>
         </div>
     </div>

@@ -343,6 +343,7 @@
                             <th style="min-width:120px">Phone</th>
                             <th>Closer</th>
                             <th>Sale Date</th>
+                            <th style="min-width:160px">Scheduled</th>
                             <th>Carrier</th>
                             <th>Policy Type</th>
                             <th>Policy #</th>
@@ -366,6 +367,14 @@
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
                                 <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : 'N/A'); ?></td>
+                                <td>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required && $lead->followup_scheduled_at): ?>
+                                        <div style="font-size:.82rem;font-weight:600;color:#1e293b"><?php echo e(\Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y')); ?></div>
+                                        <div style="font-size:.74rem;color:#64748b"><?php echo e(\Carbon\Carbon::parse($lead->followup_scheduled_at)->format('h:i A')); ?></div>
+                                    <?php else: ?>
+                                        <span style="color:#94a3b8">—</span>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </td>
                                 <td><?php echo e($lead->carrier_name ?? 'N/A'); ?></td>
                                 <td><?php echo e($lead->policy_type ?? 'N/A'); ?></td>
                                 <td>
@@ -389,7 +398,7 @@
                             </tr>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
-                                <td colspan="12">
+                                <td colspan="13">
                                     <div class="sl-empty"><i class="bx bx-inbox d-block"></i><p>No followups assigned to you</p></div>
                                 </td>
                             </tr>

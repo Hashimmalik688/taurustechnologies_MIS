@@ -126,7 +126,7 @@
                 <tbody>
                     @forelse($leads as $lead)
                         <tr>
-                            <td style="white-space:nowrap;">{{ $lead->verified_at ? $lead->verified_at->setTimezone('America/Denver')->format('M d, h:i A') : ($lead->created_at ? $lead->created_at->setTimezone('America/Denver')->format('M d, h:i A') : '—') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->verified_at ? $lead->verified_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : ($lead->created_at ? $lead->created_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : '—') }}</td>
                             <td><strong>{{ $lead->cn_name }}</strong></td>
                             <td>{{ $lead->phone_number ?? '—' }}</td>
                             <td>{{ $lead->closer_name ?? '—' }}</td>

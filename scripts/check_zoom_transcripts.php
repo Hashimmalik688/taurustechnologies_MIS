@@ -69,7 +69,7 @@ $longCalls = array_filter($callLogs, fn($c) => ($c['duration'] ?? 0) >= 420);
 echo "Calls over 7 minutes: " . count($longCalls) . "\n\n";
 
 // For each long call, check if it has a recording/transcript
-$header = str_pad("Call ID",          26) . str_pad("Duration",10) . str_pad("Caller",18) . str_pad("Callee",18) . str_pad("Agent",22) . str_pad("Time (MT)",22) . str_pad("Recording",12) . "Transcript\n";
+$header = str_pad("Call ID",          26) . str_pad("Duration",10) . str_pad("Caller",18) . str_pad("Callee",18) . str_pad("Agent",22) . str_pad("Time (PT)",22) . str_pad("Recording",12) . "Transcript\n";
 echo $header;
 echo str_repeat('-', 140) . "\n";
 
@@ -82,7 +82,7 @@ foreach ($longCalls as $call) {
     $callee     = $call['callee_number'] ?? $call['callee']['phone_number'] ?? '?';
     $owner      = $call['owner']['name'] ?? $call['caller']['name'] ?? '?';
     $startRaw   = $call['date_time'] ?? $call['start_time'] ?? '';
-    $startMT    = $startRaw ? \Carbon\Carbon::parse($startRaw)->setTimezone('America/Denver')->format('M j g:ia') : '?';
+    $startMT    = $startRaw ? \Carbon\Carbon::parse($startRaw)->setTimezone('America/Los_Angeles')->format('M j g:ia') : '?';
 
     // Fetch recordings for this call log
     $recResp = Http::timeout(15)->withToken($token)

@@ -125,7 +125,7 @@
                                 <span class="disp-pill {{ $dispClass }}">{{ \App\Models\BadLead::getDispositionLabel($badLead->disposition) }}</span>
                             </td>
                             <td>{{ $badLead->disposedBy->name ?? 'Unknown' }}</td>
-                            <td style="white-space:nowrap;">{{ $badLead->created_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $badLead->created_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                             <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $badLead->notes }}">{{ $badLead->notes ?? '—' }}</td>
                             <td class="text-center">
                                 <button class="act-btn a-success" onclick="sendBackLead({{ $badLead->lead_id }}, this)" title="Send back to calling system">

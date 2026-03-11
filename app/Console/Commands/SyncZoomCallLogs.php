@@ -79,6 +79,12 @@ class SyncZoomCallLogs extends Command
         $this->info('═══════════════════════════════════');
         $this->newLine();
 
+        // Sync MOS quality data for the same date range
+        $this->info('Syncing MOS (call quality) data from phone/metrics/call_logs...');
+        $mosResult = $service->syncMosData($from, $to);
+        $this->info("  MOS updated: {$mosResult['updated']}  skipped: {$mosResult['skipped']}  pages: {$mosResult['pages']}");
+        $this->newLine();
+
         return $result['errors'] > 0 ? self::FAILURE : self::SUCCESS;
     }
 }

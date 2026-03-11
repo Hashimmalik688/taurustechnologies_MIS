@@ -228,4 +228,86 @@ class FollowupController extends Controller
             'message' => 'Bank verification updated successfully.'
         ]);
     }
+
+    /**
+     * Display a summary report of followup assignments per person.
+     * Columns: Total Assigned | Pending (status = No) | Done (status = Yes)
+     */
+    public function report(Request $request)
+    {
+        // Base: only leads with a followup person assigned
+        $baseQuery = fn() => Lead::whereNotNull('assigned_followup_person');
+
+        // Apply optional date range filters on followup_assigned_at
+        $applyDateFilters = function ($q) use ($request) {
+            if ($request->filled('date_from')) {
+                $q->whereDate('followup_assigned_at', '>=', $request->date_from);
+            }
+            if ($request->filled('date_to')) {
+                $q->whereDate('followup_assigned_at', '<=', $request->date_to);
+            }
+            return $q;
+        };
+
+        // Aggregate by person + status
+        $rows = $applyDateFilters($baseQuery())
+            ->selectRaw('assigned_followup_person, followup_status, COUNT(*) as cnt')
+            ->groupBy('assigned_followup_person', 'followup_status')
+            ->get();
+
+        // Count pending (unassigned) leads — leads eligible for followup but not yet assigned
+        $pendingQuery = Lead::whereNull('assigned_followup_person')
+            ->whereNotNull('sale_at')
+            ->whereNotNull('closer_name')
+            ->where('manager_status', \App\Support\Statuses::MGR_APPROVED);
+        if ($request->filled('date_from')) {
+            $pendingQuery->whereDate('sale_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $pendingQuery->whereDate('sale_at', '<=', $request->date_to);
+        }
+        $totalUnassigned = $pendingQuery->count();
+
+        // Build per-person summary
+        $userIds = $rows->pluck('assigned_followup_person')->unique();
+        $users   = User::whereIn('id', $userIds)->pluck('name', 'id');
+
+        $summary = [];
+        foreach ($rows as $row) {
+            $uid = $row->assigned_followup_person;
+            if (!isset($summary[$uid])) {
+                $summary[$uid] = [
+                    'name'    => $users[$uid] ?? 'Unknown',
+                    'total'   => 0,
+                    'pending' => 0,  // assigned but followup_status = 'No'
+                    'done'    => 0,  // followup_status = 'Yes'
+                ];
+            }
+            $summary[$uid]['total'] += $row->cnt;
+            if ($row->followup_status === 'Yes') {
+                $summary[$uid]['done'] += $row->cnt;
+            } else {
+                $summary[$uid]['pending'] += $row->cnt;
+            }
+        }
+
+        // Sort by total descending
+        uasort($summary, fn($a, $b) => $b['total'] <=> $a['total']);
+
+        // Grand totals across all agents
+        $grandTotal   = array_sum(array_column($summary, 'total'));
+        $grandPending = array_sum(array_column($summary, 'pending'));
+        $grandDone    = array_sum(array_column($summary, 'done'));
+
+        $today = now()->toDateString();
+
+        return view('admin.followup.report', compact(
+            'summary',
+            'totalUnassigned',
+            'grandTotal',
+            'grandPending',
+            'grandDone',
+            'today'
+        ));
+    }
 }

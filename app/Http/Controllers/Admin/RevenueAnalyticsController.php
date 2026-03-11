@@ -7,16 +7,40 @@ use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
 use App\Support\Statuses;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class RevenueAnalyticsController extends Controller
 {
     public function index(Request $request)
     {
-        // Get all issued and verified sales
+        // ── Date Range (1st-to-1st month window, default = current month) ──
+        if ($request->filled('month')) {
+            // ?month=YYYY-MM  → full calendar month
+            $periodStart = Carbon::parse($request->month . '-01')->startOfDay();
+            $periodEnd   = $periodStart->copy()->endOfMonth()->endOfDay();
+        } elseif ($request->filled('start') && $request->filled('end')) {
+            // custom range
+            $periodStart = Carbon::parse($request->start)->startOfDay();
+            $periodEnd   = Carbon::parse($request->end)->endOfDay();
+        } else {
+            // default: current month 1st → today
+            $periodStart = Carbon::now()->startOfMonth()->startOfDay();
+            $periodEnd   = Carbon::now()->endOfDay();
+        }
+
+        $periodLabel    = $periodStart->format('F Y');
+        $prevMonth      = $periodStart->copy()->subMonth()->format('Y-m');
+        $nextMonth      = $periodStart->copy()->addMonth()->format('Y-m');
+        $currentMonth   = Carbon::now()->format('Y-m');
+        $activeMonth    = $periodStart->format('Y-m');
+
+        // Get all issued and verified sales (eager-load partner for breakdown table)
         $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
             ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+            ->whereBetween('issuance_date', [$periodStart, $periodEnd])
+            ->with('partner')
             ->get();
 
         // Calculate revenue by verification status using agent_revenue (calculated commission)
@@ -127,7 +151,59 @@ class RevenueAnalyticsController extends Controller
             ];
         }
 
+        // ── Partner × Carrier Revenue Breakdown ──────────────────────────────
+        // Group issued sales by partner → then by carrier to show revenue per cluster
+        $partner_carrier_breakdown = $issued_sales
+            ->groupBy(function ($lead) {
+                return $lead->partner_id ?? 0; // 0 = no partner assigned
+            })
+            ->map(function ($partnerGroup, $partnerId) {
+                $partner = $partnerGroup->first()->partner;
+                $partnerName = $partner ? $partner->name : 'Unassigned';
+                $partnerCode = $partner ? $partner->code : '—';
+
+                $carriers = $partnerGroup
+                    ->groupBy(function ($lead) {
+                        return $lead->carrier_name ?: 'Unknown Carrier';
+                    })
+                    ->map(function ($carrierGroup, $carrierName) {
+                        $revenue = $carrierGroup->sum(function ($lead) {
+                            return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
+                        });
+                        $premium = $carrierGroup->sum(fn ($l) => $l->monthly_premium ?? 0);
+                        return [
+                            'carrier'  => $carrierName,
+                            'count'    => $carrierGroup->count(),
+                            'revenue'  => $revenue,
+                            'premium'  => $premium,
+                        ];
+                    })
+                    ->sortByDesc('revenue')
+                    ->values();
+
+                $totalRevenue = $carriers->sum('revenue');
+                $totalCount   = $carriers->sum('count');
+
+                return [
+                    'partner_id'   => $partnerId,
+                    'partner_name' => $partnerName,
+                    'partner_code' => $partnerCode,
+                    'carriers'     => $carriers,
+                    'total_revenue'=> $totalRevenue,
+                    'total_count'  => $totalCount,
+                ];
+            })
+            ->sortByDesc('total_revenue')
+            ->values();
+
         return view('admin.revenue-analytics.index', compact(
+            'periodLabel',
+            'prevMonth',
+            'nextMonth',
+            'currentMonth',
+            'activeMonth',
+            'periodStart',
+            'periodEnd',
             'good_revenue',
             'average_revenue',
             'bad_revenue',
@@ -149,6 +225,7 @@ class RevenueAnalyticsController extends Controller
             'monthly_data',
             'verifier_stats',
             'issued_sales',
+            'partner_carrier_breakdown',
         ));
     }
 }

@@ -206,7 +206,7 @@
     </div>
     <div class="col-md-4">
         <label for="initial_draft_date" class="form-label required">Draft Date</label>
-        <input type="date" class="form-control" name="initial_draft_date" value="{{ old('initial_draft_date', $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : '') }}" required>
+        <input type="date" class="form-control" name="initial_draft_date" value="{{ old('initial_draft_date', $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : '2026-04-01') }}" required>
     </div>
     <div class="col-md-4">
         <label for="coverage_amount" class="form-label required">Coverage Amount</label>

@@ -116,7 +116,7 @@
                         <tr class="clickable-row" data-bs-toggle="modal" data-bs-target="#leadModal{{ $lead->id }}">
                             <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
                             <td>{{ $lead->phone_number ?? 'N/A' }}</td>
-                            <td style="white-space:nowrap;">{{ $lead->date ?? ($lead->created_at ? $lead->created_at->setTimezone('America/Denver')->format('M d, h:i A') : 'N/A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->date ?? ($lead->created_at ? $lead->created_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : 'N/A') }}</td>
                             <td>{{ $lead->account_verified_by ?? 'N/A' }}</td>
                             <td class="text-center">
                                 @if($lead->status == Statuses::LEAD_RETURNED)
@@ -286,7 +286,7 @@
                                     <span class="s-pill s-closed">Closed</span>
                                 @endif
                             </td>
-                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-info-circle"></i> No completed leads yet</td></tr>
@@ -328,7 +328,7 @@
                                     @endif
                                 </span>
                             </td>
-                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A') }}</td>
+                            <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-smile"></i> No failed leads</td></tr>

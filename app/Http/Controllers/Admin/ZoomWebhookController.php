@@ -875,6 +875,7 @@ class ZoomWebhookController extends Controller
 
             $callSessionId = $payload['call_session_id'] ?? 
                             $callLogData['call_session_id'] ?? 
+                            $callLogData['call_id'] ??    // hex session ID (present in caller_call_log_completed)
                             null;
 
             // Extract caller information
@@ -1160,12 +1161,27 @@ class ZoomWebhookController extends Controller
             'sanitizedPhone' => $this->sanitizePhoneForChannel($phoneNumber),
         ]);
 
-        broadcast(new CallStatusChanged(
-            null, // no lead ID
-            $eventType,
-            $phoneNumber,
-            null, // no lead data
-            $rawWebhookData
-        ))->toOthers();
+        try {
+            broadcast(new CallStatusChanged(
+                null, // no lead ID
+                $eventType,
+                $phoneNumber,
+                null, // no lead data
+                $rawWebhookData
+            ))->toOthers();
+        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+            // No client is subscribed to this channel right now — safe to ignore.
+            // This happens when no browser has the lead open; the call log still saves correctly.
+            Log::debug('[Webhook] Broadcast skipped — no subscriber on channel', [
+                'event'   => $eventType,
+                'channel' => 'calls.' . $this->sanitizePhoneForChannel($phoneNumber),
+            ]);
+        } catch (\Exception $e) {
+            // Any other broadcast failure should not crash the webhook endpoint.
+            Log::warning('[Webhook] Broadcast failed', [
+                'event' => $eventType,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

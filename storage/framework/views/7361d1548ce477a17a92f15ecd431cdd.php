@@ -145,7 +145,7 @@
                                         <br><span style="font-size:.62rem;color:var(--bs-surface-400);"><?php echo e($sale->phone_number); ?></span>
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </td>
-                                <td style="white-space:nowrap;"><?php echo e($sale->sale_at ? $sale->sale_at->setTimezone('America/Denver')->format('M d, h:i A') : ($sale->sale_date ? $sale->sale_date->format('M d, Y') : 'N/A')); ?></td>
+                                <td style="white-space:nowrap;"><?php echo e($sale->sale_at ? $sale->sale_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : ($sale->sale_date ? $sale->sale_date->format('M d, Y') : 'N/A')); ?></td>
                                 <td class="text-center">
                                     <?php $stClass = 'st-'.($sale->status ?? 'pending'); ?>
                                     <span class="st-pill <?php echo e($stClass); ?>"><?php echo e(ucfirst($sale->status ?? 'pending')); ?></span>
@@ -233,7 +233,7 @@
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td style="white-space:nowrap;"><?php echo e($lead->updated_at->setTimezone('America/Denver')->format('M d, h:i A')); ?></td>
+                            <td style="white-space:nowrap;"><?php echo e($lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A')); ?></td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr><td colspan="6" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-smile"></i> No declined or chargebacks</td></tr>

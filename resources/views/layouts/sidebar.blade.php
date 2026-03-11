@@ -58,12 +58,25 @@
             </a>
         @endcanViewModule
 
+        {{-- LEADS HUB --}}
+        @php
+            $canSeeLeads = auth()->check() && (
+                auth()->user()->canViewModule('leads-peregrine') ||
+                auth()->user()->canViewModule('leads') ||
+                auth()->user()->canViewModule('ravens-bad-leads')
+            );
+        @endphp
+        @if($canSeeLeads)
+            <a href="{{ route('leads.hub') }}" class="menu-item {{ Request::is('leads/hub') || Request::is('leads') || Request::is('leads/peregrine*') || Request::is('ravens/bad-leads*') ? 'active' : '' }}">
+                <i class="bx bx-clipboard"></i>
+                <span class="menu-text">Leads</span>
+            </a>
+        @endif
+
         {{-- SALES OPERATIONS --}}
         @php
             $canSeeSalesOps = auth()->check() && (
                 auth()->user()->canViewModule('sales') ||
-                auth()->user()->canViewModule('leads') ||
-                auth()->user()->canViewModule('leads-peregrine') ||
                 auth()->user()->canViewModule('qa-review') ||
                 auth()->user()->canViewModule('issuance') ||
                 auth()->user()->canViewModule('bank-verification') ||
@@ -79,17 +92,10 @@
             </a>
 
             <div class="menu-dropdown" id="misDropdown">
-                @canViewModule('leads-peregrine')
-                    <a href="{{ route('leads.peregrine') }}" class="dropdown-item {{ Request::is('leads/peregrine*') ? 'active' : '' }}">
-                        <i class="bx bx-user-voice"></i>
-                        <span class="menu-text">Peregrine Leads</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('leads-peregrine')
-                    <a href="{{ route('leads.index') }}" class="dropdown-item {{ Request::is('leads') && !Request::is('leads/peregrine*') && !Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-briefcase"></i>
-                        <span class="menu-text">Raven Leads</span>
+                @canViewModule('sales')
+                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
+                        <i class="bx bx-dollar-circle"></i>
+                        <span class="menu-text">Sales Records</span>
                     </a>
                 @endcanViewModule
 
@@ -98,17 +104,6 @@
                         <i class="bx bx-check-circle"></i>
                         <span class="menu-text">QA Review</span>
                     </a>
-                    <a href="{{ route('qa.scoring') }}" class="dropdown-item {{ Request::is('qa/scoring*') ? 'active' : '' }}">
-                        <i class="bx bx-shield-quarter"></i>
-                        <span class="menu-text">QA Scoring</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('sales')
-                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
                 @endcanViewModule
 
                 @canViewModule('issuance')
@@ -116,12 +111,23 @@
                         <i class="bx bx-send"></i>
                         <span class="menu-text">Policy Submission</span>
                     </a>
+                    <a href="{{ route('followup.report') }}" class="dropdown-item {{ Request::is('followup/report*') ? 'active' : '' }}">
+                        <i class="bx bx-bar-chart-alt-2"></i>
+                        <span class="menu-text">Followup Report</span>
+                    </a>
                 @endcanViewModule
 
                 @canViewModule('bank-verification')
                     <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
                         <i class="bx bx-check-shield"></i>
                         <span class="menu-text">Bank Verification</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('qa-review')
+                    <a href="{{ route('qa.scoring') }}" class="dropdown-item {{ Request::is('qa/scoring*') ? 'active' : '' }}">
+                        <i class="bx bx-shield-quarter"></i>
+                        <span class="menu-text">QA Scoring</span>
                     </a>
                 @endcanViewModule
 
@@ -231,7 +237,6 @@
                 auth()->user()->canViewModule('ravens') ||
                 auth()->user()->canViewModule('ravens-dashboard') ||
                 auth()->user()->canViewModule('ravens-calling') ||
-                auth()->user()->canViewModule('ravens-bad-leads') ||
                 auth()->user()->canViewModule('ravens-followups')
             );
         @endphp
@@ -254,13 +259,6 @@
                     <a href="{{ route('ravens.calling') }}" class="dropdown-item {{ Request::is('ravens/calling*') ? 'active' : '' }}">
                         <i class="bx bx-phone"></i>
                         <span class="menu-text">Ravens Calling</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('ravens-bad-leads')
-                    <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
-                        <i class="bx bx-x-circle"></i>
-                        <span class="menu-text">Bad Leads</span>
                     </a>
                 @endcanViewModule
 

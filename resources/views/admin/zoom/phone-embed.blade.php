@@ -11,7 +11,7 @@
 
     .zse-wrap {
         width: 100%;
-        height: calc(100vh - 60px);
+        height: calc(100vh - 90px);
         min-height: 580px;
         background: #f4f5f7;
         display: flex;
@@ -29,6 +29,27 @@
     /* Hide floating phone FAB — we ARE the phone page */
     .zpw-fab, .zpw-panel { display: none !important; }
 
+    /* Token status bar */
+    .zt-bar{display:flex;align-items:center;justify-content:space-between;padding:.4rem .85rem;font-size:.72rem;gap:.5rem;flex-wrap:wrap;border-bottom:1px solid rgba(0,0,0,.06);background:#fff;flex-shrink:0}
+    .zt-bar.warn{background:#fff3cd;border-bottom-color:#ffc107}
+    .zt-bar .zt-msg{display:flex;align-items:center;gap:.4rem;color:#4a5568}
+    .zt-bar.warn .zt-msg{color:#856404;font-weight:600}
+    .zt-btn-reauth{
+        display:inline-flex;align-items:center;gap:.35rem;
+        padding:.3rem .85rem;border-radius:7px;font-size:.72rem;font-weight:700;
+        text-decoration:none;border:none;cursor:pointer;
+        background:linear-gradient(135deg,#1a73e8,#0f5ecb);
+        color:#fff;box-shadow:0 2px 6px rgba(26,115,232,.35);
+        transition:all .15s;
+        white-space:nowrap;
+    }
+    .zt-btn-reauth:hover{background:linear-gradient(135deg,#1558b0,#0a46a3);color:#fff;box-shadow:0 3px 10px rgba(26,115,232,.45);transform:translateY(-1px)}
+    .zt-btn-reauth i{font-size:.95rem}
+    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar{background:#0d1526;border-bottom-color:rgba(255,255,255,.06)}
+    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar .zt-msg{color:#94a3b8}
+    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar.warn{background:#2d200a;border-bottom-color:#b38600}
+    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar.warn .zt-msg{color:#fbbf24}
+
     :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],
         [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zse-wrap {
         background: #0a0f1e;
@@ -37,6 +58,22 @@
 @endsection
 
 @section('content')
+{{-- Token status bar --}}
+<div class="zt-bar {{ $hasToken ? '' : 'warn' }}">
+    <span class="zt-msg">
+        @if($hasToken)
+            <i class="bx bx-check-circle" style="color:#1a8754;font-size:.9rem"></i>
+            Zoom Phone connected
+        @else
+            <i class="bx bx-error-circle" style="font-size:.9rem"></i>
+            Token expired &mdash; calls will fail until you re-authorize
+        @endif
+    </span>
+    <a href="{{ route('zoom.authorize') }}" class="zt-btn-reauth">
+        <i class="bx bx-refresh"></i>
+        Re-authorize Zoom
+    </a>
+</div>
 <div class="zse-wrap">
     <iframe
         src="https://applications.zoom.us/integration/phone/embeddablephone/home"
