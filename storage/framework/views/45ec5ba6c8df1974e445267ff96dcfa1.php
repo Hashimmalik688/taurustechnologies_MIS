@@ -362,7 +362,7 @@
 
         
         <?php if(auth()->check() && auth()->user()->canViewModule('accounting')): ?>
-        <a href="<?php echo e(route('admin.accounting.journal.index')); ?>" class="menu-item <?php echo e(Request::is('admin/accounting*') ? 'active' : ''); ?>">
+        <a href="<?php echo e(route('admin.accounting.dashboard')); ?>" class="menu-item <?php echo e(Request::is('admin/accounting*') ? 'active' : ''); ?>">
             <i class="bx bx-book-open"></i>
             <span class="menu-text">Accounting</span>
         </a>

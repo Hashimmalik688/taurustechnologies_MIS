@@ -679,11 +679,26 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($lead->assigned_partner)
-                                                    <span class="badge bg-primary">{{ $lead->assigned_partner }}</span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
+                                                <div class="sl-edit-cell">
+                                                    @if($lead->assigned_partner)
+                                                        <small class="text-muted fw-semibold">{{ $lead->assigned_partner }}</small>
+                                                    @else
+                                                        <small class="text-danger">Not set</small>
+                                                    @endif
+                                                    @canEditModule('sales')
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-partner" data-lead-id="{{ $lead->id }}">
+                                                            <option value="">-- None --</option>
+                                                            @foreach($partners as $pt)
+                                                                <option value="{{ $pt->id }}" {{ $lead->partner_id == $pt->id ? 'selected' : '' }}>{{ $pt->code }}{{ $pt->name ? ' — '.$pt->name : '' }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="partner" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    @endcanEditModule
+                                                </div>
                                             </td>
                                             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A') }}</td>
                                             <td>
@@ -863,21 +878,43 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($lead->followup_required)
-                                                    <span class="sl-follow-badge yes">Yes</span>
-                                                @else
-                                                    <span class="sl-follow-badge no">No</span>
-                                                @endif
+                                                <div class="sl-edit-cell">
+                                                    @if($lead->followup_required !== null)
+                                                        <small class="text-muted fw-semibold">{{ $lead->followup_required ? 'Yes' : 'No' }}</small>
+                                                    @else
+                                                        <small class="text-danger">Not set</small>
+                                                    @endif
+                                                    @canEditModule('sales')
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-followup-required" data-lead-id="{{ $lead->id }}">
+                                                            <option value="">-- None --</option>
+                                                            <option value="1" {{ $lead->followup_required ? 'selected' : '' }}>Yes</option>
+                                                            <option value="0" {{ $lead->followup_required === false || $lead->followup_required === 0 ? 'selected' : '' }}>No</option>
+                                                        </select>
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="followup_required" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    @endcanEditModule
+                                                </div>
                                             </td>
                                             <td>
-                                                @if($lead->followup_required && $lead->followup_scheduled_at)
-                                                    <span class="text-primary">
-                                                        <i class="bx bx-calendar me-1"></i>
-                                                        {{ \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A') }}
-                                                    </span>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
+                                                <div class="sl-edit-cell">
+                                                    @if($lead->followup_required && $lead->followup_scheduled_at)
+                                                        <small class="text-muted fw-semibold">{{ \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A') }}</small>
+                                                    @else
+                                                        <small class="text-danger">Not set</small>
+                                                    @endif
+                                                    @canEditModule('sales')
+                                                    <div class="sl-edit-row">
+                                                        <input type="datetime-local" class="form-control form-control-sm editable-followup-scheduled" data-lead-id="{{ $lead->id }}"
+                                                            value="{{ $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '' }}">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="{{ $lead->id }}" data-field="followup_scheduled_at" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    @endcanEditModule
+                                                </div>
                                             </td>
                                         @endif
                                     </tr>
@@ -1142,9 +1179,21 @@ $(document).ready(function() {
                 fieldInput = $(`.editable-future-draft[data-lead-id="${leadId}"]`);
                 value = fieldInput.val();
                 break;
+            case 'partner':
+                fieldInput = $(`.editable-partner[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'followup_required':
+                fieldInput = $(`.editable-followup-required[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'followup_scheduled_at':
+                fieldInput = $(`.editable-followup-scheduled[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
         }
         
-        if (!value || value === '') {
+        if (!['partner', 'followup_required', 'followup_scheduled_at'].includes(fieldType) && (!value || value === '')) {
             alert('Please enter a value');
             return;
         }

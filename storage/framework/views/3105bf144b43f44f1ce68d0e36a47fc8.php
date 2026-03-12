@@ -680,11 +680,26 @@
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->assigned_partner): ?>
-                                                    <span class="badge bg-primary"><?php echo e($lead->assigned_partner); ?></span>
-                                                <?php else: ?>
-                                                    <span class="text-muted">—</span>
-                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <div class="sl-edit-cell">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->assigned_partner): ?>
+                                                        <small class="text-muted fw-semibold"><?php echo e($lead->assigned_partner); ?></small>
+                                                    <?php else: ?>
+                                                        <small class="text-danger">Not set</small>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    <?php if(auth()->check() && auth()->user()->canEditModule('sales')): ?>
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-partner" data-lead-id="<?php echo e($lead->id); ?>">
+                                                            <option value="">-- None --</option>
+                                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $partners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <option value="<?php echo e($pt->id); ?>" <?php echo e($lead->partner_id == $pt->id ? 'selected' : ''); ?>><?php echo e($pt->code); ?><?php echo e($pt->name ? ' — '.$pt->name : ''); ?></option>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                        </select>
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="partner" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                             <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : ($lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : 'N/A')); ?></td>
                                             <td>
@@ -867,22 +882,43 @@
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required): ?>
-                                                    <span class="sl-follow-badge yes">Yes</span>
-                                                <?php else: ?>
-                                                    <span class="sl-follow-badge no">No</span>
-                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <div class="sl-edit-cell">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required !== null): ?>
+                                                        <small class="text-muted fw-semibold"><?php echo e($lead->followup_required ? 'Yes' : 'No'); ?></small>
+                                                    <?php else: ?>
+                                                        <small class="text-danger">Not set</small>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    <?php if(auth()->check() && auth()->user()->canEditModule('sales')): ?>
+                                                    <div class="sl-edit-row">
+                                                        <select class="form-select form-select-sm editable-followup-required" data-lead-id="<?php echo e($lead->id); ?>">
+                                                            <option value="">-- None --</option>
+                                                            <option value="1" <?php echo e($lead->followup_required ? 'selected' : ''); ?>>Yes</option>
+                                                            <option value="0" <?php echo e($lead->followup_required === false || $lead->followup_required === 0 ? 'selected' : ''); ?>>No</option>
+                                                        </select>
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="followup_required" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                             <td>
-                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required && $lead->followup_scheduled_at): ?>
-                                                    <span class="text-primary">
-                                                        <i class="bx bx-calendar me-1"></i>
-                                                        <?php echo e(\Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A')); ?>
-
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="text-muted">—</span>
-                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <div class="sl-edit-cell">
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->followup_required && $lead->followup_scheduled_at): ?>
+                                                        <small class="text-muted fw-semibold"><?php echo e(\Carbon\Carbon::parse($lead->followup_scheduled_at)->format('M d, Y h:i A')); ?></small>
+                                                    <?php else: ?>
+                                                        <small class="text-danger">Not set</small>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                    <?php if(auth()->check() && auth()->user()->canEditModule('sales')): ?>
+                                                    <div class="sl-edit-row">
+                                                        <input type="datetime-local" class="form-control form-control-sm editable-followup-scheduled" data-lead-id="<?php echo e($lead->id); ?>"
+                                                            value="<?php echo e($lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : ''); ?>">
+                                                        <button class="btn btn-sm btn-success save-field-btn" data-lead-id="<?php echo e($lead->id); ?>" data-field="followup_scheduled_at" title="Save">
+                                                            <i class="bx bx-check"></i>
+                                                        </button>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </tr>
@@ -1148,9 +1184,21 @@ $(document).ready(function() {
                 fieldInput = $(`.editable-future-draft[data-lead-id="${leadId}"]`);
                 value = fieldInput.val();
                 break;
+            case 'partner':
+                fieldInput = $(`.editable-partner[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'followup_required':
+                fieldInput = $(`.editable-followup-required[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
+            case 'followup_scheduled_at':
+                fieldInput = $(`.editable-followup-scheduled[data-lead-id="${leadId}"]`);
+                value = fieldInput.val();
+                break;
         }
         
-        if (!value || value === '') {
+        if (!['partner', 'followup_required', 'followup_scheduled_at'].includes(fieldType) && (!value || value === '')) {
             alert('Please enter a value');
             return;
         }

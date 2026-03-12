@@ -158,6 +158,7 @@
 @endsection
 
 @section('content')
+@include('admin.accounting._nav')
 <div class="container-fluid">
     <div class="voucher-wrap">
 

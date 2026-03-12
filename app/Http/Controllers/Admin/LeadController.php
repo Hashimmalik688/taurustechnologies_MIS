@@ -373,7 +373,9 @@ class LeadController extends Controller
         // Get Peregrine closer names for tagging
         $peregrineClosers = \App\Models\User::role(Roles::PEREGRINE_CLOSER)->pluck('name')->toArray();
         
-        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers'));
+        $partners = \App\Models\Partner::where('is_active', true)->orderBy('code')->get(['id', 'name', 'code']);
+
+        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers', 'partners'));
     }
 
     /**
@@ -640,7 +642,15 @@ class LeadController extends Controller
     {
         $lead = Lead::findOrFail($id);
 
-        return view('admin.leads.edit', compact('lead'));
+        $closers = \App\Models\User::role([Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER])
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        $partners = \App\Models\Partner::where('is_active', true)
+            ->orderBy('code')
+            ->get(['id', 'name', 'code']);
+
+        return view('admin.leads.edit', compact('lead', 'closers', 'partners'));
     }
 
     public function update(UpdateLeadRequest $request, $id)
@@ -649,10 +659,16 @@ class LeadController extends Controller
 
         $identityFields = ['cn_name', 'phone_number', 'ssn', 'date_of_birth', 'address',
             'carrier_name', 'coverage_amount', 'monthly_premium', 'bank_name',
-            'routing_number', 'acc_number', 'beneficiary', 'status'];
+            'routing_number', 'acc_number', 'beneficiary', 'status',
+            'closer_name', 'sale_at', 'sale_date', 'assigned_agent_id'];
         $before = $lead->only($identityFields);
 
         $validated = $request->validated();
+
+        // Auto-populate sale_date from sale_at if sale_at is set but sale_date is not
+        if (!empty($validated['sale_at']) && empty($validated['sale_date'])) {
+            $validated['sale_date'] = \Carbon\Carbon::parse($validated['sale_at'])->toDateString();
+        }
 
         // Prominently log any change to name or phone on an established lead
         if (!empty($lead->cn_name) && !empty($lead->phone_number)) {
@@ -673,6 +689,24 @@ class LeadController extends Controller
         }
 
         $lead->update($validated);
+
+        // Sync beneficiaries JSON → scalar beneficiary/beneficiary_dob fields
+        $bens = array_values(array_filter($request->input('beneficiaries', []), fn($b) => !empty(trim($b['name'] ?? ''))));
+        $lead->beneficiaries   = $bens ?: null;
+        $lead->beneficiary     = $bens[0]['name'] ?? null;
+        $lead->beneficiary_dob = !empty($bens[0]['dob']) ? $bens[0]['dob'] : null;
+
+        // Sync partner_id → assigned_partner text
+        if (array_key_exists('partner_id', $validated)) {
+            if (!empty($validated['partner_id'])) {
+                $p = \App\Models\Partner::find($validated['partner_id']);
+                $lead->assigned_partner = $p ? ($p->code ?: $p->name) : null;
+            } else {
+                $lead->assigned_partner = null;
+            }
+        }
+
+        $lead->saveQuietly();
 
         $after   = $lead->fresh()->only($identityFields);
         $changed = array_filter($after, fn($v, $k) => $v !== $before[$k], ARRAY_FILTER_USE_BOTH);
@@ -701,7 +735,38 @@ class LeadController extends Controller
         $value = $request->value;
         
         // Validate based on field type
-        $validFields = ['carrier', 'policy_type', 'coverage', 'premium', 'initial_draft', 'future_draft'];
+        // Handle partner update specially (sets partner_id + syncs assigned_partner text)
+        if ($field === 'partner') {
+            $lead->partner_id = $value ?: null;
+            $lead->assigned_partner = null;
+            if ($value) {
+                $p = \App\Models\Partner::find((int) $value);
+                if (!$p) {
+                    return response()->json(['success' => false, 'message' => 'Partner not found'], 400);
+                }
+                $lead->assigned_partner = $p->code ?: $p->name;
+            }
+            $lead->save();
+            return response()->json(['success' => true, 'message' => 'Partner updated']);
+        }
+
+        if ($field === 'followup_required') {
+            $lead->followup_required = $value !== '' ? (bool)(int)$value : null;
+            if (!(bool)(int)$value) {
+                $lead->followup_scheduled_at = null;
+            }
+            $lead->save();
+            return response()->json(['success' => true, 'message' => 'Follow-up updated']);
+        }
+
+        if ($field === 'followup_scheduled_at') {
+            if ($value && !strtotime($value)) {
+                return response()->json(['success' => false, 'message' => 'Invalid date/time'], 400);
+            }
+            $lead->followup_scheduled_at = $value ?: null;
+            $lead->save();
+            return response()->json(['success' => true, 'message' => 'Follow-up scheduled time updated']);
+        }
         if (!in_array($field, $validFields)) {
             return response()->json([
                 'success' => false,

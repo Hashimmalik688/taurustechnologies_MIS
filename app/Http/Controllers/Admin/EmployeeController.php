@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\User;
 use App\Support\Roles;
 use App\Support\Statuses;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -97,7 +98,12 @@ class EmployeeController extends Controller
             });
             
             \Log::debug('EMS index: rendering view', ['employees_count' => $employees->count()]);
-            return view('admin.employee.ems', compact('employees'));
+
+            // Pinned employees for Chill Party widget (stored in cache, expires end of day)
+            $pinnedNames = collect(Cache::get('chill_party_pinned_' . today()->toDateString(), []))
+                ->pluck('name')->all();
+
+            return view('admin.employee.ems', compact('employees', 'pinnedNames'));
         } catch (\Throwable $e) {
             \Log::error('EMS index error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             abort(500, 'EMS error: ' . $e->getMessage());

@@ -110,7 +110,7 @@
         } else {
             $totalDebit = \App\Models\PettyCashLedger::sum('debit');
             $totalCredit = \App\Models\PettyCashLedger::sum('credit');
-            $lastEntry = \App\Models\PettyCashLedger::orderBy('id', 'desc')->first();
+            $lastEntry = \App\Models\PettyCashLedger::orderBy('date', 'desc')->orderBy('id', 'desc')->first();
             $currentBalance = $lastEntry ? $balanceMap[$lastEntry->id] : 0;
         }
     @endphp

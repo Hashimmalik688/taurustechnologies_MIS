@@ -1,6 +1,6 @@
 
 
-<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasanyrole', 'Super Admin|Manager|CEO|Ravens Closer')): ?>
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->guard()->check()): ?>
 <style>
     /* ── Button ─────────────────────────────────────────── */
     .fl-btn {
@@ -118,6 +118,14 @@
         display: inline-flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
+    .fl-item-photo {
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid rgba(236,72,153,.35);
+    }
+    .fl-pin-badge { font-size: .58rem; opacity: .7; margin-left: .1rem; }
 
     .fl-empty {
         padding: 1.2rem 1rem;
@@ -238,14 +246,14 @@
 </style>
 
 <div class="position-relative fl-btn" id="freeloadersWidget">
-    <button class="fl-trigger" onclick="toggleFreeloarders(event)" title="Freeloaders — Ravens Closers with no sale today">
-        😴
+    <button class="fl-trigger" onclick="toggleFreeloarders(event)" title="Chill Party — Ravens Closers with no sale today">
+        🏖️
         <span class="fl-badge d-none" id="flBadge">0</span>
     </button>
 
     <div class="fl-dropdown" id="flDropdown">
         <div class="fl-header">
-            😴 Freeloaders
+            🏖️ Chill Party
             <span class="fl-total" id="flTotal"></span>
         </div>
         <div class="fl-list" id="flList">
@@ -261,9 +269,9 @@
 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Ravens Closer')): ?>
 <div class="fl-popup-overlay" id="flPopupOverlay">
     <div class="fl-popup" id="flPopup">
-        <span class="fl-popup-emoji" id="flPopupEmoji">😴</span>
-        <div class="fl-popup-title" id="flPopupTitle">Still sleeping?</div>
-        <div class="fl-popup-body" id="flPopupBody">You haven't made a sale yet today.</div>
+        <span class="fl-popup-emoji" id="flPopupEmoji">🏖️</span>
+        <div class="fl-popup-title" id="flPopupTitle">You're in the Chill Party!</div>
+        <div class="fl-popup-body" id="flPopupBody">No sale yet today — time to change that.</div>
         <button class="fl-popup-cta" onclick="closeFlPopup()">Let's get that sale! 🚀</button>
         <button class="fl-popup-dismiss" onclick="closeFlPopup()">dismiss</button>
     </div>
@@ -273,7 +281,7 @@
 <script>
 (function () {
     const POLL_MS = 60_000;
-    let flData = { freeloaders: [], count: 0, total: 0 };
+    let flData = { freeloaders: [], chillParty: [], count: 0, total: 0 };
 
     // ── Popup messages ────────────────────────────────────────────────────
     // Each message: { emoji, title, body }  (alternates tease ↔ encourage)
@@ -306,7 +314,7 @@
         {
             emoji: '👀',
             title: 'The board is watching.',
-            body: "Your name is glowing on the freeloader list. Time to get it off. You've got this! 🔥"
+            body: "Your name is shining on the Chill Party list. Time to get it off. You've got this! 🔥"
         },
         {
             emoji: '🚀',
@@ -394,7 +402,7 @@
         const footer = document.getElementById('flFooter');
 
         const count = flData.count;
-        const names = flData.freeloaders;
+        const items = flData.chillParty || [];
 
         // Badge
         if (count > 0) {
@@ -405,21 +413,26 @@
         }
 
         // Total pill
-        total.textContent = `${flData.total - count} / ${flData.total} sold`;
+        const autoSold = Math.max(0, flData.total - (items.filter(i => !i.pinned).length));
+        total.textContent = `${autoSold} / ${flData.total} sold`;
 
         // List
         if (count === 0) {
             list.innerHTML = `<div class="fl-empty">
                 <span class="fl-empty-icon">🎉</span>
-                No freeloaders today!<br>
-                <span style="font-weight:400;color:var(--bs-surface-400)">Everyone's pulled their weight.</span>
+                No one in the Chill Party!<br>
+                <span style="font-weight:400;color:var(--bs-surface-400)">Everyone's on fire today.</span>
             </div>`;
         } else {
-            list.innerHTML = names.map(name => {
-                const initials = name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+            list.innerHTML = items.map(item => {
+                const initials = item.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
+                const avatar = item.photo
+                    ? `<img src="${escHtml(item.photo)}" class="fl-item-photo" alt="${escHtml(item.name)}">`
+                    : `<span class="fl-item-avatar">${escHtml(initials)}</span>`;
+                const pin = item.pinned ? ' <span class="fl-pin-badge">📌</span>' : '';
                 return `<div class="fl-item">
-                    <span class="fl-item-avatar">${escHtml(initials)}</span>
-                    ${escHtml(name)}
+                    ${avatar}
+                    ${escHtml(item.name)}${pin}
                 </div>`;
             }).join('');
         }
@@ -442,7 +455,7 @@
         .then(r => r.ok ? r.json() : null)
         .then(data => {
             if (data) {
-                flData = data;
+                flData = { ...data, chillParty: data.chillParty || [] };
                 renderFreeloarders();
                 // On first fetch, schedule the first popup if user is a freeloader
                 if (firstFetch) {

@@ -936,8 +936,8 @@
 
                                 <div class="col-md-12">
                                     <div class="ph-field">
-                                        <label>Follow Up Required</label>
-                                        <select class="form-select" id="phase3_followup_required">
+                                        <label>Follow Up Required <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="phase3_followup_required" required>
                                             <option value="">Select option...</option>
                                             <option value="1">Yes</option>
                                             <option value="0">No</option>
@@ -946,7 +946,7 @@
                                 </div>
                                 <div class="col-md-12 d-none" id="followup_datetime_field">
                                     <div class="ph-field">
-                                        <label>Follow Up Date & Time (PT)</label>
+                                        <label>Follow Up Date &amp; Time (PT) <span class="text-danger">*</span></label>
                                         <input type="datetime-local" class="form-control" id="phase3_followup_scheduled_at">
                                         <small style="font-size:.7rem;color:var(--bs-secondary-color);margin-top:.25rem;display:block">Enter in Pacific Time (PT)</small>
                                     </div>
@@ -3290,8 +3290,22 @@
         }
         
         // All fields are now optional, skip required field validation
-        
-        // Collect beneficiary data from Phase 3
+
+        // Validate follow-up fields (required)
+        const followupRequiredVal = document.getElementById('phase3_followup_required')?.value;
+        if (!followupRequiredVal) {
+            toastr.error('Please select whether a follow-up is required.');
+            document.getElementById('phase3_followup_required')?.focus();
+            return;
+        }
+        if (followupRequiredVal === '1') {
+            const followupAt = document.getElementById('phase3_followup_scheduled_at')?.value;
+            if (!followupAt) {
+                toastr.error('Please set a follow-up date & time (PT).');
+                document.getElementById('phase3_followup_scheduled_at')?.focus();
+                return;
+            }
+        }
         const beneficiaries = [];
         document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
             const name = row.querySelector('.beneficiary-name-phase3')?.value;

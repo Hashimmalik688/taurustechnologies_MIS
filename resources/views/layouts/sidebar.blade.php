@@ -361,7 +361,7 @@
 
         {{-- ACCOUNTING LEDGER (Double-Entry) --}}
         @canViewModule('accounting')
-        <a href="{{ route('admin.accounting.journal.index') }}" class="menu-item {{ Request::is('admin/accounting*') ? 'active' : '' }}">
+        <a href="{{ route('admin.accounting.dashboard') }}" class="menu-item {{ Request::is('admin/accounting*') ? 'active' : '' }}">
             <i class="bx bx-book-open"></i>
             <span class="menu-text">Accounting</span>
         </a>

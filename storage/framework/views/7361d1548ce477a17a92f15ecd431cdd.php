@@ -260,30 +260,30 @@
                     <div class="col-md-6">
                         <div class="ph-field">
                             <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="ns_cn_name" placeholder="Customer full name">
+                            <input type="text" class="form-control" id="ns_cn_name" placeholder="Customer full name" oninput="this.value=this.value.replace(/[0-9]/g,'')">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Phone Number</label>
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_phone_number" placeholder="Primary phone">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Secondary Phone</label>
+                            <label class="form-label">Secondary Phone <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_secondary_phone" placeholder="Secondary phone">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="ph-field">
-                            <label class="form-label">Date of Birth</label>
+                            <label class="form-label">Date of Birth <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="ns_dob">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="ph-field">
-                            <label class="form-label">Gender</label>
+                            <label class="form-label">Gender <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_gender">
                                 <option value="">Select</option>
                                 <option value="Male">Male</option>
@@ -294,13 +294,13 @@
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">SSN</label>
+                            <label class="form-label">SSN <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_ssn" placeholder="XXX-XX-XXXX">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">State</label>
+                            <label class="form-label">State <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_state">
                                 <option value="">Select State</option>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $usStates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $code => $name): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -311,25 +311,25 @@
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Zip Code</label>
+                            <label class="form-label">Zip Code <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_zip" placeholder="Zip code">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Address</label>
+                            <label class="form-label">Address <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_address" placeholder="Street address">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Emergency Contact</label>
+                            <label class="form-label">Emergency Contact <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_emergency_contact" placeholder="Emergency contact">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="ph-field">
-                            <label class="form-label">Birth Place</label>
+                            <label class="form-label">Birth Place <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_birth_place" placeholder="City / State">
                         </div>
                     </div>
@@ -344,19 +344,19 @@
                     </div>
                     <div class="col-md-3">
                         <div class="ph-field">
-                            <label class="form-label">Height</label>
+                            <label class="form-label">Height <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_height" placeholder="5'10&quot;">
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="ph-field">
-                            <label class="form-label">Weight</label>
+                            <label class="form-label">Weight <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_weight" placeholder="lbs">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Driving License</label>
+                            <label class="form-label">Driving License <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_driving_license">
                                 <option value="">Select</option>
                                 <option value="Yes">Yes</option>
@@ -371,31 +371,31 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Medical Issues</label>
+                            <label class="form-label">Medical Issues <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="ns_medical_issue" rows="2" placeholder="Enter medical issues"></textarea>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Medications</label>
+                            <label class="form-label">Medications <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="ns_medications" rows="2" placeholder="Enter medications"></textarea>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Doctor Name</label>
+                            <label class="form-label">Doctor Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_doctor_name" placeholder="Doctor name">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Doctor Phone</label>
+                            <label class="form-label">Doctor Phone <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_doctor_number" placeholder="Doctor phone">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Doctor Address</label>
+                            <label class="form-label">Doctor Address <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_doctor_address" placeholder="Doctor address">
                         </div>
                     </div>
@@ -415,7 +415,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Policy Carrier</label>
+                            <label class="form-label">Policy Carrier <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_policy_carrier" data-carrier-partner-info='<?php echo json_encode($carrierPartnerData, 15, 512) ?>'>
                                 <option value="">Select Carrier</option>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carrierPartnerData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -434,7 +434,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Approved State</label>
+                            <label class="form-label">Approved State <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_approved_state">
                                 <option value="">Select Carrier First</option>
                             </select>
@@ -450,37 +450,37 @@
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Policy Type</label>
+                            <label class="form-label">Policy Type <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_policy_type" placeholder="Policy type">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Policy Number</label>
+                            <label class="form-label">Policy Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_policy_number" placeholder="Policy number">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Coverage Amount</label>
+                            <label class="form-label">Coverage Amount <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="ns_coverage" step="0.01" placeholder="Amount">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Monthly Premium</label>
+                            <label class="form-label">Monthly Premium <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="ns_premium" step="0.01" placeholder="Amount">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Initial Draft Date</label>
+                            <label class="form-label">Initial Draft Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="ns_initial_draft_date">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Future Draft Date</label>
+                            <label class="form-label">Future Draft Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="ns_future_draft_date">
                         </div>
                     </div>
@@ -491,19 +491,19 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Bank Name</label>
+                            <label class="form-label">Bank Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_bank_name" placeholder="Bank name">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Account Title</label>
+                            <label class="form-label">Account Title <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_account_title" placeholder="Account title">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Account Type</label>
+                            <label class="form-label">Account Type <span class="text-danger">*</span></label>
                             <select class="form-select" id="ns_account_type">
                                 <option value="">Select</option>
                                 <option value="Checking">Checking</option>
@@ -513,25 +513,25 @@
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Routing Number</label>
+                            <label class="form-label">Routing Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_routing_number" placeholder="Routing number">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Account Number</label>
+                            <label class="form-label">Account Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_account_number" placeholder="Account number">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Verified By</label>
+                            <label class="form-label">Verified By <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_account_verified_by" placeholder="Verifier name">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Bank Balance</label>
+                            <label class="form-label">Bank Balance <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="ns_bank_balance" step="0.01" placeholder="Balance">
                         </div>
                     </div>
@@ -542,19 +542,19 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Card Number</label>
+                            <label class="form-label">Card Number <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_card_number" placeholder="Card number">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">CVV</label>
+                            <label class="form-label">CVV <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_cvv" placeholder="CVV" maxlength="4">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="ph-field">
-                            <label class="form-label">Expiry Date</label>
+                            <label class="form-label">Expiry Date <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_expiry_date" placeholder="MM/YY">
                         </div>
                     </div>
@@ -565,7 +565,7 @@
                 <div class="row g-2">
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Source</label>
+                            <label class="form-label">Source <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ns_source" placeholder="Lead source">
                         </div>
                     </div>
@@ -576,8 +576,8 @@
                 <div class="row g-2">
                     <div class="col-md-6">
                         <div class="ph-field">
-                            <label class="form-label">Follow Up Required</label>
-                            <select class="form-select" id="ns_followup_required">
+                            <label class="form-label">Follow Up Required <span class="text-danger">*</span></label>
+                            <select class="form-select" id="ns_followup_required" required>
                                 <option value="">Select option…</option>
                                 <option value="1">Yes</option>
                                 <option value="0">No</option>
@@ -586,7 +586,7 @@
                     </div>
                     <div class="col-md-6 d-none" id="ns_followup_datetime_wrap">
                         <div class="ph-field">
-                            <label class="form-label">Follow Up Date &amp; Time</label>
+                            <label class="form-label">Follow Up Date &amp; Time <span class="text-danger">*</span></label>
                             <input type="datetime-local" class="form-control" id="ns_followup_scheduled_at">
                             <small class="text-muted" style="font-size:.7rem">When should the follow-up call be scheduled?</small>
                         </div>
@@ -627,6 +627,14 @@
 
     // ─── Add Sale Modal ───────────────────────────────────────────────
     const nsAllStates = <?php echo json_encode($usStates, 15, 512) ?>;
+
+    // Clear is-invalid styling as user fills fields
+    document.getElementById('addSaleModal').addEventListener('input', function(e) {
+        if (e.target.value && e.target.value.trim()) e.target.classList.remove('is-invalid');
+    });
+    document.getElementById('addSaleModal').addEventListener('change', function(e) {
+        if (e.target.value && e.target.value.trim()) e.target.classList.remove('is-invalid');
+    });
 
     function openAddSaleModal() {
         // Clear all fields
@@ -772,13 +780,87 @@
         const name  = document.getElementById('ns_cn_name').value.trim();
         const phone = document.getElementById('ns_phone_number').value.trim();
 
-        if (!name && !phone) {
-            if (typeof toastr !== 'undefined') {
-                toastr.error('Customer name or phone number is required.');
+        // ── Validate all required fields ────────────────────────────────────
+        const required = [
+            { id: 'ns_cn_name',             label: 'Full Name' },
+            { id: 'ns_phone_number',         label: 'Phone Number' },
+            { id: 'ns_secondary_phone',      label: 'Secondary Phone' },
+            { id: 'ns_dob',                  label: 'Date of Birth' },
+            { id: 'ns_gender',               label: 'Gender' },
+            { id: 'ns_ssn',                  label: 'SSN' },
+            { id: 'ns_state',                label: 'State' },
+            { id: 'ns_zip',                  label: 'Zip Code' },
+            { id: 'ns_address',              label: 'Address' },
+            { id: 'ns_emergency_contact',    label: 'Emergency Contact' },
+            { id: 'ns_birth_place',          label: 'Birth Place' },
+            { id: 'ns_height',               label: 'Height' },
+            { id: 'ns_weight',               label: 'Weight' },
+            { id: 'ns_driving_license',      label: 'Driving License' },
+            { id: 'ns_medical_issue',        label: 'Medical Issues' },
+            { id: 'ns_medications',          label: 'Medications' },
+            { id: 'ns_doctor_name',          label: 'Doctor Name' },
+            { id: 'ns_doctor_number',        label: 'Doctor Phone' },
+            { id: 'ns_doctor_address',       label: 'Doctor Address' },
+            { id: 'ns_policy_carrier',       label: 'Policy Carrier' },
+            { id: 'ns_approved_state',       label: 'Approved State' },
+            { id: 'ns_policy_type',          label: 'Policy Type' },
+            { id: 'ns_policy_number',        label: 'Policy Number' },
+            { id: 'ns_coverage',             label: 'Coverage Amount' },
+            { id: 'ns_premium',              label: 'Monthly Premium' },
+            { id: 'ns_initial_draft_date',   label: 'Initial Draft Date' },
+            { id: 'ns_future_draft_date',    label: 'Future Draft Date' },
+            { id: 'ns_bank_name',            label: 'Bank Name' },
+            { id: 'ns_account_title',        label: 'Account Title' },
+            { id: 'ns_account_type',         label: 'Account Type' },
+            { id: 'ns_routing_number',       label: 'Routing Number' },
+            { id: 'ns_account_number',       label: 'Account Number' },
+            { id: 'ns_account_verified_by',  label: 'Verified By' },
+            { id: 'ns_bank_balance',         label: 'Bank Balance' },
+            { id: 'ns_card_number',          label: 'Card Number' },
+            { id: 'ns_cvv',                  label: 'CVV' },
+            { id: 'ns_expiry_date',          label: 'Expiry Date' },
+            { id: 'ns_source',               label: 'Source' },
+            { id: 'ns_followup_required',    label: 'Follow Up Required' },
+        ];
+
+        let missing = [];
+        required.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (!el) return;
+            const val = el.value.trim ? el.value.trim() : el.value;
+            if (!val) {
+                el.classList.add('is-invalid');
+                missing.push(f.label);
             } else {
-                alert('Customer name or phone number is required.');
+                el.classList.remove('is-invalid');
             }
+        });
+
+        // Name must not contain digits
+        if (name && /\d/.test(name)) {
+            document.getElementById('ns_cn_name').classList.add('is-invalid');
+            if (!missing.includes('Full Name')) missing.push('Full Name (no numbers allowed)');
+        }
+
+        if (missing.length > 0) {
+            toastr ? toastr.error('Please fill in: ' + missing.slice(0, 5).join(', ') + (missing.length > 5 ? ` (+${missing.length - 5} more)` : ''))
+                   : alert('Please fill in: ' + missing.join(', '));
+            // Scroll to first invalid field
+            const firstInvalid = document.querySelector('#addSaleModal .is-invalid');
+            if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
+        }
+
+        // Followup datetime required when followup = Yes
+        const followupRequired = document.getElementById('ns_followup_required').value;
+        if (followupRequired === '1') {
+            const followupAt = document.getElementById('ns_followup_scheduled_at').value;
+            if (!followupAt) {
+                document.getElementById('ns_followup_scheduled_at').classList.add('is-invalid');
+                toastr ? toastr.error('Please set a follow-up date & time.') : alert('Please set a follow-up date & time.');
+                document.getElementById('ns_followup_scheduled_at').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
         }
 
         if (!confirm('Are you sure you want to submit this sale? This will be stored in leads and notified to QA and Managers.')) {

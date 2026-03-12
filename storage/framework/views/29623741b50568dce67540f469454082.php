@@ -1099,6 +1099,7 @@
     <script src="<?php echo e(URL::asset('js/crm-security.js')); ?>?v=<?php echo e(filemtime(public_path('js/crm-security.js'))); ?>"></script>
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
+    <?php echo $__env->yieldContent('script'); ?>
 
 </body>
 </html>

@@ -24,6 +24,137 @@ class LedgerJournalController extends Controller
         $this->ledger = $ledger;
     }
 
+    // ── Accounting Dashboard ───────────────────────────────────────────────
+
+    public function dashboard()
+    {
+        $totalSales      = LedgerJournalEntry::where('type', 'sale')->sum('total_debit');
+        $totalChargebacks= LedgerJournalEntry::where('type', 'chargeback')->sum('total_debit');
+        $totalPayments   = LedgerJournalEntry::where('type', 'payment_received')->sum('total_debit');
+        $totalEntries    = LedgerJournalEntry::count();
+        $netAR           = $totalSales - $totalChargebacks - $totalPayments;
+
+        $thisMonth = now()->startOfMonth()->toDateString();
+        $salesThisMonth  = LedgerJournalEntry::where('type', 'sale')
+                            ->where('entry_date', '>=', $thisMonth)->sum('total_debit');
+        $chargesThisMonth= LedgerJournalEntry::where('type', 'chargeback')
+                            ->where('entry_date', '>=', $thisMonth)->sum('total_debit');
+
+        $recentEntries = LedgerJournalEntry::with('creator')
+                            ->orderByDesc('entry_date')->orderByDesc('id')
+                            ->limit(8)->get();
+
+        // Monthly sales trend (last 6 months)
+        $trend = DB::table('ledger_journal_entries')
+            ->selectRaw("DATE_FORMAT(entry_date, '%b %Y') as month, DATE_FORMAT(entry_date, '%Y-%m') as ym,
+                SUM(CASE WHEN type='sale' THEN total_debit ELSE 0 END) as sales,
+                SUM(CASE WHEN type='chargeback' THEN total_debit ELSE 0 END) as chargebacks")
+            ->where('entry_date', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('ym', 'month')
+            ->orderBy('ym')
+            ->get();
+
+        // AR balances by partner
+        $arAccount = \App\Models\ChartOfAccount::where('account_code', '1200')->first();
+        $partnerBalances = [];
+        if ($arAccount) {
+            $partnerBalances = DB::table('ledger_journal_entry_lines as l')
+                ->join('partners as p', 'l.partner_id', '=', 'p.id')
+                ->where('l.account_id', $arAccount->id)
+                ->groupBy('l.partner_id', 'p.name')
+                ->selectRaw('l.partner_id, p.name as partner_name,
+                    SUM(l.debit) as total_dr, SUM(l.credit) as total_cr,
+                    SUM(l.debit) - SUM(l.credit) as balance')
+                ->having('balance', '!=', 0)
+                ->orderByDesc('balance')
+                ->limit(5)
+                ->get();
+        }
+
+        return view('admin.accounting.dashboard', compact(
+            'totalSales','totalChargebacks','totalPayments','totalEntries','netAR',
+            'salesThisMonth','chargesThisMonth','recentEntries','trend','partnerBalances'
+        ));
+    }
+
+    // ── Sales Ledger (AR Sub-ledger) ───────────────────────────────────────
+
+    public function salesLedger(Request $request)
+    {
+        $arAccount = \App\Models\ChartOfAccount::where('account_code', '1200')->first();
+
+        $partnersWithAR = collect();
+        if ($arAccount) {
+            $partnersWithAR = DB::table('ledger_journal_entry_lines as l')
+                ->join('partners as p', 'l.partner_id', '=', 'p.id')
+                ->where('l.account_id', $arAccount->id)
+                ->groupBy('l.partner_id', 'p.name', 'p.code')
+                ->selectRaw('l.partner_id, p.name as partner_name, p.code as partner_code,
+                    SUM(l.debit) as total_dr, SUM(l.credit) as total_cr,
+                    SUM(l.debit) - SUM(l.credit) as balance,
+                    COUNT(DISTINCT l.journal_entry_id) as tx_count,
+                    MAX(je.entry_date) as last_activity')
+                ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+                ->orderByDesc('balance')
+                ->get();
+        }
+
+        $totalDr      = $partnersWithAR->sum('total_dr');
+        $totalCr      = $partnersWithAR->sum('total_cr');
+        $totalBalance = $partnersWithAR->sum('balance');
+
+        $partners = \App\Models\Partner::where('is_active', true)->orderBy('name')->get(['id','name','code']);
+
+        return view('admin.accounting.sales-ledger.index',
+            compact('partnersWithAR','totalDr','totalCr','totalBalance','partners'));
+    }
+
+    public function salesLedgerPartner(Request $request, int $partnerId)
+    {
+        $partner   = \App\Models\Partner::findOrFail($partnerId);
+        $arAccount = \App\Models\ChartOfAccount::where('account_code', '1200')->first();
+
+        $query = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->leftJoin('insurance_carriers as ic', 'l.insurance_carrier_id', '=', 'ic.id')
+            ->where('l.partner_id', $partnerId)
+            ->where('l.account_id', $arAccount?->id ?? 0);
+
+        if ($request->filled('date_from')) {
+            $query->where('je.entry_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->where('je.entry_date', '<=', $request->date_to);
+        }
+        if ($request->filled('carrier_id')) {
+            $query->where('l.insurance_carrier_id', $request->carrier_id);
+        }
+
+        $lines = $query->selectRaw('
+            je.id as entry_id, je.entry_number, je.entry_date, je.type,
+            je.description, je.reference, je.insured_name,
+            l.debit, l.credit,
+            ic.name as carrier_name
+        ')->orderBy('je.entry_date')->orderBy('je.id')->get();
+
+        // Compute running balance
+        $running = 0;
+        $lines = $lines->map(function ($row) use (&$running) {
+            $running += ($row->debit - $row->credit);
+            $row->running_balance = $running;
+            return $row;
+        });
+
+        $totalDr = $lines->sum('debit');
+        $totalCr = $lines->sum('credit');
+        $closingBalance = $running;
+
+        $carriers = \App\Models\InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id','name']);
+
+        return view('admin.accounting.sales-ledger.partner',
+            compact('partner','lines','totalDr','totalCr','closingBalance','carriers'));
+    }
+
     // ── Journal Entries List ───────────────────────────────────────────────
 
     public function index(Request $request)

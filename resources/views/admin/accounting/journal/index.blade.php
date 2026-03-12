@@ -1,342 +1,249 @@
 @extends('layouts.master')
-
-@section('title', 'Accounting — Journal')
+@section('title', 'Journal Entries')
 
 @section('css')
+<link href="{{ URL::asset('/build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" />
+<link href="{{ URL::asset('/build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" />
 <style>
-/* ── Accounting Module — Asset-Soft / Taurus Style ── */
 :root {
-    --acct-gold:        #d4af37;
-    --acct-gold-dark:   #b8941f;
-    --acct-gold-light:  #f5ecd0;
-    --acct-dark:        #1a1a1a;
-    --acct-header-bg:   #2d2d2d;
-    --acct-surface:     #f8f9fa;
+    --acct-gold:    #d4af37;
+    --acct-gold-dk: #b8941f;
+    --acct-surface: #f5f6fa;
+    --acct-border:  #e8eaed;
+    --acct-text:    #1a1a2e;
+    --acct-muted:   #6b7280;
 }
+body { background: var(--acct-surface); }
+.acct-page { padding: 24px 24px 40px; }
 
-/* Module header bar */
-.acct-module-header {
-    background: var(--acct-header-bg);
-    border-bottom: 3px solid var(--acct-gold);
-    padding: 14px 20px;
-    border-radius: 6px 6px 0 0;
+/* Page header */
+.jnl-page-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
+    margin-bottom: 22px;
 }
-.acct-module-header .acct-module-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--acct-gold);
-    letter-spacing: 0.03em;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.acct-module-header .acct-module-sub {
-    font-size: 0.78rem;
-    color: #aaa;
-    margin: 0;
-}
+.jnl-page-title { font-size: 1.25rem; font-weight: 800; color: var(--acct-text); margin: 0 0 2px; }
+.jnl-page-sub   { font-size: .8rem; color: var(--acct-muted); margin: 0; }
 
-/* KPI tiles */
-.acct-kpi-row {
+/* KPI strip */
+.jnl-kpi-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: #dee2e6;
-    border: 1px solid #dee2e6;
-    border-top: none;
-    border-radius: 0 0 6px 6px;
-    overflow: hidden;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 22px;
 }
-@media (max-width: 768px) {
-    .acct-kpi-row { grid-template-columns: repeat(2, 1fr); }
-}
-.acct-kpi-tile {
+@media(max-width:800px){ .jnl-kpi-strip{ grid-template-columns: repeat(2,1fr); } }
+.jnl-kpi {
     background: #fff;
+    border: 1px solid var(--acct-border);
+    border-radius: 8px;
     padding: 14px 18px;
     position: relative;
-}
-.acct-kpi-tile::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--acct-gold);
-}
-.acct-kpi-tile .kpi-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: #6c757d;
-    margin-bottom: 4px;
-}
-.acct-kpi-tile .kpi-value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    font-family: 'Courier New', Courier, monospace;
-    color: var(--acct-dark);
-}
-.acct-kpi-tile .kpi-value.kpi-dr   { color: #198754; }
-.acct-kpi-tile .kpi-value.kpi-cr   { color: #dc3545; }
-.acct-kpi-tile .kpi-value.kpi-gold { color: var(--acct-gold-dark); }
-.acct-kpi-tile .kpi-icon {
-    position: absolute;
-    right: 14px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.8rem;
-    color: var(--acct-gold-light);
-}
-
-/* Filter bar */
-.acct-filter-bar {
-    background: var(--acct-surface);
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-.acct-filter-bar label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #6c757d;
-    white-space: nowrap;
-    margin: 0;
-}
-
-/* Journal table */
-.acct-journal-card {
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
     overflow: hidden;
 }
-.acct-journal-card .acct-table-header {
-    background: var(--acct-header-bg);
-    padding: 8px 16px;
+.jnl-kpi::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; border-radius: 8px 8px 0 0;
+    background: var(--acct-gold);
+}
+.jnl-kpi-label { font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--acct-muted); margin-bottom: 4px; }
+.jnl-kpi-val   { font-size: 1.3rem; font-weight: 800; color: var(--acct-text); font-family: 'Inter',system-ui,sans-serif; }
+.jnl-kpi-val.green  { color: #059669; }
+.jnl-kpi-val.red    { color: #dc2626; }
+.jnl-kpi-val.indigo { color: #4f46e5; }
+.jnl-kpi-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1.9rem; opacity: .1; }
+
+/* Filter bar */
+.jnl-filter-bar {
+    background: #fff;
+    border: 1px solid var(--acct-border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.jnl-filter-bar label { font-size: .73rem; font-weight: 700; color: var(--acct-muted); white-space: nowrap; margin: 0; }
+.jnl-filter-bar .form-select, .jnl-filter-bar .form-control {
+    font-size: .82rem; border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 10px; height: auto;
+}
+.jnl-filter-bar .form-select:focus, .jnl-filter-bar .form-control:focus {
+    border-color: var(--acct-gold); box-shadow: 0 0 0 3px rgba(212,175,55,.15);
+}
+
+/* Journal table card */
+.jnl-card {
+    background: #fff;
+    border: 1px solid var(--acct-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.jnl-card-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--acct-border);
+    background: #fafbfc;
 }
-.acct-journal-card .acct-table-header span {
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #ccc;
+.jnl-card-title {
+    font-size: .82rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: #374151;
+    display: flex; align-items: center; gap: 7px;
 }
-.acct-journal-card .acct-table-header .gold-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, var(--acct-gold), transparent);
-    margin-left: 8px;
+.jnl-card-title i { color: var(--acct-gold); }
+
+/* Override DataTables styling */
+div.dataTables_wrapper div.dataTables_length,
+div.dataTables_wrapper div.dataTables_info { display: none; }
+div.dataTables_wrapper div.dataTables_filter {
+    text-align: right;
+    padding: 10px 16px 6px;
 }
+div.dataTables_wrapper div.dataTables_filter label {
+    font-size: .75rem; font-weight: 600; color: var(--acct-muted);
+}
+div.dataTables_wrapper div.dataTables_filter input {
+    border: 1px solid #d1d5db; border-radius: 6px; font-size: .8rem;
+    padding: 4px 10px; margin-left: 6px;
+}
+div.dataTables_wrapper div.dataTables_filter input:focus {
+    border-color: var(--acct-gold); outline: none;
+    box-shadow: 0 0 0 2px rgba(212,175,55,.15);
+}
+div.dataTables_wrapper div.dataTables_paginate {
+    padding: 12px 16px;
+    border-top: 1px solid var(--acct-border);
+}
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.current {
+    background: var(--acct-gold) !important;
+    border: none !important; color: #1a1a2e !important;
+    border-radius: 5px !important; font-weight: 700;
+}
+div.dataTables_wrapper div.dataTables_paginate .paginate_button:hover {
+    background: rgba(212,175,55,.15) !important;
+    border: 1px solid rgba(212,175,55,.3) !important;
+    color: var(--acct-gold-dk) !important; border-radius: 5px !important;
+}
+div.dataTables_wrapper div.dataTables_paginate .paginate_button {
+    font-size: .78rem; padding: 4px 10px !important;
+}
+
+/* Table itself */
+#journalTable { border: none !important; }
 #journalTable thead th {
-    background: #f1f3f5;
-    font-size: 0.75rem;
+    background: #fafbfc;
+    font-size: .68rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: .07em;
     text-transform: uppercase;
-    color: #495057;
-    border-bottom: 2px solid var(--acct-gold);
+    color: var(--acct-muted);
+    border-bottom: 2px solid var(--acct-border) !important;
+    border-top: none !important;
+    padding: 10px 16px;
     white-space: nowrap;
 }
-#journalTable tbody tr:hover { background: #fffef5 !important; }
-#journalTable td {
-    font-size: 0.855rem;
+#journalTable tbody td {
+    padding: 11px 16px;
+    border-color: #f3f4f6 !important;
     vertical-align: middle;
-    border-color: #f1f3f5;
+    font-size: .84rem;
 }
-.acct-entry-num {
+#journalTable tbody tr:hover td { background: #fffef5 !important; }
+
+.entry-num {
     font-family: 'Courier New', monospace;
-    font-size: 0.82rem;
-    color: var(--acct-gold-dark);
-    font-weight: 600;
+    font-size: .78rem; font-weight: 700;
+    color: var(--acct-gold-dk); text-decoration: none;
 }
+.entry-num:hover { text-decoration: underline; }
+
+.acct-type-badge {
+    display: inline-block; font-size: .65rem; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 3px; white-space: nowrap;
+}
+.acct-badge-sale       { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.acct-badge-payment    { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.acct-badge-opening    { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+.acct-badge-general    { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.acct-badge-chargeback { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
 .acct-amount {
     font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
-    color: #1a1a1a;
-    font-weight: 600;
+    font-size: .88rem; font-weight: 700; color: var(--acct-text);
 }
 
-/* Type badges */
-.acct-type-badge {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 3px;
-    white-space: nowrap;
-}
-.acct-badge-sale     { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
-.acct-badge-payment  { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
-.acct-badge-opening  { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
-.acct-badge-general  { background: #f3e5f5; color: #6a1b9a; border: 1px solid #ce93d8; }
-.acct-badge-chargeback { background: #fce4ec; color: #b71c1c; border: 1px solid #ef9a9a; }
-
-/* View button */
 .btn-acct-view {
-    font-size: 0.76rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 3px 10px;
-    border: 1px solid var(--acct-gold);
-    color: var(--acct-gold-dark);
-    background: transparent;
-    border-radius: 3px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    transition: background 0.15s, color 0.15s;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .75rem; font-weight: 600; padding: 4px 10px;
+    border: 1px solid var(--acct-gold); color: var(--acct-gold-dk);
+    background: transparent; border-radius: 5px; text-decoration: none;
+    transition: background .15s, color .15s;
 }
-.btn-acct-view:hover {
-    background: var(--acct-gold);
-    color: #fff;
-}
+.btn-acct-view:hover { background: var(--acct-gold); color: #fff; }
 
-/* New entry button */
-.btn-acct-new {
-    background: var(--acct-gold);
-    border: none;
-    color: #1a1a1a;
-    font-weight: 700;
-    font-size: 0.82rem;
-    padding: 6px 16px;
-    border-radius: 4px 0 0 4px;
-    letter-spacing: 0.03em;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    transition: background 0.15s;
-}
-.btn-acct-new:hover { background: var(--acct-gold-dark); color: #fff; }
-.btn-acct-toggle {
-    background: var(--acct-gold-dark);
-    border: none;
-    color: #1a1a1a;
-    padding: 6px 10px;
-    border-radius: 0 4px 4px 0;
-    border-left: 1px solid rgba(0,0,0,.15);
-    transition: background 0.15s;
-}
-.btn-acct-toggle:hover { background: var(--acct-gold); }
+#recordCount { font-size: .75rem; color: var(--acct-muted); }
 </style>
 @endsection
 
 @section('content')
-<div class="container-fluid">
+@include('admin.accounting._nav')
 
-    {{-- ── Module Header ── --}}
-    <div class="acct-module-header">
+<div class="acct-page">
+
+    {{-- Page header --}}
+    <div class="jnl-page-header">
         <div>
-            <div class="acct-module-title">
-                <i class="bx bx-book-open"></i>
-                Accounting — General Ledger
-            </div>
-            <p class="acct-module-sub">All posted journal entries · Double-entry bookkeeping</p>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
-            <a href="{{ route('admin.accounting.partner-ledger') }}"
-               class="btn btn-sm btn-outline-secondary"
-               style="font-size:0.8rem; color:#ccc; border-color:#555;">
-                <i class="bx bx-user-circle me-1"></i> Partner Ledger
-            </a>
-            @canEditModule('accounting')
-            <div class="btn-group">
-                <a href="{{ route('admin.accounting.record-sale') }}" class="btn-acct-new">
-                    <i class="bx bx-plus"></i> New Entry
-                </a>
-                <button type="button" class="btn-acct-toggle dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
-                    <span class="visually-hidden">More</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:0.85rem; min-width:180px">
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.record-sale') }}">
-                            <i class="bx bx-purchase-tag text-success"></i> Record Sale
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.record-payment') }}">
-                            <i class="bx bx-money text-primary"></i> Payment Received
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.record-chargeback') }}">
-                            <i class="bx bx-undo" style="color:#b71c1c;"></i> ChargeBack / Sales Return
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.opening-balance') }}">
-                            <i class="bx bx-reset text-warning"></i> Opening Balance
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.journal.create') }}">
-                            <i class="bx bx-edit text-secondary"></i> General Journal Entry
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            @endcanEditModule
-        </div>
-    </div>
-
-    {{-- ── KPI Tiles ── --}}
-    <div class="acct-kpi-row">
-        <div class="acct-kpi-tile">
-            <div class="kpi-label">Total Entries</div>
-            <div class="kpi-value kpi-gold">{{ number_format($stats['entry_count']) }}</div>
-            <i class="bx bx-list-ul kpi-icon"></i>
-        </div>
-        <div class="acct-kpi-tile">
-            <div class="kpi-label">Total Sales (Dr)</div>
-            <div class="kpi-value kpi-dr">{{ number_format($stats['total_sales'], 2) }}</div>
-            <i class="bx bx-trending-up kpi-icon"></i>
-        </div>
-        <div class="acct-kpi-tile">
-            <div class="kpi-label">Received (Cr)</div>
-            <div class="kpi-value kpi-cr">{{ number_format($stats['total_payments'], 2) }}</div>
-            <i class="bx bx-wallet kpi-icon"></i>
-        </div>
-        <div class="acct-kpi-tile">
-            <div class="kpi-label">Net Outstanding</div>
-            <div class="kpi-value {{ $stats['net_outstanding'] >= 0 ? 'kpi-dr' : 'kpi-cr' }}">
-                {{ number_format(abs($stats['net_outstanding']), 2) }}
-                <small style="font-size:0.65rem; font-family:sans-serif; color:#999; margin-left:3px">
-                    {{ $stats['net_outstanding'] >= 0 ? 'Dr' : 'Cr' }}
-                </small>
-            </div>
-            <i class="bx bx-balance kpi-icon"></i>
+            <h1 class="jnl-page-title">Journal Entries</h1>
+            <p class="jnl-page-sub">General ledger — all posted double-entry transactions</p>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show py-2 mb-3" role="alert"
-             style="border-left: 4px solid #198754; border-radius: 4px; font-size:.875rem;">
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-3" style="border-left:4px solid #059669;font-size:.875rem;border-radius:6px">
             <i class="bx bx-check-circle me-1"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    {{-- ── Filter Bar ── --}}
-    <div class="acct-filter-bar">
+    {{-- KPI Strip --}}
+    <div class="jnl-kpi-strip">
+        <div class="jnl-kpi">
+            <div class="jnl-kpi-label">Total Entries</div>
+            <div class="jnl-kpi-val">{{ number_format($stats['entry_count']) }}</div>
+            <i class="bx bx-list-ul jnl-kpi-icon"></i>
+        </div>
+        <div class="jnl-kpi">
+            <div class="jnl-kpi-label">Total Sales</div>
+            <div class="jnl-kpi-val green">${{ number_format($stats['total_sales'], 2) }}</div>
+            <i class="bx bx-trending-up jnl-kpi-icon"></i>
+        </div>
+        <div class="jnl-kpi">
+            <div class="jnl-kpi-label">Payments Received</div>
+            <div class="jnl-kpi-val indigo">${{ number_format($stats['total_payments'], 2) }}</div>
+            <i class="bx bx-money jnl-kpi-icon"></i>
+        </div>
+        <div class="jnl-kpi">
+            <div class="jnl-kpi-label">Net Outstanding</div>
+            <div class="jnl-kpi-val {{ $stats['net_outstanding'] >= 0 ? 'green' : 'red' }}">
+                ${{ number_format(abs($stats['net_outstanding']), 2) }}
+                <small style="font-size:.65rem;font-weight:500;color:var(--acct-muted)">{{ $stats['net_outstanding'] >= 0 ? 'Dr' : 'Cr' }}</small>
+            </div>
+            <i class="bx bx-balance jnl-kpi-icon"></i>
+        </div>
+    </div>
+
+    {{-- Filter bar --}}
+    <div class="jnl-filter-bar">
         <label><i class="bx bx-filter-alt me-1"></i> Filter:</label>
-        <select id="filterType" class="form-select form-select-sm" style="max-width:160px; font-size:.8rem">
+        <select id="filterType" class="form-select" style="max-width:170px">
             <option value="">All Types</option>
             <option value="sale">Sale</option>
             <option value="chargeback">Chargeback</option>
@@ -344,29 +251,25 @@
             <option value="opening_balance">Opening Balance</option>
             <option value="general">General Journal</option>
         </select>
-        <input type="date" id="filterDateFrom" class="form-control form-control-sm" style="max-width:136px; font-size:.8rem" title="From date">
-        <input type="date" id="filterDateTo"   class="form-control form-control-sm" style="max-width:136px; font-size:.8rem" title="To date">
-        <button id="btnFilter" class="btn btn-sm" style="background:var(--acct-gold);color:#1a1a1a;font-weight:600;font-size:.79rem;border:none;padding:4px 14px;">
+        <input type="date" id="filterDateFrom" class="form-control" style="max-width:145px" title="From date">
+        <input type="date" id="filterDateTo"   class="form-control" style="max-width:145px" title="To date">
+        <button id="btnFilter" class="btn btn-sm" style="background:var(--acct-gold);color:#1a1a2e;font-weight:700;font-size:.79rem;border:none;padding:5px 16px">
             <i class="bx bx-search me-1"></i> Apply
         </button>
-        <button id="btnToday" class="btn btn-sm btn-outline-secondary" style="font-size:.79rem;">
+        <button id="btnToday" class="btn btn-sm btn-outline-secondary" style="font-size:.79rem">
             <i class="bx bx-calendar-today me-1"></i> Today
         </button>
-        <button id="btnClear" class="btn btn-sm btn-outline-secondary" style="font-size:.79rem;">
-            Clear
-        </button>
-        <span class="ms-auto text-muted" style="font-size:0.75rem" id="recordCount"></span>
+        <button id="btnClear" class="btn btn-sm btn-outline-secondary" style="font-size:.79rem">Clear</button>
+        <span class="ms-auto" id="recordCount"></span>
     </div>
 
-    {{-- ── Journal Table ── --}}
-    <div class="acct-journal-card">
-        <div class="acct-table-header">
-            <i class="bx bx-spreadsheet" style="color:var(--acct-gold); font-size:1rem;"></i>
-            <span>Journal Entries</span>
-            <div class="gold-line"></div>
+    {{-- Table --}}
+    <div class="jnl-card">
+        <div class="jnl-card-header">
+            <span class="jnl-card-title"><i class="bx bx-spreadsheet"></i> All Journal Entries</span>
         </div>
-        <div class="table-responsive">
-            <table id="journalTable" class="table table-hover mb-0 w-100">
+        <div style="overflow-x:auto">
+            <table id="journalTable" class="table mb-0 w-100">
                 <thead>
                     <tr>
                         <th>Entry #</th>
@@ -387,9 +290,12 @@
 @endsection
 
 @section('script')
+<script src="{{ URL::asset('build/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 <script>
 $(function () {
     var table = $('#journalTable').DataTable({
+        destroy: true,
         processing: true,
         serverSide: true,
         ajax: {
@@ -403,14 +309,13 @@ $(function () {
         columns: [
             {
                 data: 'entry_number', name: 'entry_number',
-                render: function(data) {
-                    return '<span class="acct-entry-num">' + data + '</span>';
+                render: function(data, type, row) {
+                    return '<a href="/admin/accounting/journal/' + row.id + '" class="entry-num">' + (data||'') + '</a>';
                 }
             },
             { data: 'entry_date', name: 'entry_date',
               render: function(data) {
-                  // Parse as local date to avoid UTC timezone offset issues
-                  var p = data.split('-');
+                  var p = (data||'').split('-');
                   var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
                   return p[2] + ' ' + (m[parseInt(p[1],10)-1] || p[1]) + ' ' + p[0];
               }
@@ -419,38 +324,36 @@ $(function () {
             {
                 data: 'description', name: 'description',
                 render: function(data) {
-                    return '<span style="font-size:.85rem;color:#495057">' + (data || '—') + '</span>';
+                    return '<span style="color:#374151;max-width:240px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle">' + (data||'—') + '</span>';
                 }
             },
-            { data: 'reference', name: 'reference', defaultContent: '<span class="text-muted">—</span>' },
+            { data: 'reference', name: 'reference', defaultContent: '<span style="color:#9ca3af">—</span>' },
             {
-                data: 'total_debit', name: 'total_debit',
-                className: 'text-end',
-                render: function (data) {
-                    return '<span class="acct-amount">' +
-                        parseFloat(data).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) +
-                        '</span>';
+                data: 'total_debit', name: 'total_debit', className: 'text-end',
+                render: function(data) {
+                    return '<span class="acct-amount">$' + parseFloat(data||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>';
                 }
             },
             {
                 data: 'creator', name: 'creator.name', orderable: false, searchable: false,
                 render: function(data) {
-                    return data ? ('<small class="text-muted">' + data.name + '</small>') : '<span class="text-muted">—</span>';
+                    return data ? '<small style="color:var(--acct-muted)">' + data.name + '</small>' : '<span style="color:#9ca3af">—</span>';
                 }
             },
             { data: 'actions', name: 'actions', orderable: false, searchable: false }
         ],
         order: [[0, 'desc']],
         pageLength: 25,
+        dom: 'frtip',
         language: {
             processing: '<span style="color:var(--acct-gold)">Loading…</span>',
-            emptyTable: '<span class="text-muted" style="font-size:.85rem">No journal entries found.</span>',
-            zeroRecords: '<span class="text-muted" style="font-size:.85rem">No matching entries.</span>',
+            emptyTable: '<span style="color:var(--acct-muted);font-size:.85rem">No journal entries found.</span>',
+            zeroRecords: '<span style="color:var(--acct-muted);font-size:.85rem">No matching entries.</span>',
+            search: 'Search:',
         },
-        drawCallback: function(settings) {
-            var api  = this.api();
-            var info = api.page.info();
-            $('#recordCount').text(info.recordsTotal + ' total entries');
+        drawCallback: function() {
+            var info = this.api().page.info();
+            $('#recordCount').text(info.recordsTotal.toLocaleString() + ' total entries');
         }
     });
 

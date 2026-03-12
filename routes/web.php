@@ -89,8 +89,11 @@ Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Role
     // API endpoint to fetch fresh KPI data for live updates
     Route::get('/dashboard/kpi-data', [DashboardController::class, 'getKpiData'])->name('dashboard.kpi-data');
 
-    // Freeloaders topbar widget — Ravens Closers without a sale today
+    // Chill Party topbar widget — Ravens Closers without a sale today
     Route::get('/api/freeloaders', [DashboardController::class, 'freeloaders'])->name('api.freeloaders');
+
+    // EMS 🏖️ button — manually pin/unpin an employee in the Chill Party widget
+    Route::post('/api/chill-party/toggle', [DashboardController::class, 'toggleChillParty'])->name('api.chill-party.toggle');
 });
 
 // Team Dashboards — access controlled by role.permission:team-dashboards,level
@@ -548,6 +551,13 @@ Route::group(['prefix' => 'petty-cash', 'as' => 'petty-cash.', 'middleware' => [
 
 // Accounting Ledger (Double-Entry) — access controlled by role.permission:accounting,level
 Route::group(['prefix' => 'admin/accounting', 'as' => 'admin.accounting.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+
+    // Accounting Dashboard
+    Route::get('/', [LedgerJournalController::class, 'dashboard'])->name('dashboard')->middleware('role.permission:accounting,view');
+
+    // Sales Ledger (AR sub-ledger)
+    Route::get('/sales-ledger', [LedgerJournalController::class, 'salesLedger'])->name('sales-ledger')->middleware('role.permission:accounting,view');
+    Route::get('/sales-ledger/{partnerId}', [LedgerJournalController::class, 'salesLedgerPartner'])->name('sales-ledger.partner')->middleware('role.permission:accounting,view');
 
     // Journal Entries list + detail
     Route::get('/journal', [LedgerJournalController::class, 'index'])->name('journal.index')->middleware('role.permission:accounting,view');

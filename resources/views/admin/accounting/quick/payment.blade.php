@@ -38,6 +38,7 @@
 @endsection
 
 @section('content')
+@include('admin.accounting._nav')
 <div class="container-fluid">
 
     <div class="d-flex align-items-center gap-3 mb-3" style="font-size:.82rem;color:#888;">

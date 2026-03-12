@@ -203,7 +203,7 @@
                     </button>
                 </div>
 
-                {{-- Freeloaders (Ravens Closers with no sale today) --}}
+                {{-- Chill Party (Ravens Closers with no sale today) --}}
                 @include('components.freeloaders-widget')
 
                 {{-- Notifications --}}
@@ -1098,6 +1098,7 @@
     <script src="{{ URL::asset('js/crm-security.js') }}?v={{ filemtime(public_path('js/crm-security.js')) }}"></script>
 
     @stack('scripts')
+    @yield('script')
 
 </body>
 </html>
