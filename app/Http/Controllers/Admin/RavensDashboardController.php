@@ -563,11 +563,12 @@ class RavensDashboardController extends Controller
             if ($request->filled('source')) {
                 $updateData['source'] = $request->input('source');
             }
-            
-            if ($request->filled('closer_name')) {
-                $updateData['closer_name'] = $request->input('closer_name');
-            }
-            
+
+            // Always derive closer_name from the authenticated user — never trust raw form input.
+            // This prevents mismatches like "Roman" vs "Roman Ijaz" that break salary/revenue queries.
+            $updateData['closer_name'] = Auth::user()->name;
+            $updateData['closer_id']   = Auth::id();
+
             if ($request->filled('height')) {
                 $updateData['height'] = $request->input('height');
             }
@@ -799,10 +800,10 @@ class RavensDashboardController extends Controller
                 $updateData['source'] = $request->input('source');
             }
             
-            if ($request->filled('closer_name')) {
-                $updateData['closer_name'] = $request->input('closer_name');
-            }
-            
+            // Always use the authenticated user's canonical name — never trust the form value.
+            // Prevents mismatches (e.g. "Roman" vs "Roman Ijaz") in salary/revenue calculations.
+            $updateData['closer_name'] = Auth::user()->name;
+
             if ($request->filled('state')) {
                 $updateData['state'] = $request->input('state');
             }
@@ -877,10 +878,27 @@ class RavensDashboardController extends Controller
 
             // Mark as sold - pending status for QA review
             $updateData['status'] = 'pending'; // Sale status - pending QA review
-            $updateData['sale_at'] = now();
-            $updateData['sale_date'] = now()->format('Y-m-d');
             $updateData['team'] = Teams::RAVENS; // Mark as Ravens team sale
             $updateData['closer_id'] = Auth::id(); // Store user ID for reliable matching
+
+            if (!empty($lead->sale_at)) {
+                // ── RE-SUBMISSION: lead already had a sale – preserve original date ──
+                // Do NOT overwrite sale_at / sale_date; just log the re-submission.
+                $log = $lead->resale_log ?? [];
+                $log[] = [
+                    'closer_id'    => Auth::id(),
+                    'closer_name'  => Auth::user()->name,
+                    'submitted_at' => now()->toDateTimeString(),
+                ];
+                $updateData['resale_count'] = ($lead->resale_count ?? 0) + 1;
+                $updateData['resale_log']   = $log;
+                // Remove sale_at / sale_date from update so they are never touched
+                unset($updateData['sale_at'], $updateData['sale_date']);
+            } else {
+                // First time being sold – stamp the original sale date
+                $updateData['sale_at']   = now();
+                $updateData['sale_date'] = now()->format('Y-m-d');
+            }
 
             $lead->update($updateData);
 

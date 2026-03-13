@@ -235,6 +235,14 @@ class FollowupController extends Controller
      */
     public function report(Request $request)
     {
+        // Default to current month if no date filter is applied (mirrors issuance page behaviour)
+        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+            $request->merge([
+                'date_from' => now()->startOfMonth()->toDateString(),
+                'date_to'   => now()->endOfMonth()->toDateString(),
+            ]);
+        }
+
         // Base: only leads with a followup person assigned
         $baseQuery = fn() => Lead::whereNotNull('assigned_followup_person');
 
@@ -255,16 +263,18 @@ class FollowupController extends Controller
             ->groupBy('assigned_followup_person', 'followup_status')
             ->get();
 
-        // Count pending (unassigned) leads — leads eligible for followup but not yet assigned
+        // Count pending (unassigned) leads — same base query as the issuance/policy-submission page
+        // but scoped to those not yet assigned a followup person
         $pendingQuery = Lead::whereNull('assigned_followup_person')
-            ->whereNotNull('sale_at')
             ->whereNotNull('closer_name')
-            ->where('manager_status', \App\Support\Statuses::MGR_APPROVED);
+            ->whereNotNull('sale_at')
+            ->where('manager_status', \App\Support\Statuses::MGR_APPROVED)
+            ->where(fn($q) => $q->whereNull('followup_status')->orWhere('followup_status', '!=', 'Yes'));
         if ($request->filled('date_from')) {
-            $pendingQuery->whereDate('sale_at', '>=', $request->date_from);
+            $pendingQuery->whereDate('sale_date', '>=', $request->date_from);
         }
         if ($request->filled('date_to')) {
-            $pendingQuery->whereDate('sale_at', '<=', $request->date_to);
+            $pendingQuery->whereDate('sale_date', '<=', $request->date_to);
         }
         $totalUnassigned = $pendingQuery->count();
 

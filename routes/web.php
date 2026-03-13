@@ -956,6 +956,9 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     // Dashboard page (serves the SPA frontend)
     Route::get('/scoring', [\App\Http\Controllers\QA\QADashboardController::class, 'index'])->name('qa.scoring');
 
+    // Script editor page
+    Route::get('/script', [\App\Http\Controllers\QA\QADashboardController::class, 'showScript'])->name('qa.script');
+
     // API endpoints
     Route::get('/api/overview', [\App\Http\Controllers\QA\QADashboardController::class, 'overview'])->name('qa.api.overview');
     Route::get('/api/agents/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'agentDetail'])->name('qa.api.agent');
@@ -963,6 +966,10 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     Route::get('/api/calls/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'callDetail'])->name('qa.api.call');
     Route::get('/api/sales', [\App\Http\Controllers\QA\QADashboardController::class, 'salesQA'])->name('qa.api.sales');
     Route::post('/api/rerun-today', [\App\Http\Controllers\QA\QADashboardController::class, 'rerunToday'])->name('qa.api.rerun-today');
+    Route::get('/api/qa-status', [\App\Http\Controllers\QA\QADashboardController::class, 'qaStatus'])->name('qa.api.status');
+    Route::post('/api/toggle', [\App\Http\Controllers\QA\QADashboardController::class, 'toggleQa'])->name('qa.api.toggle');
+    Route::post('/api/script', [\App\Http\Controllers\QA\QADashboardController::class, 'saveScript'])->name('qa.api.script.save');
+    Route::post('/api/script/reset', [\App\Http\Controllers\QA\QADashboardController::class, 'resetScript'])->name('qa.api.script.reset');
 });
 
 // Catch-all route - MUST BE LAST

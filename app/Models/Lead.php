@@ -98,6 +98,8 @@ class Lead extends Model
         // Sale tracking
         'sale_date',
         'sale_at',
+        'resale_count',
+        'resale_log',
 
         // Issuance fields
         'issuance_status',
@@ -221,6 +223,7 @@ class Lead extends Model
         'manager_reviewed_at' => 'datetime',
         'followup_assigned_at' => 'datetime',
         'bank_verifier_assigned_at' => 'datetime',
+        'resale_log' => 'array',
     ];
 
     /**

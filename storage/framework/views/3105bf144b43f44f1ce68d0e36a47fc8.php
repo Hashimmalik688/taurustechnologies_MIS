@@ -58,7 +58,7 @@
     /* KPI Row */
     .sl-kpi-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: .75rem;
         margin-bottom: 1rem;
     }
@@ -72,6 +72,16 @@
         transition: transform .15s, box-shadow .15s;
     }
     .sl-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+    .sl-kpi-link {
+        text-decoration: none; color: inherit; display: block;
+        border-radius: 10px;
+    }
+    .sl-kpi-link:hover .sl-kpi { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); cursor: pointer; }
+    .sl-kpi.active-tab {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 2px rgba(212,175,55,.3), 0 4px 16px rgba(0,0,0,.08) !important;
+        background: rgba(212,175,55,.06) !important;
+    }
     .sl-kpi-icon {
         width: 38px; height: 38px; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
@@ -391,6 +401,10 @@
     }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi-label { color: #94a3b8; }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi-val { color: #f1f5f9; }
+    :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi.active-tab {
+        background: rgba(212,175,55,.1) !important; border-color: #d4af37 !important;
+        box-shadow: 0 0 0 2px rgba(212,175,55,.25), 0 4px 16px rgba(0,0,0,.2) !important;
+    }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-card {
         background: rgba(30,41,59,.65); border-color: rgba(255,255,255,.06);
     }
@@ -456,6 +470,9 @@
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-cdd-chevron path { fill: #64748b; }
 
     /* Responsiveness */
+    @media (max-width: 992px) {
+        .sl-kpi-row { grid-template-columns: repeat(3, 1fr); }
+    }
     @media (max-width: 768px) {
         .sl-kpi-row { grid-template-columns: repeat(2, 1fr); }
         .sl-topbar { flex-direction: column; align-items: flex-start; }
@@ -475,23 +492,42 @@
         </div>
     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-    <!-- KPI Cards -->
+    <!-- KPI Tab Cards -->
+    <?php
+        $tabBaseQuery = request()->except('status', 'page');
+    ?>
     <div class="sl-kpi-row">
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $statusCounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <?php
-                $iconMap = ['pending' => 'pending', 'accepted' => 'approved', 'rejected' => 'declined', 'underwritten' => 'uw'];
-                $mdiMap = ['pending' => 'mdi-clock-outline', 'accepted' => 'mdi-check-circle', 'rejected' => 'mdi-close-circle', 'underwritten' => 'mdi-file-document-edit'];
-                $labelMap = ['pending' => 'Pending', 'accepted' => 'Approved', 'rejected' => 'Declined', 'underwritten' => 'Underwriting'];
-            ?>
-            <div class="sl-kpi">
-                <div class="sl-kpi-icon <?php echo e($iconMap[$status] ?? 'pending'); ?>">
-                    <i class="mdi <?php echo e($mdiMap[$status] ?? 'mdi-information'); ?>"></i>
+        
+        <a href="<?php echo e(route('sales.index', $tabBaseQuery)); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e(!request('status') ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #64748b, #475569);">
+                    <i class="mdi mdi-view-list"></i>
                 </div>
                 <div class="sl-kpi-info">
-                    <span class="sl-kpi-label"><?php echo e($labelMap[$status] ?? ucfirst($status)); ?></span>
-                    <span class="sl-kpi-val"><?php echo e(number_format($count)); ?></span>
+                    <span class="sl-kpi-label">All Sales</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format(array_sum($statusCounts))); ?></span>
                 </div>
             </div>
+        </a>
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $statusCounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
+                $iconMap    = ['pending' => 'pending', 'approved' => 'approved', 'declined' => 'declined', 'underwriting' => 'uw'];
+                $mdiMap     = ['pending' => 'mdi-clock-outline', 'approved' => 'mdi-check-circle', 'declined' => 'mdi-close-circle', 'underwriting' => 'mdi-file-document-edit'];
+                $labelMap   = ['pending' => 'Pending', 'approved' => 'Approved', 'declined' => 'Declined', 'underwriting' => 'Underwriting'];
+                $tabUrl     = route('sales.index', array_merge($tabBaseQuery, ['status' => $status]));
+            ?>
+            <a href="<?php echo e($tabUrl); ?>" class="sl-kpi-link">
+                <div class="sl-kpi <?php echo e(request('status') === $status ? 'active-tab' : ''); ?>">
+                    <div class="sl-kpi-icon <?php echo e($iconMap[$status] ?? 'pending'); ?>">
+                        <i class="mdi <?php echo e($mdiMap[$status] ?? 'mdi-information'); ?>"></i>
+                    </div>
+                    <div class="sl-kpi-info">
+                        <span class="sl-kpi-label"><?php echo e($labelMap[$status] ?? ucfirst($status)); ?></span>
+                        <span class="sl-kpi-val"><?php echo e(number_format($count)); ?></span>
+                    </div>
+                </div>
+            </a>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
@@ -520,18 +556,15 @@
     <div class="sl-card">
         <!-- Filter Pills -->
         <form method="GET" action="<?php echo e(route('sales.index')); ?>" id="salesFilterForm" class="sl-filter-pills">
+            
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request('status')): ?>
+                <input type="hidden" name="status" value="<?php echo e(request('status')); ?>">
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All Carriers</option>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <option value="<?php echo e($carrier); ?>" <?php echo e(request('carrier') == $carrier ? 'selected' : ''); ?>><?php echo e($carrier); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-            </select>
-            <select name="status" class="sl-pill-select" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="pending" <?php echo e(request('status') == Statuses::LEAD_PENDING ? 'selected' : ''); ?>>Pending</option>
-                <option value="accepted" <?php echo e(request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : ''); ?>>Approved</option>
-                <option value="rejected" <?php echo e(request('status') == Statuses::LEAD_REJECTED ? 'selected' : ''); ?>>Declined</option>
-                <option value="underwritten" <?php echo e(request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : ''); ?>>Underwriting</option>
             </select>
             <select name="policy_type" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">Policy Type</option>
@@ -677,6 +710,21 @@
                                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                 <?php else: ?>
                                                     <span class="text-muted">—</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                                <?php if (\Illuminate\Support\Facades\Blade::check('hasrole', [\App\Support\Roles::SUPER_ADMIN, \App\Support\Roles::MANAGER])): ?>
+                                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(($lead->resale_count ?? 0) > 0): ?>
+                                                        <?php
+                                                            $resaleTip = collect($lead->resale_log ?? [])
+                                                                ->map(fn($e) => ($e['closer_name'] ?? '?') . ' (' . \Carbon\Carbon::parse($e['submitted_at'])->format('M d, g:i A') . ')')
+                                                                ->join(' | ');
+                                                        ?>
+                                                        <span class="badge bg-warning text-dark ms-1"
+                                                              title="Re-submitted <?php echo e($lead->resale_count); ?>x — <?php echo e($resaleTip); ?>"
+                                                              style="cursor:help">
+                                                            <i class="bx bx-refresh"></i> Re-sold &times;<?php echo e($lead->resale_count); ?>
+
+                                                        </span>
+                                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>

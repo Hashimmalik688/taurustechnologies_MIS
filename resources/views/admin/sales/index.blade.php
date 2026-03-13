@@ -58,7 +58,7 @@
     /* KPI Row */
     .sl-kpi-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: .75rem;
         margin-bottom: 1rem;
     }
@@ -72,6 +72,16 @@
         transition: transform .15s, box-shadow .15s;
     }
     .sl-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.06); }
+    .sl-kpi-link {
+        text-decoration: none; color: inherit; display: block;
+        border-radius: 10px;
+    }
+    .sl-kpi-link:hover .sl-kpi { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.1); cursor: pointer; }
+    .sl-kpi.active-tab {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 0 2px rgba(212,175,55,.3), 0 4px 16px rgba(0,0,0,.08) !important;
+        background: rgba(212,175,55,.06) !important;
+    }
     .sl-kpi-icon {
         width: 38px; height: 38px; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
@@ -391,6 +401,10 @@
     }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi-label { color: #94a3b8; }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi-val { color: #f1f5f9; }
+    :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-kpi.active-tab {
+        background: rgba(212,175,55,.1) !important; border-color: #d4af37 !important;
+        box-shadow: 0 0 0 2px rgba(212,175,55,.25), 0 4px 16px rgba(0,0,0,.2) !important;
+    }
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-card {
         background: rgba(30,41,59,.65); border-color: rgba(255,255,255,.06);
     }
@@ -456,6 +470,9 @@
     :is(:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]),[data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-cdd-chevron path { fill: #64748b; }
 
     /* Responsiveness */
+    @media (max-width: 992px) {
+        .sl-kpi-row { grid-template-columns: repeat(3, 1fr); }
+    }
     @media (max-width: 768px) {
         .sl-kpi-row { grid-template-columns: repeat(2, 1fr); }
         .sl-topbar { flex-direction: column; align-items: flex-start; }
@@ -474,23 +491,42 @@
         </div>
     @endif
 
-    <!-- KPI Cards -->
+    <!-- KPI Tab Cards -->
+    @php
+        $tabBaseQuery = request()->except('status', 'page');
+    @endphp
     <div class="sl-kpi-row">
-        @foreach($statusCounts as $status => $count)
-            @php
-                $iconMap = ['pending' => 'pending', 'accepted' => 'approved', 'rejected' => 'declined', 'underwritten' => 'uw'];
-                $mdiMap = ['pending' => 'mdi-clock-outline', 'accepted' => 'mdi-check-circle', 'rejected' => 'mdi-close-circle', 'underwritten' => 'mdi-file-document-edit'];
-                $labelMap = ['pending' => 'Pending', 'accepted' => 'Approved', 'rejected' => 'Declined', 'underwritten' => 'Underwriting'];
-            @endphp
-            <div class="sl-kpi">
-                <div class="sl-kpi-icon {{ $iconMap[$status] ?? 'pending' }}">
-                    <i class="mdi {{ $mdiMap[$status] ?? 'mdi-information' }}"></i>
+        {{-- All tab --}}
+        <a href="{{ route('sales.index', $tabBaseQuery) }}" class="sl-kpi-link">
+            <div class="sl-kpi {{ !request('status') ? 'active-tab' : '' }}">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #64748b, #475569);">
+                    <i class="mdi mdi-view-list"></i>
                 </div>
                 <div class="sl-kpi-info">
-                    <span class="sl-kpi-label">{{ $labelMap[$status] ?? ucfirst($status) }}</span>
-                    <span class="sl-kpi-val">{{ number_format($count) }}</span>
+                    <span class="sl-kpi-label">All Sales</span>
+                    <span class="sl-kpi-val">{{ number_format(array_sum($statusCounts)) }}</span>
                 </div>
             </div>
+        </a>
+        {{-- Per-status tabs --}}
+        @foreach($statusCounts as $status => $count)
+            @php
+                $iconMap    = ['pending' => 'pending', 'approved' => 'approved', 'declined' => 'declined', 'underwriting' => 'uw'];
+                $mdiMap     = ['pending' => 'mdi-clock-outline', 'approved' => 'mdi-check-circle', 'declined' => 'mdi-close-circle', 'underwriting' => 'mdi-file-document-edit'];
+                $labelMap   = ['pending' => 'Pending', 'approved' => 'Approved', 'declined' => 'Declined', 'underwriting' => 'Underwriting'];
+                $tabUrl     = route('sales.index', array_merge($tabBaseQuery, ['status' => $status]));
+            @endphp
+            <a href="{{ $tabUrl }}" class="sl-kpi-link">
+                <div class="sl-kpi {{ request('status') === $status ? 'active-tab' : '' }}">
+                    <div class="sl-kpi-icon {{ $iconMap[$status] ?? 'pending' }}">
+                        <i class="mdi {{ $mdiMap[$status] ?? 'mdi-information' }}"></i>
+                    </div>
+                    <div class="sl-kpi-info">
+                        <span class="sl-kpi-label">{{ $labelMap[$status] ?? ucfirst($status) }}</span>
+                        <span class="sl-kpi-val">{{ number_format($count) }}</span>
+                    </div>
+                </div>
+            </a>
         @endforeach
     </div>
 
@@ -519,18 +555,15 @@
     <div class="sl-card">
         <!-- Filter Pills -->
         <form method="GET" action="{{ route('sales.index') }}" id="salesFilterForm" class="sl-filter-pills">
+            {{-- Preserve active status tab when other filters change --}}
+            @if(request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
             <select name="carrier" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">All Carriers</option>
                 @foreach($carriers as $carrier)
                     <option value="{{ $carrier }}" {{ request('carrier') == $carrier ? 'selected' : '' }}>{{ $carrier }}</option>
                 @endforeach
-            </select>
-            <select name="status" class="sl-pill-select" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="pending" {{ request('status') == Statuses::LEAD_PENDING ? 'selected' : '' }}>Pending</option>
-                <option value="accepted" {{ request('status') == Statuses::LEAD_ACCEPTED ? 'selected' : '' }}>Approved</option>
-                <option value="rejected" {{ request('status') == Statuses::LEAD_REJECTED ? 'selected' : '' }}>Declined</option>
-                <option value="underwritten" {{ request('status') == Statuses::LEAD_UNDERWRITTEN ? 'selected' : '' }}>Underwriting</option>
             </select>
             <select name="policy_type" class="sl-pill-select" onchange="this.form.submit()">
                 <option value="">Policy Type</option>
@@ -677,6 +710,20 @@
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif
+                                                @hasrole([\App\Support\Roles::SUPER_ADMIN, \App\Support\Roles::MANAGER])
+                                                    @if(($lead->resale_count ?? 0) > 0)
+                                                        @php
+                                                            $resaleTip = collect($lead->resale_log ?? [])
+                                                                ->map(fn($e) => ($e['closer_name'] ?? '?') . ' (' . \Carbon\Carbon::parse($e['submitted_at'])->format('M d, g:i A') . ')')
+                                                                ->join(' | ');
+                                                        @endphp
+                                                        <span class="badge bg-warning text-dark ms-1"
+                                                              title="Re-submitted {{ $lead->resale_count }}x — {{ $resaleTip }}"
+                                                              style="cursor:help">
+                                                            <i class="bx bx-refresh"></i> Re-sold &times;{{ $lead->resale_count }}
+                                                        </span>
+                                                    @endif
+                                                @endhasrole
                                             </td>
                                             <td>
                                                 <div class="sl-edit-cell">

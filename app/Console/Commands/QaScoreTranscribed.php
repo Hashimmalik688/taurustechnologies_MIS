@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\QA\DownloadAndProcessRecording;
 use App\Models\QA\QaCall;
+use App\Models\Setting;
 use Illuminate\Console\Command;
 
 class QaScoreTranscribed extends Command
@@ -18,6 +19,13 @@ class QaScoreTranscribed extends Command
     {
         $dryRun     = $this->option('dry-run');
         $resetStuck = $this->option('reset-stuck');
+
+        // Respect the global QA enabled toggle
+        if (! Setting::get('qa_enabled', true)) {
+            $this->warn('QA scoring is currently PAUSED (qa_enabled = false). No jobs dispatched.');
+            $this->line('Resume by toggling QA on in the dashboard at /qa/scoring.');
+            return self::SUCCESS;
+        }
 
         $calls = QaCall::whereNotNull('transcript_plain')
             ->where('transcript_plain', '!=', '')

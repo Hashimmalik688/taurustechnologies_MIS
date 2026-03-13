@@ -9,6 +9,7 @@ use App\Models\Lead;
 use App\Models\CallEvent;
 use App\Models\CallLog;
 use App\Models\QA\QaCall;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\ZoomWebhookLog;
 use App\Traits\SanitizesPhoneNumbers;
@@ -714,8 +715,12 @@ class ZoomWebhookController extends Controller
             'duration' => $duration,
         ]);
 
-        // Dispatch processing job to qa-processing queue
-        DownloadAndProcessRecording::dispatch($qaCall->id);
+        // Dispatch processing job to qa-processing queue (only if QA scoring is enabled)
+        if (Setting::get('qa_enabled', true)) {
+            DownloadAndProcessRecording::dispatch($qaCall->id);
+        } else {
+            Log::info('[QA:Webhook] QA scoring is paused — skipping dispatch', ['qa_call_id' => $qaCall->id]);
+        }
     }
 
     /**
@@ -789,7 +794,11 @@ class ZoomWebhookController extends Controller
                 Log::info('[QA:Webhook] Re-queuing call with transcript URL', [
                     'qa_call_id' => $qaCall->id,
                 ]);
-                DownloadAndProcessRecording::dispatch($qaCall->id);
+                if (Setting::get('qa_enabled', true)) {
+                    DownloadAndProcessRecording::dispatch($qaCall->id);
+                } else {
+                    Log::info('[QA:Webhook] QA scoring is paused — skipping re-queue', ['qa_call_id' => $qaCall->id]);
+                }
             } else {
                 Log::info('[QA:Webhook] Call already scored, skipping re-queue', [
                     'qa_call_id' => $qaCall->id,
@@ -836,7 +845,11 @@ class ZoomWebhookController extends Controller
                 'processing_status'  => 'pending',
             ]);
 
-            DownloadAndProcessRecording::dispatch($qaCall->id);
+            if (Setting::get('qa_enabled', true)) {
+                DownloadAndProcessRecording::dispatch($qaCall->id);
+            } else {
+                Log::info('[QA:Webhook] QA scoring is paused — new transcript call queued but not dispatched', ['qa_call_id' => $qaCall->id]);
+            }
         } else {
             Log::info('[QA:Webhook] transcript_completed — skipping (no existing call, or too short/missing data)', [
                 'zoom_call_id' => $zoomCallId,

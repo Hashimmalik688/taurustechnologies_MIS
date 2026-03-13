@@ -303,14 +303,9 @@ class LeadController extends Controller
             $query->where('carrier_name', $request->carrier);
         }
         
-        // Filter by status
-        // Note: 'pending' filter includes both 'pending' and 'sale' status
+        // Filter by manager_status (pending / approved / declined / underwriting)
         if ($request->filled('status')) {
-            if ($request->status == Statuses::LEAD_PENDING) {
-                $query->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_SALE]);
-            } else {
-                $query->where('status', $request->status);
-            }
+            $query->where('manager_status', $request->status);
         }
         
         // Filter by policy type
@@ -361,10 +356,10 @@ class LeadController extends Controller
             ->first();
         
         $statusCounts = [
-            'pending' => (int) ($statusAgg->pending_count ?? 0),
-            'accepted' => (int) ($statusAgg->accepted_count ?? 0),
-            'rejected' => (int) ($statusAgg->rejected_count ?? 0),
-            'underwritten' => (int) ($statusAgg->underwritten_count ?? 0),
+            'pending'     => (int) ($statusAgg->pending_count ?? 0),
+            'approved'    => (int) ($statusAgg->accepted_count ?? 0),
+            'declined'    => (int) ($statusAgg->rejected_count ?? 0),
+            'underwriting' => (int) ($statusAgg->underwritten_count ?? 0),
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
@@ -767,6 +762,9 @@ class LeadController extends Controller
             $lead->save();
             return response()->json(['success' => true, 'message' => 'Follow-up scheduled time updated']);
         }
+
+        $validFields = ['carrier', 'policy_type', 'coverage', 'premium', 'initial_draft', 'future_draft'];
+
         if (!in_array($field, $validFields)) {
             return response()->json([
                 'success' => false,

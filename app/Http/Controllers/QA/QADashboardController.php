@@ -7,7 +7,9 @@ use App\Models\QA\QaCall;
 use App\Models\QA\QaComplianceFlag;
 use App\Models\QA\QaDailyStat;
 use App\Models\QA\QaResult;
+use App\Models\Setting;
 use App\Models\User;
+use App\Services\QA\QAScoringPrompt;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -949,6 +951,98 @@ class QADashboardController extends Controller
                 'last_page' => $calls->lastPage(),
                 'total' => $calls->total(),
             ],
+        ]);
+    }
+
+    // ── GET /qa/api/qa-status ──────────────────────────────────────────────
+    // Returns whether QA scoring is currently enabled and custom prompt info.
+
+    public function qaStatus(): JsonResponse
+    {
+        return response()->json([
+            'qa_enabled'    => (bool) Setting::get('qa_enabled', true),
+            'scored_custom' => QAScoringPrompt::hasCustomPrompt(),
+        ]);
+    }
+
+    // ── POST /qa/api/toggle ───────────────────────────────────────────────
+    // Toggle QA scoring on or off globally.
+
+    public function toggleQa(Request $request): JsonResponse
+    {
+        $current = (bool) Setting::get('qa_enabled', true);
+        $newValue = ! $current;
+
+        Setting::set('qa_enabled', $newValue ? '1' : '0', 'boolean', 'Whether QA scoring agent processes new calls', 'qa');
+
+        Log::info('[QA] QA scoring toggled', [
+            'by_user' => auth()->user()?->name ?? 'unknown',
+            'enabled' => $newValue,
+        ]);
+
+        return response()->json([
+            'qa_enabled' => $newValue,
+            'message'    => $newValue ? 'QA scoring resumed.' : 'QA scoring paused. Future calls will not be scored.',
+        ]);
+    }
+
+    // ── GET /qa/script ────────────────────────────────────────────────────
+    // Show the QA script editor page.
+
+    public function showScript()
+    {
+        $template  = QAScoringPrompt::getTemplate();
+        $hasCustom = QAScoringPrompt::hasCustomPrompt();
+
+        return view('qa.script', compact('template', 'hasCustom'));
+    }
+
+    // ── POST /qa/api/script ───────────────────────────────────────────────
+    // Save a custom QA scoring script/template.
+
+    public function saveScript(Request $request): JsonResponse
+    {
+        $request->validate([
+            'type'    => 'required|in:scored',
+            'content' => 'required|string|min:100',
+        ]);
+
+        $type    = $request->input('type');
+        $content = $request->input('content');
+
+        QAScoringPrompt::saveTemplate($type, $content);
+
+        Log::info('[QA] QA prompt template updated', [
+            'type'    => $type,
+            'by_user' => auth()->user()?->name ?? 'unknown',
+            'length'  => strlen($content),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Scoring script saved. New calls will use this prompt.',
+        ]);
+    }
+
+    // ── POST /qa/api/script/reset ─────────────────────────────────────────
+    // Reset a QA scoring script back to the built-in default.
+
+    public function resetScript(Request $request): JsonResponse
+    {
+        $request->validate(['type' => 'required|in:scored']);
+        $type = $request->input('type');
+
+        QAScoringPrompt::resetTemplate($type);
+
+        Log::info('[QA] QA prompt template reset to default', [
+            'type'    => $type,
+            'by_user' => auth()->user()?->name ?? 'unknown',
+        ]);
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Script reset to built-in default.',
+            'template' => QAScoringPrompt::getTemplate($type),
         ]);
     }
 }
