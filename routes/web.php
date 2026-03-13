@@ -89,11 +89,8 @@ Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Role
     // API endpoint to fetch fresh KPI data for live updates
     Route::get('/dashboard/kpi-data', [DashboardController::class, 'getKpiData'])->name('dashboard.kpi-data');
 
-    // Chill Party topbar widget — Ravens Closers without a sale today
+    // Chill Party topbar widget — ALL Ravens Closers with sale status for today
     Route::get('/api/freeloaders', [DashboardController::class, 'freeloaders'])->name('api.freeloaders');
-
-    // EMS 🏖️ button — manually pin/unpin an employee in the Chill Party widget
-    Route::post('/api/chill-party/toggle', [DashboardController::class, 'toggleChillParty'])->name('api.chill-party.toggle');
 });
 
 // Team Dashboards — access controlled by role.permission:team-dashboards,level
@@ -660,6 +657,7 @@ Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'midd
     Route::post('/{device}/disable', [DeviceController::class, 'disable'])->name('disable')->middleware('role.permission:allowed-devices,edit');
     Route::post('/{device}/enable', [DeviceController::class, 'enable'])->name('enable')->middleware('role.permission:allowed-devices,edit');
     Route::delete('/{device}', [DeviceController::class, 'destroy'])->name('destroy')->middleware('role.permission:allowed-devices,full');
+    Route::post('/reject-all', [DeviceController::class, 'rejectAllPending'])->name('reject-all')->middleware('role.permission:allowed-devices,full');
 });
 
 // Reports — access controlled by role.permission:reports,level

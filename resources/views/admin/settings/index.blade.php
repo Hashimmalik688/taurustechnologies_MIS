@@ -83,7 +83,7 @@
                 <div class="sec-body" style="padding:.75rem">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
                         @foreach ($groupSettings as $setting)
-                            @if($setting->key !== 'late_threshold_minutes' && $setting->key !== 'office_networks')
+                            @if($setting->key !== 'late_threshold_minutes')
                             <div style="{{ $setting->type === 'array' ? 'grid-column:1/-1' : '' }}">
                                 <label class="f-label">
                                     {{ ucwords(str_replace('_', ' ', str_replace($group . '_', '', $setting->key))) }}
@@ -113,6 +113,11 @@
                                     </div>
                                     <button type="button" class="act-btn a-primary" style="margin-top:.2rem" onclick="addNetwork()"><i class="bx bx-plus"></i> Add Network</button>
                                     <div class="f-help">Enter IP addresses or CIDR ranges (e.g., 192.168.1.0/24)</div>
+                                @elseif(str_contains($setting->key, 'zoom') || str_contains($setting->key, 'did'))
+                                    <div style="background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:.65rem;font-family:monospace;font-size:.72rem;max-height:200px;overflow-y:auto;word-break:break-all">
+                                        {{ $setting->value }}
+                                    </div>
+                                    <div class="f-help">Read-only — managed by Zoom integration</div>
                                 @else
                                     <input type="{{ in_array($setting->key, ['office_start_time','office_end_time','late_time']) ? 'time' : 'text' }}"
                                         class="f-input" id="{{ $setting->key }}" name="settings[{{ $setting->key }}]"
@@ -154,7 +159,13 @@
 
             {{-- Pending --}}
             @if($pending->count())
-                <p class="f-label" style="color:#b89730;margin-bottom:.4rem">Pending Approval</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+                    <p class="f-label" style="color:#b89730;margin-bottom:0">Pending Approval</p>
+                    <form action="{{ route('settings.devices.reject-all') }}" method="POST" style="display:inline" onsubmit="return confirm('Reject ALL pending tokens? This cannot be undone.')">
+                        @csrf
+                        <button class="act-btn a-danger" style="font-size:.68rem;padding:.2rem .5rem"><i class="bx bx-trash"></i> Reject All</button>
+                    </form>
+                </div>
                 <div class="table-responsive" style="margin-bottom:1rem">
                     <table class="table table-sm" style="font-size:.75rem">
                         <thead><tr><th>Token</th><th>IP</th><th>First Seen</th><th></th></tr></thead>
@@ -352,8 +363,13 @@
 
             {{-- Rejected (permanently blocked) --}}
             @if($rejected->count())
-                <p class="f-label" style="margin-bottom:.4rem;color:#dc3545">Rejected Devices <span style="font-weight:400;font-size:.7rem;color:var(--bs-surface-500)">(permanently blocked — these tokens cannot log in ever again)</span></p>
-                <div class="table-responsive" style="margin-bottom:1rem">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+                    <p class="f-label" style="color:#dc3545;margin-bottom:0">Rejected Devices <span style="font-weight:400;font-size:.7rem;color:var(--bs-surface-500)">(permanently blocked)</span></p>
+                    <button type="button" class="act-btn" style="font-size:.68rem;padding:.2rem .5rem" onclick="toggleRejected()" id="rejected-toggle-btn">
+                        <i class="bx bx-chevron-down" id="rejected-toggle-icon" style="font-size:.8rem;vertical-align:middle"></i> Show
+                    </button>
+                </div>
+                <div class="table-responsive" style="margin-bottom:1rem;display:none !important" id="rejected-table-container">
                     <table class="table table-sm" style="font-size:.75rem">
                         <thead><tr><th>Person</th><th>Label</th><th>Token</th><th style="width:1px"></th></tr></thead>
                         <tbody>
@@ -455,5 +471,18 @@
                 });
             });
         });
+
+        function toggleRejected() {
+            const container = document.getElementById('rejected-table-container');
+            const btn = document.getElementById('rejected-toggle-btn');
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                btn.innerHTML = '<i class="bx bx-chevron-up" style="font-size:.8rem;vertical-align:middle"></i> Hide';
+            } else {
+                container.style.display = 'none';
+                btn.innerHTML = '<i class="bx bx-chevron-down" style="font-size:.8rem;vertical-align:middle"></i> Show';
+            }
+        }
     </script>
 @endsection

@@ -159,6 +159,9 @@
                         <span class="th-brand-tag">mis</span>
                     </div>
                 </div>
+
+                
+                <?php echo $__env->make('components.freeloaders-widget', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <div class="th-right">
@@ -202,9 +205,6 @@
                         <i class="bx bx-note"></i>
                     </button>
                 </div>
-
-                
-                <?php echo $__env->make('components.freeloaders-widget', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
                 
                 <div class="position-relative">

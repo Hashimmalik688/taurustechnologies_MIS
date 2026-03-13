@@ -159,6 +159,9 @@
                         <span class="th-brand-tag">mis</span>
                     </div>
                 </div>
+
+                {{-- Chill Party strip — next to brand, shows who hasn't sold today --}}
+                @include('components.freeloaders-widget')
             </div>
 
             <div class="th-right">
@@ -202,9 +205,6 @@
                         <i class="bx bx-note"></i>
                     </button>
                 </div>
-
-                {{-- Chill Party (Ravens Closers with no sale today) --}}
-                @include('components.freeloaders-widget')
 
                 {{-- Notifications --}}
                 <div class="position-relative">

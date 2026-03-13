@@ -89,4 +89,10 @@ class DeviceController extends Controller
         $device->update(['status' => 'rejected']);
         return redirect()->back()->with('success', 'Device "' . $label . '" rejected and permanently blocked.');
     }
+
+    public function rejectAllPending()
+    {
+        $count = AllowedDevice::where('status', 'pending')->update(['status' => 'rejected']);
+        return redirect()->back()->with('success', $count . ' pending device(s) rejected and permanently blocked.');
+    }
 }

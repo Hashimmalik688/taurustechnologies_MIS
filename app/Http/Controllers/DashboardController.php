@@ -577,9 +577,9 @@ class DashboardController extends Controller
     }
 
     /**
-     * Chill Party API — Ravens Closers who haven't made a sale today
-     * plus any employees manually pinned via the EMS page.
-     * Used by the topbar "Chill Party" widget (visible to everyone).
+     * Chill Party API — all active Ravens Closers with their sale status for today.
+     * Those without a sale today are the "chill party".
+     * Used by the topbar Chill Party widget (always visible).
      */
     public function freeloaders()
     {
@@ -598,60 +598,29 @@ class DashboardController extends Controller
         $photosByEmail = Employee::whereIn('email', $allRavensClosers->pluck('email'))
             ->pluck('passport_image', 'email');
 
-        $freeloaderUsers = $allRavensClosers
+        $freeloaderNames = $allRavensClosers
             ->filter(fn($u) => !$closersWithSaleToday->contains($u->name))
-            ->sortBy('name')
+            ->pluck('name')
             ->values();
 
-        $freeloaderNames = $freeloaderUsers->pluck('name')->values();
-
-        // Manually pinned employees from the EMS page (stored in Cache, expires at end of day)
-        $pinnedKey  = 'chill_party_pinned_' . today()->toDateString();
-        $pinned     = collect(Cache::get($pinnedKey, []));
-
-        // Build the rich list: auto-detected first, then pinned (de-duplicated by name)
-        $autoList = $freeloaderUsers->map(fn($u) => [
-            'name'   => $u->name,
-            'photo'  => $photosByEmail->get($u->email)
-                            ? asset('storage/' . $photosByEmail->get($u->email))
-                            : null,
-            'pinned' => false,
-        ]);
-
-        $extraPinned = $pinned->filter(fn($p) => !$freeloaderNames->contains($p['name']))->values();
-
-        $chillParty = $autoList->concat($extraPinned)->values();
+        // Return all closers: no-sale first, then sold — each with hasSale flag
+        $allClosers = $allRavensClosers
+            ->sortBy(fn($u) => $closersWithSaleToday->contains($u->name) ? 1 : 0) // no-sale first
+            ->map(fn($u) => [
+                'name'    => $u->name,
+                'photo'   => $photosByEmail->get($u->email)
+                                ? asset('storage/' . $photosByEmail->get($u->email))
+                                : null,
+                'hasSale' => $closersWithSaleToday->contains($u->name),
+            ])
+            ->values();
 
         return response()->json([
-            'freeloaders' => $freeloaderNames,          // kept for popup JS
-            'chillParty'  => $chillParty,
-            'count'       => $chillParty->count(),
+            'freeloaders' => $freeloaderNames,          // kept for motivational popup JS
+            'allClosers'  => $allClosers,
+            'chillParty'  => $allClosers->filter(fn($c) => !$c['hasSale'])->values(), // compat
+            'count'       => $freeloaderNames->count(),
             'total'       => $allRavensClosers->count(),
         ]);
-    }
-
-    /**
-     * Toggle an employee in/out of the manually-pinned Chill Party list.
-     * Called from the EMS page 🏖️ button.
-     */
-    public function toggleChillParty(Request $request)
-    {
-        $name  = $request->input('name');
-        $photo = $request->input('photo'); // may be null
-
-        $key    = 'chill_party_pinned_' . today()->toDateString();
-        $pinned = collect(Cache::get($key, []));
-
-        if ($pinned->firstWhere('name', $name)) {
-            $pinned = $pinned->reject(fn($p) => $p['name'] === $name)->values();
-            $isPinned = false;
-        } else {
-            $pinned->push(['name' => $name, 'photo' => $photo, 'pinned' => true]);
-            $isPinned = true;
-        }
-
-        Cache::put($key, $pinned->all(), now()->endOfDay());
-
-        return response()->json(['pinned' => $isPinned]);
     }
 }

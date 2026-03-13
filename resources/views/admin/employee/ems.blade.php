@@ -80,9 +80,6 @@
         background: rgba(212,175,55,.08) !important;
         border-color: #d4af37 !important; color: #b89730 !important;
     }
-    /* Chill Party pin button */
-    .act-btn.a-chill { border-color: rgba(249,115,22,.35); background: rgba(249,115,22,.08); color: #f97316; }
-    .act-btn.a-chill:hover { background: rgba(249,115,22,.2); }
 </style>
 @endsection
 
@@ -194,18 +191,26 @@
                                         @endif
                                     </td>
                                     @php
-                                        $isPinned = in_array($emp->name, $pinnedNames ?? []);
                                         $empPhoto = $emp->passport_image ? asset('storage/'.$emp->passport_image) : '';
                                     @endphp
                                     <td>
                                         <div class="d-flex gap-1 flex-wrap">
                                             <button class="act-btn a-warn" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ $emp->id }}" title="Edit"><i class="bx bx-edit"></i></button>
                                             <button class="act-btn a-danger" onclick="deleteEmployee({{ $emp->id }}, '{{ addslashes($emp->name) }}');" title="Delete"><i class="bx bx-trash"></i></button>
-                                            <button class="act-btn {{ $isPinned ? 'a-chill' : 'a-secondary' }} cp-toggle-btn"
-                                                onclick="cpToggle({{ $emp->id }}, '{{ addslashes($emp->name) }}', '{{ addslashes($empPhoto) }}')"
-                                                title="{{ $isPinned ? 'Remove from Chill Party' : 'Pin to Chill Party' }}"
-                                                data-emp-id="{{ $emp->id }}"
-                                            >🏖️</button>
+                                            @if($emp->passport_image)
+                                                <button class="act-btn a-info"
+                                                    onclick="showCpPhoto('{{ addslashes($emp->name) }}', '{{ addslashes($empPhoto) }}')"
+                                                    title="View passport photo"
+                                                    style="font-size:.78rem;font-weight:700;width:auto;padding:0 8px;border-radius:8px;gap:4px;display:inline-flex;align-items:center;"
+                                                ><i class="bx bx-image" style="font-size:.9rem;"></i> Photo</button>
+                                            @else
+                                                <button class="act-btn a-secondary"
+                                                    onclick="showCpPhoto('{{ addslashes($emp->name) }}', '')"
+                                                    title="No photo uploaded"
+                                                    style="font-size:.78rem;font-weight:600;width:auto;padding:0 8px;border-radius:8px;gap:4px;display:inline-flex;align-items:center;opacity:.45;cursor:default;"
+                                                    disabled
+                                                ><i class="bx bx-image-alt" style="font-size:.9rem;"></i> No Photo</button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -445,33 +450,7 @@ $(document).ready(function() {
 function deleteEmployee(id, name) { if (confirm('Delete ' + name + '? This cannot be undone.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '@csrf @method("DELETE")'; document.body.appendChild(f); f.submit(); } }
 function permanentDelete(id, name) { if (confirm('PERMANENTLY delete ' + name + '? All records will be removed.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '@csrf @method("DELETE")'; document.body.appendChild(f); f.submit(); } }
 
-// Chill Party toggle — pins/unpins an employee in the topbar widget
-function cpToggle(id, name, photo) {
-    const btn = document.querySelector('[data-emp-id="' + id + '"]');
-    fetch('{{ route("api.chill-party.toggle") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content,
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({ name: name, photo: photo || null })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (btn) {
-            if (data.pinned) {
-                btn.classList.remove('a-secondary');
-                btn.classList.add('a-chill');
-                btn.title = 'Remove from Chill Party';
-            } else {
-                btn.classList.remove('a-chill');
-                btn.classList.add('a-secondary');
-                btn.title = 'Pin to Chill Party';
-            }
-        }
-    })
-    .catch(function() {});
-}
+// Chill Party photo viewer — shows the employee's passport photo
+// (the 🏖️ button now opens a preview; chill party membership is auto-detected based on today's sales)
 </script>
 @endsection

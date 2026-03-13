@@ -1,503 +1,426 @@
-{{-- ┌─────────────────────────────────────────────────────────────────────────┐
-     │  Chill Party Widget — Topbar dropdown                                  │
-     │  Shows Ravens Closers who haven't made a sale today.                   │
-     │  Name drops off the list the moment a sale is submitted. Daily reset.  │
-     │  Visible to: all authenticated users                                   │
-     └─────────────────────────────────────────────────────────────────────────┘ --}}
+{{-- ┌────────────────────────────────────────────────────────────────────────┐
+     │  Chill Party Strip — Topbar (next to taurus.mis)                      │
+     │  • Only shows Ravens Closers who have NOT made a sale today           │
+     │  • Auto-scrolling ticker when >5 chips (loops forever)               │
+     │  • Photo modal & motivational popup injected into <body> by JS        │
+     │    → avoids sticky/stacking-context trapping issues                   │
+     └────────────────────────────────────────────────────────────────────────┘ --}}
 
 @auth
 <style>
-    /* ── Button ─────────────────────────────────────────── */
-    .fl-btn {
-        position: relative;
-    }
-    .fl-trigger {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 42px;
-        height: 42px;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #f97316 0%, #ec4899 50%, #8b5cf6 100%);
-        box-shadow: 0 3px 12px rgba(236,72,153,.45), 0 1px 4px rgba(0,0,0,.2);
-        cursor: pointer;
-        font-size: 1.35rem;
-        line-height: 1;
-        transition: transform .15s, box-shadow .15s;
-        animation: fl-pulse 2.8s ease-in-out infinite;
-    }
-    .fl-trigger:hover {
-        transform: scale(1.1);
-        box-shadow: 0 5px 18px rgba(236,72,153,.6), 0 2px 6px rgba(0,0,0,.25);
-        animation: none;
-    }
-    @keyframes fl-pulse {
-        0%,100% { box-shadow: 0 3px 12px rgba(236,72,153,.45); }
-        50%      { box-shadow: 0 3px 22px rgba(139,92,246,.7); }
-    }
+/* ── Chip strip ───────────────────────────────────────────────────────── */
+.cp-topbar {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    border-left: 1px solid rgba(0,0,0,.09);
+    padding-left: 1rem;
+    margin-left: .5rem;
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: 480px;
+}
+.cp-topbar-label {
+    font-size: .63rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #f97316;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.cp-rail-wrap {
+    position: relative;
+    overflow: hidden;
+    max-width: 360px;
+    min-width: 60px;
+    flex: 1 1 auto;
+}
+/* Fade edges */
+.cp-rail-wrap::before,
+.cp-rail-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 24px;
+    z-index: 2;
+    pointer-events: none;
+}
+.cp-rail-wrap::before { left: 0;  background: linear-gradient(to right,  var(--cp-bg, #fff), transparent); }
+.cp-rail-wrap::after  { right: 0; background: linear-gradient(to left, var(--cp-bg, #fff), transparent); }
 
-    /* ── Badge ──────────────────────────────────────────── */
-    .fl-badge {
-        position: absolute;
-        top: -4px; right: -4px;
-        min-width: 18px; height: 18px;
-        background: #ef4444;
-        color: #fff;
-        font-size: .65rem;
-        font-weight: 800;
-        border-radius: 99px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 4px;
-        line-height: 1;
-        pointer-events: none;
-        border: 2px solid var(--bs-card-bg, #fff);
-        box-shadow: 0 1px 4px rgba(0,0,0,.3);
-    }
-    .fl-badge.d-none { display: none !important; }
+/* Theme bg vars for the fade edges */
+[data-theme="midnight-black"]  { --cp-bg: #050505; }
+[data-theme="emerald-glass"]   { --cp-bg: #061209; }
+[data-theme="ocean-blue"]      { --cp-bg: #060e1a; }
+[data-theme="royal-purple"]    { --cp-bg: #0d0720; }
+[data-theme="rose-gold"]       { --cp-bg: #1a0d12; }
+[data-theme="copper-steel"]    { --cp-bg: #0d0d10; }
 
-    /* ── Dropdown ───────────────────────────────────────── */
-    .fl-dropdown {
-        display: none;
-        position: absolute;
-        top: calc(100% + 10px);
-        right: 0;
-        width: 245px;
-        background: var(--bs-card-bg, #fff);
-        border: 1px solid rgba(212,175,55,.18);
-        border-radius: 14px;
-        box-shadow: 0 10px 40px rgba(0,0,0,.22);
-        z-index: 9999;
-        overflow: hidden;
-    }
-    .fl-dropdown.open { display: block; }
+/* Static rail (few chips) */
+.cp-rail {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+/* Scrolling ticker mode */
+.cp-rail.ticker {
+    display: flex;
+    width: max-content;
+    animation: cp-ticker linear infinite;
+}
+@keyframes cp-ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+/* Pause on hover */
+.cp-rail-wrap:hover .cp-rail.ticker { animation-play-state: paused; }
 
-    .fl-header {
-        padding: .65rem 1rem;
-        border-bottom: 1px solid rgba(212,175,55,.12);
-        font-size: .74rem;
-        font-weight: 800;
-        letter-spacing: .04em;
-        background: linear-gradient(90deg, rgba(249,115,22,.08), rgba(139,92,246,.08));
-        color: var(--bs-gold, #d4af37);
-        display: flex;
-        align-items: center;
-        gap: .4rem;
-    }
-    .fl-header .fl-total {
-        margin-left: auto;
-        font-size: .63rem;
-        font-weight: 600;
-        color: var(--bs-surface-400, #94a3b8);
-        background: rgba(0,0,0,.07);
-        border-radius: 99px;
-        padding: 2px 8px;
-    }
+/* Individual chip */
+.cp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    border-radius: 99px;
+    padding: 0 9px 0 3px;
+    border: 1.5px solid rgba(249,115,22,.5);
+    background: rgba(249,115,22,.07);
+    white-space: nowrap;
+    flex-shrink: 0;
+    animation: cp-chip-pulse 3s ease-in-out infinite;
+    transition: transform .15s;
+}
+.cp-chip:hover { transform: scale(1.06); animation: none; box-shadow: 0 2px 10px rgba(249,115,22,.3); }
+@keyframes cp-chip-pulse {
+    0%,100% { box-shadow: none; }
+    50%      { box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+}
+.cp-chip-photo {
+    width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+    border: 1.5px solid rgba(249,115,22,.45); flex-shrink: 0; display: block;
+}
+.cp-chip-init {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #f97316, #ec4899);
+    color: #fff; font-size: .52rem; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.cp-chip-name {
+    font-size: .69rem; font-weight: 700; color: #c2410c;
+}
+.cp-all-sold {
+    font-size: .69rem; font-weight: 700; color: #16a34a; white-space: nowrap;
+}
+.cp-sold-badge {
+    display: inline-flex; align-items: center; gap: .25rem;
+    font-size: .64rem; font-weight: 700; color: #16a34a;
+    background: rgba(22,163,74,.08); border: 1px solid rgba(22,163,74,.25);
+    border-radius: 99px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
+}
 
-    .fl-list {
-        max-height: 240px;
-        overflow-y: auto;
-        padding: .35rem 0;
-    }
-    .fl-item {
-        display: flex;
-        align-items: center;
-        gap: .55rem;
-        padding: .4rem 1rem;
-        font-size: .76rem;
-        font-weight: 500;
-        color: var(--bs-body-color);
-        transition: background .12s;
-    }
-    .fl-item:hover { background: rgba(212,175,55,.06); }
-    .fl-item-avatar {
-        width: 24px; height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #f97316, #ec4899);
-        color: #fff;
-        font-size: .62rem;
-        font-weight: 700;
-        display: inline-flex; align-items: center; justify-content: center;
-        flex-shrink: 0;
-    }
-    .fl-item-photo {
-        width: 24px; height: 24px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-        border: 1px solid rgba(236,72,153,.35);
-    }
-    .fl-pin-badge { font-size: .58rem; opacity: .7; margin-left: .1rem; }
-
-    .fl-empty {
-        padding: 1.2rem 1rem;
-        text-align: center;
-        font-size: .73rem;
-        color: #22c55e;
-        font-weight: 700;
-    }
-    .fl-empty .fl-empty-icon {
-        font-size: 1.4rem;
-        display: block;
-        margin-bottom: .3rem;
-    }
-
-    .fl-footer {
-        padding: .4rem .75rem;
-        border-top: 1px solid rgba(212,175,55,.1);
-        font-size: .62rem;
-        color: var(--bs-surface-400, #94a3b8);
-        text-align: center;
-    }
-
-    /* ── Freeloader Popup ───────────────────────────────── */
-    .fl-popup-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,.55);
-        z-index: 99999;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(3px);
-    }
-    .fl-popup-overlay.show { display: flex; }
-
-    .fl-popup {
-        background: var(--bs-card-bg, #1a1a2e);
-        border-radius: 20px;
-        padding: 2rem 2.2rem 1.6rem;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,.5),
-                    0 0 0 1px rgba(236,72,153,.25),
-                    0 0 40px rgba(139,92,246,.18);
-        border: 1px solid rgba(236,72,153,.2);
-        animation: fl-popup-in .35s cubic-bezier(.22,1,.36,1) forwards;
-        position: relative;
-        overflow: hidden;
-    }
-    .fl-popup::before {
-        content: '';
-        position: absolute;
-        top: -40px; left: 50%;
-        transform: translateX(-50%);
-        width: 160px; height: 80px;
-        background: radial-gradient(ellipse, rgba(236,72,153,.3) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    @keyframes fl-popup-in {
-        from { opacity: 0; transform: scale(.85) translateY(20px); }
-        to   { opacity: 1; transform: scale(1)  translateY(0); }
-    }
-
-    .fl-popup-emoji {
-        font-size: 3rem;
-        display: block;
-        margin-bottom: .5rem;
-        animation: fl-emoji-bounce 1s ease-in-out infinite alternate;
-    }
-    @keyframes fl-emoji-bounce {
-        from { transform: translateY(0); }
-        to   { transform: translateY(-6px); }
-    }
-
-    .fl-popup-title {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #fff;
-        margin-bottom: .55rem;
-        line-height: 1.3;
-    }
-    .fl-popup-body {
-        font-size: .85rem;
-        color: rgba(255,255,255,.72);
-        line-height: 1.55;
-        margin-bottom: 1.4rem;
-    }
-    .fl-popup-cta {
-        display: inline-block;
-        padding: .6rem 1.8rem;
-        border-radius: 99px;
-        background: linear-gradient(135deg, #f97316, #ec4899);
-        color: #fff;
-        font-size: .88rem;
-        font-weight: 700;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 14px rgba(236,72,153,.4);
-        transition: transform .15s, box-shadow .15s;
-        letter-spacing: .02em;
-    }
-    .fl-popup-cta:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(236,72,153,.55);
-    }
-    .fl-popup-dismiss {
-        display: block;
-        margin: .75rem auto 0;
-        background: none;
-        border: none;
-        color: rgba(255,255,255,.35);
-        font-size: .72rem;
-        cursor: pointer;
-        transition: color .15s;
-    }
-    .fl-popup-dismiss:hover { color: rgba(255,255,255,.6); }
+/* dark chipname */
+:is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],
+    [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .cp-chip-name {
+    color: #fb923c;
+}
+:is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],
+    [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .cp-topbar {
+    border-left-color: rgba(255,255,255,.08);
+}
 </style>
 
-<div class="position-relative fl-btn" id="freeloadersWidget">
-    <button class="fl-trigger" onclick="toggleFreeloarders(event)" title="Chill Party — Ravens Closers with no sale today">
-        🏖️
-        <span class="fl-badge d-none" id="flBadge">0</span>
-    </button>
-
-    <div class="fl-dropdown" id="flDropdown">
-        <div class="fl-header">
-            🏖️ Chill Party
-            <span class="fl-total" id="flTotal"></span>
+{{-- Strip markup lives inside th-left — modals injected into <body> by JS --}}
+<div class="cp-topbar" id="chillPartyStrip">
+    <span class="cp-topbar-label">Chill Party</span>
+    <div class="cp-rail-wrap" id="cpRailWrap">
+        <div class="cp-rail" id="cpRail">
+            <span style="font-size:.65rem;color:#94a3b8">Loading…</span>
         </div>
-        <div class="fl-list" id="flList">
-            <div class="fl-item" style="justify-content:center;color:var(--bs-surface-400)">
-                <i class="bx bx-loader-alt bx-spin"></i>&nbsp;Loading…
-            </div>
-        </div>
-        <div class="fl-footer" id="flFooter">Refreshes every 60 s</div>
     </div>
+    <span class="cp-sold-badge d-none" id="cpSoldBadge">0 sold</span>
 </div>
-
-{{-- Chill Party popup — only rendered for Ravens Closers (shown via JS when they're on the list) --}}
-@hasrole('Ravens Closer')
-<div class="fl-popup-overlay" id="flPopupOverlay">
-    <div class="fl-popup" id="flPopup">
-        <span class="fl-popup-emoji" id="flPopupEmoji">🏖️</span>
-        <div class="fl-popup-title" id="flPopupTitle">You're in the Chill Party!</div>
-        <div class="fl-popup-body" id="flPopupBody">No sale yet today — time to change that.</div>
-        <button class="fl-popup-cta" onclick="closeFlPopup()">Let's get that sale! 🚀</button>
-        <button class="fl-popup-dismiss" onclick="closeFlPopup()">dismiss</button>
-    </div>
-</div>
-@endhasrole
 
 <script>
 (function () {
-    const POLL_MS = 60_000;
-    let flData = { freeloaders: [], chillParty: [], count: 0, total: 0 };
+    'use strict';
 
-    // ── Popup messages ────────────────────────────────────────────────────
-    // Each message: { emoji, title, body }  (alternates tease ↔ encourage)
-    const FL_MESSAGES = [
-        {
-            emoji: '😴',
-            title: 'Zero sales? Bold strategy.',
-            body: "Let's see how that plays out on the leaderboard… just saying 👀"
-        },
-        {
-            emoji: '📞',
-            title: 'The phone called.',
-            body: "It said you haven't picked it up enough today. One call is all it takes. Go get it. 💪"
-        },
-        {
-            emoji: '😏',
-            title: 'Even your shadow is doing more.',
-            body: "It's been following you around all day waiting for a sale. Don't disappoint it."
-        },
-        {
-            emoji: '🤔',
-            title: "Legend has it…",
-            body: "…there's this thing called a 'closed deal'. Some say it's possible. Why not find out today?"
-        },
-        {
-            emoji: '🏆',
-            title: "Champions don't wait for luck.",
-            body: "They pick up the phone, they pitch, and they close. You know the drill. NOW GO."
-        },
-        {
-            emoji: '👀',
-            title: 'The board is watching.',
-            body: "Your name is shining on the Chill Party list. Time to get it off. You've got this! 🔥"
-        },
-        {
-            emoji: '🚀',
-            title: "Today isn't over yet.",
-            body: "One sale changes everything. Stop reading this and go make it happen. Seriously. GO!"
-        },
-        {
-            emoji: '😅',
-            title: "Zero for zero? Respect the consistency.",
-            body: "But wouldn't it feel SO much better to close one? We both know the answer. Make the call."
-        },
-        {
-            emoji: '💸',
-            title: "Money doesn't close itself.",
-            body: "But you can. You've done it before. Stop overthinking and dial that next number. 💪"
-        },
-        {
-            emoji: '🎯',
-            title: "One shot, one close.",
-            body: "That's all you need. Everybody's rooting for you — now go prove them right! 🙌"
-        },
+    /* ─────────────────────────────────────────────────────────────────────
+       Inject modals into <body> so they escape the sticky topbar stacking
+       context. This is the key fix for position:fixed not working.
+    ───────────────────────────────────────────────────────────────────── */
+    function injectModals() {
+        if (document.getElementById('cpPhotoOverlay')) return; // already injected
+
+        /* Photo preview modal */
+        var photoHtml = [
+            '<div id="cpPhotoOverlay" style="',
+                'display:none;position:fixed;inset:0;',
+                'background:rgba(0,0,0,.65);',
+                'z-index:999999;',
+                'align-items:center;justify-content:center;',
+                'backdrop-filter:blur(5px);',
+            '">',
+              '<div id="cpPhotoCard" style="',
+                  'background:var(--bs-card-bg,#1a1a2e);',
+                  'border-radius:18px;padding:1.5rem 1.5rem 1.2rem;',
+                  'text-align:center;max-width:240px;width:90%;',
+                  'box-shadow:0 20px 60px rgba(0,0,0,.5);',
+                  'border:1px solid rgba(212,175,55,.2);',
+              '">',
+                '<div id="cpPhotoContent"></div>',
+                '<div id="cpPhotoName"   style="font-size:.9rem;font-weight:700;color:var(--bs-body-color);margin:.6rem 0 .2rem"></div>',
+                '<div id="cpPhotoStatus" style="font-size:.73rem;font-weight:600;margin-bottom:.8rem"></div>',
+                '<button onclick="window.closeCpPhoto()" style="',
+                    'background:none;border:1px solid rgba(100,116,139,.25);',
+                    'border-radius:8px;color:#94a3b8;font-size:.72rem;',
+                    'padding:.3rem .9rem;cursor:pointer;',
+                '">Close</button>',
+              '</div>',
+            '</div>',
+        ].join('');
+
+        @hasrole('Ravens Closer')
+        /* Motivational popup — only for Ravens Closers */
+        var popupHtml = [
+            '<div id="flPopupOverlay" style="',
+                'display:none;position:fixed;inset:0;',
+                'background:rgba(0,0,0,.55);z-index:999998;',
+                'align-items:center;justify-content:center;',
+                'backdrop-filter:blur(3px);',
+            '">',
+              '<div id="flPopup" style="',
+                  'background:var(--bs-card-bg,#1a1a2e);',
+                  'border-radius:20px;padding:2rem 2.2rem 1.6rem;',
+                  'max-width:400px;width:90%;text-align:center;',
+                  'box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(236,72,153,.25);',
+                  'border:1px solid rgba(236,72,153,.2);position:relative;overflow:hidden;',
+              '">',
+                '<span id="flPopupEmoji"  style="font-size:3rem;display:block;margin-bottom:.5rem">🏖️</span>',
+                '<div  id="flPopupTitle" style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:.55rem;line-height:1.3"></div>',
+                '<div  id="flPopupBody"  style="font-size:.85rem;color:rgba(255,255,255,.72);line-height:1.55;margin-bottom:1.4rem"></div>',
+                '<button onclick="window.closeFlPopup()" style="',
+                    'display:inline-block;padding:.6rem 1.8rem;border-radius:99px;',
+                    'background:linear-gradient(135deg,#f97316,#ec4899);',
+                    'color:#fff;font-size:.88rem;font-weight:700;border:none;cursor:pointer;',
+                '">Let\'s get that sale! 🚀</button>',
+                '<button onclick="window.closeFlPopup()" style="',
+                    'display:block;margin:.75rem auto 0;background:none;border:none;',
+                    'color:rgba(255,255,255,.35);font-size:.72rem;cursor:pointer;',
+                '">dismiss</button>',
+              '</div>',
+            '</div>',
+        ].join('');
+        document.body.insertAdjacentHTML('beforeend', popupHtml);
+        @endhasrole
+
+        document.body.insertAdjacentHTML('beforeend', photoHtml);
+
+        /* Close on outside click */
+        document.addEventListener('click', function (e) {
+            var po = document.getElementById('flPopupOverlay');
+            if (po && po.style.display === 'flex' && !document.getElementById('flPopup').contains(e.target)) {
+                window.closeFlPopup();
+            }
+            var pho = document.getElementById('cpPhotoOverlay');
+            if (pho && pho.style.display === 'flex' && !document.getElementById('cpPhotoCard').contains(e.target)) {
+                window.closeCpPhoto();
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectModals);
+    } else {
+        injectModals();
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────
+       App state + polling
+    ───────────────────────────────────────────────────────────────────── */
+    var POLL_MS = 60000;
+    var cpData  = { freeloaders: [], allClosers: [], count: 0, total: 0 };
+    var TICKER_THRESHOLD = 5; // activate marquee when more than this many chips
+
+    /* ─────────────────────────────────────────────────────────────────────
+       Motivational popup messages
+    ───────────────────────────────────────────────────────────────────── */
+    var FL_MSG = [
+        { e:'😴', t:'Zero sales? Bold strategy.',              b:"Let's see how that plays out on the leaderboard… just saying 👀" },
+        { e:'📞', t:'The phone called.',                       b:"It said you haven't picked it up enough today. One call is all it takes. Go get it. 💪" },
+        { e:'😏', t:'Even your shadow is doing more.',         b:"It's been following you around all day waiting for a sale. Don't disappoint it." },
+        { e:'🤔', t:'Legend has it…',                          b:"…there's this thing called a 'closed deal'. Some say it's possible. Why not find out today?" },
+        { e:'🏆', t:"Champions don't wait for luck.",          b:"They pick up the phone, they pitch, and they close. You know the drill. NOW GO." },
+        { e:'👀', t:'The board is watching.',                  b:"Your name is on the Chill Party list. Time to get it off. You've got this! 🔥" },
+        { e:'🚀', t:"Today isn't over yet.",                   b:"One sale changes everything. Stop reading this and go make it happen. Seriously. GO!" },
+        { e:'😅', t:"Zero for zero? Respect the consistency.", b:"But wouldn't it feel SO much better to close one? Make the call." },
+        { e:'💸', t:"Money doesn't close itself.",             b:"But you can. Stop overthinking and dial that next number. 💪" },
+        { e:'🎯', t:"One shot, one close.",                    b:"That's all you need. Everybody's rooting for you — now prove them right! 🙌" },
     ];
 
-    // Storage key — rotates daily so it resets each day
-    const todayKey = 'fl_popup_' + new Date().toISOString().slice(0, 10);
+    var POPUP_KEY = 'fl_popup_' + new Date().toISOString().slice(0,10);
+    function popupCount()    { return parseInt(sessionStorage.getItem(POPUP_KEY) || '0', 10); }
+    function incPopupCount() { sessionStorage.setItem(POPUP_KEY, popupCount() + 1); }
 
-    function getPopupShownCount() {
-        return parseInt(sessionStorage.getItem(todayKey) || '0', 10);
-    }
-    function incPopupShownCount() {
-        sessionStorage.setItem(todayKey, getPopupShownCount() + 1);
-    }
-
-    // ── Show popup ───────────────────────────────────────────────────────
     function showFlPopup() {
-        const overlay = document.getElementById('flPopupOverlay');
-        if (!overlay) return; // not a Ravens Closer
-
-        const shown = getPopupShownCount();
-        if (shown >= 3) return; // max 3 times per session
-
-        const msg = FL_MESSAGES[Math.floor(Math.random() * FL_MESSAGES.length)];
-        document.getElementById('flPopupEmoji').textContent  = msg.emoji;
-        document.getElementById('flPopupTitle').textContent  = msg.title;
-        document.getElementById('flPopupBody').textContent   = msg.body;
-
-        overlay.classList.add('show');
-        incPopupShownCount();
+        var overlay = document.getElementById('flPopupOverlay');
+        if (!overlay || popupCount() >= 3) return;
+        var msg = FL_MSG[Math.floor(Math.random() * FL_MSG.length)];
+        document.getElementById('flPopupEmoji').textContent = msg.e;
+        document.getElementById('flPopupTitle').textContent = msg.t;
+        document.getElementById('flPopupBody').textContent  = msg.b;
+        overlay.style.display = 'flex';
+        incPopupCount();
     }
-
     window.closeFlPopup = function () {
-        document.getElementById('flPopupOverlay')?.classList.remove('show');
-        // Schedule next random appearance (only if user is still a freeloader)
+        var o = document.getElementById('flPopupOverlay');
+        if (o) o.style.display = 'none';
         scheduleNextPopup();
     };
-
-    // Close on overlay click (outside the card)
-    document.addEventListener('click', function (e) {
-        const overlay = document.getElementById('flPopupOverlay');
-        const popup   = document.getElementById('flPopup');
-        if (overlay?.classList.contains('show') && !popup?.contains(e.target)) {
-            window.closeFlPopup();
-        }
-    });
-
-    // Random delay: 2–7 minutes after dismiss / page load
     function scheduleNextPopup() {
-        if (getPopupShownCount() >= 3) return;
-        const delayMs = (2 + Math.random() * 5) * 60 * 1000; // 2–7 min
+        if (popupCount() >= 3) return;
         setTimeout(function () {
-            // Only show if the user is still a freeloader at that moment
-            if (flData.freeloaders.includes(FL_CURRENT_USER)) {
-                showFlPopup();
-            } else {
-                // They closed a sale — celebrate quietly, no popup needed
-            }
-        }, delayMs);
+            if (cpData.freeloaders.indexOf(FL_CURRENT_USER) !== -1) showFlPopup();
+        }, (2 + Math.random() * 5) * 60000);
     }
 
-    // ── Widget render / fetch ────────────────────────────────────────────
-    function renderFreeloarders() {
-        const badge  = document.getElementById('flBadge');
-        const list   = document.getElementById('flList');
-        const total  = document.getElementById('flTotal');
-        const footer = document.getElementById('flFooter');
+    /* ─────────────────────────────────────────────────────────────────────
+       HTML escape
+    ───────────────────────────────────────────────────────────────────── */
+    function esc(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function(c){
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
 
-        const count = flData.count;
-        const items = flData.chillParty || [];
+    /* ─────────────────────────────────────────────────────────────────────
+       Render chip strip + ticker logic
+    ───────────────────────────────────────────────────────────────────── */
+    function buildChipHtml(list) {
+        return list.map(function(c) {
+            var first    = esc(c.name.split(' ')[0]);
+            var initials = c.name.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+            var avatar   = c.photo
+                ? '<img class="cp-chip-photo" src="' + esc(c.photo) + '" alt="' + esc(c.name) + '">'
+                : '<span class="cp-chip-init">' + esc(initials) + '</span>';
+            return '<div class="cp-chip" title="' + esc(c.name) + '">' + avatar + '<span class="cp-chip-name">' + first + '</span></div>';
+        }).join('');
+    }
 
-        // Badge
-        if (count > 0) {
-            badge.textContent = count;
-            badge.classList.remove('d-none');
+    function renderStrip() {
+        var rail      = document.getElementById('cpRail');
+        var soldBadge = document.getElementById('cpSoldBadge');
+        var closers   = cpData.allClosers || [];
+        var noSale    = closers.filter(function(c){ return !c.hasSale; });
+        var sold      = closers.filter(function(c){ return  c.hasSale; });
+
+        /* Sold badge */
+        if (sold.length) {
+            soldBadge.textContent = '✅ ' + sold.length + ' sold';
+            soldBadge.classList.remove('d-none');
         } else {
-            badge.classList.add('d-none');
+            soldBadge.classList.add('d-none');
         }
 
-        // Total pill
-        const autoSold = Math.max(0, flData.total - (items.filter(i => !i.pinned).length));
-        total.textContent = `${autoSold} / ${flData.total} sold`;
+        if (!noSale.length) {
+            rail.className = 'cp-rail';
+            rail.style.animation = '';
+            rail.innerHTML = '<span class="cp-all-sold">🎉 Everyone sold today!</span>';
+            return;
+        }
 
-        // List
-        if (count === 0) {
-            list.innerHTML = `<div class="fl-empty">
-                <span class="fl-empty-icon">🎉</span>
-                No one in the Chill Party!<br>
-                <span style="font-weight:400;color:var(--bs-surface-400)">Everyone's on fire today.</span>
-            </div>`;
+        var chipsHtml = buildChipHtml(noSale);
+
+        if (noSale.length > TICKER_THRESHOLD) {
+            /* Ticker mode — duplicate chips for seamless loop */
+            rail.className = 'cp-rail ticker';
+            rail.innerHTML = chipsHtml + chipsHtml; // duplicate
+            /* Speed: ~60px/s — adjust duration based on how much content */
+            var chipWidth = 90; // approx px per chip incl gap
+            var totalPx   = noSale.length * chipWidth;
+            var duration  = Math.max(8, totalPx / 60); // seconds
+            rail.style.animationDuration = duration + 's';
         } else {
-            list.innerHTML = items.map(item => {
-                const initials = item.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase();
-                const avatar = item.photo
-                    ? `<img src="${escHtml(item.photo)}" class="fl-item-photo" alt="${escHtml(item.name)}">`
-                    : `<span class="fl-item-avatar">${escHtml(initials)}</span>`;
-                const pin = item.pinned ? ' <span class="fl-pin-badge">📌</span>' : '';
-                return `<div class="fl-item">
-                    ${avatar}
-                    ${escHtml(item.name)}${pin}
-                </div>`;
-            }).join('');
+            /* Static mode */
+            rail.className = 'cp-rail';
+            rail.style.animation = '';
+            rail.innerHTML = chipsHtml;
+        }
+    }
+
+    /* ─────────────────────────────────────────────────────────────────────
+       Photo preview — called by EMS "Photo" button
+    ───────────────────────────────────────────────────────────────────── */
+    window.showCpPhoto = function(name, photoUrl) {
+        var overlay   = document.getElementById('cpPhotoOverlay');
+        var contentEl = document.getElementById('cpPhotoContent');
+        var nameEl    = document.getElementById('cpPhotoName');
+        var statusEl  = document.getElementById('cpPhotoStatus');
+        if (!overlay) return;
+
+        nameEl.textContent = name;
+
+        var closer = (cpData.allClosers || []).filter(function(c){ return c.name === name; })[0];
+        if (closer && closer.hasSale) {
+            statusEl.innerHTML = '<span style="color:#16a34a">✅ Sale closed today</span>';
+        } else if (closer) {
+            statusEl.innerHTML = '<span style="color:#f97316">🏖️ In Chill Party — no sale yet</span>';
+        } else {
+            statusEl.textContent = '';
         }
 
-        // Footer timestamp
-        const now = new Date();
-        footer.textContent = `Last updated ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} · refreshes every 60 s`;
-    }
-
-    function escHtml(str) {
-        return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    let firstFetch = true;
-
-    function fetchFreeloarders() {
-        fetch('{{ route('api.freeloaders') }}', {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-            if (data) {
-                flData = { ...data, chillParty: data.chillParty || [] };
-                renderFreeloarders();
-                // On first fetch, schedule the first popup if user is a freeloader
-                if (firstFetch) {
-                    firstFetch = false;
-                    if (flData.freeloaders.includes(FL_CURRENT_USER)) {
-                        scheduleNextPopup();
-                    }
-                }
-            }
-        })
-        .catch(() => {}); // silent fail — non-critical widget
-    }
-
-    window.toggleFreeloarders = function (e) {
-        e.stopPropagation();
-        const dd = document.getElementById('flDropdown');
-        dd.classList.toggle('open');
-        // Close other dropdowns
-        if (dd.classList.contains('open')) {
-            document.getElementById('notificationDropdown')?.classList.remove('show');
+        if (photoUrl) {
+            contentEl.innerHTML = '<img src="' + esc(photoUrl) + '" alt="' + esc(name) + '" style="' +
+                'width:150px;height:150px;border-radius:50%;object-fit:cover;' +
+                'border:3px solid #f97316;box-shadow:0 0 24px rgba(249,115,22,.4);' +
+                'display:block;margin:0 auto .8rem;">';
+        } else {
+            var init = name.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+            contentEl.innerHTML = '<div style="' +
+                'width:150px;height:150px;border-radius:50%;margin:0 auto .8rem;' +
+                'background:linear-gradient(135deg,#f97316,#ec4899);' +
+                'display:flex;align-items:center;justify-content:center;' +
+                'font-size:3rem;font-weight:800;color:#fff;border:3px solid #f97316;">' +
+                esc(init) + '</div>';
         }
+
+        overlay.style.display = 'flex';
+    };
+    window.closeCpPhoto = function() {
+        var o = document.getElementById('cpPhotoOverlay');
+        if (o) o.style.display = 'none';
     };
 
-    // Close on outside click
-    document.addEventListener('click', function (e) {
-        const widget = document.getElementById('freeloadersWidget');
-        if (widget && !widget.contains(e.target)) {
-            document.getElementById('flDropdown')?.classList.remove('open');
-        }
-    });
+    /* ─────────────────────────────────────────────────────────────────────
+       Fetch & poll
+    ───────────────────────────────────────────────────────────────────── */
+    var firstFetch = true;
+    function fetchCpData() {
+        fetch('{{ route('api.freeloaders') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(data) {
+            if (!data) return;
+            cpData = {
+                freeloaders: data.freeloaders || [],
+                allClosers:  data.allClosers  || data.chillParty || [],
+                count:       data.count  || 0,
+                total:       data.total  || 0,
+            };
+            renderStrip();
+            if (firstFetch) {
+                firstFetch = false;
+                if (cpData.freeloaders.indexOf(FL_CURRENT_USER) !== -1) scheduleNextPopup();
+            }
+        })
+        .catch(function(){});
+    }
 
-    // Current user name — used to detect if the logged-in Ravens Closer is a freeloader
-    const FL_CURRENT_USER = '{{ addslashes(auth()->user()->name) }}';
-
-    // Initial load + polling
-    fetchFreeloarders();
-    setInterval(fetchFreeloarders, POLL_MS);
+    var FL_CURRENT_USER = '{{ addslashes(auth()->user()->name) }}';
+    fetchCpData();
+    setInterval(fetchCpData, POLL_MS);
 })();
 </script>
 @endauth
