@@ -595,8 +595,12 @@ class DashboardController extends Controller
             ->unique();
 
         // Fetch passport photos for Ravens Closers (matched by email → employees table)
-        $photosByEmail = Employee::whereIn('email', $allRavensClosers->pluck('email'))
-            ->pluck('passport_image', 'email');
+        // Only include photo when show_strip_photo = true
+        $empRows = Employee::whereIn('email', $allRavensClosers->pluck('email'))
+            ->get(['email', 'passport_image', 'show_strip_photo']);
+        $photosByEmail = $empRows->mapWithKeys(fn($e) => [
+            $e->email => ($e->show_strip_photo && $e->passport_image) ? $e->passport_image : null,
+        ]);
 
         $freeloaderNames = $allRavensClosers
             ->filter(fn($u) => !$closersWithSaleToday->contains($u->name))

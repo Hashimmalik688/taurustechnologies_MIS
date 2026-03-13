@@ -108,6 +108,27 @@
 .cp-all-sold {
     font-size: .69rem; font-weight: 700; color: #16a34a; white-space: nowrap;
 }
+/* Toggle photo button */
+.cp-photo-toggle {
+    flex-shrink: 0;
+    background: none;
+    border: 1px solid rgba(249,115,22,.35);
+    border-radius: 6px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: .6rem;
+    color: #f97316;
+    line-height: 1;
+    transition: background .15s, border-color .15s;
+    display: inline-flex; align-items: center; gap: 3px;
+}
+.cp-photo-toggle:hover { background: rgba(249,115,22,.12); border-color: rgba(249,115,22,.7); }
+.cp-photo-toggle.toggled { background: rgba(249,115,22,.15); border-color: rgba(249,115,22,.7); }
+/* When photos hidden: hide img, show initials (only for chips that have a photo) */
+.cp-photos-hidden .cp-chip.cp-has-photo .cp-chip-photo { display: none !important; }
+.cp-photos-hidden .cp-chip.cp-has-photo .cp-chip-init  { display: inline-flex !important; }
+/* Default: photo shown, initials hidden — only when chip has a photo */
+.cp-chip.cp-has-photo .cp-chip-init { display: none; }
 .cp-sold-badge {
     display: inline-flex; align-items: center; gap: .25rem;
     font-size: .64rem; font-weight: 700; color: #16a34a;

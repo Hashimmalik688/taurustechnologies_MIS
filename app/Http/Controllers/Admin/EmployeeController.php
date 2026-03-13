@@ -374,4 +374,13 @@ class EmployeeController extends Controller
                 ->with('error', 'Error restoring employee: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Toggle whether this employee's photo shows in the chill-party strip.
+     */
+    public function toggleStripPhoto(Employee $employee)
+    {
+        $employee->update(['show_strip_photo' => !$employee->show_strip_photo]);
+        return response()->json(['show_strip_photo' => $employee->show_strip_photo]);
+    }
 }

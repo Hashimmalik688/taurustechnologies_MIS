@@ -19,10 +19,12 @@ class Employee extends Model
         'status',
         'mis',
         'passport_image',
+        'show_strip_photo',
         'date_of_termination',
     ];
 
     protected $casts = [
         'date_of_termination' => 'date',
+        'show_strip_photo'    => 'boolean',
     ];
 }

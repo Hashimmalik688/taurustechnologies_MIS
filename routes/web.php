@@ -151,6 +151,7 @@ Route::group(['prefix' => 'ems', 'as' => 'employee.', 'middleware' => ['auth', R
     Route::delete('/terminate/{id}', [EmployeeController::class, 'terminate'])->name('terminate')->middleware('role.permission:ems,full');
     Route::post('/restore/{id}', [EmployeeController::class, 'restore'])->name('restore')->middleware('role.permission:ems,edit');
     Route::delete('/{id}', [EmployeeController::class, 'destroy'])->name('destroy')->middleware('role.permission:ems,full');
+    Route::post('/toggle-strip-photo/{employee}', [EmployeeController::class, 'toggleStripPhoto'])->name('toggle-strip-photo')->middleware('role.permission:ems,edit');
 });
 
 // Dupe Checker — access controlled by role.permission:duplicate-checker,level

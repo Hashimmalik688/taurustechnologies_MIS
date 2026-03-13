@@ -1,12 +1,12 @@
-@use('App\Support\Roles')
-@extends('layouts.master')
+<?php use \App\Support\Roles; ?>
 
-@section('title', 'Employee Management Sheet (E.M.S)')
 
-@section('css')
-<link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-<link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
-@include('partials.pipeline-dashboard-styles')
+<?php $__env->startSection('title', 'Employee Management Sheet (E.M.S)'); ?>
+
+<?php $__env->startSection('css'); ?>
+<link href="<?php echo e(URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css')); ?>" rel="stylesheet" type="text/css" />
+<link href="<?php echo e(URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css')); ?>" rel="stylesheet" type="text/css" />
+<?php echo $__env->make('partials.pipeline-dashboard-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <style>
     .ems-hdr {
         display: flex; justify-content: space-between; align-items: center;
@@ -85,9 +85,9 @@
         border-color: #d4af37 !important; color: #b89730 !important;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="ems-hdr">
         <div>
@@ -101,38 +101,38 @@
             <button class="act-btn a-info" data-bs-toggle="modal" data-bs-target="#importEmployeeModal">
                 <i class="bx bx-upload"></i> Import CSV
             </button>
-            <a href="{{ route('employee.export') }}" class="act-btn a-success">
+            <a href="<?php echo e(route('employee.export')); ?>" class="act-btn a-success">
                 <i class="bx bx-download"></i> Export CSV
             </a>
         </div>
     </div>
 
-    @php
+    <?php
         $terminatedEmployees = $employees->filter(fn($e) => $e->status === 'Terminated');
         $activeEmployees = $employees->filter(fn($e) => $e->status !== 'Terminated');
         $misCount = $employees->where('mis', 'Yes')->count();
         $activeCount = $employees->where('status', 'Active')->count();
-    @endphp
+    ?>
 
     <div class="kpi-row">
         <div class="kpi-card k-gold">
             <span class="k-icon"><i class="bx bx-group"></i></span>
-            <span class="k-val">{{ $activeEmployees->count() }}</span>
+            <span class="k-val"><?php echo e($activeEmployees->count()); ?></span>
             <span class="k-lbl">Current Employees</span>
         </div>
         <div class="kpi-card k-blue">
             <span class="k-icon"><i class="bx bx-desktop"></i></span>
-            <span class="k-val">{{ $misCount }}</span>
+            <span class="k-val"><?php echo e($misCount); ?></span>
             <span class="k-lbl">MIS Accounts</span>
         </div>
         <div class="kpi-card k-green">
             <span class="k-icon"><i class="bx bx-check-circle"></i></span>
-            <span class="k-val">{{ $activeCount }}</span>
+            <span class="k-val"><?php echo e($activeCount); ?></span>
             <span class="k-lbl">Active</span>
         </div>
         <div class="kpi-card k-red">
             <span class="k-icon"><i class="bx bx-user-x"></i></span>
-            <span class="k-val">{{ $terminatedEmployees->count() }}</span>
+            <span class="k-val"><?php echo e($terminatedEmployees->count()); ?></span>
             <span class="k-lbl">Terminated</span>
         </div>
     </div>
@@ -144,9 +144,9 @@
             </button>
             <button class="ems-tab" id="terminated-tab" data-bs-toggle="tab" data-bs-target="#terminatedEmployees" type="button" role="tab" aria-controls="terminatedEmployees" aria-selected="false">
                 <i class="bx bx-user-x"></i> Terminated
-                @if($terminatedEmployees->count() > 0)
-                    <span class="t-count">{{ $terminatedEmployees->count() }}</span>
-                @endif
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($terminatedEmployees->count() > 0): ?>
+                    <span class="t-count"><?php echo e($terminatedEmployees->count()); ?></span>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </button>
         </div>
 
@@ -163,70 +163,71 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($activeEmployees as $i => $emp)
-                                @php
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $activeEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
                                     $user = \App\Models\User::withTrashed()->where('email', $emp->email)->first();
                                     $dob = $user && $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : 'N/A';
                                     $joinDate = $user && $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : 'N/A';
-                                @endphp
+                                ?>
                                 <tr>
-                                    <td><strong>{{ $i+1 }}</strong></td>
-                                    <td><strong>{{ $emp->name }}</strong></td>
-                                    <td><a href="mailto:{{ $emp->email }}" style="color:#556ee6;text-decoration:none;font-size:.72rem">{{ $emp->email }}</a></td>
-                                    <td>{{ $dob }}</td>
-                                    <td>{{ $joinDate }}</td>
-                                    <td>{{ $emp->contact_info }}</td>
-                                    <td>{{ $emp->emergency_contact }}</td>
-                                    <td>{{ $emp->cnic }}</td>
-                                    <td>{{ $emp->position }}</td>
-                                    <td>{{ $emp->area_of_residence }}</td>
+                                    <td><strong><?php echo e($i+1); ?></strong></td>
+                                    <td><strong><?php echo e($emp->name); ?></strong></td>
+                                    <td><a href="mailto:<?php echo e($emp->email); ?>" style="color:#556ee6;text-decoration:none;font-size:.72rem"><?php echo e($emp->email); ?></a></td>
+                                    <td><?php echo e($dob); ?></td>
+                                    <td><?php echo e($joinDate); ?></td>
+                                    <td><?php echo e($emp->contact_info); ?></td>
+                                    <td><?php echo e($emp->emergency_contact); ?></td>
+                                    <td><?php echo e($emp->cnic); ?></td>
+                                    <td><?php echo e($emp->position); ?></td>
+                                    <td><?php echo e($emp->area_of_residence); ?></td>
                                     <td>
-                                        @php $sPill = match($emp->status) { 'Active' => 's-sale', 'Not Active' => 's-pending', 'Terminated' => 's-declined', default => 's-closed' }; @endphp
-                                        <span class="s-pill {{ $sPill }}">{{ $emp->status }}</span>
+                                        <?php $sPill = match($emp->status) { 'Active' => 's-sale', 'Not Active' => 's-pending', 'Terminated' => 's-declined', default => 's-closed' }; ?>
+                                        <span class="s-pill <?php echo e($sPill); ?>"><?php echo e($emp->status); ?></span>
                                     </td>
                                     <td>
-                                        <span class="s-pill {{ ($emp->mis === 'Yes') ? 's-sale' : 's-declined' }}">{{ $emp->mis }}</span>
+                                        <span class="s-pill <?php echo e(($emp->mis === 'Yes') ? 's-sale' : 's-declined'); ?>"><?php echo e($emp->mis); ?></span>
                                     </td>
-                                    <td id="emp-photo-cell-{{ $emp->id }}" style="min-width:44px">
-                                        <div id="emp-photo-{{ $emp->id }}" style="display:none">
-                                            @if($emp->passport_image)
-                                                <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="emp-avatar">
-                                            @else
-                                                <div class="emp-avatar-placeholder">{{ strtoupper(substr($emp->name, 0, 1)) }}</div>
-                                            @endif
+                                    <td id="emp-photo-cell-<?php echo e($emp->id); ?>" style="min-width:44px">
+                                        <div id="emp-photo-<?php echo e($emp->id); ?>" style="display:none">
+                                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->passport_image): ?>
+                                                <img src="<?php echo e(asset('storage/'.$emp->passport_image)); ?>" alt="<?php echo e($emp->name); ?>" class="emp-avatar">
+                                            <?php else: ?>
+                                                <div class="emp-avatar-placeholder"><?php echo e(strtoupper(substr($emp->name, 0, 1))); ?></div>
+                                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1 flex-wrap">
-                                            <button class="act-btn a-warn" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ $emp->id }}" title="Edit"><i class="bx bx-edit"></i></button>
-                                            <button class="act-btn a-danger" onclick="deleteEmployee({{ $emp->id }}, '{{ addslashes($emp->name) }}');" title="Delete"><i class="bx bx-trash"></i></button>
-                                            @canEditModule('ems')
-                                            <button class="act-btn emp-strip-toggle {{ $emp->show_strip_photo ? 'a-info' : 'a-secondary' }}"
-                                                id="strip-toggle-{{ $emp->id }}"
-                                                onclick="toggleStripPhoto({{ $emp->id }}, this)"
-                                                title="{{ $emp->show_strip_photo ? 'Photo showing in Chill Party strip — click to hide' : 'Photo hidden from Chill Party strip — click to show' }}"
+                                            <button class="act-btn a-warn" data-bs-toggle="modal" data-bs-target="#editEmployeeModal<?php echo e($emp->id); ?>" title="Edit"><i class="bx bx-edit"></i></button>
+                                            <button class="act-btn a-danger" onclick="deleteEmployee(<?php echo e($emp->id); ?>, '<?php echo e(addslashes($emp->name)); ?>');" title="Delete"><i class="bx bx-trash"></i></button>
+                                            <?php if(auth()->check() && auth()->user()->canEditModule('ems')): ?>
+                                            <button class="act-btn emp-strip-toggle <?php echo e($emp->show_strip_photo ? 'a-info' : 'a-secondary'); ?>"
+                                                id="strip-toggle-<?php echo e($emp->id); ?>"
+                                                onclick="toggleStripPhoto(<?php echo e($emp->id); ?>, this)"
+                                                title="<?php echo e($emp->show_strip_photo ? 'Photo showing in Chill Party strip — click to hide' : 'Photo hidden from Chill Party strip — click to show'); ?>"
                                                 style="font-size:.72rem;font-weight:700;width:auto;padding:0 7px;border-radius:8px;gap:3px;display:inline-flex;align-items:center;"
                                             >
-                                                <i class="bx {{ $emp->show_strip_photo ? 'bx-show' : 'bx-hide' }}" style="font-size:.85rem;"></i>
-                                                <span>{{ $emp->show_strip_photo ? 'Strip' : 'Strip' }}</span>
+                                                <i class="bx <?php echo e($emp->show_strip_photo ? 'bx-show' : 'bx-hide'); ?>" style="font-size:.85rem;"></i>
+                                                <span><?php echo e($emp->show_strip_photo ? 'Strip' : 'Strip'); ?></span>
                                             </button>
-                                            @endcanEditModule
-                                            <button class="act-btn emp-photo-toggle {{ $emp->passport_image ? 'a-info' : 'a-secondary' }}"
-                                                id="emp-photo-btn-{{ $emp->id }}"
-                                                onclick="toggleEmpPhoto({{ $emp->id }}, this)"
-                                                title="{{ $emp->passport_image ? 'Toggle photo' : 'No photo uploaded' }}"
-                                                {{ !$emp->passport_image ? 'disabled' : '' }}
-                                                style="font-size:.78rem;font-weight:700;width:auto;padding:0 8px;border-radius:8px;gap:4px;display:inline-flex;align-items:center;{{ !$emp->passport_image ? 'opacity:.45;cursor:default;' : '' }}"
-                                            ><i class="bx bx-image{{ $emp->passport_image ? '' : '-alt' }}" style="font-size:.9rem;"></i> Photo</button>
+                                            <?php endif; ?>
+                                            <button class="act-btn emp-photo-toggle <?php echo e($emp->passport_image ? 'a-info' : 'a-secondary'); ?>"
+                                                id="emp-photo-btn-<?php echo e($emp->id); ?>"
+                                                onclick="toggleEmpPhoto(<?php echo e($emp->id); ?>, this)"
+                                                title="<?php echo e($emp->passport_image ? 'Toggle photo' : 'No photo uploaded'); ?>"
+                                                <?php echo e(!$emp->passport_image ? 'disabled' : ''); ?>
+
+                                                style="font-size:.78rem;font-weight:700;width:auto;padding:0 8px;border-radius:8px;gap:4px;display:inline-flex;align-items:center;<?php echo e(!$emp->passport_image ? 'opacity:.45;cursor:default;' : ''); ?>"
+                                            ><i class="bx bx-image<?php echo e($emp->passport_image ? '' : '-alt'); ?>" style="font-size:.9rem;"></i> Photo</button>
                                         </div>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr><td colspan="14" class="text-center py-5">
                                     <i class="bx bx-inbox" style="font-size:2rem;color:#d4af37;opacity:.5"></i>
                                     <h6 class="mt-2 text-muted" style="font-size:.82rem">No Active Employees</h6>
                                 </td></tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -243,44 +244,44 @@
                                 <tr><th>Sr#</th><th>Name</th><th>Email</th><th>Contact</th><th>CNIC</th><th>Position</th><th>DOT</th><th>MIS</th><th>Photo</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
-                                @forelse($terminatedEmployees as $i => $emp)
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $terminatedEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td><strong>{{ $loop->iteration }}</strong></td>
-                                    <td><strong>{{ $emp->name }}</strong></td>
-                                    <td><a href="mailto:{{ $emp->email }}" style="color:#556ee6;text-decoration:none;font-size:.72rem">{{ $emp->email }}</a></td>
-                                    <td>{{ $emp->contact_info }}</td>
-                                    <td>{{ $emp->cnic }}</td>
-                                    <td>{{ $emp->position }}</td>
+                                    <td><strong><?php echo e($loop->iteration); ?></strong></td>
+                                    <td><strong><?php echo e($emp->name); ?></strong></td>
+                                    <td><a href="mailto:<?php echo e($emp->email); ?>" style="color:#556ee6;text-decoration:none;font-size:.72rem"><?php echo e($emp->email); ?></a></td>
+                                    <td><?php echo e($emp->contact_info); ?></td>
+                                    <td><?php echo e($emp->cnic); ?></td>
+                                    <td><?php echo e($emp->position); ?></td>
                                     <td>
-                                        @if($emp->date_of_termination)
-                                            <span class="v-badge v-red">{{ \Carbon\Carbon::parse($emp->date_of_termination)->format('d M Y') }}</span>
-                                        @else <span class="text-muted">-</span>
-                                        @endif
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->date_of_termination): ?>
+                                            <span class="v-badge v-red"><?php echo e(\Carbon\Carbon::parse($emp->date_of_termination)->format('d M Y')); ?></span>
+                                        <?php else: ?> <span class="text-muted">-</span>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </td>
                                     <td><span class="s-pill s-declined">No</span></td>
                                     <td>
-                                        @if($emp->passport_image)
-                                            <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="{{ $emp->name }}" class="emp-avatar" style="opacity:.6">
-                                        @else
-                                            <div class="emp-avatar-placeholder" style="opacity:.5">{{ strtoupper(substr($emp->name, 0, 1)) }}</div>
-                                        @endif
+                                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->passport_image): ?>
+                                            <img src="<?php echo e(asset('storage/'.$emp->passport_image)); ?>" alt="<?php echo e($emp->name); ?>" class="emp-avatar" style="opacity:.6">
+                                        <?php else: ?>
+                                            <div class="emp-avatar-placeholder" style="opacity:.5"><?php echo e(strtoupper(substr($emp->name, 0, 1))); ?></div>
+                                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     </td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <form method="POST" action="{{ route('employee.restore', $emp->id) }}" class="d-inline" onsubmit="return confirm('Restore {{ addslashes($emp->name) }}?');">
-                                                @csrf
+                                            <form method="POST" action="<?php echo e(route('employee.restore', $emp->id)); ?>" class="d-inline" onsubmit="return confirm('Restore <?php echo e(addslashes($emp->name)); ?>?');">
+                                                <?php echo csrf_field(); ?>
                                                 <button type="submit" class="act-btn a-success"><i class="bx bx-undo"></i> Restore</button>
                                             </form>
-                                            <button class="act-btn a-danger" onclick="permanentDelete({{ $emp->id }}, '{{ addslashes($emp->name) }}');"><i class="bx bx-trash"></i></button>
+                                            <button class="act-btn a-danger" onclick="permanentDelete(<?php echo e($emp->id); ?>, '<?php echo e(addslashes($emp->name)); ?>');"><i class="bx bx-trash"></i></button>
                                         </div>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr><td colspan="10" class="text-center py-5">
                                     <i class="bx bx-check-circle" style="font-size:2rem;color:#1a8754;opacity:.5"></i>
                                     <h6 class="mt-2 text-muted" style="font-size:.82rem">No Terminated Employees</h6>
                                 </td></tr>
-                                @endforelse
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -289,49 +290,49 @@
         </div>
     </div>
 
-    {{-- Edit Employee Modals — rendered OUTSIDE the table to avoid invalid HTML --}}
-    @foreach($activeEmployees as $emp)
-    <div class="modal fade" id="editEmployeeModal{{ $emp->id }}" tabindex="-1">
+    
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $activeEmployees; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $emp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <div class="modal fade" id="editEmployeeModal<?php echo e($emp->id); ?>" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="POST" action="{{ route('employee.update', $emp) }}" enctype="multipart/form-data">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('employee.update', $emp)); ?>" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header modal-header-glass">
                         <h5 class="modal-title"><i class="bx bx-edit me-2"></i>Edit Employee</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ $emp->name }}"></div>
-                            <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ $emp->email }}"></div>
+                            <div class="col-md-6"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="<?php echo e($emp->name); ?>"></div>
+                            <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="<?php echo e($emp->email); ?>"></div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Contact info</label><input type="text" name="contact_info" class="form-control phone-number" value="{{ $emp->contact_info }}"></div>
-                            <div class="col-md-6"><label class="form-label">Emergency Contact</label><input type="text" name="emergency_contact" class="form-control phone-number" value="{{ $emp->emergency_contact }}"></div>
+                            <div class="col-md-6"><label class="form-label">Contact info</label><input type="text" name="contact_info" class="form-control phone-number" value="<?php echo e($emp->contact_info); ?>"></div>
+                            <div class="col-md-6"><label class="form-label">Emergency Contact</label><input type="text" name="emergency_contact" class="form-control phone-number" value="<?php echo e($emp->emergency_contact); ?>"></div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">CNIC</label><input type="text" name="cnic" class="form-control" value="{{ $emp->cnic }}"></div>
-                            <div class="col-md-6"><label class="form-label">Position</label><input type="text" name="position" class="form-control" value="{{ $emp->position }}"></div>
+                            <div class="col-md-6"><label class="form-label">CNIC</label><input type="text" name="cnic" class="form-control" value="<?php echo e($emp->cnic); ?>"></div>
+                            <div class="col-md-6"><label class="form-label">Position</label><input type="text" name="position" class="form-control" value="<?php echo e($emp->position); ?>"></div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Area of Residence</label><input type="text" name="area_of_residence" class="form-control" value="{{ $emp->area_of_residence }}"></div>
+                            <div class="col-md-6"><label class="form-label">Area of Residence</label><input type="text" name="area_of_residence" class="form-control" value="<?php echo e($emp->area_of_residence); ?>"></div>
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="Active" @if($emp->status == 'Active') selected @endif>Active</option>
-                                    <option value="Not Active" @if($emp->status == 'Not Active') selected @endif>Not Active</option>
-                                    <option value="Terminated" @if($emp->status == 'Terminated') selected @endif>Terminated</option>
+                                    <option value="Active" <?php if($emp->status == 'Active'): ?> selected <?php endif; ?>>Active</option>
+                                    <option value="Not Active" <?php if($emp->status == 'Not Active'): ?> selected <?php endif; ?>>Not Active</option>
+                                    <option value="Terminated" <?php if($emp->status == 'Terminated'): ?> selected <?php endif; ?>>Terminated</option>
                                 </select>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Date of Termination</label><input type="date" name="date_of_termination" class="form-control" value="{{ $emp->date_of_termination ? (\Carbon\Carbon::parse($emp->date_of_termination)->format('Y-m-d')) : '' }}"></div>
+                            <div class="col-md-6"><label class="form-label">Date of Termination</label><input type="date" name="date_of_termination" class="form-control" value="<?php echo e($emp->date_of_termination ? (\Carbon\Carbon::parse($emp->date_of_termination)->format('Y-m-d')) : ''); ?>"></div>
                         </div>
                         <label class="form-label">Passport Image (WebP)</label>
                         <input type="file" name="passport_image" accept="image/webp" class="form-control">
-                        @if($emp->passport_image)
-                            <img src="{{ asset('storage/'.$emp->passport_image) }}" alt="Passport" class="emp-avatar mt-2" style="width:55px;height:55px;">
-                        @endif
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($emp->passport_image): ?>
+                            <img src="<?php echo e(asset('storage/'.$emp->passport_image)); ?>" alt="Passport" class="emp-avatar mt-2" style="width:55px;height:55px;">
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </div>
                     <div class="modal-footer border-top" style="background:rgba(212,175,55,.03)">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
@@ -341,14 +342,14 @@
             </div>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <!-- Import Modal -->
     <div class="modal fade" id="importEmployeeModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="{{ route('employee.import') }}" enctype="multipart/form-data">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('employee.import')); ?>" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header modal-header-glass">
                         <h5 class="modal-title"><i class="bx bx-upload me-2"></i>Import Employees</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -377,8 +378,8 @@
     <div class="modal fade" id="addEmployeeModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form method="POST" action="{{ route('employee.store') }}" enctype="multipart/form-data">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('employee.store')); ?>" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-header modal-header-glass">
                         <h5 class="modal-title"><i class="bx bx-plus-circle me-2"></i>Add New Employee</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -415,13 +416,13 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
-<script src="{{ URL::asset('build/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-<script src="{{ URL::asset('build/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
-<script src="{{ URL::asset('build/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
+<?php $__env->startSection('script'); ?>
+<script src="<?php echo e(URL::asset('build/libs/datatables.net/js/jquery.dataTables.min.js')); ?>"></script>
+<script src="<?php echo e(URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js')); ?>"></script>
+<script src="<?php echo e(URL::asset('build/libs/datatables.net-responsive/js/dataTables.responsive.min.js')); ?>"></script>
+<script src="<?php echo e(URL::asset('build/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js')); ?>"></script>
 <script>
 $(document).ready(function() {
     if (!$.fn.dataTable.isDataTable('#employeeTable')) {
@@ -454,8 +455,8 @@ $(document).ready(function() {
     $(document).on('blur', '.phone-number', function() { let v = $(this).val(); if (v) $(this).val(formatPhoneNumber(v)); });
     $(document).on('submit', 'form', function() { $(this).find('.phone-number').each(function() { let v = $(this).val(); if (v) $(this).val(formatPhoneNumber(v)); }); });
 });
-function deleteEmployee(id, name) { if (confirm('Delete ' + name + '? This cannot be undone.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '@csrf @method("DELETE")'; document.body.appendChild(f); f.submit(); } }
-function permanentDelete(id, name) { if (confirm('PERMANENTLY delete ' + name + '? All records will be removed.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '@csrf @method("DELETE")'; document.body.appendChild(f); f.submit(); } }
+function deleteEmployee(id, name) { if (confirm('Delete ' + name + '? This cannot be undone.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '<?php echo csrf_field(); ?> <?php echo method_field("DELETE"); ?>'; document.body.appendChild(f); f.submit(); } }
+function permanentDelete(id, name) { if (confirm('PERMANENTLY delete ' + name + '? All records will be removed.')) { let f = document.createElement('form'); f.method = 'POST'; f.action = '/ems/' + id; f.innerHTML = '<?php echo csrf_field(); ?> <?php echo method_field("DELETE"); ?>'; document.body.appendChild(f); f.submit(); } }
 
 function toggleStripPhoto(id, btn) {
     fetch('/ems/toggle-strip-photo/' + id, {
@@ -499,4 +500,6 @@ function toggleEmpPhoto(id, btn) {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/employee/ems.blade.php ENDPATH**/ ?>
