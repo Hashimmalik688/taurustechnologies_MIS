@@ -876,6 +876,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/zoom/phone/match-contacts', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'matchContacts'])->name('zoom.phone.match-contacts');
     Route::post('/zoom/phone/auto-log', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'autoLog'])->name('zoom.phone.auto-log');
     Route::get('/zoom/phone/my-calls', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'myCallLogs'])->name('zoom.phone.my-calls');
+    Route::get('/zoom/phone/my-dids', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'myDids'])->name('zoom.phone.my-dids');
     Route::get('/zoom/phone/recording/{id}', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'getCallLogRecording'])->name('zoom.phone.call-recording');
 });
 

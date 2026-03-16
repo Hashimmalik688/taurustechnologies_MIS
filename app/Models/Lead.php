@@ -256,6 +256,22 @@ class Lead extends Model
         });
     }
 
+    /**
+     * Get age: return stored value or calculate from date_of_birth.
+     */
+    public function getAgeAttribute($value): ?int
+    {
+        if (!empty($value)) {
+            return (int) $value;
+        }
+
+        if (!empty($this->attributes['date_of_birth'])) {
+            return \Carbon\Carbon::parse($this->attributes['date_of_birth'])->age;
+        }
+
+        return null;
+    }
+
     public function carriers()
     {
         return $this->hasMany(Carrier::class);

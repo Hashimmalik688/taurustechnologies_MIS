@@ -25,8 +25,65 @@ class ZoomPhoneEmbedController extends Controller
     public function index()
     {
         $hasToken = $this->hasValidToken();
-        $dids     = $this->getCompanyDids();
-        return view('admin.zoom.phone-embed', compact('hasToken', 'dids'));
+        return view('admin.zoom.phone-embed', compact('hasToken'));
+    }
+
+    /**
+     * Return the authenticated user's Zoom Phone DIDs (phone numbers) fetched live
+     * from GET /phone/users/me using their OAuth token.
+     * Falls back to company DIDs if no personal token is available.
+     */
+    public function myDids()
+    {
+        $token = $this->getUserToken();
+
+        if ($token) {
+            try {
+                $response = Http::timeout(10)
+                    ->withToken($token)
+                    ->get('https://api.zoom.us/v2/phone/users/me');
+
+                if ($response->successful()) {
+                    $phoneNumbers = $response->json('phone_numbers', []);
+                    $dids = collect($phoneNumbers)->map(function ($p) {
+                        $number = $p['number'] ?? null;
+                        $type   = $p['type'] ?? 'number';
+                        $label  = match (true) {
+                            isset($p['display_name']) && $p['display_name']  => $p['display_name'],
+                            $type === 'direct_number'  => 'Direct',
+                            $type === 'extension_number' => 'Extension',
+                            default => 'Phone',
+                        };
+                        return [
+                            'number'  => $number,
+                            'label'   => $label,
+                            'primary' => $p['primary_number'] ?? false,
+                            'type'    => $type,
+                        ];
+                    })->filter(fn($d) => !empty($d['number']))->values()->toArray();
+
+                    // Primary number first
+                    usort($dids, fn($a, $b) => (int)($b['primary'] ?? false) - (int)($a['primary'] ?? false));
+
+                    if (!empty($dids)) {
+                        Log::info('[ZoomPhone] Fetched DIDs for user ' . Auth::id(), ['count' => count($dids)]);
+                        return response()->json(['dids' => $dids, 'source' => 'zoom']);
+                    }
+                }
+
+                Log::warning('[ZoomPhone] /phone/users/me returned no numbers', [
+                    'user_id' => Auth::id(),
+                    'status'  => $response->status(),
+                    'body'    => substr($response->body(), 0, 300),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('[ZoomPhone] myDids exception: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback: company DIDs
+        $dids = $this->getCompanyDids();
+        return response()->json(['dids' => $dids, 'source' => 'fallback']);
     }
 
     /**

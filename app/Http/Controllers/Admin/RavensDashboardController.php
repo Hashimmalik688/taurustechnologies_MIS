@@ -882,8 +882,9 @@ class RavensDashboardController extends Controller
             $updateData['closer_id'] = Auth::id(); // Store user ID for reliable matching
 
             if (!empty($lead->sale_at)) {
-                // ── RE-SUBMISSION: lead already had a sale – preserve original date ──
-                // Do NOT overwrite sale_at / sale_date; just log the re-submission.
+                // ── RE-SUBMISSION: lead already had a sale – update to current submission date ──
+                // Update sale_at / sale_date to reflect the latest submission (e.g., half → full sale)
+                // This ensures re-submitted sales appear in today's sales view.
                 $log = $lead->resale_log ?? [];
                 $log[] = [
                     'closer_id'    => Auth::id(),
@@ -892,8 +893,9 @@ class RavensDashboardController extends Controller
                 ];
                 $updateData['resale_count'] = ($lead->resale_count ?? 0) + 1;
                 $updateData['resale_log']   = $log;
-                // Remove sale_at / sale_date from update so they are never touched
-                unset($updateData['sale_at'], $updateData['sale_date']);
+                // Update sale_at / sale_date to today so the lead shows in today's sales
+                $updateData['sale_at']   = now();
+                $updateData['sale_date'] = now()->format('Y-m-d');
             } else {
                 // First time being sold – stamp the original sale date
                 $updateData['sale_at']   = now();
@@ -1538,6 +1540,9 @@ class RavensDashboardController extends Controller
 
         DB::beginTransaction();
         try {
+            // A user can only be on one call at a time — release any other locks they hold
+            LeadLock::where('user_id', $userId)->where('lead_id', '!=', $leadId)->delete();
+
             $existing = LeadLock::where('lead_id', $leadId)->lockForUpdate()->first();
 
             if ($existing) {

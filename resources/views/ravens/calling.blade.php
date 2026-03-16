@@ -973,10 +973,10 @@
                                 if (followupRequired) {
                                     followupRequired.addEventListener('change', function() {
                                         if (this.value === '1') {
-                                            followupDatetimeField.style.display = 'block';
+                                            followupDatetimeField.classList.remove('d-none');
                                             followupScheduledAt.setAttribute('required', 'required');
                                         } else {
-                                            followupDatetimeField.style.display = 'none';
+                                            followupDatetimeField.classList.add('d-none');
                                             followupScheduledAt.removeAttribute('required');
                                         }
                                     });
@@ -1253,6 +1253,19 @@
     // Clear any stale call status from before this page load
     localStorage.removeItem('zpw_call_status');
 
+    // Release call lock when the user navigates away so the live badge clears for others
+    window.addEventListener('beforeunload', function() {
+        const lockId = window.currentCallInfo?.leadId || window.currentLeadData?.id;
+        if (lockId) {
+            navigator.sendBeacon('/ravens/leads/release-lock',
+                new Blob([JSON.stringify({
+                    lead_id: lockId,
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                })], { type: 'application/json' })
+            );
+        }
+    });
+
     // TEST: Ensure JavaScript is loading
     console.log('✅ Ravens calling script loaded');
     
@@ -1398,6 +1411,14 @@
             return;
         }
 
+        // Release previous call lock before starting a new one
+        const prevId = window.currentCallInfo?.leadId || window.currentLeadData?.id;
+        if (prevId && String(prevId) !== String(leadId)) {
+            releaseLock(prevId);
+            window.currentCallInfo = null;
+            window.currentLeadData = null;
+        }
+
         // Fast client-side check using cached lock state
         const cachedLock = window.activeLocks?.[String(leadId)];
         if (cachedLock && !cachedLock.is_mine) {
@@ -1479,6 +1500,19 @@
 
                 // Refresh badges so others see the LIVE indicator immediately
                 loadDialStatus();
+
+                // Fallback: open the call form automatically after 2 s if
+                // the Zoom Smart Embed 'connected' event hasn't fired yet.
+                if (window._formFallbackTimer) clearTimeout(window._formFallbackTimer);
+                window._formFallbackTimer = setTimeout(function() {
+                    // Only open if the form is not already visible
+                    const modalEl = document.getElementById('callDetailsModal');
+                    const isOpen = modalEl && modalEl.classList.contains('show');
+                    if (!isOpen && window.currentCallInfo && String(window.currentCallInfo.leadId) === String(leadId)) {
+                        console.log('⏱ Fallback: opening form for', data.lead_name);
+                        showRavensFormForCall(leadId, phoneNumber, data.lead_name, 'connected', 0);
+                    }
+                }, 2000);
 
             } else {
                 // Zoom call failed — release lock so others can try
