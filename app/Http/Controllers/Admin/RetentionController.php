@@ -96,7 +96,7 @@ class RetentionController extends Controller
         $rewrite_query = $applyFilters($rewrite_query);
         $rewrite_leads = $rewrite_query->latest('sale_date')->paginate(50, ['*'], 'rewrite_page');
 
-        // 4. DISPOSITION - Incomplete issuances waiting for disposition
+        // 4. DISPOSITION - Legacy Incomplete issuances (pre-pipeline, for backwards compatibility)
         $disposition_query = Lead::with('insuranceCarrier')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
@@ -105,12 +105,31 @@ class RetentionController extends Controller
         
         $disposition_query = $applyFilters($disposition_query);
         $disposition_leads = $disposition_query->latest('sale_date')->paginate(50, ['*'], 'disposition_page');
-        
+
+        // 5. NOT ISSUED — Blocked at Pendings Approved stage; Retention must resolve
+        $not_issued_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy'])
+            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->whereNull('pending_contract_at')
+            ->whereNotNull('not_issued_at')
+            ->whereNull('not_issued_resolved_at');// Policy Died leads are excluded — no retention action permitted on them
+
+        $not_issued_query = $applyFilters($not_issued_query);
+        $not_issued_leads = $not_issued_query->latest('not_issued_at')->paginate(50, ['*'], 'not_issued_page');
+
+        // 6. NOT PAID (FDFP) — First Draft First Pay failures at Pending Draft stage
+        $not_paid_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'followupDoneBy'])
+            ->whereNotNull('followup_done_at')
+            ->whereNotNull('not_paid_at')
+            ->whereNull('paid_at')
+            ->whereNull('policy_died_at');  // Policy Died: no retention action
+
+        $not_paid_query = $applyFilters($not_paid_query);
+        $not_paid_leads = $not_paid_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
+
         // Get unique carriers for filter dropdown
         $carriers = Lead::distinct()->pluck('carrier_name')->filter();
 
-        // Calculate stats — consolidated into 2 queries instead of 5
-        // Query 1: All chargeback/retention stats in a single pass
+        // Calculate stats — consolidated queries
         $retentionAgg = Lead::selectRaw("
             SUM(CASE WHEN status = 'chargeback' THEN 1 ELSE 0 END) as cb_count,
             SUM(CASE WHEN status = 'chargeback' AND (retention_status IS NULL OR retention_status = 'pending') THEN 1 ELSE 0 END) as yet_to_retain_count,
@@ -118,16 +137,29 @@ class RetentionController extends Controller
             SUM(CASE WHEN status = 'chargeback' AND is_rewrite = 1 THEN 1 ELSE 0 END) as rewrite_count
         ")->first();
         
-        $cb_count = (int) ($retentionAgg->cb_count ?? 0);
+        $cb_count            = (int) ($retentionAgg->cb_count ?? 0);
         $yet_to_retain_count = (int) ($retentionAgg->yet_to_retain_count ?? 0);
-        $retained_count = (int) ($retentionAgg->retained_count ?? 0);
-        $rewrite_count = (int) ($retentionAgg->rewrite_count ?? 0);
-        
-        // Query 2: Disposition count (different base conditions)
+        $retained_count      = (int) ($retentionAgg->retained_count ?? 0);
+        $rewrite_count       = (int) ($retentionAgg->rewrite_count ?? 0);
+
+        // Legacy Disposition count
         $disposition_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
             ->where('manager_status', Statuses::MGR_APPROVED)
             ->where('issuance_status', 'Incomplete')
+            ->count();
+
+        // New pipeline counts
+        $not_issued_count = Lead::where('manager_status', Statuses::MGR_APPROVED)
+            ->whereNull('pending_contract_at')
+            ->whereNotNull('not_issued_at')
+            ->whereNull('not_issued_resolved_at')
+            ->count();
+
+        $not_paid_count = Lead::whereNotNull('followup_done_at')
+            ->whereNotNull('not_paid_at')
+            ->whereNull('paid_at')
+            ->whereNull('policy_died_at')
             ->count();
 
         return view('admin.retention.index', compact(
@@ -135,6 +167,8 @@ class RetentionController extends Controller
             'retained_leads',
             'rewrite_leads',
             'disposition_leads',
+            'not_issued_leads',
+            'not_paid_leads',
             'carriers',
             'search',
             'month',
@@ -145,7 +179,9 @@ class RetentionController extends Controller
             'rewrite_count',
             'yet_to_retain_count',
             'retained_count',
-            'disposition_count'
+            'disposition_count',
+            'not_issued_count',
+            'not_paid_count'
         ));
     }
 

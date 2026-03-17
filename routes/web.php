@@ -16,6 +16,9 @@ use App\Http\Controllers\Admin\LedgerJournalController;
 use App\Http\Controllers\Admin\ChartOfAccountController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RetentionController;
+use App\Http\Controllers\Admin\PendingsApprovedController;
+use App\Http\Controllers\Admin\PendingDraftController;
+use App\Http\Controllers\Admin\PaidSalesController;
 use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DeviceController;
@@ -273,6 +276,28 @@ Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['aut
     Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission')->middleware('role.permission:issuance,full');
 });
 
+// Pendings Approved — Stage 2 pipeline
+Route::group(['prefix' => 'pendings-approved', 'as' => 'pendings-approved.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [PendingsApprovedController::class, 'index'])->name('index')->middleware('role.permission:pendings-approved,view');
+    Route::post('/{id}/send-to-contract', [PendingsApprovedController::class, 'sendToContract'])->name('sendToContract')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/mark-not-issued', [PendingsApprovedController::class, 'markNotIssued'])->name('markNotIssued')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/resolve-not-issued', [PendingsApprovedController::class, 'resolveNotIssued'])->name('resolveNotIssued')->middleware('role.permission:pendings-approved,edit');
+});
+
+// Pending Draft — Stage 6 pipeline
+Route::group(['prefix' => 'pending-draft', 'as' => 'pending-draft.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [PendingDraftController::class, 'index'])->name('index')->middleware('role.permission:pending-draft,view');
+    Route::post('/{id}/mark-not-paid', [PendingDraftController::class, 'markNotPaid'])->name('markNotPaid')->middleware('role.permission:pending-draft,edit');
+    Route::post('/{id}/mark-paid', [PendingDraftController::class, 'markPaid'])->name('markPaid')->middleware('role.permission:pending-draft,full');
+    Route::post('/{id}/mark-policy-died', [PendingDraftController::class, 'markPolicyDied'])->name('markPolicyDied')->middleware('role.permission:pending-draft,full');
+    Route::post('/{id}/clear-not-paid', [PendingDraftController::class, 'clearNotPaid'])->name('clearNotPaid')->middleware('role.permission:pending-draft,edit');
+});
+
+// Paid Sales — Stage 7 pipeline (read-only)
+Route::group(['prefix' => 'paid-sales', 'as' => 'paid-sales.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [PaidSalesController::class, 'index'])->name('index')->middleware('role.permission:paid-sales,view');
+});
+
 // QA Review — access controlled by role.permission:qa-review,level
 Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/review', [LeadController::class, 'qaReview'])->name('review')->middleware('role.permission:qa-review,view');
@@ -289,6 +314,8 @@ Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['aut
     Route::get('/report', [\App\Http\Controllers\Admin\FollowupController::class, 'report'])->name('report')->middleware('role.permission:issuance,view');
     Route::post('/{id}/update-status', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupStatus'])->name('updateStatus');
     Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification');
+    Route::post('/{id}/mark-done', [\App\Http\Controllers\Admin\FollowupController::class, 'markFollowupDone'])->name('mark-done');
+    Route::get('/followup-done', [\App\Http\Controllers\Admin\FollowupController::class, 'followupDone'])->name('followup-done')->middleware('role.permission:issuance,view');
 });
 
 // Verifier Routes — access controlled by role.permission:peregrine*,level
@@ -636,6 +663,14 @@ Route::get('/leads/hub', function () {
     return view('admin.leads.hub');
 })->name('leads.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
 
+Route::get('/sales/hub', function () {
+    $user = auth()->user();
+    if (!$user->canViewModule('sales') && !$user->canViewModule('qa-review') && !$user->canViewModule('issuance') && !$user->canViewModule('pendings-approved') && !$user->canViewModule('pending-draft') && !$user->canViewModule('paid-sales') && !$user->canViewModule('bank-verification') && !$user->canViewModule('revenue-analytics') && !$user->canViewModule('live-analytics')) {
+        abort(403, "You don't have permission to view any Sales Operations module.");
+    }
+    return view('admin.sales.hub');
+})->name('sales.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
+
 // Settings (access controlled by role.permission:settings,level — Permission Management remains Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
@@ -822,6 +857,12 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::get('/leads/find-by-phone', [RavensDashboardController::class, 'findByPhone'])->name('leads.find-by-phone');
     Route::post('/leads/create-sale', [RavensDashboardController::class, 'createSale'])->name('leads.create-sale')->middleware('role.permission:ravens,edit');
     Route::get('/bad-leads', [RavensDashboardController::class, 'badLeads'])->name('bad-leads')->middleware('role.permission:ravens-bad-leads,view');
+
+    // Ravens Validation — review approved/declined leads before Policy Submission
+    Route::get('/validation', [\App\Http\Controllers\Admin\RavensValidationController::class, 'index'])->name('validation.index')->middleware('role.permission:ravens-validation,view');
+    Route::post('/validation/{lead}/mark-valid', [\App\Http\Controllers\Admin\RavensValidationController::class, 'markValid'])->name('validation.mark-valid')->middleware('role.permission:ravens-validation,edit');
+    Route::post('/validation/{lead}/keep-declined', [\App\Http\Controllers\Admin\RavensValidationController::class, 'keepDeclined'])->name('validation.keep-declined')->middleware('role.permission:ravens-validation,edit');
+    Route::post('/validation/{lead}/undo', [\App\Http\Controllers\Admin\RavensValidationController::class, 'undoValidation'])->name('validation.undo')->middleware('role.permission:ravens-validation,edit');
 });
 
 // Public (authenticated) attendance endpoints for all users - MUST BE BEFORE CATCH-ALL

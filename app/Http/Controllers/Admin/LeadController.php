@@ -1077,7 +1077,9 @@ class LeadController extends Controller
     }
 
     /**
-     * Issuance page - shows manager-approved sales ready for issuance
+     * Pending Contract page (formerly Issuance / Policy Submission).
+     * Shows manager-approved leads that have been explicitly sent to Pending Contract
+     * (pending_contract_at IS NOT NULL). These are actively being submitted to carriers.
      */
     public function issuance(Request $request)
     {
@@ -1089,12 +1091,12 @@ class LeadController extends Controller
             ]);
         }
 
-        // Issuance section - show all sales that have been approved by manager
-        // These are leads ready to be issued
+        // Only show leads that have been explicitly moved to Pending Contract
         $query = Lead::with(['insuranceCarrier', 'partner', 'issuedByUser', 'followupAssignedByUser'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED);
+            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->whereNotNull('pending_contract_at');  // Stage gate: must be sent from Pendings Approved
         
         // Search functionality
         if ($request->filled('search')) {
@@ -1177,7 +1179,7 @@ class LeadController extends Controller
             : 'required|integer|exists:partners,id';
         
         $request->validate([
-            'issuance_status' => 'required|in:Issued,Incomplete,Pending',
+            'issuance_status' => 'required|in:Issued,Pending',  // 'Incomplete' retired — use Not Issued flow on Pendings Approved
             'issuance_reason' => 'nullable|string|max:1000',
             'issued_policy_number' => 'required|string|max:255',
             'partner_id' => $partnerValidation

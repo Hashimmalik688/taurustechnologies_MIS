@@ -95,6 +95,10 @@ class Lead extends Model
         'manager_user_id',
         'manager_reviewed_at',
 
+        // Ravens Validation fields
+        'ravens_validated_at',
+        'ravens_validated_by',
+
         // Sale tracking
         'sale_date',
         'sale_at',
@@ -165,6 +169,41 @@ class Lead extends Model
         'returned_at',
         'declined_at',
 
+        // ── Sales Pipeline Stage fields ────────────────────────────────────
+        // Pendings Approved → Pending Contract transition
+        'pending_contract_at',
+        'pending_contract_by_id',
+
+        // Not Issued (Retention exception at Pendings Approved)
+        'not_issued_disposition',
+        'not_issued_at',
+        'not_issued_by_id',
+        'not_issued_resolved_by_id',
+        'not_issued_resolved_at',
+
+        // Followup Done
+        'followup_done_at',
+        'followup_done_by_id',
+
+        // Pending Draft
+        'pending_draft_at',
+        'pending_draft_by_id',
+
+        // Not Paid / FDFP (Retention exception at Pending Draft)
+        'not_paid_fdfp_type',
+        'not_paid_manual_disposition',
+        'not_paid_at',
+        'not_paid_by_id',
+
+        // Paid Sales
+        'paid_at',
+        'paid_by_id',
+
+        // Policy Died
+        'policy_died_reason',
+        'policy_died_at',
+        'policy_died_by_id',
+
         'status',
         'decline_reason',
         'pending_reason',
@@ -221,9 +260,20 @@ class Lead extends Model
         'callback_note_updated_at' => 'datetime',
         'qa_reviewed_at' => 'datetime',
         'manager_reviewed_at' => 'datetime',
+        'ravens_validated_at' => 'datetime',
         'followup_assigned_at' => 'datetime',
         'bank_verifier_assigned_at' => 'datetime',
         'resale_log' => 'array',
+
+        // Sales pipeline stage timestamps
+        'pending_contract_at'      => 'datetime',
+        'not_issued_at'            => 'datetime',
+        'not_issued_resolved_at'   => 'datetime',
+        'followup_done_at'         => 'datetime',
+        'pending_draft_at'         => 'datetime',
+        'not_paid_at'              => 'datetime',
+        'paid_at'                  => 'datetime',
+        'policy_died_at'           => 'datetime',
     ];
 
     /**
@@ -451,5 +501,113 @@ class Lead extends Model
     public function bankVerifiedByUser()
     {
         return $this->belongsTo(User::class, 'bank_verified_by');
+    }
+
+    // ── Sales Pipeline Stage relationships ────────────────────────────────────
+
+    /** Manager who sent this lead from Pendings Approved to Pending Contract */
+    public function pendingContractBy()
+    {
+        return $this->belongsTo(User::class, 'pending_contract_by_id');
+    }
+
+    /** Manager who marked this lead as Not Issued */
+    public function notIssuedBy()
+    {
+        return $this->belongsTo(User::class, 'not_issued_by_id');
+    }
+
+    /** Retention officer who resolved the Not Issued block */
+    public function notIssuedResolvedBy()
+    {
+        return $this->belongsTo(User::class, 'not_issued_resolved_by_id');
+    }
+
+    /** Closer who marked followup as done */
+    public function followupDoneBy()
+    {
+        return $this->belongsTo(User::class, 'followup_done_by_id');
+    }
+
+    /** Manager who moved lead to Pending Draft */
+    public function pendingDraftBy()
+    {
+        return $this->belongsTo(User::class, 'pending_draft_by_id');
+    }
+
+    /** Retention officer who marked lead as Not Paid (FDFP) */
+    public function notPaidBy()
+    {
+        return $this->belongsTo(User::class, 'not_paid_by_id');
+    }
+
+    /** Manager/Finance who marked lead as Paid */
+    public function paidBy()
+    {
+        return $this->belongsTo(User::class, 'paid_by_id');
+    }
+
+    /** User who marked lead as Policy Died */
+    public function policyDiedBy()
+    {
+        return $this->belongsTo(User::class, 'policy_died_by_id');
+    }
+
+    // ── Pipeline stage helper scopes ──────────────────────────────────────────
+
+    /** Leads currently in Pendings Approved (manager-approved, not yet sent to contract) */
+    public function scopePendingsApproved($query)
+    {
+        return $query->where('manager_status', 'approved')
+                     ->whereNull('pending_contract_at')
+                     ->whereNull('not_issued_at');
+    }
+
+    /** Leads currently blocked as Not Issued (awaiting Retention to resolve) */
+    public function scopeNotIssued($query)
+    {
+        return $query->whereNotNull('not_issued_at')
+                     ->whereNull('not_issued_resolved_at')
+                     ->whereNull('pending_contract_at');
+    }
+
+    /** Leads in Pending Contract stage */
+    public function scopePendingContract($query)
+    {
+        return $query->where('manager_status', 'approved')
+                     ->whereNotNull('pending_contract_at')
+                     ->where(function ($q) {
+                         $q->whereNull('issuance_status')
+                           ->orWhere('issuance_status', 'Pending');
+                     })
+                     ->whereNull('policy_died_at');
+    }
+
+    /** Leads in Followup (issued but closer hasn't marked followup done yet) */
+    public function scopeFollowupPending($query)
+    {
+        return $query->where('issuance_status', 'Issued')
+                     ->whereNull('followup_done_at')
+                     ->whereNull('policy_died_at');
+    }
+
+    /** Leads in Pending Draft (followup done, awaiting first premium draft) */
+    public function scopePendingDraft($query)
+    {
+        return $query->whereNotNull('followup_done_at')
+                     ->whereNull('paid_at')
+                     ->whereNull('policy_died_at');
+    }
+
+    /** Leads that are Paid Sales */
+    public function scopePaidSales($query)
+    {
+        return $query->whereNotNull('paid_at');
+    }
+
+    /** Leads that have Died (no retention action; re-dialable) */
+    public function scopePolicyDied($query)
+    {
+        return $query->whereNotNull('policy_died_at');
     }
 }

@@ -79,72 +79,19 @@
                 auth()->user()->canViewModule('sales') ||
                 auth()->user()->canViewModule('qa-review') ||
                 auth()->user()->canViewModule('issuance') ||
+                auth()->user()->canViewModule('pendings-approved') ||
+                auth()->user()->canViewModule('pending-draft') ||
+                auth()->user()->canViewModule('paid-sales') ||
                 auth()->user()->canViewModule('bank-verification') ||
                 auth()->user()->canViewModule('revenue-analytics') ||
                 auth()->user()->canViewModule('live-analytics')
             );
         @endphp
         @if($canSeeSalesOps)
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
+            <a href="{{ route('sales.hub') }}" class="menu-item {{ Request::is('sales/hub') || Request::is('sales*') || Request::is('qa/review*') || Request::is('qa/scoring*') || Request::is('issuance*') || Request::is('pendings-approved*') || Request::is('pending-draft*') || Request::is('paid-sales*') || Request::is('followup/report*') || Request::is('followup/followup-done*') || Request::is('bank-verification*') || Request::is('revenue-analytics*') || Request::is('analytics/live*') ? 'active' : '' }}">
                 <i class="bx bx-briefcase-alt"></i>
                 <span class="menu-text">Sales Operations</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
             </a>
-
-            <div class="menu-dropdown" id="misDropdown">
-                @canViewModule('sales')
-                    <a href="{{ route('sales.index') }}" class="dropdown-item {{ Request::is('sales*') ? 'active' : '' }}">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('qa-review')
-                    <a href="{{ route('qa.review') }}" class="dropdown-item {{ Request::is('qa/review*') ? 'active' : '' }}">
-                        <i class="bx bx-check-circle"></i>
-                        <span class="menu-text">QA Review</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('issuance')
-                    <a href="{{ route('issuance.index') }}" class="dropdown-item {{ Request::is('issuance*') ? 'active' : '' }}">
-                        <i class="bx bx-send"></i>
-                        <span class="menu-text">Policy Submission</span>
-                    </a>
-                    <a href="{{ route('followup.report') }}" class="dropdown-item {{ Request::is('followup/report*') ? 'active' : '' }}">
-                        <i class="bx bx-bar-chart-alt-2"></i>
-                        <span class="menu-text">Followup Report</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('bank-verification')
-                    <a href="{{ route('bank-verification.index') }}" class="dropdown-item {{ Request::is('bank-verification*') ? 'active' : '' }}">
-                        <i class="bx bx-check-shield"></i>
-                        <span class="menu-text">Bank Verification</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('qa-review')
-                    <a href="{{ route('qa.scoring') }}" class="dropdown-item {{ Request::is('qa/scoring*') ? 'active' : '' }}">
-                        <i class="bx bx-shield-quarter"></i>
-                        <span class="menu-text">QA Scoring</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('revenue-analytics')
-                    <a href="{{ route('revenue-analytics.index') }}" class="dropdown-item {{ Request::is('revenue-analytics*') ? 'active' : '' }}">
-                        <i class="bx bx-line-chart"></i>
-                        <span class="menu-text">Revenue Analytics</span>
-                    </a>
-                @endcanViewModule
-
-                @canViewModule('live-analytics')
-                    <a href="{{ route('analytics.live') }}" class="dropdown-item {{ Request::is('analytics/live*') ? 'active' : '' }}">
-                        <i class="bx bx-line-chart"></i>
-                        <span class="menu-text">Live Analytics</span>
-                    </a>
-                @endcanViewModule
-            </div>
         @endif
 
         {{-- RETENTION & CHARGEBACKS --}}
@@ -237,7 +184,8 @@
                 auth()->user()->canViewModule('ravens') ||
                 auth()->user()->canViewModule('ravens-dashboard') ||
                 auth()->user()->canViewModule('ravens-calling') ||
-                auth()->user()->canViewModule('ravens-followups')
+                auth()->user()->canViewModule('ravens-followups') ||
+                auth()->user()->canViewModule('ravens-validation')
             );
         @endphp
         @if($canSeeRavens)
@@ -266,6 +214,13 @@
                     <a href="{{ route('followup.my-followups') }}" class="dropdown-item {{ Request::is('followup*') ? 'active' : '' }}">
                         <i class="bx bx-task"></i>
                         <span class="menu-text">My Followup & Bank Verification</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('ravens-validation')
+                    <a href="{{ route('ravens.validation.index') }}" class="dropdown-item {{ Request::is('ravens/validation*') ? 'active' : '' }}">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Ravens Validation</span>
                     </a>
                 @endcanViewModule
             </div>

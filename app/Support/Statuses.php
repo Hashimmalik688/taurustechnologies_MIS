@@ -51,10 +51,68 @@ class Statuses
 
     // ═══════════════════════════════════════════════════════════════════
     //  Issuance Status  (leads.issuance_status column — Title Case)
+    //  NOTE: 'Incomplete' is retired — use Not Issued flow upstream.
     // ═══════════════════════════════════════════════════════════════════
 
     public const ISSUANCE_PENDING = 'Pending';
     public const ISSUANCE_ISSUED  = 'Issued';
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Not Issued Dispositions  (leads.not_issued_disposition — snake_case)
+    //  Applied at the Pendings Approved stage by Manager.
+    //  Retention officer resolves and clears the block.
+    // ═══════════════════════════════════════════════════════════════════
+
+    public const NI_EMAIL_MISSING          = 'email_missing';
+    public const NI_SSN_MISSING            = 'ssn_missing';
+    public const NI_POSTAL_MAIL_MISSING    = 'postal_mail_missing';
+    public const NI_BENEFICIARY_INCOMPLETE = 'beneficiary_incomplete';
+    public const NI_DOCTOR_INFO_MISSING    = 'doctor_info_missing';
+    public const NI_UNDERWRITING_BY_LAW    = 'underwriting_by_law';
+
+    /** Human-readable labels for Not Issued dispositions */
+    public const NOT_ISSUED_DISPOSITIONS = [
+        self::NI_EMAIL_MISSING          => 'Email Missing',
+        self::NI_SSN_MISSING            => 'SSN Missing',
+        self::NI_POSTAL_MAIL_MISSING    => 'Postal Mail Missing',
+        self::NI_BENEFICIARY_INCOMPLETE => 'Beneficiary Incomplete',
+        self::NI_DOCTOR_INFO_MISSING    => 'Doctor Info Missing',
+        self::NI_UNDERWRITING_BY_LAW    => 'Underwriting by Law',
+    ];
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  FDFP Types  (leads.not_paid_fdfp_type — snake_case)
+    //  First Draft First Pay — applied at Pending Draft by Retention.
+    //  'manual_action' requires a secondary not_paid_manual_disposition.
+    // ═══════════════════════════════════════════════════════════════════
+
+    public const FDFP_UNSTABLE_TO_LOCATE    = 'unstable_to_locate';
+    public const FDFP_INSUFFICIENT_FUND     = 'insufficient_fund';
+    public const FDFP_UNAUTHORIZED_PAYMENTS = 'unauthorized_payments';
+    public const FDFP_MANUAL_ACTION         = 'manual_action';
+
+    /** Human-readable labels for FDFP types */
+    public const FDFP_TYPES = [
+        self::FDFP_UNSTABLE_TO_LOCATE    => 'Unstable to Locate',
+        self::FDFP_INSUFFICIENT_FUND     => 'Insufficient Fund',
+        self::FDFP_UNAUTHORIZED_PAYMENTS => 'Unauthorized Payments',
+        self::FDFP_MANUAL_ACTION         => 'Manual Action',
+    ];
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Policy Died Reasons  (leads.policy_died_reason — snake_case)
+    //  Terminal but re-dialable: lead.status reset to 'active'.
+    //  No retention action permitted on these.
+    // ═══════════════════════════════════════════════════════════════════
+
+    public const PD_CHARGEBACK_FAILED_PAYMENT = 'chargeback_failed_payment';
+    public const PD_CHARGEBACK_CANCELLATION   = 'chargeback_cancellation';
+
+    /** Human-readable labels for Policy Died reasons */
+    public const POLICY_DIED_REASONS = [
+        self::PD_CHARGEBACK_FAILED_PAYMENT => 'Chargeback Failed Payment',
+        self::PD_CHARGEBACK_CANCELLATION   => 'Chargeback Cancellation',
+    ];
 
     // ═══════════════════════════════════════════════════════════════════
     //  Retention Status  (leads.retention_status column — lowercase)

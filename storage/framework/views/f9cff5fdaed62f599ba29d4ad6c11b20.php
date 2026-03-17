@@ -1502,18 +1502,17 @@
                 // Refresh badges so others see the LIVE indicator immediately
                 loadDialStatus();
 
-                // Fallback: open the call form automatically after 2 s if
-                // the Zoom Smart Embed 'connected' event hasn't fired yet.
+                // Open the call form automatically after 10 s — closer must close it manually
                 if (window._formFallbackTimer) clearTimeout(window._formFallbackTimer);
                 window._formFallbackTimer = setTimeout(function() {
                     // Only open if the form is not already visible
                     const modalEl = document.getElementById('callDetailsModal');
                     const isOpen = modalEl && modalEl.classList.contains('show');
                     if (!isOpen && window.currentCallInfo && String(window.currentCallInfo.leadId) === String(leadId)) {
-                        console.log('⏱ Fallback: opening form for', data.lead_name);
+                        console.log('⏱ Auto-opening form after 10s for', data.lead_name);
                         showRavensFormForCall(leadId, phoneNumber, data.lead_name, 'connected', 0);
                     }
-                }, 2000);
+                }, 10000);
 
             } else {
                 // Zoom call failed — release lock so others can try
@@ -1675,12 +1674,9 @@
                         timeOut: 0, extendedTimeOut: 0, closeButton: true
                     });
                 } else {
-                    // Inbound — try to pre-load lead by caller number
-                    if (resolvedCallerNum) {
-                        handleInboundRinging(resolvedCallerNum);
-                    } else {
-                        toastr.info('📲 Incoming call…', 'Incoming Call', { timeOut: 0, extendedTimeOut: 0, closeButton: true });
-                    }
+                    // Inbound callback — form auto-open disabled; show toast only
+                    // handleInboundRinging(resolvedCallerNum); // disabled — form opens manually
+                    toastr.info('📲 Incoming call…', 'Incoming Call', { timeOut: 0, extendedTimeOut: 0, closeButton: true });
                 }
 
             } else if (s.status === 'connected') {
@@ -1688,27 +1684,11 @@
                 const connAc = window.currentCallInfo;
                 if (connAc) {
                     toastr.success('✅ Call Connected — ' + connAc.leadName, 'Connected', { timeOut: 3000 });
-                    showRavensFormForCall(connAc.leadId, connAc.phoneNumber, connAc.leadName, 'connected', 0);
-                } else if (resolvedCallerNum) {
-                    // No currentCallInfo yet (ringing lookup may still be pending or was skipped)
-                    const digits = resolvedCallerNum.replace(/\D/g, '');
-                    fetch('/ravens/leads/find-by-phone?phone=' + encodeURIComponent(digits), {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(r => r.json())
-                        .then(function(lead) {
-                            if (lead && lead.id) {
-                                window.currentCallInfo = { leadId: lead.id, phoneNumber: lead.phone_number, leadName: lead.cn_name };
-                                toastr.success('✅ Call Connected — ' + lead.cn_name, 'Connected', { timeOut: 3000 });
-                                showRavensFormForCall(lead.id, lead.phone_number, lead.cn_name, 'connected', 0);
-                            } else {
-                                toastr.success('✅ Call Connected (no matching lead)', 'Connected', { timeOut: 3000 });
-                            }
-                        }).catch(() => toastr.success('✅ Call Connected', 'Connected', { timeOut: 3000 }));
+                    // Auto-open on connected disabled — form opens via 10s fallback timer after dial button click
+                    // showRavensFormForCall(connAc.leadId, connAc.phoneNumber, connAc.leadName, 'connected', 0);
                 } else {
+                    // Inbound connected — auto-open disabled
+                    // showRavensFormForCall(...) disabled for inbound callbacks
                     toastr.success('✅ Call Connected', 'Connected', { timeOut: 3000 });
                 }
 
@@ -1716,14 +1696,16 @@
                 toastr.clear();
                 const endedLabels = { ended: '✅ Call ended', rejected: '📵 Call declined', missed: '⏰ No answer' };
                 toastr.info(endedLabels[s.result] || ('Call ' + (s.result || 'ended')), 'Call Status');
-                closeRavensForm();
-                window.currentCallInfo = null;
+                // Auto-close on ended disabled — closer must click a button to close
+                // closeRavensForm();
+                // window.currentCallInfo = null;
 
             } else if (s.status === 'voicemail') {
                 toastr.clear();
                 toastr.info('📬 Went to voicemail', 'Voicemail');
-                closeRavensForm();
-                window.currentCallInfo = null;
+                // Auto-close on voicemail disabled — closer must click a button to close
+                // closeRavensForm();
+                // window.currentCallInfo = null;
             }
         } catch(err) { console.error('zpw_call_status parse error', err); }
     });

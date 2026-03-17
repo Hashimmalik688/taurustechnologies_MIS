@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\InsuranceCarrier;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
@@ -318,6 +319,86 @@ class FollowupController extends Controller
             'grandPending',
             'grandDone',
             'today'
+        ));
+    }
+
+    /**
+     * Mark a lead's followup as Done (Closer action).
+     * Once done, lead appears in manager's Pending Draft queue.
+     *
+     * Route: POST /followup/{id}/mark-done
+     */
+    public function markFollowupDone(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+
+        if ($lead->issuance_status !== \App\Support\Statuses::ISSUANCE_ISSUED) {
+            return response()->json(['success' => false, 'message' => 'Lead is not in Issued state.'], 422);
+        }
+
+        if (!empty($lead->followup_done_at)) {
+            return response()->json(['success' => false, 'message' => 'Followup already marked as done.'], 422);
+        }
+
+        $lead->followup_done_at    = now();
+        $lead->followup_done_by_id = auth()->id();
+
+        // Advance to Pending Draft stage automatically
+        $lead->pending_draft_at    = now();
+        $lead->pending_draft_by_id = auth()->id();
+
+        // Also set legacy followup_status = 'Yes' for backwards compatibility
+        $lead->followup_status = 'Yes';
+
+        $lead->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Followup marked as done. Lead moved to Pending Draft queue.',
+        ]);
+    }
+
+    /**
+     * Manager view: leads that have completed followup and are awaiting draft.
+     * Alias for PendingDraftController context — shown in followup report area.
+     *
+     * Route: GET /followup/followup-done
+     */
+    public function followupDone(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $search   = $request->get('search');
+        $carrier  = $request->get('carrier');
+
+        $query = Lead::with(['insuranceCarrier', 'followupDoneBy', 'notPaidBy'])
+            ->whereNotNull('followup_done_at')
+            ->whereNull('paid_at')
+            ->whereNull('policy_died_at');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('cn_name',      'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%")
+                  ->orWhere('closer_name',  'like', "%{$search}%");
+            });
+        }
+
+        if ($carrier) {
+            $query->where('insurance_carrier_id', $carrier);
+        }
+
+        $query->whereDate('sale_date', '>=', $dateFrom)
+              ->whereDate('sale_date', '<=', $dateTo);
+
+        $totalCount        = (clone $query)->count();
+        $pendingDraftCount = (clone $query)->whereNull('pending_draft_at')->count();
+        $leads             = $query->orderBy('followup_done_at', 'desc')->paginate(50);
+        $carriers          = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
+        return view('admin.followup.done', compact(
+            'leads', 'search', 'carrier', 'dateFrom', 'dateTo',
+            'carriers', 'totalCount', 'pendingDraftCount'
         ));
     }
 }

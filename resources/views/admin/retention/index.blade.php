@@ -378,6 +378,18 @@
                 <i class="bx bx-history"></i> Unissued
                 <span class="badge bg-danger">{{ $disposition_count }}</span>
             </a>
+            @if(isset($not_issued_count) && $not_issued_count > 0)
+            <a class="sl-tab" data-bs-toggle="tab" href="#not-issued" role="tab">
+                <i class="bx bx-x-circle"></i> Not Issued
+                <span class="badge bg-warning text-dark">{{ $not_issued_count }}</span>
+            </a>
+            @endif
+            @if(isset($not_paid_count) && $not_paid_count > 0)
+            <a class="sl-tab" data-bs-toggle="tab" href="#not-paid" role="tab">
+                <i class="bx bx-error"></i> Not Paid / FDFP
+                <span class="badge bg-danger">{{ $not_paid_count }}</span>
+            </a>
+            @endif
         </div>
 
         <!-- Tab Content -->
@@ -752,6 +764,110 @@
                                 </div>
                             @endif
                         </div>
+
+                        <!-- NOT ISSUED TAB -->
+                        <div class="tab-pane" id="not-issued" role="tabpanel">
+                            <div class="sl-tbl-wrap">
+                                <table class="sl-tbl">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width:150px">Client Name</th>
+                                            <th style="min-width:120px">Phone</th>
+                                            <th style="min-width:110px">Carrier</th>
+                                            <th style="min-width:160px">Not Issued Reason</th>
+                                            <th style="min-width:120px">Marked By</th>
+                                            <th style="min-width:110px">Marked At</th>
+                                            <th style="min-width:130px">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($not_issued_leads ?? [] as $lead)
+                                            <tr>
+                                                <td><strong>{{ $lead->cn_name }}</strong></td>
+                                                <td>{{ $lead->phone_number }}</td>
+                                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                                <td>
+                                                    @php
+                                                        $niLabels = \App\Support\Statuses::NOT_ISSUED_DISPOSITIONS;
+                                                    @endphp
+                                                    <span class="badge bg-warning text-dark">
+                                                        {{ $niLabels[$lead->not_issued_disposition] ?? $lead->not_issued_disposition }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $lead->notIssuedBy->name ?? '—' }}</td>
+                                                <td>{{ $lead->not_issued_at ? $lead->not_issued_at->format('M d, Y') : '—' }}</td>
+                                                <td>
+                                                    @if($lead->not_issued_resolved_at)
+                                                        <span class="badge bg-success">Resolved</span>
+                                                        <div style="font-size:.65rem;color:#6c757d;">by {{ $lead->notIssuedResolvedBy->name ?? '—' }}</div>
+                                                    @else
+                                                        <span class="badge bg-danger">Pending</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">
+                                                    <i class="bx bx-inbox" style="font-size:2rem;color:#94a3b8"></i>
+                                                    <p class="mb-0 text-muted" style="font-size:.82rem">No Not Issued leads</p>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- NOT PAID / FDFP TAB -->
+                        <div class="tab-pane" id="not-paid" role="tabpanel">
+                            <div class="sl-tbl-wrap">
+                                <table class="sl-tbl">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width:150px">Client Name</th>
+                                            <th style="min-width:120px">Phone</th>
+                                            <th style="min-width:110px">Carrier</th>
+                                            <th style="min-width:160px">FDFP Type</th>
+                                            <th style="min-width:120px">Marked By</th>
+                                            <th style="min-width:110px">Marked At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($not_paid_leads ?? [] as $lead)
+                                            <tr>
+                                                <td><strong>{{ $lead->cn_name }}</strong></td>
+                                                <td>{{ $lead->phone_number }}</td>
+                                                <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
+                                                <td>
+                                                    @php
+                                                        $fdfpLabels = \App\Support\Statuses::FDFP_TYPES;
+                                                    @endphp
+                                                    <span class="badge bg-danger">
+                                                        {{ $fdfpLabels[$lead->not_paid_fdfp_type] ?? $lead->not_paid_fdfp_type }}
+                                                    </span>
+                                                    @if($lead->not_paid_fdfp_type === 'manual_action' && $lead->not_paid_manual_disposition)
+                                                        @php $niLabels = \App\Support\Statuses::NOT_ISSUED_DISPOSITIONS; @endphp
+                                                        <div style="font-size:.65rem;color:#6c757d;">
+                                                            {{ $niLabels[$lead->not_paid_manual_disposition] ?? $lead->not_paid_manual_disposition }}
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $lead->notPaidBy->name ?? '—' }}</td>
+                                                <td>{{ $lead->not_paid_at ? $lead->not_paid_at->format('M d, Y') : '—' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4">
+                                                    <i class="bx bx-inbox" style="font-size:2rem;color:#94a3b8"></i>
+                                                    <p class="mb-0 text-muted" style="font-size:.82rem">No Not Paid / FDFP leads</p>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
     </div>
 

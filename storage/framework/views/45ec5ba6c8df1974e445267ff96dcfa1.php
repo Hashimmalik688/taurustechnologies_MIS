@@ -80,72 +80,19 @@
                 auth()->user()->canViewModule('sales') ||
                 auth()->user()->canViewModule('qa-review') ||
                 auth()->user()->canViewModule('issuance') ||
+                auth()->user()->canViewModule('pendings-approved') ||
+                auth()->user()->canViewModule('pending-draft') ||
+                auth()->user()->canViewModule('paid-sales') ||
                 auth()->user()->canViewModule('bank-verification') ||
                 auth()->user()->canViewModule('revenue-analytics') ||
                 auth()->user()->canViewModule('live-analytics')
             );
         ?>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeSalesOps): ?>
-            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'misDropdown')">
+            <a href="<?php echo e(route('sales.hub')); ?>" class="menu-item <?php echo e(Request::is('sales/hub') || Request::is('sales*') || Request::is('qa/review*') || Request::is('qa/scoring*') || Request::is('issuance*') || Request::is('pendings-approved*') || Request::is('pending-draft*') || Request::is('paid-sales*') || Request::is('followup/report*') || Request::is('followup/followup-done*') || Request::is('bank-verification*') || Request::is('revenue-analytics*') || Request::is('analytics/live*') ? 'active' : ''); ?>">
                 <i class="bx bx-briefcase-alt"></i>
                 <span class="menu-text">Sales Operations</span>
-                <i class="bx bx-chevron-down dropdown-icon"></i>
             </a>
-
-            <div class="menu-dropdown" id="misDropdown">
-                <?php if(auth()->check() && auth()->user()->canViewModule('sales')): ?>
-                    <a href="<?php echo e(route('sales.index')); ?>" class="dropdown-item <?php echo e(Request::is('sales*') ? 'active' : ''); ?>">
-                        <i class="bx bx-dollar-circle"></i>
-                        <span class="menu-text">Sales Records</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('qa-review')): ?>
-                    <a href="<?php echo e(route('qa.review')); ?>" class="dropdown-item <?php echo e(Request::is('qa/review*') ? 'active' : ''); ?>">
-                        <i class="bx bx-check-circle"></i>
-                        <span class="menu-text">QA Review</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('issuance')): ?>
-                    <a href="<?php echo e(route('issuance.index')); ?>" class="dropdown-item <?php echo e(Request::is('issuance*') ? 'active' : ''); ?>">
-                        <i class="bx bx-send"></i>
-                        <span class="menu-text">Policy Submission</span>
-                    </a>
-                    <a href="<?php echo e(route('followup.report')); ?>" class="dropdown-item <?php echo e(Request::is('followup/report*') ? 'active' : ''); ?>">
-                        <i class="bx bx-bar-chart-alt-2"></i>
-                        <span class="menu-text">Followup Report</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('bank-verification')): ?>
-                    <a href="<?php echo e(route('bank-verification.index')); ?>" class="dropdown-item <?php echo e(Request::is('bank-verification*') ? 'active' : ''); ?>">
-                        <i class="bx bx-check-shield"></i>
-                        <span class="menu-text">Bank Verification</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('qa-review')): ?>
-                    <a href="<?php echo e(route('qa.scoring')); ?>" class="dropdown-item <?php echo e(Request::is('qa/scoring*') ? 'active' : ''); ?>">
-                        <i class="bx bx-shield-quarter"></i>
-                        <span class="menu-text">QA Scoring</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('revenue-analytics')): ?>
-                    <a href="<?php echo e(route('revenue-analytics.index')); ?>" class="dropdown-item <?php echo e(Request::is('revenue-analytics*') ? 'active' : ''); ?>">
-                        <i class="bx bx-line-chart"></i>
-                        <span class="menu-text">Revenue Analytics</span>
-                    </a>
-                <?php endif; ?>
-
-                <?php if(auth()->check() && auth()->user()->canViewModule('live-analytics')): ?>
-                    <a href="<?php echo e(route('analytics.live')); ?>" class="dropdown-item <?php echo e(Request::is('analytics/live*') ? 'active' : ''); ?>">
-                        <i class="bx bx-line-chart"></i>
-                        <span class="menu-text">Live Analytics</span>
-                    </a>
-                <?php endif; ?>
-            </div>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
@@ -238,7 +185,8 @@
                 auth()->user()->canViewModule('ravens') ||
                 auth()->user()->canViewModule('ravens-dashboard') ||
                 auth()->user()->canViewModule('ravens-calling') ||
-                auth()->user()->canViewModule('ravens-followups')
+                auth()->user()->canViewModule('ravens-followups') ||
+                auth()->user()->canViewModule('ravens-validation')
             );
         ?>
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($canSeeRavens): ?>
@@ -267,6 +215,13 @@
                     <a href="<?php echo e(route('followup.my-followups')); ?>" class="dropdown-item <?php echo e(Request::is('followup*') ? 'active' : ''); ?>">
                         <i class="bx bx-task"></i>
                         <span class="menu-text">My Followup & Bank Verification</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if(auth()->check() && auth()->user()->canViewModule('ravens-validation')): ?>
+                    <a href="<?php echo e(route('ravens.validation.index')); ?>" class="dropdown-item <?php echo e(Request::is('ravens/validation*') ? 'active' : ''); ?>">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Ravens Validation</span>
                     </a>
                 <?php endif; ?>
             </div>

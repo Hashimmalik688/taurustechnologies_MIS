@@ -182,7 +182,7 @@ Staff Notes: {{ $lead->staff_notes }}
 @endif
 @if(!empty($lead->closer_qna))
 Closer Q&A:
-@foreach($lead->closer_qna as $i => $pair)
+@foreach((is_array($lead->closer_qna) ? $lead->closer_qna : (json_decode($lead->closer_qna, true) ?? [])) as $i => $pair)
   Q{{ $i + 1 }}: {{ $pair['question'] ?? '' }}
   A{{ $i + 1 }}: {{ $pair['answer'] ?? '' }}
 @endforeach

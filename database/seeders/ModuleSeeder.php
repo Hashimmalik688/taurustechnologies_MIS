@@ -171,6 +171,13 @@ class ModuleSeeder extends Seeder
                 'category' => 'Ravens Operations',
                 'sort_order' => 134,
             ],
+            [
+                'name' => 'Ravens Validation',
+                'slug' => 'ravens-validation',
+                'description' => 'Review and validate Ravens leads approved or declined by manager before policy submission',
+                'category' => 'Ravens Operations',
+                'sort_order' => 135,
+            ],
 
             // 6. HR Operations
             [
