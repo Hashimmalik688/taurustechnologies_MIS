@@ -54,7 +54,7 @@
 
         <div class="chat-input-container">
             <div class="chat-input-wrapper">
-                <textarea id="chat-message-input" rows="1" placeholder="Type a message..." onkeydown="handleChatInputKeydown(event)"></textarea>
+                <textarea id="chat-message-input" rows="1" placeholder="Type a message..." onkeydown="handleChatInputKeydown(event)" onpaste="handleChatInputPaste(event)"></textarea>
                 <button class="chat-attach-btn" onclick="triggerFileUpload()">
                     <i class="bx bx-paperclip"></i>
                 </button>
@@ -295,6 +295,7 @@ async function sendChatMessage() {
 
         if (data.success) {
             input.value = '';
+            input.placeholder = 'Type a message...';
             chatState.selectedFiles = [];
             document.getElementById('chat-file-input').value = '';
             await loadMessages(chatState.currentConversationId);
@@ -309,6 +310,59 @@ function handleChatInputKeydown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         sendChatMessage();
+    }
+}
+
+// Handle paste — images from clipboard (Ctrl+V) + preserve Excel/text as-is (rendered as table on display)
+function handleChatInputPaste(e) {
+    const clipData = e.clipboardData || window.clipboardData;
+    const items    = clipData ? clipData.items : [];
+
+    // Check clipboard contents
+    const imageItems = [];
+    let hasText = false, hasHtml = false;
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith('image/')) imageItems.push(items[i]);
+        if (items[i].type === 'text/plain') hasText = true;
+        if (items[i].type === 'text/html')  hasHtml = true;
+    }
+    const plainRaw = clipData && clipData.getData ? (clipData.getData('text/plain') || '') : '';
+    const htmlRaw  = clipData && clipData.getData ? (clipData.getData('text/html')  || '') : '';
+
+    // 1. Pure image paste (screenshot) — skip if clipboard also has text (e.g. Excel copy)
+    const isPureImage = imageItems.length > 0 && !hasText && !hasHtml;
+    if (isPureImage) {
+        e.preventDefault();
+        const dt = new DataTransfer();
+        imageItems.forEach((item, idx) => {
+            const file = item.getAsFile();
+            if (file) {
+                const ext   = (file.type.split('/')[1] || 'png').split(';')[0];
+                const named = new File([file], `clipboard-image-${Date.now()}-${idx}.${ext}`, { type: file.type });
+                dt.items.add(named);
+            }
+        });
+        if (dt.files.length > 0) {
+            chatState.selectedFiles = Array.from(dt.files);
+            document.getElementById('chat-message-input').placeholder = `📎 ${dt.files.length} image(s) ready to send`;
+        }
+        return;
+    }
+
+    // 2. Text / Excel paste — prefix [[TABLE]] for tabular data so renderer builds HTML table
+    if (plainRaw || htmlRaw) {
+        e.preventDefault();
+        const plainLines    = plainRaw.split(/\r?\n/).filter(l => l !== '');
+        const hasTabularTxt  = plainLines.some(l => l.includes('\t'));
+        const hasTabularHtml = htmlRaw.includes('<table') || htmlRaw.includes('<td') || htmlRaw.includes('<TD');
+        const isTabular      = (hasTabularTxt || hasTabularHtml) && plainLines.length >= 2;
+        const toInsert       = isTabular ? '[[TABLE]]' + plainRaw : plainRaw;
+
+        const ta    = e.target;
+        const start = ta.selectionStart;
+        const end   = ta.selectionEnd;
+        ta.value = ta.value.substring(0, start) + toInsert + ta.value.substring(end);
+        ta.selectionStart = ta.selectionEnd = start + toInsert.length;
     }
 }
 

@@ -2046,7 +2046,85 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
         document.getElementById('fileInput').click();
     });
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-    
+
+    // Auto-expand textarea as user types, up to max-height
+    const msgInput = document.getElementById('messageInput');
+    function autoResizeInput() {
+        msgInput.style.height = 'auto';
+        msgInput.style.height = Math.min(msgInput.scrollHeight, 140) + 'px';
+    }
+    msgInput.addEventListener('input', autoResizeInput);
+    // Reset height after send
+    const origSendMessage = sendMessage;
+    window._chatAutoResizeReset = function() {
+        msgInput.style.height = '22px';
+    };
+
+    // ── Paste handler: images from clipboard (Ctrl+V) + Excel table formatting ──
+    document.getElementById('messageInput').addEventListener('paste', function(e) {
+        const clipData = e.clipboardData || window.clipboardData;
+        const items    = clipData ? clipData.items : [];
+
+        // Check clipboard contents
+        const imageItems = [];
+        let hasText = false, hasHtml = false, hasTabularHtml = false;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.startsWith('image/')) imageItems.push(items[i]);
+            if (items[i].type === 'text/plain') hasText = true;
+            if (items[i].type === 'text/html')  hasHtml = true;
+        }
+        const plainRaw = clipData && clipData.getData ? (clipData.getData('text/plain') || '') : '';
+        const htmlRaw  = clipData && clipData.getData ? (clipData.getData('text/html')  || '') : '';
+        hasTabularHtml = htmlRaw.includes('<table') || htmlRaw.includes('<TD') || htmlRaw.includes('<td');
+        const plainLines   = plainRaw.split(/\r?\n/).filter(l => l !== '');
+        const hasTabularTxt = plainLines.some(l => l.includes('\t'));
+
+        // 1. Image paste — ONLY when there is no accompanying text/HTML (pure screenshot).
+        //    Excel always includes image/png alongside text; skip the image in that case.
+        const isPureImage = imageItems.length > 0 && !hasText && !hasHtml;
+        if (isPureImage) {
+            e.preventDefault();
+            const dt = new DataTransfer();
+            imageItems.forEach((item, idx) => {
+                const file = item.getAsFile();
+                if (file) {
+                    const ext   = (file.type.split('/')[1] || 'png').split(';')[0];
+                    const named = new File([file], `clipboard-image-${Date.now()}-${idx}.${ext}`, { type: file.type });
+                    dt.items.add(named);
+                }
+            });
+            if (dt.files.length > 0) {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            return;
+        }
+
+        // 2. Text / Excel paste
+        //    If clipboard HTML contains a table (any column count), prefix with [[TABLE]]
+        //    so formatMessageText() always renders it as an HTML table, not plain text.
+        if (plainRaw || htmlRaw) {
+            e.preventDefault();
+            const plainLines    = plainRaw.split(/\r?\n/).filter(l => l !== '');
+            const hasTabularTxt = plainLines.some(l => l.includes('\t'));
+            const hasTabularHtml = htmlRaw.includes('<table') || htmlRaw.includes('<TD') || htmlRaw.includes('<td');
+            const isTabular     = (hasTabularTxt || hasTabularHtml) && plainLines.length >= 2;
+
+            // Prefix with [[TABLE]] so the renderer knows to build an HTML table
+            const toInsert = isTabular ? '[[TABLE]]' + plainRaw : plainRaw;
+
+            const ta    = e.target;
+            const start = ta.selectionStart;
+            const end   = ta.selectionEnd;
+            ta.value = ta.value.substring(0, start) + toInsert + ta.value.substring(end);
+            ta.selectionStart = ta.selectionEnd = start + toInsert.length;
+            // Close mention suggestions
+            const mentionEl = document.getElementById('mentionSuggestions');
+            if (mentionEl) mentionEl.style.display = 'none';
+        }
+    });
+
     // Add emoji button listener
     const emojiBtn = document.getElementById('emojiBtn');
     if (emojiBtn) {
@@ -2083,22 +2161,41 @@ function escapeHtml(text) {
 // Helper function to format message text with mentions and GIFs
 function formatMessageText(text) {
     if (!text) return '';
-    
-    // Check if this is a GIF message
+
+    // GIF message
     if (text.startsWith('[GIF]')) {
-        const gifUrl = text.substring(5); // Remove [GIF] prefix
+        const gifUrl = text.substring(5);
         return `<img src="${gifUrl}" alt="GIF" style="max-width: 300px; border-radius: 8px; display: block; margin: 4px 0;">`;
     }
-    
-    // First escape HTML
-    let escaped = escapeHtml(text);
-    
-    // Highlight @[Full Name] mentions (multi-word names in brackets)
+
+    // Table: explicitly marked by paste handler with [[TABLE]] prefix
+    const isMarkedTable = text.startsWith('[[TABLE]]');
+    const rawText       = isMarkedTable ? text.substring(9) : text;
+    const rawLines      = rawText.split(/\r?\n/).filter(l => l !== '');
+    const hasTabs       = rawLines.some(l => l.includes('\t'));
+    const isTsv         = isMarkedTable || (rawLines.length >= 2 && hasTabs);
+
+    if (isTsv && rawLines.length > 0) {
+        const rows     = rawLines.map(l => l.split('\t'));
+        const colCount = Math.max(...rows.map(r => r.length));
+        let html = '<div class="chat-table-wrap"><table class="chat-table"><tbody>';
+        rows.forEach(row => {
+            html += '<tr>';
+            for (let c = 0; c < colCount; c++) {
+                const cell = escapeHtml((row[c] || '').trim());
+                html += `<td>${cell}</td>`;
+            }
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        return html;
+    }
+
+    // Regular text
+    let escaped = escapeHtml(rawText);
     escaped = escaped.replace(/@\[([^\]]+)\]/g, '<span class="mention-highlight">@$1</span>');
-    
-    // Highlight @word mentions (single-word including @everyone)
     escaped = escaped.replace(/@(everyone|\w+)/g, '<span class="mention-highlight">@$1</span>');
-    
+    escaped = escaped.replace(/\n/g, '<br>');
     return escaped;
 }
 
@@ -2476,6 +2573,8 @@ async function sendMessage() {
         input.value = '';
         fileInput.value = '';
         input.placeholder = 'Type a message...'; // Reset placeholder
+        // Reset textarea height
+        if (window._chatAutoResizeReset) window._chatAutoResizeReset();
         await refreshMessages();
         updateConversationPreview(window.currentConversationId, message); // Update sidebar without full reload
     } catch (error) {
@@ -3777,9 +3876,9 @@ window.ChatToast = {
         
         container.innerHTML = suggestions.map((s, i) => `
             <div class="suggestion-item ${i === 0 ? 'active' : ''}" data-index="${i}" data-mention="${s.name}">
-                ${s.type === 'special' ? 
+                ${s.type === 'special' ?
                     `<span>${s.icon}</span><div class="user-name">@${s.name}</div>` :
-                    `<img src="${s.avatar || 'https://via.placeholder.com/24'}" alt="${s.name}" class="rounded-circle">
+                    `<img src="${s.avatar || ''}" alt="${s.name}" width="26" height="26" onerror="this.style.display='none'">
                      <div>
                         <div class="user-name">@${s.name}</div>
                         <div class="user-role">${s.role || 'Member'}</div>
