@@ -712,7 +712,7 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
 });
 
 // Permission Management (Super Admin only)
-Route::group(['prefix' => 'settings/permissions', 'as' => 'settings.permissions.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN)]], function () {
+Route::group(['prefix' => 'settings/permissions', 'as' => 'settings.permissions.', 'middleware' => ['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::CEO, Roles::COORDINATOR)]], function () {
     // Main permission management page (list of roles)
     Route::get('/', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('index');
     

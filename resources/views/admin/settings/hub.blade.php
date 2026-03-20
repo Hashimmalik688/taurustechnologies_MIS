@@ -28,7 +28,7 @@
             </a>
             @endcanViewModule
 
-            @hasrole('Super Admin')
+            @canViewModule('permission-manager')
             <a href="{{ route('settings.permissions.index') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
                 <div class="hub-card-body">
@@ -37,9 +37,7 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-
-
-            @endhasrole
+            @endcanViewModule
 
             <a href="{{ route('settings.themes') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-palette"></i></div>

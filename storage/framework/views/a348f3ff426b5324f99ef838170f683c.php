@@ -26,7 +26,7 @@
             </a>
             <?php endif; ?>
 
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if (\Illuminate\Support\Facades\Blade::check('hasrole', 'Super Admin')): ?>
+            <?php if(auth()->check() && auth()->user()->canViewModule('permission-manager')): ?>
             <a href="<?php echo e(route('settings.permissions.index')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
                 <div class="hub-card-body">
@@ -35,9 +35,7 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-
-
-            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <?php endif; ?>
 
             <a href="<?php echo e(route('settings.themes')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-palette"></i></div>

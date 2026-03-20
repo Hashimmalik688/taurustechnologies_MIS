@@ -363,6 +363,7 @@
             auth()->user()->canViewModule('reports') ||
             auth()->user()->canViewModule('duplicate-checker') ||
             auth()->user()->canViewModule('account-switch-log') ||
+            auth()->user()->canViewModule('permission-manager') ||
             auth()->user()->hasRole('Super Admin')
         );
     @endphp

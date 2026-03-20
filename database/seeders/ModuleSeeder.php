@@ -316,6 +316,13 @@ class ModuleSeeder extends Seeder
                 'category' => 'Users Management',
                 'sort_order' => 290,
             ],
+            [
+                'name' => 'Permission Manager',
+                'slug' => 'permission-manager',
+                'description' => 'Manage role-based permissions for all modules',
+                'category' => 'Users Management',
+                'sort_order' => 295,
+            ],
 
             // Additional Settings modules
             [
