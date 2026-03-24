@@ -276,6 +276,7 @@ class LeadController extends Controller
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
+            ->whereNotNull('ravens_validated_at')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
@@ -303,11 +304,22 @@ class LeadController extends Controller
             $query->where('carrier_name', $request->carrier);
         }
         
-        // Filter by manager_status (pending / approved / declined / underwriting)
-        if ($request->filled('status')) {
-            $query->where('manager_status', $request->status);
+        // Tab-based status filter
+        $activeTab = $request->get('status', 'pending_submission');
+        if ($activeTab === 'pending_submission') {
+            $query->where('manager_status', Statuses::MGR_PENDING);
+        } elseif ($activeTab === 'valid_submitted') {
+            $query->where('manager_status', Statuses::MGR_APPROVED);
+        } elseif ($activeTab === 'not_valid') {
+            $query->where('ravens_validation_status', 'not_valid');
+        } elseif ($activeTab === 'declined') {
+            $query->where('manager_status', Statuses::MGR_DECLINED)
+                  ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'));
+        } elseif ($activeTab === 'underwriting') {
+            $query->where('manager_status', Statuses::MGR_UNDERWRITING);
         }
-        
+        // 'all' = no additional filter
+
         // Filter by policy type
         if ($request->filled('policy_type')) {
             $query->where('policy_type', $request->policy_type);
@@ -333,10 +345,11 @@ class LeadController extends Controller
         
         $carriers = $insuranceCarriers; // Use insurance carriers for filter
         
-        // Get KPI statistics for manager_status in a single query instead of 4 separate COUNT queries
-        $statusAgg = Lead::whereNotNull('closer_name')
+        // KPI statistics for the new tab-based sales page
+        $statsBase = Lead::whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
+            ->whereNotNull('ravens_validated_at')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
             })
@@ -346,20 +359,16 @@ class LeadController extends Controller
                   ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
             })
             ->when($request->filled('date_from'), fn($q) => $q->whereDate('sale_date', '>=', $request->date_from))
-            ->when($request->filled('date_to'),   fn($q) => $q->whereDate('sale_date', '<=', $request->date_to))
-            ->selectRaw("
-                SUM(CASE WHEN manager_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-                SUM(CASE WHEN manager_status = 'approved' THEN 1 ELSE 0 END) as accepted_count,
-                SUM(CASE WHEN manager_status = 'declined' THEN 1 ELSE 0 END) as rejected_count,
-                SUM(CASE WHEN manager_status = 'underwriting' THEN 1 ELSE 0 END) as underwritten_count
-            ")
-            ->first();
-        
+            ->when($request->filled('date_to'),   fn($q) => $q->whereDate('sale_date', '<=', $request->date_to));
+
         $statusCounts = [
-            'pending'     => (int) ($statusAgg->pending_count ?? 0),
-            'approved'    => (int) ($statusAgg->accepted_count ?? 0),
-            'declined'    => (int) ($statusAgg->rejected_count ?? 0),
-            'underwriting' => (int) ($statusAgg->underwritten_count ?? 0),
+            'all'                => (clone $statsBase)->count(),
+            'pending_submission' => (clone $statsBase)->where('manager_status', Statuses::MGR_PENDING)->count(),
+            'valid_submitted'    => (clone $statsBase)->where('manager_status', Statuses::MGR_APPROVED)->count(),
+            'not_valid'          => (clone $statsBase)->where('ravens_validation_status', 'not_valid')->count(),
+            'declined'           => (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)
+                                        ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'))->count(),
+            'underwriting'       => (clone $statsBase)->where('manager_status', Statuses::MGR_UNDERWRITING)->count(),
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
@@ -370,7 +379,7 @@ class LeadController extends Controller
         
         $partners = \App\Models\Partner::where('is_active', true)->orderBy('code')->get(['id', 'name', 'code']);
 
-        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers', 'partners'));
+        return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers', 'partners', 'activeTab'));
     }
 
     /**
@@ -389,7 +398,7 @@ class LeadController extends Controller
             'policy_number' => 'nullable|string|max:100',
             'sale_date' => 'required|date',
             'closer_name' => 'required|string|max:255',
-            'status' => 'nullable|string|in:pending,accepted,rejected,chargeback,verified',
+            'status' => 'nullable|string|in:pending,accepted,rejected,verified',
             'account_number' => 'nullable|string|max:50',
             'bank_name' => 'nullable|string|max:255',
             'beneficiary' => 'nullable|string|max:255',
@@ -1037,7 +1046,7 @@ class LeadController extends Controller
     public function updateManagerStatus(Request $request, $id)
     {
         $request->validate([
-            'manager_status' => 'required|in:pending,approved,declined,underwriting,chargeback',
+            'manager_status' => 'required|in:pending,approved,declined,underwriting',
             'manager_reason' => 'nullable|string|max:1000'
         ]);
 
@@ -1048,16 +1057,8 @@ class LeadController extends Controller
         $lead->manager_user_id = auth()->id();
         $lead->manager_reviewed_at = now();
         
-        // When manager marks as chargeback, update the main status too
-        // This ensures it appears in Chargebacks page and Retention "Yet to Retain"
-        if ($request->manager_status === Statuses::MGR_CHARGEBACK) {
-            $lead->status = Statuses::LEAD_CHARGEBACK;
-            $lead->chargeback_marked_date = now();
-            // Set retention_status to pending so it appears in "Yet to Retain"
-            $lead->retention_status = Statuses::RETENTION_PENDING;
-        }
         // When manager approves, update status to accepted/underwritten
-        elseif ($request->manager_status === Statuses::MGR_APPROVED) {
+        if ($request->manager_status === Statuses::MGR_APPROVED) {
             $lead->status = Statuses::LEAD_ACCEPTED;
         }
         elseif ($request->manager_status === Statuses::MGR_UNDERWRITING) {

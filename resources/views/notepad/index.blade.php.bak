@@ -1,0 +1,611 @@
+@extends('layouts.master')
+
+@section('title', 'Notepad')
+
+@section('css')
+<style>
+/* ═══════════════════════════════════════════════════
+   Notepad — Personal Notes Page
+   ═══════════════════════════════════════════════════ */
+
+.np-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+}
+
+/* ── Header ── */
+.np-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+.np-header h4 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.np-header h4 i { color: var(--bs-gold, #d4af37); font-size: 1.3rem; }
+.np-header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+
+/* ── New Note Form ── */
+.np-new-card {
+    background: var(--bs-card-bg);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 0.65rem;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+.np-new-card .np-title-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    color: var(--bs-body-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.3rem 0;
+    margin-bottom: 0.6rem;
+    outline: none;
+}
+.np-new-card .np-title-input::placeholder { opacity: .45; font-weight: 400; }
+.np-new-card .np-content-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--bs-body-color);
+    font-size: 0.82rem;
+    resize: vertical;
+    min-height: 80px;
+    padding: 0;
+    outline: none;
+    line-height: 1.6;
+}
+.np-new-card .np-content-input::placeholder { opacity: .4; }
+.np-new-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.7rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.np-color-row { display: flex; gap: 0.4rem; align-items: center; }
+.np-color-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform .15s, border-color .15s;
+}
+.np-color-dot:hover, .np-color-dot.active { transform: scale(1.25); border-color: var(--bs-gold, #d4af37); }
+.btn-np-add {
+    background: linear-gradient(135deg, #d4af37 0%, #b8942a 100%);
+    border: none;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.btn-np-add:hover { opacity: .87; }
+.btn-np-add:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Filters ── */
+.np-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.np-filters .form-control,
+.np-filters .form-select {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.4rem;
+    max-width: 200px;
+}
+
+/* ── Notes Grid ── */
+.np-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 0.85rem;
+}
+
+/* ── Note Card ── */
+.np-card {
+    border-radius: 0.6rem;
+    padding: 0.85rem;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    transition: box-shadow .2s, transform .15s;
+    border: 1px solid rgba(0,0,0,.06);
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+}
+.np-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.12); transform: translateY(-1px); }
+.np-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: rgba(0,0,0,.8);
+    word-break: break-word;
+}
+.np-card-title:empty { display: none; }
+.np-card-body {
+    font-size: 0.78rem;
+    color: rgba(0,0,0,.7);
+    line-height: 1.55;
+    flex: 1;
+    word-break: break-word;
+    white-space: pre-wrap;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+}
+.np-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-size: 0.65rem;
+    color: rgba(0,0,0,.45);
+}
+.np-card-actions { display: flex; gap: 0.3rem; }
+.np-card-actions button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.15rem 0.3rem;
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    color: rgba(0,0,0,.45);
+    transition: color .15s, background .15s;
+}
+.np-card-actions button:hover { background: rgba(0,0,0,.08); color: rgba(0,0,0,.7); }
+.np-card-pin { position: absolute; top: 0.5rem; right: 0.5rem; }
+.np-card-pin i { font-size: 0.85rem; color: rgba(0,0,0,.35); }
+.np-card-pin.pinned i { color: #c84646; }
+
+/* ── Edit Modal ── */
+.np-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.np-modal-backdrop.show { display: flex; }
+.np-modal {
+    background: var(--bs-card-bg);
+    border-radius: 0.7rem;
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    border: 1px solid rgba(255,255,255,.1);
+}
+.np-modal-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.9rem;
+}
+.np-modal-hdr h6 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    display: flex; align-items: center; gap: 0.35rem;
+}
+.np-modal-close {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--bs-body-color);
+    opacity: .5;
+    padding: 0;
+}
+.np-modal-close:hover { opacity: 1; }
+.np-modal .np-input {
+    width: 100%;
+    background: var(--bs-body-bg);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 0.4rem;
+    color: var(--bs-body-color);
+    font-size: 0.82rem;
+    padding: 0.45rem 0.6rem;
+    outline: none;
+    margin-bottom: 0.65rem;
+}
+.np-modal .np-input:focus { border-color: var(--bs-gold, #d4af37); }
+.np-modal .np-textarea {
+    min-height: 160px;
+    resize: vertical;
+    line-height: 1.6;
+}
+.np-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+.btn-np-save {
+    background: linear-gradient(135deg, #d4af37 0%, #b8942a 100%);
+    border: none;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.38rem 0.9rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.btn-np-save:hover { opacity: .87; }
+
+/* ── Empty state ── */
+.np-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--bs-surface-400, #94a3b8);
+}
+.np-empty i { font-size: 2.8rem; opacity: .35; display: block; margin-bottom: 0.6rem; }
+.np-empty p { font-size: 0.82rem; }
+
+/* ── Stats strip ── */
+.np-stats {
+    display: flex;
+    gap: 1.2rem;
+    font-size: 0.72rem;
+    color: var(--bs-surface-400, #94a3b8);
+    margin-bottom: 0.9rem;
+    flex-wrap: wrap;
+}
+.np-stats strong { color: var(--bs-body-color); }
+</style>
+@endsection
+
+@section('content')
+<div class="np-page">
+
+    {{-- Header --}}
+    <div class="np-header">
+        <h4><i class="bx bx-notepad"></i> My Notepad</h4>
+        <div class="np-header-actions">
+            <span class="np-stats" id="npStats">
+                <span>Total: <strong id="statTotal">{{ $notes->count() }}</strong></span>
+                <span>Pinned: <strong id="statPinned">{{ $notes->where('is_pinned', true)->count() }}</strong></span>
+            </span>
+        </div>
+    </div>
+
+    {{-- New Note Form --}}
+    <div class="np-new-card" id="newNoteCard">
+        <input type="text" class="np-title-input" id="newTitle" placeholder="Note title..." maxlength="255">
+        <textarea class="np-content-input" id="newContent" placeholder="Write something..."></textarea>
+        <div class="np-new-footer">
+            <div class="np-color-row" id="newColorRow">
+                @foreach(['#fffde7','#e8f5e9','#e3f2fd','#fce4ec','#f3e5f5','#fff3e0','#ffffff'] as $col)
+                <div class="np-color-dot" style="background:{{ $col }}" data-color="{{ $col }}" title="{{ $col }}" onclick="selectNewColor(this)"></div>
+                @endforeach
+            </div>
+            <button class="btn-np-add" id="btnAddNote" onclick="addNote()">
+                <i class="bx bx-plus"></i> Add Note
+            </button>
+        </div>
+    </div>
+
+    {{-- Filters --}}
+    <div class="np-filters">
+        <input type="text" class="form-control" id="npSearch" placeholder="Search notes..." oninput="filterNotes()" autocomplete="off">
+        <select class="form-select" id="npSort" onchange="filterNotes()">
+            <option value="updated">Recently Updated</option>
+            <option value="created">Recently Created</option>
+            <option value="title">By Title</option>
+        </select>
+    </div>
+
+    {{-- Notes Grid --}}
+    <div class="np-grid" id="npGrid">
+        @forelse($notes as $note)
+        <div class="np-card" id="note-{{ $note->id }}"
+             style="background:{{ $note->color ?: '#ffffff' }}"
+             data-id="{{ $note->id }}"
+             data-title="{{ e($note->title) }}"
+             data-content="{{ e($note->content) }}"
+             data-color="{{ $note->color ?: '#ffffff' }}"
+             data-pinned="{{ $note->is_pinned ? '1' : '0' }}"
+             data-updated="{{ $note->updated_at->timestamp }}">
+            <div class="np-card-pin {{ $note->is_pinned ? 'pinned' : '' }}" onclick="togglePin({{ $note->id }}, this)" title="{{ $note->is_pinned ? 'Unpin' : 'Pin' }}">
+                <i class="bx {{ $note->is_pinned ? 'bxs-pin' : 'bx-pin' }}"></i>
+            </div>
+            @if($note->title)
+            <div class="np-card-title">{{ $note->title }}</div>
+            @endif
+            <div class="np-card-body">{{ $note->content }}</div>
+            <div class="np-card-footer">
+                <span>{{ $note->updated_at->diffForHumans() }}</span>
+                <div class="np-card-actions">
+                    <button onclick="openEdit({{ $note->id }})" title="Edit"><i class="bx bx-edit-alt"></i></button>
+                    <button onclick="deleteNote({{ $note->id }})" title="Delete"><i class="bx bx-trash"></i></button>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="np-empty" id="npEmpty" style="grid-column: 1 / -1;">
+            <i class="bx bx-notepad"></i>
+            <p>No notes yet. Start writing above!</p>
+        </div>
+        @endforelse
+    </div>
+
+</div>
+
+{{-- Edit Modal --}}
+<div class="np-modal-backdrop" id="editModal">
+    <div class="np-modal">
+        <div class="np-modal-hdr">
+            <h6><i class="bx bx-edit"></i> Edit Note</h6>
+            <button class="np-modal-close" onclick="closeEdit()">&times;</button>
+        </div>
+        <input type="hidden" id="editNoteId">
+        <input type="text" class="np-input" id="editTitle" placeholder="Note title..." maxlength="255">
+        <textarea class="np-input np-textarea" id="editContent" placeholder="Note content..."></textarea>
+        <div class="np-new-footer">
+            <div class="np-color-row" id="editColorRow">
+                @foreach(['#fffde7','#e8f5e9','#e3f2fd','#fce4ec','#f3e5f5','#fff3e0','#ffffff'] as $col)
+                <div class="np-color-dot" style="background:{{ $col }}" data-color="{{ $col }}" title="{{ $col }}" onclick="selectEditColor(this)"></div>
+                @endforeach
+            </div>
+            <div class="np-modal-footer" style="margin:0">
+                <button class="btn-np-save" onclick="saveEdit()"><i class="bx bx-save"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('script')
+<script>
+const CSRF = '{{ csrf_token() }}';
+let newSelectedColor = '#ffffff';
+let editSelectedColor = '#ffffff';
+
+// ── Color pickers ──
+function selectNewColor(el) {
+    document.querySelectorAll('#newColorRow .np-color-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    newSelectedColor = el.dataset.color;
+}
+function selectEditColor(el) {
+    document.querySelectorAll('#editColorRow .np-color-dot').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    editSelectedColor = el.dataset.color;
+}
+
+// Activate first color on page load
+document.querySelectorAll('#newColorRow .np-color-dot')[6]?.classList.add('active');
+
+// ── Add Note ──
+async function addNote() {
+    const title   = document.getElementById('newTitle').value.trim();
+    const content = document.getElementById('newContent').value.trim();
+    const btn     = document.getElementById('btnAddNote');
+
+    if (!title && !content) return;
+
+    btn.disabled = true;
+    try {
+        const res = await fetch('{{ route("notepad.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ title, content, color: newSelectedColor }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newContent').value = '';
+            prependNoteCard(data.note);
+            updateStats();
+        }
+    } catch (e) {
+        console.error('Add note failed', e);
+    }
+    btn.disabled = false;
+}
+
+// ── Delete Note ──
+async function deleteNote(id) {
+    if (!confirm('Delete this note?')) return;
+    try {
+        const res = await fetch(`/notepad/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+        });
+        const data = await res.json();
+        if (data.success) {
+            const card = document.getElementById(`note-${id}`);
+            if (card) card.remove();
+            checkEmpty();
+            updateStats();
+        }
+    } catch (e) { console.error('Delete note failed', e); }
+}
+
+// ── Toggle Pin ──
+async function togglePin(id, pinEl) {
+    const card   = document.getElementById(`note-${id}`);
+    const pinned = card.dataset.pinned === '1' ? false : true;
+    try {
+        const res = await fetch(`/notepad/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ is_pinned: pinned }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            card.dataset.pinned = pinned ? '1' : '0';
+            pinEl.classList.toggle('pinned', pinned);
+            pinEl.querySelector('i').className = pinned ? 'bx bxs-pin' : 'bx bx-pin';
+            pinEl.title = pinned ? 'Unpin' : 'Pin';
+            updateStats();
+        }
+    } catch (e) { console.error('Toggle pin failed', e); }
+}
+
+// ── Edit Modal ──
+function openEdit(id) {
+    const card = document.getElementById(`note-${id}`);
+    document.getElementById('editNoteId').value  = id;
+    document.getElementById('editTitle').value   = card.dataset.title;
+    document.getElementById('editContent').value = card.dataset.content;
+    editSelectedColor = card.dataset.color || '#ffffff';
+
+    // Activate matching color dot
+    document.querySelectorAll('#editColorRow .np-color-dot').forEach(d => {
+        d.classList.toggle('active', d.dataset.color === editSelectedColor);
+    });
+
+    document.getElementById('editModal').classList.add('show');
+}
+function closeEdit() {
+    document.getElementById('editModal').classList.remove('show');
+}
+async function saveEdit() {
+    const id      = document.getElementById('editNoteId').value;
+    const title   = document.getElementById('editTitle').value.trim();
+    const content = document.getElementById('editContent').value.trim();
+
+    try {
+        const res = await fetch(`/notepad/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ title, content, color: editSelectedColor }),
+        });
+        const data = await res.json();
+        if (data.success) {
+            const note = data.note;
+            const card = document.getElementById(`note-${id}`);
+            card.style.background       = note.color;
+            card.dataset.title          = note.title || '';
+            card.dataset.content        = note.content || '';
+            card.dataset.color          = note.color;
+            card.dataset.updated        = Math.floor(Date.now() / 1000);
+
+            const titleEl = card.querySelector('.np-card-title');
+            if (titleEl) titleEl.textContent = note.title || '';
+            card.querySelector('.np-card-body').textContent = note.content || '';
+            card.querySelector('.np-card-footer span').textContent = note.updated_ago;
+            closeEdit();
+        }
+    } catch (e) { console.error('Save edit failed', e); }
+}
+
+// Close modal on backdrop click
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEdit();
+});
+
+// Enter key in new-note title → focus content
+document.getElementById('newTitle').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('newContent').focus(); }
+});
+
+// ── Render helpers ──
+function prependNoteCard(note) {
+    const empty = document.getElementById('npEmpty');
+    if (empty) empty.remove();
+
+    const grid = document.getElementById('npGrid');
+    const card = buildCard(note);
+    grid.insertAdjacentHTML('afterbegin', card);
+}
+
+function buildCard(note) {
+    const title   = note.title ? `<div class="np-card-title">${esc(note.title)}</div>` : '';
+    const content = esc(note.content || '');
+    return `
+    <div class="np-card" id="note-${note.id}"
+         style="background:${note.color}"
+         data-id="${note.id}"
+         data-title="${esc(note.title || '')}"
+         data-content="${esc(note.content || '')}"
+         data-color="${note.color}"
+         data-pinned="0"
+         data-updated="${Math.floor(Date.now()/1000)}">
+        <div class="np-card-pin" onclick="togglePin(${note.id}, this)" title="Pin">
+            <i class="bx bx-pin"></i>
+        </div>
+        ${title}
+        <div class="np-card-body">${content}</div>
+        <div class="np-card-footer">
+            <span>${note.updated_ago}</span>
+            <div class="np-card-actions">
+                <button onclick="openEdit(${note.id})" title="Edit"><i class="bx bx-edit-alt"></i></button>
+                <button onclick="deleteNote(${note.id})" title="Delete"><i class="bx bx-trash"></i></button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function checkEmpty() {
+    const grid = document.getElementById('npGrid');
+    if (!grid.querySelector('.np-card')) {
+        grid.innerHTML = `<div class="np-empty" id="npEmpty" style="grid-column: 1 / -1;">
+            <i class="bx bx-notepad"></i><p>No notes yet. Start writing above!</p></div>`;
+    }
+}
+
+function updateStats() {
+    const cards  = document.querySelectorAll('.np-card');
+    const pinned = document.querySelectorAll('.np-card .np-card-pin.pinned');
+    document.getElementById('statTotal').textContent  = cards.length;
+    document.getElementById('statPinned').textContent = pinned.length;
+}
+
+// ── Search/filter ──
+function filterNotes() {
+    const q = document.getElementById('npSearch').value.toLowerCase();
+    document.querySelectorAll('.np-card').forEach(card => {
+        const title   = (card.dataset.title   || '').toLowerCase();
+        const content = (card.dataset.content || '').toLowerCase();
+        card.style.display = (!q || title.includes(q) || content.includes(q)) ? '' : 'none';
+    });
+}
+
+// Enter to add note from content textarea
+document.getElementById('newContent').addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') addNote();
+});
+</script>
+@endsection

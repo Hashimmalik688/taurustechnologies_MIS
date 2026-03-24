@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Ghost Mode'); ?>
 
-@section('title', 'Ghost Mode')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    Ghost Mode — Executive Dashboard Style
@@ -772,9 +770,9 @@
     margin-top: 2px;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- Page Header -->
 <div class="cs-page-hdr">
     <h5>
@@ -782,7 +780,7 @@
         <span class="cs-sub">Real-time monitoring</span>
         <span class="cs-live-dot" id="liveDot" title="Live updates active"></span>
     </h5>
-    <a href="{{ route('settings.hub') }}" class="link-btn"><i class="bx bx-arrow-back"></i> Settings</a>
+    <a href="<?php echo e(route('settings.hub')); ?>" class="link-btn"><i class="bx bx-arrow-back"></i> Settings</a>
 </div>
 
 <!-- Tabs -->
@@ -1016,9 +1014,9 @@
     </div>
 </div><!-- /tabNotepad -->
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -1077,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const p = new URLSearchParams({
             page, search: fSearch.value, type: fType.value, status: fStatus.value
         });
-        api(`{{ url('settings/chat-shadow/conversations') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/conversations')); ?>?${p}`)
         .then(d => {
             convSpin.style.display = 'none';
             if (!d.success) return;
@@ -1179,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const p = new URLSearchParams({
             page, search: mSearch.value, date_from: mFrom.value, date_to: mTo.value, show_deleted: mDelFilter.value
         });
-        api(`{{ url('settings/chat-shadow/conversations') }}/${convId}/messages?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/conversations')); ?>/${convId}/messages?${p}`)
         .then(d => {
             if (!d.success) return;
             const conv = d.conversation;
@@ -1282,13 +1280,13 @@ document.addEventListener('DOMContentLoaded', function() {
     msgNext.addEventListener('click', () => { if (currentId && msgPage < msgLast) loadMessages(currentId, msgPage + 1); });
 
     // ── Live Updates (Echo/Reverb) ──
-    const echoConfig = {!! json_encode([
+    const echoConfig = <?php echo json_encode([
         'key' => env('REVERB_APP_KEY', ''),
         'host' => env('REVERB_HOST', '127.0.0.1'),
         'port' => intval(env('REVERB_PORT', 8080)),
         'scheme' => env('REVERB_SCHEME', 'http'),
         'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
-    ]) !!};
+    ]); ?>;
 
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -1364,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function escA(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function trunc(s, n) { return s && s.length > n ? s.substring(0,n) + '...' : s; }
     function hash(s) { let h=0; for(let i=0;i<(s||'').length;i++) h=s.charCodeAt(i)+((h<<5)-h); return Math.abs(h); }
-    function assetUrl(p) { if (!p) return ''; if (p.startsWith('http')) return p; return '{{ asset("") }}' + p; }
+    function assetUrl(p) { if (!p) return ''; if (p.startsWith('http')) return p; return '<?php echo e(asset("")); ?>' + p; }
 
     // ── Init ──
     loadConversations(1);
@@ -1414,7 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
             user_id: nUserFilter.value,
             status: nStatusFilter.value,
         });
-        api(`{{ url('settings/chat-shadow/notes') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/notes')); ?>?${p}`)
         .then(d => {
             notesSpin.style.display = 'none';
             if (!d.success) return;
@@ -1541,7 +1539,7 @@ document.addEventListener('DOMContentLoaded', function() {
             user_id: npUserFilter.value,
             show_deleted: npStatusFilter ? npStatusFilter.value : 'all',
         });
-        api(`{{ url('settings/chat-shadow/notepad-notes') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/notepad-notes')); ?>?${p}`)
         .then(d => {
             notepadSpin.style.display = 'none';
             if (!d.success) return;
@@ -1673,4 +1671,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/settings/chat-shadow.blade.php ENDPATH**/ ?>

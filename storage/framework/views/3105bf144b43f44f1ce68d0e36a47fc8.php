@@ -58,7 +58,7 @@
     /* KPI Row */
     .sl-kpi-row {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: .75rem;
         margin-bottom: 1rem;
     }
@@ -102,6 +102,7 @@
         border: 1px solid rgba(0,0,0,.06);
         border-radius: 12px;
         overflow: hidden;
+        padding-bottom: .75rem;
     }
 
     /* Filter Pills */
@@ -161,9 +162,10 @@
     .sl-tbl-wrap {
         overflow-x: auto;
         overflow-y: auto;
-        max-height: 560px;
+        max-height: calc(100vh - 320px);
         scrollbar-width: thin;
         scrollbar-color: #d4af37 transparent;
+        padding-bottom: .25rem;
     }
     .sl-tbl-wrap::-webkit-scrollbar { width: 5px; height: 5px; }
     .sl-tbl-wrap::-webkit-scrollbar-track { background: transparent; }
@@ -498,37 +500,77 @@
     ?>
     <div class="sl-kpi-row">
         
-        <a href="<?php echo e(route('sales.index', $tabBaseQuery)); ?>" class="sl-kpi-link">
-            <div class="sl-kpi <?php echo e(!request('status') ? 'active-tab' : ''); ?>">
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'all']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'all' ? 'active-tab' : ''); ?>">
                 <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #64748b, #475569);">
                     <i class="mdi mdi-view-list"></i>
                 </div>
                 <div class="sl-kpi-info">
                     <span class="sl-kpi-label">All Sales</span>
-                    <span class="sl-kpi-val"><?php echo e(number_format(array_sum($statusCounts))); ?></span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['all'])); ?></span>
                 </div>
             </div>
         </a>
         
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $statusCounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <?php
-                $iconMap    = ['pending' => 'pending', 'approved' => 'approved', 'declined' => 'declined', 'underwriting' => 'uw'];
-                $mdiMap     = ['pending' => 'mdi-clock-outline', 'approved' => 'mdi-check-circle', 'declined' => 'mdi-close-circle', 'underwriting' => 'mdi-file-document-edit'];
-                $labelMap   = ['pending' => 'Pending', 'approved' => 'Approved', 'declined' => 'Declined', 'underwriting' => 'Underwriting'];
-                $tabUrl     = route('sales.index', array_merge($tabBaseQuery, ['status' => $status]));
-            ?>
-            <a href="<?php echo e($tabUrl); ?>" class="sl-kpi-link">
-                <div class="sl-kpi <?php echo e(request('status') === $status ? 'active-tab' : ''); ?>">
-                    <div class="sl-kpi-icon <?php echo e($iconMap[$status] ?? 'pending'); ?>">
-                        <i class="mdi <?php echo e($mdiMap[$status] ?? 'mdi-information'); ?>"></i>
-                    </div>
-                    <div class="sl-kpi-info">
-                        <span class="sl-kpi-label"><?php echo e($labelMap[$status] ?? ucfirst($status)); ?></span>
-                        <span class="sl-kpi-val"><?php echo e(number_format($count)); ?></span>
-                    </div>
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'pending_submission']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'pending_submission' ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="mdi mdi-clock-outline"></i>
                 </div>
-            </a>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">Pending Submission</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['pending_submission'])); ?></span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'valid_submitted']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'valid_submitted' ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                </div>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">Validated &amp; Submitted</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['valid_submitted'])); ?></span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'not_valid']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'not_valid' ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="mdi mdi-close-circle-outline"></i>
+                </div>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">Not Valid</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['not_valid'])); ?></span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'declined']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'declined' ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                    <i class="mdi mdi-thumb-down-outline"></i>
+                </div>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">Declined</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['declined'])); ?></span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="<?php echo e(route('sales.index', array_merge($tabBaseQuery, ['status' => 'underwriting']))); ?>" class="sl-kpi-link">
+            <div class="sl-kpi <?php echo e($activeTab === 'underwriting' ? 'active-tab' : ''); ?>">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="mdi mdi-file-document-edit-outline"></i>
+                </div>
+                <div class="sl-kpi-info">
+                    <span class="sl-kpi-label">Underwriting</span>
+                    <span class="sl-kpi-val"><?php echo e(number_format($statusCounts['underwriting'])); ?></span>
+                </div>
+            </div>
+        </a>
     </div>
 
     <!-- Top bar: Title + Actions -->
@@ -616,6 +658,9 @@
                             <th style="min-width:140px">Mgr Status</th>
                             <th style="min-width:200px">Mgr Reason</th>
                             <th style="min-width:140px">Mgr By</th>
+                            <th style="min-width:130px">Validator</th>
+                            <th style="min-width:130px">Validated At</th>
+                            <th style="min-width:120px">Val. Status</th>
                             <th style="min-width:100px">Follow Up</th>
                             <th style="min-width:160px">Scheduled</th>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -898,7 +943,6 @@
                                                     <option value="approved" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : ''); ?>>Approved</option>
                                                     <option value="declined" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : ''); ?>>Declined</option>
                                                     <option value="underwriting" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : ''); ?>>Underwriting</option>
-                                                    <option value="chargeback" <?php echo e(($lead->manager_status ?? '') == Statuses::MGR_CHARGEBACK ? 'selected' : ''); ?>>Chargeback</option>
                                                 </select>
                                             </td>
                                             <td>
@@ -927,6 +971,36 @@
                                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                 <?php else: ?>
                                                     <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            
+                                            <td>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validated_by): ?>
+                                                    <strong style="font-size:.75rem"><?php echo e($lead->ravens_validated_by); ?></strong>
+                                                <?php else: ?>
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validated_at): ?>
+                                                    <span style="font-size:.75rem"><?php echo e(\Carbon\Carbon::parse($lead->ravens_validated_at)->format('M d, Y')); ?></span>
+                                                    <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                        <?php echo e(\Carbon\Carbon::parse($lead->ravens_validated_at)->format('h:i A')); ?>
+
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validation_status === 'valid'): ?>
+                                                    <span class="badge" style="background:#d1fae5;color:#065f46;font-size:.7rem;padding:.3em .65em">Valid</span>
+                                                <?php elseif($lead->ravens_validation_status === 'not_valid'): ?>
+                                                    <span class="badge" style="background:#fee2e2;color:#991b1b;font-size:.7rem;padding:.3em .65em">Not Valid</span>
+                                                <?php elseif($lead->ravens_validated_at): ?>
+                                                    <span class="badge" style="background:#d1fae5;color:#065f46;font-size:.7rem;padding:.3em .65em">Valid</span>
+                                                <?php else: ?>
+                                                    <span class="badge" style="background:#fef9c3;color:#78350f;font-size:.7rem;padding:.3em .65em">Awaiting</span>
                                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                             </td>
                                             <td>
@@ -1567,10 +1641,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 select.style.background = themeColors.surface50;
                 select.style.color = themeColors.infoDark;
                 break;
-            case 'chargeback':
-                select.style.background = themeColors.surface50;
-                select.style.color = themeColors.dangerDark;
-                break;
         }
     }
 });
@@ -1685,7 +1755,6 @@ function setTodayFilter() {
                                 <option value="pending">Pending</option>
                                 <option value="verified">Verified</option>
                                 <option value="rejected">Rejected</option>
-                                <option value="chargeback">Chargeback</option>
                             </select>
                         </div>
 

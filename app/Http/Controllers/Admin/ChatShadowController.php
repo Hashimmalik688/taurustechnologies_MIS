@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ChatConversation;
 use App\Models\ChatMessage;
+use App\Models\NotepadNote;
 use App\Models\StickyNote;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -90,6 +91,85 @@ class ChatShadowController extends Controller
             'users' => $usersWithNotes,
             'total' => $notes->count(),
             'deleted_count' => $deletedCount,
+        ]);
+    }
+
+    /**
+     * Get all notepad notes for Ghost Mode shadowing (read-only).
+     */
+    public function getNotepadNotes(Request $request)
+    {
+        $filter = $request->input('show_deleted', 'all');
+
+        $query = NotepadNote::withTrashed()
+            ->with(['user:id,name', 'sharedWith:id,name'])
+            ->orderByDesc('updated_at');
+
+        if ($filter === 'deleted') {
+            $query->onlyTrashed();
+        } elseif ($filter === 'active') {
+            $query->whereNull('notepad_notes.deleted_at');
+        } elseif ($filter === 'shared') {
+            $query->where('is_shared', true);
+        }
+        // else 'all' = withTrashed (show everything)
+
+        if ($request->filled('user_id') && $request->user_id !== 'all') {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $notes = $query->get();
+
+        $usersWithNotes = NotepadNote::withTrashed()
+            ->with('user:id,name')
+            ->select('user_id')
+            ->distinct()
+            ->get()
+            ->map(fn($n) => [
+                'id'   => $n->user_id,
+                'name' => $n->user?->name ?? 'Deleted User',
+            ])
+            ->sortBy('name')
+            ->values();
+
+        $deletedCount = NotepadNote::withTrashed()->whereNotNull('deleted_at')->count();
+        $sharedCount  = NotepadNote::where('is_shared', true)->count();
+
+        $notes->transform(function ($note) {
+            return [
+                'id'                => $note->id,
+                'title'             => $note->title ?: 'Untitled',
+                'content'           => $note->content,
+                'color'             => $note->color,
+                'is_pinned'         => $note->is_pinned,
+                'is_shared'         => $note->is_shared,
+                'user_id'           => $note->user_id,
+                'user_name'         => $note->user?->name ?? 'Deleted User',
+                'is_deleted'        => !is_null($note->deleted_at),
+                'deleted_ago'       => $note->deleted_at?->diffForHumans(),
+                'deleted_at'        => $note->deleted_at?->format('M d, Y h:i A'),
+                'shared_with_names' => $note->sharedWith->pluck('name')->join(', '),
+                'created_at'        => $note->created_at->format('M d, Y h:i A'),
+                'updated_at'        => $note->updated_at->format('M d, Y h:i A'),
+                'updated_ago'       => $note->updated_at->diffForHumans(),
+            ];
+        });
+
+        return response()->json([
+            'success'       => true,
+            'notes'         => $notes,
+            'users'         => $usersWithNotes,
+            'total'         => $notes->count(),
+            'deleted_count' => $deletedCount,
+            'shared_count'  => $sharedCount,
         ]);
     }
 

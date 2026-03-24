@@ -201,7 +201,7 @@ async function loadMessages(conversationId) {
         const data = await response.json();
 
         if (data.success) {
-            chatState.messages = data.messages.data || [];
+            chatState.messages = data.messages || [];
             renderMessages();
             scrollToBottom();
 

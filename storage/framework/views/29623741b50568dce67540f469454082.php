@@ -207,6 +207,11 @@
                 </div>
 
                 
+                <a href="<?php echo e(route('notepad.index')); ?>" class="th-action" title="My Notepad">
+                    <i class="bx bx-notepad"></i>
+                </a>
+
+                
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">
                         <i class="bx bx-bell"></i>

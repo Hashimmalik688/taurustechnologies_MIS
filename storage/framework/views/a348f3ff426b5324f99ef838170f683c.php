@@ -84,9 +84,9 @@
 
             <?php if(auth()->check() && auth()->user()->canViewModule('chat-shadow')): ?>
             <a href="<?php echo e(route('settings.chat-shadow.index')); ?>" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-show"></i></div>
+                <div class="hub-card-icon"><i class="bx bx-ghost"></i></div>
                 <div class="hub-card-body">
-                    <div class="hub-card-title">Chat Shadowing</div>
+                    <div class="hub-card-title">Ghost Mode</div>
                     <p class="hub-card-desc">Monitor &amp; review user conversations in read-only mode</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>

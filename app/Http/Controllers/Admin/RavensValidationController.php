@@ -28,10 +28,15 @@ class RavensValidationController extends Controller
 
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
 
-        // Pending: approved/declined by manager, not yet validated
+        // Pending: Ravens sales not yet validated
         $pendingQuery = Lead::where('team', Teams::RAVENS)
-            ->whereIn('manager_status', [Statuses::MGR_APPROVED, Statuses::MGR_DECLINED])
-            ->whereNull('ravens_validated_at');
+            ->whereNull('ravens_validated_at')
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+            });
 
         if (!$showAll) {
             $pendingQuery->where(function ($q) use ($startDate, $endDate) {
@@ -75,20 +80,25 @@ class RavensValidationController extends Controller
 
         $todayStats = [
             'pending' => Lead::where('team', Teams::RAVENS)
-                ->whereIn('manager_status', [Statuses::MGR_APPROVED, Statuses::MGR_DECLINED])
                 ->whereNull('ravens_validated_at')
+                ->whereNotNull('closer_name')
+                ->where('cn_name', '!=', '')
+                ->whereNotNull('cn_name')
+                ->where(function($q) {
+                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+                })
                 ->count(),
             'validated' => Lead::where('team', Teams::RAVENS)
                 ->whereNotNull('ravens_validated_at')
                 ->whereBetween('ravens_validated_at', [$todayStart, $todayEnd])
                 ->count(),
             'sent_to_policy' => Lead::where('team', Teams::RAVENS)
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('ravens_validation_status', 'valid')
                 ->whereNotNull('ravens_validated_at')
                 ->whereBetween('ravens_validated_at', [$todayStart, $todayEnd])
                 ->count(),
             'kept_declined' => Lead::where('team', Teams::RAVENS)
-                ->where('manager_status', Statuses::MGR_DECLINED)
+                ->where('ravens_validation_status', 'not_valid')
                 ->whereNotNull('ravens_validated_at')
                 ->whereBetween('ravens_validated_at', [$todayStart, $todayEnd])
                 ->count(),
@@ -105,19 +115,17 @@ class RavensValidationController extends Controller
     }
 
     /**
-     * Mark lead as valid — sets manager_status = approved, stamps ravens_validated_at.
-     * The lead will now appear in Policy Submission (issuance page).
+     * Mark lead as valid — stamps ravens_validated_at + ravens_validation_status.
+     * The lead will now appear on the Sales page for manager review.
      */
     public function markValid(Request $request, Lead $lead)
     {
         $this->abortIfNotRavens($lead);
 
-        $old = $lead->manager_status;
-
         $lead->update([
-            'manager_status'      => Statuses::MGR_APPROVED,
-            'ravens_validated_at' => now(),
-            'ravens_validated_by' => Auth::user()->name,
+            'ravens_validated_at'      => now(),
+            'ravens_validated_by'      => Auth::user()->name,
+            'ravens_validation_status' => 'valid',
         ]);
 
         AuditLog::create([
@@ -125,42 +133,40 @@ class RavensValidationController extends Controller
             'action'     => 'Ravens Validation — Lead Valid',
             'model'      => 'Lead',
             'model_id'   => $lead->id,
-            'old_values' => json_encode(['manager_status' => $old]),
-            'new_values' => json_encode(['manager_status' => Statuses::MGR_APPROVED]),
+            'old_values' => json_encode(['ravens_validation_status' => null]),
+            'new_values' => json_encode(['ravens_validation_status' => 'valid']),
             'ip_address' => $request->ip(),
         ]);
 
         return redirect()->route('ravens.validation.index')
-            ->with('success', "Lead \"{$lead->cn_name}\" marked valid and sent to Policy Submission.");
+            ->with('success', "Lead \"{$lead->cn_name}\" marked as valid.");
     }
 
     /**
-     * Keep lead as declined — acknowledges decline, does NOT send to policy submission.
+     * Mark lead as not valid — sale is flagged as invalid by Ravens validator.
      */
     public function keepDeclined(Request $request, Lead $lead)
     {
         $this->abortIfNotRavens($lead);
 
-        $old = $lead->manager_status;
-
         $lead->update([
-            'manager_status'      => Statuses::MGR_DECLINED,
-            'ravens_validated_at' => now(),
-            'ravens_validated_by' => Auth::user()->name,
+            'ravens_validated_at'      => now(),
+            'ravens_validated_by'      => Auth::user()->name,
+            'ravens_validation_status' => 'not_valid',
         ]);
 
         AuditLog::create([
             'user_id'    => Auth::id(),
-            'action'     => 'Ravens Validation — Lead Kept Declined',
+            'action'     => 'Ravens Validation — Lead Not Valid',
             'model'      => 'Lead',
             'model_id'   => $lead->id,
-            'old_values' => json_encode(['manager_status' => $old]),
-            'new_values' => json_encode(['manager_status' => Statuses::MGR_DECLINED]),
+            'old_values' => json_encode(['ravens_validation_status' => null]),
+            'new_values' => json_encode(['ravens_validation_status' => 'not_valid']),
             'ip_address' => $request->ip(),
         ]);
 
         return redirect()->route('ravens.validation.index')
-            ->with('success', "Lead \"{$lead->cn_name}\" kept as declined.");
+            ->with('success', "Lead \"{$lead->cn_name}\" marked as not valid.");
     }
 
     /**
@@ -173,8 +179,9 @@ class RavensValidationController extends Controller
         $old = $lead->ravens_validated_at;
 
         $lead->update([
-            'ravens_validated_at' => null,
-            'ravens_validated_by' => null,
+            'ravens_validated_at'      => null,
+            'ravens_validated_by'      => null,
+            'ravens_validation_status' => null,
         ]);
 
         AuditLog::create([

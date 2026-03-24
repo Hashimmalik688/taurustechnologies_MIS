@@ -288,8 +288,11 @@ class ChatController extends Controller
 
         $messages = ChatMessage::where('conversation_id', $conversationId)
             ->with(['user', 'attachments'])
-            ->orderBy('created_at', 'asc')
-            ->paginate(50);
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get()
+            ->reverse()
+            ->values();
 
         // Mark as read
         $participant = ChatParticipant::where('conversation_id', $conversationId)
@@ -302,7 +305,7 @@ class ChatController extends Controller
 
         return response()->json([
             'success' => true,
-            'messages' => $messages->items(),  // Get just the items array from paginated collection
+            'messages' => $messages,  // Latest 50 messages in ascending order
             'conversation' => [
                 'id' => $conversation->id,
                 'name' => $conversation->name,

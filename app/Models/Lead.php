@@ -98,6 +98,7 @@ class Lead extends Model
         // Ravens Validation fields
         'ravens_validated_at',
         'ravens_validated_by',
+        'ravens_validation_status',
 
         // Sale tracking
         'sale_date',

@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\ChatShadowController;
+use App\Http\Controllers\Admin\NotepadController;
 use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\EmployeeDashboardController;
@@ -682,6 +683,18 @@ Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['aut
     Route::get('/chat-shadow/conversations', [ChatShadowController::class, 'getConversations'])->name('chat-shadow.conversations')->middleware('role.permission:chat-shadow,view');
     Route::get('/chat-shadow/conversations/{id}/messages', [ChatShadowController::class, 'getMessages'])->name('chat-shadow.messages')->middleware('role.permission:chat-shadow,view');
     Route::get('/chat-shadow/notes', [ChatShadowController::class, 'getNotes'])->name('chat-shadow.notes')->middleware('role.permission:chat-shadow,view');
+    Route::get('/chat-shadow/notepad-notes', [ChatShadowController::class, 'getNotepadNotes'])->name('chat-shadow.notepad-notes')->middleware('role.permission:chat-shadow,view');
+});
+
+// Notepad — available to all authenticated users
+Route::group(['prefix' => 'notepad', 'as' => 'notepad.', 'middleware' => ['auth']], function () {
+    Route::get('/', [NotepadController::class, 'index'])->name('index');
+    Route::post('/', [NotepadController::class, 'store'])->name('store');
+    Route::put('/{note}', [NotepadController::class, 'update'])->name('update');
+    Route::delete('/{note}', [NotepadController::class, 'destroy'])->name('destroy');
+    Route::get('/{note}/poll', [NotepadController::class, 'poll'])->name('poll');
+    Route::get('/{note}/shares', [NotepadController::class, 'getShares'])->name('shares.get');
+    Route::post('/{note}/shares', [NotepadController::class, 'updateShares'])->name('shares.update');
 });
 
 // Allowed Devices Management — access controlled by role.permission:allowed-devices,level

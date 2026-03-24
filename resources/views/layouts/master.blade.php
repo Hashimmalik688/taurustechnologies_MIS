@@ -206,6 +206,11 @@
                     </button>
                 </div>
 
+                {{-- Notepad --}}
+                <a href="{{ route('notepad.index') }}" class="th-action" title="My Notepad">
+                    <i class="bx bx-notepad"></i>
+                </a>
+
                 {{-- Notifications --}}
                 <div class="position-relative">
                     <button class="th-action" onclick="toggleNotifications()" title="Notifications">

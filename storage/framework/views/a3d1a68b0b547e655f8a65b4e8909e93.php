@@ -95,22 +95,17 @@
     <div class="kpi-card k-warn ex-card">
         <i class="bx bx-time-five k-icon"></i>
         <div class="k-val"><?php echo e($todayStats['pending']); ?></div>
-        <div class="k-lbl">Pending Review</div>
-    </div>
-    <div class="kpi-card k-teal ex-card">
-        <i class="bx bx-check-shield k-icon"></i>
-        <div class="k-val"><?php echo e($todayStats['validated']); ?></div>
-        <div class="k-lbl">Reviewed Today</div>
+        <div class="k-lbl">Pending</div>
     </div>
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-send k-icon"></i>
         <div class="k-val"><?php echo e($todayStats['sent_to_policy']); ?></div>
-        <div class="k-lbl">Sent to Policy</div>
+        <div class="k-lbl">Valid</div>
     </div>
     <div class="kpi-card k-red ex-card">
         <i class="bx bx-x-circle k-icon"></i>
         <div class="k-val"><?php echo e($todayStats['kept_declined']); ?></div>
-        <div class="k-lbl">Kept Declined</div>
+        <div class="k-lbl">Not Valid</div>
     </div>
 </div>
 
@@ -149,11 +144,13 @@
                     </td>
                     <td><?php echo e($lead->phone_number ?? '—'); ?></td>
                     <td class="text-center">
-                        <span class="mgr-badge <?php echo e($lead->manager_status === 'approved' ? 'mgr-approved' : 'mgr-declined'); ?>">
-                            <i class="bx <?php echo e($lead->manager_status === 'approved' ? 'bx-check' : 'bx-x'); ?>"></i>
-                            <?php echo e(ucfirst($lead->manager_status ?? '—')); ?>
-
-                        </span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->manager_status === 'approved'): ?>
+                            <span class="mgr-badge mgr-approved"><i class="bx bx-check"></i> Approved</span>
+                        <?php elseif($lead->manager_status === 'declined'): ?>
+                            <span class="mgr-badge mgr-declined"><i class="bx bx-x"></i> Declined</span>
+                        <?php else: ?>
+                            <span class="mgr-badge" style="background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);"><i class="bx bx-time-five"></i> Pending</span>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td class="text-center">
                         <div class="act-group">
@@ -164,18 +161,18 @@
                             </button>
                             <form method="POST" action="<?php echo e(route('ravens.validation.mark-valid', $lead->id)); ?>"
                                   style="display:inline;"
-                                  onsubmit="return confirm('Mark this lead as valid and send to Policy Submission?')">
+                                  onsubmit="return confirm('Mark this lead as valid?')">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="act-btn a-success">
-                                    <i class="bx bx-check-circle"></i> Lead is Valid
+                                    <i class="bx bx-check-circle"></i> Valid
                                 </button>
                             </form>
                             <form method="POST" action="<?php echo e(route('ravens.validation.keep-declined', $lead->id)); ?>"
                                   style="display:inline;"
-                                  onsubmit="return confirm('Confirm keeping this lead as declined?')">
+                                  onsubmit="return confirm('Mark this lead as not valid?')">
                                 <?php echo csrf_field(); ?>
                                 <button type="submit" class="act-btn a-danger">
-                                    <i class="bx bx-x-circle"></i> Keep Declined
+                                    <i class="bx bx-x-circle"></i> Not Valid
                                 </button>
                             </form>
                         </div>
@@ -205,7 +202,7 @@
                 <h5 class="modal-title">
                     <i class="bx bx-user-circle" style="color:#d4af37;margin-right:.4rem;"></i>
                     <?php echo e($lead->cn_name); ?> &mdash;
-                    <span class="mgr-badge <?php echo e($lead->manager_status === 'approved' ? 'mgr-approved' : 'mgr-declined'); ?>" style="margin-left:.3rem;">
+                    <span class="mgr-badge <?php echo e($lead->manager_status === 'approved' ? 'mgr-approved' : ($lead->manager_status === 'declined' ? 'mgr-declined' : '')); ?>" style="margin-left:.3rem;<?php echo e($lead->manager_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : ''); ?>">
                         <?php echo e(ucfirst($lead->manager_status ?? '—')); ?>
 
                     </span>
@@ -331,7 +328,7 @@
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td>Status</td>
-                                    <td><span class="mgr-badge <?php echo e($lead->manager_status === 'approved' ? 'mgr-approved' : 'mgr-declined'); ?>"><?php echo e(ucfirst($lead->manager_status ?? '—')); ?></span></td>
+                                    <td><span class="mgr-badge <?php echo e($lead->manager_status === 'approved' ? 'mgr-approved' : ($lead->manager_status === 'declined' ? 'mgr-declined' : '')); ?>" style="<?php echo e($lead->manager_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : ''); ?>"><?php echo e(ucfirst($lead->manager_status ?? '—')); ?></span></td>
                                 </tr>
                                 <tr><td>Reviewed At</td><td><?php echo e($lead->manager_reviewed_at?->setTimezone('America/Los_Angeles')->format('M d, Y h:i A') ?? '—'); ?></td></tr>
                                 <tr><td>Reason</td><td><?php echo e($lead->manager_reason ?? '—'); ?></td></tr>
@@ -360,17 +357,17 @@
             </div>
             <div class="modal-footer" style="gap:.35rem;">
                 <form method="POST" action="<?php echo e(route('ravens.validation.mark-valid', $lead->id)); ?>"
-                      onsubmit="return confirm('Mark this lead as valid and send to Policy Submission?')">
+                      onsubmit="return confirm('Mark this lead as valid?')">
                     <?php echo csrf_field(); ?>
                     <button type="submit" class="act-btn a-success" style="padding:.35rem .9rem;">
-                        <i class="bx bx-check-circle"></i> Lead is Valid
+                        <i class="bx bx-check-circle"></i> Valid
                     </button>
                 </form>
                 <form method="POST" action="<?php echo e(route('ravens.validation.keep-declined', $lead->id)); ?>"
-                      onsubmit="return confirm('Confirm keeping this lead as declined?')">
+                      onsubmit="return confirm('Mark this lead as not valid?')">
                     <?php echo csrf_field(); ?>
                     <button type="submit" class="act-btn a-danger" style="padding:.35rem .9rem;">
-                        <i class="bx bx-x-circle"></i> Keep Declined
+                        <i class="bx bx-x-circle"></i> Not Valid
                     </button>
                 </form>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
@@ -398,54 +395,19 @@
             <thead>
                 <tr>
                     <th>Customer</th>
-                    <th>Phone</th>
-                    <th>Closer</th>
                     <th class="text-center">Result</th>
-                    <th class="text-end">Coverage</th>
-                    <th>Carrier</th>
-                    <th>Reviewed By</th>
-                    <th>Reviewed At</th>
-                    <th class="text-center">Undo</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $reviewedLeads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr class="reviewed-row">
                     <td><strong><?php echo e($lead->cn_name ?? 'N/A'); ?></strong></td>
-                    <td><?php echo e($lead->phone_number ?? '—'); ?></td>
-                    <td><?php echo e($lead->closer_name ?? '—'); ?></td>
                     <td class="text-center">
-                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->manager_status === 'approved'): ?>
-                            <span class="mgr-badge mgr-approved">
-                                <i class="bx bx-send"></i> Sent to Policy
-                            </span>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validation_status === 'valid'): ?>
+                            <span class="mgr-badge mgr-approved"><i class="bx bx-check"></i> Valid</span>
                         <?php else: ?>
-                            <span class="mgr-badge mgr-declined">
-                                <i class="bx bx-x"></i> Kept Declined
-                            </span>
+                            <span class="mgr-badge mgr-declined"><i class="bx bx-x"></i> Not Valid</span>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                    </td>
-                    <td class="text-end">$<?php echo e(number_format($lead->coverage_amount ?? 0, 0)); ?></td>
-                    <td><?php echo e($lead->carrier_name ?? '—'); ?></td>
-                    <td>
-                        <span style="display:inline-flex;align-items:center;gap:.3rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:.15rem .55rem;font-size:.72rem;font-weight:600;white-space:nowrap;">
-                            <i class="bx bx-user-check" style="font-size:.8rem;color:#f0a500;"></i>
-                            <?php echo e($lead->ravens_validated_by ?? '—'); ?>
-
-                        </span>
-                    </td>
-                    <td style="white-space:nowrap;">
-                        <span style="font-size:.72rem;font-weight:600;"><?php echo e($lead->ravens_validated_at?->setTimezone('America/Los_Angeles')->format('M d') ?? '—'); ?></span><br>
-                        <span style="font-size:.65rem;opacity:.65;"><?php echo e($lead->ravens_validated_at?->setTimezone('America/Los_Angeles')->format('h:i A') ?? ''); ?></span>
-                    </td>
-                    <td class="text-center">
-                        <form method="POST" action="<?php echo e(route('ravens.validation.undo', $lead->id)); ?>"
-                              onsubmit="return confirm('Reset validation for this lead?')">
-                            <?php echo csrf_field(); ?>
-                            <button type="submit" class="act-btn a-warn" style="padding:.2rem .5rem;font-size:.65rem;">
-                                <i class="bx bx-undo"></i> Undo
-                            </button>
-                        </form>
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>

@@ -55,7 +55,6 @@ class PublicHolidayController extends Controller
             'date' => 'required|date|unique:public_holidays,date',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
@@ -77,7 +76,6 @@ class PublicHolidayController extends Controller
             'date' => 'required|date|unique:public_holidays,date,' . $holiday->id,
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
