@@ -15,11 +15,15 @@ class ChatMessage extends Model
         'user_id',
         'message',
         'type',
+        'is_edited',
+        'forwarded_from_message_id',
+        'forwarded_from_user_name',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'is_edited' => 'boolean',
     ];
 
     protected $with = ['user', 'attachments'];

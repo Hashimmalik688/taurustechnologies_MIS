@@ -102,6 +102,10 @@ class RavensValidationController extends Controller
                 ->whereNotNull('ravens_validated_at')
                 ->whereBetween('ravens_validated_at', [$todayStart, $todayEnd])
                 ->count(),
+            'callback' => Lead::where('team', Teams::RAVENS)
+                ->whereNotNull('recall_requested_at')
+                ->whereNull('ravens_validated_at')
+                ->count(),
         ];
 
         return view('ravens.validation', compact(
@@ -143,30 +147,44 @@ class RavensValidationController extends Controller
     }
 
     /**
-     * Mark lead as not valid — sale is flagged as invalid by Ravens validator.
+     * Mark lead as not valid — sends it back to the closer with a recall note.
+     * Responds with JSON (called via AJAX from the recall modal).
      */
     public function keepDeclined(Request $request, Lead $lead)
     {
         $this->abortIfNotRavens($lead);
 
+        $request->validate([
+            'recall_note' => 'required|string|max:1000',
+        ]);
+
         $lead->update([
             'ravens_validated_at'      => now(),
             'ravens_validated_by'      => Auth::user()->name,
             'ravens_validation_status' => 'not_valid',
+            // Recall / Assign Back fields
+            'recall_requested_at'      => now(),
+            'recall_requested_by'      => Auth::id(),
+            'recall_note'              => $request->recall_note,
         ]);
 
         AuditLog::create([
             'user_id'    => Auth::id(),
-            'action'     => 'Ravens Validation — Lead Not Valid',
+            'action'     => 'Ravens Validation — Lead Not Valid (Assign Back)',
             'model'      => 'Lead',
             'model_id'   => $lead->id,
             'old_values' => json_encode(['ravens_validation_status' => null]),
-            'new_values' => json_encode(['ravens_validation_status' => 'not_valid']),
+            'new_values' => json_encode([
+                'ravens_validation_status' => 'not_valid',
+                'recall_note'              => $request->recall_note,
+            ]),
             'ip_address' => $request->ip(),
         ]);
 
-        return redirect()->route('ravens.validation.index')
-            ->with('success', "Lead \"{$lead->cn_name}\" marked as not valid.");
+        return response()->json([
+            'success' => true,
+            'message' => "Lead \"{$lead->cn_name}\" marked as not valid and assigned back to closer.",
+        ]);
     }
 
     /**
@@ -182,6 +200,10 @@ class RavensValidationController extends Controller
             'ravens_validated_at'      => null,
             'ravens_validated_by'      => null,
             'ravens_validation_status' => null,
+            // Also clear recall fields so the lead doesn't show as "Callback"
+            'recall_requested_at'      => null,
+            'recall_requested_by'      => null,
+            'recall_note'              => null,
         ]);
 
         AuditLog::create([
@@ -193,6 +215,10 @@ class RavensValidationController extends Controller
             'new_values' => json_encode(['ravens_validated_at' => null]),
             'ip_address' => $request->ip(),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "Validation for \"{$lead->cn_name}\" has been reset."]);
+        }
 
         return redirect()->route('ravens.validation.index')
             ->with('success', "Validation for \"{$lead->cn_name}\" has been reset.");

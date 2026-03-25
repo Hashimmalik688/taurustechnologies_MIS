@@ -267,8 +267,8 @@ Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', Ro
     Route::post('/{id}/assign-back', [LeadController::class, 'assignBack'])->name('assignBack')->middleware('role.permission:sales,edit');
 });
 
-// Issuance Management — access controlled by role.permission:issuance,level
-Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+// Pending Contracts (formerly Issuance) — access controlled by role.permission:issuance,level
+Route::group(['prefix' => 'pending-contracts', 'as' => 'issuance.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [LeadController::class, 'issuance'])->name('index')->middleware('role.permission:issuance,view');
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show')->middleware('role.permission:issuance,view');
     Route::post('/{id}/issuance-status', [LeadController::class, 'updateIssuanceStatus'])->name('updateIssuanceStatus')->middleware('role.permission:issuance,edit');
@@ -284,8 +284,9 @@ Route::group(['prefix' => 'submissions', 'as' => 'submissions.', 'middleware' =>
     Route::post('/{id}/send-to-contract', [PendingsApprovedController::class, 'sendToContract'])->name('sendToContract')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/mark-not-issued', [PendingsApprovedController::class, 'markNotIssued'])->name('markNotIssued')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/resolve-not-issued', [PendingsApprovedController::class, 'resolveNotIssued'])->name('resolveNotIssued')->middleware('role.permission:pendings-approved,edit');
-    Route::post('/{id}/update-status', [PendingsApprovedController::class, 'updateStatus'])->name('updateStatus')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/save-decision', [PendingsApprovedController::class, 'saveDecision'])->name('saveDecision')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/update-field', [PendingsApprovedController::class, 'updateField'])->name('updateField')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/recall-to-closer', [PendingsApprovedController::class, 'recallToCloser'])->name('recallToCloser')->middleware('role.permission:pendings-approved,edit');
 });
 
 // Pending Draft — Stage 6 pipeline
@@ -814,6 +815,8 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     
     Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
     Route::post('/messages', [ChatController::class, 'sendMessage']);
+    Route::put('/messages/{messageId}', [ChatController::class, 'updateMessage']);
+    Route::post('/messages/{messageId}/forward', [ChatController::class, 'forwardMessage']);
     Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
     Route::get('/users', [ChatController::class, 'getUsers']);
     Route::get('/search', [ChatController::class, 'search']);

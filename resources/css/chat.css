@@ -1535,8 +1535,8 @@
     z-index: 10;
 }
 .message-item:hover .message-actions { opacity: 1; pointer-events: auto; }
-.message-item.message-sender .message-actions { right: auto; left: -30px; }
-.message-item.message-receiver .message-actions { right: -30px; }
+.message-item.message-sender .message-actions { right: auto; left: -80px; }
+.message-item.message-receiver .message-actions { right: -35px; }
 
 /* Style all buttons inside message-actions (including those without .message-action-btn) */
 .message-actions button {
@@ -1557,6 +1557,14 @@
 .message-actions button:hover {
     background: rgba(244,106,106,.1);
     color: #c84646;
+}
+.message-actions button[title="Edit"]:hover {
+    background: rgba(85,110,230,.1);
+    color: #556ee6;
+}
+.message-actions button[title="Forward"]:hover {
+    background: rgba(139,92,246,.1);
+    color: #7c3aed;
 }
 
 .message-action-btn {

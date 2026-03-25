@@ -510,27 +510,27 @@
                 </div>
             </div>
         </a>
-        {{-- Pending Submission --}}
-        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'pending_submission'])) }}" class="sl-kpi-link">
-            <div class="sl-kpi {{ $activeTab === 'pending_submission' ? 'active-tab' : '' }}">
+        {{-- Pending Validation --}}
+        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'pending_validation'])) }}" class="sl-kpi-link">
+            <div class="sl-kpi {{ $activeTab === 'pending_validation' ? 'active-tab' : '' }}">
                 <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
                     <i class="mdi mdi-clock-outline"></i>
                 </div>
                 <div class="sl-kpi-info">
-                    <span class="sl-kpi-label">Pending Submission</span>
-                    <span class="sl-kpi-val">{{ number_format($statusCounts['pending_submission']) }}</span>
+                    <span class="sl-kpi-label">Pending Validation</span>
+                    <span class="sl-kpi-val">{{ number_format($statusCounts['pending_validation']) }}</span>
                 </div>
             </div>
         </a>
-        {{-- Validated & Submitted --}}
-        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'valid_submitted'])) }}" class="sl-kpi-link">
-            <div class="sl-kpi {{ $activeTab === 'valid_submitted' ? 'active-tab' : '' }}">
+        {{-- Validated --}}
+        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'validated'])) }}" class="sl-kpi-link">
+            <div class="sl-kpi {{ $activeTab === 'validated' ? 'active-tab' : '' }}">
                 <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
                     <i class="mdi mdi-check-circle-outline"></i>
                 </div>
                 <div class="sl-kpi-info">
-                    <span class="sl-kpi-label">Validated &amp; Submitted</span>
-                    <span class="sl-kpi-val">{{ number_format($statusCounts['valid_submitted']) }}</span>
+                    <span class="sl-kpi-label">Validated</span>
+                    <span class="sl-kpi-val">{{ number_format($statusCounts['validated']) }}</span>
                 </div>
             </div>
         </a>
@@ -546,15 +546,15 @@
                 </div>
             </div>
         </a>
-        {{-- Declined --}}
-        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'declined'])) }}" class="sl-kpi-link">
-            <div class="sl-kpi {{ $activeTab === 'declined' ? 'active-tab' : '' }}">
-                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);">
-                    <i class="mdi mdi-thumb-down-outline"></i>
+        {{-- Recall --}}
+        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'callback'])) }}" class="sl-kpi-link">
+            <div class="sl-kpi {{ $activeTab === 'callback' ? 'active-tab' : '' }}">
+                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="mdi mdi-phone-outgoing-outline"></i>
                 </div>
                 <div class="sl-kpi-info">
-                    <span class="sl-kpi-label">Declined</span>
-                    <span class="sl-kpi-val">{{ number_format($statusCounts['declined']) }}</span>
+                    <span class="sl-kpi-label">Recall</span>
+                    <span class="sl-kpi-val">{{ number_format($statusCounts['callback']) }}</span>
                 </div>
             </div>
         </a>
@@ -642,9 +642,7 @@
                             <th style="min-width:130px">QA Status</th>
                             <th style="min-width:200px">QA Reason</th>
                             <th style="min-width:140px">QA By</th>
-                            <th style="min-width:140px">Mgr Status</th>
-                            <th style="min-width:200px">Mgr Reason</th>
-                            <th style="min-width:140px">Mgr By</th>
+                            <th style="min-width:130px">Status</th>
                             <th style="min-width:130px">Validator</th>
                             <th style="min-width:130px">Validated At</th>
                             <th style="min-width:120px">Val. Status</th>
@@ -703,14 +701,12 @@
                                             <td class="text-center sl-sticky-col sl-col-1">
                                                 <div class="sl-act-group">
                                                     @php
-                                                        $zoomNumber = preg_replace('/[^\d\+]/', '', $lead->phone_number);
+                                                        $isDeclinedOrInvalid = $lead->manager_status === Statuses::MGR_DECLINED
+                                                            || $lead->ravens_validation_status === 'not_valid';
                                                     @endphp
                                                     <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank">
                                                         <i class="fas fa-print"></i>
                                                     </a>
-                                                    <button onclick="zoomDial('{{ $zoomNumber }}')" class="btn btn-warning btn-sm" title="Call">
-                                                        <i class="fas fa-phone-alt"></i>
-                                                    </button>
                                                     <a href="{{ route('sales.show', $lead->id) }}" class="btn btn-info btn-sm text-white" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
@@ -718,6 +714,16 @@
                                                     <a href="{{ route('sales.edit', $lead->id) }}" class="btn btn-primary btn-sm" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    @if($isDeclinedOrInvalid)
+                                                    <button type="button"
+                                                        class="btn btn-sm sl-assign-back-btn"
+                                                        style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;border:none;"
+                                                        data-lead-id="{{ $lead->id }}"
+                                                        data-lead-name="{{ addslashes($lead->cn_name) }}"
+                                                        title="Recall — send back to closer for callback">
+                                                        <i class="bx bx-phone-outgoing"></i>
+                                                    </button>
+                                                    @endif
                                                     @endcanEditModule
                                                     @canDeleteInModule('sales')
                                                     <button type="button" class="btn btn-danger btn-sm sl-delete-lead-btn"
@@ -922,37 +928,14 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <select class="sl-bubble-select manager-status-dropdown" data-lead-id="{{ $lead->id }}" data-current-status="{{ $lead->manager_status ?? 'pending' }}">
-                                                    <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>Pending</option>
-                                                    <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>Approved</option>
-                                                    <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>Declined</option>
-                                                </select>
-                                            </td>
-                                            <td>
-                                                <textarea class="sl-bubble-textarea manager-reason-input" 
-                                                          data-lead-id="{{ $lead->id }}" 
-                                                          placeholder="Manager comments..." 
-                                                          rows="1"
->{{ $lead->manager_reason ?? '' }}</textarea>
-                                                <button class="sl-save-btn success save-manager-reason" data-lead-id="{{ $lead->id }}">
-                                                    <i class="bx bx-save"></i> Save
-                                                </button>
-                                                @if(auth()->user()->hasRole(Roles::SUPER_ADMIN) && $lead->manager_status !== Statuses::MGR_PENDING)
-                                                    <button class="sl-save-btn warning reset-manager-status" data-lead-id="{{ $lead->id }}" title="Reset to Pending (Super Admin only)">
-                                                        <i class="bx bx-undo"></i> Reset
-                                                    </button>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                @if($lead->managerUser)
-                                                    <strong style="font-size:.75rem">{{ $lead->managerUser->name }}</strong>
-                                                    @if($lead->manager_reviewed_at)
-                                                        <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
-                                                            {{ \Carbon\Carbon::parse($lead->manager_reviewed_at)->format('M d, h:i A') }}
-                                                        </div>
-                                                    @endif
+                                                @if($lead->manager_status === Statuses::MGR_APPROVED)
+                                                    <span style="display:inline-block;padding:.2rem .5rem;background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Approved</span>
+                                                @elseif($lead->manager_status === Statuses::MGR_DECLINED)
+                                                    <span style="display:inline-block;padding:.2rem .5rem;background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Declined</span>
+                                                @elseif($lead->manager_status === Statuses::MGR_UNDERWRITING)
+                                                    <span style="display:inline-block;padding:.2rem .5rem;background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Underwriting</span>
                                                 @else
-                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                    <span style="display:inline-block;padding:.2rem .5rem;background:rgba(241,180,76,.1);color:#b87a14;border:1px solid rgba(241,180,76,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Pending</span>
                                                 @endif
                                             </td>
                                             {{-- Validator columns --}}
@@ -1045,10 +1028,39 @@
                     </div>
     </div>
 
+    <!-- Recall Modal -->
+    <div class="modal fade" id="assignBackModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <div class="modal-content">
+                <div class="modal-header py-2 px-3">
+                    <h6 class="modal-title mb-0" style="font-size:.85rem;">
+                        <i class="bx bx-phone-outgoing me-1" style="color:#8b5cf6;"></i> Recall Lead for Callback
+                    </h6>
+                    <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-3 py-3">
+                    <p class="mb-2" style="font-size:.78rem;color:var(--bs-body-color);">
+                        Lead: <strong id="assign-back-lead-name"></strong>
+                    </p>
+                    <p class="mb-3" style="font-size:.72rem;color:#94a3b8;">
+                        This will reset the lead back to Ravens validation queue and mark it as needing a callback.
+                    </p>
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Reason for Recall <span style="color:#94a3b8;font-weight:400;">(decline reason — visible to closer)</span></label>
+                    <textarea id="assign-back-note" class="form-control form-control-sm" rows="3" placeholder="e.g. Client said price too high, wants to compare options — follow up next week..." style="font-size:.72rem;resize:none;"></textarea>
+                </div>
+                <div class="modal-footer py-2 px-3">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm text-white" id="assign-back-confirm-btn" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);border:none;">
+                        <i class="bx bx-phone-outgoing me-1"></i> Recall
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Shared Delete Confirmation Modal -->
     @canDeleteInModule('sales')
     <div class="modal fade" id="sharedDeleteModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-gold">Confirm Delete</h5>
@@ -1123,11 +1135,54 @@
 
 @section('script')
 <script>
+/* ── Recall Modal ── */
+(function() {
+    let assignBackLeadId = null;
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.sl-assign-back-btn');
+        if (!btn) return;
+        assignBackLeadId = btn.dataset.leadId;
+        document.getElementById('assign-back-lead-name').textContent = btn.dataset.leadName;
+        document.getElementById('assign-back-note').value = '';
+        new bootstrap.Modal(document.getElementById('assignBackModal')).show();
+    });
+    document.getElementById('assign-back-confirm-btn')?.addEventListener('click', function() {
+        if (!assignBackLeadId) return;
+        const note = document.getElementById('assign-back-note').value.trim();
+        this.disabled = true;
+        this.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Saving...';
+        fetch(`/sales/${assignBackLeadId}/assign-back`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ recall_note: note })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('assignBackModal')).hide();
+                location.reload();
+            } else {
+                alert(data.message || 'Error processing recall');
+                this.disabled = false;
+                this.innerHTML = '<i class="bx bx-phone-outgoing me-1"></i> Recall';
+            }
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+            this.disabled = false;
+            this.innerHTML = '<i class="bx bx-phone-outgoing me-1"></i> Recall';
+        });
+    });
+})();
+
 /* ── Shared Delete Modal ── */
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('.sl-delete-lead-btn');
-    if (!btn) return;
-    const modal = document.getElementById('sharedDeleteModal');
+    if (!btn) return;    const modal = document.getElementById('sharedDeleteModal');
     if (!modal) return;
     document.getElementById('sharedDeleteLeadName').textContent = btn.dataset.leadName;
     document.getElementById('sharedDeleteForm').action = btn.dataset.deleteUrl;
@@ -1411,25 +1466,8 @@ $(document).ready(function() {
         }
     });
 
-    // Handle Manager status dropdown changes
-    $('.manager-status-dropdown').change(function() {
-        const leadId = $(this).data('lead-id');
-        const newManagerStatus = $(this).val();
-        const managerReason = $(`.manager-reason-input[data-lead-id="${leadId}"]`).val();
-        const dropdown = $(this);
-        
-        updateManagerStatus(leadId, newManagerStatus, managerReason, dropdown);
-    });
-
-    // Handle Manager reason save button
-    $('.save-manager-reason').click(function() {
-        const leadId = $(this).data('lead-id');
-        const managerStatus = $(`.manager-status-dropdown[data-lead-id="${leadId}"]`).val();
-        const managerReason = $(`.manager-reason-input[data-lead-id="${leadId}"]`).val();
-        const button = $(this);
-        
-        updateManagerStatus(leadId, managerStatus, managerReason, button);
-    });
+    // Manager status dropdown and save removed — decisions now happen on Pending Submission page.
+    // Super Admin reset remains below.
 
     // Handle reset Manager status button (Super Admin only)
     $('.reset-manager-status').click(function() {
@@ -1447,25 +1485,7 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (response.success) {
-                        // Reset dropdown and data attribute
-                        const dropdown = $(`.manager-status-dropdown[data-lead-id="${leadId}"]`);
-                        dropdown.val('pending').data('current-status', 'pending');
-                        $(`.manager-reason-input[data-lead-id="${leadId}"]`).val('');
-                        
-                        button.addClass('btn-success');
-                        setTimeout(() => {
-                            button.removeClass('btn-success');
-                        }, 2000);
-                        
-                        // Show success message
-                        const alertHtml = `
-                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                                <i class="mdi mdi-undo me-2"></i>
-                                <strong>Reset by Super Admin!</strong> ${response.message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        `;
-                        $('.breadcrumb-header').after(alertHtml);
+                        location.reload();
                     }
                 },
                 error: function(xhr) {
@@ -1527,43 +1547,7 @@ $(document).ready(function() {
         });
     }
 
-    function updateManagerStatus(leadId, managerStatus, managerReason, element) {
-        element.prop('disabled', true);
-        
-        $.ajax({
-            url: `/sales/${leadId}/manager-status`,
-            method: 'POST',
-            data: {
-                manager_status: managerStatus,
-                manager_reason: managerReason,
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    element.addClass('border-success');
-                    setTimeout(() => {
-                        element.removeClass('border-success');
-                    }, 2000);
-                    
-                    // Show success message
-                    const alertHtml = `
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="mdi mdi-check-all me-2"></i>
-                            <strong>Success!</strong> ${response.message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    `;
-                    $('.breadcrumb-header').after(alertHtml);
-                }
-            },
-            error: function() {
-                alert('Failed to update Manager status');
-            },
-            complete: function() {
-                element.prop('disabled', false);
-            }
-        });
-    }
+    // updateManagerStatus removed — decisions now happen on Pending Submission page only.
 });
 </script>
 <script>

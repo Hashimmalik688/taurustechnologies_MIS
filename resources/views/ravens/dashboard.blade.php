@@ -154,6 +154,16 @@
                                     @if($sale->qa_status)
                                         <br><span style="font-size:.55rem;color:var(--bs-surface-400);">QA: {{ $sale->qa_status }}</span>
                                     @endif
+                                    @if($sale->recall_requested_at)
+                                        <br><span class="st-pill" style="background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.2);margin-top:.15rem;">
+                                            <i class="bx bx-undo" style="font-size:.7rem;"></i> Recalled
+                                        </span>
+                                        @if($sale->recall_note)
+                                            <br><span style="font-size:.65rem;color:#7c3aed;font-style:italic;display:inline-block;margin-top:.15rem;max-width:180px;white-space:normal;line-height:1.3;" title="{{ $sale->recall_note }}">
+                                                <i class="bx bx-message-rounded-dots" style="font-size:.6rem;"></i> {{ $sale->recall_note }}
+                                            </span>
+                                        @endif
+                                    @endif
                                 </td>
                                 <td class="text-end">
                                     @if($sale->coverage_amount)
@@ -224,6 +234,16 @@
                                     <span class="st-pill st-chargeback">Chargeback</span>
                                 @else
                                     <span class="st-pill st-declined">Declined</span>
+                                @endif
+                                @if($lead->recall_requested_at)
+                                    <br><span class="st-pill" style="background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.2);margin-top:.15rem;">
+                                        <i class="bx bx-undo" style="font-size:.7rem;"></i> Recalled
+                                    </span>
+                                    @if($lead->recall_note)
+                                        <br><span style="font-size:.65rem;color:#7c3aed;font-style:italic;display:inline-block;margin-top:.15rem;max-width:180px;white-space:normal;line-height:1.3;" title="{{ $lead->recall_note }}">
+                                            <i class="bx bx-message-rounded-dots" style="font-size:.6rem;"></i> {{ $lead->recall_note }}
+                                        </span>
+                                    @endif
                                 @endif
                             </td>
                             <td>{{ $lead->carrier_name ?? 'N/A' }}</td>

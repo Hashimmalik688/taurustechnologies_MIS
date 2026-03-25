@@ -108,6 +108,11 @@
         <div class="k-val">{{ $todayStats['kept_declined'] }}</div>
         <div class="k-lbl">Not Valid</div>
     </div>
+    <div class="kpi-card ex-card" style="background:rgba(139,92,246,.06);border-color:rgba(139,92,246,.15);">
+        <i class="bx bx-phone-outgoing k-icon" style="color:#8b5cf6;"></i>
+        <div class="k-val" style="color:#7c3aed;">{{ $todayStats['callback'] }}</div>
+        <div class="k-lbl">Call Back</div>
+    </div>
 </div>
 
 {{-- Pending Validation --}}
@@ -139,6 +144,14 @@
                 <tr>
                     <td>
                         <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
+                        @if($lead->recall_requested_at)
+                            <br><span style="display:inline-flex;align-items:center;gap:.25rem;background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.3);border-radius:10px;font-size:.6rem;font-weight:700;padding:.15rem .45rem;margin-top:.2rem;">
+                                <i class="bx bx-phone-outgoing" style="font-size:.65rem;"></i> Callback
+                            </span>
+                            @if($lead->recall_note)
+                                <br><span style="font-size:.6rem;color:#94a3b8;font-style:italic;">{{ $lead->recall_note }}</span>
+                            @endif
+                        @endif
                         @if($lead->state)
                             <br><span style="font-size:.6rem;color:var(--bs-surface-400);">{{ $lead->state }}</span>
                         @endif
@@ -168,14 +181,10 @@
                                     <i class="bx bx-check-circle"></i> Valid
                                 </button>
                             </form>
-                            <form method="POST" action="{{ route('ravens.validation.keep-declined', $lead->id) }}"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Mark this lead as not valid?')">
-                                @csrf
-                                <button type="submit" class="act-btn a-danger">
-                                    <i class="bx bx-x-circle"></i> Not Valid
-                                </button>
-                            </form>
+                            <button type="button" class="act-btn a-danger"
+                                    onclick="openRecallModal({{ $lead->id }}, '{{ addslashes($lead->cn_name ?? 'N/A') }}')">
+                                <i class="bx bx-x-circle"></i> Not Valid
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -363,13 +372,11 @@
                         <i class="bx bx-check-circle"></i> Valid
                     </button>
                 </form>
-                <form method="POST" action="{{ route('ravens.validation.keep-declined', $lead->id) }}"
-                      onsubmit="return confirm('Mark this lead as not valid?')">
-                    @csrf
-                    <button type="submit" class="act-btn a-danger" style="padding:.35rem .9rem;">
-                        <i class="bx bx-x-circle"></i> Not Valid
-                    </button>
-                </form>
+                <button type="button" class="act-btn a-danger" style="padding:.35rem .9rem;"
+                        onclick="closeDetailModal({{ $lead->id }}); openRecallModal({{ $lead->id }}, '{{ addslashes($lead->cn_name ?? 'N/A') }}')"
+                >
+                    <i class="bx bx-x-circle"></i> Not Valid
+                </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -395,19 +402,36 @@
             <thead>
                 <tr>
                     <th>Customer</th>
+                    <th>Phone</th>
                     <th class="text-center">Result</th>
+                    <th>Validated By</th>
+                    <th>Validated At</th>
+                    <th>Note</th>
+                    <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($reviewedLeads as $lead)
                 <tr class="reviewed-row">
                     <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
+                    <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
                     <td class="text-center">
                         @if($lead->ravens_validation_status === 'valid')
                             <span class="mgr-badge mgr-approved"><i class="bx bx-check"></i> Valid</span>
                         @else
                             <span class="mgr-badge mgr-declined"><i class="bx bx-x"></i> Not Valid</span>
                         @endif
+                    </td>
+                    <td style="font-size:.7rem;">{{ $lead->ravens_validated_by ?? '—' }}</td>
+                    <td style="font-size:.7rem;">{{ $lead->ravens_validated_at?->setTimezone('America/Los_Angeles')->format('M d, h:i A') ?? '—' }}</td>
+                    <td style="font-size:.68rem;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{{ $lead->recall_note ?? '' }}">
+                        {{ $lead->recall_note ?? '—' }}
+                    </td>
+                    <td class="text-center">
+                        <button class="a-btn btn-undo-validation" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}"
+                                style="font-size:.62rem;background:rgba(245,158,11,.12);color:#b45309;border-color:rgba(245,158,11,.25);padding:.15rem .5rem;">
+                            <i class="bx bx-undo me-1"></i> Undo
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -417,15 +441,139 @@
     @endif
 </div>
 
+{{-- Recall / Assign-Back Modal (shared, one per page) --}}
+<div class="modal fade" id="recallModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content">
+            <div class="modal-header py-2 px-3" style="background:rgba(244,106,106,.06);border-bottom:1px solid rgba(244,106,106,.15);">
+                <h6 class="modal-title mb-0" style="font-size:.85rem;color:#c84646;">
+                    <i class="bx bx-user-x me-1"></i> Assign Back to Closer
+                </h6>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-3 py-3">
+                <p class="mb-1" style="font-size:.75rem;color:var(--bs-surface-500);">
+                    Lead: <strong id="recall-lead-name"></strong>
+                </p>
+                <p class="mb-3" style="font-size:.7rem;color:#b45309;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:.4rem;padding:.5rem .65rem;">
+                    <i class="bx bx-info-circle me-1"></i>
+                    This lead will be marked as <strong>Not Valid</strong> and assigned back to the closer with your note.
+                </p>
+                <div class="mb-2">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">
+                        Reason / Comment <span class="text-danger">*</span>
+                    </label>
+                    <textarea id="recall-note" class="form-control form-control-sm" rows="3"
+                              placeholder="Why is this sale being sent back? e.g. Missing info, client not reached, premiums don’t match…"
+                              style="font-size:.72rem;resize:none;"></textarea>
+                    <div id="recall-note-error" style="display:none;font-size:.65rem;color:#c84646;margin-top:.2rem;">Please enter a reason.</div>
+                </div>
+            </div>
+            <div class="modal-footer py-2 px-3">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-danger" id="recall-confirm-btn">
+                    <i class="bx bx-x-circle me-1"></i> Confirm Not Valid
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
-@section('js')
+@section('script')
 <script>
     const flash = document.getElementById('flashMsg');
     if (flash) setTimeout(() => flash.remove(), 5000);
 
     document.querySelectorAll('.pipe-pill-date').forEach(function(el) {
         if (window.flatpickr) flatpickr(el, { dateFormat: 'Y-m-d', allowInput: true });
+    });
+
+    // ─── Recall Modal ───────────────────────────────────────────────────────
+    let _recallLeadId = null;
+
+    function openRecallModal(leadId, leadName) {
+        _recallLeadId = leadId;
+        document.getElementById('recall-lead-name').textContent = leadName;
+        document.getElementById('recall-note').value = '';
+        document.getElementById('recall-note-error').style.display = 'none';
+        new bootstrap.Modal(document.getElementById('recallModal')).show();
+    }
+
+    function closeDetailModal(leadId) {
+        const el = document.getElementById('detailModal' + leadId);
+        const inst = el ? bootstrap.Modal.getInstance(el) : null;
+        if (inst) inst.hide();
+    }
+
+    document.getElementById('recall-confirm-btn').addEventListener('click', function() {
+        const note = document.getElementById('recall-note').value.trim();
+        if (!note) {
+            document.getElementById('recall-note-error').style.display = 'block';
+            return;
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving…';
+
+        fetch(`/ravens/validation/${_recallLeadId}/keep-declined`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ recall_note: note })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('recallModal')).hide();
+                location.reload();
+            } else {
+                alert(data.message || 'Error.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-x-circle me-1"></i> Confirm Not Valid';
+            }
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-x-circle me-1"></i> Confirm Not Valid';
+        });
+    });
+
+    // ─── Undo Validation ────────────────────────────────────────────────────
+    document.querySelectorAll('.btn-undo-validation').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id   = this.dataset.id;
+            const name = this.dataset.name;
+            if (!confirm(`Undo validation for "${name}"? This will move the lead back to the pending queue.`)) return;
+
+            const el = this;
+            el.disabled = true;
+            el.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            fetch(`/ravens/validation/${id}/undo`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success || data.message) { location.reload(); }
+                else { alert(data.message || 'Error undoing validation.'); el.disabled = false; el.innerHTML = '<i class="bx bx-undo me-1"></i> Undo'; }
+            })
+            .catch(err => {
+                alert('Error: ' + err.message);
+                el.disabled = false;
+                el.innerHTML = '<i class="bx bx-undo me-1"></i> Undo';
+            });
+        });
     });
 </script>
 @endsection

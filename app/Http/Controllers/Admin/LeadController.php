@@ -304,16 +304,13 @@ class LeadController extends Controller
         }
         
         // Tab-based status filter
-        $activeTab = $request->get('status', 'pending_submission');
-        if ($activeTab === 'pending_submission') {
-            $query->where('manager_status', Statuses::MGR_PENDING);
-        } elseif ($activeTab === 'valid_submitted') {
-            $query->where('manager_status', Statuses::MGR_APPROVED);
+        $activeTab = $request->get('status', 'all');
+        if ($activeTab === 'pending_validation') {
+            $query->whereNull('ravens_validated_at');
+        } elseif ($activeTab === 'validated') {
+            $query->where('ravens_validation_status', 'valid');
         } elseif ($activeTab === 'not_valid') {
             $query->where('ravens_validation_status', 'not_valid');
-        } elseif ($activeTab === 'declined') {
-            $query->where('manager_status', Statuses::MGR_DECLINED)
-                  ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'));
         } elseif ($activeTab === 'callback') {
             $query->whereNotNull('recall_requested_at');
         }
@@ -361,11 +358,9 @@ class LeadController extends Controller
 
         $statusCounts = [
             'all'                => (clone $statsBase)->count(),
-            'pending_submission' => (clone $statsBase)->where('manager_status', Statuses::MGR_PENDING)->count(),
-            'valid_submitted'    => (clone $statsBase)->where('manager_status', Statuses::MGR_APPROVED)->count(),
+            'pending_validation' => (clone $statsBase)->whereNull('ravens_validated_at')->count(),
+            'validated'          => (clone $statsBase)->where('ravens_validation_status', 'valid')->count(),
             'not_valid'          => (clone $statsBase)->where('ravens_validation_status', 'not_valid')->count(),
-            'declined'           => (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)
-                                        ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'))->count(),
             'callback'           => (clone $statsBase)->whereNotNull('recall_requested_at')->count(),
         ];
         
@@ -1123,8 +1118,7 @@ class LeadController extends Controller
         $query = Lead::with(['insuranceCarrier', 'partner', 'issuedByUser', 'followupAssignedByUser'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED)
-            ->whereNotNull('pending_contract_at');  // Stage gate: must be sent from Pendings Approved
+            ->whereNotNull('pending_contract_at');  // Stage gate: must be sent from Submissions
         
         // Search functionality
         if ($request->filled('search')) {
@@ -1207,10 +1201,10 @@ class LeadController extends Controller
             : 'required|integer|exists:partners,id';
         
         $request->validate([
-            'issuance_status' => 'required|in:Issued,Pending',  // 'Incomplete' retired — use Not Issued flow on Pendings Approved
+            'issuance_status' => 'required|in:Issued,Not Issued,Pending',
             'issuance_reason' => 'nullable|string|max:1000',
-            'issued_policy_number' => 'required|string|max:255',
-            'partner_id' => $partnerValidation
+            'issued_policy_number' => 'nullable|string|max:255',
+            'partner_id' => 'nullable|integer|exists:partners,id'
         ]);
 
         $commissionService = new CommissionCalculationService();

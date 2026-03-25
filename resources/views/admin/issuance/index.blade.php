@@ -1,12 +1,12 @@
 @use('App\Support\Statuses')
 @extends('layouts.master')
 
-@section('title', 'Policy Submission')
+@section('title', 'Pending Contracts')
 
 @section('css')
 <style>
 /* ═══════════════════════════════════════════════════
-   Policy Submission — Company Overview Style
+   Pending Contracts — Company Overview Style
    ═══════════════════════════════════════════════════ */
 
 /* Glass-card base */
@@ -405,7 +405,7 @@
     {{-- Main Table --}}
     <div class="ex-card sec-card">
         <div class="sec-hdr">
-            <h6><i class="bx bx-list-check"></i> Policy Submission & Followup</h6>
+            <h6><i class="bx bx-list-check"></i> Pending Contracts</h6>
             <span style="font-size:0.62rem; color:var(--bs-surface-400);">{{ $totalLeads }} records</span>
         </div>
         <form method="GET" action="{{ route('issuance.index') }}" class="filter-form">
@@ -594,36 +594,25 @@
                     <form id="issuance-form-{{ $lead->id }}" action="{{ route('issuance.updateIssuanceStatus', $lead->id) }}" method="POST">
                         @csrf
                         <div class="modal-body">
+                            {{-- Policy # and Partner are pre-set from Submissions page --}}
+                            @if($lead->policy_number || $lead->issued_policy_number)
+                                <div class="mb-2" style="font-size:.75rem;color:var(--bs-surface-500);">
+                                    <strong>Policy #:</strong> {{ $lead->policy_number ?? $lead->issued_policy_number ?? '—' }}
+                                    &nbsp;·&nbsp;
+                                    <strong>Partner:</strong> {{ $lead->partner->name ?? $lead->assigned_partner ?? '—' }}
+                                </div>
+                            @endif
                             <div class="mb-3">
-                                <label for="policy-number-{{ $lead->id }}" class="form-label">
-                                    Policy Number <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" class="form-control" id="policy-number-{{ $lead->id }}" name="issued_policy_number" value="{{ $lead->issued_policy_number }}" required placeholder="Enter policy number">
-                            </div>
-                            <div class="mb-3">
-                                <label for="partner-{{ $lead->id }}" class="form-label">
-                                    Partner <span class="text-danger">*</span>
-                                </label>
-                                <select class="form-select" id="partner-{{ $lead->id }}" name="partner_id" required>
-                                    <option value="">Select Partner</option>
-                                    @foreach($partners as $partner)
-                                        <option value="{{ $partner->id }}" {{ $lead->partner_id == $partner->id ? 'selected' : '' }}>
-                                            {{ $partner->name }} ({{ $partner->code }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Status</label>
+                                <label class="form-label">Issuance Status</label>
                                 <div class="d-grid gap-2" id="status-buttons-{{ $lead->id }}">
                                     <button type="submit" name="issuance_status" value="Issued" class="st-btn st-issued">
                                         <i class="bx bx-check-circle"></i> Issued
                                     </button>
-                                    <button type="submit" name="issuance_status" value="Incomplete" class="st-btn st-incomplete">
-                                        <i class="bx bx-time-five"></i> Incomplete
+                                    <button type="submit" name="issuance_status" value="Not Issued" class="st-btn st-incomplete">
+                                        <i class="bx bx-x-circle"></i> Not Issued
                                     </button>
                                     <button type="submit" name="issuance_status" value="Pending" class="st-btn st-pending pending-unassign-btn" data-lead-id="{{ $lead->id }}">
-                                        <i class="bx bx-pause"></i> Pending (Unassign)
+                                        <i class="bx bx-pause"></i> Pending
                                     </button>
                                 </div>
                             </div>

@@ -378,6 +378,26 @@
     </div>
 </div>
 
+<!-- Forward Message Modal -->
+<div class="modal fade" id="forwardModal" tabindex="-1" aria-labelledby="forwardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px;overflow:hidden;">
+            <div class="modal-header" style="padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.06);">
+                <h6 class="modal-title mb-0" id="forwardModalLabel" style="font-size:.85rem;font-weight:600;">
+                    <i class="bx bx-share" style="color:#556ee6;"></i> Forward to...
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size:.65rem;"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div style="padding:10px 14px;">
+                    <input type="text" id="forwardSearchInput" class="form-control form-control-sm" placeholder="Search conversations..." style="font-size:.8rem;border-radius:8px;">
+                </div>
+                <div id="forwardConversationList" style="max-height:300px;overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- GIF Picker Modal -->
 <div class="modal fade" id="gifPickerModal" tabindex="-1" aria-labelledby="gifPickerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -2217,7 +2237,9 @@ function renderMessages(messages) {
             ${!isSender ? avatarHtml : ''}
             <div class="message-content">
                 ${!isSender ? `<div class="message-username">${userName}</div>` : ''}
+                ${msg.forwarded_from_user_name ? `<div class="message-forwarded" style="font-size:.7rem;color:#8b5cf6;margin-bottom:4px;"><i class="bx bx-share" style="font-size:.7rem;"></i> Forwarded from <strong>${escapeHtml(msg.forwarded_from_user_name)}</strong></div>` : ''}
                 ${msg.message ? `<div class="message-text">${formatMessageText(msg.message)}</div>` : ''}
+                ${msg.is_edited ? `<span class="message-edited" style="font-size:.6rem;color:#94a3b8;font-style:italic;">(edited)</span>` : ''}
                 ${msg.attachments && msg.attachments.length > 0 ? `
                     <div class="message-attachment">
                         ${msg.attachments.map(att => {
@@ -2293,8 +2315,13 @@ function renderMessages(messages) {
             </div>
             ${isSender ? `
             <div class="message-actions">
+                <button onclick="startEditMessage(${msg.id}, ${JSON.stringify(msg.message || '').replace(/"/g, '&quot;')})" title="Edit"><i class="bx bx-edit-alt"></i></button>
+                <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
                 <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
-            </div>` : ''}
+            </div>` : `
+            <div class="message-actions">
+                <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
+            </div>`}
         </div>
     `;
     }).join('');
@@ -2395,6 +2422,131 @@ async function deleteMessage(messageId) {
     } catch (error) {
         console.error('Error deleting message:', error);
         alert('Failed to delete message: ' + error.message);
+    }
+}
+
+// === Edit Message ===
+window._editingMessageId = null;
+
+function startEditMessage(messageId, currentText) {
+    window._editingMessageId = messageId;
+    const input = document.getElementById('messageInput');
+    // Decode HTML entities
+    const decoded = new DOMParser().parseFromString(currentText || '', 'text/html').body.textContent;
+    input.value = decoded;
+    input.focus();
+    // Show edit indicator
+    let indicator = document.getElementById('editIndicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'editIndicator';
+        indicator.style.cssText = 'padding:6px 12px;background:rgba(85,110,230,.1);border-left:3px solid #556ee6;font-size:.75rem;color:#556ee6;display:flex;align-items:center;justify-content:space-between;';
+        const inputArea = input.closest('.message-input-area') || input.parentElement;
+        inputArea.insertBefore(indicator, inputArea.firstChild);
+    }
+    indicator.innerHTML = '<span><i class="bx bx-edit-alt"></i> Editing message</span><button onclick="cancelEdit()" style="background:none;border:none;color:#c84646;cursor:pointer;font-size:.8rem;"><i class="bx bx-x"></i> Cancel</button>';
+    indicator.style.display = 'flex';
+}
+
+function cancelEdit() {
+    window._editingMessageId = null;
+    const input = document.getElementById('messageInput');
+    input.value = '';
+    const indicator = document.getElementById('editIndicator');
+    if (indicator) indicator.style.display = 'none';
+}
+
+async function saveEditMessage() {
+    const messageId = window._editingMessageId;
+    const input = document.getElementById('messageInput');
+    const newText = input.value.trim();
+    if (!messageId || !newText) return;
+
+    try {
+        await apiCall(`/api/chat/messages/${messageId}`, 'PUT', { message: newText });
+        cancelEdit();
+        await refreshMessages();
+    } catch (error) {
+        console.error('Error editing message:', error);
+        alert('Failed to edit message: ' + error.message);
+    }
+}
+
+// === Forward Message ===
+window._forwardingMessageId = null;
+
+function showForwardPicker(messageId) {
+    window._forwardingMessageId = messageId;
+    const modal = document.getElementById('forwardModal');
+    if (!modal) return;
+    const bsModal = new bootstrap.Modal(modal);
+    // Load conversations into the picker
+    loadForwardConversations();
+    bsModal.show();
+}
+
+async function loadForwardConversations() {
+    const list = document.getElementById('forwardConversationList');
+    if (!list) return;
+    list.innerHTML = '<div class="text-center py-3"><i class="bx bx-loader-alt bx-spin"></i></div>';
+
+    try {
+        const [directData, groupData] = await Promise.all([
+            apiCall('/api/chat/conversations'),
+            apiCall('/api/chat/group-conversations')
+        ]);
+        const directs = (directData.conversations || directData.data || []).filter(c => !c.community_id);
+        const groups = groupData.conversations || groupData.data || [];
+        const all = [...directs, ...groups].filter(c => c.id != window.currentConversationId);
+
+        if (all.length === 0) {
+            list.innerHTML = '<div class="text-center text-muted py-3">No other conversations</div>';
+            return;
+        }
+
+        const searchInput = document.getElementById('forwardSearchInput');
+        const renderList = (filter) => {
+            const filtered = filter ? all.filter(c => {
+                const name = (c.name || c.other_user?.name || '').toLowerCase();
+                return name.includes(filter.toLowerCase());
+            }) : all;
+            list.innerHTML = filtered.map(c => {
+                const name = escapeHtml(c.name || c.other_user?.name || 'Unknown');
+                const isGroup = c.type === 'group';
+                const icon = isGroup ? '<i class="bx bx-group" style="color:#556ee6;"></i>' : '<i class="bx bx-user" style="color:#34c38f;"></i>';
+                return `<div class="forward-conv-item" onclick="forwardToConversation(${c.id})" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;transition:background .15s;"
+                    onmouseover="this.style.background='rgba(85,110,230,.06)'" onmouseout="this.style.background='transparent'">
+                    ${icon}
+                    <span style="font-size:.82rem;font-weight:500;">${name}</span>
+                </div>`;
+            }).join('');
+        };
+        renderList('');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.oninput = () => renderList(searchInput.value);
+        }
+    } catch (e) {
+        list.innerHTML = '<div class="text-center text-danger py-3">Failed to load conversations</div>';
+    }
+}
+
+async function forwardToConversation(conversationId) {
+    if (!window._forwardingMessageId) return;
+    try {
+        await apiCall(`/api/chat/messages/${window._forwardingMessageId}/forward`, 'POST', { conversation_id: conversationId });
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('forwardModal'));
+        if (modal) modal.hide();
+        window._forwardingMessageId = null;
+        // If target is current conversation, refresh
+        if (conversationId == window.currentConversationId) {
+            await refreshMessages();
+        }
+        loadConversations();
+    } catch (e) {
+        console.error('Forward error:', e);
+        alert('Failed to forward message: ' + e.message);
     }
 }
 
@@ -2538,6 +2690,11 @@ async function selectGif(gifUrl) {
 
 // Send message
 async function sendMessage() {
+    // If editing, save edit instead
+    if (window._editingMessageId) {
+        return saveEditMessage();
+    }
+
     const input = document.getElementById('messageInput');
     const fileInput = document.getElementById('fileInput');
     const message = input.value.trim();

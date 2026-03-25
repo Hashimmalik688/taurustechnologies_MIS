@@ -36,8 +36,8 @@
             <a href="{{ route('submissions.index') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-task"></i></div>
                 <div class="hub-card-body">
-                    <div class="hub-card-title">Pendings Approved</div>
-                    <p class="hub-card-desc">Manager-approved leads awaiting submission to Pending Contract</p>
+                    <div class="hub-card-title">Pending Submission</div>
+                    <p class="hub-card-desc">Validated leads awaiting manager decision before Pending Contract</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
@@ -67,15 +67,6 @@
                 <div class="hub-card-body">
                     <div class="hub-card-title">Followup Done</div>
                     <p class="hub-card-desc">Leads confirmed by closers, ready for Pending Draft assignment</p>
-                </div>
-                <i class="bx bx-chevron-right hub-card-arrow"></i>
-            </a>
-
-            <a href="{{ route('followup.report') }}" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-bar-chart-alt-2"></i></div>
-                <div class="hub-card-body">
-                    <div class="hub-card-title">Followup Report</div>
-                    <p class="hub-card-desc">Review all followup assignments and outcomes</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>

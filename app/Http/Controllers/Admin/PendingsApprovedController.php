@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
+use App\Models\Partner;
 use App\Support\Statuses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Submissions
@@ -34,13 +37,14 @@ class PendingsApprovedController extends Controller
         $dateFrom = $request->get('date_from');
         $dateTo   = $request->get('date_to');
 
+        // Default to last 6 months if no date filters provided
         if (!$dateFrom && !$dateTo) {
-            $dateFrom = now()->startOfMonth()->toDateString();
+            $dateFrom = now()->subMonths(6)->startOfMonth()->toDateString();
             $dateTo   = now()->endOfMonth()->toDateString();
         }
 
         // Base query: ravens_validation_status = 'valid', not yet sent to Pending Contract
-        $query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy'])
+        $query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy', 'qaUser'])
             ->where('ravens_validation_status', 'valid')
             ->whereNull('pending_contract_at');
 
@@ -79,24 +83,19 @@ class PendingsApprovedController extends Controller
             ->when($dateTo, fn($q) => $q->whereDate('sale_date', '<=', $dateTo));
 
         $totalCount     = (clone $statsBase)->count();
-        $approvedCount  = (clone $statsBase)->where('manager_status', Statuses::MGR_APPROVED)->count();
-        $declinedCount  = (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)->count();
-        $underwritingCount = (clone $statsBase)->where('manager_status', Statuses::MGR_UNDERWRITING)->count();
+        $readyCount     = (clone $statsBase)->whereNotNull('policy_number')->whereNotNull('assigned_partner')->count();
+        $needsInfoCount = $totalCount - $readyCount;
 
         $leads    = $query->orderBy('sale_date', 'desc')->paginate(50);
         $carriers = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
         
-        // Get unique partners for the modal dropdown
-        $partners = Lead::distinct()
-            ->whereNotNull('assigned_partner')
-            ->pluck('assigned_partner')
-            ->sort()
-            ->values();
+        // Active partners for modal dropdown
+        $partners = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name']);
 
         return view('admin.pendings-approved.index', compact(
             'leads', 'carriers', 'search', 'carrier',
             'dateFrom', 'dateTo',
-            'totalCount', 'approvedCount', 'declinedCount', 'underwritingCount',
+            'totalCount', 'readyCount', 'needsInfoCount',
             'partners'
         ));
     }
@@ -108,10 +107,6 @@ class PendingsApprovedController extends Controller
     public function sendToContract(Request $request, int $id)
     {
         $lead = Lead::findOrFail($id);
-
-        if ($lead->manager_status !== Statuses::MGR_APPROVED) {
-            return response()->json(['success' => false, 'message' => 'Lead is not manager-approved.'], 422);
-        }
 
         if (!empty($lead->pending_contract_at)) {
             return response()->json(['success' => false, 'message' => 'Lead has already been sent to Pending Contract.'], 422);
@@ -144,10 +139,6 @@ class PendingsApprovedController extends Controller
         ]);
 
         $lead = Lead::findOrFail($id);
-
-        if ($lead->manager_status !== Statuses::MGR_APPROVED) {
-            return response()->json(['success' => false, 'message' => 'Lead is not manager-approved.'], 422);
-        }
 
         if (!empty($lead->pending_contract_at)) {
             return response()->json(['success' => false, 'message' => 'Lead is already in Pending Contract.'], 422);
@@ -190,50 +181,97 @@ class PendingsApprovedController extends Controller
     }
 
     /**
-     * Update manager_status for a lead
+     * Save lead details — App ID, Policy Number, Partner.
+     * No more manager_status — decisions are replaced by direct field assignment.
      */
-    public function updateStatus(Request $request, int $id)
+    public function saveDecision(Request $request, int $id)
     {
-        $request->validate([
-            'manager_status' => 'required|in:approved,declined,underwriting',
-        ]);
+        $rules = [
+            'app_id'          => 'nullable|string|max:100',
+            'policy_number'   => 'nullable|string|max:255',
+            'assigned_partner'=> 'nullable|string|max:255',
+            'partner_id'      => 'nullable|exists:partners,id',
+        ];
+
+        $request->validate($rules);
 
         $lead = Lead::findOrFail($id);
 
-        // Map dropdown values to Statuses constants
-        $statusMap = [
-            'approved'     => Statuses::MGR_APPROVED,
-            'declined'     => Statuses::MGR_DECLINED,
-            'underwriting' => Statuses::MGR_UNDERWRITING,
-        ];
+        if ($request->filled('app_id'))           $lead->app_id           = $request->app_id;
+        if ($request->filled('policy_number'))    $lead->policy_number    = $request->policy_number;
+        if ($request->filled('assigned_partner')) $lead->assigned_partner = $request->assigned_partner;
+        if ($request->partner_id) {
+            $lead->partner_id   = $request->partner_id;
+            $lead->partner_set_at = now();
+        }
 
-        $lead->manager_status = $statusMap[$request->manager_status];
         $lead->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Status updated successfully.',
+            'message' => 'Details saved.',
         ]);
     }
 
+    // Legacy updateStatus removed — manager_status no longer used in flow
+
     /**
-     * Update a field on a lead (policy_number, etc)
+     * Update a single field on a lead
      */
     public function updateField(Request $request, int $id)
     {
         $request->validate([
-            'field' => 'required|in:policy_number,assigned_partner',
+            'field' => 'required|in:policy_number,assigned_partner,app_id',
             'value' => 'nullable|string|max:255',
         ]);
 
         $lead = Lead::findOrFail($id);
-        $field = $request->field;
-        $lead->{$field} = $request->value;
+        $lead->{$request->field} = $request->value;
         $lead->save();
+
+        return response()->json(['success' => true, 'message' => 'Field updated.']);
+    }
+
+    /**
+     * Recall / Send Back a declined lead to the closer for re-dial.
+     * Sets recall fields so the closer sees it on their Ravens dashboard.
+     */
+    public function recallToCloser(Request $request, int $id)
+    {
+        $request->validate([
+            'recall_note' => 'required|string|max:1000',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+
+        if ($lead->recall_requested_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This lead has already been recalled.',
+            ], 422);
+        }
+
+        $lead->recall_requested_at = now();
+        $lead->recall_requested_by = Auth::id();
+        $lead->recall_note         = $request->recall_note;
+        $lead->save();
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Submissions — Recall to Closer',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['recall_requested_at' => null]),
+            'new_values' => json_encode([
+                'recall_requested_at' => now()->toISOString(),
+                'recall_note'         => $request->recall_note,
+            ]),
+            'ip_address' => $request->ip(),
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Field updated successfully.',
+            'message' => "Lead \"{$lead->cn_name}\" recalled to closer.",
         ]);
     }
 }

@@ -515,6 +515,102 @@ class ChatController extends Controller
     }
 
     /**
+     * Edit a message (only sender can edit, text-only)
+     */
+    public function updateMessage(Request $request, $messageId)
+    {
+        $request->validate([
+            'message' => 'required|string|max:5000',
+        ]);
+
+        $message = ChatMessage::where('user_id', Auth::id())
+            ->findOrFail($messageId);
+
+        $message->update([
+            'message' => $request->message,
+            'is_edited' => true,
+        ]);
+
+        $message->load(['user', 'attachments']);
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+        ]);
+    }
+
+    /**
+     * Forward a message to another conversation
+     */
+    public function forwardMessage(Request $request, $messageId)
+    {
+        $request->validate([
+            'conversation_id' => 'required|exists:chat_conversations,id',
+        ]);
+
+        $userId = Auth::id();
+
+        // Verify source message exists and user can see it (is participant)
+        $original = ChatMessage::whereHas('conversation.participants', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->findOrFail($messageId);
+
+        // Verify user is participant of target conversation
+        $targetConversation = ChatConversation::whereHas('participants', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->findOrFail($request->conversation_id);
+
+        $forwarded = DB::transaction(function () use ($original, $userId, $targetConversation) {
+            $msg = ChatMessage::create([
+                'conversation_id' => $targetConversation->id,
+                'user_id' => $userId,
+                'message' => $original->message,
+                'type' => $original->type,
+                'forwarded_from_message_id' => $original->id,
+                'forwarded_from_user_name' => $original->user->name ?? 'Unknown',
+            ]);
+
+            // Clone attachments if any
+            foreach ($original->attachments as $att) {
+                $newPath = $att->file_path;
+                // Copy file if it exists
+                if (Storage::disk('public')->exists($att->file_path)) {
+                    $ext = pathinfo($att->file_path, PATHINFO_EXTENSION);
+                    $newPath = 'chat-attachments/' . uniqid() . '.' . $ext;
+                    Storage::disk('public')->copy($att->file_path, $newPath);
+                }
+
+                ChatAttachment::create([
+                    'message_id' => $msg->id,
+                    'file_name' => $att->file_name,
+                    'file_path' => $newPath,
+                    'file_type' => $att->file_type,
+                    'file_size' => $att->file_size,
+                    'mime_type' => $att->mime_type,
+                ]);
+            }
+
+            $targetConversation->touch();
+
+            return $msg;
+        });
+
+        $forwarded->load(['user', 'attachments']);
+
+        // Broadcast
+        try {
+            broadcast(new MessageSent($forwarded))->toOthers();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $forwarded,
+        ]);
+    }
+
+    /**
      * Get all users for starting a new chat
      */
     public function getUsers()

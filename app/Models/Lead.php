@@ -100,6 +100,9 @@ class Lead extends Model
         'ravens_validated_by',
         'ravens_validation_status',
 
+        // Application ID (assigned at Submissions stage)
+        'app_id',
+
         // Assign Back / Recall fields
         'recall_requested_at',
         'recall_requested_by',
@@ -267,6 +270,7 @@ class Lead extends Model
         'qa_reviewed_at' => 'datetime',
         'manager_reviewed_at' => 'datetime',
         'ravens_validated_at' => 'datetime',
+        'recall_requested_at' => 'datetime',
         'followup_assigned_at' => 'datetime',
         'bank_verifier_assigned_at' => 'datetime',
         'resale_log' => 'array',
@@ -561,10 +565,10 @@ class Lead extends Model
 
     // ── Pipeline stage helper scopes ──────────────────────────────────────────
 
-    /** Leads currently in Pendings Approved (manager-approved, not yet sent to contract) */
+    /** Leads currently in Pendings Approved (validated, not yet sent to contract) */
     public function scopePendingsApproved($query)
     {
-        return $query->where('manager_status', 'approved')
+        return $query->where('ravens_validation_status', 'valid')
                      ->whereNull('pending_contract_at')
                      ->whereNull('not_issued_at');
     }
@@ -580,8 +584,7 @@ class Lead extends Model
     /** Leads in Pending Contract stage */
     public function scopePendingContract($query)
     {
-        return $query->where('manager_status', 'approved')
-                     ->whereNotNull('pending_contract_at')
+        return $query->whereNotNull('pending_contract_at')
                      ->where(function ($q) {
                          $q->whereNull('issuance_status')
                            ->orWhere('issuance_status', 'Pending');
