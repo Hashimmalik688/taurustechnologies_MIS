@@ -278,11 +278,13 @@ Route::group(['prefix' => 'issuance', 'as' => 'issuance.', 'middleware' => ['aut
 });
 
 // Pendings Approved — Stage 2 pipeline
-Route::group(['prefix' => 'pendings-approved', 'as' => 'pendings-approved.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+Route::group(['prefix' => 'submissions', 'as' => 'submissions.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PendingsApprovedController::class, 'index'])->name('index')->middleware('role.permission:pendings-approved,view');
     Route::post('/{id}/send-to-contract', [PendingsApprovedController::class, 'sendToContract'])->name('sendToContract')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/mark-not-issued', [PendingsApprovedController::class, 'markNotIssued'])->name('markNotIssued')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/resolve-not-issued', [PendingsApprovedController::class, 'resolveNotIssued'])->name('resolveNotIssued')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/update-status', [PendingsApprovedController::class, 'updateStatus'])->name('updateStatus')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/update-field', [PendingsApprovedController::class, 'updateField'])->name('updateField')->middleware('role.permission:pendings-approved,edit');
 });
 
 // Pending Draft — Stage 6 pipeline

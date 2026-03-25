@@ -1,7 +1,7 @@
 @use('App\Support\Statuses')
 @extends('layouts.master')
 
-@section('title', 'Pendings Approved')
+@section('title', 'Submissions')
 
 @section('css')
 <style>
@@ -36,6 +36,7 @@
 /* ── Action Buttons ── */
 .a-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.28rem .55rem;border-radius:.35rem;font-size:.68rem;font-weight:500;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:all .15s;}
 .a-send{background:#34c38f20;color:#1a8754;border-color:#34c38f40;}.a-send:hover{background:#34c38f30;color:#1a8754;}
+.a-edit{background:#556ee620;color:#556ee6;border-color:#556ee640;}.a-edit:hover{background:#556ee630;color:#556ee6;}
 .a-ni{background:#f46a6a20;color:#c84646;border-color:#f46a6a40;}.a-ni:hover{background:#f46a6a30;color:#c84646;}
 .a-resolve{background:#556ee620;color:#556ee6;border-color:#556ee640;}.a-resolve:hover{background:#556ee630;color:#556ee6;}
 
@@ -48,18 +49,15 @@
 @endsection
 
 @section('content')
-<div class="container-fluid px-3 py-3" style="max-width:1600px">
+<div class="container-fluid" style="max-width:1600px">
 
     {{-- Page Header --}}
     <div class="d-flex align-items-center justify-content-between mb-2">
         <div>
             <h5 class="mb-0 fw-semibold" style="font-size:1rem;">
                 <i class="bx bx-check-circle me-1" style="color:#34c38f;font-size:1.05rem;"></i>
-                Pendings Approved
+                Submissions
             </h5>
-            <p class="mb-0" style="font-size:.68rem;color:var(--bs-surface-400);">
-                Stage 2 — Manager-approved leads awaiting carrier submission
-            </p>
         </div>
         <div class="d-flex gap-1 align-items-center">
             <a href="{{ route('issuance.index') }}" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.08);">
@@ -75,23 +73,27 @@
             <div class="k-lbl">Total</div>
         </div>
         <div class="kpi-card k-green">
-            <div class="k-val">{{ $readyCount }}</div>
-            <div class="k-lbl">Ready to Send</div>
+            <div class="k-val">{{ $approvedCount }}</div>
+            <div class="k-lbl">Approved</div>
         </div>
         <div class="kpi-card k-red">
-            <div class="k-val">{{ $notIssuedCount }}</div>
-            <div class="k-lbl">Not Issued</div>
+            <div class="k-val">{{ $declinedCount }}</div>
+            <div class="k-lbl">Declined</div>
+        </div>
+        <div class="kpi-card k-blue">
+            <div class="k-val">{{ $underwritingCount }}</div>
+            <div class="k-lbl">Underwriting</div>
         </div>
     </div>
 
     {{-- Main Table Card --}}
     <div class="sec-card">
         <div class="sec-hdr">
-            <h6><i class="bx bx-list-ul me-1"></i> Approved Leads</h6>
+            <h6><i class="bx bx-list-ul me-1"></i> Validated Leads</h6>
         </div>
 
         {{-- Filters --}}
-        <form method="GET" action="{{ route('pendings-approved.index') }}" class="filter-form">
+        <form method="GET" action="{{ route('submissions.index') }}" class="filter-form">
             <div>
                 <label>Search</label>
                 <input type="text" name="search" class="form-control" value="{{ $search }}" placeholder="Name, phone, carrier…" style="width:160px;">
@@ -116,7 +118,7 @@
             <button type="submit" class="a-btn a-send" style="height:2rem;">
                 <i class="bx bx-search-alt-2"></i> Filter
             </button>
-            <a href="{{ route('pendings-approved.index') }}" class="f-reset">
+            <a href="{{ route('submissions.index') }}" class="f-reset">
                 <i class="bx bx-reset"></i> Clear
             </a>
         </form>
@@ -132,7 +134,11 @@
                         <th>Carrier</th>
                         <th>Premium</th>
                         <th>Closer</th>
+                        <th>Partner</th>
                         <th>Sale Date</th>
+                        <th>App ID</th>
+                        <th>Manager Status</th>
+                        <th>Policy Number</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -142,6 +148,7 @@
                         @php
                             $isBlocked = !empty($lead->not_issued_at) && empty($lead->not_issued_resolved_at);
                             $wasResolved = !empty($lead->not_issued_at) && !empty($lead->not_issued_resolved_at);
+                            $isApproved = $lead->manager_status === Statuses::MGR_APPROVED;
                         @endphp
                         <tr>
                             <td style="color:var(--bs-surface-400);">{{ $lead->id }}</td>
@@ -154,52 +161,59 @@
                             <td>{{ $lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—') }}</td>
                             <td>${{ number_format($lead->monthly_premium, 2) }}</td>
                             <td>{{ $lead->closer_name ?? '—' }}</td>
+                            <td>{{ $lead->assigned_partner ?? '—' }}</td>
                             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—' }}</td>
+                            <td style="color:var(--bs-surface-500);font-weight:600;">{{ $lead->id }}</td>
+                            <td>
+                                <span style="display:inline-block;padding:.25rem .5rem;background:#e8f5e9;color:#2e7d32;border-radius:.25rem;font-size:.7rem;font-weight:500;">
+                                    Valid - Approved
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color:var(--bs-surface-400);font-size:.7rem;">—</span>
+                            </td>
                             <td>
                                 @if($isBlocked)
-                                    <span class="bd-ni">
-                                        Not Issued: {{ Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition] ?? $lead->not_issued_disposition }}
+                                    <span class="bd-ni" style="font-size:.65rem;">
+                                        Not Issued
                                     </span>
                                     <div style="font-size:.6rem;color:var(--bs-surface-400);margin-top:.1rem;">
-                                        by {{ $lead->notIssuedBy->name ?? '?' }} · {{ $lead->not_issued_at->diffForHumans() }}
+                                        {{ $lead->notIssuedBy->name ?? '?' }} · {{ $lead->not_issued_at->diffForHumans() }}
                                     </div>
                                 @elseif($wasResolved)
-                                    <span class="bd-resolved">Resolved</span>
+                                    <span class="bd-resolved" style="font-size:.65rem;">Resolved</span>
                                 @else
-                                    <span class="bd-pending">Ready</span>
+                                    <span class="bd-pending" style="font-size:.65rem;">Ready</span>
                                 @endif
                             </td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    @if(!$isBlocked)
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-send btn-send-contract" data-id="{{ $lead->id }}">
-                                            <i class="bx bx-right-arrow-alt"></i> Send to Contract
+                                    @if($isApproved && !$isBlocked)
+                                        <button class="a-btn a-send btn-send-contract" data-id="{{ $lead->id }}" style="font-size:.65rem;">
+                                            <i class="bx bx-right-arrow-alt"></i> Send
                                         </button>
-                                        @endcanDo
                                     @endif
+                                    <button class="a-btn a-edit btn-open-actions-modal" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" data-status="{{ $lead->manager_status }}" data-policy="{{ $lead->policy_number ?? '' }}" data-partner="{{ $lead->assigned_partner ?? '' }}" style="font-size:.65rem;">
+                                        <i class="bx bx-pencil"></i> Manage
+                                    </button>
                                     @if(!$isBlocked)
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-ni btn-mark-ni" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
+                                        <button class="a-btn a-ni btn-mark-ni" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.65rem;">
                                             <i class="bx bx-error-circle"></i> Not Issued
                                         </button>
-                                        @endcanDo
                                     @endif
                                     @if($isBlocked)
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-resolve btn-resolve-ni" data-id="{{ $lead->id }}">
+                                        <button class="a-btn a-resolve btn-resolve-ni" data-id="{{ $lead->id }}" style="font-size:.65rem;">
                                             <i class="bx bx-check"></i> Resolve
                                         </button>
-                                        @endcanDo
                                     @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="13" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
-                                No leads in Pendings Approved for the selected period.
+                                No leads in Submissions for the selected period.
                             </td>
                         </tr>
                     @endforelse
@@ -212,6 +226,65 @@
         @endif
     </div>
 
+</div>
+
+
+{{-- Actions Management Modal --}}
+<div class="modal fade" id="actionsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content">
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title mb-0" style="font-size:.85rem;">
+                    <i class="bx bx-pencil me-1"></i> Manage Application
+                </h6>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-3 py-3">
+                <p class="mb-3" style="font-size:.75rem;color:var(--bs-surface-500);">
+                    Lead: <strong id="actions-lead-name"></strong>
+                </p>
+                
+                {{-- Manager Status Dropdown --}}
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Manager Decision</label>
+                    <select id="actions-status" class="form-select form-select-sm">
+                        <option value="approved">Approved</option>
+                        <option value="declined">Declined</option>
+                        <option value="underwriting">Underwriting</option>
+                    </select>
+                </div>
+
+                {{-- Policy Number (conditional) --}}
+                <div class="mb-3" id="policy-field-wrapper" style="display:none;">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Policy Number</label>
+                    <input type="text" id="actions-policy-number" class="form-control form-control-sm" placeholder="Enter policy number" style="font-size:.7rem;">
+                </div>
+
+                {{-- App ID (read-only) --}}
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">App ID</label>
+                    <input type="text" id="actions-app-id" class="form-control form-control-sm" readonly style="font-size:.7rem;background:#f5f5f5;">
+                </div>
+
+                {{-- Partner Select --}}
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Partner</label>
+                    <select id="actions-partner" class="form-select form-select-sm" style="font-size:.7rem;">
+                        <option value="">— Select Partner —</option>
+                        @if(isset($partners) && $partners)
+                            @foreach($partners as $p)
+                                <option value="{{ $p }}">{{ $p }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer py-2 px-3">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" id="actions-save-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{-- Not Issued Modal --}}
@@ -250,12 +323,118 @@
 (function() {
     let currentLeadId = null;
 
-    // Send to Contract
+    // ==== Actions Modal ====
+    document.querySelectorAll('.btn-open-actions-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentLeadId = this.dataset.id;
+            const name = this.dataset.name;
+            const status = this.dataset.status;
+            const policy = this.dataset.policy;
+            const partner = this.dataset.partner;
+
+            document.getElementById('actions-lead-name').textContent = name;
+            document.getElementById('actions-status').value = status;
+            document.getElementById('actions-policy-number').value = policy;
+            document.getElementById('actions-app-id').value = currentLeadId;
+            document.getElementById('actions-partner').value = partner;
+
+            // Show/hide policy field based on status
+            updatePolicyFieldVisibility(status);
+
+            new bootstrap.Modal(document.getElementById('actionsModal')).show();
+        });
+    });
+
+    // Toggle visibility of Policy Number field
+    document.getElementById('actions-status').addEventListener('change', function() {
+        updatePolicyFieldVisibility(this.value);
+    });
+
+    function updatePolicyFieldVisibility(status) {
+        const wrapper = document.getElementById('policy-field-wrapper');
+        if (status === 'approved') {
+            wrapper.style.display = 'block';
+        } else {
+            wrapper.style.display = 'none';
+        }
+    }
+
+    // Save Actions Modal changes
+    document.getElementById('actions-save-btn').addEventListener('click', function() {
+        const newStatus = document.getElementById('actions-status').value;
+        const policyNumber = document.getElementById('actions-policy-number').value.trim();
+        const partner = document.getElementById('actions-partner').value;
+
+        // Update manager status
+        fetch(`/submissions/${currentLeadId}/update-status`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({manager_status: newStatus})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.message || 'Error updating status');
+                return;
+            }
+            
+            // Update policy number if approved
+            if (newStatus === 'approved' && policyNumber) {
+                return fetch(`/submissions/${currentLeadId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({field: 'policy_number', value: policyNumber})
+                }).then(r => r.json());
+            }
+            return Promise.resolve({success: true});
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert(data.message || 'Error updating policy number');
+                return;
+            }
+
+            // Update partner if selected
+            if (partner) {
+                return fetch(`/submissions/${currentLeadId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({field: 'assigned_partner', value: partner})
+                }).then(r => r.json());
+            }
+            return Promise.resolve({success: true});
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert(data.message || 'Error updating partner');
+            } else {
+                bootstrap.Modal.getInstance(document.getElementById('actionsModal')).hide();
+                location.reload();
+            }
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+        });
+    });
+
+    // ==== Send to Contract ====
     document.querySelectorAll('.btn-send-contract').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             if (!confirm('Send this lead to Pending Contract?')) return;
-            fetch(`/pendings-approved/${id}/send-to-contract`, {
+            fetch(`/submissions/${id}/send-to-contract`, {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json'}
             })
@@ -267,7 +446,7 @@
         });
     });
 
-    // Mark Not Issued — open modal
+    // ==== Mark Not Issued — open modal ====
     document.querySelectorAll('.btn-mark-ni').forEach(btn => {
         btn.addEventListener('click', function() {
             currentLeadId = this.dataset.id;
@@ -277,11 +456,11 @@
         });
     });
 
-    // Confirm Not Issued
+    // ==== Confirm Not Issued ====
     document.getElementById('ni-confirm-btn').addEventListener('click', function() {
         const disposition = document.getElementById('ni-disposition').value;
         if (!disposition) { alert('Please select a disposition reason.'); return; }
-        fetch(`/pendings-approved/${currentLeadId}/mark-not-issued`, {
+        fetch(`/submissions/${currentLeadId}/mark-not-issued`, {
             method: 'POST',
             headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Content-Type': 'application/json', 'Accept': 'application/json'},
             body: JSON.stringify({not_issued_disposition: disposition})
@@ -293,12 +472,12 @@
         });
     });
 
-    // Resolve Not Issued
+    // ==== Resolve Not Issued ====
     document.querySelectorAll('.btn-resolve-ni').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             if (!confirm('Mark this Not Issued block as resolved?')) return;
-            fetch(`/pendings-approved/${id}/resolve-not-issued`, {
+            fetch(`/submissions/${id}/resolve-not-issued`, {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json'}
             })

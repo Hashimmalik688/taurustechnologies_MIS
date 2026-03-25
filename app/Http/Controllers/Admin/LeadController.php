@@ -315,8 +315,6 @@ class LeadController extends Controller
         } elseif ($activeTab === 'declined') {
             $query->where('manager_status', Statuses::MGR_DECLINED)
                   ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'));
-        } elseif ($activeTab === 'underwriting') {
-            $query->where('manager_status', Statuses::MGR_UNDERWRITING);
         }
         // 'all' = no additional filter
 
@@ -368,7 +366,6 @@ class LeadController extends Controller
             'not_valid'          => (clone $statsBase)->where('ravens_validation_status', 'not_valid')->count(),
             'declined'           => (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)
                                         ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'))->count(),
-            'underwriting'       => (clone $statsBase)->where('manager_status', Statuses::MGR_UNDERWRITING)->count(),
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);

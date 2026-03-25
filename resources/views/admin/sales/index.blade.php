@@ -58,7 +58,7 @@
     /* KPI Row */
     .sl-kpi-row {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: .75rem;
         margin-bottom: 1rem;
     }
@@ -558,18 +558,6 @@
                 </div>
             </div>
         </a>
-        {{-- Underwriting --}}
-        <a href="{{ route('sales.index', array_merge($tabBaseQuery, ['status' => 'underwriting'])) }}" class="sl-kpi-link">
-            <div class="sl-kpi {{ $activeTab === 'underwriting' ? 'active-tab' : '' }}">
-                <div class="sl-kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                    <i class="mdi mdi-file-document-edit-outline"></i>
-                </div>
-                <div class="sl-kpi-info">
-                    <span class="sl-kpi-label">Underwriting</span>
-                    <span class="sl-kpi-val">{{ number_format($statusCounts['underwriting']) }}</span>
-                </div>
-            </div>
-        </a>
     </div>
 
     <!-- Top bar: Title + Actions -->
@@ -938,7 +926,6 @@
                                                     <option value="pending" {{ ($lead->manager_status ?? Statuses::MGR_PENDING) == Statuses::MGR_PENDING ? 'selected' : '' }}>Pending</option>
                                                     <option value="approved" {{ ($lead->manager_status ?? '') == Statuses::MGR_APPROVED ? 'selected' : '' }}>Approved</option>
                                                     <option value="declined" {{ ($lead->manager_status ?? '') == Statuses::MGR_DECLINED ? 'selected' : '' }}>Declined</option>
-                                                    <option value="underwriting" {{ ($lead->manager_status ?? '') == Statuses::MGR_UNDERWRITING ? 'selected' : '' }}>Underwriting</option>
                                                 </select>
                                             </td>
                                             <td>
@@ -1629,10 +1616,6 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'declined':
                 select.style.background = themeColors.surface50;
                 select.style.color = themeColors.dangerDark;
-                break;
-            case 'underwriting':
-                select.style.background = themeColors.surface50;
-                select.style.color = themeColors.infoDark;
                 break;
         }
     }

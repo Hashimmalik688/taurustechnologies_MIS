@@ -1,7 +1,7 @@
 <?php use \App\Support\Statuses; ?>
 
 
-<?php $__env->startSection('title', 'Pendings Approved'); ?>
+<?php $__env->startSection('title', 'Submissions'); ?>
 
 <?php $__env->startSection('css'); ?>
 <style>
@@ -36,6 +36,7 @@
 /* ── Action Buttons ── */
 .a-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.28rem .55rem;border-radius:.35rem;font-size:.68rem;font-weight:500;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:all .15s;}
 .a-send{background:#34c38f20;color:#1a8754;border-color:#34c38f40;}.a-send:hover{background:#34c38f30;color:#1a8754;}
+.a-edit{background:#556ee620;color:#556ee6;border-color:#556ee640;}.a-edit:hover{background:#556ee630;color:#556ee6;}
 .a-ni{background:#f46a6a20;color:#c84646;border-color:#f46a6a40;}.a-ni:hover{background:#f46a6a30;color:#c84646;}
 .a-resolve{background:#556ee620;color:#556ee6;border-color:#556ee640;}.a-resolve:hover{background:#556ee630;color:#556ee6;}
 
@@ -48,18 +49,15 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="container-fluid px-3 py-3" style="max-width:1600px">
+<div class="container-fluid" style="max-width:1600px">
 
     
     <div class="d-flex align-items-center justify-content-between mb-2">
         <div>
             <h5 class="mb-0 fw-semibold" style="font-size:1rem;">
                 <i class="bx bx-check-circle me-1" style="color:#34c38f;font-size:1.05rem;"></i>
-                Pendings Approved
+                Submissions
             </h5>
-            <p class="mb-0" style="font-size:.68rem;color:var(--bs-surface-400);">
-                Stage 2 — Manager-approved leads awaiting carrier submission
-            </p>
         </div>
         <div class="d-flex gap-1 align-items-center">
             <a href="<?php echo e(route('issuance.index')); ?>" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.08);">
@@ -75,23 +73,27 @@
             <div class="k-lbl">Total</div>
         </div>
         <div class="kpi-card k-green">
-            <div class="k-val"><?php echo e($readyCount); ?></div>
-            <div class="k-lbl">Ready to Send</div>
+            <div class="k-val"><?php echo e($approvedCount); ?></div>
+            <div class="k-lbl">Approved</div>
         </div>
         <div class="kpi-card k-red">
-            <div class="k-val"><?php echo e($notIssuedCount); ?></div>
-            <div class="k-lbl">Not Issued</div>
+            <div class="k-val"><?php echo e($declinedCount); ?></div>
+            <div class="k-lbl">Declined</div>
+        </div>
+        <div class="kpi-card k-blue">
+            <div class="k-val"><?php echo e($underwritingCount); ?></div>
+            <div class="k-lbl">Underwriting</div>
         </div>
     </div>
 
     
     <div class="sec-card">
         <div class="sec-hdr">
-            <h6><i class="bx bx-list-ul me-1"></i> Approved Leads</h6>
+            <h6><i class="bx bx-list-ul me-1"></i> Validated Leads</h6>
         </div>
 
         
-        <form method="GET" action="<?php echo e(route('pendings-approved.index')); ?>" class="filter-form">
+        <form method="GET" action="<?php echo e(route('submissions.index')); ?>" class="filter-form">
             <div>
                 <label>Search</label>
                 <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="Name, phone, carrier…" style="width:160px;">
@@ -116,7 +118,7 @@
             <button type="submit" class="a-btn a-send" style="height:2rem;">
                 <i class="bx bx-search-alt-2"></i> Filter
             </button>
-            <a href="<?php echo e(route('pendings-approved.index')); ?>" class="f-reset">
+            <a href="<?php echo e(route('submissions.index')); ?>" class="f-reset">
                 <i class="bx bx-reset"></i> Clear
             </a>
         </form>
@@ -132,7 +134,11 @@
                         <th>Carrier</th>
                         <th>Premium</th>
                         <th>Closer</th>
+                        <th>Partner</th>
                         <th>Sale Date</th>
+                        <th>App ID</th>
+                        <th>Manager Status</th>
+                        <th>Policy Number</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -142,6 +148,7 @@
                         <?php
                             $isBlocked = !empty($lead->not_issued_at) && empty($lead->not_issued_resolved_at);
                             $wasResolved = !empty($lead->not_issued_at) && !empty($lead->not_issued_resolved_at);
+                            $isApproved = $lead->manager_status === Statuses::MGR_APPROVED;
                         ?>
                         <tr>
                             <td style="color:var(--bs-surface-400);"><?php echo e($lead->id); ?></td>
@@ -155,54 +162,60 @@
                             <td><?php echo e($lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—')); ?></td>
                             <td>$<?php echo e(number_format($lead->monthly_premium, 2)); ?></td>
                             <td><?php echo e($lead->closer_name ?? '—'); ?></td>
+                            <td><?php echo e($lead->assigned_partner ?? '—'); ?></td>
                             <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—'); ?></td>
+                            <td style="color:var(--bs-surface-500);font-weight:600;"><?php echo e($lead->id); ?></td>
+                            <td>
+                                <span style="display:inline-block;padding:.25rem .5rem;background:#e8f5e9;color:#2e7d32;border-radius:.25rem;font-size:.7rem;font-weight:500;">
+                                    Valid - Approved
+                                </span>
+                            </td>
+                            <td>
+                                <span style="color:var(--bs-surface-400);font-size:.7rem;">—</span>
+                            </td>
                             <td>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isBlocked): ?>
-                                    <span class="bd-ni">
-                                        Not Issued: <?php echo e(Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition] ?? $lead->not_issued_disposition); ?>
-
+                                    <span class="bd-ni" style="font-size:.65rem;">
+                                        Not Issued
                                     </span>
                                     <div style="font-size:.6rem;color:var(--bs-surface-400);margin-top:.1rem;">
-                                        by <?php echo e($lead->notIssuedBy->name ?? '?'); ?> · <?php echo e($lead->not_issued_at->diffForHumans()); ?>
+                                        <?php echo e($lead->notIssuedBy->name ?? '?'); ?> · <?php echo e($lead->not_issued_at->diffForHumans()); ?>
 
                                     </div>
                                 <?php elseif($wasResolved): ?>
-                                    <span class="bd-resolved">Resolved</span>
+                                    <span class="bd-resolved" style="font-size:.65rem;">Resolved</span>
                                 <?php else: ?>
-                                    <span class="bd-pending">Ready</span>
+                                    <span class="bd-pending" style="font-size:.65rem;">Ready</span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isBlocked): ?>
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-send btn-send-contract" data-id="<?php echo e($lead->id); ?>">
-                                            <i class="bx bx-right-arrow-alt"></i> Send to Contract
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isApproved && !$isBlocked): ?>
+                                        <button class="a-btn a-send btn-send-contract" data-id="<?php echo e($lead->id); ?>" style="font-size:.65rem;">
+                                            <i class="bx bx-right-arrow-alt"></i> Send
                                         </button>
-                                        @endcanDo
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <button class="a-btn a-edit btn-open-actions-modal" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>" data-status="<?php echo e($lead->manager_status); ?>" data-policy="<?php echo e($lead->policy_number ?? ''); ?>" data-partner="<?php echo e($lead->assigned_partner ?? ''); ?>" style="font-size:.65rem;">
+                                        <i class="bx bx-pencil"></i> Manage
+                                    </button>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$isBlocked): ?>
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-ni btn-mark-ni" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>">
+                                        <button class="a-btn a-ni btn-mark-ni" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>" style="font-size:.65rem;">
                                             <i class="bx bx-error-circle"></i> Not Issued
                                         </button>
-                                        @endcanDo
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isBlocked): ?>
-                                        @canDo('pendings-approved', 'edit')
-                                        <button class="a-btn a-resolve btn-resolve-ni" data-id="<?php echo e($lead->id); ?>">
+                                        <button class="a-btn a-resolve btn-resolve-ni" data-id="<?php echo e($lead->id); ?>" style="font-size:.65rem;">
                                             <i class="bx bx-check"></i> Resolve
                                         </button>
-                                        @endcanDo
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                             </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="13" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
-                                No leads in Pendings Approved for the selected period.
+                                No leads in Submissions for the selected period.
                             </td>
                         </tr>
                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -215,6 +228,65 @@
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
+</div>
+
+
+
+<div class="modal fade" id="actionsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content">
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title mb-0" style="font-size:.85rem;">
+                    <i class="bx bx-pencil me-1"></i> Manage Application
+                </h6>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-3 py-3">
+                <p class="mb-3" style="font-size:.75rem;color:var(--bs-surface-500);">
+                    Lead: <strong id="actions-lead-name"></strong>
+                </p>
+                
+                
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Manager Decision</label>
+                    <select id="actions-status" class="form-select form-select-sm">
+                        <option value="approved">Approved</option>
+                        <option value="declined">Declined</option>
+                        <option value="underwriting">Underwriting</option>
+                    </select>
+                </div>
+
+                
+                <div class="mb-3" id="policy-field-wrapper" style="display:none;">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Policy Number</label>
+                    <input type="text" id="actions-policy-number" class="form-control form-control-sm" placeholder="Enter policy number" style="font-size:.7rem;">
+                </div>
+
+                
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">App ID</label>
+                    <input type="text" id="actions-app-id" class="form-control form-control-sm" readonly style="font-size:.7rem;background:#f5f5f5;">
+                </div>
+
+                
+                <div class="mb-3">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Partner</label>
+                    <select id="actions-partner" class="form-select form-select-sm" style="font-size:.7rem;">
+                        <option value="">— Select Partner —</option>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($partners) && $partners): ?>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $partners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($p); ?>"><?php echo e($p); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer py-2 px-3">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" id="actions-save-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -253,12 +325,118 @@
 (function() {
     let currentLeadId = null;
 
-    // Send to Contract
+    // ==== Actions Modal ====
+    document.querySelectorAll('.btn-open-actions-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentLeadId = this.dataset.id;
+            const name = this.dataset.name;
+            const status = this.dataset.status;
+            const policy = this.dataset.policy;
+            const partner = this.dataset.partner;
+
+            document.getElementById('actions-lead-name').textContent = name;
+            document.getElementById('actions-status').value = status;
+            document.getElementById('actions-policy-number').value = policy;
+            document.getElementById('actions-app-id').value = currentLeadId;
+            document.getElementById('actions-partner').value = partner;
+
+            // Show/hide policy field based on status
+            updatePolicyFieldVisibility(status);
+
+            new bootstrap.Modal(document.getElementById('actionsModal')).show();
+        });
+    });
+
+    // Toggle visibility of Policy Number field
+    document.getElementById('actions-status').addEventListener('change', function() {
+        updatePolicyFieldVisibility(this.value);
+    });
+
+    function updatePolicyFieldVisibility(status) {
+        const wrapper = document.getElementById('policy-field-wrapper');
+        if (status === 'approved') {
+            wrapper.style.display = 'block';
+        } else {
+            wrapper.style.display = 'none';
+        }
+    }
+
+    // Save Actions Modal changes
+    document.getElementById('actions-save-btn').addEventListener('click', function() {
+        const newStatus = document.getElementById('actions-status').value;
+        const policyNumber = document.getElementById('actions-policy-number').value.trim();
+        const partner = document.getElementById('actions-partner').value;
+
+        // Update manager status
+        fetch(`/submissions/${currentLeadId}/update-status`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({manager_status: newStatus})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) {
+                alert(data.message || 'Error updating status');
+                return;
+            }
+            
+            // Update policy number if approved
+            if (newStatus === 'approved' && policyNumber) {
+                return fetch(`/submissions/${currentLeadId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({field: 'policy_number', value: policyNumber})
+                }).then(r => r.json());
+            }
+            return Promise.resolve({success: true});
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert(data.message || 'Error updating policy number');
+                return;
+            }
+
+            // Update partner if selected
+            if (partner) {
+                return fetch(`/submissions/${currentLeadId}/update-field`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({field: 'assigned_partner', value: partner})
+                }).then(r => r.json());
+            }
+            return Promise.resolve({success: true});
+        })
+        .then(data => {
+            if (data && !data.success) {
+                alert(data.message || 'Error updating partner');
+            } else {
+                bootstrap.Modal.getInstance(document.getElementById('actionsModal')).hide();
+                location.reload();
+            }
+        })
+        .catch(err => {
+            alert('Error: ' + err.message);
+        });
+    });
+
+    // ==== Send to Contract ====
     document.querySelectorAll('.btn-send-contract').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             if (!confirm('Send this lead to Pending Contract?')) return;
-            fetch(`/pendings-approved/${id}/send-to-contract`, {
+            fetch(`/submissions/${id}/send-to-contract`, {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json'}
             })
@@ -270,7 +448,7 @@
         });
     });
 
-    // Mark Not Issued — open modal
+    // ==== Mark Not Issued — open modal ====
     document.querySelectorAll('.btn-mark-ni').forEach(btn => {
         btn.addEventListener('click', function() {
             currentLeadId = this.dataset.id;
@@ -280,11 +458,11 @@
         });
     });
 
-    // Confirm Not Issued
+    // ==== Confirm Not Issued ====
     document.getElementById('ni-confirm-btn').addEventListener('click', function() {
         const disposition = document.getElementById('ni-disposition').value;
         if (!disposition) { alert('Please select a disposition reason.'); return; }
-        fetch(`/pendings-approved/${currentLeadId}/mark-not-issued`, {
+        fetch(`/submissions/${currentLeadId}/mark-not-issued`, {
             method: 'POST',
             headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Content-Type': 'application/json', 'Accept': 'application/json'},
             body: JSON.stringify({not_issued_disposition: disposition})
@@ -296,12 +474,12 @@
         });
     });
 
-    // Resolve Not Issued
+    // ==== Resolve Not Issued ====
     document.querySelectorAll('.btn-resolve-ni').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             if (!confirm('Mark this Not Issued block as resolved?')) return;
-            fetch(`/pendings-approved/${id}/resolve-not-issued`, {
+            fetch(`/submissions/${id}/resolve-not-issued`, {
                 method: 'POST',
                 headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json'}
             })

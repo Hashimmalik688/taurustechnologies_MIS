@@ -9,15 +9,18 @@ use App\Support\Statuses;
 use Illuminate\Http\Request;
 
 /**
- * Pendings Approved
+ * Submissions
  *
  * Stage 2 in the sales pipeline.
- * Shows all manager-approved leads that have NOT yet been sent to
+ * Shows all leads validated as "valid" by Ravens Validator that have NOT yet been sent to
  * Pending Contract (pending_contract_at IS NULL).
  *
  * Manager actions:
- *   • Send to Contract  — moves lead to Pending Contract
- *   • Mark Not Issued   — flags lead with a disposition for Retention to resolve
+ *   • Mark as Approved   — lead ready for policy submission
+ *   • Mark as Declined   — reject the validated lead
+ *   • Mark as Underwriting — send to underwriting
+ *   • Send to Contract   — moves lead to Pending Contract
+ *   • Mark Not Issued    — flags lead with a disposition for Retention to resolve
  *
  * Retention Officer actions:
  *   • Resolve Not Issued — clears the block; lead returns to this queue
@@ -36,9 +39,9 @@ class PendingsApprovedController extends Controller
             $dateTo   = now()->endOfMonth()->toDateString();
         }
 
-        // Base query: manager-approved, not yet sent to Pending Contract
+        // Base query: ravens_validation_status = 'valid', not yet sent to Pending Contract
         $query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy'])
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('ravens_validation_status', 'valid')
             ->whereNull('pending_contract_at');
 
         if ($search) {
@@ -62,20 +65,39 @@ class PendingsApprovedController extends Controller
         }
 
         // Stats
-        $allQuery  = (clone $query);
-        $totalCount    = (clone $allQuery)->count();
-        $notIssuedCount = (clone $allQuery)->whereNotNull('not_issued_at')
-                                           ->whereNull('not_issued_resolved_at')
-                                           ->count();
-        $readyCount    = $totalCount - $notIssuedCount;
+        $statsBase = Lead::where('ravens_validation_status', 'valid')->whereNull('pending_contract_at')
+            ->when($search, function ($q) use ($search) {
+                $q->where(function ($inner) use ($search) {
+                    $inner->where('cn_name', 'like', "%{$search}%")
+                          ->orWhere('phone_number', 'like', "%{$search}%")
+                          ->orWhere('carrier_name', 'like', "%{$search}%")
+                          ->orWhere('closer_name', 'like', "%{$search}%");
+                });
+            })
+            ->when($carrier, fn($q) => $q->where('insurance_carrier_id', $carrier))
+            ->when($dateFrom, fn($q) => $q->whereDate('sale_date', '>=', $dateFrom))
+            ->when($dateTo, fn($q) => $q->whereDate('sale_date', '<=', $dateTo));
+
+        $totalCount     = (clone $statsBase)->count();
+        $approvedCount  = (clone $statsBase)->where('manager_status', Statuses::MGR_APPROVED)->count();
+        $declinedCount  = (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)->count();
+        $underwritingCount = (clone $statsBase)->where('manager_status', Statuses::MGR_UNDERWRITING)->count();
 
         $leads    = $query->orderBy('sale_date', 'desc')->paginate(50);
         $carriers = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        
+        // Get unique partners for the modal dropdown
+        $partners = Lead::distinct()
+            ->whereNotNull('assigned_partner')
+            ->pluck('assigned_partner')
+            ->sort()
+            ->values();
 
         return view('admin.pendings-approved.index', compact(
             'leads', 'carriers', 'search', 'carrier',
             'dateFrom', 'dateTo',
-            'totalCount', 'notIssuedCount', 'readyCount'
+            'totalCount', 'approvedCount', 'declinedCount', 'underwritingCount',
+            'partners'
         ));
     }
 
@@ -163,7 +185,55 @@ class PendingsApprovedController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Not Issued block resolved. Lead is back in Pendings Approved.',
+            'message' => 'Not Issued block resolved. Lead is back in Submissions.',
+        ]);
+    }
+
+    /**
+     * Update manager_status for a lead
+     */
+    public function updateStatus(Request $request, int $id)
+    {
+        $request->validate([
+            'manager_status' => 'required|in:approved,declined,underwriting',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+
+        // Map dropdown values to Statuses constants
+        $statusMap = [
+            'approved'     => Statuses::MGR_APPROVED,
+            'declined'     => Statuses::MGR_DECLINED,
+            'underwriting' => Statuses::MGR_UNDERWRITING,
+        ];
+
+        $lead->manager_status = $statusMap[$request->manager_status];
+        $lead->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully.',
+        ]);
+    }
+
+    /**
+     * Update a field on a lead (policy_number, etc)
+     */
+    public function updateField(Request $request, int $id)
+    {
+        $request->validate([
+            'field' => 'required|in:policy_number,assigned_partner',
+            'value' => 'nullable|string|max:255',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+        $field = $request->field;
+        $lead->{$field} = $request->value;
+        $lead->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Field updated successfully.',
         ]);
     }
 }
