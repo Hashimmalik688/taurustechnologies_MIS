@@ -33,7 +33,7 @@
             @endcanViewModule
 
             @canViewModule('pendings-approved')
-            <a href="{{ route('pendings-approved.index') }}" class="hub-card">
+            <a href="{{ route('submissions.index') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-task"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Pendings Approved</div>

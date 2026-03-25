@@ -264,6 +264,7 @@ Route::group(['prefix' => 'sales', 'as' => 'sales.', 'middleware' => ['auth', Ro
     Route::post('/{id}/manager-status/reset', [LeadController::class, 'resetManagerStatus'])->name('resetManagerStatus')->middleware('role.permission:sales,edit');
     Route::post('/{id}/update-manager-reason', [LeadController::class, 'updateManagerReason'])->name('updateManagerReason')->middleware('role.permission:sales,edit');
     Route::post('/{id}/retention-sale', [LeadController::class, 'markRetentionSale'])->name('markRetentionSale')->middleware('role.permission:sales,edit');
+    Route::post('/{id}/assign-back', [LeadController::class, 'assignBack'])->name('assignBack')->middleware('role.permission:sales,edit');
 });
 
 // Issuance Management — access controlled by role.permission:issuance,level

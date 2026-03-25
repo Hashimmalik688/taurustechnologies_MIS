@@ -276,7 +276,6 @@ class LeadController extends Controller
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
-            ->whereNotNull('ravens_validated_at')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
@@ -315,6 +314,8 @@ class LeadController extends Controller
         } elseif ($activeTab === 'declined') {
             $query->where('manager_status', Statuses::MGR_DECLINED)
                   ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'));
+        } elseif ($activeTab === 'callback') {
+            $query->whereNotNull('recall_requested_at');
         }
         // 'all' = no additional filter
 
@@ -347,7 +348,6 @@ class LeadController extends Controller
         $statsBase = Lead::whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
-            ->whereNotNull('ravens_validated_at')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
             })
@@ -366,6 +366,7 @@ class LeadController extends Controller
             'not_valid'          => (clone $statsBase)->where('ravens_validation_status', 'not_valid')->count(),
             'declined'           => (clone $statsBase)->where('manager_status', Statuses::MGR_DECLINED)
                                         ->where(fn($q) => $q->whereNull('ravens_validation_status')->orWhere('ravens_validation_status', '!=', 'not_valid'))->count(),
+            'callback'           => (clone $statsBase)->whereNotNull('recall_requested_at')->count(),
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
@@ -379,9 +380,6 @@ class LeadController extends Controller
         return view('admin.sales.index', compact('leads', 'carriers', 'insuranceCarriers', 'statusCounts', 'statusColors', 'peregrineClosers', 'partners', 'activeTab'));
     }
 
-    /**
-     * Store manually entered sales record
-     */
     public function storeManualSale(Request $request)
     {
         $validated = $request->validate([
@@ -1075,8 +1073,40 @@ class LeadController extends Controller
     }
 
     /**
+     * Assign Back — reset a declined/invalid sale to Ravens queue for closer callback.
+     * Clears validation state so the lead re-appears in Ravens Pending Validation,
+     * and stamps recall_requested_at so ravens can see the "Callback" badge.
+     */
+    public function assignBack(Request $request, $id)
+    {
+        $request->validate([
+            'recall_note' => 'nullable|string|max:500',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+
+        $lead->recall_requested_at     = now();
+        $lead->recall_requested_by     = auth()->id();
+        $lead->recall_note             = $request->recall_note;
+
+        // Reset validation so the lead re-enters the Ravens pending queue
+        $lead->ravens_validated_at      = null;
+        $lead->ravens_validation_status = null;
+
+        // Reset manager decision back to pending
+        $lead->manager_status           = Statuses::MGR_PENDING;
+        $lead->manager_reason           = null;
+
+        $lead->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead assigned back for callback — it will reappear in Ravens validation queue.",
+        ]);
+    }
+
+    /**
      * Pending Contract page (formerly Issuance / Policy Submission).
-     * Shows manager-approved leads that have been explicitly sent to Pending Contract
      * (pending_contract_at IS NOT NULL). These are actively being submitted to carriers.
      */
     public function issuance(Request $request)

@@ -31,7 +31,7 @@
             <?php endif; ?>
 
             <?php if(auth()->check() && auth()->user()->canViewModule('pendings-approved')): ?>
-            <a href="<?php echo e(route('pendings-approved.index')); ?>" class="hub-card">
+            <a href="<?php echo e(route('submissions.index')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-task"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Pendings Approved</div>

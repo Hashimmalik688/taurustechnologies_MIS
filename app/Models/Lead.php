@@ -100,6 +100,11 @@ class Lead extends Model
         'ravens_validated_by',
         'ravens_validation_status',
 
+        // Assign Back / Recall fields
+        'recall_requested_at',
+        'recall_requested_by',
+        'recall_note',
+
         // Sale tracking
         'sale_date',
         'sale_at',
