@@ -278,56 +278,9 @@
 .a-btn.a-view:hover { background: rgba(80,165,241,.2); }
 .a-btn.a-edit { background: rgba(212,175,55,.1); color: #b89730; }
 .a-btn.a-edit:hover { background: rgba(212,175,55,.2); }
-
-/* ── Modal ── */
-.iss-modal .modal-dialog { max-width: 380px; }
-.iss-modal .modal-content {
-    border-radius: 0.6rem;
-    border: 1px solid rgba(255,255,255,.08);
-    overflow: hidden;
-    background: var(--bs-card-bg);
-    box-shadow: 0 8px 30px rgba(0,0,0,.15);
-}
-.iss-modal .modal-header {
-    background: var(--bs-card-bg);
-    padding: 0.65rem 0.85rem;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-}
-.iss-modal .modal-header .modal-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-.iss-modal .modal-header .modal-title i { color: var(--bs-gold, #d4af37); opacity: .7; font-size: 1rem; }
-.iss-modal .modal-body { padding: 0.85rem; }
-.iss-modal .modal-body .form-label { font-size: 0.75rem; font-weight: 600; margin-bottom: 0.3rem; }
-.iss-modal .modal-body .form-control, .iss-modal .modal-body .form-select {
-    font-size: 0.8rem; border-radius: 0.4rem; padding: 0.4rem 0.6rem;
-}
-.iss-modal .modal-body .form-control:focus, .iss-modal .modal-body .form-select:focus {
-    border-color: var(--bs-gold, #d4af37); box-shadow: 0 0 0 2px rgba(212,175,55,.12);
-}
-.iss-modal .modal-footer { border-top: 1px solid rgba(0,0,0,.05); padding: 0.55rem 0.85rem; }
-.iss-modal .st-btn {
-    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
-    padding: 0.5rem 0.75rem; border-radius: 0.45rem; border: 1px solid;
-    font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%;
-    transition: all .15s; background: transparent;
-}
-.iss-modal .st-issued { background: rgba(52,195,143,.06); color: #1a8754; border-color: rgba(52,195,143,.25); }
-.iss-modal .st-issued:hover { background: #1a8754; color: #fff; }
-.iss-modal .st-incomplete { background: rgba(241,180,76,.06); color: #b87a14; border-color: rgba(241,180,76,.25); }
-.iss-modal .st-incomplete:hover { background: #b87a14; color: #fff; }
-.iss-modal .st-pending { background: rgba(108,117,125,.06); color: #6c757d; border-color: rgba(108,117,125,.25); }
-.iss-modal .st-pending:hover { background: #6c757d; color: #fff; }
-.iss-modal .btn-cancel {
-    background: var(--bs-surface-100); color: var(--bs-surface-500); border: none;
-    border-radius: 1rem; padding: 0.35rem 0.85rem; font-size: 0.74rem; font-weight: 600;
-    cursor: pointer;
-}
-.iss-modal .btn-cancel:hover { background: var(--bs-surface-200); }
+.a-btn.a-draft { background: rgba(124,105,239,.1); color: #7c69ef; border: 1px solid rgba(124,105,239,.15); }
+.a-btn.a-draft:hover { background: rgba(124,105,239,.2); }
+.a-btn.a-draft.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 .iss-modal .modal-backdrop, .modal-backdrop.show { opacity: 0.3 !important; }
 
 /* Pagination */
@@ -552,12 +505,32 @@
                                 @endif
                             </td>
                             <td>
+                                @php
+                                    $canSendToDraft = $lead->issuance_status === Statuses::ISSUANCE_ISSUED 
+                                                   && $lead->followup_status === Statuses::MIS_YES;
+                                @endphp
                                 <div class="d-flex gap-1">
+                                    @if($canSendToDraft)
+                                        <button type="button" class="a-btn a-draft btn-send-to-draft" 
+                                            data-lead-id="{{ $lead->id }}" 
+                                            data-lead-name="{{ $lead->cn_name }}"
+                                            title="Send to Pending Draft">
+                                            <i class="bx bx-right-arrow-alt"></i> Pending Draft
+                                        </button>
+                                    @else
+                                        <span class="a-btn a-draft disabled" title="Requires: Issued + Followup Yes">
+                                            <i class="bx bx-right-arrow-alt"></i> Pending Draft
+                                        </span>
+                                    @endif
                                     <a href="{{ route('issuance.show', $lead->id) }}" class="a-btn a-view" title="View">
                                         <i class="bx bx-show"></i>
                                     </a>
-                                    <button type="button" class="a-btn a-edit" data-bs-toggle="modal" data-bs-target="#statusModal-{{ $lead->id }}" title="Update">
-                                        <i class="bx bx-edit-alt"></i>
+                                    <button type="button" class="a-btn btn-send-back" 
+                                        data-id="{{ $lead->id }}" 
+                                        data-name="{{ $lead->cn_name }}"
+                                        title="Send back to previous stage"
+                                        style="background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
+                                        <i class="bx bx-arrow-back"></i>
                                     </button>
                                 </div>
                             </td>
@@ -579,56 +552,6 @@
             </div>
         @endif
     </div>
-
-    {{-- Modals rendered outside table to avoid rendering issues --}}
-    @foreach($leads as $lead)
-        <div class="modal fade iss-modal" id="statusModal-{{ $lead->id }}" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="bx bx-check-circle"></i> {{ $lead->cn_name }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.6rem;"></button>
-                    </div>
-                    <form id="issuance-form-{{ $lead->id }}" action="{{ route('issuance.updateIssuanceStatus', $lead->id) }}" method="POST">
-                        @csrf
-                        <div class="modal-body">
-                            {{-- Policy # and Partner are pre-set from Submissions page --}}
-                            @if($lead->policy_number || $lead->issued_policy_number)
-                                <div class="mb-2" style="font-size:.75rem;color:var(--bs-surface-500);">
-                                    <strong>Policy #:</strong> {{ $lead->policy_number ?? $lead->issued_policy_number ?? '—' }}
-                                    &nbsp;·&nbsp;
-                                    <strong>Partner:</strong> {{ $lead->partner->name ?? $lead->assigned_partner ?? '—' }}
-                                </div>
-                            @endif
-                            <div class="mb-3">
-                                <label class="form-label">Issuance Status</label>
-                                <div class="d-grid gap-2" id="status-buttons-{{ $lead->id }}">
-                                    <button type="submit" name="issuance_status" value="Issued" class="st-btn st-issued">
-                                        <i class="bx bx-check-circle"></i> Issued
-                                    </button>
-                                    <button type="submit" name="issuance_status" value="Not Issued" class="st-btn st-incomplete">
-                                        <i class="bx bx-x-circle"></i> Not Issued
-                                    </button>
-                                    <button type="submit" name="issuance_status" value="Pending" class="st-btn st-pending pending-unassign-btn" data-lead-id="{{ $lead->id }}">
-                                        <i class="bx bx-pause"></i> Pending
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label for="reason-{{ $lead->id }}" class="form-label">Reason</label>
-                                <textarea class="form-control" id="reason-{{ $lead->id }}" name="issuance_reason" rows="2" placeholder="Add reason...">{{ $lead->issuance_reason }}</textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    @endforeach
 @endsection
 
 @include('partials.sl-filter-assets')
@@ -669,78 +592,61 @@ $(document).ready(function() {
         }
     });
 
-    // Handle unlock field button (Super Admin only)
-    $('.unlock-field').click(function(e) {
-        e.preventDefault();
-        const targetId = $(this).data('target');
-        const leadId = targetId.split('-').pop();
-        let fieldToUnlock = '';
-        if (targetId.includes('policy-number')) fieldToUnlock = 'policy_number';
-        else if (targetId.includes('partner')) fieldToUnlock = 'partner';
-        else if (targetId.includes('status-buttons')) fieldToUnlock = 'status';
-
-        if (!fieldToUnlock) { alert('Could not determine field to unlock'); return; }
-
-        if (confirm('Unlock this field?')) {
-            const btn = $(this);
-            btn.prop('disabled', true);
-            $.ajax({
-                url: '/issuance/' + leadId + '/unlock-field',
-                method: 'POST',
-                data: { _token: '{{ csrf_token() }}', field: fieldToUnlock },
-                success: function(response) {
-                    if (response.success) {
-                        slToast(response.message || 'Unlocked');
-                        const targetField = $('#' + targetId);
-                        if (targetId.includes('status-buttons')) {
-                            targetField.find('button[type="submit"]').prop('disabled', false);
-                        } else {
-                            targetField.prop('readonly', false).prop('disabled', false);
-                        }
-                        btn.html('<i class="bx bx-check"></i>').prop('disabled', true);
-                    }
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON?.message || 'Failed to unlock');
-                    btn.prop('disabled', false);
-                }
-            });
-        }
-    });
-
-    // Handle reset Issuance status button
-    $('.reset-issuance-status').click(function(e) {
-        e.preventDefault();
+    // Send to Pending Draft button
+    $('.btn-send-to-draft').click(function() {
         const leadId = $(this).data('lead-id');
-        const button = $(this);
+        const leadName = $(this).data('lead-name');
+        const btn = $(this);
 
-        if (confirm('Reset this Issuance status? All issuance info will be cleared.')) {
-            button.prop('disabled', true);
+        if (confirm('Send "' + leadName + '" to Pending Draft?')) {
+            btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i> Sending...');
             $.ajax({
-                url: '/issuance/' + leadId + '/issuance-status/reset',
+                url: '/pending-contracts/' + leadId + '/send-to-pending-draft',
                 method: 'POST',
                 data: { _token: '{{ csrf_token() }}' },
                 success: function(response) {
                     if (response.success) {
-                        slToast(response.message || 'Reset successfully');
+                        slToast(response.message || 'Sent to Pending Draft');
                         setTimeout(() => location.reload(), 1500);
+                    } else {
+                        alert(response.message || 'Failed');
+                        btn.prop('disabled', false).html('<i class="bx bx-right-arrow-alt"></i> Pending Draft');
                     }
                 },
                 error: function(xhr) {
-                    alert(xhr.responseJSON?.message || 'Failed to reset');
-                    button.prop('disabled', false);
+                    alert(xhr.responseJSON?.message || 'Failed to send to Pending Draft');
+                    btn.prop('disabled', false).html('<i class="bx bx-right-arrow-alt"></i> Pending Draft');
                 }
             });
         }
     });
 
-    // Pending status with unassign partner
-    let pendingStatusClicked = false;
-    $('.pending-unassign-btn').on('click', function() { pendingStatusClicked = true; });
-    $(document).on('submit', 'form', function() {
-        if (pendingStatusClicked) {
-            $(this).find('select[name="partner_id"]').val('');
-            pendingStatusClicked = false;
+    // Send Back to Previous Stage button
+    $('.btn-send-back').click(function() {
+        const leadId = $(this).data('id');
+        const leadName = $(this).data('name');
+        const btn = $(this);
+
+        if (confirm('Send "' + leadName + '" back to the previous stage?')) {
+            btn.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i>');
+            $.ajax({
+                url: '/leads/' + leadId + '/send-to-previous-stage',
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                success: function(response) {
+                    if (response.success) {
+                        slToast(response.message || 'Sent to previous stage');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        alert(response.message || 'Failed');
+                        btn.prop('disabled', false).html('<i class="bx bx-arrow-back"></i>');
+                    }
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON?.message || 'Failed to send back');
+                    btn.prop('disabled', false).html('<i class="bx bx-arrow-back"></i>');
+                }
+            });
         }
     });
 

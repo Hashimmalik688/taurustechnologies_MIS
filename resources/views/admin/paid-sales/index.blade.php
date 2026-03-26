@@ -109,6 +109,7 @@
                         <th>Closer</th>
                         <th>Paid By</th>
                         <th>Paid At</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,10 +135,15 @@
                             <td>{{ $lead->closer_name ?? '—' }}</td>
                             <td>{{ $lead->paidBy->name ?? '—' }}</td>
                             <td>{{ $lead->paid_at ? $lead->paid_at->format('M d, Y') : '—' }}</td>
+                            <td>
+                                <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
+                                    <i class="bx bx-arrow-back"></i> Back
+                                </button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="11" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No paid sales records for the selected period.
                             </td>
@@ -152,4 +158,45 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+(function() {
+    // Send Back to Previous Stage
+    document.querySelectorAll('.btn-send-back').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var id = this.dataset.id;
+            var name = this.dataset.name;
+            if (!confirm('Send "' + name + '" back to the previous stage (Pending Draft)?')) return;
+            var button = this;
+            button.disabled = true;
+            button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+            fetch('/leads/' + id + '/send-to-previous-stage', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                button.disabled = false;
+                button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error sending back.');
+                }
+            })
+            .catch(err => {
+                button.disabled = false;
+                button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                alert('Error: ' + err.message);
+            });
+        });
+    });
+})();
+</script>
 @endsection

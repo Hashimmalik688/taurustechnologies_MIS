@@ -269,9 +269,9 @@ class LeadController extends Controller
             ]);
         }
 
-        // Sales section - show all sales that have been made by closers
-        // Sales are leads that have a closer assigned and sale timestamp
-        // Exclude incomplete leads (verifier-only forms) that lack actual sale data
+        // Sales section - show ALL sales (each closer gets credit for their sale)
+        // Resale badge indicates when same customer was sold multiple times
+        // Dedup is only applied in Pending Submission to prevent duplicate processing
         $query = Lead::with(['insuranceCarrier', 'qaUser', 'managerUser'])
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
@@ -341,7 +341,7 @@ class LeadController extends Controller
         
         $carriers = $insuranceCarriers; // Use insurance carriers for filter
         
-        // KPI statistics for the new tab-based sales page
+        // KPI statistics - count ALL sales (no dedup, each closer gets credit)
         $statsBase = Lead::whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
@@ -365,6 +365,44 @@ class LeadController extends Controller
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
+        
+        // Calculate resale history for each lead (detailed info for modal)
+        $phoneNumbers = $leads->pluck('phone_number')->unique()->filter();
+        if ($phoneNumbers->isNotEmpty()) {
+            $resaleHistory = Lead::select('id', 'phone_number', 'cn_name', 'closer_name', 'carrier_name', 
+                    'coverage_amount', 'monthly_premium', 'sale_date', 'created_at', 'team', 'status')
+                ->whereIn('phone_number', $phoneNumbers)
+                ->whereNotNull('closer_name')
+                ->where(function($q) {
+                    $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+                })
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->groupBy('phone_number');
+            
+            foreach ($leads as $lead) {
+                $history = $resaleHistory->get($lead->phone_number, collect());
+                // Count excludes current lead (for "Re-sold ×N" badge)
+                $previousSales = $history->where('id', '!=', $lead->id);
+                $lead->resale_count = $previousSales->count();
+                // Log includes ALL sales (for detailed modal view)
+                $lead->resale_log = $history->map(function($sale) use ($lead) {
+                    return [
+                        'id' => $sale->id,
+                        'is_current' => $sale->id === $lead->id,
+                        'closer_name' => $sale->closer_name,
+                        'carrier_name' => $sale->carrier_name,
+                        'coverage_amount' => $sale->coverage_amount,
+                        'monthly_premium' => $sale->monthly_premium,
+                        'sale_date' => $sale->sale_date,
+                        'created_at' => $sale->created_at?->format('M d, Y'),
+                        'team' => $sale->team,
+                        'status' => $sale->status,
+                    ];
+                })->values()->toArray();
+            }
+        }
+        
         $statusColors = $this->getStatusColors();
         
         // Get Peregrine closer names for tagging
@@ -1295,6 +1333,163 @@ class LeadController extends Controller
         $lead->save();
 
         return redirect()->route('issuance.index')->with('success', 'Issuance status updated successfully');
+    }
+
+    /**
+     * Send a lead to Pending Draft (requires Issued status and Followup Yes)
+     */
+    public function sendToPendingDraft(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+        
+        // Validate conditions
+        if ($lead->issuance_status !== Statuses::ISSUANCE_ISSUED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lead must be Issued first.'
+            ], 422);
+        }
+        
+        if ($lead->followup_status !== Statuses::MIS_YES) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Followup must be Yes.'
+            ], 422);
+        }
+        
+        // Set pending draft timestamp
+        $lead->pending_draft_at = now();
+        $lead->followup_done_at = now();
+        $lead->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead sent to Pending Draft successfully.'
+        ]);
+    }
+
+    /**
+     * Send a lead back to the previous pipeline stage.
+     * Determines current stage automatically and clears appropriate fields.
+     * 
+     * Pipeline stages (in order):
+     * 1. Sales (base)
+     * 2. Ravens Validation
+     * 3. Submissions (Pendings Approved)
+     * 4. Pending Contracts
+     * 5. Pending Draft
+     * 6. Paid Sales
+     */
+    public function sendToPreviousStage(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+        $currentStage = $this->determineCurrentStage($lead);
+        
+        switch ($currentStage) {
+            case 'paid_sales':
+                // Back to Pending Draft
+                $lead->paid_at = null;
+                $lead->paid_by_id = null;
+                $previousStage = 'Pending Draft';
+                break;
+                
+            case 'pending_draft':
+                // Back to Followup (clear followup_done_at)
+                $lead->followup_done_at = null;
+                $lead->followup_done_by_id = null;
+                $lead->pending_draft_at = null;
+                $previousStage = 'Followup';
+                break;
+                
+            case 'followup':
+                // Back to Pending Contracts (clear issuance)
+                $lead->issuance_status = Statuses::ISSUANCE_PENDING;
+                $lead->issuance_date = null;
+                $lead->followup_status = null;
+                $previousStage = 'Pending Contracts';
+                break;
+                
+            case 'pending_contracts':
+                // Back to Submissions
+                $lead->pending_contract_at = null;
+                $lead->pending_contract_by_id = null;
+                $lead->issuance_status = null;
+                $lead->issuance_date = null;
+                $lead->issuance_reason = null;
+                $lead->issued_by = null;
+                $previousStage = 'Submissions';
+                break;
+                
+            case 'submissions':
+                // Back to Ravens Validation
+                $lead->ravens_validation_status = null;
+                $lead->ravens_validated_at = null;
+                $lead->ravens_validated_by = null;
+                $lead->submission_status = null;
+                $lead->submission_policy_number = null;
+                $lead->submission_decision_by_id = null;
+                $lead->submission_decision_at = null;
+                $previousStage = 'Ravens Validation';
+                break;
+                
+            case 'ravens_validation':
+                // Back to Sales
+                $lead->ravens_validated_at = null;
+                $lead->ravens_validated_by = null;
+                $lead->ravens_validation_status = null;
+                $previousStage = 'Sales';
+                break;
+                
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lead is already at the first stage (Sales).'
+                ], 422);
+        }
+        
+        $lead->save();
+        
+        // Log the action
+        \App\Models\AuditLog::create([
+            'user_id'    => auth()->id(),
+            'action'     => "Sent lead back to {$previousStage}",
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['stage' => $currentStage]),
+            'new_values' => json_encode(['stage' => $previousStage]),
+            'ip_address' => $request->ip(),
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Lead sent back to {$previousStage}."
+        ]);
+    }
+    
+    /**
+     * Determine the current pipeline stage for a lead.
+     */
+    private function determineCurrentStage(Lead $lead): string
+    {
+        if ($lead->paid_at) {
+            return 'paid_sales';
+        }
+        if ($lead->followup_done_at || $lead->pending_draft_at) {
+            return 'pending_draft';
+        }
+        if ($lead->issuance_status === Statuses::ISSUANCE_ISSUED) {
+            return 'followup';
+        }
+        if ($lead->pending_contract_at) {
+            return 'pending_contracts';
+        }
+        if ($lead->ravens_validation_status === 'valid') {
+            return 'submissions';
+        }
+        if ($lead->ravens_validated_at) {
+            return 'ravens_validation';
+        }
+        return 'sales';
     }
 
     /**

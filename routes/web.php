@@ -241,6 +241,7 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Ro
     Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/{id}/update-comment', [LeadController::class, 'updateComment'])->name('updateComment');
     Route::post('/{id}/unassign-partner', [LeadController::class, 'unassignPartner'])->name('unassignPartner');
+    Route::post('/{id}/send-to-previous-stage', [LeadController::class, 'sendToPreviousStage'])->name('sendToPreviousStage');
 });
 
 // Sales Management — access controlled by role.permission:sales,level
@@ -276,6 +277,7 @@ Route::group(['prefix' => 'pending-contracts', 'as' => 'issuance.', 'middleware'
     Route::post('/{id}/unlock-field', [LeadController::class, 'unlockIssuanceField'])->name('unlockField')->middleware('role.permission:issuance,full');
     Route::post('/{id}/recalculate-commission', [LeadController::class, 'recalculateCommission'])->name('recalculateCommission')->middleware('role.permission:issuance,full');
     Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission')->middleware('role.permission:issuance,full');
+    Route::post('/{id}/send-to-pending-draft', [LeadController::class, 'sendToPendingDraft'])->name('sendToPendingDraft')->middleware('role.permission:issuance,edit');
 });
 
 // Pendings Approved — Stage 2 pipeline

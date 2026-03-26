@@ -36,6 +36,7 @@ class PendingsApprovedController extends Controller
         $carrier  = $request->get('carrier');
         $dateFrom = $request->get('date_from');
         $dateTo   = $request->get('date_to');
+        $status   = $request->get('status', 'pending'); // Default to pending approval
 
         // Default to last 6 months if no date filters provided
         if (!$dateFrom && !$dateTo) {
@@ -44,9 +45,45 @@ class PendingsApprovedController extends Controller
         }
 
         // Base query: ravens_validation_status = 'valid', not yet sent to Pending Contract
+        // IMPORTANT: Only show actual SALES (same criteria as Sales page)
+        // 
+        // RESELLING LOGIC:
+        // - When same customer is resold by different closers (even same team),
+        //   only show the MOST RECENT lead (highest ID) per phone number
+        // - This prevents duplicate customer sales from appearing in the queue
+        // - Older resales remain in database for history but don't show in active pipeline
+        
+        // Subquery: Get the latest lead ID for each phone number
+        $latestLeadIds = \DB::table('leads')
+            ->select('phone_number', \DB::raw('MAX(id) as latest_id'))
+            ->where('ravens_validation_status', 'valid')
+            ->where('team', '!=', 'peregrine')
+            ->whereNull('pending_contract_at')
+            ->whereNotNull('closer_name')
+            ->whereNotNull('phone_number')
+            ->where('phone_number', '!=', '')
+            ->groupBy('phone_number')
+            ->pluck('latest_id');
+        
         $query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy', 'qaUser'])
             ->where('ravens_validation_status', 'valid')
-            ->whereNull('pending_contract_at');
+            ->where('team', '!=', 'peregrine')  // Exclude old Peregrine system (pre-2026)
+            ->whereNull('pending_contract_at')
+            ->whereIn('id', $latestLeadIds)  // Only show most recent lead per customer
+            // Sales criteria - must have closer and sale timestamp
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            // At least one real sale field must be filled
+            ->where(function($q) {
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            });
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -68,8 +105,47 @@ class PendingsApprovedController extends Controller
             $query->whereDate('sale_date', '<=', $dateTo);
         }
 
-        // Stats
-        $statsBase = Lead::where('ravens_validation_status', 'valid')->whereNull('pending_contract_at')
+        // Status filter (from KPI clicks)
+        if ($status === 'pending') {
+            $query->whereNull('manager_status');
+        } elseif ($status === 'approved') {
+            $query->where('manager_status', 'approved');
+        } elseif ($status === 'declined') {
+            $query->where('manager_status', 'declined');
+        } elseif ($status === 'underwriting') {
+            $query->where('manager_status', 'underwriting');
+        }
+        // 'all' = no status filter
+
+        // Stats - same exclusions as main query (including latest lead per customer)
+        $statsLatestIds = \DB::table('leads')
+            ->select('phone_number', \DB::raw('MAX(id) as latest_id'))
+            ->where('ravens_validation_status', 'valid')
+            ->where('team', '!=', 'peregrine')
+            ->whereNull('pending_contract_at')
+            ->whereNotNull('closer_name')
+            ->whereNotNull('phone_number')
+            ->where('phone_number', '!=', '')
+            ->groupBy('phone_number')
+            ->pluck('latest_id');
+        
+        $statsBase = Lead::where('ravens_validation_status', 'valid')
+            ->where('team', '!=', 'peregrine')  // Exclude old Peregrine system
+            ->whereNull('pending_contract_at')
+            ->whereIn('id', $statsLatestIds)  // Only count most recent lead per customer
+            // Sales criteria - same as above
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->where(function($q) {
+                $q->whereNotNull('sale_at')
+                  ->orWhereNotNull('sale_date');
+            })
+            ->where(function($q) {
+                $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function($sub) { $sub->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            })
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($inner) use ($search) {
                     $inner->where('cn_name', 'like', "%{$search}%")
@@ -82,9 +158,11 @@ class PendingsApprovedController extends Controller
             ->when($dateFrom, fn($q) => $q->whereDate('sale_date', '>=', $dateFrom))
             ->when($dateTo, fn($q) => $q->whereDate('sale_date', '<=', $dateTo));
 
-        $totalCount     = (clone $statsBase)->count();
-        $readyCount     = (clone $statsBase)->whereNotNull('policy_number')->whereNotNull('assigned_partner')->count();
-        $needsInfoCount = $totalCount - $readyCount;
+        $totalCount        = (clone $statsBase)->count();
+        $pendingCount      = (clone $statsBase)->whereNull('manager_status')->count();
+        $approvedCount     = (clone $statsBase)->where('manager_status', 'approved')->count();
+        $declinedCount     = (clone $statsBase)->where('manager_status', 'declined')->count();
+        $underwritingCount = (clone $statsBase)->where('manager_status', 'underwriting')->count();
 
         $leads    = $query->orderBy('sale_date', 'desc')->paginate(50);
         $carriers = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
@@ -94,8 +172,8 @@ class PendingsApprovedController extends Controller
 
         return view('admin.pendings-approved.index', compact(
             'leads', 'carriers', 'search', 'carrier',
-            'dateFrom', 'dateTo',
-            'totalCount', 'readyCount', 'needsInfoCount',
+            'dateFrom', 'dateTo', 'status',
+            'totalCount', 'pendingCount', 'approvedCount', 'declinedCount', 'underwritingCount',
             'partners'
         ));
     }
@@ -181,12 +259,12 @@ class PendingsApprovedController extends Controller
     }
 
     /**
-     * Save lead details — App ID, Policy Number, Partner.
-     * No more manager_status — decisions are replaced by direct field assignment.
+     * Save lead details — Decision (manager_status), App ID, Policy Number, Partner.
      */
     public function saveDecision(Request $request, int $id)
     {
         $rules = [
+            'manager_status'  => 'required|in:approved,declined,underwriting',
             'app_id'          => 'nullable|string|max:100',
             'policy_number'   => 'nullable|string|max:255',
             'assigned_partner'=> 'nullable|string|max:255',
@@ -197,19 +275,38 @@ class PendingsApprovedController extends Controller
 
         $lead = Lead::findOrFail($id);
 
-        if ($request->filled('app_id'))           $lead->app_id           = $request->app_id;
-        if ($request->filled('policy_number'))    $lead->policy_number    = $request->policy_number;
-        if ($request->filled('assigned_partner')) $lead->assigned_partner = $request->assigned_partner;
-        if ($request->partner_id) {
-            $lead->partner_id   = $request->partner_id;
-            $lead->partner_set_at = now();
+        // Save manager_status
+        $lead->manager_status = $request->manager_status;
+
+        // Save App ID for all decisions
+        if ($request->filled('app_id')) $lead->app_id = $request->app_id;
+
+        // Only save policy_number and partner for "approved"
+        if ($request->manager_status === 'approved') {
+            if ($request->filled('policy_number'))    $lead->policy_number    = $request->policy_number;
+            if ($request->filled('assigned_partner')) $lead->assigned_partner = $request->assigned_partner;
+            if ($request->partner_id) {
+                $lead->partner_id     = $request->partner_id;
+                $lead->partner_set_at = now();
+            }
+
+            // Auto-send approved sales to Pending Contracts if they have policy + partner
+            if (!empty($lead->policy_number) && !empty($lead->assigned_partner)) {
+                $lead->pending_contract_at    = now();
+                $lead->pending_contract_by_id = auth()->id();
+            }
         }
 
         $lead->save();
 
+        $msg = 'Decision saved: ' . ucfirst($request->manager_status);
+        if ($request->manager_status === 'approved' && !empty($lead->pending_contract_at)) {
+            $msg .= ' — Sent to Pending Contracts';
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Details saved.',
+            'message' => $msg,
         ]);
     }
 
