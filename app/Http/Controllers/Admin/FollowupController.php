@@ -75,14 +75,37 @@ class FollowupController extends Controller
         ]);
 
         $lead = Lead::findOrFail($id);
+
+        $isReassignment = !empty($lead->assigned_followup_person)
+            && $lead->assigned_followup_person != $request->assigned_followup_person;
+
         $lead->assigned_followup_person = $request->assigned_followup_person;
-        $lead->followup_assigned_by = auth()->id();
-        $lead->followup_assigned_at = now();
+        $lead->followup_assigned_by     = auth()->id();
+        $lead->followup_assigned_at     = now();
+
+        // When reassigning, reset prior followup completion so the new person
+        // sees the lead fresh in their My Followups queue.
+        // Only reset if the lead hasn't been paid out (paid_at) or policy-died yet.
+        if ($isReassignment && empty($lead->paid_at) && empty($lead->policy_died_at)) {
+            $lead->followup_status      = null;
+            $lead->followup_done_at     = null;
+            $lead->followup_done_by_id  = null;
+            // Pull back from Pending Draft if it was only moved there via followup-done
+            if (!empty($lead->pending_draft_at) && empty($lead->paid_at)) {
+                $lead->pending_draft_at    = null;
+                $lead->pending_draft_by_id = null;
+            }
+        }
+
         $lead->save();
+
+        $message = $isReassignment
+            ? 'Followup reassigned successfully. Previous completion reset.'
+            : 'Followup person assigned successfully.';
 
         return response()->json([
             'success' => true,
-            'message' => 'Followup person assigned successfully.'
+            'message' => $message,
         ]);
     }
 

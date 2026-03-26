@@ -26,21 +26,21 @@
 .filter-form .form-control,.filter-form .form-select{font-size:.72rem;padding:.3rem .5rem;height:2rem;}
 .filter-form label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--bs-surface-500);margin-bottom:.15rem;}
 .f-reset{font-size:.68rem;color:var(--bs-surface-400);text-decoration:none;align-self:flex-end;padding:.3rem .5rem;}
+/* Prominent page title */
+.sl-page-title{font-size:1.35rem;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin:0;}
+.sl-page-title i{color:#d4af37;font-size:1.5rem;}
+.sl-page-subtitle{font-size:.78rem;color:#94a3b8;margin:0;}
+[data-bs-theme=dark] .sl-page-title,:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid px-3 py-3" style="max-width:1600px">
 
-    <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
-            <h5 class="mb-0 fw-semibold" style="font-size:1rem;">
-                <i class="bx bx-badge-check me-1" style="color:#34c38f;font-size:1.05rem;"></i>
-                Paid Sales
-            </h5>
-            <p class="mb-0" style="font-size:.68rem;color:var(--bs-surface-400);">
-                Stage 7 — Successfully collected first draft payment
-            </p>
+            <h1 class="sl-page-title"><i class="bx bx-badge-check"></i> Paid Sales</h1>
+            <p class="sl-page-subtitle mt-1">Stage 7 — Successfully collected first draft payment</p>
         </div>
     </div>
 
@@ -136,9 +136,14 @@
                             <td>{{ $lead->paidBy->name ?? '—' }}</td>
                             <td>{{ $lead->paid_at ? $lead->paid_at->format('M d, Y') : '—' }}</td>
                             <td>
-                                <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
-                                    <i class="bx bx-arrow-back"></i> Back
-                                </button>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <button class="a-btn btn-chargeback" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.12);color:#dc3545;border-color:rgba(220,53,69,.3);">
+                                        <i class="bx bx-error"></i> Chargeback
+                                    </button>
+                                    <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(100,116,139,.1);color:#64748b;border-color:rgba(100,116,139,.25);">
+                                        <i class="bx bx-arrow-back"></i> Back
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -163,32 +168,65 @@
 @section('script')
 <script>
 (function() {
-    // Send Back to Previous Stage (with debounce to prevent double-click)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // ── Mark as Chargeback ──
+    document.querySelectorAll('.btn-chargeback').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.dataset.processing === 'true') return;
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            this.dataset.processing = 'true';
+            if (!confirm('Mark "' + name + '" as Chargeback?\nThis will move the lead to Retention for follow-up.')) {
+                this.dataset.processing = 'false';
+                return;
+            }
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+            fetch('/paid-sales/' + id + '/mark-chargeback', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bx bx-error"></i> Chargeback';
+                    btn.dataset.processing = 'false';
+                    alert(data.message || 'Error.');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-error"></i> Chargeback';
+                btn.dataset.processing = 'false';
+                alert('Error: ' + err.message);
+            });
+        });
+    });
+
+    // ── Send Back to Previous Stage ──
     document.querySelectorAll('.btn-send-back').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            var button = this;
-            if (button.dataset.processing === 'true') return; // Prevent double-click
-            
-            var id = button.dataset.id;
-            var name = button.dataset.name;
-            
-            button.dataset.processing = 'true';
-            if (!confirm('Send "' + name + '" back to the previous stage (Pending Draft)?')) {
-                button.dataset.processing = 'false';
+            if (this.dataset.processing === 'true') return;
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            this.dataset.processing = 'true';
+            if (!confirm('Send "' + name + '" back to Pending Draft?')) {
+                this.dataset.processing = 'false';
                 return;
             }
-            
+            const button = this;
             button.disabled = true;
             button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
             fetch('/leads/' + id + '/send-to-previous-stage', {
                 method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' }
             })
             .then(r => r.json())
             .then(data => {

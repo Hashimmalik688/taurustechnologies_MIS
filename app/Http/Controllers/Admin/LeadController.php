@@ -1497,6 +1497,11 @@ class LeadController extends Controller
                 // Back to Pending Draft
                 $lead->paid_at = null;
                 $lead->paid_by_id = null;
+                // Clear not-paid retention flags so lead leaves Retention page
+                $lead->not_paid_at = null;
+                $lead->not_paid_by_id = null;
+                $lead->not_paid_fdfp_type = null;
+                $lead->not_paid_manual_disposition = null;
                 $previousStage = 'Pending Draft';
                 break;
                 
@@ -1522,6 +1527,11 @@ class LeadController extends Controller
                 $lead->issuance_status = Statuses::ISSUANCE_PENDING;
                 $lead->issuance_date = null;
                 $lead->followup_status = 'No';
+                // Clear not-issued retention flags so lead leaves Retention page
+                $lead->not_issued_at = null;
+                $lead->not_issued_by_id = null;
+                $lead->not_issued_disposition = null;
+                $lead->not_issued_resolved_at = null;
                 $previousStage = 'Pending Contracts';
                 break;
                 
@@ -1544,6 +1554,11 @@ class LeadController extends Controller
                 $lead->followup_assigned_by = null;
                 $lead->followup_assigned_at = null;
                 $lead->followup_status = 'No';
+                // Clear not-issued retention flags so lead leaves Retention page
+                $lead->not_issued_at = null;
+                $lead->not_issued_by_id = null;
+                $lead->not_issued_disposition = null;
+                $lead->not_issued_resolved_at = null;
                 // Reset submission to pending so it shows in Submissions
                 $lead->submission_status = Statuses::SUB_PENDING;
                 $lead->submission_by = null;
@@ -1614,9 +1629,12 @@ class LeadController extends Controller
         if ($lead->followup_done_at || $lead->pending_draft_at) {
             return 'pending_draft';
         }
-        if ($lead->issuance_status === Statuses::ISSUANCE_ISSUED) {
+        // Followup stage: Issued AND has a followup person assigned (actively being followed up)
+        if ($lead->issuance_status === Statuses::ISSUANCE_ISSUED && $lead->assigned_followup_person) {
             return 'followup';
         }
+        // Pending Contracts: has been sent from Submissions (pending_contract_at is set)
+        // Includes both pending and issued leads that haven't been assigned for followup yet
         if ($lead->pending_contract_at) {
             return 'pending_contracts';
         }

@@ -567,10 +567,14 @@
             <h5 class="sl-page-title"><i class="mdi mdi-briefcase-outline"></i> Sales</h5>
         </div>
         <div class="sl-topbar-right">
-            <div class="sl-search-wrap">
+            <form method="GET" action="<?php echo e(route('sales.index')); ?>" id="salesSearchForm" class="sl-search-wrap">
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = request()->except(['search', 'page']); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <input type="hidden" name="<?php echo e($key); ?>" value="<?php echo e($value); ?>">
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <i class="bx bx-search sl-search-icon"></i>
-                <input type="text" id="salesSearch" class="sl-search-input" placeholder="Search name, phone, carrier...">
-            </div>
+                <input type="text" name="search" id="salesSearch" class="sl-search-input" placeholder="Search name, phone, carrier..." value="<?php echo e(request('search')); ?>">
+            </form>
             <button type="button" class="sl-btn sl-btn-add" data-bs-toggle="modal" data-bs-target="#manualSaleModal">
                 <i class="bx bx-plus"></i> New Sale
             </button>
@@ -608,8 +612,12 @@
             <span class="sl-pill-label">TO</span>
             <input type="date" name="date_to" id="filter_date_to" class="sl-pill-date" value="<?php echo e(request('date_to')); ?>" onchange="this.form.submit()">
             <button type="button" class="sl-pill-today" onclick="setTodayFilter()" title="Show today's sales">Today</button>
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['carrier','status','policy_type','date_from','date_to'])): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['carrier','status','policy_type','date_from','date_to','search'])): ?>
                 <a href="<?php echo e(route('sales.index')); ?>" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request('search')): ?>
+                <span class="sl-pill-label" style="margin-left: .5rem;">SEARCH:</span>
+                <span class="sl-search-term" style="font-size:.72rem; font-weight:600; color:#1e293b; background: rgba(212,175,55,.15); padding:.25rem .5rem; border-radius:20px;"><?php echo e(request('search')); ?></span>
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </form>
 
@@ -1406,29 +1414,32 @@ document.addEventListener('click', function(e) {
 </script>
 <script>
 $(document).ready(function() {
-    // Realtime search functionality for sales table
-    $('#salesSearch').on('keyup', function() {
-        const searchValue = $(this).val().toLowerCase();
-        $('.sl-tbl tbody tr').each(function() {
-            const row = $(this);
-            // Search across multiple columns: name, phone, carrier, closer, partner
-            const clientName = row.find('td:nth-child(2)').text().toLowerCase() || row.find('td:nth-child(1)').text().toLowerCase();
-            const phoneNumber = row.find('td:nth-child(3)').text().toLowerCase() || row.find('td:nth-child(2)').text().toLowerCase();
-            const closer = row.find('td:nth-child(4)').text().toLowerCase() || row.find('td:nth-child(3)').text().toLowerCase();
-            const partner = row.find('td:nth-child(5)').text().toLowerCase() || row.find('td:nth-child(4)').text().toLowerCase();
-            const carrier = row.find('td:nth-child(7)').text().toLowerCase() || row.find('td:nth-child(6)').text().toLowerCase();
-            
-            // Check if any field matches the search
-            if (clientName.includes(searchValue) || 
-                phoneNumber.includes(searchValue) || 
-                closer.includes(searchValue) || 
-                partner.includes(searchValue) || 
-                carrier.includes(searchValue)) {
-                row.show();
-            } else {
-                row.hide();
+    // Server-side search functionality for sales table (searches all pages)
+    let searchTimeout;
+    $('#salesSearch').on('keyup', function(e) {
+        // Submit on Enter key immediately
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $('#salesSearchForm').submit();
+            return;
+        }
+        // Debounce: submit after 600ms of no typing
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            $('#salesSearchForm').submit();
+        }, 600);
+    });
+    
+    // Clear search on Escape key
+    $('#salesSearch').on('keydown', function(e) {
+        if (e.key === 'Escape') {
+            $(this).val('');
+            if ($(this).data('had-value')) {
+                $('#salesSearchForm').submit();
             }
-        });
+        }
+    }).on('focus', function() {
+        $(this).data('had-value', $(this).val() !== '');
     });
 
     // Handle inline field updates (carrier, policy_type, coverage, premium, draft dates)

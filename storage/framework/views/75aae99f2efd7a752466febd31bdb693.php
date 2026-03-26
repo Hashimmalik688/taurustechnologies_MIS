@@ -109,6 +109,14 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 .sec-card .pagination .page-link{border-radius:.35rem;margin:0 1px;font-size:.7rem;border:1px solid var(--bs-surface-200);color:var(--bs-surface-500);padding:.2rem .5rem;}
 .sec-card .pagination .page-item.active .page-link{background:var(--bs-gold,#d4af37);border-color:var(--bs-gold);color:#fff;}
 .sec-card .pagination svg{max-width:14px!important;max-height:14px!important;}
+/* ── Prominent page title ── */
+.sl-page-title{font-size:1.35rem;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin:0;}
+.sl-page-title i{color:#d4af37;font-size:1.5rem;}
+.sl-page-subtitle{font-size:.78rem;color:#94a3b8;margin:0;}
+[data-bs-theme=dark] .sl-page-title,:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
+/* Coverage edit */
+.a-covr{background:rgba(16,185,129,.08);color:#059669;border-color:rgba(16,185,129,.25);padding:.18rem .35rem!important;}
+.a-covr:hover{background:rgba(16,185,129,.18);}
 </style>
 <?php $__env->stopSection(); ?>
 
@@ -116,13 +124,10 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 <div class="container-fluid" style="max-width:1600px">
 
     
-    <div class="d-flex align-items-center justify-content-between mb-2">
+    <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
-            <h5 class="mb-0 fw-semibold" style="font-size:1rem;">
-                <i class="bx bx-check-circle me-1" style="color:#34c38f;font-size:1.05rem;"></i>
-                Pending Submission
-            </h5>
-            <p class="mb-0" style="font-size:.68rem;color:var(--bs-surface-400);margin-top:.1rem;">Assign details and send validated leads to Pending Contracts</p>
+            <h1 class="sl-page-title"><i class="bx bx-check-circle"></i> Pending Submission</h1>
+            <p class="sl-page-subtitle mt-1">Assign details and send validated leads to Pending Contracts</p>
         </div>
         <div class="d-flex gap-1 align-items-center">
             <a href="<?php echo e(route('issuance.index')); ?>" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.08);font-size:.7rem;">
@@ -209,6 +214,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                         <th>Customer Name</th>
                         <th>Closer</th>
                         <th>Sale Date</th>
+                        <th>App ID</th>
                         <th>Status</th>
                         <th>Reviewed By</th>
                         <th>Reviewed At</th>
@@ -226,13 +232,31 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                 </a>
                             </td>
                             <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
-                                    <span class="bd-mini bd-blue"><?php echo e($lead->closer_name); ?></span>
+                                <div class="d-flex align-items-center gap-1">
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
+                                        <span class="bd-mini bd-blue"><?php echo e($lead->closer_name); ?></span>
+                                    <?php else: ?>
+                                        <span style="color:#94a3b8;font-size:.72rem;">—</span>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <button class="a-btn a-covr btn-edit-coverage"
+                                        data-id="<?php echo e($lead->id); ?>"
+                                        data-name="<?php echo e($lead->cn_name); ?>"
+                                        data-coverage="<?php echo e($lead->coverage_amount ?? ''); ?>"
+                                        data-premium="<?php echo e($lead->monthly_premium ?? ''); ?>"
+                                        data-policytype="<?php echo e($lead->policy_type ?? ''); ?>"
+                                        title="Edit Coverage / Premium / Plan">
+                                        <i class="bx bx-edit-alt" style="font-size:.75rem;"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—'); ?></td>
+                            <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->app_id): ?>
+                                    <span style="font-size:.72rem;font-weight:600;color:var(--bs-primary);"><?php echo e($lead->app_id); ?></span>
                                 <?php else: ?>
                                     <span style="color:#94a3b8;font-size:.72rem;">—</span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—'); ?></td>
                             <td>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->submission_status || $lead->submission_status === 'pending'): ?>
                                     <span class="bd-mini bd-warn">Pending</span>
@@ -260,6 +284,9 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                             </td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
+                                    <a href="<?php echo e(route('sales.prettyPrint', $lead->id)); ?>" class="a-btn" style="font-size:.63rem;background:rgba(52,195,143,.08);color:#1a8754;border-color:rgba(52,195,143,.25);" target="_blank" title="Pretty Print">
+                                        <i class="fas fa-print"></i> Print
+                                    </a>
                                     <button class="a-btn a-edit btn-open-actions-modal"
                                         data-id="<?php echo e($lead->id); ?>"
                                         data-name="<?php echo e($lead->cn_name); ?>"
@@ -283,7 +310,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="8" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="9" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No validated leads in Submissions for the selected period.
                             </td>
@@ -299,6 +326,55 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
     </div>
 </div>
 
+
+
+<div class="modal fade" id="coverageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:320px;">
+        <div class="modal-content" style="border-radius:.75rem;border:1px solid rgba(212,175,55,.18);background:var(--bs-card-bg);box-shadow:0 8px 30px rgba(0,0,0,.18);overflow:hidden;">
+            
+            <div class="modal-header py-2 px-3" style="border-bottom:1px solid rgba(212,175,55,.15);background:rgba(212,175,55,.06);">
+                <span style="font-size:.78rem;font-weight:700;color:#b89730;display:flex;align-items:center;gap:.35rem;">
+                    <i class="bx bx-edit-alt"></i> Edit Coverage / Premium / Plan
+                </span>
+                <button type="button" class="btn-close" style="font-size:.55rem;" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="px-3 pt-2 pb-1">
+                <div style="font-size:.68rem;color:var(--bs-surface-400);margin-bottom:.6rem;">
+                    <i class="bx bx-user me-1"></i><span id="coverage-lead-name" style="font-weight:600;color:var(--bs-body-color);"></span>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem .5rem;margin-bottom:.5rem;">
+                    <div>
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Coverage ($)</label>
+                        <input type="number" step="0.01" id="coverage-amount" class="form-control form-control-sm" placeholder="50000" style="border-radius:.4rem;font-size:.76rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Premium ($)</label>
+                        <input type="number" step="0.01" id="coverage-premium" class="form-control form-control-sm" placeholder="75.50" style="border-radius:.4rem;font-size:.76rem;">
+                    </div>
+                    <div style="grid-column:1/-1;">
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Plan / Policy Type</label>
+                        <select id="coverage-policytype" class="form-select form-select-sm" style="border-radius:.4rem;font-size:.76rem;">
+                            <option value="">— Select Plan —</option>
+                            <option value="Level">Level</option>
+                            <option value="Graded">Graded</option>
+                            <option value="G.I">G.I (Guaranteed Issue)</option>
+                            <option value="Modified">Modified</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-3 pb-3 pt-1 d-flex justify-content-end gap-2">
+                <button type="button" data-bs-dismiss="modal" style="background:transparent;border:1px solid rgba(0,0,0,.1);border-radius:.4rem;padding:.28rem .7rem;font-size:.72rem;font-weight:600;color:var(--bs-surface-400);cursor:pointer;">Cancel</button>
+                <button type="button" id="coverage-save-btn" style="background:linear-gradient(135deg,#d4af37,#b8941f);border:none;border-radius:.4rem;padding:.28rem .85rem;font-size:.72rem;font-weight:700;color:#0f172a;cursor:pointer;">
+                    <i class="bx bx-save me-1"></i>Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <div class="modal fade sub-modal" id="actionsModal" tabindex="-1">
@@ -560,6 +636,66 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
         })
         .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="bx bx-undo me-1"></i> Send Back'; alert('Error: ' + err.message); });
     });
+
+    // ==== Coverage / Premium / Plan Edit Modal ====
+    var coverageLeadId = null;
+    const coverageModalEl = document.getElementById('coverageModal');
+    let coverageModalInstance = null;
+
+    document.querySelectorAll('.btn-edit-coverage').forEach(btn => {
+        btn.addEventListener('click', function() {
+            coverageLeadId = this.dataset.id;
+            document.getElementById('coverage-lead-name').textContent = this.dataset.name;
+            document.getElementById('coverage-amount').value = this.dataset.coverage;
+            document.getElementById('coverage-premium').value = this.dataset.premium;
+            document.getElementById('coverage-policytype').value = this.dataset.policytype;
+            if (coverageModalInstance) coverageModalInstance.dispose();
+            coverageModalInstance = new bootstrap.Modal(coverageModalEl);
+            coverageModalInstance.show();
+        });
+    });
+
+    coverageModalEl.addEventListener('hidden.bs.modal', function() {
+        if (coverageModalInstance) { coverageModalInstance.dispose(); coverageModalInstance = null; }
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    });
+
+    document.getElementById('coverage-save-btn').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Saving…';
+        fetch('/submissions/' + coverageLeadId + '/update-coverage', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                coverage_amount: document.getElementById('coverage-amount').value || null,
+                monthly_premium: document.getElementById('coverage-premium').value || null,
+                policy_type:     document.getElementById('coverage-policytype').value.trim() || null,
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-save me-1"></i> Save';
+            if (data.success) { if (coverageModalInstance) coverageModalInstance.hide(); location.reload(); }
+            else alert(data.message || 'Error saving.');
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-1"></i> Save'; alert('Error: ' + err.message); });
+    });
+
+    // ==== Live Search ====
+    const liveSearchInput = document.querySelector('input[name="search"]');
+    const liveSearchForm  = document.getElementById('submissionsFilterForm');
+    let liveSearchTimer;
+    if (liveSearchInput && liveSearchForm) {
+        liveSearchInput.addEventListener('input', function() {
+            clearTimeout(liveSearchTimer);
+            liveSearchTimer = setTimeout(() => liveSearchForm.submit(), 450);
+        });
+    }
 
     // Send Back to Previous Stage (with debounce to prevent double-click)
     document.querySelectorAll('.btn-send-back').forEach(btn => {

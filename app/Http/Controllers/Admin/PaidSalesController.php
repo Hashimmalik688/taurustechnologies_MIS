@@ -64,4 +64,27 @@ class PaidSalesController extends Controller
             'totalCount', 'totalPremium', 'totalCoverage'
         ));
     }
+
+    /**
+     * Mark a paid lead as a chargeback (policy cancelled / money clawed back).
+     */
+    public function markChargeback(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+
+        if (empty($lead->paid_at)) {
+            return response()->json(['success' => false, 'message' => 'Lead has not been paid yet.'], 422);
+        }
+
+        if ($lead->status === \App\Support\Statuses::LEAD_CHARGEBACK) {
+            return response()->json(['success' => false, 'message' => 'Lead is already marked as chargeback.'], 422);
+        }
+
+        $lead->status                = \App\Support\Statuses::LEAD_CHARGEBACK;
+        $lead->retention_status      = \App\Support\Statuses::RETENTION_PENDING;
+        // chargeback_marked_date is auto-set by the model boot observer
+        $lead->save();
+
+        return response()->json(['success' => true, 'message' => 'Lead marked as Chargeback.']);
+    }
 }

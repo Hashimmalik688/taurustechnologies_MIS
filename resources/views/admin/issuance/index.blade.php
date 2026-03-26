@@ -305,10 +305,20 @@
     .filter-form { flex-direction: column; }
     .filter-form .f-input { width: 100%; }
 }
+/* Prominent page title */
+.sl-page-title{font-size:1.35rem;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin:0;}
+.sl-page-title i{color:#d4af37;font-size:1.5rem;}
+.sl-page-subtitle{font-size:.78rem;color:#94a3b8;margin:0;}
+[data-bs-theme=dark] .sl-page-title,:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
 </style>
 @endsection
 
 @section('content')
+    {{-- Page Header --}}
+    <div class="container-fluid px-0 pb-2" style="max-width:1600px;">
+        <h1 class="sl-page-title"><i class="bx bx-file-find"></i> Pending Contracts</h1>
+        <p class="sl-page-subtitle mt-1">Stage 5 — Monitor issuance status and assign followup officers</p>
+    </div>
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius:0.5rem; border:none; background:rgba(52,195,143,.08); color:#1a8754; font-size:.78rem; padding:.5rem .75rem;">
             <i class="bx bx-check-circle me-1"></i>{{ session('success') }}
@@ -448,6 +458,7 @@
                         <th>Sale Date</th>
                         <th>Carrier</th>
                         <th>Type</th>
+                        <th>App ID</th>
                         <th>Policy #</th>
                         <th>Partner</th>
                         <th class="text-center">Coverage / Premium</th>
@@ -477,8 +488,15 @@
                             <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
                             <td>{{ $lead->policy_type ?? 'N/A' }}</td>
                             <td>
-                                @if($lead->issued_policy_number)
-                                    <code style="font-size:.7rem;">{{ $lead->issued_policy_number }}</code>
+                                @if($lead->app_id)
+                                    <code style="font-size:.7rem; color:var(--bs-primary);">{{ $lead->app_id }}</code>
+                                @else
+                                    <span style="color:var(--bs-surface-400); font-size:.7rem;">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($lead->policy_number || $lead->issued_policy_number)
+                                    <code style="font-size:.7rem;">{{ $lead->policy_number ?? $lead->issued_policy_number }}</code>
                                 @else
                                     <span style="color:var(--bs-surface-400); font-size:.7rem;">Not Set</span>
                                 @endif
@@ -615,7 +633,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="17" class="text-center py-3" style="color:var(--bs-surface-400); font-size:.78rem;">
+                            <td colspan="18" class="text-center py-3" style="color:var(--bs-surface-400); font-size:.78rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem; opacity:.4;"></i>
                                 <p class="mt-1 mb-0">No submission data available</p>
                             </td>
@@ -922,7 +940,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Accept': 'application/json'
                 }
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    return r.text().then(text => {
+                        throw new Error('Server error (' + r.status + '): ' + (text.substring(0, 100) || 'Unknown error'));
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     slToast(data.message || 'Sent to Submissions');
@@ -935,7 +960,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => {
-                alert('Failed to send back');
+                console.error('Send back failed:', err);
+                alert('Failed to send back: ' + err.message);
                 button.disabled = false;
                 button.innerHTML = '<i class="bx bx-arrow-back"></i>';
                 button.dataset.processing = 'false';

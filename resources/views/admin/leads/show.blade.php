@@ -303,35 +303,51 @@
          ══════════════════════════════════════════ --}}
     @php
         $steps = [
-            ['key'=>'sale',      'label'=>'Sale Made',            'icon'=>'mdi-handshake'],
-            ['key'=>'submit',    'label'=>'Submitted',            'icon'=>'mdi-file-upload'],
-            ['key'=>'issuance',  'label'=>'Policy Issuance',      'icon'=>'mdi-file-document-check'],
-            ['key'=>'followup',  'label'=>'Client Follow-up',     'icon'=>'mdi-phone-in-talk'],
-            ['key'=>'banking',   'label'=>'Banking Verified',     'icon'=>'mdi-bank-check'],
-            ['key'=>'draft',     'label'=>'Draft Confirmation',   'icon'=>'mdi-check-circle',   'future'=>true],
-            ['key'=>'commission','label'=>'Commission',           'icon'=>'mdi-currency-usd',   'future'=>true],
-            ['key'=>'paid',      'label'=>'Paid',                 'icon'=>'mdi-cash-check',     'future'=>true],
-            ['key'=>'recovery',  'label'=>'Advance Recovery',     'icon'=>'mdi-refresh',        'future'=>true],
+            ['key'=>'sale',       'label'=>'Sale Made',           'icon'=>'mdi-handshake'],
+            ['key'=>'validated',  'label'=>'Validated',           'icon'=>'mdi-shield-check'],
+            ['key'=>'submission', 'label'=>'Pending Submission',  'icon'=>'mdi-file-upload'],
+            ['key'=>'contract',   'label'=>'Pending Contract',    'icon'=>'mdi-file-sign'],
+            ['key'=>'issued',     'label'=>'Issued',              'icon'=>'mdi-file-document-check'],
+            ['key'=>'followup',   'label'=>'Followup Done',       'icon'=>'mdi-phone-check'],
+            ['key'=>'draft',      'label'=>'Pending Draft',       'icon'=>'mdi-clock-check-outline'],
+            ['key'=>'paid',       'label'=>'Paid',                'icon'=>'mdi-cash-check'],
         ];
 
         $done = [];
-        $isSale = in_array($insurance->status, ['sale','accepted']);
-        if ($isSale) { $done[] = 'sale'; }
-        if ($insurance->status === 'underwritten' || $isSale) {
-            $done[] = 'sale'; $done[] = 'submit';
+
+        // Sale Made — sale_at set or accepted/underwritten status
+        if ($insurance->sale_at || in_array($insurance->status, ['accepted', 'underwritten'])) {
+            $done[] = 'sale';
         }
-        $hasIssuance = ($insurance->policy_number || $insurance->issued_policy_number) && ($insurance->partner_id || $insurance->assigned_partner);
-        if ($hasIssuance) {
-            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance';
+        // Validated — ravens validated
+        if ($insurance->ravens_validated_at) {
+            $done[] = 'sale'; $done[] = 'validated';
         }
-        $hasFollowup = in_array($insurance->followup_status, ['Yes','No','Completed','yes','no','completed']) && ($insurance->assigned_followup_person || $insurance->followup_assigned_by);
-        if ($hasFollowup) {
-            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance'; $done[] = 'followup';
+        // Pending Submission — reviewed by manager (submission_at)
+        if ($insurance->submission_at) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission';
         }
-        $hasBV = in_array(strtolower($insurance->bank_verification_status ?? ''), ['bv verified','verified']);
-        if ($hasBV) {
-            $done[] = 'sale'; $done[] = 'submit'; $done[] = 'issuance'; $done[] = 'followup'; $done[] = 'banking';
+        // Pending Contract — sent to pending contracts
+        if ($insurance->pending_contract_at) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract';
         }
+        // Issued — issuance_status = Issued
+        if ($insurance->issuance_status === \App\Support\Statuses::ISSUANCE_ISSUED) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract'; $done[] = 'issued';
+        }
+        // Followup Done
+        if ($insurance->followup_done_at) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract'; $done[] = 'issued'; $done[] = 'followup';
+        }
+        // Pending Draft
+        if ($insurance->pending_draft_at) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract'; $done[] = 'issued'; $done[] = 'followup'; $done[] = 'draft';
+        }
+        // Paid
+        if ($insurance->paid_at) {
+            $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract'; $done[] = 'issued'; $done[] = 'followup'; $done[] = 'draft'; $done[] = 'paid';
+        }
+
         $done = array_unique($done);
         $currentStep = null;
         foreach ($steps as $s) {

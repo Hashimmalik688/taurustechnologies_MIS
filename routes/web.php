@@ -241,7 +241,7 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Ro
     Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/{id}/update-comment', [LeadController::class, 'updateComment'])->name('updateComment');
     Route::post('/{id}/unassign-partner', [LeadController::class, 'unassignPartner'])->name('unassignPartner');
-    Route::post('/{id}/send-to-previous-stage', [LeadController::class, 'sendToPreviousStage'])->name('sendToPreviousStage');
+    Route::post('/{id}/send-to-previous-stage', [LeadController::class, 'sendToPreviousStage'])->name('sendToPreviousStage')->middleware('role.permission:leads,edit');
 });
 
 // Sales Management — access controlled by role.permission:sales,level
@@ -291,6 +291,7 @@ Route::group(['prefix' => 'submissions', 'as' => 'submissions.', 'middleware' =>
     Route::post('/{id}/save-decision', [PendingsApprovedController::class, 'saveDecision'])->name('saveDecision')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/update-field', [PendingsApprovedController::class, 'updateField'])->name('updateField')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/recall-to-closer', [PendingsApprovedController::class, 'recallToCloser'])->name('recallToCloser')->middleware('role.permission:pendings-approved,edit');
+    Route::post('/{id}/update-coverage', [PendingsApprovedController::class, 'updateCoverage'])->name('updateCoverage')->middleware('role.permission:pendings-approved,edit');
 });
 
 // Pending Draft — Stage 6 pipeline
@@ -305,6 +306,7 @@ Route::group(['prefix' => 'pending-draft', 'as' => 'pending-draft.', 'middleware
 // Paid Sales — Stage 7 pipeline (read-only)
 Route::group(['prefix' => 'paid-sales', 'as' => 'paid-sales.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PaidSalesController::class, 'index'])->name('index')->middleware('role.permission:paid-sales,view');
+    Route::post('/{id}/mark-chargeback', [PaidSalesController::class, 'markChargeback'])->name('markChargeback')->middleware('role.permission:paid-sales,edit');
 });
 
 // QA Review — access controlled by role.permission:qa-review,level

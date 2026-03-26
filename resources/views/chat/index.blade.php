@@ -2039,6 +2039,7 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
                 </div>
             </div>
             <input type="file" id="fileInput" multiple style="display: none" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar,.mp3,.mp4,.wav,.m4a,.ogg,.webm,.png,.jpg,.jpeg,.gif,.bmp,.svg">
+            <div id="attachmentPreview" class="attachment-preview-area" style="display:none;"></div>
         </div>
     `;
 
@@ -2069,15 +2070,15 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
 
     // Auto-expand textarea as user types, up to max-height
     const msgInput = document.getElementById('messageInput');
-    function autoResizeInput() {
-        msgInput.style.height = 'auto';
-        msgInput.style.height = Math.min(msgInput.scrollHeight, 140) + 'px';
-    }
-    msgInput.addEventListener('input', autoResizeInput);
+    window._chatAutoResizeFunc = function() {
+        msgInput.style.height = '160px';
+        const newHeight = Math.max(160, Math.min(msgInput.scrollHeight, 240));
+        msgInput.style.height = newHeight + 'px';
+    };
+    msgInput.addEventListener('input', window._chatAutoResizeFunc);
     // Reset height after send
-    const origSendMessage = sendMessage;
     window._chatAutoResizeReset = function() {
-        msgInput.style.height = '22px';
+        msgInput.style.height = '160px';
     };
 
     // ── Paste handler: images from clipboard (Ctrl+V) + Excel table formatting ──
@@ -2087,21 +2088,21 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
 
         // Check clipboard contents
         const imageItems = [];
-        let hasText = false, hasHtml = false, hasTabularHtml = false;
         for (let i = 0; i < items.length; i++) {
             if (items[i].type.startsWith('image/')) imageItems.push(items[i]);
-            if (items[i].type === 'text/plain') hasText = true;
-            if (items[i].type === 'text/html')  hasHtml = true;
         }
         const plainRaw = clipData && clipData.getData ? (clipData.getData('text/plain') || '') : '';
         const htmlRaw  = clipData && clipData.getData ? (clipData.getData('text/html')  || '') : '';
-        hasTabularHtml = htmlRaw.includes('<table') || htmlRaw.includes('<TD') || htmlRaw.includes('<td');
+        const hasTabularHtml = htmlRaw.includes('<table') || htmlRaw.includes('<TD') || htmlRaw.includes('<td');
         const plainLines   = plainRaw.split(/\r?\n/).filter(l => l !== '');
         const hasTabularTxt = plainLines.some(l => l.includes('\t'));
 
-        // 1. Image paste — ONLY when there is no accompanying text/HTML (pure screenshot).
-        //    Excel always includes image/png alongside text; skip the image in that case.
-        const isPureImage = imageItems.length > 0 && !hasText && !hasHtml;
+        // 1. Image paste — if we have images AND no meaningful text/table content, treat as image paste
+        //    This handles screenshots and copied images from other apps
+        const hasMeaningfulText = plainRaw.trim().length > 0 && !plainRaw.startsWith('file://') && !plainRaw.match(/^[\s\n]*$/);
+        const hasTabularContent = hasTabularTxt || hasTabularHtml;
+        const isPureImage = imageItems.length > 0 && !hasMeaningfulText && !hasTabularContent;
+        
         if (isPureImage) {
             e.preventDefault();
             const dt = new DataTransfer();
@@ -2139,6 +2140,8 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
             const end   = ta.selectionEnd;
             ta.value = ta.value.substring(0, start) + toInsert + ta.value.substring(end);
             ta.selectionStart = ta.selectionEnd = start + toInsert.length;
+            // Trigger auto-resize so pasted content expands the textarea
+            if (window._chatAutoResizeFunc) window._chatAutoResizeFunc();
             // Close mention suggestions
             const mentionEl = document.getElementById('mentionSuggestions');
             if (mentionEl) mentionEl.style.display = 'none';
@@ -2176,6 +2179,45 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Helper function to format message time (e.g., "10:30 AM PT")
+function formatMessageTime(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' }) + ' PT';
+}
+
+// Helper function to get date label (Today, Yesterday, or formatted date)
+function getDateLabel(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+    
+    if (dateOnly.getTime() === todayOnly.getTime()) {
+        return 'Today';
+    } else if (dateOnly.getTime() === yesterdayOnly.getTime()) {
+        return 'Yesterday';
+    } else {
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined });
+    }
+}
+
+// Helper function to get date key for grouping (YYYY-MM-DD)
+function getDateKey(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
 }
 
 // Helper function to format message text with mentions and GIFs
@@ -2225,14 +2267,32 @@ function renderMessages(messages) {
         return '<div class="no-messages"><i class="bx bx-message-dots"></i><p>No messages yet. Start the conversation!</p></div>';
     }
 
-    return messages.map(msg => {
+    let html = '';
+    let lastDateKey = '';
+    
+    messages.forEach((msg, index) => {
+        const currentDateKey = getDateKey(msg.created_at);
+        
+        // Add date separator if date changed
+        if (currentDateKey && currentDateKey !== lastDateKey) {
+            const dateLabel = getDateLabel(msg.created_at);
+            html += `
+            <div class="message-date-separator" style="display:flex;align-items:center;justify-content:center;margin:1rem 0;gap:.75rem;">
+                <div style="flex:1;height:1px;background:var(--bs-border-color, rgba(0,0,0,.1));"></div>
+                <span style="font-size:.7rem;font-weight:600;color:var(--bs-secondary-color, #6b7280);background:var(--bs-body-bg, #fff);padding:.25rem .75rem;border-radius:20px;border:1px solid var(--bs-border-color, rgba(0,0,0,.1));">${dateLabel}</span>
+                <div style="flex:1;height:1px;background:var(--bs-border-color, rgba(0,0,0,.1));"></div>
+            </div>`;
+            lastDateKey = currentDateKey;
+        }
+        
         const isSender = msg.user_id === window.currentUserId;
         const userName = escapeHtml(msg.user?.name || 'Unknown User');
         const userAvatar = msg.user?.avatar;
+        const messageTime = formatMessageTime(msg.created_at);
         const avatarHtml = userAvatar 
             ? `<img src="${userAvatar}" alt="${userName}" class="message-avatar">` 
             : `<div class="message-avatar">${userName.charAt(0).toUpperCase()}</div>`;
-        return `
+        html += `
         <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}" data-message-id="${msg.id}" style="position: relative;">
             ${!isSender ? avatarHtml : ''}
             <div class="message-content">
@@ -2312,6 +2372,7 @@ function renderMessages(messages) {
                         }).join('')}
                     </div>
                 ` : ''}
+                <div class="message-time">${messageTime}</div>
             </div>
             ${isSender ? `
             <div class="message-actions">
@@ -2324,7 +2385,9 @@ function renderMessages(messages) {
             </div>`}
         </div>
     `;
-    }).join('');
+    });
+    
+    return html;
 }
 
 // Refresh messages
@@ -2730,8 +2793,9 @@ async function sendMessage() {
         input.value = '';
         fileInput.value = '';
         input.placeholder = 'Type a message...'; // Reset placeholder
-        // Reset textarea height
+        // Reset textarea height and clear preview
         if (window._chatAutoResizeReset) window._chatAutoResizeReset();
+        clearAttachmentPreview();
         await refreshMessages();
         updateConversationPreview(window.currentConversationId, message); // Update sidebar without full reload
     } catch (error) {
@@ -2791,32 +2855,87 @@ function updateConversationPreview(conversationId, messageText) {
     }
 }
 
-// Handle file select
+// Handle file select with preview
 function handleFileSelect(e) {
     const files = Array.from(e.target.files);
+    const previewArea = document.getElementById('attachmentPreview');
+    
     if (files.length > 0) {
         const messageInput = document.getElementById('messageInput');
-        
-        // Show detailed file info
-        const fileInfo = files.map(file => {
-            const sizeKB = Math.round(file.size / 1024);
-            const sizeDisplay = sizeKB > 1024 ? `${Math.round(sizeKB/1024)}MB` : `${sizeKB}KB`;
-            return `${file.name} (${sizeDisplay})`;
-        }).join(', ');
-        
-        messageInput.placeholder = `📎 ${files.length} file(s): ${fileInfo.substring(0, 80)}${fileInfo.length > 80 ? '...' : ''}`;
         
         // Validate file sizes (10MB limit)
         const oversizedFiles = files.filter(file => file.size > 10 * 1024 * 1024);
         if (oversizedFiles.length > 0) {
             alert(`Some files are too large (max 10MB): ${oversizedFiles.map(f => f.name).join(', ')}`);
-            e.target.value = ''; // Clear selection
-            messageInput.placeholder = 'Type a message...';
+            e.target.value = '';
+            clearAttachmentPreview();
             return;
         }
         
+        // Build preview HTML
+        let previewHtml = '<div class="preview-container">';
+        files.forEach((file, idx) => {
+            const sizeKB = Math.round(file.size / 1024);
+            const sizeDisplay = sizeKB > 1024 ? `${Math.round(sizeKB/1024)}MB` : `${sizeKB}KB`;
+            
+            if (file.type.startsWith('image/')) {
+                // Image preview
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    const imgEl = document.getElementById(`preview-img-${idx}`);
+                    if (imgEl) imgEl.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+                previewHtml += `
+                    <div class="preview-item image-preview">
+                        <img id="preview-img-${idx}" src="" alt="${file.name}" style="width:52px;height:52px;object-fit:contain;border-radius:4px;background:rgba(0,0,0,.05);">
+                        <button type="button" class="preview-remove" onclick="removePreviewItem(${idx})" title="Remove"><i class="bx bx-x"></i></button>
+                        <span class="preview-name">${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}</span>
+                    </div>`;
+            } else {
+                // File icon preview
+                let icon = 'bx-file';
+                if (file.type.startsWith('video/')) icon = 'bx-video';
+                else if (file.type.startsWith('audio/')) icon = 'bx-volume-full';
+                else if (file.type.includes('pdf')) icon = 'bx-file-pdf';
+                else if (file.type.includes('word') || file.name.match(/\.docx?$/)) icon = 'bx-file-doc';
+                else if (file.type.includes('zip') || file.type.includes('rar')) icon = 'bx-archive';
+                
+                previewHtml += `
+                    <div class="preview-item file-preview">
+                        <i class="bx ${icon}"></i>
+                        <button type="button" class="preview-remove" onclick="removePreviewItem(${idx})" title="Remove"><i class="bx bx-x"></i></button>
+                        <span class="preview-name">${file.name.substring(0, 15)}${file.name.length > 15 ? '...' : ''}</span>
+                        <span class="preview-size">${sizeDisplay}</span>
+                    </div>`;
+            }
+        });
+        previewHtml += '<button type="button" class="preview-clear-all" onclick="clearAttachmentPreview()" title="Remove attachment"><i class="bx bx-x"></i></button></div>';
+        
+        previewArea.innerHTML = previewHtml;
+        previewArea.style.display = 'block';
+        messageInput.focus();
+        
         console.log('Files selected:', files.map(f => ({ name: f.name, type: f.type, size: f.size })));
+    } else {
+        clearAttachmentPreview();
     }
+}
+
+// Clear attachment preview
+function clearAttachmentPreview() {
+    const previewArea = document.getElementById('attachmentPreview');
+    const fileInput = document.getElementById('fileInput');
+    if (previewArea) {
+        previewArea.innerHTML = '';
+        previewArea.style.display = 'none';
+    }
+    if (fileInput) fileInput.value = '';
+}
+
+// Remove individual preview item (clears all for now since FileList is immutable)
+function removePreviewItem(idx) {
+    clearAttachmentPreview();
 }
 
 // Load users for new chat

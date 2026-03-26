@@ -239,8 +239,10 @@ class PendingsApprovedController extends Controller
 
         $lead = Lead::findOrFail($id);
 
-        // Save submission_status
+        // Save submission_status and reviewer info
         $lead->submission_status = $request->submission_status;
+        $lead->submission_by = auth()->id();
+        $lead->submission_at = now();
 
         // Save App ID for all decisions
         if ($request->filled('app_id')) $lead->app_id = $request->app_id;
@@ -289,6 +291,26 @@ class PendingsApprovedController extends Controller
         $lead->save();
 
         return response()->json(['success' => true, 'message' => 'Field updated.']);
+    }
+
+    /**
+     * Update coverage_amount, monthly_premium, policy_type
+     */
+    public function updateCoverage(Request $request, int $id)
+    {
+        $request->validate([
+            'coverage_amount' => 'nullable|numeric|min:0',
+            'monthly_premium' => 'nullable|numeric|min:0',
+            'policy_type'     => 'nullable|string|max:255',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+        if ($request->has('coverage_amount')) $lead->coverage_amount = $request->coverage_amount;
+        if ($request->has('monthly_premium')) $lead->monthly_premium = $request->monthly_premium;
+        if ($request->has('policy_type'))     $lead->policy_type     = $request->policy_type;
+        $lead->save();
+
+        return response()->json(['success' => true, 'message' => 'Coverage details updated.']);
     }
 
     /**

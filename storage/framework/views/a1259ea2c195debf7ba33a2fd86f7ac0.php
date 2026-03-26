@@ -449,6 +449,7 @@
                         <th>Sale Date</th>
                         <th>Carrier</th>
                         <th>Type</th>
+                        <th>App ID</th>
                         <th>Policy #</th>
                         <th>Partner</th>
                         <th class="text-center">Coverage / Premium</th>
@@ -478,8 +479,15 @@
                             <td><?php echo e($lead->carrier_name ?? 'N/A'); ?></td>
                             <td><?php echo e($lead->policy_type ?? 'N/A'); ?></td>
                             <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->issued_policy_number): ?>
-                                    <code style="font-size:.7rem;"><?php echo e($lead->issued_policy_number); ?></code>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->app_id): ?>
+                                    <code style="font-size:.7rem; color:var(--bs-primary);"><?php echo e($lead->app_id); ?></code>
+                                <?php else: ?>
+                                    <span style="color:var(--bs-surface-400); font-size:.7rem;">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->policy_number || $lead->issued_policy_number): ?>
+                                    <code style="font-size:.7rem;"><?php echo e($lead->policy_number ?? $lead->issued_policy_number); ?></code>
                                 <?php else: ?>
                                     <span style="color:var(--bs-surface-400); font-size:.7rem;">Not Set</span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -619,7 +627,7 @@
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="17" class="text-center py-3" style="color:var(--bs-surface-400); font-size:.78rem;">
+                            <td colspan="18" class="text-center py-3" style="color:var(--bs-surface-400); font-size:.78rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem; opacity:.4;"></i>
                                 <p class="mt-1 mb-0">No submission data available</p>
                             </td>
@@ -927,7 +935,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Accept': 'application/json'
                 }
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    return r.text().then(text => {
+                        throw new Error('Server error (' + r.status + '): ' + (text.substring(0, 100) || 'Unknown error'));
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.success) {
                     slToast(data.message || 'Sent to Submissions');
@@ -940,7 +955,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .catch(err => {
-                alert('Failed to send back');
+                console.error('Send back failed:', err);
+                alert('Failed to send back: ' + err.message);
                 button.disabled = false;
                 button.innerHTML = '<i class="bx bx-arrow-back"></i>';
                 button.dataset.processing = 'false';

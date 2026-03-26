@@ -206,6 +206,11 @@
 
 /* ── Meta Info ── */
 .pd-meta { font-size: .65rem; color: var(--bs-surface-400); margin-top: .15rem; }
+/* Prominent page title */
+.sl-page-title{font-size:1.35rem;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin:0;}
+.sl-page-title i{color:#d4af37;font-size:1.5rem;}
+.sl-page-subtitle{font-size:.78rem;color:#94a3b8;margin:0;}
+[data-bs-theme=dark] .sl-page-title,:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
 </style>
 @endsection
 
@@ -215,13 +220,8 @@
     {{-- Header --}}
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
-            <h5 class="mb-1 fw-semibold" style="font-size:1.1rem;">
-                <i class="bx bx-time-five me-1" style="color:#f1b44c;"></i>
-                Pending Draft
-            </h5>
-            <p class="mb-0" style="font-size:.72rem;color:var(--bs-surface-400);">
-                Stage 6 — Awaiting first premium draft confirmation
-            </p>
+            <h1 class="sl-page-title"><i class="bx bx-time-five"></i> Pending Draft</h1>
+            <p class="sl-page-subtitle mt-1">Stage 6 — Awaiting first premium draft confirmation</p>
         </div>
         <a href="{{ route('paid-sales.index') }}" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.1);">
             <i class="bx bx-badge-check"></i> View Paid Sales
