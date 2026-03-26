@@ -55,7 +55,7 @@ class AnalyticsService
                 ->count(),
             'pending_validation' => Lead::whereNotNull('verified_by')
                 ->whereNull('validated_by')
-                ->where('manager_status', '!=', Statuses::MGR_DECLINED)
+                ->where('submission_status', '!=', Statuses::SUB_DECLINED)
                 ->count(),
             'total_verifiers' => Lead::whereNotNull('verified_by')
                 ->distinct('verified_by')
@@ -142,7 +142,7 @@ class AnalyticsService
             'submitted_mtd' => Lead::whereBetween('updated_at', [$monthStart, now()])
                 ->whereNotNull('validated_by')
                 ->count(),
-            'declined' => Lead::where('manager_status', Statuses::MGR_DECLINED)
+            'declined' => Lead::where('submission_status', Statuses::SUB_DECLINED)
                 ->whereNotNull('validated_by')
                 ->count(),
         ];
@@ -348,7 +348,7 @@ class AnalyticsService
 
             // Declined = manager declined the sale
             $declined = (clone $base)
-                ->where('manager_status', Statuses::MGR_DECLINED)
+                ->where('submission_status', Statuses::SUB_DECLINED)
                 ->count();
 
             if ($total == 0) {
@@ -494,7 +494,7 @@ class AnalyticsService
 
             // Declined = manager declined
             $declined = (clone $base)
-                ->where('manager_status', Statuses::MGR_DECLINED)
+                ->where('submission_status', Statuses::SUB_DECLINED)
                 ->count();
 
             // Skip closers with no activity
@@ -641,23 +641,23 @@ class AnalyticsService
                     ->whereBetween('created_at', [$start, $end]);
 
                 $mgrPending = (clone $salesBase)
-                    ->where('manager_status', Statuses::MGR_PENDING)
+                    ->where('submission_status', Statuses::SUB_PENDING)
                     ->count();
 
                 $mgrApproved = (clone $salesBase)
-                    ->where('manager_status', Statuses::MGR_APPROVED)
+                    ->where('submission_status', Statuses::SUB_APPROVED)
                     ->count();
 
                 $mgrDeclined = (clone $salesBase)
-                    ->where('manager_status', Statuses::MGR_DECLINED)
+                    ->where('submission_status', Statuses::SUB_DECLINED)
                     ->count();
 
                 $mgrUnderwriting = (clone $salesBase)
-                    ->where('manager_status', Statuses::MGR_UNDERWRITING)
+                    ->where('submission_status', Statuses::SUB_UNDERWRITING)
                     ->count();
 
                 $mgrChargeback = (clone $salesBase)
-                    ->where('manager_status', Statuses::MGR_CHARGEBACK)
+                    ->where('submission_status', Statuses::SUB_CHARGEBACK)
                     ->count();
 
                 if ($sales == 0) {
@@ -685,11 +685,11 @@ class AnalyticsService
             ->select(
                 'closer_name',
                 DB::raw('count(*) as sales_count'),
-                DB::raw("SUM(CASE WHEN manager_status = '" . Statuses::MGR_PENDING . "' THEN 1 ELSE 0 END) as mgr_pending"),
-                DB::raw("SUM(CASE WHEN manager_status = '" . Statuses::MGR_APPROVED . "' THEN 1 ELSE 0 END) as mgr_approved"),
-                DB::raw("SUM(CASE WHEN manager_status = '" . Statuses::MGR_DECLINED . "' THEN 1 ELSE 0 END) as mgr_declined"),
-                DB::raw("SUM(CASE WHEN manager_status = '" . Statuses::MGR_UNDERWRITING . "' THEN 1 ELSE 0 END) as mgr_underwriting"),
-                DB::raw("SUM(CASE WHEN manager_status = '" . Statuses::MGR_CHARGEBACK . "' THEN 1 ELSE 0 END) as mgr_chargeback")
+                DB::raw("SUM(CASE WHEN submission_status = '" . Statuses::SUB_PENDING . "' THEN 1 ELSE 0 END) as mgr_pending"),
+                DB::raw("SUM(CASE WHEN submission_status = '" . Statuses::SUB_APPROVED . "' THEN 1 ELSE 0 END) as mgr_approved"),
+                DB::raw("SUM(CASE WHEN submission_status = '" . Statuses::SUB_DECLINED . "' THEN 1 ELSE 0 END) as mgr_declined"),
+                DB::raw("SUM(CASE WHEN submission_status = '" . Statuses::SUB_UNDERWRITING . "' THEN 1 ELSE 0 END) as mgr_underwriting"),
+                DB::raw("SUM(CASE WHEN submission_status = '" . Statuses::SUB_CHARGEBACK . "' THEN 1 ELSE 0 END) as mgr_chargeback")
             )
             ->groupBy('closer_name')
             ->get();
@@ -735,14 +735,14 @@ class AnalyticsService
         $end = $endDate ?: Carbon::now();
 
         // Get manager users who have approved/declined leads in date range
-        $mgrQuery = Lead::whereNotNull('manager_user_id')
+        $mgrQuery = Lead::whereNotNull('submission_by')
             ->whereNotNull('sale_at')
             ->whereBetween('sale_at', [$start, $end]);
         if ($team) {
             $mgrQuery->where('team', $team);
         }
         $managerIds = $mgrQuery->distinct()
-            ->pluck('manager_user_id')
+            ->pluck('submission_by')
             ->toArray();
 
         // Also get users with Manager role
@@ -762,7 +762,7 @@ class AnalyticsService
 
         foreach ($managers as $manager) {
             // Base query: leads with sale in date range that this manager reviewed
-            $base = Lead::where('manager_user_id', $manager->id)
+            $base = Lead::where('submission_by', $manager->id)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end]);
             if ($team) {
@@ -771,23 +771,23 @@ class AnalyticsService
 
             // Total leads this manager has reviewed in date range
             $totalReviewed = (clone $base)
-                ->where('manager_status', '!=', Statuses::MGR_PENDING)
+                ->where('submission_status', '!=', Statuses::SUB_PENDING)
                 ->count();
 
             $approved = (clone $base)
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->count();
 
             $declined = (clone $base)
-                ->where('manager_status', Statuses::MGR_DECLINED)
+                ->where('submission_status', Statuses::SUB_DECLINED)
                 ->count();
 
             $underwriting = (clone $base)
-                ->where('manager_status', Statuses::MGR_UNDERWRITING)
+                ->where('submission_status', Statuses::SUB_UNDERWRITING)
                 ->count();
 
             $chargeback = (clone $base)
-                ->where('manager_status', Statuses::MGR_CHARGEBACK)
+                ->where('submission_status', Statuses::SUB_CHARGEBACK)
                 ->count();
 
             // Skip managers with zero activity
@@ -857,15 +857,15 @@ class AnalyticsService
             'mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])->count(),
             'ytd' => Lead::whereYear('sale_at', now()->year)->count(),
             'revenue_range' => Lead::whereBetween('sale_at', [$start, $end])
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
                 ->sum('monthly_premium'),
             'revenue_mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
                 ->sum('monthly_premium'),
             'pending_approval' => Lead::whereNotNull('sale_at')
-                ->where('manager_status', Statuses::MGR_PENDING)
+                ->where('submission_status', Statuses::SUB_PENDING)
                 ->count(),
         ];
     }
@@ -885,25 +885,25 @@ class AnalyticsService
 
         return [
             // Pending is current state - not date-filtered
-            'pending' => Lead::where('manager_status', Statuses::MGR_PENDING)
+            'pending' => Lead::where('submission_status', Statuses::SUB_PENDING)
                 ->whereNotNull('sale_at')->count(),
             // Approved/Declined scoped to sales in date range
-            'approved' => Lead::where('manager_status', Statuses::MGR_APPROVED)
+            'approved' => Lead::where('submission_status', Statuses::SUB_APPROVED)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count(),
-            'declined' => Lead::where('manager_status', Statuses::MGR_DECLINED)
+            'declined' => Lead::where('submission_status', Statuses::SUB_DECLINED)
                 ->whereNotNull('sale_at')
                 ->whereBetween('sale_at', [$start, $end])
                 ->count(),
             'approved_today' => Lead::whereBetween('sale_at', [$start, $end])
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->count(),
             'approved_range' => Lead::whereBetween('sale_at', [$start, $end])
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->count(),
             'approved_mtd' => Lead::whereBetween('sale_at', [$monthStart, now()])
-                ->where('manager_status', Statuses::MGR_APPROVED)
+                ->where('submission_status', Statuses::SUB_APPROVED)
                 ->count(),
         ];
     }
@@ -1007,7 +1007,7 @@ class AnalyticsService
         $start = $startDate ?: Carbon::today()->startOfDay();
         $end = $endDate ?: Carbon::now();
 
-        $query = Lead::with(['verifier:id,name', 'validator:id,name', 'qaUser:id,name', 'managerUser:id,name']);
+        $query = Lead::with(['verifier:id,name', 'validator:id,name', 'qaUser:id,name', 'submissionReviewer:id,name']);
 
         switch ($type) {
             case 'verifier_submitted':
@@ -1116,10 +1116,10 @@ class AnalyticsService
                 return $query->whereBetween('sale_at', [$start, $end])
                     ->orderByDesc('sale_at')
                     ->limit($limit)
-                    ->get(['id', 'cn_name', 'closer_name', 'sale_at', 'monthly_premium', 'manager_status']);
+                    ->get(['id', 'cn_name', 'closer_name', 'sale_at', 'monthly_premium', 'submission_status']);
 
             case 'manager_pending':
-                return $query->where('manager_status', Statuses::MGR_PENDING)
+                return $query->where('submission_status', Statuses::SUB_PENDING)
                     ->whereNotNull('sale_at')
                     ->orderByDesc('sale_at')
                     ->limit($limit)
@@ -1127,10 +1127,10 @@ class AnalyticsService
 
             case 'manager_approved':
                 return $query->whereBetween('updated_at', [$start, $end])
-                    ->where('manager_status', Statuses::MGR_APPROVED)
+                    ->where('submission_status', Statuses::SUB_APPROVED)
                     ->orderByDesc('updated_at')
                     ->limit($limit)
-                    ->get(['id', 'cn_name', 'manager_user_id', 'updated_at', 'monthly_premium']);
+                    ->get(['id', 'cn_name', 'submission_by', 'updated_at', 'monthly_premium']);
 
             default:
                 return collect([]);

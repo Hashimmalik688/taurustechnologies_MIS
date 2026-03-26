@@ -274,6 +274,8 @@ Route::group(['prefix' => 'pending-contracts', 'as' => 'issuance.', 'middleware'
     Route::get('/show/{id}', [LeadController::class, 'show'])->name('show')->middleware('role.permission:issuance,view');
     Route::post('/{id}/issuance-status', [LeadController::class, 'updateIssuanceStatus'])->name('updateIssuanceStatus')->middleware('role.permission:issuance,edit');
     Route::post('/{id}/issuance-status/reset', [LeadController::class, 'resetIssuanceStatus'])->name('resetIssuanceStatus')->middleware('role.permission:issuance,edit');
+    Route::post('/{id}/mark-issued', [LeadController::class, 'markAsIssued'])->name('markIssued')->middleware('role.permission:issuance,edit');
+    Route::post('/{id}/mark-not-issued', [LeadController::class, 'markAsNotIssued'])->name('markNotIssued')->middleware('role.permission:issuance,edit');
     Route::post('/{id}/unlock-field', [LeadController::class, 'unlockIssuanceField'])->name('unlockField')->middleware('role.permission:issuance,full');
     Route::post('/{id}/recalculate-commission', [LeadController::class, 'recalculateCommission'])->name('recalculateCommission')->middleware('role.permission:issuance,full');
     Route::post('/bulk-recalculate-commission', [LeadController::class, 'bulkRecalculateCommission'])->name('bulkRecalculateCommission')->middleware('role.permission:issuance,full');

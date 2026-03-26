@@ -15,7 +15,7 @@ class RavensValidationController extends Controller
 {
     /**
      * Ravens Validation Dashboard
-     * Shows Ravens leads with manager_status = approved or declined
+     * Shows Ravens leads with submission_status = approved or declined
      * that have not yet been reviewed by a validator.
      */
     public function index(Request $request)
@@ -40,7 +40,7 @@ class RavensValidationController extends Controller
 
         if (!$showAll) {
             $pendingQuery->where(function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('manager_reviewed_at', [$startDate, $endDate])
+                $q->whereBetween('submission_at', [$startDate, $endDate])
                   ->orWhereBetween('updated_at', [$startDate, $endDate]);
             });
         }
@@ -54,7 +54,7 @@ class RavensValidationController extends Controller
         }
 
         $pendingLeads = $pendingQuery
-            ->orderByDesc('manager_reviewed_at')
+            ->orderByDesc('submission_at')
             ->orderByDesc('updated_at')
             ->get();
 

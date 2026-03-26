@@ -278,8 +278,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Manager Status</label>
-                        <select name="manager_status" id="managerStatusFilter" class="sl-pill-select">
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Submission Status</label>
+                        <select name="submission_status" id="managerStatusFilter" class="sl-pill-select">
                             <option value="">All</option>
                             <option value="approved">Approved</option>
                             <option value="pending">Pending</option>

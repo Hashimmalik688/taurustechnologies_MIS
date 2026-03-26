@@ -643,9 +643,15 @@
                             <th style="min-width:200px">QA Reason</th>
                             <th style="min-width:140px">QA By</th>
                             <th style="min-width:130px">Status</th>
+                            <th style="min-width:130px">Sub. By</th>
+                            <th style="min-width:130px">Sub. At</th>
                             <th style="min-width:130px">Validator</th>
                             <th style="min-width:130px">Validated At</th>
                             <th style="min-width:120px">Val. Status</th>
+                            <th style="min-width:130px">PC By</th>
+                            <th style="min-width:130px">PC At</th>
+                            <th style="min-width:130px">PD By</th>
+                            <th style="min-width:130px">PD At</th>
                             <th style="min-width:100px">Follow Up</th>
                             <th style="min-width:160px">Scheduled</th>
                         @endif
@@ -701,7 +707,7 @@
                                             <td class="text-center sl-sticky-col sl-col-1">
                                                 <div class="sl-act-group">
                                                     @php
-                                                        $isDeclinedOrInvalid = $lead->manager_status === Statuses::MGR_DECLINED
+                                                        $isDeclinedOrInvalid = $lead->submission_status === Statuses::SUB_DECLINED
                                                             || $lead->ravens_validation_status === 'not_valid';
                                                     @endphp
                                                     <a href="{{ route('sales.prettyPrint', $lead->id) }}" class="btn btn-success btn-sm" title="Pretty Print" target="_blank">
@@ -928,14 +934,32 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                @if($lead->manager_status === Statuses::MGR_APPROVED)
+                                                @if($lead->submission_status === Statuses::SUB_APPROVED)
                                                     <span style="display:inline-block;padding:.2rem .5rem;background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Approved</span>
-                                                @elseif($lead->manager_status === Statuses::MGR_DECLINED)
+                                                @elseif($lead->submission_status === Statuses::SUB_DECLINED)
                                                     <span style="display:inline-block;padding:.2rem .5rem;background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Declined</span>
-                                                @elseif($lead->manager_status === Statuses::MGR_UNDERWRITING)
+                                                @elseif($lead->submission_status === Statuses::SUB_UNDERWRITING)
                                                     <span style="display:inline-block;padding:.2rem .5rem;background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Underwriting</span>
                                                 @else
                                                     <span style="display:inline-block;padding:.2rem .5rem;background:rgba(241,180,76,.1);color:#b87a14;border:1px solid rgba(241,180,76,.25);border-radius:.25rem;font-size:.66rem;font-weight:600;">Pending</span>
+                                                @endif
+                                            </td>
+                                            {{-- Submission Reviewer columns --}}
+                                            <td>
+                                                @if($lead->submissionReviewer)
+                                                    <strong style="font-size:.75rem">{{ $lead->submissionReviewer->name }}</strong>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($lead->submission_at)
+                                                    <span style="font-size:.75rem">{{ \Carbon\Carbon::parse($lead->submission_at)->format('M d, Y') }}</span>
+                                                    <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                        {{ \Carbon\Carbon::parse($lead->submission_at)->format('h:i A') }}
+                                                    </div>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
                                                 @endif
                                             </td>
                                             {{-- Validator columns --}}
@@ -965,6 +989,42 @@
                                                     <span class="badge" style="background:#d1fae5;color:#065f46;font-size:.7rem;padding:.3em .65em">Valid</span>
                                                 @else
                                                     <span class="badge" style="background:#fef9c3;color:#78350f;font-size:.7rem;padding:.3em .65em">Awaiting</span>
+                                                @endif
+                                            </td>
+                                            {{-- Pending Contract columns --}}
+                                            <td>
+                                                @if($lead->pendingContractBy)
+                                                    <strong style="font-size:.75rem">{{ $lead->pendingContractBy->name }}</strong>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($lead->pending_contract_at)
+                                                    <span style="font-size:.75rem">{{ \Carbon\Carbon::parse($lead->pending_contract_at)->format('M d, Y') }}</span>
+                                                    <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                        {{ \Carbon\Carbon::parse($lead->pending_contract_at)->format('h:i A') }}
+                                                    </div>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                @endif
+                                            </td>
+                                            {{-- Pending Draft columns --}}
+                                            <td>
+                                                @if($lead->pendingDraftBy)
+                                                    <strong style="font-size:.75rem">{{ $lead->pendingDraftBy->name }}</strong>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($lead->pending_draft_at)
+                                                    <span style="font-size:.75rem">{{ \Carbon\Carbon::parse($lead->pending_draft_at)->format('M d, Y') }}</span>
+                                                    <div style="font-size:.63rem;color:#94a3b8;margin-top:1px">
+                                                        {{ \Carbon\Carbon::parse($lead->pending_draft_at)->format('h:i A') }}
+                                                    </div>
+                                                @else
+                                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -1012,7 +1072,7 @@
 
                                 @empty
                                     <tr>
-                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '7' : '19' }}" class="text-center" style="padding: 3rem 1rem; color: #94a3b8;">
+                                        <td colspan="{{ auth()->user()->hasRole(Roles::QA) ? '7' : '23' }}" class="text-center" style="padding: 3rem 1rem; color: #94a3b8;">
                                             <i class="bx bx-inbox" style="font-size:2rem; display:block; margin-bottom:.5rem; opacity:.5"></i>
                                             No sales data available
                                         </td>

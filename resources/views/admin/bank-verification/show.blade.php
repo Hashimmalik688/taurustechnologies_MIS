@@ -197,8 +197,8 @@
                 <div class="card-body">
                     <table class="table table-borderless mb-0">
                         <tr>
-                            <td class="fw-semibold" style="width: 40%;">Manager Status:</td>
-                            <td><span class="badge bg-success">{{ $lead->manager_status ?? 'N/A' }}</span></td>
+                            <td class="fw-semibold" style="width: 40%;">Submission Status:</td>
+                            <td><span class="badge bg-success">{{ $lead->submission_status ?? 'N/A' }}</span></td>
                         </tr>
                         <tr>
                             <td class="fw-semibold">Issuance Status:</td>

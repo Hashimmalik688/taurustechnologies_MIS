@@ -73,6 +73,21 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 .filter-form label{font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--bs-surface-500);margin-bottom:.15rem;}
 .f-reset{font-size:.68rem;color:var(--bs-surface-400);text-decoration:none;align-self:flex-end;padding:.3rem .5rem;}.f-reset:hover{color:var(--bs-body-color);}
 
+/* ── Filter Pill Buttons (like Sales page) ── */
+.sl-pill-today,.sl-pill-week,.sl-pill-month {
+    background: transparent; border: 1px solid rgba(14,165,233,.3); color: #0ea5e9;
+    padding: .25rem .6rem; border-radius: 999px; font-size: .7rem; font-weight: 500;
+    cursor: pointer; transition: all .15s;
+}
+.sl-pill-today:hover,.sl-pill-week:hover,.sl-pill-month:hover { background: rgba(14,165,233,.1); border-color: #0ea5e9; }
+.sl-pill-label { font-size: .6rem; text-transform: uppercase; color: var(--bs-surface-400); letter-spacing: .3px; font-weight: 600; }
+.sl-pill-date { width: 120px; font-size: .72rem; padding: .25rem .5rem; border-radius: 1rem; border: 1px solid rgba(0,0,0,.08); }
+.sl-pill-clear {
+    font-size: .68rem; color: #f46a6a; text-decoration: none; display: inline-flex; align-items: center; gap: .2rem;
+    padding: .25rem .5rem; border-radius: 1rem; border: 1px solid rgba(244,106,106,.2);
+}
+.sl-pill-clear:hover { background: rgba(244,106,106,.08); color: #c84646; }
+
 /* ── Scrollable table ── */
 .scroll-tbl{overflow-x:auto;overflow-y:auto;max-height:600px;}
 .scroll-tbl::-webkit-scrollbar{width:3px;height:3px;}
@@ -118,13 +133,6 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 
     
     <div class="kpi-row">
-        <a href="<?php echo e(route('submissions.index', array_merge(request()->only(['search','carrier','date_from','date_to']), ['status' => 'all']))); ?>" class="kpi-link">
-            <div class="kpi-card k-gold <?php echo e($status === 'all' ? 'active' : ''); ?>">
-                <i class="bx bx-data k-icon"></i>
-                <div class="k-val"><?php echo e($totalCount); ?></div>
-                <div class="k-lbl">Total</div>
-            </div>
-        </a>
         <a href="<?php echo e(route('submissions.index', array_merge(request()->only(['search','carrier','date_from','date_to']), ['status' => 'pending']))); ?>" class="kpi-link">
             <div class="kpi-card k-warn <?php echo e($status === 'pending' ? 'active' : ''); ?>">
                 <i class="bx bx-timer k-icon"></i>
@@ -159,11 +167,11 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
     <div class="sec-card">
         <div class="sec-hdr">
             <h6><i class="bx bx-list-check"></i> Validated Leads</h6>
-            <span style="font-size:.62rem;color:var(--bs-surface-400);"><?php echo e($totalCount); ?> records</span>
+            <span style="font-size:.62rem;color:var(--bs-surface-400);"><?php echo e($leads->total()); ?> records</span>
         </div>
 
         
-        <form method="GET" action="<?php echo e(route('submissions.index')); ?>" class="filter-form">
+        <form method="GET" action="<?php echo e(route('submissions.index')); ?>" class="filter-form" id="submissionsFilterForm">
             <input type="hidden" name="status" value="<?php echo e($status); ?>">
             <div>
                 <label>Search</label>
@@ -178,20 +186,18 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </select>
             </div>
-            <div>
-                <label>From</label>
-                <input type="date" name="date_from" class="form-control" value="<?php echo e($dateFrom); ?>" style="width:135px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="sl-pill-label">FROM</span>
+                <input type="date" name="date_from" id="filter_date_from" class="sl-pill-date" value="<?php echo e($dateFrom); ?>" onchange="this.form.submit()">
+                <span class="sl-pill-label">TO</span>
+                <input type="date" name="date_to" id="filter_date_to" class="sl-pill-date" value="<?php echo e($dateTo); ?>" onchange="this.form.submit()">
+                <button type="button" class="sl-pill-today" onclick="setTodayFilter()" title="Show today's submissions">Today</button>
+                <button type="button" class="sl-pill-week" onclick="setThisWeekFilter()" title="Show this week's submissions">This Week</button>
+                <button type="button" class="sl-pill-month" onclick="setThisMonthFilter()" title="Show this month's submissions">This Month</button>
             </div>
-            <div>
-                <label>To</label>
-                <input type="date" name="date_to" class="form-control" value="<?php echo e($dateTo); ?>" style="width:135px;">
-            </div>
-            <button type="submit" class="a-btn a-send" style="height:2rem;">
-                <i class="bx bx-search-alt-2"></i> Filter
-            </button>
-            <a href="<?php echo e(route('submissions.index', ['status' => $status])); ?>" class="f-reset">
-                <i class="bx bx-reset"></i> Clear
-            </a>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','carrier','date_from','date_to'])): ?>
+                <a href="<?php echo e(route('submissions.index', ['status' => $status])); ?>" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </form>
 
         
@@ -200,35 +206,17 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Client Name</th>
-                        <th>Phone</th>
+                        <th>Customer Name</th>
                         <th>Closer</th>
                         <th>Sale Date</th>
-                        <th>Carrier</th>
-                        <th>Policy Type</th>
-                        <th>Coverage</th>
-                        <th>Premium</th>
-                        <th>Settlement</th>
-                        <th>Initial Draft</th>
-                        <th>Future Draft</th>
-                        <th>QA Status</th>
-                        <th>QA By</th>
-                        <th>Validator</th>
-                        <th>Validated At</th>
-                        <th>App ID</th>
-                        <th>Policy Number</th>
-                        <th>Partner</th>
                         <th>Status</th>
+                        <th>Reviewed By</th>
+                        <th>Reviewed At</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <?php
-                            $isReady = $lead->manager_status === 'approved' 
-                                    && !empty($lead->policy_number) 
-                                    && !empty($lead->assigned_partner);
-                        ?>
                         <tr>
                             <td style="color:var(--bs-surface-400);"><?php echo e($loop->iteration + (($leads->currentPage() - 1) * $leads->perPage())); ?></td>
                             <td>
@@ -237,7 +225,6 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 
                                 </a>
                             </td>
-                            <td><?php echo e($lead->phone_number ?? '—'); ?></td>
                             <td>
                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
                                     <span class="bd-mini bd-blue"><?php echo e($lead->closer_name); ?></span>
@@ -246,86 +233,40 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td><?php echo e($lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—'); ?></td>
-                            <td><?php echo e($lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—')); ?></td>
-                            <td><?php echo e($lead->policy_type ?? '—'); ?></td>
-                            <td><?php echo e($lead->coverage_amount ? '$' . number_format($lead->coverage_amount, 0) : '—'); ?></td>
-                            <td>$<?php echo e(number_format($lead->monthly_premium, 2)); ?></td>
-                            <td><?php echo e($lead->settlement_type ?? '—'); ?></td>
-                            <td><?php echo e($lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('M d, Y') : '—'); ?></td>
-                            <td><?php echo e($lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('M d, Y') : '—'); ?></td>
-                            
                             <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->qa_status === 'Good'): ?>
-                                    <span class="bd-mini bd-green">Good</span>
-                                <?php elseif($lead->qa_status === 'Avg'): ?>
-                                    <span class="bd-mini bd-warn">Avg</span>
-                                <?php elseif($lead->qa_status === 'Bad'): ?>
-                                    <span class="bd-mini bd-red">Bad</span>
-                                <?php else: ?>
-                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->qaUser): ?>
-                                    <strong style="font-size:.72rem"><?php echo e($lead->qaUser->name); ?></strong>
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->qa_reviewed_at): ?>
-                                        <div style="font-size:.58rem;color:#94a3b8;"><?php echo e(\Carbon\Carbon::parse($lead->qa_reviewed_at)->format('M d, h:i A')); ?></div>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                <?php else: ?>
-                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            
-                            <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validated_by): ?>
-                                    <strong style="font-size:.72rem"><?php echo e($lead->ravens_validated_by); ?></strong>
-                                <?php else: ?>
-                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ravens_validated_at): ?>
-                                    <span style="font-size:.72rem"><?php echo e(\Carbon\Carbon::parse($lead->ravens_validated_at)->format('M d, Y')); ?></span>
-                                    <div style="font-size:.58rem;color:#94a3b8;"><?php echo e(\Carbon\Carbon::parse($lead->ravens_validated_at)->format('h:i A')); ?></div>
-                                <?php else: ?>
-                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            
-                            <td style="font-weight:600;font-size:.72rem;"><?php echo e($lead->app_id ?? '—'); ?></td>
-                            <td style="font-size:.72rem;"><?php echo e($lead->policy_number ?? '—'); ?></td>
-                            <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->assigned_partner): ?>
-                                    <span class="bd-mini" style="background:rgba(212,175,55,.12);color:#b89730;"><?php echo e($lead->assigned_partner); ?></span>
-                                <?php else: ?>
-                                    <span style="color:#94a3b8;font-size:.72rem">—</span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                            </td>
-                            <td>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->manager_status): ?>
-                                    <span class="bd-mini bd-warn">Pending Approval</span>
-                                <?php elseif($lead->manager_status === 'approved'): ?>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->submission_status || $lead->submission_status === 'pending'): ?>
+                                    <span class="bd-mini bd-warn">Pending</span>
+                                <?php elseif($lead->submission_status === 'approved'): ?>
                                     <span class="bd-mini bd-green">Approved</span>
-                                <?php elseif($lead->manager_status === 'declined'): ?>
+                                <?php elseif($lead->submission_status === 'declined'): ?>
                                     <span class="bd-mini bd-red">Declined</span>
-                                <?php elseif($lead->manager_status === 'underwriting'): ?>
+                                <?php elseif($lead->submission_status === 'underwriting'): ?>
                                     <span class="bd-mini bd-blue">Underwriting</span>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->submissionReviewer): ?>
+                                    <span style="font-size:.72rem;font-weight:600;"><?php echo e($lead->submissionReviewer->name); ?></span>
+                                <?php else: ?>
+                                    <span style="color:#94a3b8;font-size:.72rem;">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->submission_at): ?>
+                                    <span style="font-size:.72rem;"><?php echo e(\Carbon\Carbon::parse($lead->submission_at)->format('M d, h:i A')); ?></span>
+                                <?php else: ?>
+                                    <span style="color:#94a3b8;font-size:.72rem;">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($isReady): ?>
-                                        <button class="a-btn a-send btn-send-contract" data-id="<?php echo e($lead->id); ?>" style="font-size:.63rem;">
-                                            <i class="bx bx-right-arrow-alt"></i> Send
-                                        </button>
-                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                     <button class="a-btn a-edit btn-open-actions-modal"
                                         data-id="<?php echo e($lead->id); ?>"
                                         data-name="<?php echo e($lead->cn_name); ?>"
                                         data-policy="<?php echo e($lead->policy_number ?? ''); ?>"
                                         data-partner="<?php echo e($lead->assigned_partner ?? ''); ?>"
                                         data-appid="<?php echo e($lead->app_id ?? ''); ?>"
-                                        data-decision="<?php echo e($lead->manager_status ?? ''); ?>"
+                                        data-decision="<?php echo e($lead->submission_status ?? ''); ?>"
                                         style="font-size:.63rem;">
                                         <i class="bx bx-pencil"></i> Manage
                                     </button>
@@ -342,7 +283,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="21" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="8" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No validated leads in Submissions for the selected period.
                             </td>
@@ -545,7 +486,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                manager_status:   decision,
+                submission_status:   decision,
                 app_id:           appId || null,
                 policy_number:    decision === 'approved' ? (policy || null) : null,
                 assigned_partner: decision === 'approved' ? (partner || null) : null,
@@ -564,20 +505,6 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             }
         })
         .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="bx bx-save me-1"></i> Save'; alert('Error: ' + err.message); });
-    });
-
-    // ==== Send to Contract ====
-    document.querySelectorAll('.btn-send-contract').forEach(btn => {
-        btn.addEventListener('click', function() {
-            var id = this.dataset.id;
-            if (!confirm('Send this lead to Pending Contracts?')) return;
-            fetch('/submissions/' + id + '/send-to-contract', {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            })
-            .then(r => r.json())
-            .then(data => { if (data.success) location.reload(); else alert(data.message); });
-        });
     });
 
     // ==== Recall / Send Back ====
@@ -634,13 +561,23 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
         .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="bx bx-undo me-1"></i> Send Back'; alert('Error: ' + err.message); });
     });
 
-    // Send Back to Previous Stage
+    // Send Back to Previous Stage (with debounce to prevent double-click)
     document.querySelectorAll('.btn-send-back').forEach(btn => {
-        btn.addEventListener('click', function() {
-            var id = this.dataset.id;
-            var name = this.dataset.name;
-            if (!confirm('Send "' + name + '" back to the previous stage?')) return;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             var button = this;
+            if (button.dataset.processing === 'true') return; // Prevent double-click
+            
+            var id = button.dataset.id;
+            var name = button.dataset.name;
+            
+            button.dataset.processing = 'true';
+            if (!confirm('Send "' + name + '" back to the previous stage?')) {
+                button.dataset.processing = 'false';
+                return;
+            }
+            
             button.disabled = true;
             button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
             fetch('/leads/' + id + '/send-to-previous-stage', {
@@ -649,22 +586,55 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             })
             .then(r => r.json())
             .then(data => {
-                button.disabled = false;
-                button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
                 if (data.success) {
                     location.reload();
                 } else {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                    button.dataset.processing = 'false';
                     alert(data.message || 'Error sending back.');
                 }
             })
             .catch(err => {
                 button.disabled = false;
                 button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                button.dataset.processing = 'false';
                 alert('Error: ' + err.message);
             });
         });
     });
 })();
+
+// Date filter functions (matching Sales page behavior)
+function setTodayFilter() {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+    document.getElementById('filter_date_from').value = today;
+    document.getElementById('filter_date_to').value = today;
+    document.getElementById('submissionsFilterForm').submit();
+}
+
+function setThisWeekFilter() {
+    const now = new Date();
+    const pacific = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    const dayOfWeek = pacific.getDay();
+    const sunday = new Date(pacific);
+    sunday.setDate(pacific.getDate() - dayOfWeek);
+    const saturday = new Date(pacific);
+    saturday.setDate(pacific.getDate() + (6 - dayOfWeek));
+    document.getElementById('filter_date_from').value = sunday.toISOString().split('T')[0];
+    document.getElementById('filter_date_to').value = saturday.toISOString().split('T')[0];
+    document.getElementById('submissionsFilterForm').submit();
+}
+
+function setThisMonthFilter() {
+    const now = new Date();
+    const pacific = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    const firstDay = new Date(pacific.getFullYear(), pacific.getMonth(), 1);
+    const lastDay = new Date(pacific.getFullYear(), pacific.getMonth() + 1, 0);
+    document.getElementById('filter_date_from').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('filter_date_to').value = lastDay.toISOString().split('T')[0];
+    document.getElementById('submissionsFilterForm').submit();
+}
 </script>
 <?php $__env->stopSection(); ?>
 

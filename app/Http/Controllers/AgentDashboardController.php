@@ -41,7 +41,7 @@ class AgentDashboardController extends Controller
         // Calculate statistics - include both closed sales and issued apps
         $stats = [
             'total_sales' => $totalSalesCount,
-            'approved' => $allLeads->where('status', Statuses::LEAD_ACCEPTED)->count() + $issuedLeads->where('manager_status', Statuses::MGR_APPROVED)->count(),
+            'approved' => $allLeads->where('status', Statuses::LEAD_ACCEPTED)->count() + $issuedLeads->where('submission_status', Statuses::SUB_APPROVED)->count(),
             'declined' => $allLeads->where('status', Statuses::LEAD_REJECTED)->count(),
             'revenue' => $allLeads->where('status', Statuses::LEAD_ACCEPTED)->sum('monthly_premium') + $issuedLeads->sum('monthly_premium'),
             'company_share' => ($allLeads->where('status', Statuses::LEAD_ACCEPTED)->sum('monthly_premium') + $issuedLeads->sum('monthly_premium')) * 0.3, // 30% company share

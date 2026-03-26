@@ -89,11 +89,11 @@ class Lead extends Model
         'qa_user_id',
         'qa_reviewed_at',
 
-        // Manager fields
-        'manager_status',
-        'manager_reason',
-        'manager_user_id',
-        'manager_reviewed_at',
+        // Submission review fields
+        'submission_status',
+        'submission_reason',
+        'submission_by',
+        'submission_at',
 
         // Ravens Validation fields
         'ravens_validated_at',
@@ -268,7 +268,7 @@ class Lead extends Model
         'declined_at' => 'datetime',
         'callback_note_updated_at' => 'datetime',
         'qa_reviewed_at' => 'datetime',
-        'manager_reviewed_at' => 'datetime',
+        'submission_at' => 'datetime',
         'ravens_validated_at' => 'datetime',
         'recall_requested_at' => 'datetime',
         'followup_assigned_at' => 'datetime',
@@ -442,11 +442,11 @@ class Lead extends Model
     }
 
     /**
-     * Get the manager user assigned to this lead
+     * Get the submission reviewer assigned to this lead
      */
-    public function managerUser()
+    public function submissionReviewer()
     {
-        return $this->belongsTo(User::class, 'manager_user_id');
+        return $this->belongsTo(User::class, 'submission_by');
     }
 
     /**

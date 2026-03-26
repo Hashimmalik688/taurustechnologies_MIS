@@ -40,14 +40,14 @@ class Statuses
     public const QA_IN_REVIEW = 'In Review';
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Manager Status  (leads.manager_status column — lowercase)
+    //  Submission Status  (leads.submission_status column — lowercase)
     // ═══════════════════════════════════════════════════════════════════
 
-    public const MGR_PENDING      = 'pending';
-    public const MGR_APPROVED     = 'approved';
-    public const MGR_DECLINED     = 'declined';
-    public const MGR_UNDERWRITING = 'underwriting';
-    public const MGR_CHARGEBACK   = 'chargeback';
+    public const SUB_PENDING      = 'pending';
+    public const SUB_APPROVED     = 'approved';
+    public const SUB_DECLINED     = 'declined';
+    public const SUB_UNDERWRITING = 'underwriting';
+    public const SUB_CHARGEBACK   = 'chargeback';
 
     // ═══════════════════════════════════════════════════════════════════
     //  Issuance Status  (leads.issuance_status column — Title Case)

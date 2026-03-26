@@ -39,7 +39,7 @@ class PendingDraftController extends Controller
         }
 
         // All pending-draft leads: followup done, not yet paid/died
-        $baseQuery = Lead::with(['insuranceCarrier', 'notPaidBy', 'paidBy', 'policyDiedBy', 'followupDoneBy'])
+        $baseQuery = Lead::with(['insuranceCarrier', 'notPaidBy', 'paidBy', 'policyDiedBy', 'followupDoneBy', 'pendingDraftBy'])
             ->whereNotNull('followup_done_at')
             ->whereNull('paid_at')
             ->whereNull('policy_died_at');

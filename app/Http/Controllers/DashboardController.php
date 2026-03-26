@@ -146,7 +146,7 @@ class DashboardController extends Controller
         // Calculate revenue from issued and verified sales (Revenue Analytics logic)
         // Use agent_revenue (calculated commission) with fallback to monthly_premium
         $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->get();
             
@@ -154,25 +154,25 @@ class DashboardController extends Controller
             return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
         });
         
-        // Sales status counts by manager_status (MTD) using sale_date
+        // Sales status counts by submission_status (MTD) using sale_date
         $done_count = $total_monthly_sales; // Total submitted MTD
         $approved_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->whereMonth('sale_date', now()->month)
             ->whereYear('sale_date', now()->year)
             ->count();
             
         $underwriting_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
-            ->where('manager_status', Statuses::MGR_UNDERWRITING)
+            ->where('submission_status', Statuses::SUB_UNDERWRITING)
             ->whereMonth('sale_date', now()->month)
             ->whereYear('sale_date', now()->year)
             ->count();
             
         $declined_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
-            ->where('manager_status', Statuses::MGR_DECLINED)
+            ->where('submission_status', Statuses::SUB_DECLINED)
             ->whereMonth('sale_date', now()->month)
             ->whereYear('sale_date', now()->year)
             ->count();
@@ -194,7 +194,7 @@ class DashboardController extends Controller
         $present_count = $todayAttendances->whereIn('status', [Statuses::ATTENDANCE_PRESENT, Statuses::ATTENDANCE_LATE])->count();
         $absent_count = $todayAttendances->where('status', Statuses::ATTENDANCE_ABSENT)->count();
 
-        // Sales per closer - Calculate from local database using manager_status and sale_date
+        // Sales per closer - Calculate from local database using submission_status and sale_date
         $closers = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
             ->whereMonth('sale_date', now()->month)
@@ -221,9 +221,9 @@ class DashboardController extends Controller
                 'closer' => $closerName,
                 'today' => $todaySales,
                 'mtd' => $sales->count(),
-                'approvedMTD' => $sales->where('manager_status', Statuses::MGR_APPROVED)->count(),
-                'declinedMTD' => $sales->where('manager_status', Statuses::MGR_DECLINED)->count(),
-                'uwMTD' => $sales->where('manager_status', Statuses::MGR_UNDERWRITING)->count(),
+                'approvedMTD' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
+                'declinedMTD' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
+                'uwMTD' => $sales->where('submission_status', Statuses::SUB_UNDERWRITING)->count(),
                 'team' => $team
             ];
         }
@@ -333,7 +333,7 @@ class DashboardController extends Controller
         // Get current month and today
         $today = today();
         
-        // Sales counts using manager_status field and sale_at date (same as root method)
+        // Sales counts using submission_status field and sale_at date (same as root method)
         $total_sales_today = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
             ->whereDate('sale_at', $today)
@@ -346,25 +346,25 @@ class DashboardController extends Controller
             ->whereYear('sale_at', now()->year)
             ->count();
         
-        // Sales status counts by manager_status (MTD) - consistent with root method
+        // Sales status counts by submission_status (MTD) - consistent with root method
         $done_count = $total_monthly_sales; // Total submitted MTD
         $approved_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
             
         $underwriting_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_UNDERWRITING)
+            ->where('submission_status', Statuses::SUB_UNDERWRITING)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
             
         $declined_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_DECLINED)
+            ->where('submission_status', Statuses::SUB_DECLINED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -406,9 +406,9 @@ class DashboardController extends Controller
             }
             
             // Count statuses
-            $approvedSales = $sales->where('manager_status', Statuses::MGR_APPROVED)->count();
-            $declinedSales = $sales->where('manager_status', Statuses::MGR_DECLINED)->count();
-            $uwSales = $sales->where('manager_status', Statuses::MGR_UNDERWRITING)->count();
+            $approvedSales = $sales->where('submission_status', Statuses::SUB_APPROVED)->count();
+            $declinedSales = $sales->where('submission_status', Statuses::SUB_DECLINED)->count();
+            $uwSales = $sales->where('submission_status', Statuses::SUB_UNDERWRITING)->count();
             
             $sales_per_closer[] = [
                 'closer' => $closerName,
@@ -458,7 +458,7 @@ class DashboardController extends Controller
         // Calculate revenue from issued and approved sales (same logic as root method)
         // Use agent_revenue (calculated commission) with fallback to monthly_premium
         $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->get();
             

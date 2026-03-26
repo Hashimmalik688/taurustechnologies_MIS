@@ -23,7 +23,7 @@ class BankVerificationController extends Controller
 
         // Get all approved sales that are also issued
         $query = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->whereNotNull('issuance_status')
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->with(['insuranceCarrier', 'bankVerifiedByUser', 'bankVerifierAssignedByUser']);
@@ -56,7 +56,7 @@ class BankVerificationController extends Controller
         
         // Single query for all bank verification status counts (instead of 4 separate COUNTs)
         $bvAgg = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->when($request->filled('month'), fn($q) => $q->whereMonth('issuance_date', $request->month))
             ->when($request->filled('year'),  fn($q) => $q->whereYear('issuance_date', $request->year))

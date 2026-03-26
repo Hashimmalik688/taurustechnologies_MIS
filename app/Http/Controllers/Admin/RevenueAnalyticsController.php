@@ -37,7 +37,7 @@ class RevenueAnalyticsController extends Controller
 
         // Get all issued and verified sales (eager-load partner for breakdown table)
         $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->whereBetween('issuance_date', [$periodStart, $periodEnd])
             ->with('partner')

@@ -21,7 +21,7 @@ class FollowupController extends Controller
         $query = Lead::with(['insuranceCarrier', 'assignedAgent', 'followupPerson'])
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED);
+            ->where('submission_status', Statuses::SUB_APPROVED);
         
         // Search functionality
         if ($request->filled('search')) {
@@ -95,8 +95,11 @@ class FollowupController extends Controller
         $userId = auth()->id();
         
         // Get leads assigned to this user for followup
+        // Only show leads that are actually in Followup stage (Issued status, not yet sent to Pending Draft)
         $query = Lead::with(['insuranceCarrier', 'assignedAgent'])
             ->where('assigned_followup_person', $userId)
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+            ->whereNull('followup_done_at')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at');
         
@@ -269,7 +272,7 @@ class FollowupController extends Controller
         $pendingQuery = Lead::whereNull('assigned_followup_person')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', \App\Support\Statuses::MGR_APPROVED)
+            ->where('submission_status', \App\Support\Statuses::SUB_APPROVED)
             ->where(fn($q) => $q->whereNull('followup_status')->orWhere('followup_status', '!=', 'Yes'));
         if ($request->filled('date_from')) {
             $pendingQuery->whereDate('sale_date', '>=', $request->date_from);

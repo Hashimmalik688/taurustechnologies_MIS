@@ -472,7 +472,7 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->manager_reason ?? 'No comments' }}</span>
+                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span>
                                                 </td>
                                             </tr>
                                         @empty
@@ -505,7 +505,7 @@
                                             <th style="min-width:100px">Coverage</th>
                                             <th style="min-width:90px">Premium</th>
                                             <th style="min-width:90px">Status</th>
-                                            <th style="min-width:180px">Manager Reason</th>
+                                            <th style="min-width:180px">Submission Reason</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -535,7 +535,7 @@
                                                     <span class="badge bg-success"><i class="bx bx-check-circle me-1"></i>RETAINED</span>
                                                 </td>
                                                 <td>
-                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->manager_reason ?? 'No comments' }}</span>
+                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span>
                                                 </td>
                                             </tr>
                                         @empty
@@ -618,7 +618,7 @@
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->manager_reason ?? 'No comments' }}</span>
+                                                    <span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span>
                                                 </td>
                                             </tr>
                                         @empty

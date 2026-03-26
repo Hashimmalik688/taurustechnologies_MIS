@@ -132,6 +132,8 @@
                         <th>Premium</th>
                         <th>Closer</th>
                         <th>Followup Done</th>
+                        <th>Marked By</th>
+                        <th>Marked At</th>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($tab === 'not_paid'): ?>
                         <th>FDFP Type</th>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
@@ -143,10 +145,7 @@
                         <tr>
                             <td style="color:var(--bs-surface-400);"><?php echo e($lead->id); ?></td>
                             <td>
-                                <a href="<?php echo e(route('issuance.show', $lead->id)); ?>" style="font-weight:500;font-size:.73rem;">
-                                    <?php echo e($lead->cn_name ?? '—'); ?>
-
-                                </a>
+                                <span style="font-weight:500;font-size:.73rem;"><?php echo e($lead->cn_name ?? '—'); ?></span>
                             </td>
                             <td><?php echo e($lead->phone_number ?? '—'); ?></td>
                             <td><?php echo e($lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—')); ?></td>
@@ -159,6 +158,8 @@
                                     <div style="font-size:.6rem;color:var(--bs-surface-400);">by <?php echo e($lead->followupDoneBy->name); ?></div>
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
+                            <td><?php echo e($lead->pendingDraftBy->name ?? '—'); ?></td>
+                            <td><?php echo e($lead->pending_draft_at ? $lead->pending_draft_at->format('M d, Y h:i A') : '—'); ?></td>
                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($tab === 'not_paid'): ?>
                             <td>
                                 <span class="bd-np">
@@ -178,7 +179,7 @@
                             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    @canDo('pending-draft', 'full')
+                                    <?php if(auth()->check() && auth()->user()->canDeleteInModule('pending-draft')): ?>
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($lead->not_paid_at)): ?>
                                         <button class="a-btn a-paid btn-mark-paid" data-id="<?php echo e($lead->id); ?>">
                                             <i class="bx bx-badge-check"></i> Mark Paid
@@ -191,8 +192,8 @@
                                         <button class="a-btn a-died btn-policy-died" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>">
                                             <i class="bx bx-x-circle"></i> Policy Died
                                         </button>
-                                    @endcanDo
-                                    @canDo('pending-draft', 'edit')
+                                    <?php endif; ?>
+                                    <?php if(auth()->check() && auth()->user()->canEditModule('pending-draft')): ?>
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(empty($lead->not_paid_at)): ?>
                                         <button class="a-btn a-fdfp btn-mark-fdfp" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>">
                                             <i class="bx bx-error"></i> Not Paid
@@ -205,13 +206,13 @@
                                         <button class="a-btn btn-send-back" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>" style="background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
                                             <i class="bx bx-arrow-back"></i> Back
                                         </button>
-                                    @endcanDo
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="11" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No leads in this queue for the selected period.
                             </td>
@@ -303,7 +304,7 @@
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php $__env->startSection('js'); ?>
+<?php $__env->startSection('script'); ?>
 <script>
 (function() {
     let currentId = null;
@@ -364,13 +365,23 @@
         });
     });
 
-    // Send Back to Previous Stage
+    // Send Back to Previous Stage (with debounce to prevent double-click)
     document.querySelectorAll('.btn-send-back').forEach(btn => {
-        btn.addEventListener('click', function() {
-            var id = this.dataset.id;
-            var name = this.dataset.name;
-            if (!confirm('Send "' + name + '" back to the previous stage?')) return;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             var button = this;
+            if (button.dataset.processing === 'true') return; // Prevent double-click
+            
+            var id = button.dataset.id;
+            var name = button.dataset.name;
+            
+            button.dataset.processing = 'true';
+            if (!confirm('Send "' + name + '" back to the previous stage?')) {
+                button.dataset.processing = 'false';
+                return;
+            }
+            
             button.disabled = true;
             button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
             fetch('/leads/' + id + '/send-to-previous-stage', {
@@ -383,17 +394,19 @@
             })
             .then(r => r.json())
             .then(data => {
-                button.disabled = false;
-                button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
                 if (data.success) {
                     location.reload();
                 } else {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                    button.dataset.processing = 'false';
                     alert(data.message || 'Error sending back.');
                 }
             })
             .catch(err => {
                 button.disabled = false;
                 button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                button.dataset.processing = 'false';
                 alert('Error: ' + err.message);
             });
         });

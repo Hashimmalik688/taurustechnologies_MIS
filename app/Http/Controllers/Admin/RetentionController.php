@@ -100,7 +100,7 @@ class RetentionController extends Controller
         $disposition_query = Lead::with('insuranceCarrier')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', 'Incomplete');
         
         $disposition_query = $applyFilters($disposition_query);
@@ -108,7 +108,7 @@ class RetentionController extends Controller
 
         // 5. NOT ISSUED — Blocked at Pendings Approved stage; Retention must resolve
         $not_issued_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy'])
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->whereNull('pending_contract_at')
             ->whereNotNull('not_issued_at')
             ->whereNull('not_issued_resolved_at');// Policy Died leads are excluded — no retention action permitted on them
@@ -145,12 +145,12 @@ class RetentionController extends Controller
         // Legacy Disposition count
         $disposition_count = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', 'Incomplete')
             ->count();
 
         // New pipeline counts
-        $not_issued_count = Lead::where('manager_status', Statuses::MGR_APPROVED)
+        $not_issued_count = Lead::where('submission_status', Statuses::SUB_APPROVED)
             ->whereNull('pending_contract_at')
             ->whereNotNull('not_issued_at')
             ->whereNull('not_issued_resolved_at')
@@ -219,9 +219,9 @@ class RetentionController extends Controller
             $newSale->qa_status = Statuses::QA_PENDING; // Reset QA status
             $newSale->qa_reason = null;
             $newSale->qa_user_id = null;
-            $newSale->manager_status = Statuses::MGR_PENDING; // Reset manager status
-            $newSale->manager_reason = null;
-            $newSale->manager_user_id = null;
+            $newSale->submission_status = Statuses::SUB_PENDING; // Reset manager status
+            $newSale->submission_reason = null;
+            $newSale->submission_by = null;
             $newSale->comments = 'Retained from chargeback by ' . $retentionOfficer;
             $newSale->save();
             
@@ -245,9 +245,9 @@ class RetentionController extends Controller
             $newSale->qa_status = Statuses::QA_PENDING; // Reset QA status
             $newSale->qa_reason = null;
             $newSale->qa_user_id = null;
-            $newSale->manager_status = Statuses::MGR_PENDING; // Reset manager status
-            $newSale->manager_reason = null;
-            $newSale->manager_user_id = null;
+            $newSale->submission_status = Statuses::SUB_PENDING; // Reset manager status
+            $newSale->submission_reason = null;
+            $newSale->submission_by = null;
             $newSale->comments = 'Rewritten from chargeback by ' . $retentionOfficer;
             $newSale->save();
             
@@ -279,7 +279,7 @@ class RetentionController extends Controller
         $query = Lead::with('insuranceCarrier')
             ->whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', 'Incomplete');
         
         // Search functionality

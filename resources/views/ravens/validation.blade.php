@@ -158,9 +158,9 @@
                     </td>
                     <td>{{ $lead->phone_number ?? '—' }}</td>
                     <td class="text-center">
-                        @if($lead->manager_status === 'approved')
+                        @if($lead->submission_status === 'approved')
                             <span class="mgr-badge mgr-approved"><i class="bx bx-check"></i> Approved</span>
-                        @elseif($lead->manager_status === 'declined')
+                        @elseif($lead->submission_status === 'declined')
                             <span class="mgr-badge mgr-declined"><i class="bx bx-x"></i> Declined</span>
                         @else
                             <span class="mgr-badge" style="background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);"><i class="bx bx-time-five"></i> Pending</span>
@@ -212,8 +212,8 @@
                 <h5 class="modal-title">
                     <i class="bx bx-user-circle" style="color:#d4af37;margin-right:.4rem;"></i>
                     {{ $lead->cn_name }} &mdash;
-                    <span class="mgr-badge {{ $lead->manager_status === 'approved' ? 'mgr-approved' : ($lead->manager_status === 'declined' ? 'mgr-declined' : '') }}" style="margin-left:.3rem;{{ $lead->manager_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : '' }}">
-                        {{ ucfirst($lead->manager_status ?? '—') }}
+                    <span class="mgr-badge {{ $lead->submission_status === 'approved' ? 'mgr-approved' : ($lead->submission_status === 'declined' ? 'mgr-declined' : '') }}" style="margin-left:.3rem;{{ $lead->submission_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : '' }}">
+                        {{ ucfirst($lead->submission_status ?? '—') }}
                     </span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -337,10 +337,10 @@
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td>Status</td>
-                                    <td><span class="mgr-badge {{ $lead->manager_status === 'approved' ? 'mgr-approved' : ($lead->manager_status === 'declined' ? 'mgr-declined' : '') }}" style="{{ $lead->manager_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : '' }}">{{ ucfirst($lead->manager_status ?? '—') }}</span></td>
+                                    <td><span class="mgr-badge {{ $lead->submission_status === 'approved' ? 'mgr-approved' : ($lead->submission_status === 'declined' ? 'mgr-declined' : '') }}" style="{{ $lead->submission_status === 'pending' ? 'background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.2);' : '' }}">{{ ucfirst($lead->submission_status ?? '—') }}</span></td>
                                 </tr>
-                                <tr><td>Reviewed At</td><td>{{ $lead->manager_reviewed_at?->setTimezone('America/Los_Angeles')->format('M d, Y h:i A') ?? '—' }}</td></tr>
-                                <tr><td>Reason</td><td>{{ $lead->manager_reason ?? '—' }}</td></tr>
+                                <tr><td>Reviewed At</td><td>{{ $lead->submission_at?->setTimezone('America/Los_Angeles')->format('M d, Y h:i A') ?? '—' }}</td></tr>
+                                <tr><td>Reason</td><td>{{ $lead->submission_reason ?? '—' }}</td></tr>
                             </table>
                             @if($lead->manager_notes)
                                 <div style="margin-top:.5rem;padding:.5rem .65rem;background:rgba(212,175,55,.05);border-radius:.4rem;border:1px solid rgba(212,175,55,.12);font-size:.77rem;">{{ $lead->manager_notes }}</div>

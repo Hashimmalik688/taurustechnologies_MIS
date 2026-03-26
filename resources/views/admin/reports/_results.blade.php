@@ -77,9 +77,9 @@
                             @endif
                         </td>
                         <td>
-                            @if($lead->manager_status)
+                            @if($lead->submission_status)
                                 @php
-                                    $mgrClass = match($lead->manager_status) {
+                                    $mgrClass = match($lead->submission_status) {
                                         'approved' => 'rp-badge-sale',
                                         'pending' => 'rp-badge-pending',
                                         'declined' => 'rp-badge-declined',
@@ -88,7 +88,7 @@
                                         default => 'rp-badge-default',
                                     };
                                 @endphp
-                                <span class="rp-badge {{ $mgrClass }}">{{ ucfirst($lead->manager_status) }}</span>
+                                <span class="rp-badge {{ $mgrClass }}">{{ ucfirst($lead->submission_status) }}</span>
                             @else
                                 —
                             @endif

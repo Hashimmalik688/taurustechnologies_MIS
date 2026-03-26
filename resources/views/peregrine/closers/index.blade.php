@@ -322,7 +322,7 @@
                             <td class="text-center">
                                 <span class="s-pill s-declined">
                                     @if($lead->status == Statuses::LEAD_DECLINED)
-                                        {{ $lead->manager_reason ?? $lead->decline_reason ?? 'Declined' }}
+                                        {{ $lead->submission_reason ?? $lead->decline_reason ?? 'Declined' }}
                                     @else
                                         {{ $lead->decline_reason ?? 'Failed' }}
                                     @endif

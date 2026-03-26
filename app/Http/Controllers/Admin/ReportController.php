@@ -897,7 +897,7 @@ class ReportController extends Controller
                 'leads.sale_at',
                 'leads.issuance_status',
                 'leads.qa_status',
-                'leads.manager_status',
+                'leads.submission_status',
                 'leads.retention_status',
                 'leads.agent_commission',
                 'leads.agent_revenue',
@@ -978,7 +978,7 @@ class ReportController extends Controller
                 'leads.closer_name',
                 'leads.sale_date',
                 'leads.qa_status',
-                'leads.manager_status',
+                'leads.submission_status',
                 'leads.retention_status',
                 'leads.issuance_status',
                 'leads.agent_commission',
@@ -1033,7 +1033,7 @@ class ReportController extends Controller
                     $row->partner_name ?? $row->assigned_partner,
                     $row->sale_date,
                     $row->qa_status,
-                    $row->manager_status,
+                    $row->submission_status,
                     $row->retention_status,
                     $row->issuance_status,
                     $row->agent_commission,
@@ -1077,10 +1077,10 @@ class ReportController extends Controller
                 });
                 break;
             case 'submissions':
-                $query->whereIn('leads.manager_status', [
-                    Statuses::MGR_APPROVED,
-                    Statuses::MGR_PENDING,
-                    Statuses::MGR_UNDERWRITING,
+                $query->whereIn('leads.submission_status', [
+                    Statuses::SUB_APPROVED,
+                    Statuses::SUB_PENDING,
+                    Statuses::SUB_UNDERWRITING,
                 ]);
                 break;
             case 'chargebacks':
@@ -1115,7 +1115,7 @@ class ReportController extends Controller
             }
         }
         if ($request->filled('manager_id')) {
-            $query->where('leads.manager_user_id', $request->manager_id);
+            $query->where('leads.submission_by', $request->manager_id);
         }
         // Carrier: use alias mapping to match free-text carrier_name variations
         if ($request->filled('carrier_id')) {
@@ -1149,8 +1149,8 @@ class ReportController extends Controller
         if ($request->filled('qa_status')) {
             $query->where('leads.qa_status', $request->qa_status);
         }
-        if ($request->filled('manager_status')) {
-            $query->where('leads.manager_status', $request->manager_status);
+        if ($request->filled('submission_status')) {
+            $query->where('leads.submission_status', $request->submission_status);
         }
         if ($request->filled('date_from')) {
             $query->whereDate('leads.created_at', '>=', $request->date_from);

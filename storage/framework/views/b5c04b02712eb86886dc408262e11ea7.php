@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Paid Sales'); ?>
 
-@section('title', 'Paid Sales')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 .kpi-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.65rem;}
 .kpi-card{flex:1 1 80px;min-width:75px;padding:.65rem .6rem;border-radius:.55rem;text-align:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:transform .15s;}
@@ -27,9 +25,9 @@
 .filter-form label{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--bs-surface-500);margin-bottom:.15rem;}
 .f-reset{font-size:.68rem;color:var(--bs-surface-400);text-decoration:none;align-self:flex-end;padding:.3rem .5rem;}
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid px-3 py-3" style="max-width:1600px">
 
     <div class="d-flex align-items-center justify-content-between mb-2">
@@ -44,18 +42,18 @@
         </div>
     </div>
 
-    {{-- KPIs --}}
+    
     <div class="kpi-row">
         <div class="kpi-card k-gold">
-            <div class="k-val">{{ $totalCount }}</div>
+            <div class="k-val"><?php echo e($totalCount); ?></div>
             <div class="k-lbl">Total Paid</div>
         </div>
         <div class="kpi-card k-green">
-            <div class="k-val">${{ number_format($totalPremium, 2) }}</div>
+            <div class="k-val">$<?php echo e(number_format($totalPremium, 2)); ?></div>
             <div class="k-lbl">Monthly Premium</div>
         </div>
         <div class="kpi-card k-blue">
-            <div class="k-val">${{ number_format($totalCoverage, 0) }}</div>
+            <div class="k-val">$<?php echo e(number_format($totalCoverage, 0)); ?></div>
             <div class="k-lbl">Total Coverage</div>
         </div>
     </div>
@@ -66,33 +64,33 @@
             <span style="font-size:.68rem;color:var(--bs-surface-400);">Read-only</span>
         </div>
 
-        {{-- Filters --}}
-        <form method="GET" action="{{ route('paid-sales.index') }}" class="filter-form">
+        
+        <form method="GET" action="<?php echo e(route('paid-sales.index')); ?>" class="filter-form">
             <div>
                 <label>Search</label>
-                <input type="text" name="search" class="form-control" value="{{ $search }}" placeholder="Name, phone…" style="width:150px;">
+                <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="Name, phone…" style="width:150px;">
             </div>
             <div>
                 <label>Carrier</label>
                 <select name="carrier" class="form-select" style="width:130px;">
                     <option value="">All Carriers</option>
-                    @foreach($carriers as $c)
-                        <option value="{{ $c->id }}" {{ $carrier == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                    @endforeach
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($c->id); ?>" <?php echo e($carrier == $c->id ? 'selected' : ''); ?>><?php echo e($c->name); ?></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </select>
             </div>
             <div>
                 <label>From</label>
-                <input type="date" name="date_from" class="form-control" value="{{ $dateFrom }}" style="width:135px;">
+                <input type="date" name="date_from" class="form-control" value="<?php echo e($dateFrom); ?>" style="width:135px;">
             </div>
             <div>
                 <label>To</label>
-                <input type="date" name="date_to" class="form-control" value="{{ $dateTo }}" style="width:135px;">
+                <input type="date" name="date_to" class="form-control" value="<?php echo e($dateTo); ?>" style="width:135px;">
             </div>
             <button type="submit" class="a-btn" style="background:rgba(52,195,143,.2);color:#1a8754;border-color:rgba(52,195,143,.3);height:2rem;">
                 <i class="bx bx-search-alt-2"></i> Filter
             </button>
-            <a href="{{ route('paid-sales.index') }}" class="f-reset"><i class="bx bx-reset"></i> Clear</a>
+            <a href="<?php echo e(route('paid-sales.index')); ?>" class="f-reset"><i class="bx bx-reset"></i> Clear</a>
         </form>
 
         <div class="table-responsive">
@@ -113,54 +111,56 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($leads as $lead)
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
-                            <td style="color:var(--bs-surface-400);">{{ $lead->id }}</td>
+                            <td style="color:var(--bs-surface-400);"><?php echo e($lead->id); ?></td>
                             <td>
-                                <a href="{{ route('issuance.show', $lead->id) }}" style="font-weight:500;font-size:.73rem;">
-                                    {{ $lead->cn_name ?? '—' }}
+                                <a href="<?php echo e(route('issuance.show', $lead->id)); ?>" style="font-weight:500;font-size:.73rem;">
+                                    <?php echo e($lead->cn_name ?? '—'); ?>
+
                                 </a>
                             </td>
-                            <td>{{ $lead->phone_number ?? '—' }}</td>
-                            <td>{{ $lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—') }}</td>
-                            <td>${{ number_format($lead->monthly_premium, 2) }}</td>
+                            <td><?php echo e($lead->phone_number ?? '—'); ?></td>
+                            <td><?php echo e($lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—')); ?></td>
+                            <td>$<?php echo e(number_format($lead->monthly_premium, 2)); ?></td>
                             <td>
-                                @if($lead->coverage_amount)
-                                    ${{ number_format($lead->coverage_amount, 0) }}
-                                @else
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->coverage_amount): ?>
+                                    $<?php echo e(number_format($lead->coverage_amount, 0)); ?>
+
+                                <?php else: ?>
                                     —
-                                @endif
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td><span class="bd-paid">Paid</span></td>
-                            <td>{{ $lead->closer_name ?? '—' }}</td>
-                            <td>{{ $lead->paidBy->name ?? '—' }}</td>
-                            <td>{{ $lead->paid_at ? $lead->paid_at->format('M d, Y') : '—' }}</td>
+                            <td><?php echo e($lead->closer_name ?? '—'); ?></td>
+                            <td><?php echo e($lead->paidBy->name ?? '—'); ?></td>
+                            <td><?php echo e($lead->paid_at ? $lead->paid_at->format('M d, Y') : '—'); ?></td>
                             <td>
-                                <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
+                                <button class="a-btn btn-send-back" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>" style="font-size:.63rem;background:rgba(220,53,69,.1);color:#dc3545;border-color:rgba(220,53,69,.25);">
                                     <i class="bx bx-arrow-back"></i> Back
                                 </button>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="11" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No paid sales records for the selected period.
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        @if($leads->hasPages())
-            <div class="px-3 py-2">{{ $leads->withQueryString()->links() }}</div>
-        @endif
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($leads->hasPages()): ?>
+            <div class="px-3 py-2"><?php echo e($leads->withQueryString()->links()); ?></div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 (function() {
     // Send Back to Previous Stage (with debounce to prevent double-click)
@@ -211,4 +211,6 @@
     });
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/paid-sales/index.blade.php ENDPATH**/ ?>

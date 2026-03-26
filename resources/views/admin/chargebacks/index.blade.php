@@ -303,7 +303,7 @@
                             <td>{{ $lead->carrier_name ?? 'N/A' }}</td>
                             <td><span class="badge bg-danger">${{ number_format($lead->monthly_premium ?? 0, 2) }}</span></td>
                             <td><span class="text-muted" style="font-size:.74rem">{{ Str::limit($lead->comments ?? 'No reason provided', 50) }}</span></td>
-                            <td><span class="text-muted" style="font-size:.74rem">{{ $lead->manager_reason ?? 'No comments' }}</span></td>
+                            <td><span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span></td>
                             <td>
                                 <div class="sl-act-group">
                                     <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View Details" target="_blank">

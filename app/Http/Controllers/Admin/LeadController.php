@@ -272,7 +272,7 @@ class LeadController extends Controller
         // Sales section - show ALL sales (each closer gets credit for their sale)
         // Resale badge indicates when same customer was sold multiple times
         // Dedup is only applied in Pending Submission to prevent duplicate processing
-        $query = Lead::with(['insuranceCarrier', 'qaUser', 'managerUser'])
+        $query = Lead::with(['insuranceCarrier', 'qaUser', 'submissionReviewer', 'pendingContractBy', 'pendingDraftBy'])
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
@@ -1074,26 +1074,26 @@ class LeadController extends Controller
     public function updateManagerStatus(Request $request, $id)
     {
         $request->validate([
-            'manager_status' => 'required|in:pending,approved,declined,underwriting',
-            'manager_reason' => 'nullable|string|max:1000'
+            'submission_status' => 'required|in:pending,approved,declined,underwriting',
+            'submission_reason' => 'nullable|string|max:1000'
         ]);
 
         $lead = Lead::findOrFail($id);
         
-        $lead->manager_status = $request->manager_status;
-        $lead->manager_reason = $request->manager_reason;
-        $lead->manager_user_id = auth()->id();
-        $lead->manager_reviewed_at = now();
+        $lead->submission_status = $request->submission_status;
+        $lead->submission_reason = $request->submission_reason;
+        $lead->submission_by = auth()->id();
+        $lead->submission_at = now();
         
         // When manager approves, update status to accepted/underwritten
-        if ($request->manager_status === Statuses::MGR_APPROVED) {
+        if ($request->submission_status === Statuses::SUB_APPROVED) {
             $lead->status = Statuses::LEAD_ACCEPTED;
         }
-        elseif ($request->manager_status === Statuses::MGR_UNDERWRITING) {
+        elseif ($request->submission_status === Statuses::SUB_UNDERWRITING) {
             $lead->status = Statuses::LEAD_UNDERWRITTEN;
         }
         // When manager declines, update main status so it moves to Failed Leads section
-        elseif ($request->manager_status === 'declined') {
+        elseif ($request->submission_status === 'declined') {
             $lead->status = 'declined';
         }
         
@@ -1127,8 +1127,8 @@ class LeadController extends Controller
         $lead->ravens_validation_status = null;
 
         // Reset manager decision back to pending
-        $lead->manager_status           = Statuses::MGR_PENDING;
-        $lead->manager_reason           = null;
+        $lead->submission_status           = Statuses::SUB_PENDING;
+        $lead->submission_reason           = null;
 
         $lead->save();
 
@@ -1176,7 +1176,20 @@ class LeadController extends Controller
         
         // Filter by issuance status
         if ($request->filled('issuance_status')) {
-            $query->where('issuance_status', $request->issuance_status);
+            if ($request->issuance_status === 'pending') {
+                // Handle pending filter - includes NULL, Pending, Incomplete
+                $query->where(function($q) {
+                    $q->whereNull('issuance_status')
+                      ->orWhere('issuance_status', 'Pending')
+                      ->orWhere('issuance_status', 'Incomplete');
+                });
+            } elseif ($request->issuance_status === 'Issued') {
+                // Issued filter - exclude leads that have been sent to draft
+                $query->where('issuance_status', 'Issued')
+                      ->whereNull('pending_draft_at');
+            } else {
+                $query->where('issuance_status', $request->issuance_status);
+            }
         }
         
         // Filter by followup status
@@ -1211,8 +1224,46 @@ class LeadController extends Controller
         // Partners are managed separately in the Partner system
         $followupUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
         
+        // Get all leads that have been sent to pending draft
+        $sentToDraft = Lead::with(['pendingDraftBy'])
+            ->whereNotNull('pending_draft_at')
+            ->orderByDesc('pending_draft_at')
+            ->get(['id', 'cn_name', 'phone_number', 'pending_draft_at', 'pending_draft_by_id']);
+        
+        // Get Not Issued dispositions for the modal
+        $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
+        
+        // Calculate KPI counts from base query (before status filters)
+        $baseKpiQuery = Lead::whereNotNull('closer_name')
+            ->whereNotNull('sale_at')
+            ->whereNotNull('pending_contract_at')
+            ->whereNull('pending_draft_at'); // Only leads NOT yet sent to draft
+        
+        // Apply date filter to KPIs
+        if ($request->filled('date_from')) {
+            $baseKpiQuery->whereDate('sale_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $baseKpiQuery->whereDate('sale_date', '<=', $request->date_to);
+        }
+        
+        $kpiCounts = [
+            'pending' => (clone $baseKpiQuery)->where(function($q) {
+                $q->whereNull('issuance_status')
+                  ->orWhere('issuance_status', 'Pending')
+                  ->orWhere('issuance_status', 'Incomplete');
+            })->count(),
+            'issued' => (clone $baseKpiQuery)->where('issuance_status', Statuses::ISSUANCE_ISSUED)->count(),
+            'not_issued' => (clone $baseKpiQuery)->where('issuance_status', 'Not Issued')->count(),
+            'ready_for_draft' => (clone $baseKpiQuery)
+                ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+                ->where('followup_status', Statuses::MIS_YES)
+                ->count(),
+            'sent_to_draft' => $sentToDraft->count(),
+        ];
+        
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
-        return view('admin.issuance.index', compact('leads', 'carriers', 'partners', 'followupUsers'));
+        return view('admin.issuance.index', compact('leads', 'carriers', 'partners', 'followupUsers', 'sentToDraft', 'niDispositions', 'kpiCounts'));
     }
 
     /**
@@ -1359,12 +1410,68 @@ class LeadController extends Controller
         
         // Set pending draft timestamp
         $lead->pending_draft_at = now();
+        $lead->pending_draft_by_id = auth()->id();
         $lead->followup_done_at = now();
+        $lead->followup_done_by_id = auth()->id();
         $lead->save();
         
         return response()->json([
             'success' => true,
             'message' => 'Lead sent to Pending Draft successfully.'
+        ]);
+    }
+
+    /**
+     * Mark a lead as Issued from Pending Contracts page.
+     * Simple action that sets issuance_status to Issued.
+     */
+    public function markAsIssued(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+        
+        // Don't allow if already issued
+        if ($lead->issuance_status === Statuses::ISSUANCE_ISSUED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lead is already marked as Issued.'
+            ], 422);
+        }
+        
+        $lead->issuance_status = Statuses::ISSUANCE_ISSUED;
+        $lead->issuance_date = now();
+        $lead->issued_by = auth()->id();
+        $lead->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead marked as Issued successfully.'
+        ]);
+    }
+
+    /**
+     * Mark a lead as Not Issued from Pending Contracts page.
+     * Sets disposition and sends to retention for resolution.
+     */
+    public function markAsNotIssued(Request $request, int $id)
+    {
+        $request->validate([
+            'not_issued_disposition' => 'required|in:' . implode(',', array_keys(Statuses::NOT_ISSUED_DISPOSITIONS)),
+        ]);
+        
+        $lead = Lead::findOrFail($id);
+        
+        $lead->issuance_status = 'Not Issued';
+        $lead->not_issued_disposition = $request->not_issued_disposition;
+        $lead->not_issued_at = now();
+        $lead->not_issued_by_id = auth()->id();
+        $lead->not_issued_resolved_at = null;
+        $lead->not_issued_resolved_by_id = null;
+        $lead->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead marked as Not Issued. Sent to Retention.',
+            'disposition_label' => Statuses::NOT_ISSUED_DISPOSITIONS[$request->not_issued_disposition],
         ]);
     }
 
@@ -1398,37 +1505,67 @@ class LeadController extends Controller
                 $lead->followup_done_at = null;
                 $lead->followup_done_by_id = null;
                 $lead->pending_draft_at = null;
+                $lead->pending_draft_by_id = null;
+                // Clear FDFP/not paid fields if any
+                $lead->not_paid_at = null;
+                $lead->not_paid_by_id = null;
+                $lead->not_paid_fdfp_type = null;
+                $lead->not_paid_manual_disposition = null;
                 $previousStage = 'Followup';
                 break;
                 
             case 'followup':
-                // Back to Pending Contracts (clear issuance)
+                // Back to Pending Contracts (clear followup assignment and issuance)
+                $lead->assigned_followup_person = null;
+                $lead->followup_assigned_by = null;
+                $lead->followup_assigned_at = null;
                 $lead->issuance_status = Statuses::ISSUANCE_PENDING;
                 $lead->issuance_date = null;
-                $lead->followup_status = null;
+                $lead->followup_status = 'No';
                 $previousStage = 'Pending Contracts';
                 break;
                 
             case 'pending_contracts':
-                // Back to Submissions
+                // Back to Submissions - clear all pending contract stage fields
                 $lead->pending_contract_at = null;
                 $lead->pending_contract_by_id = null;
-                $lead->issuance_status = null;
+                // Clear issuance fields
+                $lead->issuance_status = Statuses::ISSUANCE_PENDING;
                 $lead->issuance_date = null;
                 $lead->issuance_reason = null;
                 $lead->issued_by = null;
+                // Clear issued policy number and partner assignment
+                $lead->issued_policy_number = null;
+                $lead->policy_number_set_at = null;
+                $lead->partner_id = null;
+                $lead->partner_set_at = null;
+                // Clear followup assignment
+                $lead->assigned_followup_person = null;
+                $lead->followup_assigned_by = null;
+                $lead->followup_assigned_at = null;
+                $lead->followup_status = 'No';
+                // Reset submission to pending so it shows in Submissions
+                $lead->submission_status = Statuses::SUB_PENDING;
+                $lead->submission_by = null;
+                $lead->submission_at = null;
+                $lead->submission_reason = null;
                 $previousStage = 'Submissions';
                 break;
                 
             case 'submissions':
-                // Back to Ravens Validation
+                // Back to Ravens Validation - clear all submission stage fields
                 $lead->ravens_validation_status = null;
                 $lead->ravens_validated_at = null;
                 $lead->ravens_validated_by = null;
-                $lead->submission_status = null;
-                $lead->submission_policy_number = null;
-                $lead->submission_decision_by_id = null;
-                $lead->submission_decision_at = null;
+                $lead->submission_status = Statuses::SUB_PENDING;
+                $lead->submission_reason = null;
+                $lead->submission_by = null;
+                $lead->submission_at = null;
+                $lead->app_id = null;
+                $lead->policy_number = null;
+                $lead->assigned_partner = null;
+                $lead->partner_id = null;
+                $lead->partner_set_at = null;
                 $previousStage = 'Ravens Validation';
                 break;
                 
@@ -1714,9 +1851,9 @@ class LeadController extends Controller
         $newSale->qa_status = Statuses::QA_PENDING;
         $newSale->qa_reason = null;
         $newSale->qa_user_id = null;
-        $newSale->manager_status = Statuses::MGR_PENDING;
-        $newSale->manager_reason = null;
-        $newSale->manager_user_id = null;
+        $newSale->submission_status = Statuses::SUB_PENDING;
+        $newSale->submission_reason = null;
+        $newSale->submission_by = null;
         $newSale->comments = ($isRetained ? 'Retained' : 'Rewritten') . " from chargeback by {$retentionOfficer} ({$daysDifference} days after chargeback)";
         $newSale->save();
 
@@ -1747,11 +1884,11 @@ class LeadController extends Controller
     public function updateManagerReason(Request $request, $id)
     {
         $request->validate([
-            'manager_reason' => 'nullable|string|max:1000'
+            'submission_reason' => 'nullable|string|max:1000'
         ]);
 
         $lead = Lead::findOrFail($id);
-        $lead->manager_reason = $request->manager_reason;
+        $lead->submission_reason = $request->submission_reason;
         $lead->save();
 
         return response()->json([
@@ -1818,10 +1955,10 @@ class LeadController extends Controller
 
         $lead = Lead::findOrFail($id);
         
-        $lead->manager_status = Statuses::MGR_PENDING;
-        $lead->manager_reason = null;
-        $lead->manager_user_id = null;
-        $lead->manager_reviewed_at = null;
+        $lead->submission_status = Statuses::SUB_PENDING;
+        $lead->submission_reason = null;
+        $lead->submission_by = null;
+        $lead->submission_at = null;
         // If it was marked as chargeback, revert those changes too
         if ($lead->status === Statuses::LEAD_CHARGEBACK) {
             $lead->status = Statuses::LEAD_PENDING;

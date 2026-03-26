@@ -122,14 +122,14 @@
                             <p><strong>QA Reason:</strong> {{ $lead->qa_reason ?? '—' }}</p>
                         </div>
                         <div class="col-md-4">
-                            <p><strong>Manager Status:</strong>
-                                @if($lead->manager_status)
-                                    <span class="badge bg-warning">{{ $lead->manager_status }}</span>
+                            <p><strong>Submission Status:</strong>
+                                @if($lead->submission_status)
+                                    <span class="badge bg-warning">{{ $lead->submission_status }}</span>
                                 @else
                                     <span class="text-muted">N/A</span>
                                 @endif
                             </p>
-                            <p><strong>Manager Reason:</strong> {{ $lead->manager_reason ?? '—' }}</p>
+                            <p><strong>Submission Reason:</strong> {{ $lead->submission_reason ?? '—' }}</p>
                         </div>
                         <div class="col-md-4">
                             <p><strong>Issuance Status:</strong>

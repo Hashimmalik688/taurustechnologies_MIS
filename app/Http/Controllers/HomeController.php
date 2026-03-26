@@ -69,7 +69,7 @@ class HomeController extends Controller
         // Extract data from local database
         $users_count = User::count();
         
-        // Sales counts using manager_status field (submitted sales with closer_name)
+        // Sales counts using submission_status field (submitted sales with closer_name)
         $total_sales_today = Lead::whereNotNull('closer_name')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
@@ -91,21 +91,21 @@ class HomeController extends Controller
         // Calculate revenue from issued and verified sales (Revenue Analytics logic)
         // Revenue = Total partner commissions (Premium × 9 × Settlement %)
         $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
             ->get();
             
         // Revenue is the sum of all partner commissions
         $total_revenue = $issued_sales->sum('agent_revenue');
         
-        // Sales status counts by manager_status (MTD)
+        // Sales status counts by submission_status (MTD)
         $done_count = $total_monthly_sales; // Total submitted MTD
         $approved_count = Lead::whereNotNull('closer_name')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', Statuses::MGR_APPROVED)
+            ->where('submission_status', Statuses::SUB_APPROVED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -115,7 +115,7 @@ class HomeController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', Statuses::MGR_UNDERWRITING)
+            ->where('submission_status', Statuses::SUB_UNDERWRITING)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -125,7 +125,7 @@ class HomeController extends Controller
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
             })
-            ->where('manager_status', Statuses::MGR_DECLINED)
+            ->where('submission_status', Statuses::SUB_DECLINED)
             ->whereMonth('sale_at', now()->month)
             ->whereYear('sale_at', now()->year)
             ->count();
@@ -168,9 +168,9 @@ class HomeController extends Controller
                 'closer' => $closerName,
                 'today' => $todaySales,
                 'mtd' => $sales->count(),
-                'approvedMTD' => $sales->where('manager_status', Statuses::MGR_APPROVED)->count(),
-                'declinedMTD' => $sales->where('manager_status', Statuses::MGR_DECLINED)->count(),
-                'uwMTD' => $sales->where('manager_status', Statuses::MGR_UNDERWRITING)->count(),
+                'approvedMTD' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
+                'declinedMTD' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
+                'uwMTD' => $sales->where('submission_status', Statuses::SUB_UNDERWRITING)->count(),
                 'team' => $sales->first()->team ?? Teams::RAVENS
             ];
         }
