@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'Ghost Mode'); ?>
 
-@section('title', 'Ghost Mode')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    Ghost Mode — Executive Dashboard Style
@@ -11,9 +9,11 @@
 /* Glass-card base (matching dashboard) */
 .ex-card {
     background: var(--bs-card-bg);
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.08);
     border-radius: 0.6rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     transition: box-shadow .2s;
 }
 .ex-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
@@ -681,8 +681,7 @@
 .ns-user-name {
     font-weight: 700;
     font-size: 0.68rem;
-    color: inherit;
-    opacity: .88;
+    color: rgba(0,0,0,.7);
 }
 .ns-note-id {
     font-size: 0.5rem;
@@ -693,7 +692,7 @@
     flex: 1;
     font-size: 0.75rem;
     line-height: 1.55;
-    color: inherit;
+    color: rgba(0,0,0,.75);
     white-space: pre-wrap;
     word-break: break-word;
     overflow-y: auto;
@@ -711,8 +710,7 @@
 }
 .ns-time {
     font-size: 0.55rem;
-    color: inherit;
-    opacity: .5;
+    color: rgba(0,0,0,.4);
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -772,9 +770,9 @@
     margin-top: 2px;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- Page Header -->
 <div class="cs-page-hdr">
     <h5>
@@ -782,7 +780,7 @@
         <span class="cs-sub">Real-time monitoring</span>
         <span class="cs-live-dot" id="liveDot" title="Live updates active"></span>
     </h5>
-    <a href="{{ route('settings.hub') }}" class="link-btn"><i class="bx bx-arrow-back"></i> Settings</a>
+    <a href="<?php echo e(route('settings.hub')); ?>" class="link-btn"><i class="bx bx-arrow-back"></i> Settings</a>
 </div>
 
 <!-- Tabs -->
@@ -1005,20 +1003,20 @@
         <div style="background:var(--bs-card-bg);border:1px solid rgba(255,255,255,.13);border-radius:8px;max-width:640px;width:92%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.5)">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.2rem;border-bottom:1px solid rgba(255,255,255,.08)">
                 <div>
-                    <div id="npPreviewTitle" style="font-size:.95rem;font-weight:700;color:var(--bs-body-color)"></div>
-                    <div id="npPreviewMeta" style="font-size:.68rem;color:var(--bs-surface-400,#94a3b8);margin-top:.15rem"></div>
+                    <div id="npPreviewTitle" style="font-size:.95rem;font-weight:700"></div>
+                    <div id="npPreviewMeta" style="font-size:.68rem;opacity:.45;margin-top:.15rem"></div>
                 </div>
                 <button onclick="document.getElementById('npPreviewModal').style.display='none'" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--bs-body-color);padding:.2rem .55rem;cursor:pointer;font-size:.8rem">&times;</button>
             </div>
-            <div id="npPreviewBody" style="flex:1;overflow-y:auto;padding:1.1rem 1.2rem;font-family:'Consolas','Courier New',monospace;font-size:.8rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--bs-body-color)"></div>
+            <div id="npPreviewBody" style="flex:1;overflow-y:auto;padding:1.1rem 1.2rem;font-family:'Consolas','Courier New',monospace;font-size:.8rem;line-height:1.7;white-space:pre-wrap;word-break:break-word"></div>
         <div id="npSharedBadge" style="display:none;padding:.55rem 1.2rem;border-top:1px solid rgba(255,255,255,.06);font-size:.68rem;color:#34c38f"><i class="bx bxs-share-alt"></i> <span id="npSharedWithText">This note is shared</span></div>
         </div>
     </div>
 </div><!-- /tabNotepad -->
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -1077,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const p = new URLSearchParams({
             page, search: fSearch.value, type: fType.value, status: fStatus.value
         });
-        api(`{{ url('settings/chat-shadow/conversations') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/conversations')); ?>?${p}`)
         .then(d => {
             convSpin.style.display = 'none';
             if (!d.success) return;
@@ -1179,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const p = new URLSearchParams({
             page, search: mSearch.value, date_from: mFrom.value, date_to: mTo.value, show_deleted: mDelFilter.value
         });
-        api(`{{ url('settings/chat-shadow/conversations') }}/${convId}/messages?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/conversations')); ?>/${convId}/messages?${p}`)
         .then(d => {
             if (!d.success) return;
             const conv = d.conversation;
@@ -1282,13 +1280,13 @@ document.addEventListener('DOMContentLoaded', function() {
     msgNext.addEventListener('click', () => { if (currentId && msgPage < msgLast) loadMessages(currentId, msgPage + 1); });
 
     // ── Live Updates (Echo/Reverb) ──
-    const echoConfig = {!! json_encode([
+    const echoConfig = <?php echo json_encode([
         'key' => env('REVERB_APP_KEY', ''),
         'host' => env('REVERB_HOST', '127.0.0.1'),
         'port' => intval(env('REVERB_PORT', 8080)),
         'scheme' => env('REVERB_SCHEME', 'http'),
         'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
-    ]) !!};
+    ]); ?>;
 
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -1364,7 +1362,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function escA(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"&#39;").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function trunc(s, n) { return s && s.length > n ? s.substring(0,n) + '...' : s; }
     function hash(s) { let h=0; for(let i=0;i<(s||'').length;i++) h=s.charCodeAt(i)+((h<<5)-h); return Math.abs(h); }
-    function assetUrl(p) { if (!p) return ''; if (p.startsWith('http')) return p; return '{{ asset("") }}' + p; }
+    function assetUrl(p) { if (!p) return ''; if (p.startsWith('http')) return p; return '<?php echo e(asset("")); ?>' + p; }
 
     // ── Init ──
     loadConversations(1);
@@ -1414,7 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
             user_id: nUserFilter.value,
             status: nStatusFilter.value,
         });
-        api(`{{ url('settings/chat-shadow/notes') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/notes')); ?>?${p}`)
         .then(d => {
             notesSpin.style.display = 'none';
             if (!d.success) return;
@@ -1541,7 +1539,7 @@ document.addEventListener('DOMContentLoaded', function() {
             user_id: npUserFilter.value,
             show_deleted: npStatusFilter ? npStatusFilter.value : 'all',
         });
-        api(`{{ url('settings/chat-shadow/notepad-notes') }}?${p}`)
+        api(`<?php echo e(url('settings/chat-shadow/notepad-notes')); ?>?${p}`)
         .then(d => {
             notepadSpin.style.display = 'none';
             if (!d.success) return;
@@ -1673,4 +1671,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/settings/chat-shadow.blade.php ENDPATH**/ ?>

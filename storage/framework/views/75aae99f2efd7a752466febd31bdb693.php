@@ -244,6 +244,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                         data-coverage="<?php echo e($lead->coverage_amount ?? ''); ?>"
                                         data-premium="<?php echo e($lead->monthly_premium ?? ''); ?>"
                                         data-policytype="<?php echo e($lead->policy_type ?? ''); ?>"
+                                        data-carrier="<?php echo e($lead->insurance_carrier_id ?? ''); ?>"
                                         title="Edit Coverage / Premium / Plan">
                                         <i class="bx bx-edit-alt" style="font-size:.75rem;"></i>
                                     </button>
@@ -361,6 +362,15 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                             <option value="Graded">Graded</option>
                             <option value="G.I">G.I (Guaranteed Issue)</option>
                             <option value="Modified">Modified</option>
+                        </select>
+                    </div>
+                    <div style="grid-column:1/-1;">
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Carrier</label>
+                        <select id="coverage-carrier" class="form-select form-select-sm" style="border-radius:.4rem;font-size:.76rem;">
+                            <option value="">— Select Carrier —</option>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($c->id); ?>"><?php echo e($c->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </select>
                     </div>
                 </div>
@@ -649,6 +659,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             document.getElementById('coverage-amount').value = this.dataset.coverage;
             document.getElementById('coverage-premium').value = this.dataset.premium;
             document.getElementById('coverage-policytype').value = this.dataset.policytype;
+            document.getElementById('coverage-carrier').value = this.dataset.carrier || '';
             if (coverageModalInstance) coverageModalInstance.dispose();
             coverageModalInstance = new bootstrap.Modal(coverageModalEl);
             coverageModalInstance.show();
@@ -671,9 +682,10 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
-                coverage_amount: document.getElementById('coverage-amount').value || null,
-                monthly_premium: document.getElementById('coverage-premium').value || null,
-                policy_type:     document.getElementById('coverage-policytype').value.trim() || null,
+                coverage_amount:      document.getElementById('coverage-amount').value || null,
+                monthly_premium:      document.getElementById('coverage-premium').value || null,
+                policy_type:          document.getElementById('coverage-policytype').value.trim() || null,
+                insurance_carrier_id: document.getElementById('coverage-carrier').value || null,
             })
         })
         .then(r => r.json())

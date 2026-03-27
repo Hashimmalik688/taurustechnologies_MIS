@@ -299,15 +299,17 @@ class PendingsApprovedController extends Controller
     public function updateCoverage(Request $request, int $id)
     {
         $request->validate([
-            'coverage_amount' => 'nullable|numeric|min:0',
-            'monthly_premium' => 'nullable|numeric|min:0',
-            'policy_type'     => 'nullable|string|max:255',
+            'coverage_amount'      => 'nullable|numeric|min:0',
+            'monthly_premium'      => 'nullable|numeric|min:0',
+            'policy_type'          => 'nullable|string|max:255',
+            'insurance_carrier_id' => 'nullable|integer|exists:insurance_carriers,id',
         ]);
 
         $lead = Lead::findOrFail($id);
-        if ($request->has('coverage_amount')) $lead->coverage_amount = $request->coverage_amount;
-        if ($request->has('monthly_premium')) $lead->monthly_premium = $request->monthly_premium;
-        if ($request->has('policy_type'))     $lead->policy_type     = $request->policy_type;
+        if ($request->has('coverage_amount'))      $lead->coverage_amount      = $request->coverage_amount;
+        if ($request->has('monthly_premium'))      $lead->monthly_premium      = $request->monthly_premium;
+        if ($request->has('policy_type'))          $lead->policy_type          = $request->policy_type;
+        if ($request->has('insurance_carrier_id')) $lead->insurance_carrier_id = $request->insurance_carrier_id;
         $lead->save();
 
         return response()->json(['success' => true, 'message' => 'Coverage details updated.']);
