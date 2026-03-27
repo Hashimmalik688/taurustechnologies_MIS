@@ -305,10 +305,20 @@
     .filter-form { flex-direction: column; }
     .filter-form .f-input { width: 100%; }
 }
+/* Prominent page title */
+.sl-page-title{font-size:1.35rem;font-weight:700;color:#1e293b;display:flex;align-items:center;gap:8px;margin:0;}
+.sl-page-title i{color:#d4af37;font-size:1.5rem;}
+.sl-page-subtitle{font-size:.78rem;color:#94a3b8;margin:0;}
+[data-bs-theme=dark] .sl-page-title,:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
 </style>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
+    
+    <div class="container-fluid px-0 pb-2" style="max-width:1600px;">
+        <h1 class="sl-page-title"><i class="bx bx-file-find"></i> Pending Contracts</h1>
+        <p class="sl-page-subtitle mt-1">Stage 5 — Monitor issuance status and assign followup officers</p>
+    </div>
     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius:0.5rem; border:none; background:rgba(52,195,143,.08); color:#1a8754; font-size:.78rem; padding:.5rem .75rem;">
             <i class="bx bx-check-circle me-1"></i><?php echo e(session('success')); ?>
