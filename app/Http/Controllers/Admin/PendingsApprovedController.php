@@ -303,6 +303,8 @@ class PendingsApprovedController extends Controller
             'monthly_premium'      => 'nullable|numeric|min:0',
             'policy_type'          => 'nullable|string|max:255',
             'insurance_carrier_id' => 'nullable|integer|exists:insurance_carriers,id',
+            'initial_draft_date'   => 'nullable|date',
+            'future_draft_date'    => 'nullable|date',
         ]);
 
         $lead = Lead::findOrFail($id);
@@ -310,6 +312,8 @@ class PendingsApprovedController extends Controller
         if ($request->has('monthly_premium'))      $lead->monthly_premium      = $request->monthly_premium;
         if ($request->has('policy_type'))          $lead->policy_type          = $request->policy_type;
         if ($request->has('insurance_carrier_id')) $lead->insurance_carrier_id = $request->insurance_carrier_id;
+        if ($request->has('initial_draft_date'))   $lead->initial_draft_date   = $request->initial_draft_date;
+        if ($request->has('future_draft_date'))    $lead->future_draft_date    = $request->future_draft_date;
         $lead->save();
 
         return response()->json(['success' => true, 'message' => 'Coverage details updated.']);

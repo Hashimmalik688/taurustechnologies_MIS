@@ -244,6 +244,8 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                         data-premium="{{ $lead->monthly_premium ?? '' }}"
                                         data-policytype="{{ $lead->policy_type ?? '' }}"
                                         data-carrier="{{ $lead->insurance_carrier_id ?? '' }}"
+                                        data-initialdraft="{{ $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : '' }}"
+                                        data-futuredraft="{{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d') : '' }}"
                                         title="Edit Coverage / Premium / Plan">
                                         <i class="bx bx-edit-alt" style="font-size:.75rem;"></i>
                                     </button>
@@ -371,6 +373,14 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                 <option value="{{ $c->id }}">{{ $c->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+                    <div>
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Initial Draft</label>
+                        <input type="date" id="coverage-initial-draft" class="form-control form-control-sm" style="border-radius:.4rem;font-size:.76rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400);display:block;margin-bottom:.2rem;">Future Draft</label>
+                        <input type="date" id="coverage-future-draft" class="form-control form-control-sm" style="border-radius:.4rem;font-size:.76rem;">
                     </div>
                 </div>
             </div>
@@ -659,6 +669,8 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             document.getElementById('coverage-premium').value = this.dataset.premium;
             document.getElementById('coverage-policytype').value = this.dataset.policytype;
             document.getElementById('coverage-carrier').value = this.dataset.carrier || '';
+            document.getElementById('coverage-initial-draft').value = this.dataset.initialdraft || '';
+            document.getElementById('coverage-future-draft').value = this.dataset.futuredraft || '';
             if (coverageModalInstance) coverageModalInstance.dispose();
             coverageModalInstance = new bootstrap.Modal(coverageModalEl);
             coverageModalInstance.show();
@@ -685,6 +697,8 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                 monthly_premium:      document.getElementById('coverage-premium').value || null,
                 policy_type:          document.getElementById('coverage-policytype').value.trim() || null,
                 insurance_carrier_id: document.getElementById('coverage-carrier').value || null,
+                initial_draft_date:   document.getElementById('coverage-initial-draft').value || null,
+                future_draft_date:    document.getElementById('coverage-future-draft').value || null,
             })
         })
         .then(r => r.json())
