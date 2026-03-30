@@ -57,6 +57,9 @@
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-tbl thead th{background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,.9));color:#94a3b8;border-color:rgba(212,175,55,.12);}
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-tbl tbody td{color:#cbd5e1;border-color:rgba(255,255,255,.04);}
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-search-input{background:rgba(30,41,59,.8);border-color:rgba(255,255,255,.1);color:#e2e8f0;}
+/* Recall button */
+.a-btn{display:inline-flex;align-items:center;gap:2px;font-size:.65rem;font-weight:600;padding:.2rem .45rem;border-radius:.3rem;border:1px solid;cursor:pointer;text-decoration:none;transition:all .12s;}
+.a-recall{background:rgba(139,92,246,.08);color:#7c3aed;border-color:rgba(139,92,246,.25);}.a-recall:hover{background:rgba(139,92,246,.18);}
 </style>
 @endsection
 
@@ -188,9 +191,18 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('leads.show', $lead->id) }}" class="a-btn" style="font-size:.63rem;background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);text-decoration:none;" target="_blank">
-                                            <i class="bx bx-show"></i> View
-                                        </a>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <a href="{{ route('leads.show', $lead->id) }}" class="a-btn" style="font-size:.63rem;background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);text-decoration:none;" target="_blank">
+                                                <i class="bx bx-show"></i> View
+                                            </a>
+                                            @if(!$lead->recall_requested_at)
+                                                <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;">
+                                                    <i class="bx bx-undo"></i> Recall
+                                                </button>
+                                            @else
+                                                <span class="badge bg-secondary" style="font-size:.58rem;">Recalled</span>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -253,9 +265,18 @@
                                     <td style="font-size:.71rem;">{{ $lead->notPaidBy->name ?? '—' }}</td>
                                     <td style="font-size:.7rem;">{{ $lead->not_paid_at ? $lead->not_paid_at->format('M d, Y') : '—' }}</td>
                                     <td>
-                                        <a href="{{ route('leads.show', $lead->id) }}" class="a-btn" style="font-size:.63rem;background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);text-decoration:none;" target="_blank">
-                                            <i class="bx bx-show"></i> View
-                                        </a>
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            <a href="{{ route('leads.show', $lead->id) }}" class="a-btn" style="font-size:.63rem;background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);text-decoration:none;" target="_blank">
+                                                <i class="bx bx-show"></i> View
+                                            </a>
+                                            @if(!$lead->recall_requested_at)
+                                                <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;">
+                                                    <i class="bx bx-undo"></i> Recall
+                                                </button>
+                                            @else
+                                                <span class="badge bg-secondary" style="font-size:.58rem;">Recalled</span>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -277,6 +298,40 @@
         </div>{{-- /tab-content --}}
     </div>{{-- /sl-card --}}
 
+</div>
+
+{{-- Recall / Send Back to Closer Modal --}}
+<div class="modal fade" id="recallModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content">
+            <div class="modal-header" style="background:rgba(139,92,246,.04);border-bottom:1px solid rgba(139,92,246,.1);">
+                <h6 class="modal-title mb-0" style="font-size:.85rem;color:#7c3aed;">
+                    <i class="bx bx-undo me-1"></i> Send Back to Closer
+                </h6>
+                <button type="button" class="btn-close" style="font-size:.65rem;" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1" style="font-size:.75rem;color:var(--bs-surface-500);">
+                    Lead: <strong id="recall-lead-name"></strong>
+                </p>
+                <p class="mb-3" style="font-size:.7rem;color:#7c3aed;background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.12);border-radius:.4rem;padding:.5rem .65rem;">
+                    <i class="bx bx-info-circle me-1"></i>
+                    This will send the lead back to the closer for re-dial. The closer will see the recall note on their dashboard.
+                </p>
+                <div class="mb-2">
+                    <label class="form-label">Comment / Instructions <span class="text-danger">*</span></label>
+                    <textarea id="recall-note" class="form-control" rows="3" placeholder="Why is this being sent back?" style="resize:none;"></textarea>
+                    <div id="recall-note-error" style="display:none;font-size:.65rem;color:#c84646;margin-top:.2rem;">Please enter a comment.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background:var(--bs-surface-100);color:var(--bs-surface-500);border:none;border-radius:1rem;padding:.35rem .85rem;font-size:.74rem;font-weight:600;">Cancel</button>
+                <button type="button" class="btn btn-sm" id="recall-confirm-btn" style="background:rgba(139,92,246,.9);color:#fff;border:none;border-radius:1rem;padding:.35rem .85rem;font-size:.74rem;font-weight:600;">
+                    <i class="bx bx-undo me-1"></i> Send Back
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -314,6 +369,61 @@
         tab.addEventListener('click', function () {
             history.replaceState(null, '', this.getAttribute('href'));
         });
+    });
+
+    // ==== Recall / Send Back ====
+    var recallLeadId = null;
+    const recallModalEl = document.getElementById('recallModal');
+    let recallModalInstance = null;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    document.querySelectorAll('.btn-recall-closer').forEach(btn => {
+        btn.addEventListener('click', function() {
+            recallLeadId = this.dataset.id;
+            document.getElementById('recall-lead-name').textContent = this.dataset.name;
+            document.getElementById('recall-note').value = '';
+            document.getElementById('recall-note-error').style.display = 'none';
+
+            if (recallModalInstance) recallModalInstance.dispose();
+            recallModalInstance = new bootstrap.Modal(recallModalEl);
+            recallModalInstance.show();
+        });
+    });
+
+    // Cleanup recall modal on hide
+    recallModalEl.addEventListener('hidden.bs.modal', function() {
+        if (recallModalInstance) {
+            recallModalInstance.dispose();
+            recallModalInstance = null;
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    });
+
+    document.getElementById('recall-confirm-btn').addEventListener('click', function() {
+        var note = document.getElementById('recall-note').value.trim();
+        if (!note) { document.getElementById('recall-note-error').style.display = 'block'; return; }
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Sending…';
+        fetch('/retention/' + recallLeadId + '/recall-to-closer', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ recall_note: note })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-undo me-1"></i> Send Back';
+            if (data.success) {
+                if (recallModalInstance) recallModalInstance.hide();
+                location.reload();
+            }
+            else alert(data.message || 'Error.');
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = '<i class="bx bx-undo me-1"></i> Send Back'; alert('Error: ' + err.message); });
     });
 })();
 </script>

@@ -69,6 +69,7 @@ class Statuses
     public const NI_BENEFICIARY_INCOMPLETE = 'beneficiary_incomplete';
     public const NI_DOCTOR_INFO_MISSING    = 'doctor_info_missing';
     public const NI_UNDERWRITING_BY_LAW    = 'underwriting_by_law';
+    public const NI_CANCELLED_BY_CUSTOMER  = 'cancelled_by_customer';
 
     /** Human-readable labels for Not Issued dispositions */
     public const NOT_ISSUED_DISPOSITIONS = [
@@ -78,6 +79,7 @@ class Statuses
         self::NI_BENEFICIARY_INCOMPLETE => 'Beneficiary Incomplete',
         self::NI_DOCTOR_INFO_MISSING    => 'Doctor Info Missing',
         self::NI_UNDERWRITING_BY_LAW    => 'Underwriting by Law',
+        self::NI_CANCELLED_BY_CUSTOMER  => 'Cancelled by Customer',
     ];
 
     // ═══════════════════════════════════════════════════════════════════

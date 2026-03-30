@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Lead;
 use App\Support\Statuses;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class RetentionController extends Controller
@@ -347,5 +349,48 @@ class RetentionController extends Controller
         }
         
         return 0;
+    }
+
+    /**
+     * Recall / Send Back a lead to the closer for re-dial.
+     * Sets recall fields so the closer sees it on their Ravens dashboard.
+     */
+    public function recallToCloser(Request $request, int $id)
+    {
+        $request->validate([
+            'recall_note' => 'required|string|max:1000',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+
+        if ($lead->recall_requested_at) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This lead has already been recalled.',
+            ], 422);
+        }
+
+        $lead->recall_requested_at = now();
+        $lead->recall_requested_by = Auth::id();
+        $lead->recall_note         = $request->recall_note;
+        $lead->save();
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Retention — Recall to Closer',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['recall_requested_at' => null]),
+            'new_values' => json_encode([
+                'recall_requested_at' => now()->toISOString(),
+                'recall_note'         => $request->recall_note,
+            ]),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead \"{$lead->cn_name}\" recalled to closer.",
+        ]);
     }
 }
