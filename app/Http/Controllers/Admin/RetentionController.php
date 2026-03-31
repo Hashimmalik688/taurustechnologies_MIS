@@ -31,6 +31,7 @@ class RetentionController extends Controller
         $year      = $request->get('year');
         $date_from = $request->get('date_from');
         $date_to   = $request->get('date_to');
+        $disposed  = $request->boolean('disposed', false); // show disposed leads?
 
         $applyFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
             if ($search) {
@@ -53,40 +54,140 @@ class RetentionController extends Controller
             return $query;
         };
 
-        // NOT ISSUED — marked not issued on Pending Contracts, not yet resolved
-        // Only include leads still in the pipeline (pending_contract_at set); if sent back, they exit
-        $not_issued_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'notIssuedResolvedBy'])
-            ->whereNotNull('not_issued_at')
-            ->whereNull('not_issued_resolved_at')
-            ->whereNotNull('pending_contract_at');
-        $not_issued_query = $applyFilters($not_issued_query);
-        $not_issued_leads = $not_issued_query->latest('not_issued_at')->paginate(50, ['*'], 'not_issued_page');
+        // Disposed = fixed / cancelled / recalled
+        $disposedStatuses = Statuses::RET_DISPOSED_STATUSES;
 
-        // NOT PAID — FDFP failure at Pending Draft stage
-        $not_paid_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'followupDoneBy'])
-            ->whereNotNull('not_paid_at')
-            ->whereNull('paid_at')
-            ->whereNull('policy_died_at');
-        $not_paid_query = $applyFilters($not_paid_query);
-        $not_paid_leads = $not_paid_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
+        // NOT ISSUED base scope
+        $niBase = Lead::whereNotNull('not_issued_at')
+                      ->whereNull('not_issued_resolved_at')
+                      ->whereNotNull('pending_contract_at');
 
-        $carriers = Lead::distinct()->pluck('carrier_name')->filter();
+        // NOT PAID base scope
+        $npBase = Lead::whereNotNull('not_paid_at')
+                      ->whereNull('paid_at')
+                      ->whereNull('policy_died_at');
 
-        $not_issued_count = Lead::whereNotNull('not_issued_at')->whereNull('not_issued_resolved_at')->whereNotNull('pending_contract_at')->count();
-        $not_paid_count   = Lead::whereNotNull('not_paid_at')->whereNull('paid_at')->whereNull('policy_died_at')->count();
+        // ----- KPI counts (all time, across both scopes) -----
+        // A lead is "recalled" if recall_requested_at is set OR ret_action_status = 'recalled'.
+        // A lead is "pending" only when it has no ret_action_status (or = 'pending') AND is NOT recalled.
+        $kpi = [];
+        foreach (array_keys(Statuses::RET_ACTION_STATUSES) as $s) {
+            if ($s === 'recalled') {
+                $kpi[$s] = $niBase->clone()->where(fn($q) => $q->whereNotNull('recall_requested_at')->orWhere('ret_action_status', 'recalled'))->count()
+                         + $npBase->clone()->where(fn($q) => $q->whereNotNull('recall_requested_at')->orWhere('ret_action_status', 'recalled'))->count();
+            } elseif ($s === 'pending') {
+                $kpi[$s] = $niBase->clone()->where(fn($q) => $q->whereNull('ret_action_status')->orWhere('ret_action_status', 'pending'))->whereNull('recall_requested_at')->count()
+                         + $npBase->clone()->where(fn($q) => $q->whereNull('ret_action_status')->orWhere('ret_action_status', 'pending'))->whereNull('recall_requested_at')->count();
+            } else {
+                $kpi[$s] = $niBase->clone()->where('ret_action_status', $s)->count()
+                         + $npBase->clone()->where('ret_action_status', $s)->count();
+            }
+        }
+
+        // ----- Active counts (filter for the counts KPI numbers above the tabs) -----
+        $not_issued_count = $niBase->clone()->whereNotIn('ret_action_status', $disposedStatuses)->whereNotNull('pending_contract_at')->count()
+                          + $niBase->clone()->whereNull('ret_action_status')->count();
+        // simplify:
+        $not_issued_count = $niBase->clone()
+            ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
+            ->count();
+        $not_paid_count   = $npBase->clone()
+            ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
+            ->count();
+
+        // ----- Table queries -----
+        if ($disposed) {
+            // Show disposed leads
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->whereIn('ret_action_status', $disposedStatuses);
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->whereNotNull('not_paid_at')
+                ->whereNull('paid_at')
+                ->whereNull('policy_died_at')
+                ->whereIn('ret_action_status', $disposedStatuses);
+        } else {
+            // Show active (non-disposed) leads
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses));
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->whereNotNull('not_paid_at')
+                ->whereNull('paid_at')
+                ->whereNull('policy_died_at')
+                ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses));
+        }
+
+        $ni_query = $applyFilters($ni_query);
+        $np_query = $applyFilters($np_query);
+
+        $not_issued_leads = $ni_query->latest('not_issued_at')->paginate(50, ['*'], 'not_issued_page');
+        $not_paid_leads   = $np_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
+
+        $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
+            ->where('expires_at', '>', now())
+            ->exists();
 
         return view('admin.retention.index', compact(
             'not_issued_leads',
             'not_paid_leads',
-            'carriers',
+            'not_issued_count',
+            'not_paid_count',
+            'kpi',
+            'disposed',
+            'hasZoomToken',
             'search',
             'month',
             'year',
             'date_from',
-            'date_to',
-            'not_issued_count',
-            'not_paid_count'
+            'date_to'
         ));
+    }
+
+    /**
+     * Update retention action status (disposed/active sub-status).
+     */
+    public function updateActionStatus(Request $request, int $id)
+    {
+        $request->validate([
+            'ret_action_status' => 'required|in:pending,in_progress,waiting_on_cx,fixed,cancelled,recalled',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+        $old  = $lead->ret_action_status;
+
+        $lead->ret_action_status      = $request->ret_action_status;
+        $lead->ret_action_updated_at  = now();
+        $lead->ret_action_updated_by  = Auth::id();
+
+        // If recalled via this method, also set recall fields if not already set
+        if ($request->ret_action_status === 'recalled' && !$lead->recall_requested_at) {
+            $lead->recall_requested_at = now();
+            $lead->recall_requested_by = Auth::id();
+            $lead->recall_note         = $request->input('note', 'Recalled from Retention Management');
+        }
+
+        $lead->save();
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Retention — Update Action Status',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['ret_action_status' => $old]),
+            'new_values' => json_encode(['ret_action_status' => $request->ret_action_status]),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Status updated to \"{$request->ret_action_status}\".",
+            'disposed' => in_array($request->ret_action_status, Statuses::RET_DISPOSED_STATUSES),
+        ]);
     }
 
     /**
@@ -373,6 +474,7 @@ class RetentionController extends Controller
         $lead->recall_requested_at = now();
         $lead->recall_requested_by = Auth::id();
         $lead->recall_note         = $request->recall_note;
+        $lead->ret_action_status   = 'recalled';
         $lead->save();
 
         AuditLog::create([

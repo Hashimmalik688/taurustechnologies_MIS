@@ -14,6 +14,7 @@
     .st-pending { background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.15); }
     .st-declined { background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.15); }
     .st-chargeback { background:rgba(107,114,128,.1);color:#4b5563;border:1px solid rgba(107,114,128,.15); }
+    .st-recalled { background:rgba(139,92,246,.1);color:#7c3aed;border:1px solid rgba(139,92,246,.2); }
     /* Search input in filter bar */
     .pipe-search {
         font-size:.72rem; font-weight:600; padding:.32rem .55rem .32rem 1.8rem;
@@ -117,8 +118,9 @@
             <div style="display:flex;gap:.4rem;flex-wrap:wrap;padding:.3rem .65rem .5rem;">
                 <span class="st-pill st-accepted"><i class="bx bx-check"></i> Accepted: {{ $mySales->where('status','accepted')->count() }}</span>
                 <span class="st-pill st-underwritten"><i class="bx bx-edit"></i> Underwritten: {{ $mySales->where('status','underwritten')->count() }}</span>
-                <span class="st-pill st-pending"><i class="bx bx-time"></i> Pending: {{ $mySales->where('status','pending')->count() }}</span>
+                <span class="st-pill st-pending"><i class="bx bx-time"></i> Pending: {{ $mySales->where('status','pending')->whereNull('recall_requested_at')->count() }}</span>
                 <span class="st-pill st-declined"><i class="bx bx-x"></i> Declined: {{ $mySales->where('status','declined')->count() }}</span>
+                <span class="st-pill st-recalled"><i class="bx bx-undo"></i> Recalled: {{ $mySales->filter(fn($s) => $s->recall_requested_at)->count() }}</span>
             </div>
 
             <div class="scroll-tbl" style="max-height:400px;">
@@ -149,20 +151,19 @@
                                 </td>
                                 <td style="white-space:nowrap;">{{ $sale->sale_at ? $sale->sale_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') : ($sale->sale_date ? $sale->sale_date->format('M d, Y') : 'N/A') }}</td>
                                 <td class="text-center">
-                                    @php $stClass = 'st-'.($sale->status ?? 'pending'); @endphp
-                                    <span class="st-pill {{ $stClass }}">{{ ucfirst($sale->status ?? 'pending') }}</span>
+                                    @php
+                                        $isRecalled = !is_null($sale->recall_requested_at);
+                                        $stClass = $isRecalled ? 'st-recalled' : 'st-'.($sale->status ?? 'pending');
+                                        $stLabel = $isRecalled ? 'Recalled' : ucfirst($sale->status ?? 'pending');
+                                    @endphp
+                                    <span class="st-pill {{ $stClass }}">{{ $stLabel }}</span>
                                     @if($sale->qa_status)
                                         <br><span style="font-size:.55rem;color:var(--bs-surface-400);">QA: {{ $sale->qa_status }}</span>
                                     @endif
-                                    @if($sale->recall_requested_at)
-                                        <br><span class="st-pill" style="background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.2);margin-top:.15rem;">
-                                            <i class="bx bx-undo" style="font-size:.7rem;"></i> Recalled
+                                    @if($isRecalled && $sale->recall_note)
+                                        <br><span style="font-size:.65rem;color:#7c3aed;font-style:italic;display:inline-block;margin-top:.15rem;max-width:180px;white-space:normal;line-height:1.3;" title="{{ $sale->recall_note }}">
+                                            <i class="bx bx-message-rounded-dots" style="font-size:.6rem;"></i> {{ $sale->recall_note }}
                                         </span>
-                                        @if($sale->recall_note)
-                                            <br><span style="font-size:.65rem;color:#7c3aed;font-style:italic;display:inline-block;margin-top:.15rem;max-width:180px;white-space:normal;line-height:1.3;" title="{{ $sale->recall_note }}">
-                                                <i class="bx bx-message-rounded-dots" style="font-size:.6rem;"></i> {{ $sale->recall_note }}
-                                            </span>
-                                        @endif
                                     @endif
                                 </td>
                                 <td class="text-end">
@@ -230,20 +231,17 @@
                             <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
                             <td>{{ $lead->phone_number ?? 'N/A' }}</td>
                             <td class="text-center">
-                                @if($lead->status === 'chargeback')
-                                    <span class="st-pill st-chargeback">Chargeback</span>
-                                @else
-                                    <span class="st-pill st-declined">Declined</span>
-                                @endif
                                 @if($lead->recall_requested_at)
-                                    <br><span class="st-pill" style="background:rgba(139,92,246,.12);color:#8b5cf6;border:1px solid rgba(139,92,246,.2);margin-top:.15rem;">
-                                        <i class="bx bx-undo" style="font-size:.7rem;"></i> Recalled
-                                    </span>
+                                    <span class="st-pill st-recalled"><i class="bx bx-undo" style="font-size:.7rem;"></i> Recalled</span>
                                     @if($lead->recall_note)
                                         <br><span style="font-size:.65rem;color:#7c3aed;font-style:italic;display:inline-block;margin-top:.15rem;max-width:180px;white-space:normal;line-height:1.3;" title="{{ $lead->recall_note }}">
                                             <i class="bx bx-message-rounded-dots" style="font-size:.6rem;"></i> {{ $lead->recall_note }}
                                         </span>
                                     @endif
+                                @elseif($lead->status === 'chargeback')
+                                    <span class="st-pill st-chargeback">Chargeback</span>
+                                @else
+                                    <span class="st-pill st-declined">Declined</span>
                                 @endif
                             </td>
                             <td>{{ $lead->carrier_name ?? 'N/A' }}</td>

@@ -82,6 +82,9 @@ class Lead extends Model
         'is_rewrite',
         'retention_notes',
         'retention_officer_id',
+        'ret_action_status',
+        'ret_action_updated_at',
+        'ret_action_updated_by',
 
         // QA fields
         'qa_status',
@@ -273,6 +276,7 @@ class Lead extends Model
         'recall_requested_at' => 'datetime',
         'followup_assigned_at' => 'datetime',
         'bank_verifier_assigned_at' => 'datetime',
+        'ret_action_updated_at' => 'datetime',
         'resale_log' => 'array',
 
         // Sales pipeline stage timestamps
@@ -549,6 +553,18 @@ class Lead extends Model
     public function notPaidBy()
     {
         return $this->belongsTo(User::class, 'not_paid_by_id');
+    }
+
+    /** User who last updated retention action status */
+    public function retActionUpdatedBy()
+    {
+        return $this->belongsTo(User::class, 'ret_action_updated_by');
+    }
+
+    /** User who recalled this lead to the closer */
+    public function recallRequestedBy()
+    {
+        return $this->belongsTo(User::class, 'recall_requested_by');
     }
 
     /** Manager/Finance who marked lead as Paid */

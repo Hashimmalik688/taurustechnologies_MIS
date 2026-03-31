@@ -843,6 +843,7 @@ Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['a
     Route::post('/{id}/disposition', [RetentionController::class, 'saveDisposition'])->name('saveDisposition')->middleware('role.permission:retention,edit');
     Route::get('/check-other-insurances/{id}', [RetentionController::class, 'checkOtherInsurances'])->name('checkOtherInsurances')->middleware('role.permission:retention,view');
     Route::post('/{id}/recall-to-closer', [RetentionController::class, 'recallToCloser'])->name('recallToCloser')->middleware('role.permission:retention,edit');
+    Route::post('/{id}/action-status', [RetentionController::class, 'updateActionStatus'])->name('updateActionStatus')->middleware('role.permission:retention,edit');
 });
 
 // Retention Officer Dashboard

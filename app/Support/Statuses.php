@@ -125,6 +125,36 @@ class Statuses
     public const RETENTION_REWRITE  = 'rewrite';
 
     // ═══════════════════════════════════════════════════════════════════
+    //  Retention Action Status  (leads.ret_action_status — snake_case)
+    //  Set by retention officers on Not Issued / Not Paid cases.
+    //  'fixed' and 'cancelled' hide the lead from the active work list.
+    // ═══════════════════════════════════════════════════════════════════
+
+    public const RET_PENDING        = 'pending';
+    public const RET_IN_PROGRESS    = 'in_progress';
+    public const RET_WAITING_ON_CX  = 'waiting_on_cx';
+    public const RET_FIXED          = 'fixed';
+    public const RET_CANCELLED      = 'cancelled';
+    public const RET_RECALLED       = 'recalled';
+
+    /** Human-readable labels for retention action statuses */
+    public const RET_ACTION_STATUSES = [
+        self::RET_PENDING       => 'Pending',
+        self::RET_IN_PROGRESS   => 'In Progress',
+        self::RET_WAITING_ON_CX => 'Waiting On Cx',
+        self::RET_FIXED         => 'Fixed',
+        self::RET_CANCELLED     => 'Cancelled',
+        self::RET_RECALLED      => 'Recalled',
+    ];
+
+    /** Statuses that are considered "disposed" — hidden from active list */
+    public const RET_DISPOSED_STATUSES = [
+        self::RET_FIXED,
+        self::RET_CANCELLED,
+        self::RET_RECALLED,
+    ];
+
+    // ═══════════════════════════════════════════════════════════════════
     //  Bank Verification Status  (leads.bank_verification_status — Title Case)
     // ═══════════════════════════════════════════════════════════════════
 
