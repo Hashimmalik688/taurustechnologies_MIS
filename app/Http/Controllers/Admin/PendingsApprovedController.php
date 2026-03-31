@@ -129,7 +129,10 @@ class PendingsApprovedController extends Controller
         $approvedCount     = (clone $statsBase)->where('submission_status', 'approved')->count();
 
         $leads    = $query->orderBy('sale_date', 'desc')->paginate(50);
-        $carriers = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $carriers = InsuranceCarrier::where('is_active', true)
+            ->whereHas('agentStates', fn($q) => $q->whereNotNull('partner_id'))
+            ->orderBy('name')
+            ->get(['id', 'name']);
         
         // Active partners for modal dropdown
         $partners = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name']);

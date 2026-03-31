@@ -13,28 +13,23 @@ class QAResultService
 {
     /**
      * Compliance check code → DB column mapping.
+     * New C1-C11 (simplified) mapped to original DB column names.
      */
     private const COMPLIANCE_MAP = [
         // Call Handling
-        'C1_closer_consent' => 'c1_closer_consent',
-        'C2_agent_identity' => 'c2_agent_identity',
-        'C3_carrier_named' => 'c3_carrier_named',
-        'C4_product_type_stated' => 'c4_product_type_stated',
-        'C5_health_questions_complete' => 'c5_health_questions_complete',
-        'C6_proper_quote' => 'c6_proper_quote',
-        'C7_coverage_amount' => 'c7_coverage_amount',
-        'C8_draft_date_confirmed' => 'c8_draft_date_confirmed',
-        'C9_end_of_call_consent' => 'c9_end_of_call_consent',
-        'C10_waiting_period' => 'c10_waiting_period',
+        'C1_agent_identity'             => 'c2_agent_identity',
+        'C2_carrier_named'              => 'c3_carrier_named',
+        'C3_product_type_stated'        => 'c4_product_type_stated',
+        'C4_health_questions_complete'  => 'c5_health_questions_complete',
+        'C5_quote_and_coverage'         => 'c6_proper_quote',
+        'C6_draft_date_confirmed'       => 'c8_draft_date_confirmed',
+        'C7_end_of_call_consent'        => 'c9_end_of_call_consent',
         // Application Requirements
-        'C11_application_info_collected' => 'c11_application_info_collected',
+        'C8_application_info_collected' => 'c11_application_info_collected',
         // Behavioral Compliance
-        'C12_customer_not_on_dnc' => 'c12_customer_not_on_dnc',
-        'C13_customer_not_aggressive' => 'c13_customer_not_aggressive',
-        'C14_customer_not_disinterested' => 'c14_customer_not_disinterested',
-        'C15_no_pushy_sale' => 'c15_no_pushy_sale',
-        'C16_appropriate_language' => 'c16_appropriate_language',
-        'C17_customer_not_abusive' => 'c17_customer_not_abusive',
+        'C9_customer_not_on_dnc'        => 'c12_customer_not_on_dnc',
+        'C10_agent_handles_objections'  => 'c14_customer_not_disinterested',
+        'C11_appropriate_language'      => 'c16_appropriate_language',
     ];
 
     /**
@@ -56,6 +51,15 @@ class QAResultService
                 $complianceData[$dbColumn] = in_array($value, ['pass', 'fail', 'na']) ? $value : 'na';
             }
 
+            // Handle informational waiting period note (stored in c10_waiting_period but NOT a compliance check)
+            $infoNotes = $aiResponse['informational_notes'] ?? [];
+            $waitingPeriodNote = $infoNotes['waiting_period'] ?? 'not_applicable';
+            $complianceData['c10_waiting_period'] = match ($waitingPeriodNote) {
+                'disclosed'     => 'pass',
+                'not_disclosed' => 'fail',
+                default         => 'na',
+            };
+
             // Extract score breakdown
             $scores = $aiResponse['score_breakdown'] ?? [];
 
@@ -63,16 +67,18 @@ class QAResultService
             $extracted = $aiResponse['extracted_data'] ?? [];
 
             // Recalculate total_score from sub-scores if AI returned 0 but sub-scores exist.
-            // Claude sometimes zeroes total_score on COMPLIANCE_FAIL despite having valid sub-scores.
+            // Formula: total_score = round((S1+S2+S3+S4+S5+S6+S7) / 70 * 100)
+            // Compliance is a hard gate (disposition), not a score component.
             $totalScore = floatval($aiResponse['total_score'] ?? 0);
+            $compliancePass = (bool) ($aiResponse['compliance_pass'] ?? false);
             if ($totalScore == 0 && !empty($scores)) {
                 $subScoreSum = array_sum(array_values($scores));
                 if ($subScoreSum > 0) {
                     $totalScore = round($subScoreSum / 70 * 100, 2);
                     Log::info('[QA:Result] Recalculated total_score from sub-scores', [
-                        'qa_call_id'   => $qaCall->id,
-                        'sub_sum'      => $subScoreSum,
-                        'total_score'  => $totalScore,
+                        'qa_call_id'  => $qaCall->id,
+                        'sub_sum'     => $subScoreSum,
+                        'total_score' => $totalScore,
                     ]);
                 }
             }
@@ -84,7 +90,7 @@ class QAResultService
                 'qa_call_id' => $qaCall->id,
                 'disposition' => $this->validateDisposition($aiResponse['disposition'] ?? 'POOR'),
                 'total_score' => $totalScore,
-                'compliance_pass' => (bool) ($aiResponse['compliance_pass'] ?? false),
+                'compliance_pass' => $compliancePass,
                 'score_opening' => $this->clampScore($scores['opening'] ?? 0),
                 'score_discovery' => $this->clampScore($scores['discovery'] ?? 0),
                 'score_presentation' => $this->clampScore($scores['presentation'] ?? 0),
@@ -178,7 +184,7 @@ class QAResultService
                 ROUND(AVG(qa_results.total_score), 2) as avg_score,
                 ROUND(MIN(qa_results.total_score), 2) as min_score,
                 ROUND(MAX(qa_results.total_score), 2) as max_score,
-                SUM(CASE WHEN qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
+                SUM(CASE WHEN qa_results.compliance_pass = 0 OR qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN qa_results.disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_count,
                 SUM(CASE WHEN qa_results.disposition = "GOOD" THEN 1 ELSE 0 END) as good_count,
@@ -227,7 +233,9 @@ class QAResultService
 
     private function validateDisposition(string $disposition): string
     {
-        $valid = ['COMPLIANCE_FAIL', 'VOID_RISK', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR'];
+        // COMPLIANCE_FAIL is kept for backward-compatibility with legacy records.
+        // New calls will never receive this disposition from the AI prompt.
+        $valid = ['VOID_RISK', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR', 'COMPLIANCE_FAIL'];
         return in_array($disposition, $valid) ? $disposition : 'POOR';
     }
 

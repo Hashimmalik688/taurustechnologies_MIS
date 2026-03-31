@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'QA Script Editor'); ?>
 
-@section('title', 'QA Script Editor')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    QA Script Editor — qa-* design system alignment
@@ -242,9 +240,9 @@
 .qs-autosave-status.saved  { color: #34c38f; }
 .qs-autosave-dot { width:6px; height:6px; border-radius:50%; background:currentColor; display:inline-block; flex-shrink:0; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="qs-wrap">
 
     <!-- ═══ Header ═══ -->
@@ -252,16 +250,17 @@
         <h5 class="qs-title">
             <i class="ri-code-s-slash-line"></i>
             QA Script Editor
-            <span id="customBadge" class="qs-badge {{ $hasCustom ? 'qs-badge-custom' : 'qs-badge-default' }}">
-                <i class="{{ $hasCustom ? 'ri-edit-2-line' : 'ri-cpu-line' }}"></i>
-                {{ $hasCustom ? 'Custom Prompt' : 'Built-in Default' }}
+            <span id="customBadge" class="qs-badge <?php echo e($hasCustom ? 'qs-badge-custom' : 'qs-badge-default'); ?>">
+                <i class="<?php echo e($hasCustom ? 'ri-edit-2-line' : 'ri-cpu-line'); ?>"></i>
+                <?php echo e($hasCustom ? 'Custom Prompt' : 'Built-in Default'); ?>
+
             </span>
         </h5>
         <div class="qs-toolbar">
             <a href="/qa/scoring" class="qs-btn qs-btn-ghost">
                 <i class="ri-arrow-left-line"></i> Dashboard
             </a>
-            <button id="resetBtn" class="qs-btn qs-btn-danger" onclick="resetToDefault()" {{ !$hasCustom ? 'disabled' : '' }}>
+            <button id="resetBtn" class="qs-btn qs-btn-danger" onclick="resetToDefault()" <?php echo e(!$hasCustom ? 'disabled' : ''); ?>>
                 <i class="ri-refresh-line"></i> Reset to Default
             </button>
             <button class="qs-btn qs-btn-blue" onclick="copyToClipboard()">
@@ -291,9 +290,9 @@
         <strong>How this works:</strong>
         This prompt is sent to the AI for every completed call. Edit it to change what the QA agent checks, how it scores, or what it extracts.
         Use these placeholders — they are replaced automatically at runtime:
-        <code>@{{TRANSCRIPT}}</code> — the full call transcript &nbsp;·&nbsp;
-        <code>@{{DURATION_MINUTES}}</code> — call length in minutes &nbsp;·&nbsp;
-        <code>@{{DURATION_SECONDS}}</code> — call length in seconds.
+        <code>{{TRANSCRIPT}}</code> — the full call transcript &nbsp;·&nbsp;
+        <code>{{DURATION_MINUTES}}</code> — call length in minutes &nbsp;·&nbsp;
+        <code>{{DURATION_SECONDS}}</code> — call length in seconds.
         <br><br>
         ⚠️ Changes take effect for <em>future calls only</em>. Previously scored calls are not retroactively updated.
     </div>
@@ -308,7 +307,7 @@
             <span><i class="ri-code-line" style="margin-right:.25rem;"></i> AI Instruction Prompt</span>
             <span class="qs-hint" style="margin:0;">Save: <kbd>Ctrl</kbd>+<kbd>S</kbd></span>
         </div>
-        <textarea id="promptEditor" oninput="updateCharCount()" spellcheck="false">{{ $template }}</textarea>
+        <textarea id="promptEditor" oninput="updateCharCount()" spellcheck="false"><?php echo e($template); ?></textarea>
     </div>
 
     <div class="qs-hint">
@@ -319,9 +318,9 @@
 
 <!-- ═══ Toast ═══ -->
 <div class="qa-toast" id="qaToast"></div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 (function() {
 
@@ -389,7 +388,7 @@
         const content = document.getElementById('promptEditor').value.trim();
         if (!content) { showToast('Prompt cannot be empty.', 'error'); return; }
         if (!isAuto && !content.includes('{' + '{TRANSCRIPT}}')) {
-            if (!confirm('The prompt does not contain @{{TRANSCRIPT}} — the transcript will not be injected. Save anyway?')) return;
+            if (!confirm('The prompt does not contain {{TRANSCRIPT}} — the transcript will not be injected. Save anyway?')) return;
         }
 
         isSaving = true;
@@ -479,4 +478,6 @@
 
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/qa/script.blade.php ENDPATH**/ ?>

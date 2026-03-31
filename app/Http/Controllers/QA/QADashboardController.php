@@ -52,12 +52,32 @@ class QADashboardController extends Controller
             ->selectRaw('disposition, COUNT(*) as count')
             ->pluck('count', 'disposition');
 
-        // ── Score trend (7 days) ───────────────────────────────────────
+        // ── Score trend — try QaDailyStat first, fall back to live query ─
+        $trendWindow = match ($range) {
+            'today'        => 14,
+            '7d', 'week'   => 14,
+            '30d', 'month' => 30,
+            '90d'          => 90,
+            'all'          => 90,
+            default        => 30,
+        };
         $scoreTrend = QaDailyStat::selectRaw('stat_date, ROUND(AVG(avg_score), 1) as avg')
-            ->where('stat_date', '>=', now()->subDays(7)->toDateString())
+            ->where('stat_date', '>=', now()->subDays($trendWindow)->toDateString())
             ->groupBy('stat_date')
             ->orderBy('stat_date')
             ->pluck('avg', 'stat_date');
+
+        // Fall back to direct qa_calls query if QaDailyStat has no entries
+        if ($scoreTrend->isEmpty()) {
+            $scoreTrend = QaResult::join('qa_calls', 'qa_results.qa_call_id', '=', 'qa_calls.id')
+                ->where('qa_calls.processing_status', 'completed')
+                ->where('qa_calls.call_start_time', '>=', now()->subDays($trendWindow)->startOfDay())
+                ->whereNotNull('qa_results.total_score')
+                ->selectRaw('DATE(qa_calls.call_start_time) as stat_date, ROUND(AVG(qa_results.total_score), 1) as avg')
+                ->groupBy('stat_date')
+                ->orderBy('stat_date')
+                ->pluck('avg', 'stat_date');
+        }
 
         // ── Compliance Rate Trend (7 days) ─────────────────────────────
         $complianceTrend = QaCall::completed()
@@ -173,7 +193,7 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN disposition = "GOOD" THEN 1 ELSE 0 END) as good_count,
                 SUM(CASE WHEN disposition = "AVERAGE" THEN 1 ELSE 0 END) as average_count,
                 SUM(CASE WHEN disposition = "POOR" THEN 1 ELSE 0 END) as poor_count,
-                SUM(CASE WHEN disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
+                SUM(CASE WHEN compliance_pass = 0 OR disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count,
                 ROUND(AVG(score_opening), 1) as avg_opening,
@@ -397,9 +417,29 @@ class QADashboardController extends Controller
                 'disposition' => $result->disposition,
                 'total_score' => $result->total_score,
                 'compliance_pass' => $result->compliance_pass,
-                'compliance_checks' => $result->compliance_checks,
+                'compliance_checks' => [
+                    'C1_agent_identity'             => $this->mapComplianceValue($result->c2_agent_identity),
+                    'C2_carrier_named'              => $this->mapComplianceValue($result->c3_carrier_named),
+                    'C3_product_type_stated'        => $this->mapComplianceValue($result->c4_product_type_stated),
+                    'C4_health_questions_complete'  => $this->mapComplianceValue($result->c5_health_questions_complete),
+                    'C5_quote_and_coverage'         => $this->mapComplianceValue($result->c6_proper_quote),
+                    'C6_draft_date_confirmed'       => $this->mapComplianceValue($result->c8_draft_date_confirmed),
+                    'C7_end_of_call_consent'        => $this->mapComplianceValue($result->c9_end_of_call_consent),
+                    'C8_application_info_collected' => $this->mapComplianceValue($result->c11_application_info_collected),
+                    'C9_customer_not_on_dnc'        => $this->mapComplianceValue($result->c12_customer_not_on_dnc),
+                    'C10_agent_handles_objections'  => $this->mapComplianceValue($result->c14_customer_not_disinterested),
+                    'C11_appropriate_language'      => $this->mapComplianceValue($result->c16_appropriate_language),
+                ],
                 'compliance_failures' => $result->compliance_failures,
-                'score_breakdown' => $result->score_breakdown,
+                'score_breakdown' => [
+                    'opening'            => (int) ($result->score_opening ?? 0),
+                    'discovery'          => (int) ($result->score_discovery ?? 0),
+                    'presentation'       => (int) ($result->score_presentation ?? 0),
+                    'objection_handling' => (int) ($result->score_objection_handling ?? 0),
+                    'closing'            => (int) ($result->score_closing ?? 0),
+                    'soft_skills'        => (int) ($result->score_soft_skills ?? 0),
+                    'call_control'       => (int) ($result->score_call_control ?? 0),
+                ],
                 'coaching_notes' => $result->coaching_notes,
                 'top_issue' => $result->top_issue,
                 'strengths' => $result->strengths,
@@ -419,6 +459,16 @@ class QADashboardController extends Controller
     // HELPERS
     // ══════════════════════════════════════════════════════════════════
 
+    /** Convert 'pass'/'fail'/'na' DB string to boolean|null for the frontend. */
+    private function mapComplianceValue(?string $v): bool|null
+    {
+        return match ($v) {
+            'pass' => true,
+            'fail' => false,
+            default => null,
+        };
+    }
+
     private function getTeamStats(string $range): array
     {
         $base = QaCall::completed()
@@ -430,7 +480,7 @@ class QADashboardController extends Controller
             ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
             ->selectRaw('
                 ROUND(AVG(total_score), 1) as avg_score,
-                SUM(CASE WHEN disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
+                SUM(CASE WHEN compliance_pass = 0 OR disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_count,
                 SUM(CASE WHEN disposition = "GOOD" THEN 1 ELSE 0 END) as good_count,
@@ -610,7 +660,7 @@ class QADashboardController extends Controller
                 COUNT(*) as calls_scored,
                 ROUND(AVG(total_score), 1) as avg_score,
                 ROUND(AVG(qa_calls.duration_seconds), 0) as avg_handle_time,
-                SUM(CASE WHEN disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
+                SUM(CASE WHEN compliance_pass = 0 OR disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_count,
                 SUM(CASE WHEN compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count,
@@ -694,7 +744,7 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
                 ROUND(AVG(qa_results.total_score), 1) as avg_score,
                 SUM(CASE WHEN qa_results.disposition IN ("EXCELLENT","GOOD") THEN 1 ELSE 0 END) as good_calls,
-                SUM(CASE WHEN qa_results.disposition IN ("POOR","COMPLIANCE_FAIL") THEN 1 ELSE 0 END) as bad_calls,
+                SUM(CASE WHEN qa_results.disposition = "POOR" OR qa_results.compliance_pass = 0 THEN 1 ELSE 0 END) as bad_calls,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
@@ -734,6 +784,7 @@ class QADashboardController extends Controller
             'disposition' => $call->qaResult?->disposition,
             'total_score' => $call->qaResult?->total_score,
             'compliance_pass' => $call->qaResult?->compliance_pass,
+            'compliance_failures' => $call->qaResult?->compliance_failures ?? [],
             'scored_by' => $call->scored_by,
             'is_sale' => (bool) $call->qaResult?->is_sale,
             'sale_amount' => $call->qaResult?->sale_amount,
@@ -832,13 +883,13 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "AVERAGE" THEN 1 ELSE 0 END) as avg_sales,
                 SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "POOR" THEN 1 ELSE 0 END) as poor_sales,
                 SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risk_sales,
-                SUM(CASE WHEN qa_results.is_sale = 1 AND qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fail_sales,
+                SUM(CASE WHEN qa_results.is_sale = 1 AND (qa_results.compliance_pass = 0 OR qa_results.disposition = "COMPLIANCE_FAIL") THEN 1 ELSE 0 END) as compliance_fail_sales,
                 SUM(CASE WHEN qa_results.disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_calls,
                 SUM(CASE WHEN qa_results.disposition = "GOOD" THEN 1 ELSE 0 END) as good_calls,
                 SUM(CASE WHEN qa_results.disposition = "AVERAGE" THEN 1 ELSE 0 END) as avg_calls,
                 SUM(CASE WHEN qa_results.disposition = "POOR" THEN 1 ELSE 0 END) as poor_calls,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risk_calls,
-                SUM(CASE WHEN qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fail_calls,
+                SUM(CASE WHEN qa_results.compliance_pass = 0 OR qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fail_calls,
                 ROUND(AVG(qa_results.total_score), 1) as avg_score,
                 ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE NULL END), 0) as avg_coverage,
                 ROUND(AVG(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE NULL END), 2) as avg_premium,
@@ -851,6 +902,8 @@ class QADashboardController extends Controller
         $filteredQuery = clone $baseQuery;
         if ($filter === 'sales_only') {
             $filteredQuery->whereHas('qaResult', fn ($q) => $q->where('is_sale', true));
+        } elseif ($filter === 'compliance_fail') {
+            $filteredQuery->whereHas('qaResult', fn ($q) => $q->where('compliance_pass', false)->orWhere('disposition', 'COMPLIANCE_FAIL'));
         } elseif ($filter !== 'all') {
             $disposition = strtoupper($filter);
             $filteredQuery->whereHas('qaResult', fn ($q) => $q->where('disposition', $disposition));
@@ -869,7 +922,7 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN qa_results.is_sale = 1 THEN 1 ELSE 0 END) as total_sales,
                 ROUND(AVG(qa_results.total_score), 1) as avg_score,
                 SUM(CASE WHEN qa_results.disposition IN ("EXCELLENT","GOOD") THEN 1 ELSE 0 END) as good_calls,
-                SUM(CASE WHEN qa_results.disposition IN ("POOR","COMPLIANCE_FAIL") THEN 1 ELSE 0 END) as bad_calls,
+                SUM(CASE WHEN qa_results.disposition = "POOR" OR qa_results.compliance_pass = 0 THEN 1 ELSE 0 END) as bad_calls,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium

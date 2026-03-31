@@ -5,295 +5,489 @@
 @section('css')
 <style>
 /* ═══════════════════════════════════════════════════
-   QA Scoring Dashboard v2 — Unified Single Page
+   QA Dashboard v3 — Enterprise Clean
+   Design principles: hierarchy, whitespace, clarity
    ═══════════════════════════════════════════════════ */
 
-.ex-card {
-    background: var(--bs-card-bg);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 0.6rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    transition: box-shadow .2s;
+/* ── Design Tokens ── */
+:root {
+  --qa-radius: 0.5rem;
+  --qa-radius-lg: 0.75rem;
+  --qa-border: 1px solid rgba(255,255,255,.07);
+  --qa-shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --qa-shadow-hover: 0 4px 16px rgba(0,0,0,.1);
+  --qa-gold: #d4af37;
+  --qa-gold-dim: rgba(212,175,55,.1);
+  --qa-green: #34c38f; --qa-green-dim: rgba(52,195,143,.1);
+  --qa-blue: #556ee6;  --qa-blue-dim: rgba(85,110,230,.1);
+  --qa-red: #f46a6a;   --qa-red-dim: rgba(244,106,106,.1);
+  --qa-warn: #f1b44c;  --qa-warn-dim: rgba(241,180,76,.1);
+  --qa-purple: #7c69ef;--qa-purple-dim: rgba(124,105,239,.1);
+  --qa-teal: #50a5f1;  --qa-teal-dim: rgba(80,165,241,.1);
+  --qa-muted: var(--bs-surface-400, #8a94a6);
+  --qa-surface: var(--bs-surface-100, rgba(255,255,255,.03));
+  --qa-surface-border: var(--bs-surface-200, rgba(255,255,255,.06));
 }
-.ex-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
 
-/* KPI Cards */
-.kpi-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.65rem; }
-.kpi-card {
-    flex: 1 1 80px; min-width: 75px; padding: 0.65rem 0.6rem;
-    border-radius: 0.55rem; text-align: center; position: relative;
-    overflow: hidden; border: 1px solid rgba(255,255,255,.06);
-    transition: transform .15s, box-shadow .15s;
+/* ── Base Card ── */
+.qa-card {
+  background: var(--bs-card-bg);
+  border: var(--qa-border);
+  border-radius: var(--qa-radius);
+  box-shadow: var(--qa-shadow);
 }
-.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:.55rem .55rem 0 0; }
-.kpi-card .k-icon { font-size: 1rem; margin-bottom: 0.2rem; display: block; opacity: .7; }
-.kpi-card .k-val { font-size: 1.35rem; font-weight: 700; line-height: 1; }
-.kpi-card .k-lbl { font-size:.58rem; text-transform:uppercase; font-weight:600; letter-spacing:.4px; color:var(--bs-surface-500); margin-top:.2rem; }
+.qa-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .6rem .9rem; border-bottom: 1px solid var(--qa-surface-border);
+}
+.qa-card-header h6 {
+  margin: 0; font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--qa-muted);
+  display: flex; align-items: center; gap: .35rem;
+}
+.qa-card-header h6 i { font-size: .85rem; }
+.qa-card-body { padding: .75rem .9rem; }
+.qa-card-body.p0 { padding: 0; }
 
-.kpi-card.k-gold    { background:rgba(212,175,55,.06); }
-.kpi-card.k-gold::before    { background:linear-gradient(90deg,#d4af37,#e8c84a); }
-.kpi-card.k-gold .k-val, .kpi-card.k-gold .k-icon { color:#b89730; }
-.kpi-card.k-blue    { background:rgba(85,110,230,.06); }
-.kpi-card.k-blue::before    { background:linear-gradient(90deg,#556ee6,#8b9cf7); }
-.kpi-card.k-blue .k-val, .kpi-card.k-blue .k-icon { color:#556ee6; }
-.kpi-card.k-green   { background:rgba(52,195,143,.06); }
-.kpi-card.k-green::before   { background:linear-gradient(90deg,#34c38f,#6eddb8); }
-.kpi-card.k-green .k-val, .kpi-card.k-green .k-icon { color:#1a8754; }
-.kpi-card.k-teal    { background:rgba(80,165,241,.06); }
-.kpi-card.k-teal::before    { background:linear-gradient(90deg,#50a5f1,#8cc5f7); }
-.kpi-card.k-teal .k-val, .kpi-card.k-teal .k-icon { color:#2b81c9; }
-.kpi-card.k-red     { background:rgba(244,106,106,.06); }
-.kpi-card.k-red::before     { background:linear-gradient(90deg,#f46a6a,#f89b9b); }
-.kpi-card.k-red .k-val, .kpi-card.k-red .k-icon { color:#c84646; }
-.kpi-card.k-warn    { background:rgba(241,180,76,.06); }
-.kpi-card.k-warn::before    { background:linear-gradient(90deg,#f1b44c,#f5cd7e); }
-.kpi-card.k-warn .k-val, .kpi-card.k-warn .k-icon { color:#b87a14; }
-.kpi-card.k-purple  { background:rgba(124,105,239,.06); }
-.kpi-card.k-purple::before  { background:linear-gradient(90deg,#7c69ef,#a899f5); }
-.kpi-card.k-purple .k-val, .kpi-card.k-purple .k-icon { color:#5b49c7; }
-.kpi-card.k-gray    { background:rgba(108,117,125,.05); }
-.kpi-card.k-gray::before    { background:linear-gradient(90deg,#6c757d,#95a0a8); }
-.kpi-card.k-gray .k-val, .kpi-card.k-gray .k-icon { color:#6c757d; }
+/* ── Page Header ── */
+.qa-page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap;
+}
+.qa-page-title {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: 1rem; font-weight: 700; margin: 0;
+  white-space: nowrap;
+}
+.qa-page-title i { color: var(--qa-gold); font-size: 1.1rem; }
+.qa-page-title .qa-info-btn { margin-left: .1rem; }
 
-/* Section cards */
-.sec-card { padding:0; margin-bottom:.65rem; overflow:hidden; }
-.sec-hdr { display:flex; justify-content:space-between; align-items:center; padding:.5rem .75rem; border-bottom:1px solid rgba(0,0,0,.05); flex-wrap:wrap; gap:.4rem; }
-.sec-hdr h6 { margin:0; font-size:.78rem; font-weight:600; display:flex; align-items:center; gap:.3rem; }
-.sec-hdr h6 i { opacity:.6; font-size:.95rem; }
-.sec-body { padding:.6rem .75rem; }
+.qa-toolbar {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.qa-range-group {
+  display: flex; align-items: center; gap: .3rem;
+  background: var(--qa-surface); border: var(--qa-border);
+  border-radius: var(--qa-radius); padding: .2rem .4rem;
+}
+.qa-range-group select,
+.qa-range-group input[type=date] {
+  background: transparent; border: none; outline: none;
+  font-size: .7rem; color: inherit; padding: .15rem .2rem;
+  cursor: pointer;
+}
+.qa-range-group .qa-sep { color: var(--qa-muted); font-size: .7rem; padding: 0 .1rem; }
+.qa-range-group .qa-range-divider { width: 1px; height: 14px; background: var(--qa-surface-border); margin: 0 .2rem; }
 
-/* Tables */
-.ex-tbl { width:100%; border-collapse:separate; border-spacing:0; font-size:.75rem; }
-.ex-tbl thead th { text-transform:uppercase; font-size:.6rem; font-weight:700; letter-spacing:.5px; color:var(--bs-surface-500); padding:.4rem .5rem; border-bottom:1px solid var(--bs-surface-200); white-space:nowrap; background:var(--bs-surface-100); position:sticky; top:0; z-index:1; }
-.ex-tbl tbody td { padding:.4rem .5rem; border-bottom:1px solid rgba(0,0,0,.03); vertical-align:middle; }
-.ex-tbl tbody tr { transition:background .12s; }
-.ex-tbl tbody tr:hover { background:rgba(212,175,55,.03); }
+.qa-action-btn {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .7rem; font-weight: 600; padding: .32rem .65rem;
+  border-radius: var(--qa-radius); border: 1px solid transparent;
+  cursor: pointer; transition: opacity .15s, box-shadow .15s; white-space: nowrap;
+  text-decoration: none;
+}
+.qa-action-btn:hover { opacity: .85; box-shadow: 0 2px 8px rgba(0,0,0,.15); text-decoration: none; }
+.qa-action-btn i { font-size: .8rem; }
+.qa-btn-primary   { background: var(--qa-gold); color: #fff; border-color: transparent; }
+.qa-btn-danger    { background: var(--qa-red-dim); color: #c84646; border-color: rgba(244,106,106,.25); }
+.qa-btn-success   { background: var(--qa-green-dim); color: #1a8754; border-color: rgba(52,195,143,.25); }
+.qa-btn-secondary { background: var(--qa-blue-dim); color: var(--qa-blue); border-color: rgba(85,110,230,.25); }
+.qa-btn-ghost     { background: transparent; color: var(--qa-muted); border-color: var(--qa-surface-border); }
+.qa-btn-ghost:hover { color: var(--qa-gold); border-color: rgba(212,175,55,.4); }
 
-/* Badges */
-.bd-mini { font-size:.6rem; font-weight:700; padding:.15rem .4rem; border-radius:.25rem; display:inline-block; min-width:22px; text-align:center; }
-.bd-mini.bd-blue   { background:rgba(85,110,230,.12); color:#556ee6; }
-.bd-mini.bd-green  { background:rgba(52,195,143,.12); color:#1a8754; }
-.bd-mini.bd-red    { background:rgba(244,106,106,.12); color:#c84646; }
-.bd-mini.bd-warn   { background:rgba(241,180,76,.12); color:#b87a14; }
-.bd-mini.bd-teal   { background:rgba(80,165,241,.12); color:#2b81c9; }
-.bd-mini.bd-gold   { background:rgba(212,175,55,.12); color:#b89730; }
-.bd-mini.bd-purple { background:rgba(124,105,239,.12); color:#5b49c7; }
-.bd-mini.bd-gray   { background:rgba(108,117,125,.08); color:#6c757d; }
+/* ── KPI Strip ── */
+.qa-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: .6rem; margin-bottom: 1rem;
+}
+.qa-kpi {
+  background: var(--bs-card-bg); border: var(--qa-border);
+  border-radius: var(--qa-radius); padding: .9rem .75rem;
+  position: relative; overflow: hidden;
+  transition: transform .15s, box-shadow .15s;
+}
+.qa-kpi:hover { transform: translateY(-2px); box-shadow: var(--qa-shadow-hover); }
+.qa-kpi::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; border-radius: 0 0 var(--qa-radius) var(--qa-radius);
+}
+.qa-kpi-icon { font-size: 1.1rem; margin-bottom: .35rem; display: block; }
+.qa-kpi-value { font-size: 1.6rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.qa-kpi-label { font-size: .6rem; text-transform: uppercase; font-weight: 600; letter-spacing: .5px; color: var(--qa-muted); margin-top: .3rem; }
+.qa-kpi-delta { font-size: .62rem; font-weight: 600; margin-top: .2rem; }
 
-.scroll-tbl { max-height:280px; overflow-y:auto; }
-.scroll-tbl::-webkit-scrollbar { width:3px; }
-.scroll-tbl::-webkit-scrollbar-thumb { background:var(--bs-surface-300); border-radius:3px; }
+.qa-kpi.kpi-score  .qa-kpi-icon, .qa-kpi.kpi-score  .qa-kpi-value { color: var(--qa-gold); }
+.qa-kpi.kpi-score::after  { background: var(--qa-gold); }
+.qa-kpi.kpi-comply .qa-kpi-icon, .qa-kpi.kpi-comply .qa-kpi-value { color: var(--qa-green); }
+.qa-kpi.kpi-comply::after { background: var(--qa-green); }
+.qa-kpi.kpi-calls  .qa-kpi-icon, .qa-kpi.kpi-calls  .qa-kpi-value { color: var(--qa-blue); }
+.qa-kpi.kpi-calls::after  { background: var(--qa-blue); }
+.qa-kpi.kpi-sales  .qa-kpi-icon, .qa-kpi.kpi-sales  .qa-kpi-value { color: var(--qa-teal); }
+.qa-kpi.kpi-sales::after  { background: var(--qa-teal); }
+.qa-kpi.kpi-alert  .qa-kpi-icon, .qa-kpi.kpi-alert  .qa-kpi-value { color: var(--qa-red); }
+.qa-kpi.kpi-alert::after  { background: var(--qa-red); }
 
-.link-btn { font-size:.62rem; padding:.18rem .45rem; border-radius:.3rem; border:1px solid var(--bs-surface-300); background:transparent; color:var(--bs-surface-500); cursor:pointer; text-decoration:none; transition:all .15s; }
-.link-btn:hover { border-color:var(--bs-gold); color:var(--bs-gold); }
+/* Secondary stat strip */
+.qa-stat-strip {
+  display: flex; gap: 0; margin-bottom: 1rem;
+  background: var(--bs-card-bg); border: var(--qa-border); border-radius: var(--qa-radius);
+  overflow: hidden;
+}
+.qa-stat {
+  flex: 1; padding: .55rem .75rem; text-align: center;
+  border-right: 1px solid var(--qa-surface-border);
+  position: relative;
+}
+.qa-stat:last-child { border-right: none; }
+.qa-stat-val { font-size: .95rem; font-weight: 700; line-height: 1; }
+.qa-stat-lbl { font-size: .58rem; text-transform: uppercase; font-weight: 600; letter-spacing: .4px; color: var(--qa-muted); margin-top: .2rem; }
+.qa-stat.st-excellent .qa-stat-val { color: #1a8754; }
+.qa-stat.st-good      .qa-stat-val { color: var(--qa-blue); }
+.qa-stat.st-average   .qa-stat-val { color: #b87a14; }
+.qa-stat.st-poor      .qa-stat-val { color: #c84646; }
+.qa-stat.st-void      .qa-stat-val { color: var(--qa-purple); }
+.qa-stat.st-aht       .qa-stat-val { color: var(--qa-muted); }
 
-/* Disposition badges */
-.qa-disp { display:inline-block; padding:.12rem .4rem; border-radius:1rem; font-size:.58rem; font-weight:700; letter-spacing:.3px; text-transform:uppercase; }
+/* ── Disposition Badges ── */
+.qa-disp { display:inline-block; padding:.1rem .38rem; border-radius:1rem; font-size:.58rem; font-weight:700; letter-spacing:.3px; text-transform:uppercase; line-height:1.4; }
 .qa-disp.d-excellent { background:rgba(52,195,143,.12); color:#1a8754; }
 .qa-disp.d-good      { background:rgba(85,110,230,.12); color:#556ee6; }
 .qa-disp.d-average   { background:rgba(241,180,76,.12); color:#b87a14; }
 .qa-disp.d-poor      { background:rgba(244,106,106,.12); color:#c84646; }
-.qa-disp.d-comp-fail { background:rgba(214,48,49,.12); color:#c84646; border:1px solid rgba(214,48,49,.2); }
+.qa-disp.d-comp-fail { background:rgba(214,48,49,.1); color:#c84646; border:1px solid rgba(214,48,49,.2); }
+.qa-cf-badge { font-size:.52rem !important; vertical-align:middle; margin-left:.2rem; opacity:.9; }
 .qa-disp.d-void-risk { background:rgba(124,105,239,.12); color:#5b49c7; border:1px solid rgba(124,105,239,.2); }
 
-.qa-score { font-weight:700; font-size:.8rem; }
+/* Score value */
+.qa-score { font-weight:700; font-size:.8rem; letter-spacing:-.01em; }
 .qa-score.s-excellent { color:#1a8754; }
-.qa-score.s-good      { color:#556ee6; }
+.qa-score.s-good      { color:var(--qa-blue); }
 .qa-score.s-average   { color:#b87a14; }
 .qa-score.s-poor      { color:#c84646; }
 
-.comp-dot { display:inline-block; width:8px; height:8px; border-radius:50%; }
-.comp-dot.cd-pass { background:#34c38f; }
-.comp-dot.cd-fail { background:#f46a6a; }
+/* ── Tables ── */
+.qa-tbl { width:100%; border-collapse:separate; border-spacing:0; font-size:.74rem; }
+.qa-tbl thead th {
+  text-transform:uppercase; font-size:.58rem; font-weight:700; letter-spacing:.5px;
+  color: var(--qa-muted); padding:.45rem .7rem;
+  border-bottom: 1px solid var(--qa-surface-border);
+  background: var(--qa-surface); position:sticky; top:0; z-index:1; white-space:nowrap;
+}
+.qa-tbl tbody td { padding:.42rem .7rem; border-bottom: 1px solid var(--qa-surface-border); vertical-align:middle; }
+.qa-tbl tbody tr:last-child td { border-bottom:none; }
+.qa-tbl tbody tr { cursor:pointer; transition:background .1s; }
+.qa-tbl tbody tr:hover { background: rgba(212,175,55,.03); }
 
-.qa-bar { height:4px; background:var(--bs-surface-200); border-radius:2px; overflow:hidden; width:50px; display:inline-block; vertical-align:middle; margin-left:4px; }
-.qa-bar .fill { height:100%; border-radius:2px; transition:width .3s; }
-.qa-bar .fill.f-green { background:#34c38f; } .qa-bar .fill.f-blue { background:#556ee6; }
-.qa-bar .fill.f-warn { background:#f1b44c; } .qa-bar .fill.f-red { background:#f46a6a; }
+.qa-scroll { overflow-y:auto; }
+.qa-scroll::-webkit-scrollbar { width:3px; }
+.qa-scroll::-webkit-scrollbar-thumb { background:var(--qa-surface-border); border-radius:3px; }
 
-/* Header */
-.qa-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; flex-wrap:wrap; gap:.4rem; }
-.qa-header h5 { margin:0; font-size:.95rem; font-weight:700; display:flex; align-items:center; gap:.4rem; }
-.qa-header h5 i { opacity:.6; }
-.qa-controls { display:flex; gap:.4rem; align-items:center; }
-.qa-controls select { font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit; cursor:pointer; }
-.qa-controls .qa-btn { font-size:.68rem; padding:.25rem .6rem; border-radius:.35rem; border:none; cursor:pointer; font-weight:600; transition:all .15s; }
-.qa-controls .qa-btn-gold { background:var(--bs-gold,#d4af37); color:#fff; }
-.qa-controls .qa-btn-gold:hover { opacity:.85; }
+/* Mini badges */
+.qa-badge { font-size:.6rem; font-weight:700; padding:.12rem .38rem; border-radius:.25rem; display:inline-block; min-width:20px; text-align:center; line-height:1.4; }
+.qa-badge.b-green  { background:var(--qa-green-dim); color:#1a8754; }
+.qa-badge.b-red    { background:var(--qa-red-dim); color:#c84646; }
+.qa-badge.b-gray   { background:rgba(108,117,125,.08); color:#6c757d; }
+.qa-badge.b-blue   { background:var(--qa-blue-dim); color:var(--qa-blue); }
+.qa-badge.b-gold   { background:var(--qa-gold-dim); color:#b89730; }
 
-/* Category bars */
-.qa-cat-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.45rem; }
-.qa-cat-label { width:100px; font-size:.68rem; color:var(--bs-surface-500); text-align:right; flex-shrink:0; }
-.qa-cat-bar { flex:1; height:18px; background:var(--bs-surface-100); border-radius:.25rem; overflow:hidden; position:relative; }
-.qa-cat-bar .fill { height:100%; border-radius:.25rem; transition:width .4s; display:flex; align-items:center; justify-content:flex-end; padding-right:6px; font-size:.6rem; font-weight:700; color:#fff; min-width:24px; }
-.qa-cat-val { width:40px; font-size:.72rem; font-weight:600; text-align:right; }
+/* ── Category Bars ── */
+.qa-cat-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.42rem; }
+.qa-cat-row:last-child { margin-bottom:0; }
+.qa-cat-lbl { width:108px; font-size:.66rem; color:var(--qa-muted); text-align:right; flex-shrink:0; }
+.qa-cat-track { flex:1; height:8px; background:var(--qa-surface); border-radius:4px; overflow:hidden; }
+.qa-cat-fill { height:100%; border-radius:4px; transition:width .45s ease; }
+.qa-cat-fill.f-green  { background: linear-gradient(90deg, #34c38f, #6eddb8); }
+.qa-cat-fill.f-blue   { background: linear-gradient(90deg, #556ee6, #8b9cf7); }
+.qa-cat-fill.f-warn   { background: linear-gradient(90deg, #f1b44c, #f7d38a); }
+.qa-cat-fill.f-red    { background: linear-gradient(90deg, #f46a6a, #f99898); }
+.qa-cat-score { width:28px; font-size:.7rem; font-weight:600; text-align:right; flex-shrink:0; }
 
-/* Compliance breakdown bars */
-.qa-comp-bar-row { display:flex; align-items:center; gap:.4rem; margin-bottom:.3rem; font-size:.68rem; }
-.qa-comp-bar-label { width:90px; text-align:right; color:var(--bs-surface-500); flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.qa-comp-bar-track { flex:1; height:12px; background:var(--bs-surface-100); border-radius:.2rem; overflow:hidden; }
-.qa-comp-bar-fill { height:100%; background:#f46a6a; border-radius:.2rem; transition:width .3s; }
-.qa-comp-bar-val { width:24px; text-align:right; font-weight:700; color:#c84646; font-size:.65rem; }
+/* ── Compliance bars ── */
+.qa-comp-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.32rem; font-size:.68rem; }
+.qa-comp-row:last-child { margin-bottom:0; }
+.qa-comp-lbl { width:40px; font-weight:700; color:var(--qa-muted); font-size:.65rem; flex-shrink:0; }
+.qa-comp-name { flex:0 0 130px; font-size:.65rem; color:var(--qa-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.qa-comp-track { flex:1; height:6px; background:var(--qa-surface); border-radius:3px; overflow:hidden; }
+.qa-comp-fill { height:100%; background:linear-gradient(90deg,#f46a6a,#f99898); border-radius:3px; transition:width .3s; }
+.qa-comp-count { width:24px; text-align:right; font-weight:700; color:#c84646; font-size:.65rem; }
 
-/* Agent header card */
-.qa-agent-hdr { display:flex; align-items:center; gap:.75rem; padding:.75rem; margin-bottom:.65rem; flex-wrap:wrap; }
-.qa-agent-avatar { width:44px; height:44px; border-radius:50%; background:var(--bs-gold,#d4af37); display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; color:#fff; flex-shrink:0; }
-.qa-agent-info h6 { margin:0; font-size:.85rem; font-weight:700; }
-.qa-agent-info p { margin:0; font-size:.7rem; color:var(--bs-surface-500); }
-.qa-agent-kpis { display:flex; gap:1rem; margin-left:auto; flex-wrap:wrap; }
-.qa-agent-kpi { text-align:center; }
-.qa-agent-kpi .val { font-size:1.1rem; font-weight:700; line-height:1; }
-.qa-agent-kpi .lbl { font-size:.55rem; text-transform:uppercase; font-weight:600; letter-spacing:.3px; color:var(--bs-surface-500); margin-top:.1rem; }
+/* ── Closer Table row ── */
+.qa-closer-rank { width:20px; font-size:.65rem; font-weight:700; color:var(--qa-muted); text-align:center; }
 
-/* Checklist */
-.qa-checklist-item { display:flex; align-items:center; gap:.4rem; padding:.25rem 0; font-size:.7rem; border-bottom:1px solid rgba(0,0,0,.02); }
-.qa-checklist-item:last-child { border-bottom:none; }
-.qa-check-icon { width:16px; text-align:center; font-size:.75rem; }
-.qa-check-pass { color:#34c38f; } .qa-check-fail { color:#f46a6a; } .qa-check-na { color:var(--bs-surface-400); }
+/* ── Chart containers ── */
+.qa-chart-wrap { position:relative; }
+.qa-chart-wrap.h160 { height:160px; }
+.qa-chart-wrap.h200 { height:200px; }
 
-/* Coaching box */
-.qa-coaching { background:var(--bs-surface-100); border-radius:.4rem; padding:.5rem .65rem; font-size:.72rem; line-height:1.5; margin-bottom:.5rem; }
-.qa-coaching h6 { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; color:var(--bs-gold,#d4af37); margin-bottom:.3rem; }
-.qa-coaching ul { margin:0; padding-left:1rem; }
-.qa-coaching li { margin-bottom:.15rem; }
+/* ── Filter Tabs ── */
+.qa-filter-bar {
+  display:flex; gap:.3rem; flex-wrap:wrap; padding:.6rem .9rem;
+  border-bottom: 1px solid var(--qa-surface-border);
+}
+.qa-filter-tab {
+  font-size:.62rem; font-weight:600; padding:.22rem .55rem; border-radius:1rem;
+  border:1px solid transparent; background:transparent; color:var(--qa-muted);
+  cursor:pointer; transition:all .15s;
+}
+.qa-filter-tab:hover { color: var(--qa-gold); border-color:rgba(212,175,55,.3); }
+.qa-filter-tab.active { background:var(--qa-gold-dim); border-color:rgba(212,175,55,.4); color:#b89730; font-weight:700; }
 
-/* Transcript */
-.qa-transcript { background:var(--bs-surface-100); border-radius:.4rem; padding:.65rem; max-height:350px; overflow-y:auto; font-size:.72rem; line-height:1.6; }
-.qa-transcript::-webkit-scrollbar { width:3px; }
-.qa-transcript::-webkit-scrollbar-thumb { background:var(--bs-surface-300); border-radius:3px; }
-.qa-transcript .t-line { margin-bottom:.3rem; }
-.qa-transcript .t-agent { color:#556ee6; font-weight:600; }
-.qa-transcript .t-customer { color:#1a8754; font-weight:600; }
-.qa-transcript .t-unknown { color:var(--bs-surface-400); font-weight:600; }
+/* ── Pagination ── */
+.qa-pagination { display:flex; justify-content:center; gap:.25rem; padding:.65rem; }
+.qa-pagination button {
+  font-size:.62rem; padding:.22rem .5rem; border-radius:.3rem;
+  border:1px solid var(--qa-surface-border); background:transparent;
+  color:var(--qa-muted); cursor:pointer; transition:all .15s; min-width:28px;
+}
+.qa-pagination button:hover { border-color:var(--qa-gold); color:var(--qa-gold); }
+.qa-pagination button.active { background:var(--qa-gold); color:#fff; border-color:transparent; }
+.qa-pagination button:disabled { opacity:.35; cursor:not-allowed; }
 
-/* Call Detail Overlay — WHITE background */
-.qa-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10000; display:none; align-items:center; justify-content:center; padding:1rem; }
+/* ── Agent header ── */
+.qa-agent-banner {
+  display:flex; align-items:center; gap:.85rem;
+  padding: .85rem .9rem; flex-wrap:wrap;
+}
+.qa-agent-avatar {
+  width:42px; height:42px; border-radius:50%; flex-shrink:0;
+  background:var(--qa-gold); display:flex; align-items:center; justify-content:center;
+  font-size:1.05rem; font-weight:700; color:#fff;
+}
+.qa-agent-meta h6 { margin:0; font-size:.88rem; font-weight:700; }
+.qa-agent-meta p  { margin:0; font-size:.68rem; color:var(--qa-muted); }
+.qa-agent-stats { display:flex; gap:1.5rem; margin-left:auto; flex-wrap:wrap; }
+.qa-agent-stat .val { font-size:1.15rem; font-weight:700; line-height:1; }
+.qa-agent-stat .lbl { font-size:.55rem; text-transform:uppercase; letter-spacing:.3px; color:var(--qa-muted); margin-top:.15rem; }
+
+/* ── Call Detail Overlay ── */
+.qa-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:10000; display:none; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(2px); }
 .qa-overlay.show { display:flex; }
 .qa-overlay-box {
-    background:#ffffff; border:1px solid #e0e0e0; border-radius:.6rem; width:100%; max-width:1050px;
-    max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 12px 48px rgba(0,0,0,.35);
-    padding:1rem; color:#1a1a2e;
-    scrollbar-width:thin; scrollbar-color:#ccc transparent;
+  background:#ffffff; border:1px solid #e5e7eb; border-radius:var(--qa-radius-lg);
+  width:100%; max-width:1060px; max-height:92vh; overflow-y:auto;
+  position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3);
+  color:#1a1a2e; scrollbar-width:thin; scrollbar-color:#ddd transparent;
 }
 .qa-overlay-box::-webkit-scrollbar { width:4px; }
-.qa-overlay-box::-webkit-scrollbar-thumb { background:#ccc; border-radius:4px; }
-.qa-overlay-box .ex-card { background:#f8f9fa; border-color:#e9ecef; }
-.qa-overlay-box .sec-hdr { border-bottom-color:#e9ecef; }
-.qa-overlay-box .sec-hdr h6 { color:#1a1a2e; }
-.qa-overlay-box .qa-cat-label { color:#555; }
-.qa-overlay-box .qa-cat-val { color:#1a1a2e; }
-.qa-overlay-box .qa-coaching { background:#fffbf0; border-left:3px solid #d4af37; color:#333; }
-.qa-overlay-box .qa-coaching h6 { color:#b89730; }
-.qa-overlay-box .qa-transcript { background:#f4f5f7; color:#333; }
-.qa-overlay-box .qa-detail-meta { color:#666; }
-.qa-overlay-box .qa-checklist-item { color:#333; }
-.qa-overlay-box .qa-empty { color:#888; }
-.qa-overlay-box .ex-tbl thead th { background:#f0f0f0; color:#555; border-bottom-color:#ddd; }
-.qa-overlay-box .ex-tbl tbody td { color:#333; border-bottom-color:#eee; }
-.qa-overlay-box .qa-cat-bar { background:#e9ecef; }
-.qa-overlay-close { position:absolute; top:8px; right:12px; background:none; border:none; font-size:1.3rem; cursor:pointer; color:#888; z-index:10; }
-.qa-overlay-close:hover { color:#b89730; }
+.qa-overlay-box::-webkit-scrollbar-thumb { background:#ddd; border-radius:4px; }
 
-/* Detail meta badges */
-.qa-detail-meta { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; font-size:.68rem; color:var(--bs-surface-400); }
-.qa-detail-meta .meta-item { display:flex; align-items:center; gap:.2rem; }
-.qa-detail-meta .meta-item i { font-size:.8rem; opacity:.6; }
+/* Overlay inner sections inherit light theme */
+.qa-overlay-box .qa-card { background:#f8fafc; border-color:#e5e7eb; }
+.qa-overlay-box .qa-card-header { border-bottom-color:#e5e7eb; }
+.qa-overlay-box .qa-card-header h6 { color:#64748b; }
+.qa-overlay-box .qa-tbl thead th { background:#f1f5f9; color:#94a3b8; border-bottom-color:#e2e8f0; }
+.qa-overlay-box .qa-tbl tbody td { color:#334155; border-bottom-color:#f1f5f9; }
+.qa-overlay-box .qa-cat-track { background:#e9ecef; }
 
-/* Pagination */
-.qa-pagination { display:flex; justify-content:center; gap:.25rem; margin-top:.65rem; padding:0 .75rem .65rem; }
-.qa-pagination button { font-size:.62rem; padding:.2rem .45rem; border-radius:.25rem; border:1px solid var(--bs-surface-300); background:transparent; color:var(--bs-surface-500); cursor:pointer; transition:all .15s; }
-.qa-pagination button:hover { border-color:var(--bs-gold); color:var(--bs-gold); }
-.qa-pagination button.active { background:var(--bs-gold,#d4af37); color:#fff; border-color:var(--bs-gold); }
-.qa-pagination button:disabled { opacity:.4; cursor:not-allowed; }
+.qa-overlay-head {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:.9rem 1rem .7rem; border-bottom:1px solid #e5e7eb;
+}
+.qa-overlay-close {
+  background:none; border:none; font-size:1.3rem; cursor:pointer;
+  color:#9ca3af; line-height:1; padding:.2rem; flex-shrink:0; margin-left:.5rem;
+}
+.qa-overlay-close:hover { color:#374151; }
+.qa-overlay-body { padding:.9rem 1rem; }
 
-/* Filter buttons */
-.qa-filter-row { display:flex; gap:.3rem; flex-wrap:wrap; margin-bottom:.65rem; }
-.qa-filter-btn { font-size:.62rem; font-weight:600; padding:.2rem .55rem; border-radius:1rem; border:1px solid var(--bs-surface-300); background:transparent; color:var(--bs-surface-500); cursor:pointer; transition:all .15s; }
-.qa-filter-btn:hover { border-color:var(--bs-gold); color:var(--bs-gold); }
-.qa-filter-btn.active { background:var(--bs-gold,#d4af37); border-color:var(--bs-gold); color:#fff; }
+/* Score ring — big centered score */
+.qa-score-ring {
+  width:90px; height:90px; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border:3px solid; margin:0 auto .5rem;
+}
+.qa-score-ring .ring-val { font-size:1.6rem; font-weight:800; line-height:1; letter-spacing:-.03em; }
+.qa-score-ring .ring-max { font-size:.58rem; color:#94a3b8; margin-top:.1rem; }
+.qa-score-ring.sr-excellent { border-color:#34c38f; background:rgba(52,195,143,.06); }
+.qa-score-ring.sr-excellent .ring-val { color:#1a8754; }
+.qa-score-ring.sr-good { border-color:#556ee6; background:rgba(85,110,230,.06); }
+.qa-score-ring.sr-good .ring-val { color:#556ee6; }
+.qa-score-ring.sr-average { border-color:#f1b44c; background:rgba(241,180,76,.06); }
+.qa-score-ring.sr-average .ring-val { color:#b87a14; }
+.qa-score-ring.sr-poor { border-color:#f46a6a; background:rgba(244,106,106,.06); }
+.qa-score-ring.sr-poor .ring-val { color:#c84646; }
 
-/* Loading / Empty */
-.qa-loading { text-align:center; padding:2rem; color:var(--bs-surface-400); font-size:.78rem; }
-.qa-loading .spin { display:inline-block; width:18px; height:18px; border:2px solid var(--bs-surface-300); border-top-color:var(--bs-gold,#d4af37); border-radius:50%; animation:qaSpin .7s linear infinite; margin-right:6px; vertical-align:middle; }
+/* Checklist */
+.qa-check-item { display:flex; align-items:center; gap:.45rem; padding:.28rem 0; border-bottom:1px solid rgba(0,0,0,.025); font-size:.7rem; }
+.qa-check-item:last-child { border-bottom:none; }
+.qa-check-icon { width:16px; text-align:center; font-size:.8rem; flex-shrink:0; }
+.qa-check-pass { color:#34c38f; } .qa-check-fail { color:#f46a6a; } .qa-check-na { color:#cbd5e1; }
+
+/* Coaching block */
+.qa-coaching {
+  background:#fffbf0; border-left:3px solid #d4af37;
+  border-radius:0 .35rem .35rem 0; padding:.55rem .75rem;
+  font-size:.72rem; line-height:1.55; color:#3d2e00;
+}
+.qa-coaching ul { margin:0; padding-left:1rem; }
+.qa-coaching li { margin-bottom:.18rem; }
+
+/* Transcript */
+.qa-transcript { background:#f4f6f9; border-radius:.35rem; padding:.65rem .75rem; max-height:320px; overflow-y:auto; font-size:.71rem; line-height:1.65; color:#374151; }
+.qa-transcript::-webkit-scrollbar { width:3px; }
+.qa-transcript::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:3px; }
+.qa-transcript .t-closer   { color:#4f6ef7; font-weight:600; }
+.qa-transcript .t-customer { color:#059669; font-weight:600; }
+.qa-transcript .t-unknown  { color:#9ca3af; font-weight:600; }
+.qa-transcript .t-line { margin-bottom:.32rem; }
+
+/* Call meta bar */
+.qa-call-meta { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; font-size:.68rem; color:#64748b; }
+.qa-call-meta-item { display:flex; align-items:center; gap:.22rem; }
+.qa-call-meta-item i { font-size:.78rem; opacity:.65; }
+
+/* ── Loading / Empty states ── */
+.qa-loading { text-align:center; padding:3rem 1rem; color:var(--qa-muted); font-size:.78rem; }
+.qa-spin {
+  display:inline-block; width:20px; height:20px; border-radius:50%;
+  border:2px solid var(--qa-surface-border); border-top-color:var(--qa-gold);
+  animation:qaSpin .75s linear infinite; vertical-align:middle; margin-right:.5rem;
+}
 @keyframes qaSpin { to { transform:rotate(360deg); } }
-.qa-empty { text-align:center; padding:1.5rem; color:var(--bs-surface-400); font-size:.72rem; }
+.qa-empty { text-align:center; padding:2rem 1rem; color:var(--qa-muted); font-size:.72rem; }
 
-/* Chart containers */
-.qa-chart-wrap { position:relative; height:180px; }
+/* Chart empty state */
+.qa-chart-wrap { position:relative; }
+.qa-chart-empty { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--qa-muted); font-size:.72rem; gap:.3rem; pointer-events:none; }
+.qa-chart-empty i { font-size:1.5rem; opacity:.4; }
 
-/* Issue items */
-.qa-issue-item { display:flex; justify-content:space-between; align-items:center; padding:.3rem 0; border-bottom:1px solid rgba(0,0,0,.03); font-size:.72rem; }
-.qa-issue-item:last-child { border-bottom:none; }
-.qa-issue-count { background:var(--bs-surface-100); padding:.1rem .4rem; border-radius:.8rem; font-size:.6rem; font-weight:700; color:var(--bs-surface-500); }
+/* Calls table — review-optimised */
+.qa-calls-tbl tbody tr.qa-call-row { cursor:pointer; transition:background .12s; }
+.qa-calls-tbl tbody tr.qa-call-row:hover { background:rgba(212,175,55,.05); }
+.qa-call-customer { font-size:.77rem; font-weight:600; color:var(--qa-text); line-height:1.2; }
+.qa-call-phone { font-size:.61rem; color:var(--qa-muted); margin-top:.06rem; }
+.qa-score-cell { display:inline-flex; align-items:center; justify-content:center; width:36px; height:28px; border-radius:.3rem; font-size:.8rem; font-weight:700; }
+.qa-score-cell.s-excellent { background:rgba(52,195,143,.12); color:#1a8754; }
+.qa-score-cell.s-good      { background:rgba(85,110,230,.12); color:#556ee6; }
+.qa-score-cell.s-average   { background:rgba(241,180,76,.12); color:#b87a14; }
+.qa-score-cell.s-poor      { background:rgba(244,106,106,.12); color:#c84646; }
+.qa-sale-yes  { font-size:.66rem; font-weight:600; color:#34c38f; white-space:nowrap; }
+.qa-sale-no   { color:var(--qa-muted); font-size:.68rem; }
+.qa-row-arrow { color:var(--qa-muted); font-size:.9rem; opacity:.5; transition:opacity .1s; }
+.qa-call-row:hover .qa-row-arrow { opacity:1; }
 
-/* Info button & modal */
-.qa-info-btn { background:none; border:1px solid rgba(212,175,55,.35); color:var(--bs-gold,#d4af37); border-radius:50%; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; cursor:pointer; margin-left:.4rem; vertical-align:middle; transition:all .2s; }
-.qa-info-btn:hover { background:rgba(212,175,55,.12); border-color:var(--bs-gold); }
+/* Review action bar inside overlay */
+.qa-review-bar {
+  display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
+  padding:.7rem 1rem; background:#f8fafc; border-top:1px solid #e5e7eb;
+  border-bottom:1px solid #e5e7eb;
+}
+.qa-review-bar-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#94a3b8; margin-right:.2rem; flex-shrink:0; }
+.qa-review-btn {
+  display:inline-flex; align-items:center; gap:.3rem; padding:.38rem .75rem;
+  border-radius:.4rem; font-size:.72rem; font-weight:600; cursor:pointer;
+  border:2px solid transparent; transition:all .15s; letter-spacing:.1px;
+}
+.qa-review-btn.rv-approve  { border-color:#34c38f; color:#1a8754; background:rgba(52,195,143,.08); }
+.qa-review-btn.rv-approve:hover  { background:#34c38f; color:#fff; }
+.qa-review-btn.rv-review   { border-color:#f1b44c; color:#b87a14; background:rgba(241,180,76,.08); }
+.qa-review-btn.rv-review:hover   { background:#f1b44c; color:#fff; }
+.qa-review-btn.rv-void     { border-color:#f46a6a; color:#c84646; background:rgba(244,106,106,.08); }
+.qa-review-btn.rv-void:hover     { background:#f46a6a; color:#fff; }
+.qa-review-btn.rv-active   { filter:brightness(.88); }
+.qa-review-status { font-size:.7rem; color:var(--qa-muted); margin-left:auto; }
+
+/* Sale info block */
+.qa-sale-block {
+  display:flex; gap:1.2rem; flex-wrap:wrap; padding:.7rem .9rem;
+  background:rgba(52,195,143,.06); border:1px solid rgba(52,195,143,.25);
+  border-radius:.45rem; margin-bottom:.75rem; align-items:center;
+}
+.qa-sale-block .sb-icon { font-size:1.4rem; color:#34c38f; flex-shrink:0; }
+.qa-sale-block .sb-item { display:flex; flex-direction:column; }
+.qa-sale-block .sb-val  { font-size:.88rem; font-weight:700; color:#1a8754; line-height:1.15; }
+.qa-sale-block .sb-lbl  { font-size:.58rem; text-transform:uppercase; letter-spacing:.3px; color:#94a3b8; }
+
+/* ── Back link ── */
+.qa-back-link {
+  display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem;
+  color:var(--qa-muted); cursor:pointer; margin-bottom:.75rem;
+  background:none; border:none; padding:.2rem 0; transition:color .15s;
+}
+.qa-back-link:hover { color:var(--qa-gold); }
+
+/* Collapsible section toggle icon */
+.qa-toggle-icon { font-size:.9rem; color:var(--qa-muted); flex-shrink:0; transition:transform .15s; }
+
+/* ── Info modal ── */
+.qa-info-btn {
+  background:none; border:1px solid rgba(212,175,55,.3); color:var(--qa-gold);
+  border-radius:50%; width:24px; height:24px; display:inline-flex;
+  align-items:center; justify-content:center; font-size:.85rem;
+  cursor:pointer; vertical-align:middle; transition:all .2s;
+}
+.qa-info-btn:hover { background:var(--qa-gold-dim); border-color:var(--qa-gold); }
 .qa-info-modal { display:none; position:fixed; inset:0; z-index:10001; background:rgba(0,0,0,.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem; }
 .qa-info-modal.show { display:flex; }
-.qa-info-box { background:#ffffff; border:1px solid #e0e0e0; border-radius:.75rem; box-shadow:0 8px 32px rgba(0,0,0,.25); color:#1a1a2e; width:100%; max-width:680px; max-height:85vh; overflow-y:auto; padding:1.5rem; position:relative; scrollbar-width:thin; }
-.qa-info-box::-webkit-scrollbar { width:4px; }
-.qa-info-box::-webkit-scrollbar-thumb { background:#ccc; border-radius:4px; }
-.qa-info-close { position:absolute; top:.75rem; right:.75rem; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#888; line-height:1; z-index:1; }
-.qa-info-close:hover { color:#b89730; }
-.qa-info-section { margin-bottom:1.1rem; padding-bottom:1rem; border-bottom:1px solid #eee; }
+.qa-info-box { background:#fff; border-radius:var(--qa-radius-lg); box-shadow:0 12px 40px rgba(0,0,0,.25); color:#1e293b; width:100%; max-width:680px; max-height:88vh; overflow-y:auto; padding:1.5rem; position:relative; scrollbar-width:thin; }
+.qa-info-close { position:absolute; top:.85rem; right:.85rem; background:none; border:none; font-size:1.3rem; cursor:pointer; color:#9ca3af; line-height:1; }
+.qa-info-close:hover { color:#374151; }
+.qa-info-section { margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid #f1f5f9; }
 .qa-info-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
-.qa-info-section h6 { font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.5px; color:#b89730; margin:0 0 .45rem; }
-.qa-info-section h6 i { margin-right:.3rem; opacity:.7; }
-.qa-info-section p { font-size:.78rem; color:#555; margin:0 0 .4rem; line-height:1.5; }
-.qa-info-section ol,.qa-info-section ul { font-size:.78rem; color:#555; margin:0 0 .4rem; padding-left:1.2rem; line-height:1.6; }
-.qa-info-tbl { width:100%; font-size:.75rem; border-collapse:collapse; }
-.qa-info-tbl td { padding:.3rem .5rem; border-bottom:1px solid #eee; color:#444; vertical-align:top; }
+.qa-info-section h6 { font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; color:#b89730; margin:0 0 .45rem; display:flex; align-items:center; gap:.3rem; }
+.qa-info-section p { font-size:.77rem; color:#64748b; margin:0 0 .4rem; line-height:1.55; }
+.qa-info-section ol, .qa-info-section ul { font-size:.77rem; color:#64748b; margin:0 0 .4rem; padding-left:1.2rem; line-height:1.65; }
+.qa-info-tbl { width:100%; font-size:.74rem; border-collapse:collapse; }
+.qa-info-tbl td { padding:.3rem .5rem; border-bottom:1px solid #f1f5f9; color:#475569; vertical-align:top; }
 .qa-info-tbl td:first-child { white-space:nowrap; width:130px; }
 .qa-info-tbl tr:last-child td { border-bottom:none; }
 
-@media (max-width:768px) {
-    .qa-agent-kpis { margin-left:0; }
-    .qa-cat-label { width:70px; }
+/* ── Processing badge ── */
+.qa-proc-badge { display:flex; gap:.4rem; justify-content:flex-end; padding:.35rem 0; font-size:.62rem; margin-top:.35rem; }
+
+@media (max-width:900px) {
+  .qa-kpi-strip { grid-template-columns:repeat(3,1fr); }
+  .qa-stat-strip .qa-stat:nth-child(n+4) { display:none; }
+}
+@media (max-width:600px) {
+  .qa-kpi-strip { grid-template-columns:repeat(2,1fr); }
+  .qa-toolbar { width:100%; }
+  .qa-page-header { flex-direction:column; align-items:flex-start; }
 }
 </style>
 @endsection
 
 @section('content')
 
-<!-- ═══ Header ═══ -->
-<div class="qa-header">
-    <h5><i class="ri-shield-star-line"></i> QA Scoring Dashboard
+<!-- ═══ Page Header ═══ -->
+<div class="qa-page-header">
+    <h5 class="qa-page-title">
+        <i class="ri-shield-star-line"></i> QA Scoring
         <button class="qa-info-btn" onclick="document.getElementById('qaInfoModal').classList.add('show')" title="How QA Scoring Works">
             <i class="ri-question-line"></i>
         </button>
     </h5>
-    <div class="qa-controls">
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <select id="qaRangePreset" onchange="QA.presetChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit; cursor:pointer;">
-                <option value="">Custom Range</option>
+    <div class="qa-toolbar">
+        <div class="qa-range-group">
+            <select id="qaRangePreset" onchange="QA.presetChanged()">
+                <option value="">Custom</option>
                 <option value="today">Today</option>
                 <option value="7d">Last 7 Days</option>
                 <option value="30d">Last 30 Days</option>
                 <option value="90d">Last 90 Days</option>
                 <option value="all">All Time</option>
             </select>
-            <input type="date" id="qaStartDate" onchange="QA.rangeChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit;">
-            <span style="color:var(--bs-surface-500); font-size:.7rem;">to</span>
-            <input type="date" id="qaEndDate" onchange="QA.rangeChanged()" style="font-size:.7rem; padding:.25rem .5rem; border-radius:.35rem; border:1px solid var(--bs-surface-300); background:var(--bs-card-bg); color:inherit;">
+            <div class="qa-range-divider"></div>
+            <input type="date" id="qaStartDate" onchange="QA.rangeChanged()">
+            <span class="qa-sep">→</span>
+            <input type="date" id="qaEndDate" onchange="QA.rangeChanged()">
         </div>
-        <button class="qa-btn qa-btn-gold" onclick="QA.refresh()"><i class="ri-refresh-line"></i> Refresh</button>
-        <button class="qa-btn" id="rerunTodayBtn" onclick="QA.rerunToday()" style="background:rgba(220,38,38,.12);color:#c84646;border:1px solid rgba(220,38,38,.25);" title="Re-score today&apos;s calls with the latest AI prompt"><i class="ri-restart-line"></i> Rerun Today</button>
-        <button class="qa-btn" id="qaToggleBtn" onclick="QA.toggleQa()" style="background:rgba(52,195,143,.10);color:#1a8754;border:1px solid rgba(52,195,143,.3);" title="Pause or resume QA scoring for future calls"><i class="ri-pause-circle-line" id="qaToggleIcon"></i> <span id="qaToggleLabel">QA Active</span></button>
-        <a href="/qa/script" class="qa-btn" style="background:rgba(85,110,230,.10);color:#556ee6;border:1px solid rgba(85,110,230,.3);text-decoration:none;" title="Edit the AI scoring script / prompt"><i class="ri-code-s-slash-line"></i> Edit Script</a>
+        <button class="qa-action-btn qa-btn-primary" onclick="QA.refresh()"><i class="ri-refresh-line"></i> Refresh</button>
+        <button class="qa-action-btn qa-btn-danger" id="rerunTodayBtn" onclick="QA.rerunToday()" title="Re-score today's calls"><i class="ri-restart-line"></i> Rerun</button>
+        <button class="qa-action-btn qa-btn-success" id="qaToggleBtn" onclick="QA.toggleQa()" title="Pause/resume QA scoring"><i class="ri-pause-circle-line" id="qaToggleIcon"></i> <span id="qaToggleLabel">Active</span></button>
+        <a href="/qa/script" class="qa-action-btn qa-btn-ghost" title="Edit AI scoring prompt"><i class="ri-code-s-slash-line"></i> Script</a>
     </div>
 </div>
 
 <!-- ═══ Main Content ═══ -->
 <div id="qa-content">
-    <div class="qa-loading"><span class="spin"></span> Loading dashboard...</div>
+    <div class="qa-loading"><span class="qa-spin"></span> Loading dashboard…</div>
 </div>
 
 <!-- ═══ Call Detail Overlay ═══ -->
-<div class="qa-overlay" id="qaOverlay">
+<div class="qa-overlay" id="qaOverlay" onclick="if(event.target===this)QA.closeDetail()">
     <div class="qa-overlay-box" id="qaOverlayBox">
-        <button class="qa-overlay-close" onclick="QA.closeDetail()">&times;</button>
         <div id="qaOverlayContent"></div>
     </div>
 </div>
@@ -305,7 +499,7 @@
 
         <div class="qa-info-section">
             <h6><i class="ri-robot-2-line"></i> AI-Powered Quality Assurance</h6>
-            <p>Every recorded sales call is automatically transcribed via Zoom's built-in transcription service and scored by AI against <strong>17 compliance codes</strong> and <strong>7 quality categories</strong>. Calls are graded on a 100-point scale with automatic disposition assignment.</p>
+            <p>Every recorded sales call is automatically transcribed via Zoom's built-in transcription service and scored by AI against <strong>11 compliance codes</strong> and <strong>7 quality categories</strong>. The numeric score (0–100) reflects sales performance. Compliance is a hard gate — any single failure results in a <strong>COMPLIANCE FAIL</strong> disposition, overriding the score entirely.</p>
         </div>
 
         <div class="qa-info-section">
@@ -314,38 +508,33 @@
         </div>
 
         <div class="qa-info-section">
-            <h6><i class="ri-shield-check-line"></i> 17 Compliance Codes</h6>
+            <h6><i class="ri-shield-check-line"></i> 11 Compliance Codes</h6>
             <table class="qa-info-tbl">
                 <tr><td colspan="2"><strong style="color:var(--bs-primary)">Call Handling</strong></td></tr>
-                <tr><td><strong>C1</strong> Closer Consent</td><td>Closer takes proper verbal consent from the customer</td></tr>
-                <tr><td><strong>C2</strong> Agent Identity</td><td>Closer states full name and company</td></tr>
-                <tr><td><strong>C3</strong> Carrier Named</td><td>Insurance carrier name clearly stated</td></tr>
-                <tr><td><strong>C4</strong> Product Type</td><td>Identifies product as final expense / whole life</td></tr>
-                <tr><td><strong>C5</strong> Health Questions</td><td>Complete and accurate health questions + medications asked</td></tr>
-                <tr><td><strong>C6</strong> Proper Quote</td><td>Quote provided according to customer's health conditions</td></tr>
-                <tr><td><strong>C7</strong> Coverage Amount</td><td>Death benefit / face amount stated and confirmed</td></tr>
-                <tr><td><strong>C8</strong> Draft Date</td><td>Payment draft date confirmed with customer</td></tr>
-                <tr><td><strong>C9</strong> End-of-Call Consent</td><td>Confirms date, full name, DOB, and SSN at end of call</td></tr>
-                <tr><td><strong>C10</strong> Waiting Period</td><td>Graded/modified benefit period disclosed (if applicable)</td></tr>
+                <tr><td><strong>C1</strong> Closer Introduction</td><td>Closer states their name and company name at any point in the call</td></tr>
+                <tr><td><strong>C2</strong> Carrier Named</td><td>Actual insurance carrier name stated (e.g. AIG / Corebridge, Mutual of Omaha)</td></tr>
+                <tr><td><strong>C3</strong> Product Type Stated</td><td>Closer clearly identifies product as life insurance (not just a "benefit")</td></tr>
+                <tr><td><strong>C4</strong> Health Questions</td><td>Medications and health conditions both asked (any form qualifies)</td></tr>
+                <tr><td><strong>C5</strong> Quote &amp; Coverage</td><td>Monthly premium and death benefit stated — exact amount or a range</td></tr>
+                <tr><td><strong>C6</strong> Draft Date Confirmed</td><td>Payment draft date confirmed with customer</td></tr>
+                <tr><td><strong>C7</strong> End-of-Call Consent</td><td>Confirms date, full name, DOB, SSN, draft consent &amp; e-comm consent</td></tr>
                 <tr><td colspan="2"><strong style="color:var(--bs-primary)">Application Requirements</strong></td></tr>
-                <tr><td><strong>C11</strong> Application Info</td><td>Collects name, DOB, payment info, address, doctor, beneficiary, etc.</td></tr>
+                <tr><td><strong>C8</strong> Application Info</td><td>Collects name, DOB, address, bank info, SSN, beneficiary (no email/IVR required)</td></tr>
                 <tr><td colspan="2"><strong style="color:var(--bs-primary)">Behavioral Compliance</strong></td></tr>
-                <tr><td><strong>C12</strong> DNC Honored</td><td>Do-Not-Call requests honored immediately</td></tr>
-                <tr><td><strong>C13</strong> No Aggression</td><td>Customer not aggressive during the call</td></tr>
-                <tr><td><strong>C14</strong> Customer Interest</td><td>Customer not disinterested or deferring decision</td></tr>
-                <tr><td><strong>C15</strong> No Pushy Sale</td><td>Agent does not pressure or confuse the customer</td></tr>
-                <tr><td><strong>C16</strong> Appropriate Language</td><td>No inappropriate or unprofessional language used</td></tr>
-                <tr><td><strong>C17</strong> No Abuse</td><td>Customer not abusive toward agent</td></tr>
+                <tr><td><strong>C9</strong> DNC Honored</td><td>Do-Not-Call requests honored immediately; n/a if none made</td></tr>
+                <tr><td><strong>C10</strong> Agent Handles Objections</td><td>Fails only if closer ignores a firm repeated refusal or uses deceptive pressure</td></tr>
+                <tr><td><strong>C11</strong> Appropriate Language</td><td>No inappropriate or unprofessional language used by the closer</td></tr>
             </table>
+            <p style="font-size:.75rem;color:#94a3b8;margin-top:.4rem;"><em>Note: Waiting period disclosure is tracked informally and does not affect compliance.</em></p>
         </div>
 
         <div class="qa-info-section">
-            <h6><i class="ri-bar-chart-grouped-line"></i> 7 Quality Categories (100pts)</h6>
+            <h6><i class="ri-bar-chart-grouped-line"></i> 7 Sales Quality Categories (0–100 scale)</h6>
             <table class="qa-info-tbl">
                 <tr><td><strong>Opening</strong></td><td>Professional greeting, tone, rapport building (1-10)</td></tr>
                 <tr><td><strong>Discovery</strong></td><td>Needs assessment, health/family questions, listening (1-10)</td></tr>
                 <tr><td><strong>Presentation</strong></td><td>Product explanation, personalization, proper quote (1-10)</td></tr>
-                <tr><td><strong>Objection Handling</strong></td><td>Pushback handling, reframing without pressure (1-10)</td></tr>
+                <tr><td><strong>Objection Handling</strong></td><td>Rebuttal quality — rebuttals are expected on cold calls (1-10)</td></tr>
                 <tr><td><strong>Closing</strong></td><td>Asking for sale, consent, application completion (1-10)</td></tr>
                 <tr><td><strong>Soft Skills</strong></td><td>Empathy, patience, respect, sensitivity with seniors (1-10)</td></tr>
                 <tr><td><strong>Call Control</strong></td><td>Conversation flow, redirecting tangents, pacing (1-10)</td></tr>
@@ -353,14 +542,15 @@
         </div>
 
         <div class="qa-info-section">
-            <h6><i class="ri-award-line"></i> Disposition Scale</h6>
+            <h6><i class="ri-award-line"></i> Scoring &amp; Disposition</h6>
+            <p style="font-size:.78rem;margin-bottom:.5rem;">Score is based on <strong>sales quality (0–100)</strong>. Compliance issues are shown as a badge alongside the score-based disposition — e.g. <span class="qa-disp d-good" style="font-size:.7rem;">GOOD</span> <span class="qa-disp d-comp-fail qa-cf-badge">⚠ C2</span>. A call can have a high score and still have a compliance issue flagged.</p>
             <table class="qa-info-tbl">
-                <tr><td><span class="qa-disp d-excellent">EXCELLENT</span></td><td>90-100 — Exceptional call, exceeds all standards</td></tr>
-                <tr><td><span class="qa-disp d-good">GOOD</span></td><td>75-89 — Solid performance, minor improvements possible</td></tr>
-                <tr><td><span class="qa-disp d-average">AVERAGE</span></td><td>60-74 — Meets basic standards, needs coaching</td></tr>
-                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>&lt;60 — Below standard, immediate coaching required</td></tr>
-                <tr><td><span class="qa-disp d-comp-fail">COMPLIANCE FAIL</span></td><td>Any C1-C17 compliance check failed</td></tr>
-                <tr><td><span class="qa-disp d-void-risk">VOID RISK</span></td><td>Misrepresentation, confusion, or pressured sale</td></tr>
+                <tr><td><span class="qa-disp d-excellent">EXCELLENT</span></td><td>≥ 90 — Exceptional sales performance</td></tr>
+                <tr><td><span class="qa-disp d-good">GOOD</span></td><td>75–89 — Solid sales performance</td></tr>
+                <tr><td><span class="qa-disp d-average">AVERAGE</span></td><td>60–74 — Adequate, needs coaching</td></tr>
+                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>&lt; 60 — Well below standard</td></tr>
+                <tr><td><span class="qa-disp d-comp-fail">VOID RISK</span></td><td>Misrepresentation or coerced sale</td></tr>
+                <tr><td><span class="qa-disp d-comp-fail qa-cf-badge" style="font-size:.65rem;">⚠ Cx</span></td><td>Compliance badge — shown alongside score when a C1–C11 check failed</td></tr>
             </table>
         </div>
 
@@ -369,9 +559,9 @@
             <ol>
                 <li><strong>Recording captured</strong> — Zoom webhook triggers automatic capture</li>
                 <li><strong>Transcription fetched</strong> — Zoom's built-in transcript with speaker labels (AGENT:/CUSTOMER:)</li>
-                <li><strong>AI analysis</strong> — Claude / Gemini scores against 17 compliance codes + 7 quality categories</li>
+                <li><strong>AI analysis</strong> — Claude / Gemini scores against 11 compliance codes + 7 quality categories</li>
                 <li><strong>Results saved</strong> — Scores, compliance flags, and coaching notes stored</li>
-                <li><strong>Dashboard updated</strong> — Real-time metrics and agent performance tracking</li>
+                <li><strong>Dashboard updated</strong> — Real-time metrics and closer performance tracking</li>
             </ol>
         </div>
     </div>
@@ -454,6 +644,22 @@ window.QA = {
     goPage(p)      { S.currentPage = p; loadDashboard(); },
     openDetail(id) { openCallDetail(id); },
     closeDetail()  { $('#qaOverlay').classList.remove('show'); document.body.style.overflow=''; },
+    markReview(callId, status, btn) {
+        const statusEl = document.getElementById('reviewStatus');
+        const map = { approve: 'Approved for Submission', review: 'Needs Review', void: 'Void Risk' };
+        // Visual feedback immediately
+        document.querySelectorAll('.qa-review-btn').forEach(b => b.classList.remove('rv-active'));
+        btn.classList.add('rv-active');
+        if (statusEl) statusEl.textContent = 'Saving…';
+        // Persist (best-effort; silently fails if endpoint not implemented yet)
+        fetch(`/qa/api/calls/${callId}/review`, {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({ review_status: status })
+        }).then(r => r.ok ? r.json() : Promise.reject())
+          .then(() => { if (statusEl) statusEl.textContent = `Marked: ${map[status]||status}`; })
+          .catch(() => { if (statusEl) statusEl.textContent = `Marked: ${map[status]||status} (not saved)`; });
+    },
     rerunToday() {
         if (!confirm("Re-score all of today's completed calls with the latest AI prompt?\n\nThis resets their results and re-queues them. It may take several minutes.")) return;
         const btn = $('#rerunTodayBtn');
@@ -503,157 +709,142 @@ window.QA = {
    ══════════════════════════════════════════════════ */
 function loadDashboard() {
     const el = $('#qa-content');
-    el.innerHTML = '<div class="qa-loading"><span class="spin"></span> Loading dashboard...</div>';
+    el.innerHTML = '<div class="qa-loading"><span class="qa-spin"></span> Loading dashboard…</div>';
 
     const url = `${API_BASE}/overview?range=${S.currentRange}&page=${S.currentPage}&qa_filter=${S.currentFilter}`;
     api(url).then(d => {
         S.data = d;
-        // team_stats: {calls_scored, avg_score, compliance_rate, compliance_fails, void_risks, excellent_count, good_count, average_count, poor_count}
-        const ts = d.team_stats || {};
-        // extended_kpis: {avg_handle_time, agents_scored, passing_rate, ...}
+        const ts = d.team_stats    || {};
         const ex = d.extended_kpis || {};
-        // sales_summary: {total_sales, total_coverage, total_premium, avg_coverage, avg_premium}
         const ss = d.sales_summary || {};
 
+        const avgScore    = ts.avg_score != null ? parseFloat(ts.avg_score).toFixed(1) : '—';
+        const compRate    = ts.compliance_rate != null ? parseFloat(ts.compliance_rate).toFixed(0)+'%' : '—';
+        const voidCount   = parseInt(ts.void_risks||0);
+        const alertCls    = voidCount > 0 ? 'kpi-alert' : 'kpi-alert';
+        const ahtStr      = ex.avg_handle_time ? fmtDuration(ex.avg_handle_time) : '—';
+
         el.innerHTML = `
-            <!-- KPI Row 1: Performance -->
-            <div class="kpi-row">
-                <div class="kpi-card k-blue">
-                    <span class="k-icon"><i class="ri-phone-line"></i></span>
-                    <div class="k-val">${ts.calls_scored||0}</div>
-                    <div class="k-lbl">Calls Scored</div>
+            <!-- ── Hero KPI Strip ── -->
+            <div class="qa-kpi-strip">
+                <div class="qa-kpi kpi-score">
+                    <span class="qa-kpi-icon"><i class="ri-bar-chart-2-line"></i></span>
+                    <div class="qa-kpi-value">${avgScore}</div>
+                    <div class="qa-kpi-label">Avg Score</div>
                 </div>
-                <div class="kpi-card k-gold">
-                    <span class="k-icon"><i class="ri-bar-chart-2-line"></i></span>
-                    <div class="k-val">${ts.avg_score != null ? parseFloat(ts.avg_score).toFixed(1) : '—'}</div>
-                    <div class="k-lbl">Avg Score</div>
+                <div class="qa-kpi kpi-comply">
+                    <span class="qa-kpi-icon"><i class="ri-shield-check-line"></i></span>
+                    <div class="qa-kpi-value">${compRate}</div>
+                    <div class="qa-kpi-label">Compliance</div>
                 </div>
-                <div class="kpi-card k-green">
-                    <span class="k-icon"><i class="ri-shield-check-line"></i></span>
-                    <div class="k-val">${ts.compliance_rate != null ? parseFloat(ts.compliance_rate).toFixed(0) : '—'}%</div>
-                    <div class="k-lbl">Compliance Rate</div>
+                <div class="qa-kpi kpi-calls">
+                    <span class="qa-kpi-icon"><i class="ri-phone-line"></i></span>
+                    <div class="qa-kpi-value">${ts.calls_scored||0}</div>
+                    <div class="qa-kpi-label">Calls Scored</div>
                 </div>
-                <div class="kpi-card k-purple">
-                    <span class="k-icon"><i class="ri-money-dollar-circle-line"></i></span>
-                    <div class="k-val">${ss.total_sales||0}</div>
-                    <div class="k-lbl">Sales Made</div>
+                <div class="qa-kpi kpi-sales">
+                    <span class="qa-kpi-icon"><i class="ri-hand-coin-line"></i></span>
+                    <div class="qa-kpi-value">${ss.total_sales||0}</div>
+                    <div class="qa-kpi-label">Sales / $${formatNum(ss.total_premium||0)}/mo</div>
                 </div>
-                <div class="kpi-card k-teal">
-                    <span class="k-icon"><i class="ri-hand-coin-line"></i></span>
-                    <div class="k-val">$${formatNum(ss.total_premium||0)}</div>
-                    <div class="k-lbl">Total Premium</div>
-                </div>
-                <div class="kpi-card k-warn">
-                    <span class="k-icon"><i class="ri-shield-line"></i></span>
-                    <div class="k-val">$${formatNum(ss.total_coverage||0)}</div>
-                    <div class="k-lbl">Total Coverage</div>
+                <div class="qa-kpi ${alertCls}">
+                    <span class="qa-kpi-icon"><i class="ri-alert-line"></i></span>
+                    <div class="qa-kpi-value">${voidCount}</div>
+                    <div class="qa-kpi-label">Void Risks</div>
                 </div>
             </div>
 
-            <!-- KPI Row 2: Operational -->
-            <div class="kpi-row">
-                <div class="kpi-card k-blue">
-                    <span class="k-icon"><i class="ri-timer-line"></i></span>
-                    <div class="k-val">${ex.avg_handle_time ? fmtDuration(ex.avg_handle_time) : '—'}</div>
-                    <div class="k-lbl">Avg Handle Time</div>
+            <!-- ── Secondary Stat Strip ── -->
+            <div class="qa-stat-strip">
+                <div class="qa-stat st-excellent">
+                    <div class="qa-stat-val">${ts.excellent_count||0}</div>
+                    <div class="qa-stat-lbl">Excellent</div>
                 </div>
-                <div class="kpi-card k-green">
-                    <span class="k-icon"><i class="ri-trophy-line"></i></span>
-                    <div class="k-val">${ts.excellent_count||0}</div>
-                    <div class="k-lbl">Excellent</div>
+                <div class="qa-stat st-good">
+                    <div class="qa-stat-val">${ts.good_count||0}</div>
+                    <div class="qa-stat-lbl">Good</div>
                 </div>
-                <div class="kpi-card k-teal">
-                    <span class="k-icon"><i class="ri-thumb-up-line"></i></span>
-                    <div class="k-val">${ts.good_count||0}</div>
-                    <div class="k-lbl">Good</div>
+                <div class="qa-stat st-average">
+                    <div class="qa-stat-val">${ts.average_count||0}</div>
+                    <div class="qa-stat-lbl">Average</div>
                 </div>
-                <div class="kpi-card k-warn">
-                    <span class="k-icon"><i class="ri-error-warning-line"></i></span>
-                    <div class="k-val">${ts.poor_count||0}</div>
-                    <div class="k-lbl">Poor</div>
+                <div class="qa-stat st-poor">
+                    <div class="qa-stat-val">${ts.poor_count||0}</div>
+                    <div class="qa-stat-lbl">Poor</div>
                 </div>
-                <div class="kpi-card k-red">
-                    <span class="k-icon"><i class="ri-alarm-warning-line"></i></span>
-                    <div class="k-val">${ts.compliance_fails||0}</div>
-                    <div class="k-lbl">Comp Fails</div>
+                <div class="qa-stat st-void">
+                    <div class="qa-stat-val">${ts.compliance_fails||0}</div>
+                    <div class="qa-stat-lbl">Comp Issues</div>
                 </div>
-                <div class="kpi-card k-purple">
-                    <span class="k-icon"><i class="ri-alert-line"></i></span>
-                    <div class="k-val">${ts.void_risks||0}</div>
-                    <div class="k-lbl">Void Risks</div>
+                <div class="qa-stat st-aht">
+                    <div class="qa-stat-val">${ahtStr}</div>
+                    <div class="qa-stat-lbl">Avg Handle Time</div>
+                </div>
+                <div class="qa-stat st-aht">
+                    <div class="qa-stat-val">$${formatNum(ss.avg_coverage||0)}</div>
+                    <div class="qa-stat-lbl">Avg Coverage</div>
+                </div>
+                <div class="qa-stat st-aht">
+                    <div class="qa-stat-val">$${formatNum(ss.avg_premium||0)}</div>
+                    <div class="qa-stat-lbl">Avg Premium</div>
                 </div>
             </div>
 
-            <!-- Charts Row -->
+            <!-- ── Charts: Trend (primary) + Dispositions (secondary) ── -->
             <div class="row g-2 mb-2">
-                <div class="col-md-4">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-line-chart-line"></i> Score Trend</h6></div>
-                        <div class="sec-body"><div class="qa-chart-wrap"><canvas id="trendChart"></canvas></div></div>
+                <div class="col-md-8">
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-line-chart-line"></i> Score Trend</h6></div>
+                        <div class="qa-card-body"><div class="qa-chart-wrap h200"><canvas id="trendChart"></canvas></div></div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-pie-chart-2-line"></i> Dispositions</h6></div>
-                        <div class="sec-body"><div class="qa-chart-wrap"><canvas id="dispChart"></canvas></div></div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-bar-chart-grouped-line"></i> Score Distribution</h6></div>
-                        <div class="sec-body"><div class="qa-chart-wrap"><canvas id="distChart"></canvas></div></div>
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-pie-chart-2-line"></i> Dispositions</h6></div>
+                        <div class="qa-card-body"><div class="qa-chart-wrap h200"><canvas id="dispChart"></canvas></div></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Category Averages + Compliance Breakdown -->
+            <!-- ── Category Averages + Compliance Breakdown ── -->
             <div class="row g-2 mb-2">
                 <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-equalizer-line"></i> Category Averages</h6></div>
-                        <div class="sec-body" id="catBars"></div>
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-equalizer-line"></i> Category Averages</h6></div>
+                        <div class="qa-card-body" id="catBars"></div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-shield-cross-line"></i> Compliance Failure Breakdown</h6></div>
-                        <div class="sec-body" id="compBreak"></div>
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-shield-cross-line"></i> Compliance Failures</h6></div>
+                        <div class="qa-card-body" id="compBreak"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Closer Performance + Agent Leaderboard -->
-            <div class="row g-2 mb-2">
-                <div class="col-md-7">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-team-line"></i> Closer Performance</h6></div>
-                        <div class="sec-body" style="padding:0;"><div class="scroll-tbl" id="closerTbl"></div></div>
-                    </div>
-                </div>
-                <div class="col-md-5">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-medal-line"></i> Agent Leaderboard</h6></div>
-                        <div class="sec-body" style="padding:0;"><div class="scroll-tbl" id="lbTbl"></div></div>
-                    </div>
-                </div>
+            <!-- ── Closer Performance (merged) ── -->
+            <div class="qa-card mb-2">
+                <div class="qa-card-header"><h6><i class="ri-team-line"></i> Closer Performance</h6></div>
+                <div class="qa-card-body p0"><div class="qa-scroll" style="max-height:280px;" id="closerTbl"></div></div>
             </div>
 
-            <!-- Filters + Calls List -->
-            <div class="ex-card sec-card">
-                <div class="sec-hdr"><h6><i class="ri-phone-find-line"></i> Scored Calls</h6></div>
-                <div class="sec-body" style="padding-bottom:0;"><div class="qa-filter-row" id="filterRow"></div></div>
-                <div style="padding:0 .75rem;"><div class="scroll-tbl" style="max-height:400px;" id="callsTbl"></div></div>
+            <!-- ── Scored Calls ── -->
+            <div class="qa-card mb-2">
+                <div class="qa-card-header"><h6><i class="ri-phone-find-line"></i> Scored Calls</h6></div>
+                <div class="qa-filter-bar" id="filterRow"></div>
+                <div class="qa-card-body p0">
+                    <div class="qa-scroll" style="max-height:420px;" id="callsTbl"></div>
+                </div>
                 <div id="callsPag"></div>
             </div>
 
-            <div id="procStatus" style="margin-top:.5rem;"></div>
+            <div id="procStatus"></div>
         `;
 
         renderCharts(d);
         renderCategoryBars(d.team_category_averages, 'catBars');
         renderComplianceBreakdown(d.compliance_breakdown);
-        renderCloserTable(d.closer_breakdown);
-        renderLeaderboard(d.agent_leaderboard);
+        renderCloserTable(d.closer_breakdown, d.agent_leaderboard);
         renderFilterRow();
         renderCallsTable(d.calls);
         renderPagination(d.calls_pagination);
@@ -670,27 +861,55 @@ function renderCharts(d) {
     Object.values(S.charts).forEach(c => c.destroy());
     S.charts = {};
 
-    // score_trend is {date: avg_score} object
+    // score_trend: {date: avg_score} object
     const trendObj = d.score_trend || {};
     const trendDates = Object.keys(trendObj);
-    if (trendDates.length && document.getElementById('trendChart')) {
-        S.charts.trend = new Chart(document.getElementById('trendChart'), {
+    const trendEl = document.getElementById('trendChart');
+    const trendWrap = trendEl && trendEl.closest('.qa-chart-wrap');
+    if (trendDates.length && trendEl) {
+        trendEl.style.display = '';
+        const vals = trendDates.map(k => parseFloat(trendObj[k]));
+        const mn = Math.max(0, Math.min(...vals) - 10);
+        S.charts.trend = new Chart(trendEl, {
             type: 'line',
             data: {
-                labels: trendDates,
+                labels: trendDates.map(d => { const dt=new Date(d+'T12:00:00'); return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }),
                 datasets: [{
                     label: 'Avg Score',
-                    data: trendDates.map(k => trendObj[k]),
+                    data: vals,
                     borderColor: '#d4af37',
-                    backgroundColor: 'rgba(212,175,55,.08)',
-                    fill: true, tension: .3, pointRadius: 2, borderWidth: 2
+                    backgroundColor: 'rgba(212,175,55,.07)',
+                    fill: true, tension: .4,
+                    pointRadius: vals.length <= 10 ? 4 : 2,
+                    pointBackgroundColor: '#d4af37',
+                    borderWidth: 2
                 }]
             },
-            options: chartOpts(0, 100)
+            options: {
+                ...chartOpts(mn, 100),
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` Score: ${ctx.parsed.y}`
+                        }
+                    }
+                }
+            }
         });
+    } else if (trendWrap) {
+        // Show empty state inside the chart wrap
+        if(trendEl) trendEl.style.display = 'none';
+        const existing = trendWrap.querySelector('.qa-chart-empty');
+        if (!existing) {
+            const em = document.createElement('div');
+            em.className = 'qa-chart-empty';
+            em.innerHTML = '<i class="ri-line-chart-line"></i><br>No trend data yet';
+            trendWrap.appendChild(em);
+        }
     }
 
-    // disposition_chart is {EXCELLENT: count, GOOD: count} object
+    // disposition_chart: {EXCELLENT: count, ...} object
     const dispObj = d.disposition_chart || {};
     const dispKeys = Object.keys(dispObj);
     if (dispKeys.length && document.getElementById('dispChart')) {
@@ -701,22 +920,7 @@ function renderCharts(d) {
                 labels: dispKeys.map(k => dispLabel(k)),
                 datasets: [{ data: dispKeys.map(k => dispObj[k]), backgroundColor: dispKeys.map(k => colors[k]||'#6c757d'), borderWidth: 0 }]
             },
-            options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'right', labels:{ boxWidth:10, font:{size:10}, color:'#999' } } } }
-        });
-    }
-
-    // score_distribution is {0-39: count, 40-59: count, ...} object
-    const distObj = d.score_distribution || {};
-    const distKeys = Object.keys(distObj);
-    if (distKeys.length && document.getElementById('distChart')) {
-        const distColors = distKeys.map(r => r.includes('90')?'#34c38f':r.includes('80')?'#556ee6':r.includes('60')?'#f1b44c':r.includes('40')?'#f46a6a':'#d63031');
-        S.charts.dist = new Chart(document.getElementById('distChart'), {
-            type: 'bar',
-            data: {
-                labels: distKeys,
-                datasets: [{ data: distKeys.map(k => distObj[k]), backgroundColor: distColors, borderRadius: 3 }]
-            },
-            options: { ...chartOpts(), plugins:{ legend:{ display:false } } }
+            options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:9, font:{size:9}, color:'#888', padding:5 } } } }
         });
     }
 }
@@ -724,18 +928,18 @@ function renderCharts(d) {
 function chartOpts(min, max) {
     return {
         responsive:true, maintainAspectRatio:false,
-        scales:{ x:{ grid:{display:false}, ticks:{font:{size:9}, color:'#999', maxRotation:0} }, y:{ min:min, max:max, grid:{color:'rgba(255,255,255,.04)'}, ticks:{font:{size:9}, color:'#999'} } },
+        scales:{
+            x:{ grid:{display:false}, ticks:{font:{size:9}, color:'#888', maxRotation:0, maxTicksLimit:10} },
+            y:{ min:min, max:max, grid:{color:'rgba(255,255,255,.04)'}, ticks:{font:{size:9}, color:'#888'}, border:{display:false} }
+        },
         plugins:{ legend:{ display:false } }
     };
 }
 
 
-/* ── Category Bars ──
-   Data is {opening: 7.5, discovery: 8.0, ...} object — raw scores out of max.
-   Max scores: opening=10, discovery=10, presentation=10, objection_handling=10, closing=10, soft_skills=10, call_control=10
-*/
+/* ── Category Bars ── */
 const catMaxScores = { opening:10, discovery:10, presentation:10, objection_handling:10, closing:10, soft_skills:10, call_control:10 };
-const catLabels = { opening:'Opening', discovery:'Discovery', presentation:'Presentation', objection_handling:'Objection Handling', closing:'Closing', soft_skills:'Soft Skills', call_control:'Call Control' };
+const catLabels = { opening:'Opening', discovery:'Discovery', presentation:'Presentation', objection_handling:'Obj. Handling', closing:'Closing', soft_skills:'Soft Skills', call_control:'Call Control' };
 
 function renderCategoryBars(catsObj, containerId) {
     const el = document.getElementById(containerId || 'catBars');
@@ -749,17 +953,15 @@ function renderCategoryBars(catsObj, containerId) {
         const pct = Math.min(100, Math.max(0, (val / maxVal) * 100));
         const cls = pct >= 80 ? 'f-green' : pct >= 65 ? 'f-blue' : pct >= 50 ? 'f-warn' : 'f-red';
         return `<div class="qa-cat-row">
-            <div class="qa-cat-label">${esc(catLabels[k]||k)}</div>
-            <div class="qa-cat-bar"><div class="fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
-            <div class="qa-cat-val">${val.toFixed(1)}/${maxVal}</div>
+            <div class="qa-cat-lbl">${esc(catLabels[k]||k)}</div>
+            <div class="qa-cat-track"><div class="qa-cat-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
+            <div class="qa-cat-score">${val.toFixed(1)}</div>
         </div>`;
     }).join('');
 }
 
 
-/* ── Compliance Breakdown ──
-   Data is [{check_code, check_label, count}]
-*/
+/* ── Compliance Breakdown ── */
 function renderComplianceBreakdown(items) {
     const el = document.getElementById('compBreak');
     if (!el) return;
@@ -767,101 +969,123 @@ function renderComplianceBreakdown(items) {
     const maxFails = Math.max(...items.map(x => x.count || 0), 1);
     el.innerHTML = items.map(c => {
         const pct = ((c.count || 0) / maxFails * 100).toFixed(0);
-        return `<div class="qa-comp-bar-row">
-            <div class="qa-comp-bar-label" title="${esc(c.check_label||c.check_code)}">${esc(c.check_code)}</div>
-            <div class="qa-comp-bar-track"><div class="qa-comp-bar-fill" style="width:${pct}%"></div></div>
-            <div class="qa-comp-bar-val">${c.count||0}</div>
+        return `<div class="qa-comp-row">
+            <div class="qa-comp-lbl">${esc(c.check_code)}</div>
+            <div class="qa-comp-name" title="${esc(c.check_label||c.check_code)}">${esc(c.check_label||c.check_code)}</div>
+            <div class="qa-comp-track"><div class="qa-comp-fill" style="width:${pct}%"></div></div>
+            <div class="qa-comp-count">${c.count||0}</div>
         </div>`;
     }).join('');
 }
 
 
-/* ── Closer Performance Table ──
-   Data is [{closer_name, total_calls, avg_score, total_sales, sale_rate, total_coverage, total_premium, void_risks}]
-*/
-function renderCloserTable(closers) {
+/* ── Closer Performance (merged with leaderboard) ── */
+function renderCloserTable(closers, leaderboard) {
     const el = document.getElementById('closerTbl');
     if (!el) return;
-    if (!closers || !closers.length) { el.innerHTML = '<div class="qa-empty">No closer data</div>'; return; }
-    el.innerHTML = `<table class="ex-tbl"><thead><tr>
-        <th>Closer</th><th>Calls</th><th>Avg Score</th><th>Sales</th><th>Close Rate</th>
-        <th>Coverage</th><th>Premium</th><th>Void Risk</th>
-    </tr></thead><tbody>${closers.map(c => `<tr>
-        <td><strong>${esc(c.closer_name)}</strong></td>
-        <td>${c.total_calls}</td>
-        <td><span class="qa-score ${scoreClass(c.avg_score)}">${parseFloat(c.avg_score).toFixed(1)}</span></td>
-        <td><span class="bd-mini bd-green">${c.total_sales||0}</span></td>
-        <td>${c.sale_rate||0}%</td>
-        <td>$${formatNum(c.total_coverage||0)}</td>
-        <td>$${formatNum(c.total_premium||0)}/mo</td>
-        <td>${c.void_risks ? '<span class="bd-mini bd-red">'+c.void_risks+'</span>' : '<span class="bd-mini bd-gray">0</span>'}</td>
-    </tr>`).join('')}</tbody></table>`;
+    const rows = (closers && closers.length) ? closers : (leaderboard || []);
+    if (!rows.length) { el.innerHTML = '<div class="qa-empty">No performance data yet</div>'; return; }
+    const useCloser = !!(closers && closers.length);
+    el.innerHTML = `<table class="qa-tbl">
+        <thead><tr>
+            <th style="width:28px;">#</th>
+            <th>Closer</th>
+            <th style="width:60px;">Calls</th>
+            <th style="width:100px;">Score</th>
+            <th style="width:60px;">Sales</th>
+            <th style="width:80px;">Rate</th>
+            <th style="width:90px;">Compliance</th>
+        </tr></thead>
+        <tbody>${rows.map((c, i) => {
+        const name     = useCloser ? c.closer_name : c.agent_name;
+        const agentId  = useCloser ? c.closer_user_id : c.agent_user_id;
+        const calls    = useCloser ? (c.total_calls||0) : (c.calls_scored||0);
+        const avgScore = parseFloat(c.avg_score || 0);
+        const sales    = useCloser ? (c.total_sales||0) : (c.sales_count||0);
+        const saleRate = useCloser ? ((c.sale_rate||0)+'%') : '—';
+        const compRate = useCloser && c.compliance_rate != null ? parseFloat(c.compliance_rate).toFixed(0) : null;
+        const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span style="color:var(--qa-muted);">${i+1}</span>`;
+        const scoreBarW = Math.min(100, isNaN(avgScore) ? 0 : avgScore);
+        const scoreBarC = scoreClass(avgScore).replace('s-','f-') || 'f-red';
+        return `<tr onclick="QA.viewAgent(${agentId})">
+            <td style="text-align:center;font-size:.75rem;">${rankIcon}</td>
+            <td>
+                <div style="font-size:.77rem;font-weight:600;">${esc(name||'Unknown')}</div>
+                <div style="font-size:.62rem;color:var(--qa-muted);">${calls} call${calls!==1?'s':''}</div>
+            </td>
+            <td style="font-size:.72rem;">${calls}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:.4rem;">
+                    <span class="qa-score ${scoreClass(avgScore)}" style="font-size:.82rem;width:28px;display:inline-block;">${isNaN(avgScore)?'—':avgScore.toFixed(0)}</span>
+                    <div style="flex:1;height:5px;background:var(--qa-surface);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${scoreBarW}%;background:currentColor" class="qa-score ${scoreClass(avgScore)}"></div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="qa-badge b-green" style="font-size:.68rem;">${sales}</span></td>
+            <td style="font-size:.72rem;">${saleRate}</td>
+            <td>${compRate !== null ? `<span class="qa-badge ${compRate>=80?'b-green':'b-red'}" style="font-size:.68rem;">${compRate}%</span>` : '<span style="color:var(--qa-muted);font-size:.7rem;">—</span>'}</td>
+        </tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 
-/* ── Leaderboard ──
-   Data is [{agent_user_id, agent_name, calls_scored, avg_score, sales_count}]
-*/
-function renderLeaderboard(agents) {
-    const el = document.getElementById('lbTbl');
-    if (!el) return;
-    if (!agents || !agents.length) { el.innerHTML = '<div class="qa-empty">No agent data</div>'; return; }
-    el.innerHTML = `<table class="ex-tbl"><thead><tr>
-        <th>#</th><th>Agent</th><th>Calls</th><th>Avg</th><th>Sales</th>
-    </tr></thead><tbody>${agents.map((a, i) => `<tr style="cursor:pointer" onclick="QA.viewAgent(${a.agent_user_id})">
-        <td>${i === 0 ? '<i class="ri-vip-crown-line" style="color:#d4af37"></i>' : i+1}</td>
-        <td>${esc(a.agent_name)}</td>
-        <td>${a.calls_scored}</td>
-        <td><span class="qa-score ${scoreClass(a.avg_score)}">${parseFloat(a.avg_score).toFixed(1)}</span></td>
-        <td><span class="bd-mini bd-green">${a.sales_count||0}</span></td>
-    </tr>`).join('')}</tbody></table>`;
-}
-
-
-/* ── Filter Row ── */
+/* ── Filter Bar ── */
 function renderFilterRow() {
     const el = document.getElementById('filterRow');
     if (!el) return;
     const filters = [
-        { key:'all', label:'All Calls' },
-        { key:'sales_only', label:'Sales Only' },
-        { key:'excellent', label:'Excellent' },
-        { key:'good', label:'Good' },
-        { key:'average', label:'Average' },
-        { key:'poor', label:'Poor' },
-        { key:'void_risk', label:'Void Risk' },
-        { key:'compliance_fail', label:'Comp Fail' }
+        { key:'all',            label:'All' },
+        { key:'sales_only',     label:'Sales Only' },
+        { key:'excellent',      label:'Excellent' },
+        { key:'good',           label:'Good' },
+        { key:'average',        label:'Average' },
+        { key:'poor',           label:'Poor' },
+        { key:'void_risk',      label:'Void Risk' },
+        { key:'compliance_fail',label:'Comp Fail' }
     ];
     el.innerHTML = filters.map(f =>
-        `<button class="qa-filter-btn ${S.currentFilter===f.key?'active':''}" onclick="QA.filterCalls('${f.key}')">${f.label}</button>`
+        `<button class="qa-filter-tab ${S.currentFilter===f.key?'active':''}" onclick="QA.filterCalls('${f.key}')">${f.label}</button>`
     ).join('');
 }
 
 
-/* ── Calls Table ──
-   Data from formatCallSummary: [{id, agent_name, caller_number, customer_name, callee_number,
-     duration_seconds, call_start_time, disposition, total_score, is_sale, sale_amount, monthly_premium, carrier_name}]
-*/
+/* ── Calls Table — review-focused ── */
 function renderCallsTable(calls) {
     const el = document.getElementById('callsTbl');
     if (!el) return;
-    if (!calls || !calls.length) { el.innerHTML = '<div class="qa-empty">No calls found</div>'; return; }
-    el.innerHTML = `<table class="ex-tbl"><thead><tr>
-        <th>Customer</th><th>Phone</th><th>Closer</th><th>Date</th><th>Duration</th>
-        <th>Score</th><th>Disposition</th><th>Sale</th><th>Carrier</th><th>Coverage</th><th>Premium</th>
-    </tr></thead><tbody>${calls.map(c => `<tr style="cursor:pointer" onclick="QA.openDetail(${c.id})">
-        <td><strong>${esc(c.customer_name||'Unknown')}</strong></td>
-        <td>${fmtPhone(c.callee_number)}</td>
-        <td>${esc(c.agent_name||'Unknown')}</td>
-        <td>${fmtTime(c.call_start_time)}</td>
-        <td>${fmtDuration(c.duration_seconds)}</td>
-        <td><span class="qa-score ${scoreClass(c.total_score)}">${c.total_score != null ? parseFloat(c.total_score).toFixed(0) : '—'}</span></td>
-        <td><span class="qa-disp ${dispClass(c.disposition)}">${dispLabel(c.disposition)}</span></td>
-        <td>${c.is_sale ? '<span class="bd-mini bd-green">YES</span>' : '<span class="bd-mini bd-gray">NO</span>'}</td>
-        <td>${c.carrier_name ? esc(c.carrier_name) : '—'}</td>
-        <td>${c.sale_amount ? '$'+formatNum(c.sale_amount) : '—'}</td>
-        <td>${c.monthly_premium ? '$'+formatNum(c.monthly_premium)+'/mo' : '—'}</td>
-    </tr>`).join('')}</tbody></table>`;
+    if (!calls || !calls.length) { el.innerHTML = '<div class="qa-empty"><i class="ri-phone-off-line" style="font-size:1.5rem;display:block;margin-bottom:.4rem;"></i>No calls found</div>'; return; }
+    el.innerHTML = `<table class="qa-tbl qa-calls-tbl">
+        <thead><tr>
+            <th style="width:180px;">Customer</th>
+            <th>Closer</th>
+            <th style="width:110px;">Date</th>
+            <th style="width:70px;">Score</th>
+            <th style="width:140px;">Disposition</th>
+            <th style="width:60px;">Sale</th>
+            <th style="width:36px;"></th>
+        </tr></thead>
+        <tbody>${calls.map(c => {
+        const sc = scoreClass(c.total_score);
+        const score = c.total_score != null ? parseFloat(c.total_score).toFixed(0) : '—';
+        return `<tr class="qa-call-row" onclick="QA.openDetail(${c.id})">
+            <td>
+                <div class="qa-call-customer">${esc(c.customer_name||'Unknown')}</div>
+                <div class="qa-call-phone">${fmtPhone(c.callee_number)}</div>
+            </td>
+            <td style="font-size:.73rem;">${esc(c.agent_name||'—')}</td>
+            <td style="font-size:.68rem;white-space:nowrap;color:var(--qa-muted);">${fmtTime(c.call_start_time)}</td>
+            <td>
+                <div class="qa-score-cell ${sc}">${score}</div>
+            </td>
+            <td>${renderDisp(c)}</td>
+            <td>${c.is_sale
+                ? '<span class="qa-sale-yes"><i class="ri-check-line"></i> Sale</span>'
+                : '<span class="qa-sale-no">—</span>'}
+            </td>
+            <td style="text-align:center;"><i class="ri-arrow-right-s-line qa-row-arrow"></i></td>
+        </tr>`;
+    }).join('')}</tbody></table>`;
 }
 
 
@@ -888,101 +1112,109 @@ function renderProcStatus(d) {
     const el = document.getElementById('procStatus');
     if (!el) return;
     const parts = [];
-    if (d.processing_now) parts.push(`<span class="bd-mini bd-blue"><i class="ri-loader-4-line"></i> ${d.processing_now} processing</span>`);
-    if (d.pending_count) parts.push(`<span class="bd-mini bd-warn">${d.pending_count} pending</span>`);
-    if (d.failed_count) parts.push(`<span class="bd-mini bd-red">${d.failed_count} failed</span>`);
-    el.innerHTML = parts.length ? `<div style="display:flex;gap:.4rem;justify-content:flex-end;font-size:.65rem;">${parts.join('')}</div>` : '';
+    if (d.processing_now) parts.push(`<span class="qa-badge b-blue"><i class="ri-loader-4-line"></i> ${d.processing_now} processing</span>`);
+    if (d.pending_count)  parts.push(`<span class="qa-badge b-gold">${d.pending_count} pending</span>`);
+    if (d.failed_count)   parts.push(`<span class="qa-badge b-red">${d.failed_count} failed</span>`);
+    el.innerHTML = parts.length ? `<div class="qa-proc-badge">${parts.join('')}</div>` : '';
 }
 
 
 /* ══════════════════════════════════════════════════
    AGENT DETAIL VIEW
-   Response: {agent: {id,name,email}, summary: {calls_scored, avg_score, excellent_count, compliance_fails, ...},
-              category_averages: {opening:7,...}, score_trend: [{date,avg_score,calls_scored}], calls: [...], ...}
    ══════════════════════════════════════════════════ */
 function loadAgentDetail(agentId) {
     const el = $('#qa-content');
-    el.innerHTML = '<div class="qa-loading"><span class="spin"></span> Loading agent detail...</div>';
+    el.innerHTML = '<div class="qa-loading"><span class="qa-spin"></span> Loading closer detail…</div>';
 
     api(`${API_BASE}/agents/${agentId}?range=${S.currentRange}`).then(d => {
-        const a = d.agent || {};
+        const a  = d.agent   || {};
         const sm = d.summary || {};
         const calls = d.calls || [];
 
         el.innerHTML = `
-            <button class="link-btn" onclick="QA.backToDash()" style="margin-bottom:.5rem;">
-                <i class="ri-arrow-left-line"></i> Back to Dashboard
+            <button class="qa-back-link" onclick="QA.backToDash()">
+                <i class="ri-arrow-left-s-line"></i> Back to Dashboard
             </button>
 
-            <div class="ex-card qa-agent-hdr">
-                <div class="qa-agent-avatar">${esc((a.name||'?')[0])}</div>
-                <div class="qa-agent-info">
-                    <h6>${esc(a.name||'Unknown Agent')}</h6>
-                    <p>${esc(a.email||'')}</p>
-                </div>
-                <div class="qa-agent-kpis">
-                    <div class="qa-agent-kpi"><div class="val" style="color:#556ee6">${sm.calls_scored||0}</div><div class="lbl">Calls</div></div>
-                    <div class="qa-agent-kpi"><div class="val" style="color:#d4af37">${sm.avg_score != null ? parseFloat(sm.avg_score).toFixed(1) : '—'}</div><div class="lbl">Avg Score</div></div>
-                    <div class="qa-agent-kpi"><div class="val" style="color:#34c38f">${sm.excellent_count||0}</div><div class="lbl">Excellent</div></div>
-                    <div class="qa-agent-kpi"><div class="val" style="color:#f46a6a">${sm.compliance_fails||0}</div><div class="lbl">Comp Fail</div></div>
+            <div class="qa-card mb-2">
+                <div class="qa-agent-banner">
+                    <div class="qa-agent-avatar">${esc((a.name||'?')[0].toUpperCase())}</div>
+                    <div class="qa-agent-meta">
+                        <h6>${esc(a.name||'Unknown Closer')}</h6>
+                        <p>${esc(a.email||'')}</p>
+                    </div>
+                    <div class="qa-agent-stats">
+                        <div class="qa-agent-stat text-center">
+                            <div class="val" style="color:var(--qa-blue)">${sm.calls_scored||0}</div>
+                            <div class="lbl">Calls</div>
+                        </div>
+                        <div class="qa-agent-stat text-center">
+                            <div class="val" style="color:var(--qa-gold)">${sm.avg_score != null ? parseFloat(sm.avg_score).toFixed(1) : '—'}</div>
+                            <div class="lbl">Avg Score</div>
+                        </div>
+                        <div class="qa-agent-stat text-center">
+                            <div class="val" style="color:var(--qa-green)">${sm.excellent_count||0}</div>
+                            <div class="lbl">Excellent</div>
+                        </div>
+                        <div class="qa-agent-stat text-center">
+                            <div class="val" style="color:var(--qa-red)">${sm.compliance_fails||0}</div>
+                            <div class="lbl">Comp Issues</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="row g-2 mb-2">
                 <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-equalizer-line"></i> Category Scores</h6></div>
-                        <div class="sec-body" id="agentCatBars"></div>
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-equalizer-line"></i> Category Scores</h6></div>
+                        <div class="qa-card-body" id="agentCatBars"></div>
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-line-chart-line"></i> Score Trend</h6></div>
-                        <div class="sec-body"><div class="qa-chart-wrap"><canvas id="agentTrendChart"></canvas></div></div>
+                    <div class="qa-card">
+                        <div class="qa-card-header"><h6><i class="ri-line-chart-line"></i> Score Trend</h6></div>
+                        <div class="qa-card-body"><div class="qa-chart-wrap h160"><canvas id="agentTrendChart"></canvas></div></div>
                     </div>
                 </div>
             </div>
 
-            <div class="ex-card sec-card">
-                <div class="sec-hdr"><h6><i class="ri-phone-line"></i> Calls (${calls.length})</h6></div>
-                <div style="padding:0 .75rem;">
-                    <div class="scroll-tbl" style="max-height:350px;" id="agentCallsTbl"></div>
+            <div class="qa-card">
+                <div class="qa-card-header"><h6><i class="ri-phone-line"></i> Calls <span style="font-weight:400;font-size:.65rem;margin-left:.3rem;">(${calls.length})</span></h6></div>
+                <div class="qa-card-body p0">
+                    <div class="qa-scroll" style="max-height:360px;" id="agentCallsTbl"></div>
                 </div>
             </div>
         `;
 
-        // category_averages is {opening: 7.5, ...}
         renderCategoryBars(d.category_averages, 'agentCatBars');
 
-        // score_trend is [{date, avg_score, calls_scored}] array
         Object.values(S.charts).forEach(c => c.destroy());
         S.charts = {};
         const trend = d.score_trend || [];
         if (trend.length && document.getElementById('agentTrendChart')) {
+            const labels = trend.map(t => t.date);
+            const values = trend.map(t => t.avg_score);
             S.charts.agentTrend = new Chart(document.getElementById('agentTrendChart'), {
                 type: 'line',
-                data: {
-                    labels: trend.map(t => t.date),
-                    datasets: [{ label:'Score', data:trend.map(t=>t.avg_score), borderColor:'#d4af37', backgroundColor:'rgba(212,175,55,.08)', fill:true, tension:.3, pointRadius:2, borderWidth:2 }]
-                },
+                data: { labels, datasets: [{ label:'Score', data:values, borderColor:'#d4af37', backgroundColor:'rgba(212,175,55,.08)', fill:true, tension:.35, pointRadius:2, borderWidth:2 }] },
                 options: chartOpts(0, 100)
             });
         }
 
-        // Agent calls table
         const act = document.getElementById('agentCallsTbl');
         if (act) {
             if (!calls.length) { act.innerHTML = '<div class="qa-empty">No calls</div>'; }
             else {
-                act.innerHTML = `<table class="ex-tbl"><thead><tr>
+                act.innerHTML = `<table class="qa-tbl"><thead><tr>
                     <th>Customer</th><th>Date</th><th>Duration</th><th>Score</th><th>Disposition</th><th>Sale</th>
-                </tr></thead><tbody>${calls.map(c => `<tr style="cursor:pointer" onclick="QA.openDetail(${c.id})">
-                    <td>${esc(c.customer_name||'Unknown')}</td>
-                    <td>${fmtTime(c.call_start_time)}</td>
-                    <td>${fmtDuration(c.duration_seconds)}</td>
+                </tr></thead><tbody>${calls.map(c => `<tr onclick="QA.openDetail(${c.id})">
+                    <td style="font-size:.73rem;">${esc(c.customer_name||'Unknown')}</td>
+                    <td style="font-size:.69rem;white-space:nowrap;">${fmtTime(c.call_start_time)}</td>
+                    <td style="font-size:.69rem;">${fmtDuration(c.duration_seconds)}</td>
                     <td><span class="qa-score ${scoreClass(c.total_score)}">${c.total_score != null ? parseFloat(c.total_score).toFixed(0) : '—'}</span></td>
-                    <td><span class="qa-disp ${dispClass(c.disposition)}">${dispLabel(c.disposition)}</span></td>
-                    <td>${c.is_sale ? '<span class="bd-mini bd-green">YES</span>' : '<span class="bd-mini bd-gray">NO</span>'}</td>
+                    <td>${renderDisp(c)}</td>
+                    <td>${c.is_sale ? '<span class="qa-badge b-green">YES</span>' : '<span class="qa-badge b-gray">NO</span>'}</td>
                 </tr>`).join('')}</tbody></table>`;
             }
         }
@@ -992,138 +1224,195 @@ function loadAgentDetail(agentId) {
 
 /* ══════════════════════════════════════════════════
    CALL DETAIL OVERLAY
-   Response: {call: {id, agent_name, caller_number, customer_name, duration_seconds, call_start_time, is_sale, carrier_name, ...},
-              qa_result: {disposition, total_score, compliance_checks: {C1_recording_disclosure: bool,...},
-                          score_breakdown: {opening: int,...}, coaching_notes: string, compliance_failures: [string,...], ...},
-              compliance_flags: [{check_code, check_label}], transcript: [{speaker, text}]}
    ══════════════════════════════════════════════════ */
 function openCallDetail(callId) {
     const overlay = $('#qaOverlay');
     const content = $('#qaOverlayContent');
-    content.innerHTML = '<div class="qa-loading"><span class="spin"></span> Loading call detail...</div>';
+    content.innerHTML = '<div class="qa-loading" style="color:#64748b;"><span class="qa-spin" style="border-top-color:#d4af37;border-color:#e2e8f0;"></span> Loading call…</div>';
     overlay.classList.add('show');
     document.body.style.overflow = 'hidden';
+
+    const compLabels = {
+        C1_agent_identity:            'C1  Closer Introduction',
+        C2_carrier_named:             'C2  Carrier Named',
+        C3_product_type_stated:       'C3  Product Type Stated',
+        C4_health_questions_complete: 'C4  Health Questions',
+        C5_quote_and_coverage:        'C5  Quote & Coverage',
+        C6_draft_date_confirmed:      'C6  Draft Date Confirmed',
+        C7_end_of_call_consent:       'C7  End-of-Call Consent',
+        C8_application_info_collected:'C8  Application Info',
+        C9_customer_not_on_dnc:       'C9  DNC Honored',
+        C10_agent_handles_objections: 'C10 Handles Objections',
+        C11_appropriate_language:     'C11 Appropriate Language',
+    };
 
     api(`${API_BASE}/calls/${callId}`).then(d => {
         const c = d.call || {};
         const r = d.qa_result || {};
         const scoreBreak = r.score_breakdown || {};
         const compChecks = r.compliance_checks || {};
-        const flags = d.compliance_flags || [];
-        const coaching = r.coaching_notes;
+        const coaching   = r.coaching_notes;
         const transcript = d.transcript || [];
+        const sc         = scoreClass(r.total_score);
+        const ringCls    = sc.replace('s-', 'sr-') || 'sr-poor';
+        const score      = r.total_score != null ? parseFloat(r.total_score).toFixed(0) : '—';
+
+        // Sale info block
+        const saleBlock = c.is_sale ? `
+            <div class="qa-sale-block">
+                <i class="ri-shield-check-fill sb-icon"></i>
+                ${c.sale_amount    ? `<div class="sb-item"><div class="sb-val">$${parseFloat(c.sale_amount).toLocaleString()}</div><div class="sb-lbl">Coverage</div></div>` : ''}
+                ${c.monthly_premium? `<div class="sb-item"><div class="sb-val">$${parseFloat(c.monthly_premium).toFixed(2)}/mo</div><div class="sb-lbl">Premium</div></div>` : ''}
+                ${c.carrier_name   ? `<div class="sb-item"><div class="sb-val">${esc(c.carrier_name)}</div><div class="sb-lbl">Carrier</div></div>` : ''}
+                <div class="sb-item"><div class="sb-val" style="color:#34c38f;">✓ SALE</div><div class="sb-lbl">Status</div></div>
+            </div>` : '';
+
+        // Compliance checklist (failures first, then passes)
+        const compKeys = Object.keys(compChecks);
+        const failKeys = compKeys.filter(k => compChecks[k] === false);
+        const passKeys = compKeys.filter(k => compChecks[k] === true);
+        const naKeys   = compKeys.filter(k => compChecks[k] === null);
+        const sortedKeys = [...failKeys, ...naKeys, ...passKeys];
+
+        const checklistHtml = !compKeys.length
+            ? '<div class="qa-empty">No compliance data</div>'
+            : `<div style="padding:.3rem 0;">
+                ${sortedKeys.map((k, i) => {
+                    const passed = compChecks[k];
+                    const isFail = passed === false;
+                    const isPass = passed === true;
+                    const [iconCls, wrapCls] = isPass  ? ['ri-checkbox-circle-fill', 'qa-check-pass']
+                                             : passed === null ? ['ri-indeterminate-circle-line', 'qa-check-na']
+                                             :                   ['ri-close-circle-fill', 'qa-check-fail'];
+                    const divider = i === failKeys.length && failKeys.length > 0 && passed !== false
+                        ? '<div style="height:1px;background:#e2e8f0;margin:.25rem 0;"></div>' : '';
+                    return `${divider}<div class="qa-check-item" style="${isFail?'background:rgba(244,106,106,.04);border-radius:.25rem;padding:.28rem .35rem;':isPass&&failKeys.length?'opacity:.6;':''}">
+                        <div class="qa-check-icon ${wrapCls}"><i class="${iconCls}"></i></div>
+                        <div style="flex:1;color:${isFail?'#c84646':'#374151'};font-weight:${isFail?'600':'400'};">${esc(compLabels[k]||k)}</div>
+                    </div>`;
+                }).join('')}
+              </div>`;
+
+        // Coaching notes
+        let coachingHtml = '<div class="qa-empty" style="color:#94a3b8;">No coaching notes</div>';
+        if (coaching) {
+            const lines = Array.isArray(coaching)
+                ? coaching
+                : String(coaching).split(/\n|(?:^|\n)\s*[-•]\s*/g).filter(l => l.trim());
+            if (lines.length) {
+                coachingHtml = `<div class="qa-coaching"><ul>${lines.map(n => '<li>'+esc(String(n).trim())+'</li>').join('')}</ul></div>`;
+            }
+        }
+
+        // Transcript
+        const transcriptHtml = !transcript.length
+            ? '<div class="qa-empty" style="color:#94a3b8;">No transcript available</div>'
+            : `<div class="qa-transcript">${transcript.map(line => {
+                const cls   = line.speaker === 'AGENT' ? 't-closer' : line.speaker === 'CUSTOMER' ? 't-customer' : 't-unknown';
+                const label = line.speaker === 'AGENT' ? 'Closer' : line.speaker === 'CUSTOMER' ? 'Customer' : line.speaker || 'Unknown';
+                return `<div class="t-line"><span class="${cls}">${label}:</span> ${esc(line.text)}</div>`;
+            }).join('')}</div>`;
 
         content.innerHTML = `
-            <div class="qa-detail-meta" style="margin-bottom:.65rem;">
-                <div class="meta-item"><i class="ri-user-line"></i> ${esc(c.customer_name||'Unknown')}</div>
-                <div class="meta-item"><i class="ri-phone-line"></i> ${fmtPhone(c.caller_number)}</div>
-                <div class="meta-item"><i class="ri-headphone-line"></i> ${esc(c.agent_name||'Unknown')}</div>
-                <div class="meta-item"><i class="ri-calendar-line"></i> ${fmtTime(c.call_start_time)}</div>
-                <div class="meta-item"><i class="ri-time-line"></i> ${fmtDuration(c.duration_seconds)}</div>
-                ${c.is_sale ? '<div class="meta-item"><i class="ri-money-dollar-circle-line"></i> <span class="bd-mini bd-green">SALE</span></div>' : ''}
-                ${c.carrier_name ? '<div class="meta-item"><i class="ri-building-line"></i> '+esc(c.carrier_name)+'</div>' : ''}
+            <!-- Header -->
+            <div class="qa-overlay-head">
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem;">
+                        <div class="qa-score-ring ${ringCls}" style="width:56px;height:56px;flex-shrink:0;">
+                            <div class="ring-val" style="font-size:1.15rem;">${score}</div>
+                            <div class="ring-max">/100</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.95rem;font-weight:700;color:#1a1a2e;line-height:1.2;">${esc(c.customer_name||'Unknown')}</div>
+                            <div style="margin-top:.18rem;">${renderDisp(r)}</div>
+                        </div>
+                    </div>
+                    <div class="qa-call-meta">
+                        <div class="qa-call-meta-item"><i class="ri-headphone-line"></i> ${esc(c.agent_name||'Unknown')}</div>
+                        <div class="qa-call-meta-item"><i class="ri-phone-line"></i> ${fmtPhone(c.callee_number||c.caller_number)}</div>
+                        <div class="qa-call-meta-item"><i class="ri-calendar-line"></i> ${fmtTime(c.call_start_time)}</div>
+                        <div class="qa-call-meta-item"><i class="ri-time-line"></i> ${fmtDuration(c.duration_seconds)}</div>
+                        ${c.carrier_name && !c.is_sale ? `<div class="qa-call-meta-item"><i class="ri-building-line"></i> ${esc(c.carrier_name)}</div>` : ''}
+                        ${failKeys.length ? `<div class="qa-call-meta-item"><span class="qa-badge b-red">${failKeys.length} fail${failKeys.length>1?'s':''}</span></div>` : '<div class="qa-call-meta-item"><span class="qa-badge b-green">Compliant</span></div>'}
+                    </div>
+                </div>
+                <button class="qa-overlay-close" onclick="QA.closeDetail()" style="font-size:1.5rem;">&times;</button>
             </div>
 
-            <div class="row g-2 mb-2">
-                <div class="col-md-3 text-center">
-                    <div class="ex-card" style="padding:1rem;">
-                        <div class="qa-score ${scoreClass(r.total_score)}" style="font-size:2rem;">${r.total_score != null ? parseFloat(r.total_score).toFixed(0) : '—'}</div>
-                        <div><span class="qa-disp ${dispClass(r.disposition)}">${dispLabel(r.disposition)}</span></div>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-equalizer-line"></i> Category Breakdown</h6></div>
-                        <div class="sec-body" id="detailCats"></div>
-                    </div>
-                </div>
+            <!-- Review Action Bar -->
+            <div class="qa-review-bar">
+                <span class="qa-review-bar-label"><i class="ri-check-double-line"></i> Mark Review</span>
+                <button class="qa-review-btn rv-approve" onclick="QA.markReview(${callId},'approve',this)"><i class="ri-checkbox-circle-line"></i> Approve for Submission</button>
+                <button class="qa-review-btn rv-review"  onclick="QA.markReview(${callId},'review',this)"><i class="ri-error-warning-line"></i> Needs Review</button>
+                <button class="qa-review-btn rv-void"    onclick="QA.markReview(${callId},'void',this)"><i class="ri-close-circle-line"></i> Void Risk</button>
+                <span class="qa-review-status" id="reviewStatus">Not yet reviewed</span>
             </div>
 
-            <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-shield-check-line"></i> Compliance Checklist</h6></div>
-                        <div class="sec-body" id="detailChecklist"></div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="ex-card sec-card">
-                        <div class="sec-hdr"><h6><i class="ri-lightbulb-line"></i> AI Coaching Notes</h6></div>
-                        <div class="sec-body" id="detailCoaching"></div>
-                    </div>
-                </div>
-            </div>
+            <div class="qa-overlay-body">
+                ${saleBlock}
 
-            <div class="ex-card sec-card">
-                <div class="sec-hdr"><h6><i class="ri-chat-1-line"></i> Transcript</h6></div>
-                <div class="sec-body" id="detailTranscript"></div>
+                <div class="row g-2 mb-2">
+                    <!-- Category breakdown -->
+                    <div class="col-md-8">
+                        <div class="qa-card">
+                            <div class="qa-card-header"><h6><i class="ri-equalizer-line"></i> Category Breakdown</h6></div>
+                            <div class="qa-card-body" id="detailCats"></div>
+                        </div>
+                    </div>
+                    <!-- Compliance checklist -->
+                    <div class="col-md-4">
+                        <div class="qa-card">
+                            <div class="qa-card-header">
+                                <h6><i class="ri-shield-check-line"></i> Compliance
+                                    ${failKeys.length ? `<span class="qa-badge b-red" style="margin-left:.35rem;">${failKeys.length} failed</span>` : `<span class="qa-badge b-green" style="margin-left:.35rem;">All clear</span>`}
+                                </h6>
+                            </div>
+                            <div class="qa-card-body">${checklistHtml}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coaching notes -->
+                <div class="qa-card mb-2">
+                    <div class="qa-card-header" style="cursor:pointer;" onclick="toggleSection('coachSection',this)">
+                        <h6><i class="ri-lightbulb-line"></i> AI Coaching Notes</h6>
+                        <i class="ri-arrow-down-s-line qa-toggle-icon"></i>
+                    </div>
+                    <div class="qa-card-body" id="coachSection">${coachingHtml}</div>
+                </div>
+
+                <!-- Transcript (collapsed by default) -->
+                <div class="qa-card">
+                    <div class="qa-card-header" style="cursor:pointer;" onclick="toggleSection('transcriptSection',this)">
+                        <h6><i class="ri-chat-1-line"></i> Transcript <span style="font-size:.62rem;font-weight:400;color:var(--qa-muted);">(${transcript.length} lines)</span></h6>
+                        <i class="ri-arrow-right-s-line qa-toggle-icon"></i>
+                    </div>
+                    <div class="qa-card-body" id="transcriptSection" style="display:none;">${transcriptHtml}</div>
+                </div>
             </div>
         `;
 
-        // Category breakdown — score_breakdown is {opening: int, discovery: int, ...}
         renderCategoryBars(scoreBreak, 'detailCats');
 
-        // Compliance checklist — compliance_checks is {C1_recording_disclosure: bool, C2_agent_identity: bool, ...}
-        const cl = document.getElementById('detailChecklist');
-        if (cl) {
-            const compLabels = {
-                C1_recording_disclosure: 'C1 Recording Consent',
-                C2_agent_identity: 'C2 Agent Identity',
-                C3_carrier_named: 'C3 Carrier Named',
-                C4_not_government_program: 'C4 Not Government',
-                C5_product_type_stated: 'C5 Product Type',
-                C6_waiting_period: 'C6 Waiting Period',
-                C7_premium_amount: 'C7 Premium Amount',
-                C8_coverage_amount: 'C8 Coverage Amount',
-                C9_health_questions: 'C9 Health Questions',
-                C10_beneficiary_collected: 'C10 Beneficiary',
-                C11_prospect_verbal_consent: 'C11 Verbal Consent',
-                C12_dnc_honored: 'C12 DNC Honored'
-            };
-            const compKeys = Object.keys(compChecks);
-            if (!compKeys.length) { cl.innerHTML = '<div class="qa-empty">No compliance data</div>'; }
-            else {
-                cl.innerHTML = compKeys.map(k => {
-                    const passed = compChecks[k];
-                    const icon = passed === true ? 'ri-checkbox-circle-fill qa-check-pass'
-                               : passed === null ? 'ri-indeterminate-circle-line qa-check-na'
-                               : 'ri-close-circle-fill qa-check-fail';
-                    return `<div class="qa-checklist-item">
-                        <div class="qa-check-icon"><i class="${icon}"></i></div>
-                        <div style="flex:1">${esc(compLabels[k]||k)}</div>
-                    </div>`;
-                }).join('');
-            }
+        // Check if call already has a review status
+        if (c.review_status) {
+            const statusEl = document.getElementById('reviewStatus');
+            const map = { approve: 'Approved for Submission', review: 'Needs Review', void: 'Void Risk' };
+            if (statusEl && map[c.review_status]) statusEl.textContent = `Marked: ${map[c.review_status]}`;
         }
 
-        // Coaching notes — coaching_notes is a string (or possibly null)
-        const co = document.getElementById('detailCoaching');
-        if (co) {
-            if (!coaching) { co.innerHTML = '<div class="qa-empty">No coaching notes</div>'; }
-            else if (Array.isArray(coaching)) {
-                co.innerHTML = `<div class="qa-coaching"><ul>${coaching.map(n => '<li>'+esc(n)+'</li>').join('')}</ul></div>`;
-            } else {
-                // It's a string — split by newlines or bullet points
-                const lines = String(coaching).split(/\n|(?:^|\n)\s*[-•]\s*/g).filter(l => l.trim());
-                co.innerHTML = `<div class="qa-coaching"><ul>${lines.map(n => '<li>'+esc(n.trim())+'</li>').join('')}</ul></div>`;
-            }
-        }
-
-        // Transcript — is [{speaker, text}] array
-        const tr = document.getElementById('detailTranscript');
-        if (tr) {
-            if (!transcript.length) { tr.innerHTML = '<div class="qa-empty">No transcript available</div>'; }
-            else {
-                tr.innerHTML = `<div class="qa-transcript">${transcript.map(line => {
-                    const cls = line.speaker === 'AGENT' ? 't-agent' : line.speaker === 'CUSTOMER' ? 't-customer' : 't-unknown';
-                    const label = line.speaker === 'AGENT' ? 'Agent' : line.speaker === 'CUSTOMER' ? 'Customer' : 'Unknown';
-                    return `<div class="t-line"><span class="${cls}">${label}:</span> ${esc(line.text)}</div>`;
-                }).join('')}</div>`;
-            }
-        }
     }).catch(e => {
-        content.innerHTML = `<div class="qa-empty">Error loading call: ${esc(e.message)}</div>`;
+        content.innerHTML = `<div class="qa-empty" style="color:#64748b;">Error loading call: ${esc(e.message)}</div>`;
     });
+}
+
+function toggleSection(sectionId, headerEl) {
+    const sec = document.getElementById(sectionId);
+    if (!sec) return;
+    const icon = headerEl && headerEl.querySelector('.qa-toggle-icon');
+    const open = sec.style.display !== 'none';
+    sec.style.display = open ? 'none' : '';
+    if (icon) icon.className = open ? 'ri-arrow-right-s-line qa-toggle-icon' : 'ri-arrow-down-s-line qa-toggle-icon';
 }
 
 
@@ -1133,6 +1422,23 @@ function openCallDetail(callId) {
 function scoreClass(s) { s=parseFloat(s); if(isNaN(s)) return ''; return s>=90?'s-excellent':s>=75?'s-good':s>=60?'s-average':'s-poor'; }
 function dispClass(d) { return 'd-'+(d||'').toLowerCase().replace(/_/g,'-'); }
 function dispLabel(d) { return (d||'N/A').replace(/_/g,' '); }
+// renderDisp: shows score-based disposition + compliance fail badge when applicable
+function renderDisp(c) {
+    const disp = c.disposition || 'N/A';
+    // Handle legacy COMPLIANCE_FAIL records gracefully
+    const legacyFail = disp === 'COMPLIANCE_FAIL';
+    const baseLbl  = legacyFail ? 'COMP FAIL' : dispLabel(disp);
+    const baseCls  = legacyFail ? 'd-comp-fail' : dispClass(disp);
+    let html = `<span class="qa-disp ${baseCls}">${esc(baseLbl)}</span>`;
+    // Add compliance fail badge for new records that have a score-based disposition
+    if (!legacyFail && c.compliance_pass === false) {
+        const codes = Array.isArray(c.compliance_failures) && c.compliance_failures.length
+            ? c.compliance_failures.map(f => f.replace(/_.*/, '')).join(', ')
+            : '!';
+        html += ` <span class="qa-disp d-comp-fail qa-cf-badge" title="Compliance issue: ${esc(codes)}">⚠ ${esc(codes)}</span>`;
+    }
+    return html;
+}
 function fmtPhone(p) { if(!p) return '—'; p=String(p).replace(/\D/g,''); return p.length===10?`(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}`:p.length===11?`+${p[0]} (${p.slice(1,4)}) ${p.slice(4,7)}-${p.slice(7)}`:esc(String(p)); }
 function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Los_Angeles'}; return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' PT'; }
 function fmtDuration(s) { if(!s&&s!==0) return '—'; s=parseInt(s); const m=Math.floor(s/60); const sec=s%60; return m>0?m+'m '+sec+'s':sec+'s'; }
@@ -1144,17 +1450,10 @@ function updateQaToggleBtn(enabled) {
     const icon = $('#qaToggleIcon');
     const lbl  = $('#qaToggleLabel');
     if (!btn) return;
-    if (enabled) {
-        btn.style.cssText  = 'background:rgba(52,195,143,.10);color:#1a8754;border:1px solid rgba(52,195,143,.3);';
-        icon.className     = 'ri-pause-circle-line';
-        lbl.textContent    = 'QA Active';
-        btn.title          = 'Click to PAUSE QA scoring (saves AI costs)';
-    } else {
-        btn.style.cssText  = 'background:rgba(241,180,76,.10);color:#b87a14;border:1px solid rgba(241,180,76,.3);';
-        icon.className     = 'ri-play-circle-line';
-        lbl.textContent    = 'QA Paused';
-        btn.title          = 'Click to RESUME QA scoring';
-    }
+    btn.className = 'qa-action-btn ' + (enabled ? 'qa-btn-success' : 'qa-btn-secondary');
+    icon.className = enabled ? 'ri-pause-circle-line' : 'ri-play-circle-line';
+    lbl.textContent = enabled ? 'Active' : 'Paused';
+    btn.title = enabled ? 'Click to PAUSE QA scoring' : 'Click to RESUME QA scoring';
 }
 
 function loadQaStatus() {
