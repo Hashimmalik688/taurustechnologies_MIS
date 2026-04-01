@@ -9,7 +9,11 @@ use App\Models\QA\QaDailyStat;
 use App\Models\QA\QaResult;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\QA\ClaudeService;
+use App\Services\QA\GeminiService;
+use App\Services\QA\QAResultService;
 use App\Services\QA\QAScoringPrompt;
+use App\Services\QA\ZoomTranscriptParser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -467,6 +471,151 @@ class QADashboardController extends Controller
             'fail' => false,
             default => null,
         };
+    }
+
+    // ── GET /qa/manual ───────────────────────────────────────────────────
+
+    public function showManualSubmit()
+    {
+        $agents = User::whereHas('roles', fn($q) => $q->whereIn('name', [
+            'Ravens Closer', 'Peregrine Closer', 'Agent', 'Employee',
+        ]))->orderBy('name')->get(['id', 'name']);
+
+        return view('qa.manual', compact('agents'));
+    }
+
+    // ── POST /qa/api/manual-score ────────────────────────────────────────
+
+    public function manualScore(Request $request): JsonResponse
+    {
+        $request->validate([
+            'transcript'    => 'required|string|min:200',
+            'agent_user_id' => 'nullable|integer|exists:users,id',
+            'call_date'     => 'nullable|date',
+        ]);
+
+        $raw      = $request->input('transcript');
+        $agentId  = $request->input('agent_user_id');
+        $callDate = $request->input('call_date')
+            ? now()->parse($request->input('call_date'))
+            : now();
+
+        // Parse Zoom transcript → diarized AGENT:/CUSTOMER: format
+        $parsed = ZoomTranscriptParser::parse($raw);
+
+        if (empty(trim($parsed['diarized']))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not parse transcript. Please check the format.',
+            ], 422);
+        }
+
+        $durationSeconds = $parsed['duration_seconds'] ?: 600;
+        $agentUser       = $agentId ? User::find($agentId) : null;
+
+        // Create a QaCall record for this manual submission
+        $qaCall = QaCall::create([
+            'zoom_call_id'        => 'manual-' . uniqid(),
+            'agent_user_id'       => $agentId,
+            'agent_name'          => $agentUser?->name ?? $parsed['agent_name'] ?? 'Unknown',
+            'agent_email'         => $agentUser?->email,
+            'duration_seconds'    => $durationSeconds,
+            'call_start_time'     => $callDate,
+            'transcript_plain'    => $raw,
+            'transcript_diarized' => $parsed['diarized'],
+            'transcript_source'   => 'manual',
+            'processing_status'   => 'scoring',
+            'scored_by'           => 'claude',
+        ]);
+
+        Log::info('[QA:Manual] Scoring manual transcript', [
+            'qa_call_id'   => $qaCall->id,
+            'agent_name'   => $qaCall->agent_name,
+            'duration_sec' => $durationSeconds,
+            'utterances'   => count($parsed['lines']),
+            'by_user'      => auth()->user()?->name,
+        ]);
+
+        try {
+            $claude   = new ClaudeService();
+            $aiResult = $claude->analyzePreLabeledCall($parsed['diarized'], $durationSeconds);
+        } catch (\Throwable $e) {
+            Log::warning('[QA:Manual] Claude failed, falling back to Gemini', [
+                'error' => $e->getMessage(),
+            ]);
+            try {
+                $gemini   = new GeminiService();
+                $aiResult = $gemini->analyzePreLabeledCall($parsed['diarized'], $durationSeconds);
+            } catch (\Throwable $e2) {
+                $qaCall->update([
+                    'processing_status' => 'failed',
+                    'failure_reason'    => $e2->getMessage(),
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI scoring failed: ' . $e2->getMessage(),
+                ], 500);
+            }
+        }
+
+        // Persist result
+        $resultService = new QAResultService();
+        $qaResult      = $resultService->saveResult($qaCall, $aiResult);
+
+        // Rebuild compliance_checks for frontend (individual columns → map)
+        $compChecks = [
+            'C1_agent_identity'             => $this->mapComplianceValue($qaResult->c2_agent_identity),
+            'C2_carrier_named'              => $this->mapComplianceValue($qaResult->c3_carrier_named),
+            'C3_product_type_stated'        => $this->mapComplianceValue($qaResult->c4_product_type_stated),
+            'C4_health_questions_complete'  => $this->mapComplianceValue($qaResult->c5_health_questions_complete),
+            'C5_quote_and_coverage'         => $this->mapComplianceValue($qaResult->c6_proper_quote),
+            'C6_draft_date_confirmed'       => $this->mapComplianceValue($qaResult->c8_draft_date_confirmed),
+            'C7_end_of_call_consent'        => $this->mapComplianceValue($qaResult->c9_end_of_call_consent),
+            'C8_application_info_collected' => $this->mapComplianceValue($qaResult->c11_application_info_collected),
+            'C9_customer_not_on_dnc'        => $this->mapComplianceValue($qaResult->c12_customer_not_on_dnc),
+            'C10_agent_handles_objections'  => $this->mapComplianceValue($qaResult->c14_customer_not_disinterested),
+            'C11_appropriate_language'      => $this->mapComplianceValue($qaResult->c16_appropriate_language),
+        ];
+
+        Log::info('[QA:Manual] Scoring complete', [
+            'qa_call_id'  => $qaCall->id,
+            'disposition' => $qaResult->disposition,
+            'total_score' => $qaResult->total_score,
+            'compliance'  => $qaResult->compliance_pass ? 'PASS' : 'FAIL',
+        ]);
+
+        return response()->json([
+            'success'    => true,
+            'qa_call_id' => $qaCall->id,
+            'result' => [
+                'disposition'         => $qaResult->disposition,
+                'total_score'         => $qaResult->total_score,
+                'compliance_pass'     => $qaResult->compliance_pass,
+                'compliance_checks'   => $compChecks,
+                'compliance_failures' => $qaResult->compliance_failures,
+                'void_risk_reason'    => $qaResult->void_risk_reason,
+                'score_breakdown' => [
+                    'opening'            => (int)($qaResult->score_opening ?? 0),
+                    'discovery'          => (int)($qaResult->score_discovery ?? 0),
+                    'presentation'       => (int)($qaResult->score_presentation ?? 0),
+                    'objection_handling' => (int)($qaResult->score_objection_handling ?? 0),
+                    'closing'            => (int)($qaResult->score_closing ?? 0),
+                    'soft_skills'        => (int)($qaResult->score_soft_skills ?? 0),
+                    'call_control'       => (int)($qaResult->score_call_control ?? 0),
+                ],
+                'coaching_notes'  => $qaResult->coaching_notes,
+                'customer_name'   => $qaResult->customer_name,
+                'carrier_name'    => $qaResult->carrier_name,
+                'is_sale'         => $qaResult->is_sale,
+                'monthly_premium' => $qaResult->monthly_premium,
+                'sale_amount'     => $qaResult->sale_amount,
+            ],
+            'parsed' => [
+                'agent_name'      => $parsed['agent_name'],
+                'duration_seconds'=> $durationSeconds,
+                'utterance_count' => count($parsed['lines']),
+            ],
+        ]);
     }
 
     private function getTeamStats(string $range): array
@@ -1098,4 +1247,306 @@ class QADashboardController extends Controller
             'template' => QAScoringPrompt::getTemplate($type),
         ]);
     }
+
+    public function deleteCall(int $id): JsonResponse
+    {
+        $call = QaCall::findOrFail($id);
+
+        QaResult::where('qa_call_id', $id)->delete();
+        $call->delete();
+
+        Log::info('[QA] Call deleted', [
+            'qa_call_id' => $id,
+            'agent_name' => $call->agent_name,
+            'by_user'    => auth()->user()?->name ?? 'unknown',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Call deleted.']);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ASSEMBLYAI — AUDIO UPLOAD & TRANSCRIPTION PIPELINE
+    // ══════════════════════════════════════════════════════════════════════════
+
+    // ── GET /qa/upload ──────────────────────────────────────────────────────
+
+    public function showUploadScore()
+    {
+        $agents = \App\Models\User::whereHas('roles', fn ($q) => $q->whereIn('name', [
+            'Ravens Closer', 'Peregrine Closer', 'Agent', 'Employee',
+        ]))->orderBy('name')->get(['id', 'name']);
+
+        return view('qa.upload', compact('agents'));
+    }
+
+    // ── POST /qa/api/upload-transcribe ──────────────────────────────────────
+    //
+    // 1. Accept audio file upload (mp3/wav/m4a/mp4/ogg/webm)
+    // 2. Store locally in storage/app/qa_audio/
+    // 3. Upload to AssemblyAI
+    // 4. Create a QaCall record with status = 'transcribing'
+    // 5. Return the QaCall ID and AssemblyAI transcript_id for async polling
+
+    public function uploadAndTranscribe(Request $request): JsonResponse
+    {
+        $request->validate([
+            'audio'         => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200', // 50 MB (PHP-FPM limit)
+            'agent_user_id' => 'nullable|integer|exists:users,id',
+            'call_date'     => 'nullable|date',
+            'swap_speakers' => 'nullable|boolean',
+        ]);
+
+        $file      = $request->file('audio');
+        $agentId   = $request->input('agent_user_id');
+        $callDate  = $request->input('call_date') ? now()->parse($request->input('call_date')) : now();
+        $agentUser = $agentId ? \App\Models\User::find($agentId) : null;
+
+        // Store the uploaded file permanently so we can re-process if needed
+        $storedPath = $file->store('qa_audio', 'local');
+
+        Log::info('[QA:Upload] Audio received', [
+            'original_name' => $file->getClientOriginalName(),
+            'size_kb'       => round($file->getSize() / 1024, 1),
+            'stored_path'   => $storedPath,
+            'by_user'       => auth()->user()?->name,
+        ]);
+
+        try {
+            $assembly = new \App\Services\QA\AssemblyAIService();
+
+            // Upload audio to AssemblyAI storage
+            $uploadUrl    = $assembly->uploadAudio($file->getRealPath());
+
+            // Submit transcription job (async — returns immediately)
+            $transcriptId = $assembly->submitTranscription($uploadUrl);
+        } catch (\Throwable $e) {
+            Log::error('[QA:Upload] AssemblyAI error', ['error' => $e->getMessage()]);
+
+            // Clean up stored file on failure
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($storedPath);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'AssemblyAI error: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // Create a QaCall placeholder — will be updated once scoring completes
+        $qaCall = QaCall::create([
+            'zoom_call_id'            => 'upload-' . uniqid(),
+            'agent_user_id'           => $agentId,
+            'agent_name'              => $agentUser?->name ?? 'Unknown',
+            'agent_email'             => $agentUser?->email,
+            'call_start_time'         => $callDate,
+            'transcript_source'       => 'assemblyai',
+            'processing_status'       => 'transcribing',
+            'scored_by'               => 'claude',
+            'audio_file_path'         => $storedPath,
+            'audio_original_name'     => $file->getClientOriginalName(),
+            'assemblyai_transcript_id'=> $transcriptId,
+            'assemblyai_status'       => 'processing',
+        ]);
+
+        Log::info('[QA:Upload] QaCall created, transcription queued', [
+            'qa_call_id'    => $qaCall->id,
+            'transcript_id' => $transcriptId,
+        ]);
+
+        return response()->json([
+            'success'       => true,
+            'qa_call_id'    => $qaCall->id,
+            'transcript_id' => $transcriptId,
+            'message'       => 'Audio uploaded. Transcription in progress…',
+        ]);
+    }
+
+    // ── GET /qa/api/transcription/{qaCallId}/status ─────────────────────────
+    //
+    // Poll AssemblyAI for transcript status.
+    // When completed, automatically triggers Claude scoring.
+    // Returns current status and — when done — the scoring result.
+
+    public function transcriptionStatus(int $qaCallId): JsonResponse
+    {
+        $qaCall = QaCall::findOrFail($qaCallId);
+
+        if (!$qaCall->assemblyai_transcript_id) {
+            return response()->json(['success' => false, 'message' => 'No AssemblyAI transcript ID for this call.'], 404);
+        }
+
+        // If already fully scored, return cached result immediately
+        if ($qaCall->processing_status === 'completed') {
+            return $this->buildScoredResponse($qaCall);
+        }
+
+        // If previously errored, surface the error
+        if ($qaCall->processing_status === 'failed') {
+            return response()->json([
+                'success'    => false,
+                'status'     => 'failed',
+                'message'    => $qaCall->failure_reason ?? 'Processing failed.',
+                'qa_call_id' => $qaCall->id,
+            ]);
+        }
+
+        try {
+            $assembly = new \App\Services\QA\AssemblyAIService();
+            $data     = $assembly->getTranscript($qaCall->assemblyai_transcript_id);
+            $status   = $data['status'] ?? 'unknown';
+
+            // Persist latest AssemblyAI status
+            $qaCall->update(['assemblyai_status' => $status]);
+
+            if ($status === 'error') {
+                $qaCall->update([
+                    'processing_status' => 'failed',
+                    'failure_reason'    => 'AssemblyAI error: ' . ($data['error'] ?? 'unknown'),
+                ]);
+
+                return response()->json([
+                    'success'    => false,
+                    'status'     => 'error',
+                    'message'    => 'Transcription failed: ' . ($data['error'] ?? 'unknown'),
+                    'qa_call_id' => $qaCall->id,
+                ]);
+            }
+
+            if ($status !== 'completed') {
+                return response()->json([
+                    'success'    => true,
+                    'status'     => $status,   // 'queued' or 'processing'
+                    'qa_call_id' => $qaCall->id,
+                    'message'    => 'Transcription in progress…',
+                ]);
+            }
+
+            // ─── Transcript is ready — parse + score ─────────────────────
+
+            $parsed      = $assembly->parseTranscriptResult($data);
+            $diarized    = $parsed['diarized'];
+            $durationSec = $parsed['duration_seconds'] ?: $qaCall->duration_seconds ?: 600;
+
+            // Optional speaker swap from the original upload request
+            // (stored as a flag in the call record or passed fresh via request param)
+            if (request()->boolean('swap_speakers')) {
+                $diarized = \App\Services\QA\AssemblyAIService::swapSpeakers($diarized);
+            }
+
+            // Persist transcript
+            $qaCall->update([
+                'transcript_plain'    => $parsed['text'],
+                'transcript_diarized' => $diarized,
+                'duration_seconds'    => $durationSec,
+                'processing_status'   => 'scoring',
+                'assemblyai_status'   => 'completed',
+            ]);
+
+            // Score with Claude → fallback Gemini
+            try {
+                $claude   = new ClaudeService();
+                $aiResult = $claude->analyzePreLabeledCall($diarized, $durationSec);
+                $qaCall->update(['scored_by' => 'claude']);
+            } catch (\Throwable $e) {
+                Log::warning('[QA:Upload] Claude failed, falling back to Gemini', ['error' => $e->getMessage()]);
+                try {
+                    $gemini   = new GeminiService();
+                    $aiResult = $gemini->analyzePreLabeledCall($diarized, $durationSec);
+                    $qaCall->update(['scored_by' => 'gemini']);
+                } catch (\Throwable $e2) {
+                    $qaCall->update([
+                        'processing_status' => 'failed',
+                        'failure_reason'    => 'AI scoring failed: ' . $e2->getMessage(),
+                    ]);
+                    return response()->json([
+                        'success'    => false,
+                        'status'     => 'scoring_failed',
+                        'message'    => 'AI scoring failed: ' . $e2->getMessage(),
+                        'qa_call_id' => $qaCall->id,
+                    ], 500);
+                }
+            }
+
+            // Persist scoring result
+            $resultService = new QAResultService();
+            $resultService->saveResult($qaCall, $aiResult);
+
+            Log::info('[QA:Upload] Scoring complete', [
+                'qa_call_id'  => $qaCall->id,
+                'disposition' => $aiResult['disposition'] ?? 'unknown',
+                'total_score' => $aiResult['total_score'] ?? 0,
+                'scored_by'   => $qaCall->scored_by,
+            ]);
+
+            return $this->buildScoredResponse($qaCall->fresh(['qaResult']));
+
+        } catch (\Throwable $e) {
+            Log::error('[QA:Upload] Status poll error', [
+                'qa_call_id' => $qaCall->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success'    => false,
+                'status'     => 'error',
+                'message'    => $e->getMessage(),
+                'qa_call_id' => $qaCall->id,
+            ], 500);
+        }
+    }
+
+    /**
+     * Build the standardised scored response payload.
+     */
+    private function buildScoredResponse(QaCall $qaCall): JsonResponse
+    {
+        $result = $qaCall->qaResult;
+
+        $compChecks = [
+            'C1_agent_identity'             => $this->mapComplianceValue($result?->c2_agent_identity),
+            'C2_carrier_named'              => $this->mapComplianceValue($result?->c3_carrier_named),
+            'C3_product_type_stated'        => $this->mapComplianceValue($result?->c4_product_type_stated),
+            'C4_health_questions_complete'  => $this->mapComplianceValue($result?->c5_health_questions_complete),
+            'C5_quote_and_coverage'         => $this->mapComplianceValue($result?->c6_proper_quote),
+            'C6_draft_date_confirmed'       => $this->mapComplianceValue($result?->c8_draft_date_confirmed),
+            'C7_end_of_call_consent'        => $this->mapComplianceValue($result?->c9_end_of_call_consent),
+            'C8_application_info_collected' => $this->mapComplianceValue($result?->c11_application_info_collected),
+            'C9_customer_not_on_dnc'        => $this->mapComplianceValue($result?->c12_customer_not_on_dnc),
+            'C10_agent_handles_objections'  => $this->mapComplianceValue($result?->c14_customer_not_disinterested),
+            'C11_appropriate_language'      => $this->mapComplianceValue($result?->c16_appropriate_language),
+        ];
+
+        return response()->json([
+            'success'    => true,
+            'status'     => 'completed',
+            'qa_call_id' => $qaCall->id,
+            'result'     => $result ? [
+                'disposition'         => $result->disposition,
+                'total_score'         => $result->total_score,
+                'compliance_pass'     => $result->compliance_pass,
+                'compliance_checks'   => $compChecks,
+                'compliance_failures' => $result->compliance_failures,
+                'void_risk_reason'    => $result->void_risk_reason,
+                'score_breakdown'     => [
+                    'opening'            => (int) ($result->score_opening ?? 0),
+                    'discovery'          => (int) ($result->score_discovery ?? 0),
+                    'presentation'       => (int) ($result->score_presentation ?? 0),
+                    'objection_handling' => (int) ($result->score_objection_handling ?? 0),
+                    'closing'            => (int) ($result->score_closing ?? 0),
+                    'soft_skills'        => (int) ($result->score_soft_skills ?? 0),
+                    'call_control'       => (int) ($result->score_call_control ?? 0),
+                ],
+                'coaching_notes'  => $result->coaching_notes,
+                'top_issue'       => $result->top_issue,
+                'strengths'       => $result->strengths,
+                'improvements'    => $result->improvements,
+                'customer_name'   => $result->customer_name,
+                'carrier_name'    => $result->carrier_name,
+                'is_sale'         => (bool) $result->is_sale,
+                'monthly_premium' => $result->monthly_premium,
+                'sale_amount'     => $result->sale_amount,
+            ] : null,
+            'transcript' => $qaCall->transcript_diarized,
+        ]);
+    }
 }
+

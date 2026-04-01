@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class ClaudeService
 {
     private string $apiKey;
-    private string $model = 'claude-haiku-4-5-20251001';
+    private string $model = 'claude-sonnet-4-6';
     private string $baseUrl = 'https://api.anthropic.com/v1';
 
     public function __construct()

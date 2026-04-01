@@ -35,6 +35,10 @@ class QaCall extends Model
         'failure_reason',
         'scored_by',
         'retry_count',
+        'assemblyai_transcript_id',
+        'assemblyai_status',
+        'audio_file_path',
+        'audio_original_name',
     ];
 
     protected $casts = [

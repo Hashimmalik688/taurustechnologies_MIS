@@ -114,6 +114,7 @@ class QAResultService
                 'carrier_name' => $extracted['carrier_name'] ?? null,
                 'policy_type' => $extracted['policy_type'] ?? null,
                 'customer_state' => $extracted['customer_state'] ?? null,
+                'call_type' => $extracted['call_type'] ?? null,
             ]));
 
             // Create individual compliance flag rows for failed items

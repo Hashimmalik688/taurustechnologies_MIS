@@ -1039,6 +1039,16 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     Route::post('/api/toggle', [\App\Http\Controllers\QA\QADashboardController::class, 'toggleQa'])->name('qa.api.toggle');
     Route::post('/api/script', [\App\Http\Controllers\QA\QADashboardController::class, 'saveScript'])->name('qa.api.script.save');
     Route::post('/api/script/reset', [\App\Http\Controllers\QA\QADashboardController::class, 'resetScript'])->name('qa.api.script.reset');
+
+    // Manual transcript submission
+    Route::get('/manual', [\App\Http\Controllers\QA\QADashboardController::class, 'showManualSubmit'])->name('qa.manual');
+    Route::post('/api/manual-score', [\App\Http\Controllers\QA\QADashboardController::class, 'manualScore'])->name('qa.api.manual.score');
+    Route::delete('/api/calls/{id}', [\App\Http\Controllers\QA\QADashboardController::class, 'deleteCall'])->name('qa.api.call.delete');
+
+    // ── AssemblyAI Audio Upload & Scoring ─────────────────────────────────
+    Route::get('/upload', [\App\Http\Controllers\QA\QADashboardController::class, 'showUploadScore'])->name('qa.upload');
+    Route::post('/api/upload-transcribe', [\App\Http\Controllers\QA\QADashboardController::class, 'uploadAndTranscribe'])->name('qa.api.upload.transcribe');
+    Route::get('/api/transcription/{qaCallId}/status', [\App\Http\Controllers\QA\QADashboardController::class, 'transcriptionStatus'])->name('qa.api.transcription.status');
 });
 
 // Catch-all route - MUST BE LAST

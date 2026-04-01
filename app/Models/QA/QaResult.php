@@ -59,6 +59,7 @@ class QaResult extends Model
         'carrier_name',
         'policy_type',
         'customer_state',
+        'call_type',
     ];
 
     protected $casts = [

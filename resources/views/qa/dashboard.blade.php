@@ -386,6 +386,8 @@
 .qa-review-btn.rv-void     { border-color:#f46a6a; color:#c84646; background:rgba(244,106,106,.08); }
 .qa-review-btn.rv-void:hover     { background:#f46a6a; color:#fff; }
 .qa-review-btn.rv-active   { filter:brightness(.88); }
+.qa-review-btn.rv-delete   { border-color:rgba(244,106,106,.3); color:#c84646; background:transparent; margin-left:auto; }
+.qa-review-btn.rv-delete:hover { background:#c84646; color:#fff; border-color:#c84646; }
 .qa-review-status { font-size:.7rem; color:var(--qa-muted); margin-left:auto; }
 
 /* Sale info block */
@@ -477,6 +479,8 @@
         <button class="qa-action-btn qa-btn-danger" id="rerunTodayBtn" onclick="QA.rerunToday()" title="Re-score today's calls"><i class="ri-restart-line"></i> Rerun</button>
         <button class="qa-action-btn qa-btn-success" id="qaToggleBtn" onclick="QA.toggleQa()" title="Pause/resume QA scoring"><i class="ri-pause-circle-line" id="qaToggleIcon"></i> <span id="qaToggleLabel">Active</span></button>
         <a href="/qa/script" class="qa-action-btn qa-btn-ghost" title="Edit AI scoring prompt"><i class="ri-code-s-slash-line"></i> Script</a>
+        <a href="/qa/manual" class="qa-action-btn qa-btn-secondary" title="Manually paste &amp; score a Zoom transcript"><i class="ri-upload-cloud-line"></i> Manual</a>
+        <a href="/qa/upload" class="qa-action-btn qa-btn-secondary" title="Upload audio recording — transcribe via AssemblyAI &amp; score with Claude"><i class="ri-mic-line"></i> Upload Recording</a>
     </div>
 </div>
 
@@ -644,6 +648,16 @@ window.QA = {
     goPage(p)      { S.currentPage = p; loadDashboard(); },
     openDetail(id) { openCallDetail(id); },
     closeDetail()  { $('#qaOverlay').classList.remove('show'); document.body.style.overflow=''; },
+    deleteCall(callId) {
+        if (!confirm('Delete this QA record permanently? This cannot be undone.')) return;
+        fetch(`/qa/api/calls/${callId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+        }).then(r => r.json()).then(d => {
+            if (d.success) { this.closeDetail(); loadDashboard(); }
+            else alert('Delete failed: ' + (d.message || 'Unknown error'));
+        }).catch(e => alert('Request failed: ' + e.message));
+    },
     markReview(callId, status, btn) {
         const statusEl = document.getElementById('reviewStatus');
         const map = { approve: 'Approved for Submission', review: 'Needs Review', void: 'Void Risk' };
@@ -1346,6 +1360,7 @@ function openCallDetail(callId) {
                 <button class="qa-review-btn rv-review"  onclick="QA.markReview(${callId},'review',this)"><i class="ri-error-warning-line"></i> Needs Review</button>
                 <button class="qa-review-btn rv-void"    onclick="QA.markReview(${callId},'void',this)"><i class="ri-close-circle-line"></i> Void Risk</button>
                 <span class="qa-review-status" id="reviewStatus">Not yet reviewed</span>
+                <button class="qa-review-btn rv-delete" onclick="QA.deleteCall(${callId})" title="Delete this QA record"><i class="ri-delete-bin-line"></i> Delete</button>
             </div>
 
             <div class="qa-overlay-body">

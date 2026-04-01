@@ -55,4 +55,8 @@ return [
         'api_key' => env('ANTHROPIC_API_KEY'),
     ],
 
+    'assemblyai' => [
+        'api_key' => env('ASSEMBLYAI_API_KEY'),
+    ],
+
 ];
