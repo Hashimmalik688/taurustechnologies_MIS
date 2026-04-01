@@ -331,7 +331,9 @@
                     <option value="Yes" {{ request('followup_status') == 'Yes' ? 'selected' : '' }}>Completed</option>
                     <option value="No" {{ request('followup_status') == 'No' ? 'selected' : '' }}>Pending</option>
                 </select>
-                @if(request()->hasAny(['search','carrier','followup_status']))
+                <input type="date" name="date_from" class="sl-pill-select" style="min-width:130px;" value="{{ request('date_from') }}" title="From date" onchange="this.form.submit()">
+                <input type="date" name="date_to" class="sl-pill-select" style="min-width:130px;" value="{{ request('date_to') }}" title="To date" onchange="this.form.submit()">
+                @if(request()->hasAny(['search','carrier','followup_status','date_from','date_to']))
                     <a href="{{ route('followup.my-followups') }}" class="sl-pill-clear"><i class="bx bx-x"></i> Clear</a>
                 @endif
                 <span class="sl-result-count">{{ $leads->total() }} leads</span>

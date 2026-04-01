@@ -140,15 +140,17 @@
 .qa-stat:last-child { border-right: none; }
 .qa-stat-val { font-size: .95rem; font-weight: 700; line-height: 1; }
 .qa-stat-lbl { font-size: .58rem; text-transform: uppercase; font-weight: 600; letter-spacing: .4px; color: var(--qa-muted); margin-top: .2rem; }
-.qa-stat.st-excellent .qa-stat-val { color: #1a8754; }
-.qa-stat.st-good      .qa-stat-val { color: var(--qa-blue); }
-.qa-stat.st-average   .qa-stat-val { color: #b87a14; }
-.qa-stat.st-poor      .qa-stat-val { color: #c84646; }
+.qa-stat.st-excellent   .qa-stat-val { color: #1a8754; }
+.qa-stat.st-exceptional .qa-stat-val { color: #7c3aed; }
+.qa-stat.st-good        .qa-stat-val { color: var(--qa-blue); }
+.qa-stat.st-average     .qa-stat-val { color: #b87a14; }
+.qa-stat.st-poor        .qa-stat-val { color: #c84646; }
 .qa-stat.st-void      .qa-stat-val { color: var(--qa-purple); }
 .qa-stat.st-aht       .qa-stat-val { color: var(--qa-muted); }
 
 /* ── Disposition Badges ── */
 .qa-disp { display:inline-block; padding:.1rem .38rem; border-radius:1rem; font-size:.58rem; font-weight:700; letter-spacing:.3px; text-transform:uppercase; line-height:1.4; }
+.qa-disp.d-exceptional { background:rgba(124,58,237,.12); color:#7c3aed; border:1px solid rgba(124,58,237,.2); }
 .qa-disp.d-excellent { background:rgba(52,195,143,.12); color:#1a8754; }
 .qa-disp.d-good      { background:rgba(85,110,230,.12); color:#556ee6; }
 .qa-disp.d-average   { background:rgba(241,180,76,.12); color:#b87a14; }
@@ -159,6 +161,7 @@
 
 /* Score value */
 .qa-score { font-weight:700; font-size:.8rem; letter-spacing:-.01em; }
+.qa-score.s-exceptional { color:#7c3aed; }
 .qa-score.s-excellent { color:#1a8754; }
 .qa-score.s-good      { color:var(--qa-blue); }
 .qa-score.s-average   { color:#b87a14; }
@@ -259,35 +262,65 @@
 .qa-agent-stat .lbl { font-size:.55rem; text-transform:uppercase; letter-spacing:.3px; color:var(--qa-muted); margin-top:.15rem; }
 
 /* ── Call Detail Overlay ── */
-.qa-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:10000; display:none; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(2px); }
+.qa-overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:10000; display:none; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(2px); }
 .qa-overlay.show { display:flex; }
 .qa-overlay-box {
-  background:#ffffff; border:1px solid #e5e7eb; border-radius:var(--qa-radius-lg);
+  background:var(--bs-card-bg); border:var(--qa-border); border-radius:var(--qa-radius-lg);
   width:100%; max-width:1060px; max-height:92vh; overflow-y:auto;
-  position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3);
-  color:#1a1a2e; scrollbar-width:thin; scrollbar-color:#ddd transparent;
+  position:relative; box-shadow:0 20px 60px rgba(0,0,0,.55);
+  color:var(--bs-body-color); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent;
 }
 .qa-overlay-box::-webkit-scrollbar { width:4px; }
-.qa-overlay-box::-webkit-scrollbar-thumb { background:#ddd; border-radius:4px; }
-
-/* Overlay inner sections inherit light theme */
-.qa-overlay-box .qa-card { background:#f8fafc; border-color:#e5e7eb; }
-.qa-overlay-box .qa-card-header { border-bottom-color:#e5e7eb; }
-.qa-overlay-box .qa-card-header h6 { color:#64748b; }
-.qa-overlay-box .qa-tbl thead th { background:#f1f5f9; color:#94a3b8; border-bottom-color:#e2e8f0; }
-.qa-overlay-box .qa-tbl tbody td { color:#334155; border-bottom-color:#f1f5f9; }
-.qa-overlay-box .qa-cat-track { background:#e9ecef; }
+.qa-overlay-box::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:4px; }
 
 .qa-overlay-head {
   display:flex; justify-content:space-between; align-items:flex-start;
-  padding:.9rem 1rem .7rem; border-bottom:1px solid #e5e7eb;
+  padding:.9rem 1rem .7rem; border-bottom:1px solid rgba(255,255,255,.07);
 }
 .qa-overlay-close {
   background:none; border:none; font-size:1.3rem; cursor:pointer;
-  color:#9ca3af; line-height:1; padding:.2rem; flex-shrink:0; margin-left:.5rem;
+  color:var(--qa-muted); line-height:1; padding:.2rem; flex-shrink:0; margin-left:.5rem;
 }
-.qa-overlay-close:hover { color:#374151; }
+.qa-overlay-close:hover { color:var(--bs-body-color); }
 .qa-overlay-body { padding:.9rem 1rem; }
+
+/* ── Upload-page style cards for the overlay ── */
+.qu-card { background:var(--bs-card-bg); border:var(--qa-border); border-radius:var(--qa-radius); box-shadow:var(--qa-shadow); margin-bottom:0; }
+.qu-card-hdr { display:flex; justify-content:space-between; align-items:center; padding:.6rem .9rem; border-bottom:1px solid rgba(255,255,255,.06); }
+.qu-card-hdr h6 { margin:0; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--qa-muted); display:flex; align-items:center; gap:.35rem; }
+.qu-card-body { padding:.85rem .9rem; }
+.qu-score-hero { text-align:center; padding:.75rem 0; }
+.qu-score-num { font-size:3rem; font-weight:800; line-height:1; }
+.qu-score-num.excellent { color:var(--qa-green); }
+.qu-score-num.good      { color:#5bc8a8; }
+.qu-score-num.average   { color:var(--qa-warn); }
+.qu-score-num.poor      { color:var(--qa-red); }
+.qu-score-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--qa-muted); margin-top:.2rem; }
+.qu-breakdown { display:grid; grid-template-columns:1fr 1fr; gap:.4rem .75rem; }
+@media(max-width:600px){ .qu-breakdown { grid-template-columns:1fr; } }
+.qu-bar-row { display:flex; align-items:center; gap:.5rem; }
+.qu-bar-label { width:110px; font-size:.65rem; color:var(--qa-muted); white-space:nowrap; flex-shrink:0; }
+.qu-bar-outer { flex:1; height:5px; background:rgba(255,255,255,.07); border-radius:3px; overflow:hidden; }
+.qu-bar-inner { height:100%; background:var(--qa-blue); border-radius:3px; transition:width .5s; }
+.qu-bar-val   { font-size:.65rem; font-weight:700; width:26px; text-align:right; }
+.qu-checks { display:grid; grid-template-columns:1fr 1fr; gap:.35rem .75rem; }
+@media(max-width:600px){ .qu-checks { grid-template-columns:1fr; } }
+.qu-check-item { display:flex; align-items:flex-start; gap:.45rem; font-size:.7rem; }
+.qu-check-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:.3rem; }
+.dot-pass { background:var(--qa-green); }
+.dot-fail { background:var(--qa-red); }
+.dot-na   { background:rgba(255,255,255,.2); }
+.qu-coaching { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.07); border-radius:.4rem; padding:.7rem .85rem; font-size:.73rem; line-height:1.65; white-space:pre-wrap; }
+.qu-transcript .t-line { padding:.15rem 0; border-bottom:1px solid rgba(255,255,255,.03); }
+.qu-transcript .t-speaker { font-weight:700; margin-right:.35rem; }
+.qu-transcript .t-agent    { color:var(--qa-blue); }
+.qu-transcript .t-customer { color:var(--qa-gold); }
+.qu-toggle-icon.open { transform:rotate(0deg); }
+.qu-toggle-icon:not(.open) { transform:rotate(-90deg); }
+.comp-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.68rem; font-weight:700; padding:.18rem .55rem; border-radius:.8rem; }
+.comp-pass { background:var(--qa-green-dim); color:var(--qa-green); border:1px solid rgba(52,195,143,.3); }
+.comp-fail { background:var(--qa-red-dim);   color:var(--qa-red);   border:1px solid rgba(244,106,106,.3); }
+.collapsed { display:none; }
 
 /* Score ring — big centered score */
 .qa-score-ring {
@@ -297,6 +330,8 @@
 }
 .qa-score-ring .ring-val { font-size:1.6rem; font-weight:800; line-height:1; letter-spacing:-.03em; }
 .qa-score-ring .ring-max { font-size:.58rem; color:#94a3b8; margin-top:.1rem; }
+.qa-score-ring.sr-exceptional { border-color:#7c3aed; background:rgba(124,58,237,.06); }
+.qa-score-ring.sr-exceptional .ring-val { color:#7c3aed; }
 .qa-score-ring.sr-excellent { border-color:#34c38f; background:rgba(52,195,143,.06); }
 .qa-score-ring.sr-excellent .ring-val { color:#1a8754; }
 .qa-score-ring.sr-good { border-color:#556ee6; background:rgba(85,110,230,.06); }
@@ -356,6 +391,7 @@
 .qa-call-customer { font-size:.77rem; font-weight:600; color:var(--qa-text); line-height:1.2; }
 .qa-call-phone { font-size:.61rem; color:var(--qa-muted); margin-top:.06rem; }
 .qa-score-cell { display:inline-flex; align-items:center; justify-content:center; width:36px; height:28px; border-radius:.3rem; font-size:.8rem; font-weight:700; }
+.qa-score-cell.s-exceptional { background:rgba(124,58,237,.12); color:#7c3aed; }
 .qa-score-cell.s-excellent { background:rgba(52,195,143,.12); color:#1a8754; }
 .qa-score-cell.s-good      { background:rgba(85,110,230,.12); color:#556ee6; }
 .qa-score-cell.s-average   { background:rgba(241,180,76,.12); color:#b87a14; }
@@ -365,28 +401,19 @@
 .qa-row-arrow { color:var(--qa-muted); font-size:.9rem; opacity:.5; transition:opacity .1s; }
 .qa-call-row:hover .qa-row-arrow { opacity:1; }
 
-/* Review action bar inside overlay */
+/* Action bar inside overlay */
 .qa-review-bar {
   display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
-  padding:.7rem 1rem; background:#f8fafc; border-top:1px solid #e5e7eb;
-  border-bottom:1px solid #e5e7eb;
+  padding:.7rem 1rem; background:rgba(255,255,255,.02); border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.06); justify-content:flex-end;
 }
-.qa-review-bar-label { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#94a3b8; margin-right:.2rem; flex-shrink:0; }
 .qa-review-btn {
   display:inline-flex; align-items:center; gap:.3rem; padding:.38rem .75rem;
   border-radius:.4rem; font-size:.72rem; font-weight:600; cursor:pointer;
   border:2px solid transparent; transition:all .15s; letter-spacing:.1px;
 }
-.qa-review-btn.rv-approve  { border-color:#34c38f; color:#1a8754; background:rgba(52,195,143,.08); }
-.qa-review-btn.rv-approve:hover  { background:#34c38f; color:#fff; }
-.qa-review-btn.rv-review   { border-color:#f1b44c; color:#b87a14; background:rgba(241,180,76,.08); }
-.qa-review-btn.rv-review:hover   { background:#f1b44c; color:#fff; }
-.qa-review-btn.rv-void     { border-color:#f46a6a; color:#c84646; background:rgba(244,106,106,.08); }
-.qa-review-btn.rv-void:hover     { background:#f46a6a; color:#fff; }
-.qa-review-btn.rv-active   { filter:brightness(.88); }
-.qa-review-btn.rv-delete   { border-color:rgba(244,106,106,.3); color:#c84646; background:transparent; margin-left:auto; }
+.qa-review-btn.rv-delete   { border-color:rgba(244,106,106,.3); color:#c84646; background:transparent; }
 .qa-review-btn.rv-delete:hover { background:#c84646; color:#fff; border-color:#c84646; }
-.qa-review-status { font-size:.7rem; color:var(--qa-muted); margin-left:auto; }
 
 /* Sale info block */
 .qa-sale-block {
@@ -519,7 +546,7 @@
                 <tr><td><strong>C4</strong> Health Questions</td><td>Medications and health conditions both asked (any form qualifies)</td></tr>
                 <tr><td><strong>C5</strong> Quote &amp; Coverage</td><td>Monthly premium and death benefit stated — exact amount or a range</td></tr>
                 <tr><td><strong>C6</strong> Draft Date Confirmed</td><td>Payment draft date confirmed with customer</td></tr>
-                <tr><td><strong>C7</strong> End-of-Call Consent</td><td>Confirms date, full name, DOB, SSN, draft consent &amp; e-comm consent</td></tr>
+                <tr><td><strong>C7</strong> Recorded Consent</td><td>Confirms name, DOB, SSN &amp; draft consent — at ANY point during the call (Format A: script read-back, or Format B: item-by-item)</td></tr>
                 <tr><td colspan="2"><strong style="color:var(--bs-primary)">Application Requirements</strong></td></tr>
                 <tr><td><strong>C8</strong> Application Info</td><td>Collects name, DOB, address, bank info, SSN, beneficiary (no email/IVR required)</td></tr>
                 <tr><td colspan="2"><strong style="color:var(--bs-primary)">Behavioral Compliance</strong></td></tr>
@@ -547,10 +574,11 @@
             <h6><i class="ri-award-line"></i> Scoring &amp; Disposition</h6>
             <p style="font-size:.78rem;margin-bottom:.5rem;">Score is based on <strong>sales quality (0–100)</strong>. Compliance issues are shown as a badge alongside the score-based disposition — e.g. <span class="qa-disp d-good" style="font-size:.7rem;">GOOD</span> <span class="qa-disp d-comp-fail qa-cf-badge">⚠ C2</span>. A call can have a high score and still have a compliance issue flagged.</p>
             <table class="qa-info-tbl">
-                <tr><td><span class="qa-disp d-excellent">EXCELLENT</span></td><td>≥ 90 — Exceptional sales performance</td></tr>
-                <tr><td><span class="qa-disp d-good">GOOD</span></td><td>75–89 — Solid sales performance</td></tr>
-                <tr><td><span class="qa-disp d-average">AVERAGE</span></td><td>60–74 — Adequate, needs coaching</td></tr>
-                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>&lt; 60 — Well below standard</td></tr>
+                <tr><td><span class="qa-disp d-exceptional">EXCEPTIONAL</span></td><td>100 — Perfect score, all sub-scores 10 (essentially never)</td></tr>
+                <tr><td><span class="qa-disp d-excellent">EXCELLENT</span></td><td>90–99 — Near-perfect sales performance</td></tr>
+                <tr><td><span class="qa-disp d-good">GOOD</span></td><td>70–89 — Skilled closer, quality technique</td></tr>
+                <tr><td><span class="qa-disp d-average">AVERAGE</span></td><td>50–69 — Functional, follows script, needs coaching</td></tr>
+                <tr><td><span class="qa-disp d-poor">POOR</span></td><td>&lt; 50 — Real errors or call breakdown</td></tr>
                 <tr><td><span class="qa-disp d-comp-fail">VOID RISK</span></td><td>Misrepresentation or coerced sale</td></tr>
                 <tr><td><span class="qa-disp d-comp-fail qa-cf-badge" style="font-size:.65rem;">⚠ Cx</span></td><td>Compliance badge — shown alongside score when a C1–C11 check failed</td></tr>
             </table>
@@ -560,8 +588,8 @@
             <h6><i class="ri-lightbulb-line"></i> How It Works</h6>
             <ol>
                 <li><strong>Recording captured</strong> — Zoom webhook triggers automatic capture</li>
-                <li><strong>Transcription fetched</strong> — Zoom's built-in transcript with speaker labels (AGENT:/CUSTOMER:)</li>
-                <li><strong>AI analysis</strong> — Claude / Gemini scores against 11 compliance codes + 7 quality categories</li>
+                <li><strong>Transcription fetched</strong> — Zoom or AssemblyAI transcript with Closer/Customer speaker labels</li>
+                <li><strong>QA analysis</strong> — AI scores against 11 compliance checks + 7 quality categories</li>
                 <li><strong>Results saved</strong> — Scores, compliance flags, and coaching notes stored</li>
                 <li><strong>Dashboard updated</strong> — Real-time metrics and closer performance tracking</li>
             </ol>
@@ -656,22 +684,7 @@ window.QA = {
             else alert('Delete failed: ' + (d.message || 'Unknown error'));
         }).catch(e => alert('Request failed: ' + e.message));
     },
-    markReview(callId, status, btn) {
-        const statusEl = document.getElementById('reviewStatus');
-        const map = { approve: 'Approved for Submission', review: 'Needs Review', void: 'Void Risk' };
-        // Visual feedback immediately
-        document.querySelectorAll('.qa-review-btn').forEach(b => b.classList.remove('rv-active'));
-        btn.classList.add('rv-active');
-        if (statusEl) statusEl.textContent = 'Saving…';
-        // Persist (best-effort; silently fails if endpoint not implemented yet)
-        fetch(`/qa/api/calls/${callId}/review`, {
-            method: 'POST',
-            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-            body: JSON.stringify({ review_status: status })
-        }).then(r => r.ok ? r.json() : Promise.reject())
-          .then(() => { if (statusEl) statusEl.textContent = `Marked: ${map[status]||status}`; })
-          .catch(() => { if (statusEl) statusEl.textContent = `Marked: ${map[status]||status} (not saved)`; });
-    },
+
     rerunToday() {
         if (!confirm("Re-score all of today's completed calls with the latest AI prompt?\n\nThis resets their results and re-queues them. It may take several minutes.")) return;
         const btn = $('#rerunTodayBtn');
@@ -768,6 +781,10 @@ function loadDashboard() {
 
             <!-- ── Secondary Stat Strip ── -->
             <div class="qa-stat-strip">
+                <div class="qa-stat st-exceptional">
+                    <div class="qa-stat-val">${ts.exceptional_count||0}</div>
+                    <div class="qa-stat-lbl">Exceptional</div>
+                </div>
                 <div class="qa-stat st-excellent">
                     <div class="qa-stat-val">${ts.excellent_count||0}</div>
                     <div class="qa-stat-lbl">Excellent</div>
@@ -925,7 +942,7 @@ function renderCharts(d) {
     const dispObj = d.disposition_chart || {};
     const dispKeys = Object.keys(dispObj);
     if (dispKeys.length && document.getElementById('dispChart')) {
-        const colors = { EXCELLENT:'#34c38f', GOOD:'#556ee6', AVERAGE:'#f1b44c', POOR:'#f46a6a', COMPLIANCE_FAIL:'#d63031', VOID_RISK:'#7c69ef' };
+        const colors = { EXCEPTIONAL:'#7c3aed', EXCELLENT:'#34c38f', GOOD:'#556ee6', AVERAGE:'#f1b44c', POOR:'#f46a6a', COMPLIANCE_FAIL:'#d63031', VOID_RISK:'#7c69ef' };
         S.charts.disp = new Chart(document.getElementById('dispChart'), {
             type: 'doughnut',
             data: {
@@ -1049,6 +1066,7 @@ function renderFilterRow() {
     const filters = [
         { key:'all',            label:'All' },
         { key:'sales_only',     label:'Sales Only' },
+        { key:'exceptional',    label:'Exceptional' },
         { key:'excellent',      label:'Excellent' },
         { key:'good',           label:'Good' },
         { key:'average',        label:'Average' },
@@ -1251,7 +1269,7 @@ function openCallDetail(callId) {
         C4_health_questions_complete: 'C4  Health Questions',
         C5_quote_and_coverage:        'C5  Quote & Coverage',
         C6_draft_date_confirmed:      'C6  Draft Date Confirmed',
-        C7_end_of_call_consent:       'C7  End-of-Call Consent',
+        C7_recorded_consent:          'C7  Recorded Consent',
         C8_application_info_collected:'C8  Application Info',
         C9_customer_not_on_dnc:       'C9  DNC Honored',
         C10_agent_handles_objections: 'C10 Handles Objections',
@@ -1262,24 +1280,45 @@ function openCallDetail(callId) {
         const c = d.call || {};
         const r = d.qa_result || {};
         const scoreBreak = r.score_breakdown || {};
-        const compChecks = r.compliance_checks || {};
-        const coaching   = r.coaching_notes;
+        const compChecks   = r.compliance_checks || {};
+        const compDetails  = r.compliance_details || {};
+        const coaching     = r.coaching_notes;
         const transcript = d.transcript || [];
         const sc         = scoreClass(r.total_score);
         const ringCls    = sc.replace('s-', 'sr-') || 'sr-poor';
         const score      = r.total_score != null ? parseFloat(r.total_score).toFixed(0) : '—';
+        const topIssue   = r.top_issue || null;
+        const strengths  = r.strengths || [];
+        const improvements = r.improvements || [];
+        const voidReason = r.void_risk_reason || null;
+        const compFailures = r.compliance_failures || [];
+        const audioNote  = (r.informational_notes || {}).audio_quality || null;
 
         // Sale info block
         const saleBlock = c.is_sale ? `
             <div class="qa-sale-block">
-                <i class="ri-shield-check-fill sb-icon"></i>
+                <i class="bx bx-shield-check sb-icon"></i>
                 ${c.sale_amount    ? `<div class="sb-item"><div class="sb-val">$${parseFloat(c.sale_amount).toLocaleString()}</div><div class="sb-lbl">Coverage</div></div>` : ''}
                 ${c.monthly_premium? `<div class="sb-item"><div class="sb-val">$${parseFloat(c.monthly_premium).toFixed(2)}/mo</div><div class="sb-lbl">Premium</div></div>` : ''}
                 ${c.carrier_name   ? `<div class="sb-item"><div class="sb-val">${esc(c.carrier_name)}</div><div class="sb-lbl">Carrier</div></div>` : ''}
                 <div class="sb-item"><div class="sb-val" style="color:#34c38f;">✓ SALE</div><div class="sb-lbl">Status</div></div>
             </div>` : '';
 
-        // Compliance checklist (failures first, then passes)
+        // Void risk warning
+        const voidBlock = (r.disposition === 'VOID_RISK' && voidReason) ? `
+            <div style="background:rgba(244,106,106,.06);border:1px solid rgba(244,106,106,.2);border-radius:.5rem;padding:.65rem .85rem;margin-bottom:.5rem;">
+                <div style="font-weight:700;color:var(--qa-red);font-size:.82rem;margin-bottom:.25rem;"><i class="bx bx-error"></i> Void Risk</div>
+                <div style="font-size:.8rem;color:var(--bs-body-color);line-height:1.4;">${esc(voidReason)}</div>
+            </div>` : '';
+
+        // Audio quality warning
+        const audioBlock = audioNote ? `
+            <div style="background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.2);border-radius:.5rem;padding:.55rem .85rem;margin-bottom:.5rem;">
+                <div style="font-weight:600;color:var(--qa-warn);font-size:.8rem;"><i class="bx bx-volume-mute"></i> Audio Quality Note</div>
+                <div style="font-size:.78rem;color:var(--bs-body-color);margin-top:.15rem;">${esc(audioNote)}</div>
+            </div>` : '';
+
+        // Compliance (failures first, then NA, then passes) — dot/grid style matching upload page
         const compKeys = Object.keys(compChecks);
         const failKeys = compKeys.filter(k => compChecks[k] === false);
         const passKeys = compKeys.filter(k => compChecks[k] === true);
@@ -1287,135 +1326,175 @@ function openCallDetail(callId) {
         const sortedKeys = [...failKeys, ...naKeys, ...passKeys];
 
         const checklistHtml = !compKeys.length
-            ? '<div class="qa-empty">No compliance data</div>'
-            : `<div style="padding:.3rem 0;">
-                ${sortedKeys.map((k, i) => {
-                    const passed = compChecks[k];
-                    const isFail = passed === false;
-                    const isPass = passed === true;
-                    const [iconCls, wrapCls] = isPass  ? ['ri-checkbox-circle-fill', 'qa-check-pass']
-                                             : passed === null ? ['ri-indeterminate-circle-line', 'qa-check-na']
-                                             :                   ['ri-close-circle-fill', 'qa-check-fail'];
-                    const divider = i === failKeys.length && failKeys.length > 0 && passed !== false
-                        ? '<div style="height:1px;background:#e2e8f0;margin:.25rem 0;"></div>' : '';
-                    return `${divider}<div class="qa-check-item" style="${isFail?'background:rgba(244,106,106,.04);border-radius:.25rem;padding:.28rem .35rem;':isPass&&failKeys.length?'opacity:.6;':''}">
-                        <div class="qa-check-icon ${wrapCls}"><i class="${iconCls}"></i></div>
-                        <div style="flex:1;color:${isFail?'#c84646':'#374151'};font-weight:${isFail?'600':'400'};">${esc(compLabels[k]||k)}</div>
+            ? `<div style="font-size:.72rem;color:var(--qa-muted);padding:.5rem 0;">No compliance data</div>`
+            : `<div class="qu-checks">${sortedKeys.map(k => {
+                    const val = compChecks[k];
+                    const dot = val === true ? 'dot-pass' : (val === false ? 'dot-fail' : 'dot-na');
+                    const lbl = val === true ? 'pass' : (val === false ? 'fail' : 'n/a');
+                    const detail = (val === false && compDetails[k])
+                        ? `<div style="font-size:.62rem;color:var(--qa-red);margin-top:.1rem;line-height:1.3;">${esc(compDetails[k])}</div>` : '';
+                    return `<div class="qu-check-item">
+                        <span class="qu-check-dot ${dot}"></span>
+                        <span style="${val===false?'color:var(--qa-red);':val===null?'opacity:.55;':''}">
+                            ${esc(compLabels[k]||k)} <span style="opacity:.55;">(${lbl})</span>
+                            ${detail}
+                        </span>
                     </div>`;
-                }).join('')}
-              </div>`;
+                }).join('')}</div>
+                ${failKeys.length ? `<div style="margin-top:.5rem;font-size:.67rem;color:var(--qa-red);">⚠ ${failKeys.length} failure${failKeys.length>1?'s':''}: ${failKeys.map(k=>(compLabels[k]||k).trim()).join(', ')}</div>` : ''}`;
+
+        // Score breakdown bars — qu-breakdown 2-col grid
+        const catMaxes   = { opening:10, discovery:10, presentation:10, objection_handling:10, closing:10, soft_skills:10, call_control:10 };
+        const catDisplay = { opening:'Opening', discovery:'Discovery', presentation:'Presentation', objection_handling:'Obj. Handling', closing:'Closing', soft_skills:'Soft Skills', call_control:'Call Control' };
+        const barsHtml = scoreBreak && Object.keys(scoreBreak).length
+            ? `<div class="qu-breakdown">${Object.entries(catMaxes).map(([key, maxPts]) => {
+                    const val = parseFloat(scoreBreak[key] || 0);
+                    const pct = Math.min((val / maxPts) * 100, 100);
+                    return `<div class="qu-bar-row">
+                        <span class="qu-bar-label">${esc(catDisplay[key]||key)}</span>
+                        <div class="qu-bar-outer"><div class="qu-bar-inner" style="width:${pct.toFixed(0)}%;"></div></div>
+                        <span class="qu-bar-val">${val.toFixed(0)}</span>
+                    </div>`;
+                }).join('')}</div>`
+            : `<div style="font-size:.72rem;color:var(--qa-muted);">No breakdown data</div>`;
+
+        // Score number CSS class
+        const scoreNumCls = sc ? sc.replace('s-','') : 'poor';
+
+        // Compliance badge
+        const compBadgeHtml = r.compliance_pass === true
+            ? '<span class="comp-badge comp-pass" style="margin-top:.3rem;display:inline-flex;"><i class="bx bx-check"></i> PASS</span>'
+            : r.compliance_pass === false
+                ? '<span class="comp-badge comp-fail" style="margin-top:.3rem;display:inline-flex;"><i class="bx bx-x"></i> FAIL</span>'
+                : '';
+
+        // Sale badge (score hero)
+        const saleBadgeHtml = c.is_sale
+            ? `<span style="font-size:.66rem;color:var(--qa-green);font-weight:700;margin-top:.25rem;display:block;">💰 SALE${c.monthly_premium ? ` · $${parseFloat(c.monthly_premium).toFixed(2)}/mo` : ''}</span>`
+            : '';
 
         // Coaching notes
-        let coachingHtml = '<div class="qa-empty" style="color:#94a3b8;">No coaching notes</div>';
+        let coachingText = '—';
         if (coaching) {
-            const lines = Array.isArray(coaching)
-                ? coaching
-                : String(coaching).split(/\n|(?:^|\n)\s*[-•]\s*/g).filter(l => l.trim());
-            if (lines.length) {
-                coachingHtml = `<div class="qa-coaching"><ul>${lines.map(n => '<li>'+esc(String(n).trim())+'</li>').join('')}</ul></div>`;
-            }
+            coachingText = Array.isArray(coaching) ? coaching.join('\n') : String(coaching);
         }
 
         // Transcript
-        const transcriptHtml = !transcript.length
-            ? '<div class="qa-empty" style="color:#94a3b8;">No transcript available</div>'
-            : `<div class="qa-transcript">${transcript.map(line => {
-                const cls   = line.speaker === 'AGENT' ? 't-closer' : line.speaker === 'CUSTOMER' ? 't-customer' : 't-unknown';
-                const label = line.speaker === 'AGENT' ? 'Closer' : line.speaker === 'CUSTOMER' ? 'Customer' : line.speaker || 'Unknown';
-                return `<div class="t-line"><span class="${cls}">${label}:</span> ${esc(line.text)}</div>`;
-            }).join('')}</div>`;
+        const transcriptLines = !transcript.length
+            ? '<span style="color:var(--qa-muted);font-style:italic;">No transcript available</span>'
+            : transcript.map(line => {
+                const isAgent = line.speaker === 'AGENT';
+                const isCust  = line.speaker === 'CUSTOMER';
+                const spCls   = isAgent ? 't-agent' : isCust ? 't-customer' : '';
+                const spLbl   = isAgent ? 'AGENT' : isCust ? 'CUSTOMER' : (line.speaker || 'UNKNOWN');
+                return `<div class="t-line"><span class="t-speaker ${spCls}">${esc(spLbl)}:</span>${esc(line.text)}</div>`;
+            }).join('');
 
         content.innerHTML = `
-            <!-- Header -->
-            <div class="qa-overlay-head">
+            <!-- Overlay Header -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:.9rem 1rem .7rem;border-bottom:1px solid rgba(255,255,255,.07);">
                 <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem;">
-                        <div class="qa-score-ring ${ringCls}" style="width:56px;height:56px;flex-shrink:0;">
-                            <div class="ring-val" style="font-size:1.15rem;">${score}</div>
-                            <div class="ring-max">/100</div>
-                        </div>
-                        <div>
-                            <div style="font-size:.95rem;font-weight:700;color:#1a1a2e;line-height:1.2;">${esc(c.customer_name||'Unknown')}</div>
-                            <div style="margin-top:.18rem;">${renderDisp(r)}</div>
-                        </div>
-                    </div>
+                    <div style="font-size:.95rem;font-weight:700;line-height:1.2;margin-bottom:.3rem;">${esc(c.customer_name||'Unknown Customer')}</div>
                     <div class="qa-call-meta">
-                        <div class="qa-call-meta-item"><i class="ri-headphone-line"></i> ${esc(c.agent_name||'Unknown')}</div>
-                        <div class="qa-call-meta-item"><i class="ri-phone-line"></i> ${fmtPhone(c.callee_number||c.caller_number)}</div>
-                        <div class="qa-call-meta-item"><i class="ri-calendar-line"></i> ${fmtTime(c.call_start_time)}</div>
-                        <div class="qa-call-meta-item"><i class="ri-time-line"></i> ${fmtDuration(c.duration_seconds)}</div>
-                        ${c.carrier_name && !c.is_sale ? `<div class="qa-call-meta-item"><i class="ri-building-line"></i> ${esc(c.carrier_name)}</div>` : ''}
+                        <div class="qa-call-meta-item"><i class="bx bx-headphone"></i> ${esc(c.agent_name||'Unknown')}</div>
+                        <div class="qa-call-meta-item"><i class="bx bx-phone"></i> ${fmtPhone(c.callee_number||c.caller_number)}</div>
+                        <div class="qa-call-meta-item"><i class="bx bx-calendar"></i> ${fmtTime(c.call_start_time)}</div>
+                        <div class="qa-call-meta-item"><i class="bx bx-time-five"></i> ${fmtDuration(c.duration_seconds)}</div>
+                        ${c.carrier_name && !c.is_sale ? `<div class="qa-call-meta-item"><i class="bx bx-building"></i> ${esc(c.carrier_name)}</div>` : ''}
                         ${failKeys.length ? `<div class="qa-call-meta-item"><span class="qa-badge b-red">${failKeys.length} fail${failKeys.length>1?'s':''}</span></div>` : '<div class="qa-call-meta-item"><span class="qa-badge b-green">Compliant</span></div>'}
                     </div>
                 </div>
                 <button class="qa-overlay-close" onclick="QA.closeDetail()" style="font-size:1.5rem;">&times;</button>
             </div>
 
-            <!-- Review Action Bar -->
+            <!-- Action Bar -->
             <div class="qa-review-bar">
-                <span class="qa-review-bar-label"><i class="ri-check-double-line"></i> Mark Review</span>
-                <button class="qa-review-btn rv-approve" onclick="QA.markReview(${callId},'approve',this)"><i class="ri-checkbox-circle-line"></i> Approve for Submission</button>
-                <button class="qa-review-btn rv-review"  onclick="QA.markReview(${callId},'review',this)"><i class="ri-error-warning-line"></i> Needs Review</button>
-                <button class="qa-review-btn rv-void"    onclick="QA.markReview(${callId},'void',this)"><i class="ri-close-circle-line"></i> Void Risk</button>
-                <span class="qa-review-status" id="reviewStatus">Not yet reviewed</span>
-                <button class="qa-review-btn rv-delete" onclick="QA.deleteCall(${callId})" title="Delete this QA record"><i class="ri-delete-bin-line"></i> Delete</button>
+                <button class="qa-review-btn rv-delete" onclick="QA.deleteCall(${callId})" title="Delete this QA record"><i class="bx bx-trash"></i> Delete</button>
             </div>
 
-            <div class="qa-overlay-body">
-                ${saleBlock}
+            <!-- Body -->
+            <div style="padding:.85rem .9rem;">
+                ${voidBlock}${audioBlock}${saleBlock}
 
-                <div class="row g-2 mb-2">
-                    <!-- Category breakdown -->
-                    <div class="col-md-8">
-                        <div class="qa-card">
-                            <div class="qa-card-header"><h6><i class="ri-equalizer-line"></i> Category Breakdown</h6></div>
-                            <div class="qa-card-body" id="detailCats"></div>
-                        </div>
-                    </div>
-                    <!-- Compliance checklist -->
-                    <div class="col-md-4">
-                        <div class="qa-card">
-                            <div class="qa-card-header">
-                                <h6><i class="ri-shield-check-line"></i> Compliance
-                                    ${failKeys.length ? `<span class="qa-badge b-red" style="margin-left:.35rem;">${failKeys.length} failed</span>` : `<span class="qa-badge b-green" style="margin-left:.35rem;">All clear</span>`}
-                                </h6>
+                <div class="row g-2">
+
+                    <!-- Score hero -->
+                    <div class="col-md-3">
+                        <div class="qu-card h-100">
+                            <div class="qu-card-hdr"><h6><i class="bx bx-trophy"></i> Score</h6></div>
+                            <div class="qu-card-body qu-score-hero">
+                                <div class="qu-score-num ${scoreNumCls}">${score}</div>
+                                <div class="qu-score-label">Total Score</div>
+                                <div class="mt-1">${renderDisp(r)}</div>
+                                ${compBadgeHtml}
+                                ${saleBadgeHtml}
                             </div>
-                            <div class="qa-card-body">${checklistHtml}</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Coaching notes -->
-                <div class="qa-card mb-2">
-                    <div class="qa-card-header" style="cursor:pointer;" onclick="toggleSection('coachSection',this)">
-                        <h6><i class="ri-lightbulb-line"></i> AI Coaching Notes</h6>
-                        <i class="ri-arrow-down-s-line qa-toggle-icon"></i>
+                    <!-- Score breakdown -->
+                    <div class="col-md-5">
+                        <div class="qu-card h-100">
+                            <div class="qu-card-hdr"><h6><i class="bx bx-bar-chart-alt-2"></i> Score Breakdown</h6></div>
+                            <div class="qu-card-body">${barsHtml}</div>
+                        </div>
                     </div>
-                    <div class="qa-card-body" id="coachSection">${coachingHtml}</div>
-                </div>
 
-                <!-- Transcript (collapsed by default) -->
-                <div class="qa-card">
-                    <div class="qa-card-header" style="cursor:pointer;" onclick="toggleSection('transcriptSection',this)">
-                        <h6><i class="ri-chat-1-line"></i> Transcript <span style="font-size:.62rem;font-weight:400;color:var(--qa-muted);">(${transcript.length} lines)</span></h6>
-                        <i class="ri-arrow-right-s-line qa-toggle-icon"></i>
+                    <!-- Compliance -->
+                    <div class="col-md-4">
+                        <div class="qu-card h-100">
+                            <div class="qu-card-hdr"><h6><i class="bx bx-shield-check"></i> Compliance</h6></div>
+                            <div class="qu-card-body">${checklistHtml}</div>
+                        </div>
                     </div>
-                    <div class="qa-card-body" id="transcriptSection" style="display:none;">${transcriptHtml}</div>
+
+                    <!-- Coaching notes -->
+                    <div class="col-12">
+                        <div class="qu-card">
+                            <div class="qu-card-hdr"><h6><i class="bx bx-comment-dots"></i> AI Coaching Notes</h6></div>
+                            <div class="qu-card-body">
+                                <div class="qu-coaching">${esc(coachingText)}</div>
+                                <div class="mt-2 d-flex gap-3" style="font-size:.72rem;flex-wrap:wrap;">
+                                    ${topIssue ? `<span><span style="color:var(--qa-muted);">Top issue:</span> <span style="color:var(--qa-red);">${esc(topIssue)}</span></span>` : ''}
+                                    ${c.customer_name ? `<span><span style="color:var(--qa-muted);">Customer:</span> <span>${esc(c.customer_name)}</span></span>` : ''}
+                                    ${c.carrier_name ? `<span><span style="color:var(--qa-muted);">Carrier:</span> <span>${esc(c.carrier_name)}</span></span>` : ''}
+                                </div>
+                                ${(strengths.length || improvements.length) ? `
+                                <div class="mt-2 row g-2">
+                                    ${strengths.length ? `<div class="col-md-6">
+                                        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--qa-green);margin-bottom:.25rem;">Strengths</div>
+                                        <ul style="margin:0;padding-left:1.1rem;font-size:.72rem;line-height:1.55;">${strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+                                    </div>` : ''}
+                                    ${improvements.length ? `<div class="col-md-6">
+                                        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--qa-warn);margin-bottom:.25rem;">Areas for Improvement</div>
+                                        <ul style="margin:0;padding-left:1.1rem;font-size:.72rem;line-height:1.55;">${improvements.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+                                    </div>` : ''}
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transcript (collapsed) -->
+                    <div class="col-12">
+                        <div class="qu-card">
+                            <div class="qu-card-hdr" style="cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('collapsed');const ic=this.querySelector('.qu-toggle-icon');ic.classList.toggle('open');">
+                                <h6><i class="bx bx-file"></i> Transcript <span style="font-weight:400;opacity:.6;">(${transcript.length} lines)</span></h6>
+                                <span class="qu-toggle-icon" style="font-size:.7rem;transition:transform .2s;">▼</span>
+                            </div>
+                            <div class="qu-card-body collapsed">
+                                <div class="qu-transcript" style="max-height:500px;overflow-y:auto;font-size:.75rem;line-height:1.65;font-family:'Fira Code',monospace,Consolas,monospace;">${transcriptLines}</div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         `;
 
-        renderCategoryBars(scoreBreak, 'detailCats');
 
-        // Check if call already has a review status
-        if (c.review_status) {
-            const statusEl = document.getElementById('reviewStatus');
-            const map = { approve: 'Approved for Submission', review: 'Needs Review', void: 'Void Risk' };
-            if (statusEl && map[c.review_status]) statusEl.textContent = `Marked: ${map[c.review_status]}`;
-        }
 
     }).catch(e => {
-        content.innerHTML = `<div class="qa-empty" style="color:#64748b;">Error loading call: ${esc(e.message)}</div>`;
+        content.innerHTML = `<div class="qa-empty" style="color:var(--qa-muted);">Error loading call: ${esc(e.message)}</div>`;
     });
 }
 
@@ -1432,7 +1511,7 @@ function toggleSection(sectionId, headerEl) {
 /* ══════════════════════════════════════════════════
    UTILITIES
    ══════════════════════════════════════════════════ */
-function scoreClass(s) { s=parseFloat(s); if(isNaN(s)) return ''; return s>=90?'s-excellent':s>=75?'s-good':s>=60?'s-average':'s-poor'; }
+function scoreClass(s) { s=parseFloat(s); if(isNaN(s)) return ''; return s>=100?'s-exceptional':s>=90?'s-excellent':s>=70?'s-good':s>=50?'s-average':'s-poor'; }
 function dispClass(d) { return 'd-'+(d||'').toLowerCase().replace(/_/g,'-'); }
 function dispLabel(d) { return (d||'N/A').replace(/_/g,' '); }
 // renderDisp: shows score-based disposition + compliance fail badge when applicable
@@ -1443,6 +1522,12 @@ function renderDisp(c) {
     const baseLbl  = legacyFail ? 'COMP FAIL' : dispLabel(disp);
     const baseCls  = legacyFail ? 'd-comp-fail' : dispClass(disp);
     let html = `<span class="qa-disp ${baseCls}">${esc(baseLbl)}</span>`;
+    // For VOID_RISK, also show the score-based quality badge
+    if (disp === 'VOID_RISK' && c.score_disposition) {
+        const scoreCls = dispClass(c.score_disposition);
+        const scoreLbl = dispLabel(c.score_disposition);
+        html += ` <span class="qa-disp ${scoreCls}" title="Sales quality: ${esc(scoreLbl)}">${esc(scoreLbl)}</span>`;
+    }
     // Add compliance fail badge for new records that have a score-based disposition
     if (!legacyFail && c.compliance_pass === false) {
         const codes = Array.isArray(c.compliance_failures) && c.compliance_failures.length
@@ -1479,6 +1564,15 @@ function loadQaStatus() {
 loadDashboard();
 loadQaStatus();
 S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDashboard(); }, 60000);
+
+// Auto-open call detail if ?call= param is present (e.g. from upload page link)
+const urlParams = new URLSearchParams(window.location.search);
+const autoCallId = urlParams.get('call');
+if (autoCallId && !isNaN(autoCallId)) {
+    openCallDetail(parseInt(autoCallId));
+    // Clean up the URL so refreshing doesn't re-open
+    window.history.replaceState({}, '', window.location.pathname);
+}
 
 })();
 </script>

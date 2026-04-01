@@ -114,11 +114,11 @@
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($mySales) && $mySales->count() > 0): ?>
             
             <div style="display:flex;gap:.4rem;flex-wrap:wrap;padding:.3rem .65rem .5rem;">
-                <span class="st-pill st-accepted"><i class="bx bx-check"></i> Accepted: <?php echo e($mySales->where('status','accepted')->count()); ?></span>
-                <span class="st-pill st-underwritten"><i class="bx bx-edit"></i> Underwritten: <?php echo e($mySales->where('status','underwritten')->count()); ?></span>
-                <span class="st-pill st-pending"><i class="bx bx-time"></i> Pending: <?php echo e($mySales->where('status','pending')->whereNull('recall_requested_at')->count()); ?></span>
-                <span class="st-pill st-declined"><i class="bx bx-x"></i> Declined: <?php echo e($mySales->where('status','declined')->count()); ?></span>
-                <span class="st-pill st-recalled"><i class="bx bx-undo"></i> Recalled: <?php echo e($mySales->filter(fn($s) => $s->recall_requested_at)->count()); ?></span>
+                <span class="st-pill st-accepted"><i class="bx bx-check"></i> Approved: <?php echo e($mySalesCounts->approved ?? 0); ?></span>
+                <span class="st-pill st-underwritten"><i class="bx bx-edit"></i> Underwriting: <?php echo e($mySalesCounts->underwriting ?? 0); ?></span>
+                <span class="st-pill st-pending"><i class="bx bx-time"></i> Pending: <?php echo e($mySalesCounts->pending ?? 0); ?></span>
+                <span class="st-pill st-declined"><i class="bx bx-x"></i> Declined: <?php echo e($mySalesCounts->declined ?? 0); ?></span>
+                <span class="st-pill st-recalled"><i class="bx bx-undo"></i> Recalled: <?php echo e($mySalesCounts->recalled ?? 0); ?></span>
             </div>
 
             <div class="scroll-tbl" style="max-height:400px;">
@@ -151,8 +151,22 @@
                                 <td class="text-center">
                                     <?php
                                         $isRecalled = !is_null($sale->recall_requested_at);
-                                        $stClass = $isRecalled ? 'st-recalled' : 'st-'.($sale->status ?? 'pending');
-                                        $stLabel = $isRecalled ? 'Recalled' : ucfirst($sale->status ?? 'pending');
+                                        // Show submission_status (set by manager on submission page)
+                                        $subStatus = $sale->submission_status ?? 'pending';
+                                        $subClassMap = [
+                                            'approved'    => 'st-accepted',
+                                            'declined'    => 'st-declined',
+                                            'underwriting'=> 'st-underwritten',
+                                            'pending'     => 'st-pending',
+                                        ];
+                                        $subLabelMap = [
+                                            'approved'    => 'Approved',
+                                            'declined'    => 'Declined',
+                                            'underwriting'=> 'Underwriting',
+                                            'pending'     => 'Pending',
+                                        ];
+                                        $stClass = $isRecalled ? 'st-recalled' : ($subClassMap[$subStatus] ?? 'st-pending');
+                                        $stLabel = $isRecalled ? 'Recalled' : ($subLabelMap[$subStatus] ?? 'Pending');
                                     ?>
                                     <span class="st-pill <?php echo e($stClass); ?>"><?php echo e($stLabel); ?></span>
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($sale->qa_status): ?>

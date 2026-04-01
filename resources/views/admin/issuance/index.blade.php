@@ -418,6 +418,8 @@
         </div>
         <form method="GET" action="{{ route('issuance.index') }}" class="filter-form">
             <input type="text" name="search" class="f-input" style="min-width:160px;" placeholder="Search name, phone, carrier..." value="{{ request('search') }}">
+            <input type="date" name="date_from" class="f-input" style="min-width:130px;" value="{{ request('date_from') }}" title="From date">
+            <input type="date" name="date_to" class="f-input" style="min-width:130px;" value="{{ request('date_to') }}" title="To date">
             <select name="carrier" class="sl-pill-select">
                 <option value="">All Carriers</option>
                 @foreach($carriers as $carrier)
@@ -443,7 +445,7 @@
                 <option value="Modified" {{ request('policy_type') == 'Modified' ? 'selected' : '' }}>Modified</option>
             </select>
             <button type="submit" class="f-btn"><i class="bx bx-search"></i> Filter</button>
-            @if(request()->hasAny(['search','carrier','issuance_status','followup_status','policy_type']))
+            @if(request()->hasAny(['search','carrier','issuance_status','followup_status','policy_type','date_from','date_to']))
                 <a href="{{ route('issuance.index') }}" class="f-reset"><i class="bx bx-reset"></i> Clear</a>
             @endif
         </form>

@@ -2,17 +2,146 @@
 
 namespace App\Services\QA;
 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
 class QAScoringPrompt
 {
+    // Storage file for the custom prompt override
+    private const FILE_SCORED = 'qa_prompt_scored.txt';
+
+    /**
+     * Return the path to the prompt override file (stored in storage/app/).
+     */
+    public static function promptFilePath(): string
+    {
+        return storage_path('app/' . self::FILE_SCORED);
+    }
+
+    /**
+     * Check if a custom prompt file exists.
+     */
+    public static function hasCustomPrompt(string $type = 'scored'): bool
+    {
+        return file_exists(self::promptFilePath());
+    }
+
+    /**
+     * Read the current active prompt template (custom if set, else built-in).
+     * Placeholders used in stored templates:
+     *   {{TRANSCRIPT}}        → the diarized transcript
+     *   {{DURATION_MINUTES}}  → rounded duration in minutes
+     *   {{DURATION_SECONDS}}  → raw seconds
+     */
+    public static function getTemplate(string $type = 'scored'): string
+    {
+        $path = self::promptFilePath();
+        if (file_exists($path)) {
+            $content = file_get_contents($path);
+            if ($content !== false && trim($content) !== '') {
+                return $content;
+            }
+        }
+
+        // No custom template — generate the default with placeholder markers.
+        $transcriptSentinel = '___QA_TRANSCRIPT_PLACEHOLDER___';
+        $text = self::build($transcriptSentinel, 0);
+        $text = str_replace($transcriptSentinel, '{{TRANSCRIPT}}', $text);
+        $text = preg_replace('/0\.0 minutes \(0 seconds\)/', '{{DURATION_MINUTES}} minutes ({{DURATION_SECONDS}} seconds)', $text);
+
+        return $text;
+    }
+
+    /**
+     * Save a custom prompt template to disk.
+     */
+    public static function saveTemplate(string $type, string $content): void
+    {
+        file_put_contents(self::promptFilePath(), $content);
+        Log::info('[QAScoringPrompt] Custom prompt saved');
+    }
+
+    /**
+     * Reset the prompt back to the built-in default.
+     */
+    public static function resetTemplate(string $type = 'scored'): void
+    {
+        $path = self::promptFilePath();
+        if (file_exists($path)) {
+            unlink($path);
+        }
+        Log::info('[QAScoringPrompt] Custom prompt reset to default');
+    }
+
+    /**
+     * Render a stored (or default) template by injecting the actual call data.
+     */
+    private static function renderTemplate(string $template, string $transcript, int $durationSeconds): string
+    {
+        $durationMinutes = round($durationSeconds / 60, 1);
+        return str_replace(
+            ['{{TRANSCRIPT}}', '{{DURATION_MINUTES}}', '{{DURATION_SECONDS}}'],
+            [$transcript, $durationMinutes, $durationSeconds],
+            $template
+        );
+    }
+
     /**
      * Build the complete QA scoring prompt with the call transcript injected.
      */
     public static function build(string $diarizedTranscript, int $durationSeconds): string
     {
+        // If a custom template file exists, use it
+        $path = self::promptFilePath('scored');
+        if (file_exists($path)) {
+            $template = file_get_contents($path);
+            if ($template !== false && trim($template) !== '') {
+                return self::renderTemplate($template, $diarizedTranscript, $durationSeconds);
+            }
+        }
+
         $durationMinutes = round($durationSeconds / 60, 1);
 
         return <<<PROMPT
-You are an expert Quality Assurance analyst for a Final Expense life insurance outbound call center. You are evaluating a recorded sales call between an AGENT and a CUSTOMER (senior citizen, typically age 50-85).
+You are an expert Quality Assurance analyst for a government-affiliated life insurance outbound sales center. You are evaluating a recorded OUTBOUND SALES CALL where a closer contacts a pre-qualified lead from a government program database. The closer's organization already has the customer's data on file (name, DOB, address, SSN, phone number, citizenship status) — these are NOT cold prospects. The closer is calling to present and enroll the customer in a life insurance policy.
+
+BUSINESS CONTEXT — READ CAREFULLY:
+- This is NOT a traditional cold call. The organization already has all customer data from a government program database.
+- TWO CALL TYPES EXIST — See CALL TYPE DETECTION below. Scoring criteria differ between RESALE and LIVE_SALE calls. Detect the call type before scoring.
+- The closer READS BACK the customer's own data to them during the call (name, DOB, address, SSN, bank info). This is STANDARD PROCEDURE, not a red flag. Do NOT flag a closer for reading customer data back to them.
+- There is NO bank IVR (3-way call) verification process. The closer collects bank/payment info directly.
+- Collecting full debit card details (card number, expiration, CVV) OR bank routing/account numbers are BOTH valid and acceptable payment collection methods for this organization. Do NOT flag either method.
+- Phone number is already known — closers do NOT need to collect it. They only need to collect emergency contact if applicable.
+- Citizenship is pre-verified from the government database — closers do NOT need to confirm citizenship.
+- The closer advising the customer to reference them by name if other agents call (e.g., "tell them you have an agent, Mike Anderson") is a standard customer retention practice. Do NOT flag this as manipulation.
+- The organization operates under a government program affiliation. Closers may introduce themselves simply by first name without stating a company name.
+
+═══════════════════════════════════════════════════════════════
+CALL TYPE DETECTION — Read the transcript and determine which type BEFORE scoring
+═══════════════════════════════════════════════════════════════
+
+There are TWO call types. Detect which one this is:
+
+  RESALE (Re-enrollment / Upgrade Call):
+    - The closer already has the customer's data on file.
+    - The closer READS BACK the customer's name, DOB, address, SSN, existing policy details to verify and confirm them.
+    - Language cues: "I have your information here", "let me verify your details", "you're already in our system", "your current plan shows", "I'm calling about your existing coverage", "I have you as [name, DOB etc.]"
+    - The customer may be surprised but recognizes their data when read back.
+    - Closer does NOT need to collect data from scratch — confirming from file is sufficient.
+    - No requirement to disclose that a policy is being switched or upgraded (this is the organization's standard upgrade/re-enrollment process).
+
+  LIVE_SALE (New Enrollment / Fresh Data Call):
+    - The customer is being enrolled fresh or the closer has NO pre-existing data to read back.
+    - The closer ASKS for the customer's name, DOB, address, SSN, payment info, etc. from scratch.
+    - Language cues: "Can I get your full name?", "What's your date of birth?", "What address are you at?", no data read-back at start.
+    - All information must be actively collected from the customer.
+
+Record the detected call type as `call_type` in extracted_data: "resale" or "live_sale".
+If you cannot determine with confidence, use "unknown".
+
+SPEAKER ROLES:
+- AGENT: the insurance closer making the outbound call. They confirm the customer's identity, read back existing data (RESALE) or collect fresh data (LIVE_SALE), present the policy, and close the sale. (Referred to as "Closer" throughout this evaluation.)
+- CUSTOMER: the senior citizen (typically age 50-85) who receives the call. They respond to the closer's questions with short answers and may share personal concerns.
 
 CALL DURATION: {$durationMinutes} minutes ({$durationSeconds} seconds)
 
@@ -21,83 +150,171 @@ TRANSCRIPT:
 {$diarizedTranscript}
 ---
 
-IMPORTANT NOTE ON SPEAKER LABELS:
-The speaker labels (AGENT/CUSTOMER) in the transcript above are generated by an automated system using pause-based heuristics and MAY BE INCORRECT. You MUST use context clues to determine who is actually the agent (seller) and who is the customer (prospect):
-- The AGENT is the person calling FROM an insurance company to sell Final Expense life insurance. They introduce themselves with their name and company.
-- The CUSTOMER is the senior citizen being called. The agent typically asks "Am I speaking with [NAME]?" to confirm the customer's identity.
-- If the labels appear swapped, mentally correct them before scoring. Base your evaluation on who is actually selling vs buying.
+SPEAKER LABEL DEFINITIONS:
+- AGENT (= CLOSER): the insurance sales representative making the outbound call. They introduce themselves by their first name, confirm the customer's identity, present the insurance product, ask health questions, collect and confirm banking/payment information, and request the sale.
+- CUSTOMER: the senior citizen (typically age 50-85) who received the call. They respond to the closer's questions, give short replies, and may share personal stories or concerns.
+TRUST the AGENT/CUSTOMER labels as written. Score based on what the AGENT (CLOSER) lines say and how the CUSTOMER responds.
+
+IMPORTANT — TRANSCRIPTION ACCURACY: This transcript was generated by an automated speech-to-text engine (Zoom Phone). Automated transcriptions of phone calls are IMPERFECT and frequently mishear words, especially:
+  • Short single-word answers: "yes" may be captured as "Red", "Yep", "Yeah", "Uh", "Hmm", "Mesh", "Reg", "Net", "Bed", "Dead", or other phonetically adjacent sounds.
+  • "No" may be captured as "Know", "Now", "No.", "Nah", "Mow", "Low", "Go", etc.
+  • Numbers may be garbled (e.g., "sixty" → "sixteen", "$52" → "$15.2").
+  • Names of medications, carriers, or people are frequently phonetically mangled.
+  • The word "checking" (account type) may be transcribed as "chicken", "chucking", etc.
+
+HOW TO HANDLE TRANSCRIPTION ERRORS:
+  1. USE CONTEXT — Do not evaluate a single word in isolation. Look at what was ASKED and what logically makes sense as a response given the conversation flow.
+  2. IF THE AGENT PROCEEDED — If the agent asked a yes/no question and the customer's response is a garbled word, but the agent CONTINUED as if they received a valid answer, treat the answer as valid. The agent heard the actual audio; they know what was said.
+  3. DO NOT PENALIZE EITHER PARTY for transcription artifacts. A customer response that looks nonsensical (like "Red" to "Do you smoke?") is almost certainly a mishear of "Yes" or "No" — infer from context.
+  4. MEDICATION AND CONDITION NAMES — Do not penalize misspelled or phonetically wrong medication names. "Medformin" = Metformin, "Lisinpril" = Lisinopril, etc.
+  5. SHORT GARBLED RESPONSES — Single-word responses that seem random are transcription errors. Infer intent from context clues (what was asked, what the agent did next, what makes logical sense for the customer's situation).
+  6. SPECIFIC SMOKER EXAMPLE — If the agent asks "Do you smoke, ma'am?" (or similar) and the customer's reply is "Red.", "Red", "Read.", "Reg.", "Rec.", "Bed." or any other 1-word phonetically adjacent sound — this is a transcription error for "Yeah.", "Yes.", "No.", or similar. If the agent continued the call without re-asking, the answer was received and accepted. Do NOT flag this as missing health information, unanswered question, or ambiguous response.
+
+IMPORTANT — COLD CALL CONTEXT: Customers may not remember signing up for a government program or may be surprised by the call. It is NORMAL and EXPECTED for customers to be hesitant. Rebuttals are a standard and required part of the sales process — do NOT penalize rebuttals. Only mark C10 as fail if the closer becomes excessively aggressive or refuses to accept a FIRM repeated refusal.
+
+EXPECTED CALL PROCESS (use this as your scoring reference):
+
+  ── FOR RESALE CALLS ──
+ PHASE 1 — INTRODUCTION & RAPPORT: Professional greeting, confirm customer identity by READING BACK their name, build trust. Closer states their first name. Company name is NOT required.
+ PHASE 2 — DATA VERIFICATION: Read back and confirm the customer's info already on file (name, DOB, address). Verify or update beneficiary. Ask about health — tobacco use, height & weight. No need to collect what's already verified from the file.
+ PHASE 3 — HEALTH QUALIFICATION: Ask about medications and health conditions (current and past).
+ PHASE 4 — PLAN PRESENTATION: Present the upgraded/new coverage. State the monthly premium and death benefit. Name the carrier. Make clear the customer is getting life insurance.
+ PHASE 5 — CLOSE: Ask for the sale. No need to disclose switching policies from a prior plan — this is a standard upgrade/re-enrollment.
+ PHASE 6 — PAYMENT COLLECTION: Collect/confirm payment details — bank routing/account OR debit card (number, expiration, CVV). Confirm draft date.
+ PHASE 7 — CONSENT RECORDING: Record authorization — customer's name, DOB, SSN, consent to draft. Can happen AT ANY POINT in the call, not just at the end.
+
+  ── FOR LIVE_SALE CALLS ──
+ PHASE 1 — INTRODUCTION & RAPPORT: Professional greeting, introduce by first name, confirm customer identity.
+ PHASE 2 — NEEDS ANALYSIS: Ask for and collect the customer's info from scratch — name, DOB, address, beneficiary, coverage needs, budget.
+ PHASE 3 — HEALTH QUALIFICATION: Ask about medications and health conditions.
+ PHASE 4 — PLAN PRESENTATION: Present coverage. State premium and death benefit. Name the carrier.
+ PHASE 5 — CLOSE: Ask for the sale.
+ PHASE 6 — PAYMENT COLLECTION: Collect all payment details fresh — bank or debit card. Confirm draft date.
+ PHASE 7 — CONSENT RECORDING: Record authorization at any point in the call — name, DOB, SSN, consent to draft.
 
 EVALUATION INSTRUCTIONS:
 
-You MUST evaluate this call using TWO layers, then assign a disposition.
+You MUST evaluate this call using TWO scoring layers, then assign a disposition.
 
 ═══════════════════════════════════════════════════════════════
-LAYER 1 — COMPLIANCE CHECKS (12 items)
-Any single FAIL here = COMPLIANCE_FAIL disposition (overrides everything)
+LAYER 1 — COMPLIANCE CHECKS (11 items)
+Each item sets compliance_pass = false if it fails. Disposition is ALWAYS score-based — there is NO "COMPLIANCE_FAIL" disposition. A call can score GOOD and still have compliance_pass = false.
 Mark each as "pass", "fail", or "na" (not applicable to this call type)
+These checks evaluate the CLOSER's conduct, not the customer's behavior.
 ═══════════════════════════════════════════════════════════════
 
-C1  recording_consent — Customer gave verbal consent to be recorded at some point during the call (beginning, middle, or end). The agent asks something like "do you consent to this call being recorded?" or "I'm going to record this for quality purposes, is that okay?" and the customer agrees. It does NOT need to be at the start — consent at the end or middle is perfectly valid. Mark "na" if the call is too short to reach this point.
+--- Call Handling Compliance ---
 
-C2  agent_identity — Agent stated their full name AND company name within the first 90 seconds of the call.
+C1  agent_identity — The closer stated their first name at any point during the call. Company name is NOT required (this organization operates under a government program and closers identify by name only). Mark "pass" if the closer stated their first name anywhere in the call. Mark "fail" only if the closer never identified themselves by name at all.
 
-C3  carrier_named — The actual insurance carrier name was stated (e.g., "American Amicable", "Mutual of Omaha", "CUNA Mutual"). Not just "the company" or "we".
+C2  carrier_named — The actual insurance carrier name was stated at some point in the call (e.g., "American Amicable", "Mutual of Omaha", "CUNA Mutual", "Americo", "AIG", "Corebridge", etc.). Note: AIG and Corebridge Financial are the same carrier. Not just "the company" or "we" — the real carrier name must be mentioned. Mark "na" if no presentation was reached.
 
-C4  not_government_program — Agent did NOT represent the product as a government program, Medicare supplement, Social Security benefit, or any government-affiliated program. If the customer asked if it's government and the agent corrected them, that's a pass. If the agent let the misconception stand or encouraged it, that's a fail.
+C3  product_type_stated — The closer explicitly stated the customer is getting a "life insurance policy" or "whole life insurance" or "life insurance" at some point in the call. The customer must understand they are buying life insurance, not just a "benefit", "program", or "protection plan". Mark "na" if no presentation was reached.
 
-C5  product_type_stated — Agent explicitly said "life insurance policy" or "whole life insurance" or "final expense insurance". The customer must understand they are buying life insurance, not a "benefit" or "program".
+C4  health_questions_complete — The closer asked about the customer's health. Two components must be present:
+    (a) MEDICATIONS — Asked what medications the customer is taking (any form of medication question qualifies — does not need to be a detailed per-medication purpose inquiry; a general "what medications are you on?" is acceptable).
+    (b) HEALTH CONDITIONS — Asked about the customer's medical conditions or health history (current and/or past). Any reasonable health screening question qualifies. The screening does NOT need to cover a specific list of conditions.
+    Mark "pass" if BOTH (a) and (b) were addressed in any form. Mark "fail" only if health questions were entirely skipped. Mark "na" if the call is too short to reach underwriting questions.
 
-C6  waiting_period — If this is a graded/modified policy, the 2-year waiting/graded period was disclosed. If the policy is immediate coverage (no graded period), mark "na".
+C5  quote_and_coverage — The closer provided both a premium amount AND a coverage/death benefit amount. The premium may be stated as an exact figure (e.g., "$52/month") OR as a range (e.g., "$50–$70/month" or "between $50 and $70"). The coverage amount may also be a range or exact figure. Be lenient — do not fail for minor vagueness as long as both a premium figure and a coverage figure were communicated. Mark "na" if no sale was reached.
 
-C7  premium_amount — The exact monthly premium dollar amount was clearly stated and confirmed with the customer. Not vague ("around thirty" is fail, "$32.50 per month" is pass).
+C6  draft_date_confirmed — The closer confirmed the draft date (the day of the month the premium will be debited) clearly with the customer. Mark "na" if no sale was made.
 
-C8  coverage_amount — The exact death benefit/coverage amount was clearly stated and confirmed. Must be a specific dollar figure.
+C7  recorded_consent — The closer obtains recorded authorization at ANY POINT during the call (beginning, middle, or end — location does not matter). Do NOT look only at the end of the call — scan the ENTIRE transcript for a consent/authorization segment. Required elements: customer's full name, DOB, SSN, and consent to bank draft. Electronic communication consent is NOT required. There are TWO valid formats:
 
-C9  health_questions — All required underwriting/health qualification questions were asked. Agent went through the health questionnaire. If just a quick "are you healthy?" that's a fail — must be the actual carrier health questions.
+    FORMAT A (Read-Back Script): The closer reads a scripted consent statement aloud covering policy details and customer info, then the customer confirms by stating their full name and today's date. This is a PASS. The closer reading back data the organization already has on file is STANDARD PROCEDURE — do NOT treat this as coaching.
 
-C10 beneficiary_collected — Beneficiary full name AND relationship to the insured were collected. Both pieces required.
+    FORMAT B (Item-by-Item): The closer asks the customer to confirm each item: name, DOB, SSN, consent to bank draft.
 
-C11 prospect_verbal_consent — Customer gave clear verbal agreement/consent to proceed with the application. Must be unambiguous — "yes", "let's do it", "go ahead", etc. Silence or "mmhmm" alone is not sufficient.
+    Mark "pass" if EITHER format is used and consent is completed.
+    Mark "fail" ONLY if: (a) no consent attempt was made at all, OR (b) the consent was started but the customer never confirmed before the call ended.
+    Mark "na" only if no sale was made.
 
-C12 dnc_honored — If at any point the customer requested to be placed on the Do Not Call list or asked the agent to stop calling, the agent respected that request and stopped the sales pitch. If no DNC request was made, mark "na".
+--- Application Requirements Compliance ---
+
+C8  application_info_collected — The closer confirms and collects the core application information needed to process the policy. Requirements differ by call type:
+
+    ── RESALE CALL: Closer already has data on file — confirming/reading back is sufficient.
+    PERSONAL INFO: Verify from file — full name, DOB, address, tobacco use, height & weight. Getting verbal confirmation that the read-back data is correct qualifies. Phone and citizenship are pre-verified — do NOT require.
+    PAYMENT INFO: Either debit card (number, expiration, CVV) OR bank routing/account number. Confirm draft date.
+    OTHER: SSN confirmation (read-back + customer confirms), beneficiary name and relationship.
+    Mark "pass" for resale if the closer read back and the customer confirmed the key details and payment info was collected. This standard is LESS STRICT than live_sale.
+
+    ── LIVE_SALE CALL: Closer must actively collect everything from scratch.
+    PERSONAL INFO: Collect full name, DOB, address, tobacco use, height & weight. Phone and citizenship are pre-verified — do NOT require.
+    PAYMENT INFO: Collect debit card details OR bank routing/account number from scratch. Confirm draft date.
+    OTHER: Collect SSN, beneficiary name and relationship.
+    Mark "pass" for live_sale only if the closer ACTIVELY COLLECTED all critical items. Mark "fail" if DOB, SSN, payment info, or beneficiary were entirely skipped with no attempt.
+
+--- Behavioral Compliance ---
+
+C9  customer_not_on_dnc — If at any point the customer says "take me off your list", "don't call me again", "put me on the do-not-call list", or any similar DNC request, the closer MUST honor it immediately and stop the sales pitch. Mark "fail" if the closer ignored a clear DNC request and continued the pitch. Mark "na" if no DNC request was made.
+
+C10 agent_handles_objections — The closer must handle objections and rebuttals professionally. Rebuttals are expected and required — this is NOT a reason to fail. The closer advising the customer to reference them by name if other agents call (e.g., "just tell them you already have an agent, Mike Anderson") is a standard customer retention practice and is NOT a violation. Mark "fail" ONLY if the closer: (a) continued pushing after the customer gave a FIRM, repeated, unambiguous final refusal (said "no" multiple times clearly), OR (b) made outright false statements about the policy terms to force a sale. Multiple rebuttals on a reluctant customer is NORMAL and should NOT fail this check.
+
+C11 appropriate_language — The closer must NOT use inappropriate, rude, unprofessional, or abusive language during the call. Mark "pass" if the closer was professional throughout. Mark "fail" if the closer used any inappropriate language toward the customer.
+
+═══════════════════════════════════════════════════════════════
+LAYER 1B — INFORMATIONAL NOTE (not a compliance check, does not affect disposition)
+═══════════════════════════════════════════════════════════════
+
+INFO_waiting_period — If this appears to be a graded/modified policy (limited benefit in first 2 years), note whether the waiting period was disclosed to the customer. This is for informational tracking only and will NOT cause a COMPLIANCE_FAIL regardless of the result. Values: "disclosed", "not_disclosed", "not_applicable" (immediate coverage policy or no sale).
 
 ═══════════════════════════════════════════════════════════════
 LAYER 2 — SALES QUALITY SCORES (7 categories, 1-10 each)
-Use the FULL range. Do NOT inflate scores. A score of 10 should be exceptional and rare.
+total_score = round((S1+S2+S3+S4+S5+S6+S7) / 70 * 100) — gives a 0–100 range.
+Use the FULL 1–10 range per sub-score. Do NOT cluster all scores at 7-8.
 ═══════════════════════════════════════════════════════════════
 
-S1  opening (1-10): Professional greeting, warm tone, clear purpose stated, built initial rapport quickly. Did the agent hook the customer's attention within the first 30 seconds? Score 1-3 if robotic/scripted with no warmth. Score 4-6 if adequate but unremarkable. Score 7-8 if smooth and engaging. Score 9-10 only if genuinely exceptional rapport-building.
+S1  opening (1-10): Professional greeting, warm tone, clear purpose stated, built initial rapport quickly. Did the closer hook the customer's attention within the first 30 seconds? Score 1-3 if robotic/scripted with no warmth. Score 4-6 if adequate but unremarkable. Score 7-8 if smooth and engaging. Score 9-10 only if genuinely exceptional rapport-building.
 
-S2  discovery (1-10): Needs discovery — asked about family situation, current coverage, health concerns, funeral planning, financial situation. Listened more than talked during this phase. Score 1-3 if skipped discovery entirely. Score 4-6 if asked basic questions. Score 7-8 if thorough and empathetic. Score 9-10 only if masterful probing that uncovered deep emotional needs.
+S2  discovery (1-10): Needs discovery and due diligence. Criteria depend on call type:
+    RESALE — confirmed and read back existing data on file (name, DOB, address, existing coverage), asked about beneficiary updates, health verification (tobacco, height/weight, medications, conditions). Should LISTEN and confirm, not collect from scratch.
+    LIVE_SALE — actively explored customer needs from scratch: asked about family/beneficiary, coverage goals, budget, health screening (tobacco, height/weight, medications, conditions).
+    BOTH: Note: citizenship and phone number are NOT required. Score 1-3 if skipped entirely. Score 4-6 if basic questions only. Score 7-8 if thorough and empathetic. Score 9-10 only if masterful — fully covered all qualification areas and uncovered emotional needs.
 
-S3  presentation (1-10): Product presentation — explained benefits clearly in terms the senior can understand, tied features to the customer's specific needs identified in discovery. Did NOT use jargon. Score 1-3 if read a script with no personalization. Score 4-6 if adequate explanation. Score 7-8 if compelling and personalized. Score 9-10 only if the presentation was so clear and emotionally resonant that the value was undeniable.
+S3  presentation (1-10): Product presentation — explained benefits clearly in terms the senior can understand, tied features to the customer's specific needs identified in discovery. Did NOT use jargon. Provided a quote appropriate to the customer's health. Score 1-3 if read a script with no personalization. Score 4-6 if adequate explanation. Score 7-8 if compelling and personalized. Score 9-10 only if the presentation was so clear and emotionally resonant that the value was undeniable.
 
-S4  objection_handling (1-10): How well did the agent handle pushback, concerns, price objections, "I need to think about it", "let me talk to my kids", etc.? Score 1-3 if folded immediately or became aggressive. Score 4-6 if addressed concerns adequately. Score 7-8 if skillful reframing. Score 9-10 only if turned strong objections into enthusiastic buy-in. If no objections were raised, score based on prebuttals and proactive concern-addressing (max 7 if no actual objections handled).
+S4  objection_handling (1-10): How well did the closer handle pushback, concerns, price objections, "I need to think about it", "let me talk to my kids", etc.? Rebuttals are expected on cold calls — score on QUALITY of rebuttals. Score 1-3 if folded immediately at first objection with no rebuttal attempt. Score 4-6 if addressed concerns adequately. Score 7-8 if skillful reframing without pressure. Score 9-10 only if turned strong objections into enthusiastic buy-in naturally. If no objections were raised, score based on prebuttals and proactive concern-addressing (max 7 if no actual objections handled).
 
-S5  closing (1-10): Did the agent ask for the sale? MUST ask a minimum of 2 times (a trial close and a final close at minimum). Score 1-3 if never asked or only asked once timidly. Score 4-6 if asked but technique was basic. Score 7-8 if used multiple closing techniques effectively. Score 9-10 only if demonstrated masterful assumptive/alternative closing that felt natural, not pushy.
+S5  closing (1-10): Did the closer ask for the sale? Collected complete payment info (bank or card)? Obtained recorded authorization (name, DOB, SSN, draft consent)? Electronic communication consent is NOT required. Did the closer set a follow-up or establish a security reference? Score 1-3 if never asked for the sale or only asked once timidly. Score 4-6 if asked but technique was basic and consent steps were missed. Score 7-8 if used multiple closing techniques effectively and completed the application properly. Score 9-10 only if demonstrated masterful assumptive/alternative closing, full recorded authorization, and the entire end-of-call sequence executed flawlessly.
 
-S6  soft_skills (1-10): Empathy with seniors — patience, respect, appropriate pace, not rushing, acknowledging concerns about death/mortality sensitively, genuine caring tone. Score 1-3 if dismissive, impatient, or insensitive. Score 4-6 if polite but mechanical. Score 7-8 if genuinely warm and patient. Score 9-10 only if the agent made the senior feel truly heard, respected, and cared for.
+S6  soft_skills (1-10): Empathy with seniors — patience, respect, appropriate pace, not rushing, acknowledging concerns about death/mortality sensitively, genuine caring tone. Score 1-3 if dismissive, impatient, or insensitive. Score 4-6 if polite but mechanical. Score 7-8 if genuinely warm and patient. Score 9-10 only if the closer made the senior feel truly heard, respected, and cared for.
 
-S7  call_control (1-10): Maintained control of the conversation flow, redirected tangents politely, managed time well, kept momentum toward the close. Score 1-3 if lost control entirely or let customer ramble for minutes. Score 4-6 if adequate flow. Score 7-8 if smooth transitions and good pacing. Score 9-10 only if seamlessly guided a complex conversation to a natural close.
+S7  call_control (1-10): Maintained control of the conversation flow, redirected tangents politely, managed time well, kept momentum toward the close without creating pressure. Score 1-3 if lost control entirely or let customer ramble for minutes. Score 4-6 if adequate flow. Score 7-8 if smooth transitions and good pacing. Score 9-10 only if seamlessly guided a complex conversation to a natural close.
 
+SCORING FORMULA:
 total_score = round((S1 + S2 + S3 + S4 + S5 + S6 + S7) / 70 * 100)
 
+This gives a 0–100 range based purely on sales performance. Compliance issues are flagged separately and do NOT override the disposition — every call gets a score-based disposition reflecting the closer's actual performance.
+
+CRITICAL: total_score MUST ALWAYS be calculated from the formula above. Do NOT set total_score to 0 because compliance failed. Score the closer's sales performance independently regardless of compliance result.
+
 ═══════════════════════════════════════════════════════════════
-DISPOSITION (assign exactly ONE, in this priority order):
+DISPOSITION (assign exactly ONE based on total_score, in this priority order):
 ═══════════════════════════════════════════════════════════════
 
-1. COMPLIANCE_FAIL — Any C1-C12 marked as "fail"
-2. VOID_RISK — A sale was made BUT there was misrepresentation, customer confusion about what they bought, or the agent made promises the policy doesn't support. This is a sale that could be voided/charged back.
-3. EXCELLENT — compliance_pass=true AND total_score >= 90
-4. GOOD — compliance_pass=true AND total_score 75-89
-5. AVERAGE — compliance_pass=true AND total_score 60-74
-6. POOR — compliance_pass=true AND total_score < 60
+1. VOID_RISK — A sale was made BUT there was misrepresentation, customer confusion about what they bought, the closer made promises the policy doesn't support, or the customer was clearly coerced.
+   → When VOID_RISK applies, set disposition=VOID_RISK AND set score_disposition to the score-based label (EXCEPTIONAL/EXCELLENT/GOOD/AVERAGE/POOR) so the quality of the call is still visible.
+2. EXCEPTIONAL — total_score = 100 (all 7 sub-scores are exactly 10 — essentially impossible in practice; only for a genuinely perfect call).
+3. EXCELLENT — total_score 90–99
+4. GOOD — total_score 70–89
+5. AVERAGE — total_score 50–69
+6. POOR — total_score < 50
 
-CALIBRATION NOTES:
-- Excellent should be rare (~10-15% of good calls). Do NOT give Excellent just because nothing went wrong.
-- Use the full 1-10 range. An average agent on an average call should score 5-6 per category.
-- A "good" call with no mistakes but nothing special = total_score around 70-75.
-- coaching_notes MUST reference specific things the agent said or did (or failed to do). No generic advice.
+NOTE: compliance_pass and compliance_failures are tracked separately. A call can have disposition=GOOD and compliance_pass=false simultaneously — this means the closer performed well commercially but missed a compliance step. Do NOT set disposition=COMPLIANCE_FAIL. There is no such disposition anymore.
+
+CALIBRATION NOTES — READ CAREFULLY BEFORE SCORING:
+- This is a RESALE outbound call center. Closers re-sell life insurance to existing customers who already have data on file. The baseline standard is higher than a cold call (data is pre-loaded, process is structured).
+- CALIBRATE realistically:
+  • POOR (<50): Real errors — skipped health questions entirely, never attempted the sale, lost the call completely, was rude or dismissive. Do NOT score POOR just because the sale didn't close or the customer was a tough prospect.
+  • AVERAGE (50–69): Follows the basic script. Covers mandatory steps. Functional but mechanical, no special skill. This is the expected baseline for a working closer.
+  • GOOD (70–89): Skilled closer — genuine rapport, quality objection handling, controlled the call well, applied technique. Roughly 7+ per sub-score.
+  • EXCELLENT (90–99): Near-perfect across nearly all dimensions. Very rare. Roughly 9+ per sub-score average.
+  • EXCEPTIONAL (100): All 7 sub-scores = 10. Essentially never happens. Reserve for truly once-in-a-career flawless calls.
+- SCORE GUIDE using formula (sum/70)*100: avg sub=5 → total=50 | avg sub=6 → total=60 | avg sub=7 → total=70 | avg sub=8 → total=80 | avg sub=9 → total=90 | all 10s → total=100.
+- Most competent working closers should score in the 55–75 range. Do NOT deflate or inflate scores.
+- coaching_notes MUST reference specific things the closer said or did (or failed to do). No generic advice.
 - If the call was too short for a full evaluation on some criteria, score what you can observe and note limitations.
 
 ═══════════════════════════════════════════════════════════════
@@ -105,25 +322,24 @@ LAYER 3 — CALL DATA EXTRACTION
 Extract these from the transcript. These are CRITICAL for business records.
 ═══════════════════════════════════════════════════════════════
 
-E1  customer_name — The full name of the CUSTOMER (the prospect/senior being CALLED). This is the person the agent is trying to sell to. Key clues:
-    - The agent asks "Am I speaking with [NAME]?" or "Is this [NAME]?" — that name is the CUSTOMER.
-    - The agent addresses them as "Mr./Mrs./Ms. [NAME]" throughout the call.
-    - Do NOT confuse the agent/closer with the customer. The person who introduces themselves as calling FROM a company is the AGENT, not the customer.
+E1  customer_name — The full name of the CUSTOMER (the prospect/senior being CALLED). This is the person the closer is trying to sell to. Key clues:
+    - The closer asks "Am I speaking with [NAME]?" or "Is this [NAME]?" — that name is the CUSTOMER.
+    - The closer addresses them as "Mr./Mrs./Ms. [NAME]" throughout the call.
+    - Do NOT confuse the closer with the customer. The person who introduces themselves as calling FROM a company is the CLOSER, not the customer.
     Return null if unclear.
 
-E2  closer_name — The full name of the AGENT (the closer/salesperson MAKING the call). This is the person selling insurance. Key clues:
+E2  closer_name — The full name of the CLOSER (the salesperson MAKING the call). This is the person selling insurance. Key clues:
     - They say "My name is [NAME]" or "This is [NAME] calling from [COMPANY]".
     - They are the one presenting the insurance product and asking for the sale.
-    - If the transcript labels are CLOSER/AGENT vs CUSTOMER, note that Whisper diarization labels can be WRONG — use context to determine who is actually selling vs buying.
     Return null if unclear.
 
-E3  is_sale — Was a sale/application completed during this call? A sale means the customer agreed to proceed, gave personal details for the application, and the agent processed it. If the call ended with "I'll think about it" or no commitment, is_sale = false.
+E3  is_sale — Was a sale/application completed during this call? A sale means the customer agreed to proceed, gave personal details for the application, and the closer processed it. If the call ended with "I'll think about it" or no commitment, is_sale = false.
 
 E4  sale_amount — The total coverage/death benefit amount in dollars (e.g., 10000 for $10,000 coverage). Return null if no sale or amount not stated.
 
-E5  monthly_premium — The monthly premium amount in dollars (e.g., 32.50). Return null if no sale or not stated.
+E5  monthly_premium — The monthly premium amount in dollars (e.g., 32.50). If a range was quoted, use the midpoint. Return null if no sale or not stated.
 
-E6  carrier_name — The insurance carrier name (e.g., "American Amicable", "Mutual of Omaha", "CUNA Mutual", "Americo"). Return null if not mentioned.
+E6  carrier_name — The insurance carrier name (e.g., "American Amicable", "Mutual of Omaha", "CUNA Mutual", "Americo", "Corebridge", "AIG"). Return null if not mentioned.
 
 E7  policy_type — The type of policy: "Whole Life", "Term", "Graded", "Modified", or "Unknown". Return null if not clear.
 
@@ -134,24 +350,27 @@ OUTPUT FORMAT — Return ONLY this JSON, no markdown, no preamble, no explanatio
 ═══════════════════════════════════════════════════════════════
 
 {
-  "disposition": "EXCELLENT|GOOD|AVERAGE|POOR|COMPLIANCE_FAIL|VOID_RISK",
-  "total_score": 0,
+  "disposition": "EXCEPTIONAL|EXCELLENT|GOOD|AVERAGE|POOR|VOID_RISK",
+  "score_disposition": "EXCEPTIONAL|EXCELLENT|GOOD|AVERAGE|POOR",
+  "total_score": 72,
   "compliance_pass": true,
   "compliance_checks": {
-    "C1_recording_consent": "pass|fail|na",
-    "C2_agent_identity": "pass|fail|na",
-    "C3_carrier_named": "pass|fail|na",
-    "C4_not_government_program": "pass|fail|na",
-    "C5_product_type_stated": "pass|fail|na",
-    "C6_waiting_period": "pass|fail|na",
-    "C7_premium_amount": "pass|fail|na",
-    "C8_coverage_amount": "pass|fail|na",
-    "C9_health_questions": "pass|fail|na",
-    "C10_beneficiary_collected": "pass|fail|na",
-    "C11_prospect_verbal_consent": "pass|fail|na",
-    "C12_dnc_honored": "pass|fail|na"
+    "C1_agent_identity": "pass|fail|na",
+    "C2_carrier_named": "pass|fail|na",
+    "C3_product_type_stated": "pass|fail|na",
+    "C4_health_questions_complete": "pass|fail|na",
+    "C5_quote_and_coverage": "pass|fail|na",
+    "C6_draft_date_confirmed": "pass|fail|na",
+    "C7_recorded_consent": "pass|fail|na",
+    "C8_application_info_collected": "pass|fail|na",
+    "C9_customer_not_on_dnc": "pass|fail|na",
+    "C10_agent_handles_objections": "pass|fail|na",
+    "C11_appropriate_language": "pass|fail|na"
   },
-  "compliance_failures": ["C1_recording_consent", "C5_product_type_stated"],
+  "informational_notes": {
+    "waiting_period": "disclosed|not_disclosed|not_applicable"
+  },
+  "compliance_failures": [],
   "score_breakdown": {
     "opening": 0,
     "discovery": 0,
@@ -169,10 +388,14 @@ OUTPUT FORMAT — Return ONLY this JSON, no markdown, no preamble, no explanatio
     "monthly_premium": null,
     "carrier_name": null,
     "policy_type": null,
-    "customer_state": null
+    "customer_state": null,
+    "call_type": "resale|live_sale|unknown"
+  },
+  "informational_notes": {
+    "waiting_period": "disclosed|not_disclosed|not_applicable"
   },
   "coaching_notes": "Specific actionable feedback referencing what happened in THIS call...",
-  "top_issue": "The single most important thing this agent should improve",
+  "top_issue": "The single most important thing this closer should improve",
   "strengths": ["Strength 1 specific to this call", "Strength 2"],
   "improvements": ["Improvement 1 specific to this call", "Improvement 2"],
   "void_risk_reason": null
@@ -181,12 +404,15 @@ OUTPUT FORMAT — Return ONLY this JSON, no markdown, no preamble, no explanatio
 CRITICAL REMINDERS:
 - Return ONLY the JSON object above. No text before or after.
 - Every value must be filled in based on the actual transcript.
-- compliance_failures array should list the check keys that failed (empty array if all pass).
+- compliance_failures array should list the check keys that failed (e.g., "C1_agent_identity"). Empty array if all pass.
 - void_risk_reason should be null unless disposition is VOID_RISK.
+- score_disposition is ALWAYS the score-based label (EXCEPTIONAL/EXCELLENT/GOOD/AVERAGE/POOR) regardless of VOID_RISK. Even if disposition=VOID_RISK, score_disposition must still reflect where total_score falls.
 - coaching_notes must be 2-4 sentences referencing specific moments in the call.
 - strengths and improvements arrays should each have 2-4 items.
 - extracted_data MUST always be present. Use null for any field you cannot determine from the transcript.
 - is_sale must be true ONLY if the customer explicitly agreed and the application process began.
+- informational_notes.waiting_period does NOT affect compliance_pass or disposition — it is for tracking only.
 PROMPT;
     }
 }
+

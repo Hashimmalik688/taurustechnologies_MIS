@@ -78,6 +78,18 @@ class RavensDashboardController extends Controller
             });
         }
 
+        // Compute status summary counts across ALL filtered sales (before pagination)
+        $mySalesCounts = (clone $mySalesQuery)
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN recall_requested_at IS NOT NULL THEN 1 ELSE 0 END) as recalled,
+                SUM(CASE WHEN recall_requested_at IS NULL AND (submission_status = 'approved') THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN recall_requested_at IS NULL AND (submission_status = 'declined') THEN 1 ELSE 0 END) as declined,
+                SUM(CASE WHEN recall_requested_at IS NULL AND (submission_status = 'underwriting') THEN 1 ELSE 0 END) as underwriting,
+                SUM(CASE WHEN recall_requested_at IS NULL AND (submission_status IS NULL OR submission_status = 'pending') THEN 1 ELSE 0 END) as pending
+            ")
+            ->first();
+
         $mySales = $mySalesQuery->orderByRaw('COALESCE(sale_at, sale_date, created_at) DESC')
             ->paginate(10)
             ->appends($request->query());
@@ -139,7 +151,7 @@ class RavensDashboardController extends Controller
         ];
 
         return view('ravens.dashboard', compact(
-            'stats', 'mySales', 'declinedChargebacks', 'filter', 'search',
+            'stats', 'mySales', 'mySalesCounts', 'declinedChargebacks', 'filter', 'search',
             'carrierPartnerData', 'insuranceCarriers', 'usStates'
         ));
     }

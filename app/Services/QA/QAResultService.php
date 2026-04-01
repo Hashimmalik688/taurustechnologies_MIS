@@ -23,7 +23,7 @@ class QAResultService
         'C4_health_questions_complete'  => 'c5_health_questions_complete',
         'C5_quote_and_coverage'         => 'c6_proper_quote',
         'C6_draft_date_confirmed'       => 'c8_draft_date_confirmed',
-        'C7_end_of_call_consent'        => 'c9_end_of_call_consent',
+        'C7_recorded_consent'           => 'c9_end_of_call_consent',
         // Application Requirements
         'C8_application_info_collected' => 'c11_application_info_collected',
         // Behavioral Compliance
@@ -89,6 +89,7 @@ class QAResultService
                 array_merge($complianceData, [
                 'qa_call_id' => $qaCall->id,
                 'disposition' => $this->validateDisposition($aiResponse['disposition'] ?? 'POOR'),
+                'score_disposition' => $this->resolveScoreDisposition($aiResponse, $totalScore),
                 'total_score' => $totalScore,
                 'compliance_pass' => $compliancePass,
                 'score_opening' => $this->clampScore($scores['opening'] ?? 0),
@@ -118,7 +119,8 @@ class QAResultService
             ]));
 
             // Create individual compliance flag rows for failed items
-            $this->createComplianceFlags($qaCall, $qaResult, $complianceChecks);
+            $complianceDetails = $aiResponse['compliance_details'] ?? [];
+            $this->createComplianceFlags($qaCall, $qaResult, $complianceChecks, $complianceDetails);
 
             // Mark the call as completed
             $qaCall->update(['processing_status' => 'completed']);
@@ -143,7 +145,7 @@ class QAResultService
     /**
      * Create QaComplianceFlag rows for each failed compliance check.
      */
-    private function createComplianceFlags(QaCall $qaCall, QaResult $qaResult, array $complianceChecks): void
+    private function createComplianceFlags(QaCall $qaCall, QaResult $qaResult, array $complianceChecks, array $complianceDetails = []): void
     {
         // Delete existing flags so retries produce a clean set
         QaComplianceFlag::where('qa_call_id', $qaCall->id)->delete();
@@ -163,7 +165,7 @@ class QAResultService
                 'check_code' => $code,
                 'check_name' => $name,
                 'check_label' => $label,
-                'ai_reasoning' => null,
+                'ai_reasoning' => $complianceDetails[$aiKey] ?? null,
                 'flagged_at' => now(),
             ]);
         }
@@ -188,6 +190,7 @@ class QAResultService
                 SUM(CASE WHEN qa_results.compliance_pass = 0 OR qa_results.disposition = "COMPLIANCE_FAIL" THEN 1 ELSE 0 END) as compliance_fails,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
                 SUM(CASE WHEN qa_results.disposition = "EXCELLENT" THEN 1 ELSE 0 END) as excellent_count,
+                SUM(CASE WHEN qa_results.disposition = "EXCEPTIONAL" THEN 1 ELSE 0 END) as exceptional_count,
                 SUM(CASE WHEN qa_results.disposition = "GOOD" THEN 1 ELSE 0 END) as good_count,
                 SUM(CASE WHEN qa_results.disposition = "AVERAGE" THEN 1 ELSE 0 END) as average_count,
                 SUM(CASE WHEN qa_results.disposition = "POOR" THEN 1 ELSE 0 END) as poor_count,
@@ -218,6 +221,7 @@ class QAResultService
                 'compliance_fails' => $stats->compliance_fails,
                 'void_risks' => $stats->void_risks,
                 'excellent_count' => $stats->excellent_count,
+                'exceptional_count' => $stats->exceptional_count,
                 'good_count' => $stats->good_count,
                 'average_count' => $stats->average_count,
                 'poor_count' => $stats->poor_count,
@@ -236,8 +240,27 @@ class QAResultService
     {
         // COMPLIANCE_FAIL is kept for backward-compatibility with legacy records.
         // New calls will never receive this disposition from the AI prompt.
-        $valid = ['VOID_RISK', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR', 'COMPLIANCE_FAIL'];
+        $valid = ['VOID_RISK', 'EXCEPTIONAL', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR', 'COMPLIANCE_FAIL'];
         return in_array($disposition, $valid) ? $disposition : 'POOR';
+    }
+
+    /**
+     * Resolve the score-based disposition label regardless of VOID_RISK.
+     * Prefers the AI-supplied score_disposition, falls back to computing from total_score.
+     */
+    private function resolveScoreDisposition(array $aiResponse, int $totalScore): string
+    {
+        $scoreDisp = $aiResponse['score_disposition'] ?? null;
+        $scoreValid = ['EXCEPTIONAL', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR'];
+        if ($scoreDisp && in_array($scoreDisp, $scoreValid)) {
+            return $scoreDisp;
+        }
+        // Fallback: compute from total_score
+        if ($totalScore >= 100) return 'EXCEPTIONAL';
+        if ($totalScore >= 90)  return 'EXCELLENT';
+        if ($totalScore >= 70)  return 'GOOD';
+        if ($totalScore >= 50)  return 'AVERAGE';
+        return 'POOR';
     }
 
     private function clampScore(mixed $score): int

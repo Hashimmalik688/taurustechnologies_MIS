@@ -51,7 +51,7 @@ class QaComplianceFlag extends Model
         'C4'  => 'Health Questions',
         'C5'  => 'Quote & Coverage',
         'C6'  => 'Draft Date Confirmed',
-        'C7'  => 'End-of-Call Consent',
+        'C7'  => 'Recorded Consent',
         'C8'  => 'Application Info Collected',
         'C9'  => 'DNC Honored',
         'C10' => 'Agent Handles Objections',

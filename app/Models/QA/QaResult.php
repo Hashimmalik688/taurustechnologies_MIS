@@ -60,6 +60,7 @@ class QaResult extends Model
         'policy_type',
         'customer_state',
         'call_type',
+        'score_disposition',
     ];
 
     protected $casts = [

@@ -136,6 +136,8 @@
 }
 .qm-score-ring .rval { font-size:1.5rem; font-weight:800; line-height:1; letter-spacing:-.03em; }
 .qm-score-ring .rmax { font-size:.55rem; color:#94a3b8; margin-top:.1rem; }
+.qm-score-ring.sr-exceptional { border-color:#7c3aed; background:rgba(124,58,237,.07); }
+.qm-score-ring.sr-exceptional .rval { color:#7c3aed; }
 .qm-score-ring.sr-excellent { border-color:#34c38f; background:rgba(52,195,143,.07); }
 .qm-score-ring.sr-excellent .rval { color:#1a8754; }
 .qm-score-ring.sr-good { border-color:#556ee6; background:rgba(85,110,230,.07); }
@@ -150,6 +152,7 @@
   display:inline-block; font-size:.65rem; font-weight:700; text-transform:uppercase;
   letter-spacing:.3px; padding:.12rem .5rem; border-radius:1rem;
 }
+.qm-disp.d-exceptional { background:rgba(124,58,237,.12); color:#7c3aed; border:1px solid rgba(124,58,237,.2); }
 .qm-disp.d-excellent { background:rgba(52,195,143,.12); color:#1a8754; }
 .qm-disp.d-good      { background:rgba(85,110,230,.12); color:#556ee6; }
 .qm-disp.d-average   { background:rgba(241,180,76,.12); color:#b87a14; }
@@ -371,10 +374,28 @@ This is Sarah, your life insurance agent..."
             </div>
         </div>
 
+        <!-- Alerts: Void Risk + Audio Quality -->
+        <div id="rAlertsSection" style="display:none;margin-bottom:.5rem;">
+            <div id="rVoidAlert" style="display:none;background:rgba(244,106,106,.06);border:1px solid rgba(244,106,106,.2);border-radius:.5rem;padding:.55rem .85rem;margin-bottom:.35rem;">
+                <span style="font-weight:700;color:#f46a6a;font-size:.8rem;"><i class="ri-error-warning-line"></i> Void Risk:</span>
+                <span id="rVoidReason" style="font-size:.8rem;color:inherit;"></span>
+            </div>
+            <div id="rAudioAlert" style="display:none;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:.5rem;padding:.55rem .85rem;">
+                <span style="font-weight:600;color:#d4af37;font-size:.8rem;"><i class="ri-volume-mute-line"></i> Audio Quality:</span>
+                <span id="rAudioNote" style="font-size:.78rem;color:inherit;"></span>
+            </div>
+        </div>
+
+        <!-- QA Analysis: Strengths + Improvements -->
+        <div class="qm-card mb-2" id="rAnalysisCard" style="display:none;">
+            <div class="qm-card-hdr"><h6><i class="ri-bar-chart-grouped-line"></i> QA Analysis</h6></div>
+            <div class="qm-card-body" id="rAnalysisBody"></div>
+        </div>
+
         <!-- Coaching notes (open by default) -->
         <div class="qm-card mb-2">
             <div class="qm-card-hdr qm-collapsible-hdr" onclick="toggleSection('rCoachBody', this)">
-                <h6><i class="ri-lightbulb-line"></i> AI Coaching Notes</h6>
+                <h6><i class="ri-lightbulb-line"></i> QA Coaching Notes</h6>
                 <i class="ri-arrow-down-s-line qm-toggle-icon"></i>
             </div>
             <div class="qm-card-body" id="rCoachBody"></div>
@@ -402,7 +423,7 @@ This is Sarah, your life insurance agent..."
         C4_health_questions_complete: 'C4  Health Questions',
         C5_quote_and_coverage:        'C5  Quote & Coverage',
         C6_draft_date_confirmed:      'C6  Draft Date Confirmed',
-        C7_end_of_call_consent:       'C7  End-of-Call Consent',
+        C7_recorded_consent:          'C7  Recorded Consent',
         C8_application_info_collected:'C8  Application Info',
         C9_customer_not_on_dnc:       'C9  DNC Honored',
         C10_agent_handles_objections: 'C10 Handles Objections',
@@ -523,7 +544,7 @@ This is Sarah, your life insurance agent..."
     function scoreClass(s) {
         s = parseFloat(s);
         if (isNaN(s)) return '';
-        return s >= 90 ? 'sr-excellent' : s >= 75 ? 'sr-good' : s >= 60 ? 'sr-average' : 'sr-poor';
+        return s >= 100 ? 'sr-exceptional' : s >= 90 ? 'sr-excellent' : s >= 70 ? 'sr-good' : s >= 50 ? 'sr-average' : 'sr-poor';
     }
 
     function dispCls(d) {
@@ -552,6 +573,17 @@ This is Sarah, your life insurance agent..."
         const disp = document.getElementById('rDisp');
         disp.className = 'qm-disp ' + dispCls(r.disposition);
         disp.textContent = dispLabel(r.disposition);
+        // For VOID_RISK, insert a secondary score-quality badge after the main badge
+        const existingBadge = document.getElementById('rScoreDispBadge');
+        if (existingBadge) existingBadge.remove();
+        if (r.disposition === 'VOID_RISK' && r.score_disposition) {
+            const badge = document.createElement('span');
+            badge.id = 'rScoreDispBadge';
+            badge.className = 'qm-disp ' + dispCls(r.score_disposition);
+            badge.title = 'Sales quality';
+            badge.textContent = dispLabel(r.score_disposition);
+            disp.insertAdjacentElement('afterend', badge);
+        }
 
         // Compliance badge (header)
         const failKeys = Object.keys(r.compliance_checks || {}).filter(k => r.compliance_checks[k] === false);
@@ -604,6 +636,7 @@ This is Sarah, your life insurance agent..."
 
         // Compliance checklist
         const checks = r.compliance_checks || {};
+        const compDetails = r.compliance_details || {};
         const compCard = document.getElementById('rCompBadge');
         compCard.innerHTML = failKeys.length
             ? `<span class="qm-badge-red">${failKeys.length} failed</span>`
@@ -628,9 +661,42 @@ This is Sarah, your life insurance agent..."
                     ? '<div style="height:1px;background:rgba(255,255,255,.06);margin:.2rem 0;"></div>' : '';
                 return `${divider}<div class="qm-check-item" style="${isFail ? 'background:rgba(244,106,106,.05);border-radius:.25rem;padding:.3rem .35rem;margin:.08rem 0;' : isPass && failKeys.length ? 'opacity:.55;' : ''}">
                     <div class="qm-check-icon ${wrapCls}"><i class="${iconCls}"></i></div>
-                    <div style="flex:1;color:${isFail ? '#f46a6a' : 'inherit'};font-weight:${isFail ? '600' : '400'};">${esc(COMP_LABELS[k] || k)}</div>
+                    <div style="flex:1;">
+                        <div style="color:${isFail ? '#f46a6a' : 'inherit'};font-weight:${isFail ? '600' : '400'};">${esc(COMP_LABELS[k] || k)}</div>
+                        ${compDetails[k] ? `<div style="font-size:.75rem;color:#94a3b8;margin-top:.1rem;line-height:1.3;">${esc(compDetails[k])}</div>` : ''}
+                    </div>
                 </div>`;
             }).join('');
+        }
+
+        // Void Risk + Audio Quality alerts
+        const infoNotes = r.informational_notes || {};
+        let showAlerts = false;
+        if (r.disposition === 'VOID_RISK' && r.void_risk_reason) {
+            document.getElementById('rVoidReason').textContent = r.void_risk_reason;
+            document.getElementById('rVoidAlert').style.display = 'block';
+            showAlerts = true;
+        }
+        if (infoNotes.audio_quality) {
+            document.getElementById('rAudioNote').textContent = infoNotes.audio_quality;
+            document.getElementById('rAudioAlert').style.display = 'block';
+            showAlerts = true;
+        }
+        if (showAlerts) document.getElementById('rAlertsSection').style.display = '';
+
+        // QA Analysis: Strengths + Improvements
+        const strengths = r.strengths || [];
+        const improv = r.improvements || [];
+        if (strengths.length || improv.length) {
+            let aHtml = '';
+            if (strengths.length) {
+                aHtml += `<div style="margin-bottom:.4rem;"><div style="font-weight:600;color:#34c38f;font-size:.75rem;margin-bottom:.2rem;">Strengths</div><ul style="margin:0;padding-left:1.2rem;font-size:.8rem;line-height:1.5;">${strengths.map(s => '<li>'+esc(s)+'</li>').join('')}</ul></div>`;
+            }
+            if (improv.length) {
+                aHtml += `<div><div style="font-weight:600;color:#d4af37;font-size:.75rem;margin-bottom:.2rem;">Areas for Improvement</div><ul style="margin:0;padding-left:1.2rem;font-size:.8rem;line-height:1.5;">${improv.map(s => '<li>'+esc(s)+'</li>').join('')}</ul></div>`;
+            }
+            document.getElementById('rAnalysisBody').innerHTML = aHtml;
+            document.getElementById('rAnalysisCard').style.display = '';
         }
 
         // Coaching notes

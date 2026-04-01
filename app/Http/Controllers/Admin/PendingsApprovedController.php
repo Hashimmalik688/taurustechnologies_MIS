@@ -262,6 +262,12 @@ class PendingsApprovedController extends Controller
             // Auto-send approved sales to Pending Contracts
             $lead->pending_contract_at    = now();
             $lead->pending_contract_by_id = auth()->id();
+
+            // Reset main status so it no longer appears as declined on closer's dashboard
+            $lead->status = Statuses::LEAD_ACCEPTED;
+        } elseif ($request->submission_status === 'declined') {
+            // Mirror the status field so the closer's dashboard reflects the decline
+            $lead->status = Statuses::LEAD_DECLINED;
         }
 
         $lead->save();

@@ -146,6 +146,14 @@ class FollowupController extends Controller
             $query->where('carrier_name', $request->carrier);
         }
         
+        // Date range filter for sale_date
+        if ($request->filled('date_from')) {
+            $query->whereDate('sale_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('sale_date', '<=', $request->date_to);
+        }
+        
         // Get leads assigned to this user for bank verification
         $bvQuery = Lead::with(['insuranceCarrier', 'assignedAgent', 'bankVerifier'])
             ->where('assigned_bank_verifier', $userId)
