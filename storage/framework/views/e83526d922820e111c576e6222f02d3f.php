@@ -63,6 +63,17 @@
 .qu-toggle { display:flex; align-items:center; gap:.5rem; font-size:.75rem; color:var(--qa-muted); cursor:pointer; }
 .qu-toggle input { accent-color:var(--qa-blue); width:14px; height:14px; }
 
+/* ── Transcript panel ── */
+.qu-transcript { color:var(--bs-body-color,#e0e0e0); }
+.qu-transcript .t-line { padding:.15rem 0; border-bottom:1px solid rgba(255,255,255,.03); }
+.qu-transcript .t-speaker { font-weight:700; margin-right:.35rem; }
+.qu-transcript .t-agent    { color:var(--qa-blue); }
+.qu-transcript .t-customer { color:var(--qa-gold); }
+.qu-toggle-icon { display:inline-block; transition:transform .2s; }
+.qu-toggle-icon.open { transform:rotate(0deg); }
+.qu-toggle-icon:not(.open) { transform:rotate(-90deg); }
+.collapsed { display:none; }
+
 /* ── Submit button ── */
 .qu-btn {
   display:inline-flex; align-items:center; gap:.4rem;
@@ -292,7 +303,7 @@
       <div class="col-12">
         <div class="qu-card">
           <div class="qu-card-hdr">
-            <h6><i class="bx bx-comment-dots"></i> Coaching Notes</h6>
+            <h6><i class="bx bx-comment-dots"></i> AI Coaching Notes</h6>
             <a href="#" class="qu-detail-link" id="res-detail-link" target="_blank">View Full Detail →</a>
           </div>
           <div class="qu-card-body">
@@ -302,6 +313,19 @@
               <span><span style="color:var(--qa-muted);">Customer:</span> <span id="res-customer">—</span></span>
               <span><span style="color:var(--qa-muted);">Carrier:</span> <span id="res-carrier">—</span></span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="col-12">
+        <div class="qu-card">
+          <div class="qu-card-hdr" style="cursor:pointer;" onclick="document.getElementById('res-transcript-body').classList.toggle('collapsed'); this.querySelector('.qu-toggle-icon').classList.toggle('open');">
+            <h6><i class="bx bx-file"></i> Transcript <span id="res-transcript-lines" style="font-weight:400;opacity:.6;"></span></h6>
+            <span class="qu-toggle-icon open" style="font-size:.7rem;color:var(--qa-muted);transition:transform .2s;">▼</span>
+          </div>
+          <div class="qu-card-body" id="res-transcript-body">
+            <div class="qu-transcript" id="res-transcript" style="max-height:500px;overflow-y:auto;font-size:.75rem;line-height:1.65;white-space:pre-wrap;font-family:'Fira Code',monospace,Consolas,monospace;"></div>
           </div>
         </div>
       </div>
@@ -555,6 +579,31 @@ function renderResult(data) {
   const detailLink = document.getElementById('res-detail-link');
   detailLink.href  = `/qa/scoring?call=${data.qa_call_id}`;
 
+  // Transcript
+  const transcript = data.transcript || '';
+  const transcriptEl = document.getElementById('res-transcript');
+  const linesLabel   = document.getElementById('res-transcript-lines');
+  if (transcript) {
+    const lines = transcript.split('\n').filter(l => l.trim());
+    linesLabel.textContent = `(${lines.length} lines)`;
+    let html = '';
+    for (const line of lines) {
+      const agentMatch = line.match(/^(AGENT:)(.*)/);
+      const custMatch  = line.match(/^(CUSTOMER:)(.*)/);
+      if (agentMatch) {
+        html += `<div class="t-line"><span class="t-speaker t-agent">AGENT:</span>${escHtml(agentMatch[2])}</div>`;
+      } else if (custMatch) {
+        html += `<div class="t-line"><span class="t-speaker t-customer">CUSTOMER:</span>${escHtml(custMatch[2])}</div>`;
+      } else {
+        html += `<div class="t-line">${escHtml(line)}</div>`;
+      }
+    }
+    transcriptEl.innerHTML = html;
+  } else {
+    linesLabel.textContent = '';
+    transcriptEl.innerHTML = '<span style="color:var(--qa-muted);font-style:italic;">No transcript available</span>';
+  }
+
   // Show result panel
   document.getElementById('qu-result').classList.add('show');
   document.getElementById('qu-result').scrollIntoView({ behavior:'smooth', block:'nearest' });
@@ -568,6 +617,12 @@ function scoreClass(score) {
   if (score >= 75) return 'good';
   if (score >= 60) return 'average';
   return 'poor';
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
 }
 
 function showProgress(pct, msg) {
