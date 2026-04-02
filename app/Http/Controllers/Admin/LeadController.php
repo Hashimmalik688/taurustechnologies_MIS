@@ -840,6 +840,14 @@ class LeadController extends Controller
                 ], 400);
             }
         }
+
+        // Sanity-check policy_type: must be short (plan names are never full customer names)
+        if ($field === 'policy_type' && strlen($value) > 60) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid policy type value'
+            ], 400);
+        }
         
         // Update the field
         $lead->$dbField = $value;
@@ -1172,6 +1180,11 @@ class LeadController extends Controller
         // Filter by carrier
         if ($request->filled('carrier')) {
             $query->where('insurance_carrier_id', $request->carrier);
+        }
+
+        // Filter by partner
+        if ($request->filled('partner')) {
+            $query->where('partner_id', $request->partner);
         }
         
         // Filter by issuance status

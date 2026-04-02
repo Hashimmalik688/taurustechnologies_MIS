@@ -320,14 +320,13 @@ class PendingsApprovedController extends Controller
         if ($request->has('coverage_amount'))      $lead->coverage_amount      = $request->coverage_amount;
         if ($request->has('monthly_premium'))      $lead->monthly_premium      = $request->monthly_premium;
         if ($request->has('policy_type'))          $lead->policy_type          = $request->policy_type;
-        if ($request->has('insurance_carrier_id')) {
+        if ($request->has('insurance_carrier_id') && $request->insurance_carrier_id) {
             $lead->insurance_carrier_id = $request->insurance_carrier_id;
-            // Always sync carrier_name so all displays stay in sync
-            if ($request->insurance_carrier_id) {
-                $carrier = InsuranceCarrier::find((int) $request->insurance_carrier_id);
-                $lead->carrier_name = $carrier ? $carrier->name : null;
-            } else {
-                $lead->carrier_name = null;
+            // Sync carrier_name only when a valid carrier ID is provided
+            // Never clear carrier_name — it may reference a carrier not yet in the insurance_carriers table
+            $carrier = InsuranceCarrier::find((int) $request->insurance_carrier_id);
+            if ($carrier) {
+                $lead->carrier_name = $carrier->name;
             }
         }
         if ($request->has('initial_draft_date'))   $lead->initial_draft_date   = $request->initial_draft_date;

@@ -426,6 +426,12 @@
                     <option value="{{ $carrier->id }}" {{ request('carrier') == $carrier->id ? 'selected' : '' }}>{{ $carrier->name }}</option>
                 @endforeach
             </select>
+            <select name="partner" class="sl-pill-select">
+                <option value="">All Partners</option>
+                @foreach($partners as $p)
+                    <option value="{{ $p->id }}" {{ request('partner') == $p->id ? 'selected' : '' }}>{{ $p->code ?: $p->name }}</option>
+                @endforeach
+            </select>
             <select name="issuance_status" class="sl-pill-select">
                 <option value="">All Status</option>
                 <option value="pending" {{ request('issuance_status') == 'pending' ? 'selected' : '' }}>Pending</option>
@@ -445,7 +451,7 @@
                 <option value="Modified" {{ request('policy_type') == 'Modified' ? 'selected' : '' }}>Modified</option>
             </select>
             <button type="submit" class="f-btn"><i class="bx bx-search"></i> Filter</button>
-            @if(request()->hasAny(['search','carrier','issuance_status','followup_status','policy_type','date_from','date_to']))
+            @if(request()->hasAny(['search','carrier','partner','issuance_status','followup_status','policy_type','date_from','date_to']))
                 <a href="{{ route('issuance.index') }}" class="f-reset"><i class="bx bx-reset"></i> Clear</a>
             @endif
         </form>

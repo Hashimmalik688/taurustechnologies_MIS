@@ -1388,4 +1388,52 @@ class ReportController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Submission Performance Report — carrier-wise breakdown of leads that have
+     * been approved and sent to Pending Contract (pending_contract_at IS NOT NULL).
+     * Shows total sales count and total monthly premium per carrier.
+     */
+    public function submissionPerformance(Request $request)
+    {
+        // Default to current month
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
+
+        $baseQuery = Lead::whereNotNull('pending_contract_at')
+            ->whereNotNull('closer_name');
+
+        if ($dateFrom) {
+            $baseQuery->whereDate('sale_date', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $baseQuery->whereDate('sale_date', '<=', $dateTo);
+        }
+
+        // Carrier + Partner grouped data (READ-ONLY — no modifications to leads)
+        $carriersData = (clone $baseQuery)
+            ->select(
+                'insurance_carrier_id',
+                'carrier_name',
+                'partner_id',
+                'assigned_partner',
+                DB::raw('COUNT(*) as total_sales'),
+                DB::raw('SUM(COALESCE(monthly_premium, 0)) as total_premium')
+            )
+            ->groupBy('insurance_carrier_id', 'carrier_name', 'partner_id', 'assigned_partner')
+            ->orderByDesc('total_sales')
+            ->get();
+
+        // Grand totals
+        $grandTotalSales   = $carriersData->sum('total_sales');
+        $grandTotalPremium = $carriersData->sum('total_premium');
+
+        return view('admin.reports.submission-performance', compact(
+            'carriersData',
+            'grandTotalSales',
+            'grandTotalPremium',
+            'dateFrom',
+            'dateTo'
+        ));
+    }
 }
