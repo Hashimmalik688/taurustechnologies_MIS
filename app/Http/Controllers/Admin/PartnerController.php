@@ -107,7 +107,7 @@ class PartnerController extends Controller
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'ssn_last4' => 'nullable|string|size:4',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'sometimes|nullable|string|min:8|confirmed',
             'is_active' => 'boolean',
             'our_commission_percentage' => 'nullable|numeric|min:0|max:100',
         ]);

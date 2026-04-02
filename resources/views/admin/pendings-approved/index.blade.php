@@ -667,14 +667,25 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             document.getElementById('coverage-lead-name').textContent = this.dataset.name;
             document.getElementById('coverage-amount').value = this.dataset.coverage;
             document.getElementById('coverage-premium').value = this.dataset.premium;
-            document.getElementById('coverage-policytype').value = this.dataset.policytype;
-            document.getElementById('coverage-carrier').value = this.dataset.carrier || '';
+            // populate plan types for the selected carrier first, then restore the saved value
+            var coverageCarrierEl = document.getElementById('coverage-carrier');
+            coverageCarrierEl.value = this.dataset.carrier || '';
+            window.updatePlanTypeField(
+                this.dataset.carrier || null,
+                document.getElementById('coverage-policytype'),
+                this.dataset.policytype
+            );
             document.getElementById('coverage-initial-draft').value = this.dataset.initialdraft || '';
             document.getElementById('coverage-future-draft').value = this.dataset.futuredraft || '';
             if (coverageModalInstance) coverageModalInstance.dispose();
             coverageModalInstance = new bootstrap.Modal(coverageModalEl);
             coverageModalInstance.show();
         });
+    });
+
+    // When user changes carrier inside modal, rebuild plan type options
+    document.getElementById('coverage-carrier').addEventListener('change', function() {
+        window.updatePlanTypeField(this.value || null, document.getElementById('coverage-policytype'));
     });
 
     coverageModalEl.addEventListener('hidden.bs.modal', function() {

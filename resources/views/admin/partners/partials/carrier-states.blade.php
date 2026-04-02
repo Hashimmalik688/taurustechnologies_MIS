@@ -2,7 +2,7 @@
 <div id="carrier-states-container">
 
     @foreach($insuranceCarriers as $carrier)
-    <div class="cs-carrier d-none" id="carrier-state-section-{{ $carrier->id }}">
+    <div class="cs-carrier" id="carrier-state-section-{{ $carrier->id }}">
         {{-- Carrier Header --}}
         <div class="cs-carrier-hdr">
             <div class="cs-carrier-name">
@@ -53,28 +53,50 @@
                         if(isset($partnerCarrierStates) && isset($partnerCarrierStates[$carrier->id])) {
                             $existingCarrierData = $partnerCarrierStates[$carrier->id]->first();
                         }
+
+                        // Build the 4 commission column definitions.
+                        // If the carrier defines plan_types, use those as labels (up to 4).
+                        // Otherwise fall back to the standard Level/Graded/GI/Modified labels.
+                        $defaultCols = [
+                            ['field' => 'level',    'label' => 'Level %',    'hint' => 'Standard settlement', 'placeholder' => '95.00'],
+                            ['field' => 'graded',   'label' => 'Graded %',   'hint' => 'Graded/Modified',      'placeholder' => '75.00'],
+                            ['field' => 'gi',       'label' => 'GI %',       'hint' => 'Guaranteed Issue',     'placeholder' => '60.00'],
+                            ['field' => 'modified', 'label' => 'Modified %', 'hint' => 'Table shave rate',     'placeholder' => '85.00'],
+                        ];
+
+                        $planTypes = (is_array($carrier->plan_types) && count($carrier->plan_types) > 0)
+                            ? array_values($carrier->plan_types)
+                            : [];
+
+                        $commissionCols = [];
+                        foreach ($defaultCols as $i => $col) {
+                            if (isset($planTypes[$i])) {
+                                $col['label'] = $planTypes[$i] . ' %';
+                                $col['hint']  = $planTypes[$i];
+                            }
+                            $commissionCols[] = $col;
+                        }
+
+                        $fieldValues = [
+                            'level'    => $existingCarrierData ? $existingCarrierData->settlement_level_pct    : '',
+                            'graded'   => $existingCarrierData ? $existingCarrierData->settlement_graded_pct   : '',
+                            'gi'       => $existingCarrierData ? $existingCarrierData->settlement_gi_pct       : '',
+                            'modified' => $existingCarrierData ? $existingCarrierData->settlement_modified_pct : '',
+                        ];
                     @endphp
                     <div class="row g-2">
+                        @foreach($commissionCols as $col)
                         <div class="col-md-3">
-                            <label class="cs-label">Level %</label>
-                            <input type="number" name="settlement_level[{{ $carrier->id }}]" class="cs-input" step="0.01" min="0" max="200" value="{{ $existingCarrierData ? $existingCarrierData->settlement_level_pct : '' }}" placeholder="95.00">
-                            <div class="cs-hint">Standard settlement</div>
+                            <label class="cs-label">{{ $col['label'] }}</label>
+                            <input type="number"
+                                   name="settlement_{{ $col['field'] }}[{{ $carrier->id }}]"
+                                   class="cs-input"
+                                   step="0.01" min="0" max="200"
+                                   value="{{ $fieldValues[$col['field']] }}"
+                                   placeholder="{{ $col['placeholder'] }}">
+                            <div class="cs-hint">{{ $col['hint'] }}</div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="cs-label">Graded %</label>
-                            <input type="number" name="settlement_graded[{{ $carrier->id }}]" class="cs-input" step="0.01" min="0" max="200" value="{{ $existingCarrierData ? $existingCarrierData->settlement_graded_pct : '' }}" placeholder="75.00">
-                            <div class="cs-hint">Graded/Modified</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="cs-label">GI %</label>
-                            <input type="number" name="settlement_gi[{{ $carrier->id }}]" class="cs-input" step="0.01" min="0" max="200" value="{{ $existingCarrierData ? $existingCarrierData->settlement_gi_pct : '' }}" placeholder="60.00">
-                            <div class="cs-hint">Guaranteed Issue</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="cs-label">Modified %</label>
-                            <input type="number" name="settlement_modified[{{ $carrier->id }}]" class="cs-input" step="0.01" min="0" max="200" value="{{ $existingCarrierData ? $existingCarrierData->settlement_modified_pct : '' }}" placeholder="85.00">
-                            <div class="cs-hint">Table shave rate</div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>

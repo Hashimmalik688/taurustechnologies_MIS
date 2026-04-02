@@ -485,7 +485,13 @@
                     <div class="col-md-4">
                         <div class="ph-field">
                             <label class="form-label">Policy Type <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="ns_policy_type" placeholder="Policy type">
+                            <select class="form-control" id="ns_policy_type">
+                                <option value="">— Select Plan —</option>
+                                <option value="G.I">G.I</option>
+                                <option value="Graded">Graded</option>
+                                <option value="Level">Level</option>
+                                <option value="Modified">Modified</option>
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -721,6 +727,12 @@
                     partnerIdIn.value = opt.dataset.partnerId    || '';
                     carrierIdIn.value = opt.dataset.carrierId    || '';
 
+                    // Rebuild plan type dropdown for selected carrier
+                    window.updatePlanTypeField(
+                        opt.dataset.carrierId || opt.textContent.trim(),
+                        document.getElementById('ns_policy_type')
+                    );
+
                     approvedStates.forEach(code => {
                         if (nsAllStates[code]) {
                             const o = document.createElement('option');
@@ -734,6 +746,8 @@
                     }
                 } else {
                     stateSel.innerHTML = '<option value="">Select Carrier First</option>';
+                    // Reset plan types to defaults when no carrier selected
+                    window.updatePlanTypeField(null, document.getElementById('ns_policy_type'));
                 }
             });
         }

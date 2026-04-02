@@ -740,7 +740,13 @@
                                     <div class="ph-field">
                                         <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_policy_type"></span></div>
                                         <label>Policy Type</label>
-                                        <input type="text" class="form-control form-control-sm" id="change_policy_type" placeholder="Enter policy type">
+                                        <select class="form-select form-select-sm" id="change_policy_type">
+                                            <option value="">— Select Plan —</option>
+                                            <option value="G.I">G.I</option>
+                                            <option value="Graded">Graded</option>
+                                            <option value="Level">Level</option>
+                                            <option value="Modified">Modified</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -754,7 +760,7 @@
                                     <div class="ph-field">
                                         <div class="ph-cur"><span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="orig_carrier"></span></div>
                                         <label>Carrier</label>
-                                        <select class="form-select form-select-sm" id="change_carrier">
+                                        <select class="form-select form-select-sm" id="change_carrier" onchange="window.updatePlanTypeField(this.value, document.getElementById('change_policy_type'))">
                                             <option value="">Select Carrier</option>
                                             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $insuranceCarriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <option value="<?php echo e($carrier); ?>"><?php echo e($carrier); ?></option>
@@ -2515,7 +2521,14 @@
         document.getElementById('change_ssn').value = document.getElementById('phase2_ssn').value || '';
         document.getElementById('change_emergency_contact').value = ld.emergency_contact || '';
         // Beneficiary is now handled separately in beneficiaries array
-        document.getElementById('change_carrier').value = document.getElementById('phase2_carrier').value || '';
+        const _changeCarrierVal = document.getElementById('phase2_carrier').value || '';
+        document.getElementById('change_carrier').value = _changeCarrierVal;
+        // Rebuild plan type options for this carrier, then restore current policy_type
+        window.updatePlanTypeField(
+            _changeCarrierVal || null,
+            document.getElementById('change_policy_type'),
+            ld.policy_type || ''
+        );
         document.getElementById('change_coverage').value = document.getElementById('phase2_coverage').value || '';
         document.getElementById('change_premium').value = document.getElementById('phase2_premium').value || '';
         document.getElementById('change_future_draft_date').value = formatDateInput(ld.future_draft_date);

@@ -853,7 +853,7 @@
                                                         <small class="text-danger">Not set</small>
                                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                                     <div class="sl-edit-row">
-                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="<?php echo e($lead->id); ?>">
+                                                        <select class="form-select form-select-sm editable-policy-type" data-lead-id="<?php echo e($lead->id); ?>" data-carrier="<?php echo e($lead->carrier_name); ?>" data-current="<?php echo e($lead->policy_type); ?>">
                                                             <option value="">-- None --</option>
                                                             <option value="G.I" <?php echo e($lead->policy_type == 'G.I' ? 'selected' : ''); ?>>G.I</option>
                                                             <option value="Graded" <?php echo e($lead->policy_type == 'Graded' ? 'selected' : ''); ?>>Graded</option>
@@ -1463,6 +1463,30 @@ $(document).ready(function() {
     }).on('focus', function() {
         $(this).data('had-value', $(this).val() !== '');
     });
+
+    // Init inline policy-type selects with carrier-specific options on page load
+    document.querySelectorAll('.editable-policy-type').forEach(function(el) {
+        var carrier = el.dataset.carrier || '';
+        var current = el.dataset.current || '';
+        if (carrier) window.updatePlanTypeField(carrier, el, current);
+    });
+
+    // When carrier inline select changes, rebuild peer policy-type options in the same row
+    $(document).on('change', '.editable-carrier', function() {
+        var leadId  = $(this).data('lead-id');
+        var carrier = this.value;
+        var ptSel   = document.querySelector(`.editable-policy-type[data-lead-id="${leadId}"]`);
+        if (ptSel) window.updatePlanTypeField(carrier || null, ptSel);
+    });
+
+    // New Sale modal: update policy_type options when carrier name is typed
+    var newSaleCarrierEl = document.getElementById('carrier_name');
+    var newSalePolicyEl  = document.getElementById('policy_type');
+    if (newSaleCarrierEl && newSalePolicyEl) {
+        newSaleCarrierEl.addEventListener('input', function() {
+            window.updatePlanTypeField(this.value.trim() || null, newSalePolicyEl);
+        });
+    }
 
     // Handle inline field updates (carrier, policy_type, coverage, premium, draft dates)
     $('.save-field-btn').click(function() {

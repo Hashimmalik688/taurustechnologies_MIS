@@ -39,6 +39,71 @@
         window.currentUserId = {{ auth()->id() }};
     </script>
 
+    <!-- Global carrier plan types for dynamic policy-type dropdowns -->
+    @php
+        $carrierPlanData = \App\Models\InsuranceCarrier::select('id','name','plan_types')->get()
+            ->map(function($c) {
+                $pts = $c->plan_types;
+                if (!is_array($pts)) {
+                    $decoded = json_decode($pts, true);
+                    if (is_array($decoded)) {
+                        $pts = is_string($decoded[0] ?? null) ? $decoded : json_decode($decoded, true);
+                    }
+                }
+                return [
+                    'id'         => $c->id,
+                    'name'       => $c->name,
+                    'plan_types' => (is_array($pts) && count($pts)) ? array_values($pts) : null,
+                ];
+            })->values()->all();
+    @endphp
+    <script>
+    (function() {
+        var carriers = @json($carrierPlanData);
+
+        var byId   = {};
+        var byName = {};
+        carriers.forEach(function(c) {
+            var plans = c.plan_types || ['G.I','Graded','Level','Modified'];
+            byId[c.id] = plans;
+            byName[c.name.toLowerCase()] = plans;
+        });
+
+        window.CARRIER_PLAN_TYPES         = byId;
+        window.CARRIER_PLAN_TYPES_BY_NAME = byName;
+        window.DEFAULT_PLAN_TYPES         = ['G.I','Graded','Level','Modified'];
+
+        /**
+         * updatePlanTypeField(carrierKey, targetEl, currentVal)
+         *   carrierKey — carrier ID (int/string) OR carrier name string
+         *   targetEl   — a <select> element whose options should be replaced
+         *   currentVal — (optional) value to pre-select; defaults to element's current value
+         */
+        window.updatePlanTypeField = function(carrierKey, targetEl, currentVal) {
+            if (!targetEl) return;
+            var plans = window.DEFAULT_PLAN_TYPES;
+            if (carrierKey) {
+                var ck = String(carrierKey);
+                var byIdResult   = window.CARRIER_PLAN_TYPES[ck] || window.CARRIER_PLAN_TYPES[parseInt(ck)];
+                var byNameResult = window.CARRIER_PLAN_TYPES_BY_NAME[ck.toLowerCase()];
+                if (byIdResult)        plans = byIdResult;
+                else if (byNameResult) plans = byNameResult;
+            }
+            if (targetEl.tagName === 'SELECT') {
+                var prev = (currentVal !== undefined && currentVal !== null) ? currentVal : targetEl.value;
+                targetEl.innerHTML = '<option value="">— Select Plan —</option>';
+                plans.forEach(function(p) {
+                    var o = document.createElement('option');
+                    o.value = p;
+                    o.textContent = p;
+                    if (prev === p) o.selected = true;
+                    targetEl.appendChild(o);
+                });
+            }
+        };
+    })();
+    </script>
+
     <!-- Theme Colors Bridge — reads CSS custom properties for JS chart/widget usage -->
     <script>
         (function() {

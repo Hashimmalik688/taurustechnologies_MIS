@@ -79,7 +79,16 @@ class InsuranceCarrierController extends Controller
         $totalStates = !empty($partnerCarriers) ? count(array_unique(array_merge(...array_column($partnerCarriers, 'states')))) : 0;
         $totalLeads = !empty($partnerCarriers) ? array_sum(array_column($partnerCarriers, 'leads_count')) : 0;
 
-        return view('admin.insurance-carriers.index', compact('partnerCarriers', 'totalCarriers', 'totalPartners', 'totalStates', 'totalLeads'));
+        // Carriers that exist but have NO partner assignments yet
+        $assignedCarrierIds = \App\Models\AgentCarrierState::whereNotNull('partner_id')
+            ->pluck('insurance_carrier_id')
+            ->unique()
+            ->toArray();
+        $unassignedCarriers = InsuranceCarrier::whereNotIn('id', $assignedCarrierIds)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.insurance-carriers.index', compact('partnerCarriers', 'totalCarriers', 'totalPartners', 'totalStates', 'totalLeads', 'unassignedCarriers'));
     }
 
     /**

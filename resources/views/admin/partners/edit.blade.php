@@ -197,13 +197,14 @@
                 </div>
                 <div class="col-md-4">
                     <label class="ep-label">New Password</label>
-                    <input type="password" class="ep-input @error('password') is-invalid @enderror" name="password" placeholder="Min 8 characters">
+                    <input type="password" class="ep-input @error('password') is-invalid @enderror" id="pw_new" name="password" placeholder="Min 8 characters">
                     @error('password')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
-                    <div class="ep-hint">Leave blank to keep current</div>
+                    <div class="ep-hint">Leave blank to keep current password</div>
                 </div>
                 <div class="col-md-4">
                     <label class="ep-label">Confirm Password</label>
-                    <input type="password" class="ep-input" name="password_confirmation" placeholder="Confirm new password">
+                    <input type="password" class="ep-input" id="pw_confirm" name="password_confirmation" placeholder="Confirm new password" oninput="checkPwMatch()">
+                    <div id="pw_match_msg" style="font-size:.62rem;margin-top:.15rem;display:none"></div>
                 </div>
             </div>
         </div>
@@ -241,24 +242,51 @@
 @section('script')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
 <script>
+function checkPwMatch() {
+    const pw = document.getElementById('pw_new').value;
+    const pc = document.getElementById('pw_confirm').value;
+    const msg = document.getElementById('pw_match_msg');
+    if (!pw && !pc) { msg.style.display='none'; return; }
+    if (pw === pc) {
+        msg.style.display='block'; msg.style.color='#1a8754'; msg.textContent='✓ Passwords match';
+        document.getElementById('pw_confirm').style.borderColor='#34c38f';
+    } else {
+        msg.style.display='block'; msg.style.color='#c84646'; msg.textContent='✗ Passwords do not match';
+        document.getElementById('pw_confirm').style.borderColor='#f46a6a';
+    }
+}
+
 $(document).ready(function() {
+    // All carrier sections are visible — initialize select2 on all of them now
     $('.select2-multiple').select2({ placeholder:"Select states...", allowClear:true, width:'100%', theme:'bootstrap-5' });
-    @foreach($insuranceCarriers as $carrier)
-        @if(isset($partnerCarrierStates[$carrier->id]) && $partnerCarrierStates[$carrier->id]->isNotEmpty())
-            $('#carrier-state-section-{{ $carrier->id }}').removeClass('d-none');
-        @endif
-    @endforeach
+
+    // Before submit: validate password match, then sync select2 values
+    $('form').on('submit', function(e) {
+        // Block submit if password filled but confirm doesn't match
+        const pw = $('input[name=password]').val();
+        const pc = $('input[name=password_confirmation]').val();
+        if (pw && pw !== pc) {
+            e.preventDefault();
+            alert('Password and confirm password do not match. Please fix before saving, or clear both fields to keep the current password.');
+            $('input[name=password_confirmation]').focus();
+            return false;
+        }
+        // Sync select2 values to underlying <select> before POST
+        $('.select2-multiple').each(function() {
+            const vals = $(this).val() || [];
+            $(this).find('option').prop('selected', false);
+            vals.forEach(v => { $(this).find('option[value="' + v + '"]').prop('selected', true); });
+        });
+    });
 });
 
 function updateStateSettlementFields(carrierId) {
     const sel = document.getElementById('carrier_states_' + carrierId);
     const states = Array.from(sel.selectedOptions).map(o => o.value);
     const div = document.getElementById('selected-states-' + carrierId);
-    const sec = document.getElementById('carrier-state-section-' + carrierId);
     if (div && states.length > 0) {
         div.innerHTML = '<div class="cs-state-tags">' + states.map(s => '<span class="cs-state-pill">' + s + '</span>').join('') + '</div>';
     } else if (div) { div.innerHTML = ''; }
-    if (states.length > 0) { sec.classList.remove('d-none'); } else { sec.classList.add('d-none'); }
 }
 
 function toggleAllCarriers() {
@@ -269,6 +297,7 @@ function removeCarrierSection(carrierId) {
     if (!confirm('Remove this carrier? All state assignments will be cleared.')) return;
     const sec = document.getElementById('carrier-state-section-' + carrierId);
     const sel = document.getElementById('carrier_states_' + carrierId);
+    if (sel && $(sel).hasClass('select2-hidden-accessible')) { $(sel).select2('destroy'); }
     sec.querySelectorAll('input[name^="settlement_"]').forEach(i => i.remove());
     if (sel) sel.remove();
     sec.style.display = 'none';

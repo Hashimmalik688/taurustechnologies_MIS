@@ -270,6 +270,62 @@
     </div>
     @endforelse
 </div>
+
+{{-- ── Unassigned Carriers ────────────────────────────────── --}}
+@if($unassignedCarriers->count() > 0)
+<div style="margin-top:1.2rem">
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;flex-wrap:wrap">
+        <h6 style="font-weight:800;font-size:.85rem;color:var(--bs-surface-700);margin:0;display:flex;align-items:center;gap:.4rem">
+            <i class="bx bx-shield-quarter" style="color:#f1b44c"></i>
+            Carriers Not Yet Assigned to a Partner
+        </h6>
+        <span style="font-size:.62rem;background:rgba(241,180,76,.12);color:#b87a14;border:1px solid rgba(241,180,76,.25);border-radius:999px;padding:.1rem .55rem;font-weight:700">
+            {{ $unassignedCarriers->count() }} carrier{{ $unassignedCarriers->count() != 1 ? 's' : '' }}
+        </span>
+        <span style="font-size:.62rem;color:var(--bs-surface-400);margin-left:.25rem">Assign via the Partner edit page</span>
+    </div>
+    <div style="background:var(--bs-card-bg);border:1px solid rgba(241,180,76,.2);border-radius:.55rem;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)">
+        <table style="width:100%;border-collapse:collapse;font-size:.72rem">
+            <thead>
+                <tr style="border-bottom:1px solid rgba(0,0,0,.06)">
+                    <th style="padding:.45rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);text-align:left">Carrier</th>
+                    <th style="padding:.45rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);text-align:left">Payment Module</th>
+                    <th style="padding:.45rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);text-align:left">Base Comm %</th>
+                    <th style="padding:.45rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);text-align:left">Status</th>
+                    <th style="padding:.45rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-500);text-align:right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($unassignedCarriers as $uc)
+                <tr style="border-bottom:1px solid rgba(0,0,0,.04);transition:background .1s" onmouseover="this.style.background='rgba(241,180,76,.04)'" onmouseout="this.style.background=''">
+                    <td style="padding:.5rem .75rem;font-weight:700;color:var(--bs-surface-700)">
+                        <i class="bx bx-shield-quarter" style="color:#556ee6;margin-right:.3rem"></i>{{ $uc->name }}
+                    </td>
+                    <td style="padding:.5rem .75rem;color:var(--bs-surface-500)">{{ ucwords(str_replace('_', ' ', $uc->payment_module)) }}</td>
+                    <td style="padding:.5rem .75rem;color:var(--bs-surface-500)">{{ $uc->base_commission_percentage ? number_format($uc->base_commission_percentage, 1).'%' : '—' }}</td>
+                    <td style="padding:.5rem .75rem">
+                        <span style="font-size:.6rem;padding:.1rem .45rem;border-radius:999px;font-weight:700;{{ $uc->is_active ? 'background:rgba(52,195,143,.12);color:#1a8754;' : 'background:rgba(244,106,106,.1);color:#c84646;' }}">
+                            {{ $uc->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </td>
+                    <td style="padding:.5rem .75rem;text-align:right">
+                        @canEditModule('carriers')
+                        <a href="{{ route('admin.insurance-carriers.edit', $uc->id) }}" style="font-size:.62rem;font-weight:600;color:#556ee6;text-decoration:none;padding:.2rem .5rem;border:1px solid rgba(85,110,230,.2);border-radius:.3rem;margin-right:.3rem">
+                            <i class="bx bx-edit-alt"></i> Edit
+                        </a>
+                        <a href="{{ route('admin.partners.index') }}" style="font-size:.62rem;font-weight:600;color:#b87a14;text-decoration:none;padding:.2rem .5rem;border:1px solid rgba(241,180,76,.25);border-radius:.3rem">
+                            <i class="bx bx-link"></i> Assign to Partner
+                        </a>
+                        @endcanEditModule
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 @endsection
 
 @section('script')
