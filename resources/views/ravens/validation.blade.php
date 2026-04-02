@@ -4,6 +4,7 @@
 
 @section('css')
 @include('partials.pipeline-dashboard-styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
     .modal-header-custom {
         background: linear-gradient(135deg, var(--bs-card-bg) 0%, rgba(212,175,55,.08) 100%);
@@ -482,6 +483,7 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     const flash = document.getElementById('flashMsg');
     if (flash) setTimeout(() => flash.remove(), 5000);

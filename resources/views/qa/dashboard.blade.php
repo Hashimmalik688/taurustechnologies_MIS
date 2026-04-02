@@ -267,38 +267,36 @@
 .qa-overlay { position:fixed; inset:0; background:rgba(4,8,20,.72); z-index:10000; display:none; align-items:center; justify-content:center; padding:1rem; backdrop-filter:blur(8px) saturate(140%); }
 .qa-overlay.show { display:flex; }
 .qa-overlay-box {
-  background:rgba(16,18,38,.72);
-  border:1px solid rgba(255,255,255,.13);
+  background:var(--bs-card-bg, #fff);
+  border:1px solid rgba(0,0,0,.1);
   border-radius:1rem;
   width:100%; max-width:1060px; max-height:92vh; overflow-y:auto;
   position:relative;
-  backdrop-filter:blur(24px) saturate(160%);
-  -webkit-backdrop-filter:blur(24px) saturate(160%);
-  box-shadow:0 24px 64px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(255,255,255,.03);
-  color:var(--bs-body-color); scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent;
+  box-shadow:0 24px 64px rgba(0,0,0,.18);
+  color:var(--bs-body-color); scrollbar-width:thin; scrollbar-color:rgba(0,0,0,.15) transparent;
 }
 .qa-overlay-box::-webkit-scrollbar { width:4px; }
-.qa-overlay-box::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:4px; }
+.qa-overlay-box::-webkit-scrollbar-thumb { background:rgba(0,0,0,.2); border-radius:4px; }
 
 .qa-overlay-head {
   display:flex; justify-content:space-between; align-items:flex-start;
-  padding:.9rem 1rem .7rem; border-bottom:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.03);
+  padding:.9rem 1rem .7rem; border-bottom:1px solid rgba(0,0,0,.07);
+  background:rgba(0,0,0,.015);
 }
 .qa-overlay-close {
   background:none; border:none; font-size:1.3rem; cursor:pointer;
   color:var(--qa-muted); line-height:1; padding:.2rem; flex-shrink:0; margin-left:.5rem;
 }
-.qa-overlay-close:hover { color:#fff; }
+.qa-overlay-close:hover { color:var(--bs-body-color); }
 .qa-overlay-body { padding:.9rem 1rem; }
 
 /* ── Glass inner cards for the overlay ── */
-.qu-card { background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.1); border-radius:.6rem; box-shadow:0 2px 12px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.06); margin-bottom:0; backdrop-filter:blur(6px); }
-.qu-card-hdr { display:flex; justify-content:space-between; align-items:center; padding:.6rem .9rem; border-bottom:1px solid rgba(255,255,255,.07); background:rgba(255,255,255,.03); border-radius:.6rem .6rem 0 0; }
-.qu-card-hdr h6 { margin:0; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:rgba(255,255,255,.45); display:flex; align-items:center; gap:.35rem; }
+.qu-card { background:var(--bs-light, #f8f9fa); border:1px solid rgba(0,0,0,.08); border-radius:.6rem; box-shadow:0 2px 8px rgba(0,0,0,.06); margin-bottom:0; }
+.qu-card-hdr { display:flex; justify-content:space-between; align-items:center; padding:.6rem .9rem; border-bottom:1px solid rgba(0,0,0,.07); background:rgba(0,0,0,.02); border-radius:.6rem .6rem 0 0; }
+.qu-card-hdr h6 { margin:0; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--qa-muted); display:flex; align-items:center; gap:.35rem; }
 .qu-card-body { padding:.85rem .9rem; }
 .qu-score-hero { text-align:center; padding:.75rem 0; }
-.qu-score-num { font-size:3rem; font-weight:800; line-height:1; }
+.qu-score-num { font-size:3rem; font-weight:800; line-height:1; filter:drop-shadow(0 0 8px currentColor); }
 .qu-score-num.excellent { color:var(--qa-green); }
 .qu-score-num.good      { color:#5bc8a8; }
 .qu-score-num.average   { color:var(--qa-warn); }
@@ -308,21 +306,21 @@
 @media(max-width:600px){ .qu-breakdown { grid-template-columns:1fr; } }
 .qu-bar-row { display:flex; align-items:center; gap:.5rem; }
 .qu-bar-label { width:110px; font-size:.65rem; color:var(--qa-muted); white-space:nowrap; flex-shrink:0; }
-.qu-bar-outer { flex:1; height:5px; background:rgba(255,255,255,.1); border-radius:3px; overflow:hidden; }
+.qu-bar-outer { flex:1; height:5px; background:rgba(0,0,0,.08); border-radius:3px; overflow:hidden; }
 .qu-bar-inner { height:100%; background:linear-gradient(90deg,var(--qa-blue),#7a9ef7); border-radius:3px; transition:width .5s; box-shadow:0 0 6px rgba(85,110,230,.5); }
 .qu-bar-val   { font-size:.65rem; font-weight:700; width:26px; text-align:right; }
 .qu-checks { display:grid; grid-template-columns:1fr 1fr; gap:.35rem .75rem; }
 @media(max-width:600px){ .qu-checks { grid-template-columns:1fr; } }
 .qu-check-item { display:flex; align-items:flex-start; gap:.45rem; font-size:.7rem; }
-.qu-check-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:.3rem; }
+.qu-check-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .dot-pass { background:var(--qa-green); }
 .dot-fail { background:var(--qa-red); }
 .dot-na   { background:rgba(255,255,255,.2); }
 .qu-coaching { background:rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.18); border-radius:.4rem; padding:.7rem .85rem; font-size:.73rem; line-height:1.65; white-space:pre-wrap; box-shadow:inset 0 1px 0 rgba(212,175,55,.12); }
-.qu-transcript .t-line { padding:.15rem 0; border-bottom:1px solid rgba(255,255,255,.03); }
+.qu-transcript .t-line { padding:.15rem 0; border-bottom:1px solid rgba(0,0,0,.05); }
 .qu-transcript .t-speaker { font-weight:700; margin-right:.35rem; }
-.qu-transcript .t-agent    { color:var(--qa-blue); }
-.qu-transcript .t-customer { color:var(--qa-gold); }
+.qu-transcript .t-agent    { color:var(--qa-blue); text-shadow:0 0 6px rgba(85,110,230,.5); }
+.qu-transcript .t-customer { color:var(--qa-gold); text-shadow:0 0 6px rgba(212,175,55,.4); }
 .qu-toggle-icon.open { transform:rotate(0deg); }
 .qu-toggle-icon:not(.open) { transform:rotate(-90deg); }
 .comp-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.68rem; font-weight:700; padding:.18rem .55rem; border-radius:.8rem; }
@@ -412,9 +410,8 @@
 /* Action bar inside overlay */
 .qa-review-bar {
   display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
-  padding:.7rem 1rem; background:rgba(255,255,255,.03); border-top:1px solid rgba(255,255,255,.07);
-  border-bottom:1px solid rgba(255,255,255,.07); justify-content:flex-end;
-  backdrop-filter:blur(4px);
+  padding:.7rem 1rem; background:rgba(0,0,0,.015); border-top:1px solid rgba(0,0,0,.07);
+  border-bottom:1px solid rgba(0,0,0,.07); justify-content:flex-end;
 }
 .qa-review-btn {
   display:inline-flex; align-items:center; gap:.3rem; padding:.38rem .75rem;
@@ -687,7 +684,7 @@ window.QA = {
         if (!confirm('Delete this QA record permanently? This cannot be undone.')) return;
         fetch(`/qa/api/calls/${callId}`, {
             method: 'DELETE',
-            headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            headers: { 'Content-Type':'application/json', 'Accept':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
         }).then(r => r.json()).then(d => {
             if (d.success) { this.closeDetail(); loadDashboard(); }
             else alert('Delete failed: ' + (d.message || 'Unknown error'));
@@ -1336,21 +1333,25 @@ function openCallDetail(callId) {
 
         const checklistHtml = !compKeys.length
             ? `<div style="font-size:.72rem;color:var(--qa-muted);padding:.5rem 0;">No compliance data</div>`
-            : `<div class="qu-checks">${sortedKeys.map(k => {
-                    const val = compChecks[k];
-                    const dot = val === true ? 'dot-pass' : (val === false ? 'dot-fail' : 'dot-na');
-                    const lbl = val === true ? 'pass' : (val === false ? 'fail' : 'n/a');
-                    const detail = (val === false && compDetails[k])
-                        ? `<div style="font-size:.62rem;color:var(--qa-red);margin-top:.1rem;line-height:1.3;">${esc(compDetails[k])}</div>` : '';
-                    return `<div class="qu-check-item">
-                        <span class="qu-check-dot ${dot}"></span>
-                        <span style="${val===false?'color:var(--qa-red);':val===null?'opacity:.55;':''}">
-                            ${esc(compLabels[k]||k)} <span style="opacity:.55;">(${lbl})</span>
-                            ${detail}
-                        </span>
+            : `<div style="display:grid;grid-template-columns:1fr;gap:.25rem;">${sortedKeys.map(k => {
+                    const val     = compChecks[k];
+                    const isPass  = val === true;
+                    const isFail  = val === false;
+                    const dot     = isPass ? 'dot-pass' : (isFail ? 'dot-fail' : 'dot-na');
+                    const txt     = isPass ? 'pass'     : (isFail ? 'fail'     : 'n/a');
+                    const reason  = compDetails[k] || '';
+                    const reasonColor = isFail ? 'var(--qa-red)' : isPass ? 'var(--qa-green)' : 'rgba(255,255,255,.35)';
+                    return `<div style="display:flex;flex-direction:column;align-items:flex-start;padding:.35rem .4rem;border-radius:.3rem;${isFail ? 'background:rgba(244,106,106,.06);' : ''}">
+                        <div style="display:flex;align-items:center;gap:.45rem;width:100%;">
+                            <span class="qu-check-dot ${dot}" style="flex-shrink:0;"></span>
+                            <span style="flex:1;font-size:.7rem;font-weight:${isFail?'600':'400'};color:${isFail?'var(--qa-red)':'inherit'};">${esc(compLabels[k]||k)}</span>
+                            <span style="font-size:.6rem;font-weight:700;padding:.1rem .35rem;border-radius:.6rem;${isPass?'background:rgba(52,195,143,.12);color:var(--qa-green);':isFail?'background:rgba(244,106,106,.12);color:var(--qa-red);':'background:rgba(255,255,255,.07);color:rgba(255,255,255,.35);'}">${esc(txt)}</span>
+                        </div>
+                        ${reason ? `<div style="font-size:.63rem;color:${reasonColor};margin-top:.22rem;padding-left:1.05rem;line-height:1.4;">${esc(reason)}</div>` : ''}
                     </div>`;
-                }).join('')}</div>
-                ${failKeys.length ? `<div style="margin-top:.5rem;font-size:.67rem;color:var(--qa-red);">⚠ ${failKeys.length} failure${failKeys.length>1?'s':''}: ${failKeys.map(k=>(compLabels[k]||k).trim()).join(', ')}</div>` : ''}`;
+                }).join('')}
+              ${failKeys.length ? `<div style="margin-top:.3rem;font-size:.67rem;color:var(--qa-red);">⚠ ${failKeys.length} failure${failKeys.length>1?'s':''}: ${failKeys.map(k=>(compLabels[k]||k).trim()).join(', ')}</div>` : ''}
+              </div>`;
 
         // Score breakdown bars — qu-breakdown 2-col grid
         const catMaxes   = { opening:10, discovery:10, presentation:10, objection_handling:10, closing:10, soft_skills:10, call_control:10 };
@@ -1406,7 +1407,7 @@ function openCallDetail(callId) {
                     <div style="font-size:.95rem;font-weight:700;line-height:1.2;margin-bottom:.3rem;">${esc(c.customer_name||'Unknown Customer')}</div>
                     <div class="qa-call-meta">
                         <div class="qa-call-meta-item"><i class="bx bx-headphone"></i> ${esc(c.agent_name||'Unknown')}</div>
-                        <div class="qa-call-meta-item"><i class="bx bx-phone"></i> ${fmtPhone(c.callee_number||c.caller_number)}</div>
+                        <div class="qa-call-meta-item"><i class="bx bx-phone"></i> ${fmtPhone(c.lead_phone||c.callee_number||c.caller_number)}</div>
                         <div class="qa-call-meta-item"><i class="bx bx-calendar"></i> ${fmtTime(c.call_start_time)}</div>
                         <div class="qa-call-meta-item"><i class="bx bx-time-five"></i> ${fmtDuration(c.duration_seconds)}</div>
                         ${c.carrier_name && !c.is_sale ? `<div class="qa-call-meta-item"><i class="bx bx-building"></i> ${esc(c.carrier_name)}</div>` : ''}
@@ -1491,7 +1492,7 @@ function openCallDetail(callId) {
                                 <span class="qu-toggle-icon" style="font-size:.7rem;transition:transform .2s;">▼</span>
                             </div>
                             <div class="qu-card-body collapsed">
-                                <div class="qu-transcript" style="max-height:500px;overflow-y:auto;font-size:.75rem;line-height:1.65;font-family:'Fira Code',monospace,Consolas,monospace;">${transcriptLines}</div>
+                                <div class="qu-transcript" style="max-height:500px;overflow-y:auto;font-size:.75rem;line-height:1.65;font-family:'Fira Code',monospace,Consolas,monospace;background:rgba(0,0,0,.25);border-radius:.35rem;padding:.65rem .75rem;">${transcriptLines}</div>
                             </div>
                         </div>
                     </div>
@@ -1547,7 +1548,7 @@ function renderDisp(c) {
     return html;
 }
 function fmtPhone(p) { if(!p) return '—'; p=String(p).replace(/\D/g,''); return p.length===10?`(${p.slice(0,3)}) ${p.slice(3,6)}-${p.slice(6)}`:p.length===11?`+${p[0]} (${p.slice(1,4)}) ${p.slice(4,7)}-${p.slice(7)}`:esc(String(p)); }
-function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Los_Angeles'}; return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' PT'; }
+function fmtTime(t) { if(!t) return '—'; const d=new Date(t); const opts={timeZone:'America/Los_Angeles'}; const h=d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit',hour12:false}); const isMidnight=(h==='00:00'||h==='0:00'); return d.toLocaleDateString('en-US',{...opts,month:'short',day:'numeric'})+(isMidnight?'':' '+d.toLocaleTimeString('en-US',{...opts,hour:'numeric',minute:'2-digit'})+' PT'); }
 function fmtDuration(s) { if(!s&&s!==0) return '—'; s=parseInt(s); const m=Math.floor(s/60); const sec=s%60; return m>0?m+'m '+sec+'s':sec+'s'; }
 function formatNum(n) { if(!n&&n!==0) return '0'; n=parseFloat(n); return n>=1000?(n/1000).toFixed(1)+'k':n.toFixed(0); }
 function esc(s) { if(!s) return ''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }

@@ -121,6 +121,7 @@
         @endcanViewModule
 
         {{-- Verification --}}
+        @if(\Illuminate\Support\Facades\Route::has('bank-verification.index'))
         @canViewModule('bank-verification')
         <div class="hub-section-label">Verification</div>
         <div class="hub-grid">
@@ -134,6 +135,7 @@
             </a>
         </div>
         @endcanViewModule
+        @endif
 
         {{-- Analytics --}}
         @if($user->canViewModule('revenue-analytics') || $user->canViewModule('live-analytics'))

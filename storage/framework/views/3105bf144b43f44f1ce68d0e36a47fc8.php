@@ -314,6 +314,18 @@
     /* Peregrine badge */
     .bg-purple { background-color: var(--bs-ui-purple, #6f42c1) !important; color: #fff !important; }
 
+    /* QA cleared ticker */
+    .sl-qa-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; font-size: .6rem; font-weight: 800;
+        letter-spacing: .3px; line-height: 1;
+        vertical-align: middle; margin-left: 4px;
+        box-shadow: 0 1px 4px rgba(16,185,129,.45);
+        flex-shrink: 0;
+    }
+
     /* ── Custom Dropdown (pill-shaped panels) ── */
     .sl-cdd { position: relative; display: inline-block; vertical-align: middle; }
     .sl-cdd select { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; overflow: hidden; }
@@ -671,7 +683,12 @@
                                     <tr>
                                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(auth()->user()->hasRole(Roles::QA)): ?>
                                             
-                                            <td><strong><?php echo e($lead->cn_name); ?></strong></td>
+                                            <td>
+                                                <strong><?php echo e($lead->cn_name); ?></strong>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array($lead->qa_status ?? '', ['Good', 'Avg'])): ?>
+                                                    <span class="sl-qa-badge" title="QA Cleared (<?php echo e($lead->qa_status); ?>)">QA</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
                                             <td><?php echo e($lead->phone_number); ?></td>
                                             <td>
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>
@@ -751,7 +768,12 @@
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
-                                            <td class="sl-sticky-col sl-col-2"><strong><?php echo e($lead->cn_name); ?></strong></td>
+                                            <td class="sl-sticky-col sl-col-2">
+                                                <strong><?php echo e($lead->cn_name); ?></strong>
+                                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(in_array($lead->qa_status ?? '', ['Good', 'Avg'])): ?>
+                                                    <span class="sl-qa-badge" title="QA Cleared (<?php echo e($lead->qa_status); ?>)">QA</span>
+                                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                            </td>
                                             <td class="sl-sticky-col sl-col-3"><?php echo e($lead->phone_number); ?></td>
                                             <td>
                                                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?>

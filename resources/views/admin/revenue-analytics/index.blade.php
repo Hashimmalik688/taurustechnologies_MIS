@@ -165,6 +165,26 @@
 .bd-mini.bd-gold   { background: rgba(212,175,55,.12); color: #b89730; }
 .bd-mini.bd-purple { background: rgba(124,105,239,.12); color: #5b49c7; }
 
+/* Tab badge soft utilities */
+.bg-soft-purple { background: rgba(124,105,239,.12) !important; }
+.text-purple { color: #5b49c7 !important; }
+.bg-soft-blue { background: rgba(85,110,230,.12) !important; }
+
+/* Tab nav overrides */
+#salesTab .nav-link {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 0.35rem;
+    color: var(--bs-surface-500);
+    border: 1px solid transparent;
+}
+#salesTab .nav-link.active {
+    background: rgba(85,110,230,.1);
+    color: var(--bs-gradient-start, #556ee6);
+    border-color: rgba(85,110,230,.2);
+}
+
 /* Scrollable table wrapper */
 .scroll-tbl { max-height: 340px; overflow-y: auto; }
 .scroll-tbl::-webkit-scrollbar { width: 3px; }
@@ -299,7 +319,6 @@
     </a>
     @endif
 
-    {{-- Quick past months --}}
     @php
         $quickMonths = collect();
         for ($i = 1; $i <= 3; $i++) {
@@ -313,12 +332,10 @@
     </a>
     @endforeach
 
-    {{-- Showing period label --}}
     <span style="font-size:0.62rem;color:var(--bs-surface-400);margin-left:0.25rem;">
         {{ $periodStart->format('M d') }} &ndash; {{ $periodEnd->format('M d, Y') }}
     </span>
 
-    {{-- Custom range form --}}
     <form method="GET" action="{{ route('revenue-analytics.index') }}" class="pn-custom">
         <span style="font-size:0.65rem;color:var(--bs-surface-500);">Custom:</span>
         <input type="date" name="start" value="{{ request('start', $periodStart->toDateString()) }}">
@@ -327,77 +344,52 @@
         <button type="submit" class="pn-btn" style="border-color:#556ee6;color:#556ee6;"><i class="bx bx-filter-alt"></i> Apply</button>
     </form>
 </div>
+
+{{-- KPI Row --}}
 <div class="kpi-row">
     <div class="kpi-card k-gold ex-card">
         <i class="bx bx-dollar-circle k-icon"></i>
         <div class="k-val">${{ number_format($total_revenue, 0) }}</div>
-        <div class="k-lbl">Total Revenue</div>
+        <div class="k-lbl">Confirmed Revenue</div>
     </div>
     <div class="kpi-card k-blue ex-card">
         <i class="bx bx-receipt k-icon"></i>
         <div class="k-val">{{ $total_count }}</div>
-        <div class="k-lbl">Total Sales</div>
-    </div>
-    <div class="kpi-card k-teal ex-card">
-        <i class="bx bx-bar-chart-alt-2 k-icon"></i>
-        <div class="k-val">${{ number_format($total_count > 0 ? $total_revenue / $total_count : 0, 0) }}</div>
-        <div class="k-lbl">Avg / Sale</div>
-    </div>
-    <div class="kpi-card k-green ex-card">
-        <i class="bx bx-check-circle k-icon"></i>
-        <div class="k-val">{{ number_format($good_percentage, 1) }}%</div>
-        <div class="k-lbl">Quality Ratio</div>
-    </div>
-    <div class="kpi-card k-red ex-card">
-        <i class="bx bx-x-circle k-icon"></i>
-        <div class="k-val">{{ number_format($bad_percentage, 1) }}%</div>
-        <div class="k-lbl">Bad Ratio</div>
-    </div>
-</div>
-
-{{-- KPI Row 2 — Revenue by Status --}}
-<div class="kpi-row">
-    <div class="kpi-card k-green ex-card">
-        <i class="bx bx-check-double k-icon"></i>
-        <div class="k-val">${{ number_format($good_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#1a8754;">{{ $good_count }} sales</div>
-        <div class="k-lbl">Good Revenue</div>
-    </div>
-    <div class="kpi-card k-warn ex-card">
-        <i class="bx bx-error-circle k-icon"></i>
-        <div class="k-val">${{ number_format($average_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#b87a14;">{{ $average_count }} sales</div>
-        <div class="k-lbl">Average Revenue</div>
-    </div>
-    <div class="kpi-card k-red ex-card">
-        <i class="bx bx-x-circle k-icon"></i>
-        <div class="k-val">${{ number_format($bad_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#c84646;">{{ $bad_count }} sales</div>
-        <div class="k-lbl">Bad Revenue</div>
+        <div class="k-lbl">Issued Sales</div>
     </div>
     <div class="kpi-card k-purple ex-card">
-        <i class="bx bx-help-circle k-icon"></i>
-        <div class="k-val">${{ number_format($unverified_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#5b49c7;">{{ $unverified_count }} sales</div>
-        <div class="k-lbl">Unverified Revenue</div>
+        <i class="bx bx-time-five k-icon"></i>
+        <div class="k-val">${{ number_format($projected_revenue, 0) }}</div>
+        <div class="k-sub" style="color:#5b49c7;">{{ $pending_count }} drafts</div>
+        <div class="k-lbl">Projected Revenue</div>
+    </div>
+    <div class="kpi-card k-teal ex-card">
+        <i class="bx bx-loader-alt k-icon"></i>
+        <div class="k-val">{{ $pending_count }}</div>
+        <div class="k-lbl">Pending Drafts</div>
+    </div>
+    <div class="kpi-card k-green ex-card">
+        <i class="bx bx-money k-icon"></i>
+        <div class="k-val">${{ number_format($total_premium, 0) }}</div>
+        <div class="k-lbl">Total Premium</div>
     </div>
 </div>
 
 {{-- Main Content Grid --}}
 <div class="row g-2">
 
-    {{-- LEFT: Charts + Sales Table --}}
+    {{-- LEFT: Charts --}}
     <div class="col-xl-9 col-lg-8">
 
-        {{-- Revenue Charts --}}
+        {{-- Charts Row --}}
         <div class="row g-2 mb-2">
             <div class="col-md-5">
                 <div class="ex-card sec-card">
                     <div class="sec-hdr">
-                        <h6><i class="bx bx-pie-chart-alt-2"></i> Revenue Share</h6>
+                        <h6><i class="bx bx-pie-chart-alt-2"></i> Revenue by Partner</h6>
                     </div>
                     <div class="sec-body" style="padding:0.4rem 0.5rem;">
-                        <div id="revenueDonutChart"></div>
+                        <div id="partnerDonutChart"></div>
                     </div>
                 </div>
             </div>
@@ -413,143 +405,167 @@
             </div>
         </div>
 
-        {{-- Bank Verification Sales Table --}}
+        {{-- Tabbed Sales Table: Pending Drafts + Issued Sales --}}
         <div class="ex-card sec-card">
-            <div class="sec-hdr">
-                <h6><i class="bx bx-list-check"></i> Bank Verified Sales</h6>
-                <div class="filter-tabs">
-                    <button class="filter-tab-btn active" onclick="filterSales('all', this)">All ({{ $total_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('good', this)">Good ({{ $good_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('average', this)">Avg ({{ $average_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('bad', this)">Bad ({{ $bad_count }})</button>
-                    <button class="filter-tab-btn" onclick="filterSales('unverified', this)">Unverified ({{ $unverified_count }})</button>
-                </div>
+            <div class="sec-hdr" style="gap:0.5rem;flex-wrap:wrap;">
+                <ul class="nav nav-tabs nav-tabs-sm" id="salesTab" role="tablist" style="border:none;gap:0.3rem;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pendingPane" type="button" role="tab">
+                            <i class="bx bx-time-five" style="font-size:.85rem;"></i> Pending Drafts
+                            <span class="badge bg-soft-purple text-purple ms-1" style="font-size:.58rem;font-weight:700;">{{ $pending_count }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="issued-tab" data-bs-toggle="tab" data-bs-target="#issuedPane" type="button" role="tab">
+                            <i class="bx bx-list-check" style="font-size:.85rem;"></i> Issued Sales
+                            <span class="badge bg-soft-blue text-primary ms-1" style="font-size:.58rem;font-weight:700;">{{ $total_count }}</span>
+                        </button>
+                    </li>
+                </ul>
             </div>
-            <div class="scroll-tbl">
-                <table class="ex-tbl">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Client</th>
-                            <th>Closer</th>
-                            <th>Carrier</th>
-                            <th class="text-center">Premium</th>
-                            <th class="text-center">Revenue</th>
-                            <th class="text-center">Status</th>
-                            <th>Issued</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesTable">
-                        @forelse($issued_sales->sortByDesc('issuance_date') as $i => $sale)
-                        @php
-                            $bvStatus = $sale->bank_verification_status;
-                            $statusClass = match($bvStatus) {
-                                \App\Support\Statuses::BANK_GOOD => 'bd-green',
-                                \App\Support\Statuses::BANK_AVERAGE => 'bd-warn',
-                                \App\Support\Statuses::BANK_BAD => 'bd-red',
-                                default => 'bd-purple',
-                            };
-                            $statusLabel = match($bvStatus) {
-                                \App\Support\Statuses::BANK_GOOD => 'Good',
-                                \App\Support\Statuses::BANK_AVERAGE => 'Average',
-                                \App\Support\Statuses::BANK_BAD => 'Bad',
-                                default => 'Unverified',
-                            };
-                            $filterTag = match($bvStatus) {
-                                \App\Support\Statuses::BANK_GOOD => 'good',
-                                \App\Support\Statuses::BANK_AVERAGE => 'average',
-                                \App\Support\Statuses::BANK_BAD => 'bad',
-                                default => 'unverified',
-                            };
-                            $revenue = $sale->agent_revenue ?? $sale->monthly_premium ?? 0;
-                        @endphp
-                        <tr class="sale-row" data-status="{{ $filterTag }}">
-                            <td style="color:var(--bs-surface-400);">{{ $i + 1 }}</td>
-                            <td><strong>{{ $sale->cn_name ?? 'N/A' }}</strong></td>
-                            <td>{{ $sale->closer_name ?? '—' }}</td>
-                            <td>{{ $sale->carrier_name ?? '—' }}</td>
-                            <td class="text-center"><span class="bd-mini bd-blue">${{ number_format($sale->monthly_premium ?? 0, 0) }}</span></td>
-                            <td class="text-center"><span class="bd-mini bd-gold">${{ number_format($revenue, 0) }}</span></td>
-                            <td class="text-center"><span class="bd-mini {{ $statusClass }}">{{ $statusLabel }}</span></td>
-                            <td style="color:var(--bs-surface-500);font-size:0.68rem;">{{ $sale->issuance_date ? \Carbon\Carbon::parse($sale->issuance_date)->format('M d, Y') : '—' }}</td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No issued sales found</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="tab-content" id="salesTabContent">
+
+                {{-- Pending Drafts Tab --}}
+                <div class="tab-pane fade show active" id="pendingPane" role="tabpanel">
+                    <div class="scroll-tbl">
+                        <table class="ex-tbl">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Closer</th>
+                                    <th>Partner</th>
+                                    <th>Carrier</th>
+                                    <th class="text-center">Premium</th>
+                                    <th class="text-center">Proj. Revenue</th>
+                                    <th>Sale Date</th>
+                                    <th>Followup</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($pending_leads->sortByDesc('sale_date') as $i => $lead)
+                                @php $rev = $lead->agent_revenue ?? $lead->monthly_premium ?? 0; @endphp
+                                <tr>
+                                    <td style="color:var(--bs-surface-400);">{{ $i + 1 }}</td>
+                                    <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
+                                    <td>{{ $lead->closer_name ?? '—' }}</td>
+                                    <td>
+                                        @if($lead->partner)
+                                            <span class="bd-mini bd-teal">{{ $lead->partner->code ?? $lead->partner->name }}</span>
+                                        @else
+                                            <span style="color:var(--bs-surface-400);">—</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $lead->carrier_name ?? '—' }}</td>
+                                    <td class="text-center"><span class="bd-mini bd-blue">${{ number_format($lead->monthly_premium ?? 0, 0) }}</span></td>
+                                    <td class="text-center"><span class="bd-mini bd-purple">${{ number_format($rev, 0) }}</span></td>
+                                    <td style="color:var(--bs-surface-500);font-size:0.68rem;">{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—' }}</td>
+                                    <td style="color:var(--bs-surface-500);font-size:0.68rem;">{{ $lead->followup_done_at ? \Carbon\Carbon::parse($lead->followup_done_at)->format('M d') : '—' }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No pending drafts for this period</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {{-- Issued Sales Tab --}}
+                <div class="tab-pane fade" id="issuedPane" role="tabpanel">
+                    <div class="scroll-tbl">
+                        <table class="ex-tbl">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Client</th>
+                                    <th>Closer</th>
+                                    <th>Partner</th>
+                                    <th>Carrier</th>
+                                    <th class="text-center">Premium</th>
+                                    <th class="text-center">Revenue</th>
+                                    <th>Issued</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($issued_sales->sortByDesc('issuance_date') as $i => $sale)
+                                @php $revenue = $sale->agent_revenue ?? $sale->monthly_premium ?? 0; @endphp
+                                <tr>
+                                    <td style="color:var(--bs-surface-400);">{{ $i + 1 }}</td>
+                                    <td><strong>{{ $sale->cn_name ?? 'N/A' }}</strong></td>
+                                    <td>{{ $sale->closer_name ?? '—' }}</td>
+                                    <td>
+                                        @if($sale->partner)
+                                            <span class="bd-mini bd-teal">{{ $sale->partner->code ?? $sale->partner->name }}</span>
+                                        @else
+                                            <span style="color:var(--bs-surface-400);">—</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $sale->carrier_name ?? '—' }}</td>
+                                    <td class="text-center"><span class="bd-mini bd-blue">${{ number_format($sale->monthly_premium ?? 0, 0) }}</span></td>
+                                    <td class="text-center"><span class="bd-mini bd-gold">${{ number_format($revenue, 0) }}</span></td>
+                                    <td style="color:var(--bs-surface-500);font-size:0.68rem;">{{ $sale->issuance_date ? \Carbon\Carbon::parse($sale->issuance_date)->format('M d, Y') : '—' }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No issued sales found for this period</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    {{-- RIGHT: Side panels --}}
+    {{-- RIGHT: Top Closers --}}
     <div class="col-xl-3 col-lg-4">
-
-        {{-- Revenue Ratios --}}
         <div class="ex-card sec-card">
             <div class="sec-hdr">
-                <h6><i class="bx bx-analyse"></i> Revenue Ratios</h6>
+                <h6><i class="bx bx-trophy"></i> Top Closers</h6>
+                <span style="font-size:0.62rem;color:var(--bs-surface-400);">by confirmed revenue</span>
             </div>
-            <div class="sec-body">
-                <div class="ratio-row">
-                    <div class="ratio-block r-green">
-                        <div class="r-val">{{ number_format($good_revenue_percentage, 1) }}%</div>
-                        <div class="r-lbl">Good Rev</div>
+            <div class="sec-body" style="padding:0.4rem 0.6rem;">
+                @forelse($top_closers as $idx => $closer)
+                @php $maxRev = $top_closers->first()['revenue'] ?? 1; $pct = $maxRev > 0 ? ($closer['revenue'] / $maxRev) * 100 : 0; @endphp
+                <div style="margin-bottom:0.5rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.15rem;">
+                        <span style="font-size:0.72rem;font-weight:600;color:var(--bs-surface-700);display:flex;align-items:center;gap:0.3rem;">
+                            @if($idx === 0)<i class="bx bx-star" style="color:#d4af37;font-size:.85rem;"></i>@elseif($idx === 1)<i class="bx bx-star" style="color:#94a3b8;font-size:.85rem;"></i>@elseif($idx === 2)<i class="bx bx-star" style="color:#cd7f32;font-size:.85rem;"></i>@else<span style="width:.85rem;display:inline-block;font-size:.65rem;color:var(--bs-surface-400);">{{ $idx+1 }}</span>@endif
+                            {{ Str::limit($closer['name'], 18) }}
+                        </span>
+                        <div style="display:flex;align-items:center;gap:0.3rem;">
+                            <span class="bd-mini bd-blue" style="font-size:.58rem;">{{ $closer['count'] }}</span>
+                            <span style="font-size:0.68rem;font-weight:700;color:#b89730;">${{ number_format($closer['revenue'], 0) }}</span>
+                        </div>
                     </div>
-                    <div class="ratio-block r-warn">
-                        <div class="r-val">{{ number_format($average_revenue_percentage, 1) }}%</div>
-                        <div class="r-lbl">Avg Rev</div>
+                    <div style="height:4px;border-radius:2px;background:rgba(0,0,0,.06);overflow:hidden;">
+                        <div style="width:{{ number_format($pct, 1) }}%;height:100%;border-radius:2px;background:linear-gradient(90deg,#d4af37,#e8c84a);"></div>
                     </div>
                 </div>
-                <div class="ratio-row mt-2">
-                    <div class="ratio-block r-red">
-                        <div class="r-val">{{ number_format($bad_revenue_percentage, 1) }}%</div>
-                        <div class="r-lbl">Bad Rev</div>
-                    </div>
-                    <div class="ratio-block r-purple">
-                        <div class="r-val">{{ number_format($unverified_revenue_percentage, 1) }}%</div>
-                        <div class="r-lbl">Unverified</div>
-                    </div>
+                @empty
+                <div style="text-align:center;padding:1.5rem 0;color:var(--bs-surface-400);">
+                    <i class="bx bx-trophy" style="font-size:1.4rem;opacity:.3;display:block;"></i>
+                    <span style="font-size:.72rem;">No data yet</span>
                 </div>
+                @endforelse
             </div>
         </div>
-
-        {{-- Sales Count Distribution --}}
-        <div class="ex-card sec-card">
-            <div class="sec-hdr">
-                <h6><i class="bx bx-doughnut-chart"></i> Sales Distribution</h6>
-            </div>
-            <div class="sec-body" style="padding:0.4rem 0.5rem;">
-                <div id="salesCountChart"></div>
-            </div>
-        </div>
-
-        {{-- Revenue vs Count --}}
-        <div class="ex-card sec-card">
-            <div class="sec-hdr">
-                <h6><i class="bx bx-transfer"></i> Rev vs Count</h6>
-            </div>
-            <div class="sec-body" style="padding:0.4rem 0.5rem;">
-                <div id="comparisonChart"></div>
-            </div>
-        </div>
-
     </div>
 </div>
 
 {{-- Partner × Carrier Revenue Breakdown --}}
-<div class="ex-card sec-card" style="margin-bottom:0.65rem;">
+<div class="ex-card sec-card" style="margin-bottom:0.65rem;margin-top:0.65rem;">
     <div class="sec-hdr">
         <h6><i class="bx bx-buildings"></i> Revenue by Partner &amp; Carrier</h6>
-        <span style="font-size:0.62rem;color:var(--bs-surface-400);">Issued sales grouped by assigned partner → carrier</span>
+        <span style="font-size:0.62rem;color:var(--bs-surface-400);">Issued sales grouped by partner → carrier (cluster)</span>
     </div>
 
     @forelse($partner_carrier_breakdown as $pb)
     <div style="border-bottom:1px solid rgba(0,0,0,.04);padding:0.55rem 0.75rem;">
-
-        {{-- Partner header row --}}
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;flex-wrap:wrap;">
             <span style="font-size:0.72rem;font-weight:700;color:var(--bs-surface-700);">
                 <i class="bx bx-user-circle" style="font-size:0.85rem;opacity:.6;"></i>
@@ -561,8 +577,6 @@
             <span class="bd-mini bd-gold ms-auto">{{ $pb['total_count'] }} sales</span>
             <span class="bd-mini bd-green">${{ number_format($pb['total_revenue'], 0) }}</span>
         </div>
-
-        {{-- Carriers sub-table --}}
         <div class="scroll-tbl" style="max-height:180px;">
             <table class="ex-tbl">
                 <thead>
@@ -570,28 +584,18 @@
                         <th>Carrier</th>
                         <th class="text-center">Sales</th>
                         <th class="text-center">Total Premium</th>
-                        <th class="text-center">Revenue (commission)</th>
+                        <th class="text-center">Revenue (Commission)</th>
                         <th class="text-center">% of Partner</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($pb['carriers'] as $cb)
-                    @php
-                        $pct = $pb['total_revenue'] > 0 ? ($cb['revenue'] / $pb['total_revenue']) * 100 : 0;
-                    @endphp
+                    @php $pct = $pb['total_revenue'] > 0 ? ($cb['revenue'] / $pb['total_revenue']) * 100 : 0; @endphp
                     <tr>
-                        <td>
-                            <span style="font-weight:600;">{{ $cb['carrier'] }}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="bd-mini bd-blue">{{ $cb['count'] }}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="bd-mini bd-teal">${{ number_format($cb['premium'], 0) }}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="bd-mini bd-gold">${{ number_format($cb['revenue'], 0) }}</span>
-                        </td>
+                        <td><span style="font-weight:600;">{{ $cb['carrier'] }}</span></td>
+                        <td class="text-center"><span class="bd-mini bd-blue">{{ $cb['count'] }}</span></td>
+                        <td class="text-center"><span class="bd-mini bd-teal">${{ number_format($cb['premium'], 0) }}</span></td>
+                        <td class="text-center"><span class="bd-mini bd-gold">${{ number_format($cb['revenue'], 0) }}</span></td>
                         <td class="text-center">
                             <div style="display:flex;align-items:center;gap:0.3rem;">
                                 <div style="flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.06);overflow:hidden;">
@@ -625,14 +629,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
     const bgCard = isDark ? '#1e293b' : '#fff';
 
-    // ── Revenue Donut ──
-    const revenueVals = [{{ $good_revenue }}, {{ $average_revenue }}, {{ $bad_revenue }}, {{ $unverified_revenue }}];
-    if (revenueVals.some(v => v > 0)) {
-        new ApexCharts(document.querySelector('#revenueDonutChart'), {
-            series: revenueVals,
+    // ── Revenue by Partner Donut ──────────────────────────────────────────
+    @php
+        $partnerLabels = $partner_carrier_breakdown->pluck('partner_name');
+        $partnerRevenues = $partner_carrier_breakdown->pluck('total_revenue')->map(fn($v) => round($v, 2));
+        $partnerColors = ['#d4af37','#556ee6','#34c38f','#f1b44c','#f46a6a','#7c69ef','#50a5f1','#e83e8c'];
+    @endphp
+    const partnerLabels = @json($partnerLabels->values());
+    const partnerRevenues = @json($partnerRevenues->values());
+    if (partnerRevenues.length > 0 && partnerRevenues.some(v => v > 0)) {
+        new ApexCharts(document.querySelector('#partnerDonutChart'), {
+            series: partnerRevenues,
             chart: { type: 'donut', height: 220, fontFamily: 'inherit' },
-            labels: ['Good', 'Average', 'Bad', 'Unverified'],
-            colors: ['#34c38f', '#f1b44c', '#f46a6a', '#7c69ef'],
+            labels: partnerLabels,
+            colors: @json($partnerColors),
             stroke: { width: 2, colors: [bgCard] },
             legend: { position: 'bottom', fontSize: '10px', labels: { colors: txtColor } },
             dataLabels: { enabled: true, style: { fontSize: '10px', fontWeight: 700 }, formatter: (val) => val.toFixed(1) + '%' },
@@ -641,100 +651,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     formatter: () => '${{ number_format($total_revenue, 0) }}'
                 }
             } } } },
-            tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2}) } }
+            tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 0}) } }
         }).render();
     } else {
-        document.querySelector('#revenueDonutChart').innerHTML = '<div style="text-align:center;padding:40px 0;color:' + txtColor + '"><i class="bx bx-pie-chart-alt-2" style="font-size:1.5rem;opacity:.4;"></i><p style="margin-top:4px;font-size:.72rem;">No data</p></div>';
+        document.querySelector('#partnerDonutChart').innerHTML = '<div style="text-align:center;padding:40px 0;color:' + txtColor + '"><i class="bx bx-pie-chart-alt-2" style="font-size:1.5rem;opacity:.4;"></i><p style="margin-top:4px;font-size:.72rem;">No data</p></div>';
     }
 
-    // ── Monthly Revenue Stacked Bar ──
+    // ── Monthly Revenue Bar ───────────────────────────────────────────────
     @php
         $sortedMonths = $monthly_data->sortKeys()->forget('Unknown');
-        $monthLabels = $sortedMonths->keys()->map(function($m) { return \Carbon\Carbon::parse($m . '-01')->format('M Y'); })->values();
-        $goodArr = $sortedMonths->pluck('good')->values();
-        $avgArr = $sortedMonths->pluck('average')->values();
-        $badArr = $sortedMonths->pluck('bad')->values();
-        $unvArr = $sortedMonths->pluck('unverified')->values();
+        $monthLabels  = $sortedMonths->keys()->map(fn($m) => \Carbon\Carbon::parse($m.'-01')->format('M Y'))->values();
+        $monthRevArr  = $sortedMonths->pluck('revenue')->values();
+        $monthPremArr = $sortedMonths->pluck('premium')->values();
     @endphp
-
     const monthLabels = @json($monthLabels);
     if (monthLabels.length > 0) {
         new ApexCharts(document.querySelector('#monthlyRevenueChart'), {
             series: [
-                { name: 'Good', data: @json($goodArr) },
-                { name: 'Average', data: @json($avgArr) },
-                { name: 'Bad', data: @json($badArr) },
-                { name: 'Unverified', data: @json($unvArr) }
+                { name: 'Revenue', type: 'column', data: @json($monthRevArr) },
+                { name: 'Premium', type: 'line', data: @json($monthPremArr) }
             ],
-            chart: { type: 'bar', height: 220, stacked: true, fontFamily: 'inherit', toolbar: { show: false } },
-            colors: ['#34c38f', '#f1b44c', '#f46a6a', '#7c69ef'],
+            chart: { height: 220, fontFamily: 'inherit', toolbar: { show: false } },
+            colors: ['#d4af37', '#556ee6'],
             plotOptions: { bar: { borderRadius: 3, columnWidth: '55%' } },
+            stroke: { width: [0, 2], curve: 'smooth' },
+            markers: { size: [0, 4] },
             xaxis: { categories: monthLabels, labels: { style: { colors: txtColor, fontSize: '9px' }, rotate: -45 } },
             yaxis: { labels: { style: { colors: txtColor, fontSize: '9px' }, formatter: (val) => '$' + (val >= 1000 ? (val/1000).toFixed(1) + 'k' : val) } },
             legend: { position: 'top', fontSize: '10px', labels: { colors: txtColor } },
             grid: { borderColor: gridColor, strokeDashArray: 4 },
-            tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2}) } }
+            tooltip: { theme: isDark ? 'dark' : 'light', y: { formatter: (val) => '$' + val.toLocaleString('en-US', {minimumFractionDigits: 0}) } }
         }).render();
     } else {
         document.querySelector('#monthlyRevenueChart').innerHTML = '<div style="text-align:center;padding:40px 0;color:' + txtColor + '"><i class="bx bx-bar-chart-alt-2" style="font-size:1.5rem;opacity:.4;"></i><p style="margin-top:4px;font-size:.72rem;">No monthly data</p></div>';
     }
-
-    // ── Sales Count Radial Bar ──
-    const salesCounts = [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}];
-    const salesTotal = salesCounts.reduce((a, b) => a + b, 0);
-    if (salesTotal > 0) {
-        const salesPcts = salesCounts.map(c => parseFloat(((c / salesTotal) * 100).toFixed(1)));
-        new ApexCharts(document.querySelector('#salesCountChart'), {
-            series: salesPcts,
-            chart: { type: 'radialBar', height: 200, fontFamily: 'inherit' },
-            labels: ['Good', 'Average', 'Bad', 'Unverified'],
-            colors: ['#34c38f', '#f1b44c', '#f46a6a', '#7c69ef'],
-            plotOptions: { radialBar: {
-                hollow: { size: '30%' },
-                track: { background: isDark ? '#334155' : '#f1f5f9', strokeWidth: '100%' },
-                dataLabels: {
-                    name: { fontSize: '10px', color: txtColor },
-                    value: { fontSize: '12px', fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b', formatter: (val) => val + '%' },
-                    total: { show: true, label: 'Total', fontSize: '10px', color: txtColor, formatter: () => salesTotal }
-                }
-            } },
-            legend: { show: true, position: 'bottom', fontSize: '10px', labels: { colors: txtColor },
-                formatter: (name, opts) => name + ': ' + salesCounts[opts.seriesIndex]
-            }
-        }).render();
-    } else {
-        document.querySelector('#salesCountChart').innerHTML = '<div style="text-align:center;padding:30px 0;color:' + txtColor + '"><i class="bx bx-doughnut-chart" style="font-size:1.5rem;opacity:.4;"></i><p style="margin-top:4px;font-size:.72rem;">No data</p></div>';
-    }
-
-    // ── Revenue vs Count Comparison ──
-    new ApexCharts(document.querySelector('#comparisonChart'), {
-        series: [
-            { name: 'Revenue', type: 'column', data: [{{ $good_revenue }}, {{ $average_revenue }}, {{ $bad_revenue }}, {{ $unverified_revenue }}] },
-            { name: 'Count', type: 'line', data: [{{ $good_count }}, {{ $average_count }}, {{ $bad_count }}, {{ $unverified_count }}] }
-        ],
-        chart: { height: 200, fontFamily: 'inherit', toolbar: { show: false } },
-        colors: ['#d4af37', '#556ee6'],
-        plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
-        xaxis: { categories: ['Good', 'Avg', 'Bad', 'Unv'], labels: { style: { colors: txtColor, fontSize: '10px' } } },
-        yaxis: [
-            { labels: { style: { colors: txtColor, fontSize: '9px' }, formatter: (val) => '$' + (val >= 1000 ? (val/1000).toFixed(0) + 'k' : val) } },
-            { opposite: true, labels: { style: { colors: txtColor, fontSize: '9px' } } }
-        ],
-        stroke: { width: [0, 2], curve: 'smooth' },
-        markers: { size: [0, 4] },
-        legend: { position: 'top', fontSize: '10px', labels: { colors: txtColor } },
-        grid: { borderColor: gridColor, strokeDashArray: 4 },
-        tooltip: { theme: isDark ? 'dark' : 'light' }
-    }).render();
 });
-
-// ── Sales Filter ──
-function filterSales(status, btn) {
-    document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.sale-row').forEach(row => {
-        row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
-    });
-}
 </script>
 @endsection

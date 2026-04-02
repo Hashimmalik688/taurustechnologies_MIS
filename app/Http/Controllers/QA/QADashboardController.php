@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\QA;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lead;
 use App\Models\QA\QaCall;
 use App\Models\QA\QaComplianceFlag;
 use App\Models\QA\QaDailyStat;
@@ -14,6 +15,7 @@ use App\Services\QA\GeminiService;
 use App\Services\QA\QAResultService;
 use App\Services\QA\QAScoringPrompt;
 use App\Services\QA\ZoomTranscriptParser;
+use App\Support\Statuses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -370,7 +372,7 @@ class QADashboardController extends Controller
 
     public function callDetail(int $id): JsonResponse
     {
-        $call = QaCall::with(['qaResult', 'complianceFlags'])->findOrFail($id);
+        $call = QaCall::with(['qaResult', 'complianceFlags', 'lead'])->findOrFail($id);
 
         // Parse diarized transcript into array
         $transcriptLines = [];
@@ -409,6 +411,7 @@ class QADashboardController extends Controller
                 'agent_user_id' => $call->agent_user_id,
                 'caller_number' => $call->caller_number,
                 'callee_number' => $call->callee_number,
+                'lead_phone'    => $call->lead?->phone_number,
                 'customer_name' => $result?->customer_name ?? null,
                 'duration_seconds' => $call->duration_seconds,
                 'call_start_time' => $call->call_start_time?->toIso8601String(),
@@ -1269,18 +1272,38 @@ class QADashboardController extends Controller
 
     public function deleteCall(int $id): JsonResponse
     {
-        $call = QaCall::findOrFail($id);
+        try {
+            $call = QaCall::findOrFail($id);
 
-        QaResult::where('qa_call_id', $id)->delete();
-        $call->delete();
+            // Reset lead QA status to In Review so it shows back in the QA Review queue
+            if ($call->lead_id) {
+                DB::table('leads')
+                    ->where('id', $call->lead_id)
+                    ->update([
+                        'qa_status'      => Statuses::QA_PENDING,
+                        'qa_reason'      => null,
+                        'qa_reviewed_at' => null,
+                        'qa_user_id'     => null,
+                        'updated_at'     => now(),
+                    ]);
+            }
 
-        Log::info('[QA] Call deleted', [
-            'qa_call_id' => $id,
-            'agent_name' => $call->agent_name,
-            'by_user'    => auth()->user()?->name ?? 'unknown',
-        ]);
+            QaResult::where('qa_call_id', $id)->delete();
+            $call->delete();
 
-        return response()->json(['success' => true, 'message' => 'Call deleted.']);
+            Log::info('[QA] Call deleted', [
+                'qa_call_id' => $id,
+                'agent_name' => $call->agent_name,
+                'lead_id'    => $call->lead_id,
+                'by_user'    => auth()->user()?->name ?? 'unknown',
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Call deleted.']);
+
+        } catch (\Throwable $e) {
+            Log::error('[QA] Delete call failed', ['qa_call_id' => $id, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1309,40 +1332,48 @@ class QADashboardController extends Controller
     public function uploadAndTranscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'audio'         => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200', // 50 MB (PHP-FPM limit)
+            'audio'         => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
+            'audio2'        => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
             'agent_user_id' => 'nullable|integer|exists:users,id',
             'call_date'     => 'nullable|date',
             'swap_speakers' => 'nullable|boolean',
         ]);
 
         $file      = $request->file('audio');
+        $file2     = $request->file('audio2'); // optional 2nd recording (reconnected call)
         $agentId   = $request->input('agent_user_id');
         $callDate  = $request->input('call_date') ? now()->parse($request->input('call_date')) : now();
         $agentUser = $agentId ? \App\Models\User::find($agentId) : null;
 
-        // Store the uploaded file permanently so we can re-process if needed
-        $storedPath = $file->store('qa_audio', 'local');
+        // Store both files
+        $storedPath  = $file->store('qa_audio', 'local');
+        $storedPath2 = $file2 ? $file2->store('qa_audio', 'local') : null;
 
         Log::info('[QA:Upload] Audio received', [
-            'original_name' => $file->getClientOriginalName(),
-            'size_kb'       => round($file->getSize() / 1024, 1),
-            'stored_path'   => $storedPath,
-            'by_user'       => auth()->user()?->name,
+            'original_name'  => $file->getClientOriginalName(),
+            'original_name2' => $file2?->getClientOriginalName(),
+            'size_kb'        => round($file->getSize() / 1024, 1),
+            'stored_path'    => $storedPath,
+            'by_user'        => auth()->user()?->name,
         ]);
 
+        $transcriptId2 = null;
         try {
             $assembly = new \App\Services\QA\AssemblyAIService();
 
-            // Upload audio to AssemblyAI storage
+            // Upload Part 1
             $uploadUrl    = $assembly->uploadAudio($file->getRealPath());
-
-            // Submit transcription job (async — returns immediately)
             $transcriptId = $assembly->submitTranscription($uploadUrl);
+
+            // Upload Part 2 (if provided)
+            if ($file2 && $storedPath2) {
+                $uploadUrl2    = $assembly->uploadAudio($file2->getRealPath());
+                $transcriptId2 = $assembly->submitTranscription($uploadUrl2);
+            }
         } catch (\Throwable $e) {
             Log::error('[QA:Upload] AssemblyAI error', ['error' => $e->getMessage()]);
 
-            // Clean up stored file on failure
-            \Illuminate\Support\Facades\Storage::disk('local')->delete($storedPath);
+            \Illuminate\Support\Facades\Storage::disk('local')->delete(array_filter([$storedPath, $storedPath2]));
 
             return response()->json([
                 'success' => false,
@@ -1350,32 +1381,40 @@ class QADashboardController extends Controller
             ], 500);
         }
 
-        // Create a QaCall placeholder — will be updated once scoring completes
         $qaCall = QaCall::create([
-            'zoom_call_id'            => 'upload-' . uniqid(),
-            'agent_user_id'           => $agentId,
-            'agent_name'              => $agentUser?->name ?? 'Unknown',
-            'agent_email'             => $agentUser?->email,
-            'call_start_time'         => $callDate,
-            'transcript_source'       => 'assemblyai',
-            'processing_status'       => 'transcribing',
-            'scored_by'               => 'claude',
-            'audio_file_path'         => $storedPath,
-            'audio_original_name'     => $file->getClientOriginalName(),
-            'assemblyai_transcript_id'=> $transcriptId,
-            'assemblyai_status'       => 'processing',
+            'zoom_call_id'             => 'upload-' . uniqid(),
+            'agent_user_id'            => $agentId,
+            'agent_name'               => $agentUser?->name ?? 'Unknown',
+            'agent_email'              => $agentUser?->email,
+            'call_start_time'          => $callDate,
+            'transcript_source'        => 'assemblyai',
+            'processing_status'        => 'transcribing',
+            'scored_by'                => 'claude',
+            'audio_file_path'          => $storedPath,
+            'audio_original_name'      => $file->getClientOriginalName(),
+            'assemblyai_transcript_id' => $transcriptId,
+            'assemblyai_status'        => 'processing',
+            // Part 2 (nullable)
+            'audio_file_path_2'          => $storedPath2,
+            'audio_original_name_2'      => $file2?->getClientOriginalName(),
+            'assemblyai_transcript_id_2' => $transcriptId2,
         ]);
 
         Log::info('[QA:Upload] QaCall created, transcription queued', [
-            'qa_call_id'    => $qaCall->id,
-            'transcript_id' => $transcriptId,
+            'qa_call_id'     => $qaCall->id,
+            'transcript_id'  => $transcriptId,
+            'transcript_id2' => $transcriptId2,
+            'multi_part'     => (bool) $transcriptId2,
         ]);
 
         return response()->json([
             'success'       => true,
             'qa_call_id'    => $qaCall->id,
             'transcript_id' => $transcriptId,
-            'message'       => 'Audio uploaded. Transcription in progress…',
+            'multi_part'    => (bool) $transcriptId2,
+            'message'       => $transcriptId2
+                ? 'Both audio files uploaded. Transcribing Part 1 & Part 2…'
+                : 'Audio uploaded. Transcription in progress…',
         ]);
     }
 
@@ -1445,8 +1484,50 @@ class QADashboardController extends Controller
             $diarized    = $parsed['diarized'];
             $durationSec = $parsed['duration_seconds'] ?: $qaCall->duration_seconds ?: 600;
 
+            // ─── Part 2: if a second transcript exists, wait for it then merge ───
+            if ($qaCall->assemblyai_transcript_id_2) {
+                $data2   = $assembly->getTranscript($qaCall->assemblyai_transcript_id_2);
+                $status2 = $data2['status'] ?? 'unknown';
+
+                if ($status2 === 'error') {
+                    // Part 2 failed — log and continue with Part 1 only
+                    Log::warning('[QA:Upload] Part 2 transcript failed, scoring Part 1 only', [
+                        'qa_call_id' => $qaCall->id,
+                        'error'      => $data2['error'] ?? 'unknown',
+                    ]);
+                } elseif ($status2 !== 'completed') {
+                    // Part 2 still processing — tell frontend to keep polling
+                    return response()->json([
+                        'success'    => true,
+                        'status'     => 'processing',
+                        'qa_call_id' => $qaCall->id,
+                        'message'    => 'Part 1 transcribed. Waiting for Part 2…',
+                    ]);
+                } else {
+                    // Both parts ready — merge transcripts
+                    $parsed2   = $assembly->parseTranscriptResult($data2);
+                    $diarized2 = $parsed2['diarized'];
+
+                    // Apply independent speaker swap for Part 2 if requested
+                    if (request()->boolean('swap_speakers_2')) {
+                        $diarized2 = \App\Services\QA\AssemblyAIService::swapSpeakers($diarized2);
+                    }
+
+                    $diarized = $diarized
+                        . "\n\n[--- CALL DISCONNECTED — PART 2 ---]\n\n"
+                        . $diarized2;
+                    // Use the longer duration as the representative duration
+                    $durationSec = max($durationSec, $parsed2['duration_seconds'] ?: 0);
+
+                    Log::info('[QA:Upload] Two-part transcript merged', [
+                        'qa_call_id'    => $qaCall->id,
+                        'part1_seconds' => $parsed['duration_seconds'],
+                        'part2_seconds' => $parsed2['duration_seconds'],
+                    ]);
+                }
+            }
+
             // Optional speaker swap from the original upload request
-            // (stored as a flag in the call record or passed fresh via request param)
             if (request()->boolean('swap_speakers')) {
                 $diarized = \App\Services\QA\AssemblyAIService::swapSpeakers($diarized);
             }
@@ -1488,6 +1569,11 @@ class QADashboardController extends Controller
             // Persist scoring result
             $resultService = new QAResultService();
             $resultService->saveResult($qaCall, $aiResult);
+
+            // Delete audio files from disk — no longer needed after scoring
+            \Illuminate\Support\Facades\Storage::disk('local')->delete(
+                array_filter([$qaCall->audio_file_path, $qaCall->audio_file_path_2])
+            );
 
             Log::info('[QA:Upload] Scoring complete', [
                 'qa_call_id'  => $qaCall->id,
@@ -1569,6 +1655,116 @@ class QADashboardController extends Controller
                 'sale_amount'     => $result->sale_amount,
             ] : null,
             'transcript' => $qaCall->transcript_diarized,
+        ]);
+    }
+
+    // ── GET /qa/api/closer-sales ─────────────────────────────────────
+
+    /**
+     * Return sales (leads) made by a specific closer around a given date.
+     * Query params: agent_user_id, date (YYYY-MM-DD)
+     */
+    public function closerSales(Request $request): JsonResponse
+    {
+        $agentId = $request->input('agent_user_id');
+        $date    = $request->input('date');
+
+        if (! $agentId) {
+            return response()->json(['success' => false, 'message' => 'agent_user_id is required.'], 422);
+        }
+
+        $query = Lead::where('closer_id', $agentId)
+            ->whereNotNull('sale_date');
+
+        if ($date) {
+            $query->whereDate('sale_date', $date);
+        }
+
+        $leads = $query->orderByDesc('sale_date')
+            ->limit(50)
+            ->get([
+                'id', 'cn_name', 'phone_number', 'sale_date',
+                'coverage_amount', 'monthly_premium', 'carrier_name',
+                'issuance_status', 'qa_status', 'state',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'sales'   => $leads->map(fn ($l) => [
+                'id'              => $l->id,
+                'cn_name'         => $l->cn_name ?? 'N/A',
+                'phone'           => $l->phone_number ? substr($l->phone_number, -4) : '',
+                'sale_date'       => $l->sale_date?->format('M j, Y'),
+                'coverage'        => $l->coverage_amount ? '$' . number_format($l->coverage_amount, 0) : '—',
+                'premium'         => $l->monthly_premium ? '$' . number_format($l->monthly_premium, 2) . '/mo' : '—',
+                'carrier'         => $l->carrier_name ?? '—',
+                'issuance_status' => $l->issuance_status ?? '—',
+                'qa_status'       => $l->qa_status,
+                'state'           => $l->state ?? '',
+            ]),
+        ]);
+    }
+
+    // ── POST /qa/api/calls/{id}/link-sale ────────────────────────────
+
+    /**
+     * Link a QA call to a specific lead (sale) and auto-set QA status on the lead.
+     */
+    public function linkSale(Request $request, int $id): JsonResponse
+    {
+        $request->validate([
+            'lead_id' => 'required|integer|exists:leads,id',
+        ]);
+
+        $qaCall = QaCall::with('qaResult')->findOrFail($id);
+        $lead   = Lead::findOrFail($request->input('lead_id'));
+
+        // Link
+        $qaCall->lead_id = $lead->id;
+        $qaCall->save();
+
+        // Auto-determine QA status from score
+        $result = $qaCall->qaResult;
+        if ($result) {
+            $score = (int) $result->total_score;
+
+            if ($score >= 75) {
+                $qaStatus = Statuses::QA_GOOD;
+            } elseif ($score >= 50) {
+                $qaStatus = Statuses::QA_AVG;
+            } else {
+                $qaStatus = Statuses::QA_BAD;
+            }
+
+            // Build a concise reason from the AI result
+            $reasons = [];
+            if ($result->disposition) {
+                $reasons[] = 'Disposition: ' . str_replace('_', ' ', $result->disposition);
+            }
+            $reasons[] = "Score: {$score}/100";
+            if (! $result->compliance_pass) {
+                $failures = $result->compliance_failures ?? [];
+                $reasons[] = 'Compliance FAIL (' . count($failures) . ' issue' . (count($failures) !== 1 ? 's' : '') . ')';
+            } else {
+                $reasons[] = 'Compliance PASS';
+            }
+            if ($result->top_issue) {
+                $reasons[] = 'Top issue: ' . $result->top_issue;
+            }
+
+            $lead->qa_status      = $qaStatus;
+            $lead->qa_reason      = implode(' · ', $reasons);
+            $lead->qa_reviewed_at = now();
+            $lead->qa_user_id     = auth()->id();
+            $lead->save();
+        }
+
+        return response()->json([
+            'success'   => true,
+            'qa_status' => $lead->qa_status,
+            'qa_reason' => $lead->qa_reason,
+            'lead_id'   => $lead->id,
+            'cn_name'   => $lead->cn_name,
         ]);
     }
 }

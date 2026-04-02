@@ -3,6 +3,7 @@
 namespace App\Models\QA;
 
 use App\Models\CallLog;
+use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ class QaCall extends Model
         'zoom_call_id',
         'call_log_id',
         'agent_user_id',
+        'lead_id',
         'agent_name',
         'agent_email',
         'zoom_user_id',
@@ -36,9 +38,12 @@ class QaCall extends Model
         'scored_by',
         'retry_count',
         'assemblyai_transcript_id',
+        'assemblyai_transcript_id_2',
         'assemblyai_status',
         'audio_file_path',
+        'audio_file_path_2',
         'audio_original_name',
+        'audio_original_name_2',
     ];
 
     protected $casts = [
@@ -57,6 +62,11 @@ class QaCall extends Model
     public function agent(): BelongsTo
     {
         return $this->belongsTo(User::class, 'agent_user_id');
+    }
+
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class, 'lead_id');
     }
 
     public function qaResult(): HasOne

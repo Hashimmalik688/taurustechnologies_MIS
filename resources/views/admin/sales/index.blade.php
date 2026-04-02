@@ -314,6 +314,18 @@
     /* Peregrine badge */
     .bg-purple { background-color: var(--bs-ui-purple, #6f42c1) !important; color: #fff !important; }
 
+    /* QA cleared ticker */
+    .sl-qa-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff; font-size: .6rem; font-weight: 800;
+        letter-spacing: .3px; line-height: 1;
+        vertical-align: middle; margin-left: 4px;
+        box-shadow: 0 1px 4px rgba(16,185,129,.45);
+        flex-shrink: 0;
+    }
+
     /* ── Custom Dropdown (pill-shaped panels) ── */
     .sl-cdd { position: relative; display: inline-block; vertical-align: middle; }
     .sl-cdd select { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; overflow: hidden; }
@@ -670,7 +682,12 @@
                                     <tr>
                                         @if(auth()->user()->hasRole(Roles::QA))
                                             {{-- QA View: Limited data --}}
-                                            <td><strong>{{ $lead->cn_name }}</strong></td>
+                                            <td>
+                                                <strong>{{ $lead->cn_name }}</strong>
+                                                @if(in_array($lead->qa_status ?? '', ['Good', 'Avg']))
+                                                    <span class="sl-qa-badge" title="QA Cleared ({{ $lead->qa_status }})">QA</span>
+                                                @endif
+                                            </td>
                                             <td>{{ $lead->phone_number }}</td>
                                             <td>
                                                 @if($lead->closer_name)
@@ -750,7 +767,12 @@
                                                     @endcanDeleteInModule
                                                 </div>
                                             </td>
-                                            <td class="sl-sticky-col sl-col-2"><strong>{{ $lead->cn_name }}</strong></td>
+                                            <td class="sl-sticky-col sl-col-2">
+                                                <strong>{{ $lead->cn_name }}</strong>
+                                                @if(in_array($lead->qa_status ?? '', ['Good', 'Avg']))
+                                                    <span class="sl-qa-badge" title="QA Cleared ({{ $lead->qa_status }})">QA</span>
+                                                @endif
+                                            </td>
                                             <td class="sl-sticky-col sl-col-3">{{ $lead->phone_number }}</td>
                                             <td>
                                                 @if($lead->closer_name)

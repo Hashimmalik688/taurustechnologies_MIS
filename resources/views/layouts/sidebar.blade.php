@@ -82,13 +82,13 @@
                 auth()->user()->canViewModule('pendings-approved') ||
                 auth()->user()->canViewModule('pending-draft') ||
                 auth()->user()->canViewModule('paid-sales') ||
-                auth()->user()->canViewModule('bank-verification') ||
+                // auth()->user()->canViewModule('bank-verification') || // Bank verification disabled
                 auth()->user()->canViewModule('revenue-analytics') ||
                 auth()->user()->canViewModule('live-analytics')
             );
         @endphp
         @if($canSeeSalesOps)
-            <a href="{{ route('sales.hub') }}" class="menu-item {{ Request::is('sales/hub') || Request::is('sales*') || Request::is('qa/review*') || Request::is('qa/scoring*') || Request::is('issuance*') || Request::is('pendings-approved*') || Request::is('pending-draft*') || Request::is('paid-sales*') || Request::is('followup/report*') || Request::is('followup/followup-done*') || Request::is('bank-verification*') || Request::is('revenue-analytics*') || Request::is('analytics/live*') ? 'active' : '' }}">
+            <a href="{{ route('sales.hub') }}" class="menu-item {{ Request::is('sales/hub') || Request::is('sales*') || Request::is('qa/review*') || Request::is('qa/scoring*') || Request::is('issuance*') || Request::is('pendings-approved*') || Request::is('pending-draft*') || Request::is('paid-sales*') || Request::is('followup/report*') || Request::is('followup/followup-done*') || Request::is('revenue-analytics*') || Request::is('analytics/live*') ? 'active' : '' }}">
                 <i class="bx bx-briefcase-alt"></i>
                 <span class="menu-text">Sales Operations</span>
             </a>

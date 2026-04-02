@@ -324,7 +324,7 @@ Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['aut
     Route::get('/my-followups', [\App\Http\Controllers\Admin\FollowupController::class, 'myFollowups'])->name('my-followups');
     Route::get('/report', [\App\Http\Controllers\Admin\FollowupController::class, 'report'])->name('report')->middleware('role.permission:issuance,view');
     Route::post('/{id}/update-status', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupStatus'])->name('updateStatus');
-    Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification');
+    // Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification'); // Bank verification disabled
     Route::post('/{id}/mark-done', [\App\Http\Controllers\Admin\FollowupController::class, 'markFollowupDone'])->name('mark-done');
     Route::get('/followup-done', [\App\Http\Controllers\Admin\FollowupController::class, 'followupDone'])->name('followup-done')->middleware('role.permission:issuance,view');
 });
@@ -676,7 +676,7 @@ Route::get('/leads/hub', function () {
 
 Route::get('/sales/hub', function () {
     $user = auth()->user();
-    if (!$user->canViewModule('sales') && !$user->canViewModule('qa-review') && !$user->canViewModule('issuance') && !$user->canViewModule('pendings-approved') && !$user->canViewModule('pending-draft') && !$user->canViewModule('paid-sales') && !$user->canViewModule('bank-verification') && !$user->canViewModule('revenue-analytics') && !$user->canViewModule('live-analytics')) {
+    if (!$user->canViewModule('sales') && !$user->canViewModule('qa-review') && !$user->canViewModule('issuance') && !$user->canViewModule('pendings-approved') && !$user->canViewModule('pending-draft') && !$user->canViewModule('paid-sales') && /* !$user->canViewModule('bank-verification') && */ !$user->canViewModule('revenue-analytics') && !$user->canViewModule('live-analytics')) {
         abort(403, "You don't have permission to view any Sales Operations module.");
     }
     return view('admin.sales.hub');
@@ -852,14 +852,14 @@ Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'
     ->middleware('role.permission:retention,view')
     ->name('retention.dashboard');
 
-// Bank Verification — access controlled by role.permission:bank-verification,level
-Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
-    Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index')->middleware('role.permission:bank-verification,view');
-    Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show')->middleware('role.permission:bank-verification,view');
-    Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update')->middleware('role.permission:bank-verification,edit');
-    Route::post('/{id}/assign-verifier', [\App\Http\Controllers\Admin\BankVerificationController::class, 'assignVerifier'])->name('assignVerifier')->middleware('role.permission:bank-verification,edit');
-    Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment')->middleware('role.permission:bank-verification,edit');
-});
+// Bank Verification — DISABLED
+// Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+//     Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index')->middleware('role.permission:bank-verification,view');
+//     Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show')->middleware('role.permission:bank-verification,view');
+//     Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update')->middleware('role.permission:bank-verification,edit');
+//     Route::post('/{id}/assign-verifier', [\App\Http\Controllers\Admin\BankVerificationController::class, 'assignVerifier'])->name('assignVerifier')->middleware('role.permission:bank-verification,edit');
+//     Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment')->middleware('role.permission:bank-verification,edit');
+// });
 
 // Revenue Analytics — access controlled by role.permission:revenue-analytics,level
 Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
@@ -1049,6 +1049,10 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     Route::get('/upload', [\App\Http\Controllers\QA\QADashboardController::class, 'showUploadScore'])->name('qa.upload');
     Route::post('/api/upload-transcribe', [\App\Http\Controllers\QA\QADashboardController::class, 'uploadAndTranscribe'])->name('qa.api.upload.transcribe');
     Route::get('/api/transcription/{qaCallId}/status', [\App\Http\Controllers\QA\QADashboardController::class, 'transcriptionStatus'])->name('qa.api.transcription.status');
+
+    // ── Sale Linking ──────────────────────────────────────────────────────
+    Route::get('/api/closer-sales', [\App\Http\Controllers\QA\QADashboardController::class, 'closerSales'])->name('qa.api.closer-sales');
+    Route::post('/api/calls/{id}/link-sale', [\App\Http\Controllers\QA\QADashboardController::class, 'linkSale'])->name('qa.api.call.link-sale');
 });
 
 // Catch-all route - MUST BE LAST

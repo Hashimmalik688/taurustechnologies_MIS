@@ -119,6 +119,7 @@
         <?php endif; ?>
 
         
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(\Illuminate\Support\Facades\Route::has('bank-verification.index')): ?>
         <?php if(auth()->check() && auth()->user()->canViewModule('bank-verification')): ?>
         <div class="hub-section-label">Verification</div>
         <div class="hub-grid">
@@ -132,6 +133,7 @@
             </a>
         </div>
         <?php endif; ?>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
         
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($user->canViewModule('revenue-analytics') || $user->canViewModule('live-analytics')): ?>
