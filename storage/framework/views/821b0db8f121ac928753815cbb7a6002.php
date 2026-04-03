@@ -323,6 +323,8 @@
                         <th>Phone</th>
                         <th>Closer</th>
                         <th>Carrier</th>
+                        <th>Policy #</th>
+                        <th>Partner</th>
                         <th class="text-center">Premium</th>
                         <th>Followup Done</th>
                         <th>Sent to Draft</th>
@@ -348,6 +350,20 @@
                                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td><?php echo e($lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—')); ?></td>
+                            <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->policy_number): ?>
+                                    <code style="font-size:.7rem;color:var(--bs-primary);"><?php echo e($lead->policy_number); ?></code>
+                                <?php else: ?>
+                                    <span style="color:var(--bs-surface-400);font-size:.7rem;">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->partner): ?>
+                                    <span class="bd-mini bd-green"><?php echo e($lead->partner->name); ?></span>
+                                <?php else: ?>
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
                             <td class="text-center">
                                 <span class="bd-mini bd-gold">$<?php echo e(number_format($lead->monthly_premium ?? 0, 2)); ?></span>
                             </td>
@@ -414,7 +430,7 @@
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td colspan="<?php echo e($tab === 'not_paid' ? 10 : 9); ?>">
+                            <td colspan="<?php echo e($tab === 'not_paid' ? 12 : 11); ?>">
                                 <div class="pd-empty">
                                     <i class="bx bx-inbox"></i>
                                     <p>No leads in this queue for the selected period.</p>
@@ -518,6 +534,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentId = null;
     let fdfpModal = null;
     let pdModal = null;
+
+    // ── Live search: debounce auto-submit on search input ──
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let debounceTimer = null;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                this.closest('form').submit();
+            }, 400);
+        });
+    }
 
     // Toast notification
     function slToast(msg) {

@@ -710,6 +710,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = '{{ csrf_token() }}';
     let currentNotIssuedId = null;
     let notIssuedModal = null;
+
+    // ── Live search: debounce auto-submit on search input ──
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        let debounceTimer = null;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                this.closest('form').submit();
+            }, 400);
+        });
+    }
     
     // Get or create the modal instance (singleton pattern)
     function getNotIssuedModal() {

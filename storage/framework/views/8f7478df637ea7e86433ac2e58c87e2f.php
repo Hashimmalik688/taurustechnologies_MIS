@@ -379,6 +379,7 @@ $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
                     <th style="width:26px">#</th>
                     <th style="min-width:140px">Client</th>
                     <th style="min-width:80px">Policy Type</th>
+                    <th style="min-width:100px">Policy #</th>
                     <th style="min-width:45px">State</th>
                     <th class="tr" style="min-width:105px">Monthly Premium</th>
                     <th class="tr th-rev" style="min-width:105px">
@@ -413,6 +414,11 @@ $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
                     
                     <td>
                         <span class="dd-policy"><?php echo e(strtoupper($policyLabel)); ?></span>
+                    </td>
+                    
+                    <td style="font-size:.68rem;color:var(--dd-text-2)">
+                        <?php echo e($lead->policy_number ?: '—'); ?>
+
                     </td>
                     
                     <td style="font-size:.7rem;font-weight:700;color:var(--dd-text-2)">
@@ -475,7 +481,7 @@ $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3"></td>
+                    <td colspan="4"></td>
                     <td style="font-size:.68rem;font-weight:800">
                         <span style="display:inline-flex;align-items:center;gap:.2rem">
                             <i class="bx bx-sum" style="color:var(--dd-gold)"></i> TOTAL

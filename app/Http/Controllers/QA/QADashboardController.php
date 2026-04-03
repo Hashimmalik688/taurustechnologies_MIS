@@ -37,6 +37,8 @@ class QADashboardController extends Controller
         $range = $request->input('range', 'today');
         $page = $request->input('page', 1);
         $filter = $request->input('qa_filter', 'all');
+        // calls_range allows the Scored Calls section to filter independently
+        $callsRange = $request->input('calls_range') ?: $range;
 
         // ── Primary Team KPIs ──────────────────────────────────────────
         $teamStats = $this->getTeamStats($range);
@@ -118,7 +120,7 @@ class QADashboardController extends Controller
         // ── Paginated calls list with filter ───────────────────────────
         $baseQuery = QaCall::with('qaResult')
             ->completed()
-            ->when(true, fn ($q) => $this->applyRange($q, $range));
+            ->when(true, fn ($q) => $this->applyRange($q, $callsRange));
 
         if ($filter === 'sales_only') {
             $baseQuery->whereHas('qaResult', fn ($q) => $q->where('is_sale', true));
@@ -915,6 +917,7 @@ class QADashboardController extends Controller
                 SUM(CASE WHEN qa_results.disposition IN ("EXCELLENT","GOOD") THEN 1 ELSE 0 END) as good_calls,
                 SUM(CASE WHEN qa_results.disposition = "POOR" OR qa_results.compliance_pass = 0 THEN 1 ELSE 0 END) as bad_calls,
                 SUM(CASE WHEN qa_results.disposition = "VOID_RISK" THEN 1 ELSE 0 END) as void_risks,
+                SUM(CASE WHEN qa_results.compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
             ')
@@ -930,6 +933,8 @@ class QADashboardController extends Controller
                 'good_calls' => $row->good_calls,
                 'bad_calls' => $row->bad_calls,
                 'void_risks' => $row->void_risks,
+                'compliance_rate' => $row->total_calls > 0
+                    ? round(($row->compliance_pass_count / $row->total_calls) * 100, 1) : 0,
                 'total_coverage' => $row->total_coverage,
                 'total_premium' => $row->total_premium,
                 'sale_rate' => $row->total_calls > 0

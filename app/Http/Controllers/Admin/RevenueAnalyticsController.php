@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Services\CommissionCalculationService;
-use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -31,72 +30,65 @@ class RevenueAnalyticsController extends Controller
         $currentMonth = Carbon::now()->format('Y-m');
         $activeMonth  = $periodStart->format('Y-m');
 
-        // ── Confirmed Revenue (Issued) ───────────────────────────────────────
-        $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('submission_status', Statuses::SUB_APPROVED)
-            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
-            ->whereBetween('issuance_date', [$periodStart, $periodEnd])
-            ->with(['partner', 'insuranceCarrier'])
-            ->get();
+        $commissionService = app(CommissionCalculationService::class);
 
-        $total_count   = $issued_sales->count();
-        $total_premium = $issued_sales->sum(fn ($l) => $l->monthly_premium ?? 0);
-        $total_revenue = $issued_sales->sum(fn ($l) => $l->agent_revenue ?? $l->monthly_premium ?? 0);
-        $avg_revenue   = $total_count > 0 ? $total_revenue / $total_count : 0;
-
-        // ── Projected Revenue (Pending Drafts — same workflow as PendingDraftController) ─
-        // Pending Draft = followup done, draft not yet hit (paid_at IS NULL, policy_died_at IS NULL)
+        // ── Projected Revenue (Pending Draft queue) ──────────────────────────
+        // Pending Draft = followup done, not yet paid, not dead
         $pending_leads = Lead::whereNotNull('followup_done_at')
             ->whereNull('paid_at')
             ->whereNull('policy_died_at')
             ->whereBetween('sale_date', [$periodStart, $periodEnd])
-            ->with(['partner', 'insuranceCarrier'])
+            ->with(['partner'])
             ->get();
 
-        $pending_count = $pending_leads->count();
+        $pending_count   = $pending_leads->count();
+        $pending_premium = $pending_leads->sum(fn ($l) => $l->monthly_premium ?? 0);
 
-        /** @var CommissionCalculationService $commissionService */
-        $commissionService = app(CommissionCalculationService::class);
-        $projected_revenue = 0;
+        $projected_revenue       = 0;
+        $lead_projected_revenues = [];
 
         foreach ($pending_leads as $lead) {
-            if ($lead->agent_revenue) {
-                // Already calculated — use it
-                $projected_revenue += $lead->agent_revenue;
-            } elseif ($lead->partner_id && $lead->insurance_carrier_id && $lead->monthly_premium) {
-                // Use cluster formula: premium × 9 × cluster commission %
-                $settlementType = in_array($lead->settlement_type, ['level', 'graded', 'gi', 'modified'])
-                    ? $lead->settlement_type : 'level';
-                $result = $commissionService->calculateCommission(
-                    $lead->partner_id,
-                    $lead->insurance_carrier_id,
-                    $lead->state ?? '',
-                    $settlementType,
-                    (float) $lead->monthly_premium
-                );
-                $projected_revenue += $result['commission'] ?? ($lead->monthly_premium ?? 0);
-            } else {
-                $projected_revenue += $lead->monthly_premium ?? 0;
-            }
+            $premium = (float) ($lead->monthly_premium ?? 0);
+
+            // Resolve settlement type
+            $raw  = strtolower(trim($lead->settlement_type ?: $lead->policy_type ?: ''));
+            if (str_contains($raw, 'g.i') || str_contains($raw, 'gi')) $type = 'gi';
+            elseif (str_contains($raw, 'grad'))   $type = 'graded';
+            elseif (str_contains($raw, 'modif'))  $type = 'modified';
+            else                                   $type = 'level';
+
+            // premium × 9 × commission% from cluster rates
+            $result = $commissionService->calculateCommission(
+                $lead->partner_id,
+                $lead->insurance_carrier_id,
+                $lead->state ?? '',
+                $type,
+                $premium
+            );
+            $rev = $result['commission'] ?? 0;
+
+            $projected_revenue                  += $rev;
+            $lead_projected_revenues[$lead->id]  = round($rev, 2);
+            $lead->calculated_revenue            = round($rev, 2);
         }
 
-        // ── Monthly Trend ────────────────────────────────────────────────────
-        $monthly_data = $issued_sales
+        // ── Monthly Trend (from pending drafts, grouped by sale_date) ────────
+        $monthly_data = $pending_leads
             ->groupBy(function ($item) {
-                if (!$item->issuance_date) return 'Unknown';
-                $date = is_string($item->issuance_date)
-                    ? $item->issuance_date
-                    : $item->issuance_date->toDateString();
+                if (!$item->sale_date) return 'Unknown';
+                $date = is_string($item->sale_date)
+                    ? $item->sale_date
+                    : $item->sale_date->toDateString();
                 return substr($date, 0, 7);
             })
             ->map(fn ($g) => [
                 'count'   => $g->count(),
                 'premium' => $g->sum(fn ($l) => $l->monthly_premium ?? 0),
-                'revenue' => $g->sum(fn ($l) => $l->agent_revenue ?? $l->monthly_premium ?? 0),
+                'revenue' => $g->sum(fn ($l) => $l->calculated_revenue ?? 0),
             ]);
 
-        // ── Partner × Carrier Breakdown ──────────────────────────────────────
-        $partner_carrier_breakdown = $issued_sales
+        // ── Partner × Carrier Breakdown (from pending drafts) ────────────────
+        $partner_carrier_breakdown = $pending_leads
             ->groupBy(fn ($l) => $l->partner_id ?? 0)
             ->map(function ($partnerGroup, $partnerId) {
                 $partner     = $partnerGroup->first()->partner;
@@ -108,7 +100,7 @@ class RevenueAnalyticsController extends Controller
                     ->map(fn ($cg, $name) => [
                         'carrier' => $name,
                         'count'   => $cg->count(),
-                        'revenue' => $cg->sum(fn ($l) => $l->agent_revenue ?? $l->monthly_premium ?? 0),
+                        'revenue' => $cg->sum(fn ($l) => $l->calculated_revenue ?? 0),
                         'premium' => $cg->sum(fn ($l) => $l->monthly_premium ?? 0),
                     ])
                     ->sortByDesc('revenue')
@@ -126,13 +118,13 @@ class RevenueAnalyticsController extends Controller
             ->sortByDesc('total_revenue')
             ->values();
 
-        // ── Top Closers by Revenue ───────────────────────────────────────────
-        $top_closers = $issued_sales
+        // ── Top Closers by Projected Revenue ────────────────────────────────
+        $top_closers = $pending_leads
             ->groupBy(fn ($l) => $l->closer_name ?: ($l->managed_by ? 'Agent #' . $l->managed_by : 'Unknown'))
             ->map(fn ($g, $name) => [
                 'name'    => $name,
                 'count'   => $g->count(),
-                'revenue' => $g->sum(fn ($l) => $l->agent_revenue ?? $l->monthly_premium ?? 0),
+                'revenue' => $g->sum(fn ($l) => $l->calculated_revenue ?? 0),
             ])
             ->sortByDesc('revenue')
             ->take(10)
@@ -141,11 +133,10 @@ class RevenueAnalyticsController extends Controller
         return view('admin.revenue-analytics.index', compact(
             'periodLabel', 'prevMonth', 'nextMonth', 'currentMonth', 'activeMonth',
             'periodStart', 'periodEnd',
-            'total_count', 'total_premium', 'total_revenue', 'avg_revenue',
-            'pending_count', 'projected_revenue',
+            'pending_count', 'projected_revenue', 'pending_premium',
             'monthly_data',
-            'issued_sales',
             'pending_leads',
+            'lead_projected_revenues',
             'partner_carrier_breakdown',
             'top_closers',
         ));

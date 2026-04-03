@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\BadLead;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
+use App\Services\CommissionCalculationService;
 use App\Models\LeadDial;
 use App\Models\Partner;
 use App\Models\User;
@@ -1395,57 +1396,6 @@ class ReportController extends Controller
      * Shows total sales count and total monthly premium per carrier.
      */
     /**
-     * Build a lookup map of commission rates from AgentCarrierState and InsuranceCarrier.
-     * Returns: [ 'partner_carrier_state' => pct, 'partner_carrier' => pct, 'carrier' => pct ]
-     * Used to estimate revenue when agent_commission is not yet stored on a lead.
-     */
-    private function buildCommissionRateMap(): array
-    {
-        // State-specific rates: keyed by "{partner_id}_{carrier_id}_{state}_{type}"
-        $stateRates = [];
-        \App\Models\AgentCarrierState::whereNotNull('partner_id')
-            ->whereNotNull('insurance_carrier_id')
-            ->select('partner_id', 'insurance_carrier_id', 'state',
-                'settlement_level_pct', 'settlement_graded_pct',
-                'settlement_gi_pct', 'settlement_modified_pct')
-            ->get()
-            ->each(function ($r) use (&$stateRates) {
-                $base = "{$r->partner_id}_{$r->insurance_carrier_id}_{$r->state}";
-                $stateRates["{$base}_level"]    = $r->settlement_level_pct;
-                $stateRates["{$base}_graded"]   = $r->settlement_graded_pct;
-                $stateRates["{$base}_gi"]       = $r->settlement_gi_pct;
-                $stateRates["{$base}_modified"] = $r->settlement_modified_pct;
-            });
-
-        // Partner-carrier fallback: best available rate per partner+carrier (take max across states)
-        $partnerCarrierRates = [];
-        \App\Models\AgentCarrierState::whereNotNull('partner_id')
-            ->whereNotNull('insurance_carrier_id')
-            ->select('partner_id', 'insurance_carrier_id',
-                DB::raw('MAX(settlement_level_pct) as lvl'),
-                DB::raw('MAX(settlement_graded_pct) as grd'),
-                DB::raw('MAX(settlement_gi_pct) as gi_pct'),
-                DB::raw('MAX(settlement_modified_pct) as mod_pct'))
-            ->groupBy('partner_id', 'insurance_carrier_id')
-            ->get()
-            ->each(function ($r) use (&$partnerCarrierRates) {
-                $base = "{$r->partner_id}_{$r->insurance_carrier_id}";
-                $partnerCarrierRates["{$base}_level"]    = $r->lvl;
-                $partnerCarrierRates["{$base}_graded"]   = $r->grd;
-                $partnerCarrierRates["{$base}_gi"]       = $r->gi_pct;
-                $partnerCarrierRates["{$base}_modified"] = $r->mod_pct;
-            });
-
-        // Carrier base rates (last fallback)
-        $carrierBaseRates = \App\Models\InsuranceCarrier::whereNotNull('base_commission_percentage')
-            ->where('base_commission_percentage', '>', 0)
-            ->pluck('base_commission_percentage', 'id')
-            ->toArray();
-
-        return compact('stateRates', 'partnerCarrierRates', 'carrierBaseRates');
-    }
-
-    /**
      * Resolve the settlement type key from a lead's policy_type / settlement_type.
      * Maps "G.I", "Graded", "Level", "Modified" etc. → 'gi', 'graded', 'level', 'modified'
      */
@@ -1459,61 +1409,26 @@ class ReportController extends Controller
     }
 
     /**
-     * Calculate effective revenue for one lead using the rate map.
-     * Priority: stored agent_commission → state-specific rate → partner-carrier rate → carrier base rate
-     * Returns ['revenue' => float, 'rate' => float|null, 'source' => string]
+     * Calculate revenue for one lead: premium × 9 × commission%
+     * Looks up commission% from the cluster page (AgentCarrierState) by partner + carrier + settlement type.
+     * Falls back to premium × 9 if no rate is configured.
      */
-    private function calcLeadRevenue($lead, array $rateMap): array
+    private function calcLeadRevenue($lead): float
     {
-        // Use stored commission if valid
-        if ($lead->agent_commission > 0) {
-            $rate = $lead->monthly_premium > 0
-                ? round(($lead->agent_commission / ($lead->monthly_premium * 9)) * 100, 2)
-                : $lead->settlement_percentage;
-            return ['revenue' => (float)$lead->agent_commission, 'rate' => $rate, 'source' => 'stored'];
-        }
+        $premium = (float) ($lead->monthly_premium ?? 0);
+        if ($premium <= 0) return 0.0;
 
-        $premium = (float)($lead->monthly_premium ?? 0);
-        if ($premium <= 0) {
-            return ['revenue' => 0, 'rate' => null, 'source' => 'no_premium'];
-        }
+        $settlementType = $this->resolveSettlementKey($lead);
 
-        $type   = $this->resolveSettlementKey($lead);
-        $pId    = $lead->partner_id;
-        $cId    = $lead->insurance_carrier_id;
-        $state  = $lead->state ?? '';
+        $result = app(CommissionCalculationService::class)->calculateCommission(
+            $lead->partner_id,
+            $lead->insurance_carrier_id,
+            $lead->state ?? '',
+            $settlementType,
+            $premium
+        );
 
-        // 1. State-specific rate
-        if ($pId && $cId && $state) {
-            $key = "{$pId}_{$cId}_{$state}_{$type}";
-            $pct = $rateMap['stateRates'][$key] ?? null;
-            if (!$pct && $type !== 'level') {
-                $pct = $rateMap['stateRates']["{$pId}_{$cId}_{$state}_level"] ?? null;
-            }
-            if ($pct > 0) {
-                return ['revenue' => round($premium * 9 * ($pct / 100), 2), 'rate' => $pct, 'source' => 'partner_carrier_state'];
-            }
-        }
-
-        // 2. Partner-carrier fallback (max rate across states)
-        if ($pId && $cId) {
-            $key = "{$pId}_{$cId}_{$type}";
-            $pct = $rateMap['partnerCarrierRates'][$key] ?? null;
-            if (!$pct && $type !== 'level') {
-                $pct = $rateMap['partnerCarrierRates']["{$pId}_{$cId}_level"] ?? null;
-            }
-            if ($pct > 0) {
-                return ['revenue' => round($premium * 9 * ($pct / 100), 2), 'rate' => $pct, 'source' => 'partner_carrier'];
-            }
-        }
-
-        // 3. Carrier base rate
-        if ($cId && isset($rateMap['carrierBaseRates'][$cId])) {
-            $pct = $rateMap['carrierBaseRates'][$cId];
-            return ['revenue' => round($premium * 9 * ($pct / 100), 2), 'rate' => $pct, 'source' => 'carrier_base'];
-        }
-
-        return ['revenue' => 0, 'rate' => null, 'source' => 'no_rate'];
+        return round($result['commission'] ?? 0, 2);
     }
 
     public function submissionPerformance(Request $request)
@@ -1528,23 +1443,20 @@ class ReportController extends Controller
         if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
         if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
 
-        // Load all leads and calculate revenue dynamically from configured rates
+        // Load all leads and calculate revenue from cluster rates (premium × 9 × commission%)
         $leads = $query->select(
             'insurance_carrier_id', 'carrier_name', 'partner_id', 'assigned_partner',
-            'monthly_premium', 'agent_commission', 'settlement_type', 'policy_type',
-            'state', 'settlement_percentage'
+            'monthly_premium', 'settlement_type', 'policy_type', 'state'
         )->get();
-
-        $rateMap = $this->buildCommissionRateMap();
 
         // Group by carrier+partner, aggregating with dynamic revenue
         $carriersData = $leads
             ->groupBy(fn ($l) => ($l->insurance_carrier_id ?? 'null') . '_' . ($l->partner_id ?? 'null'))
-            ->map(function ($group) use ($rateMap) {
+            ->map(function ($group) {
                 $first        = $group->first();
                 $totalRevenue = 0;
                 foreach ($group as $lead) {
-                    $totalRevenue += $this->calcLeadRevenue($lead, $rateMap)['revenue'];
+                    $totalRevenue += $this->calcLeadRevenue($lead);
                 }
                 return (object) [
                     'insurance_carrier_id' => $first->insurance_carrier_id,
@@ -1594,22 +1506,19 @@ class ReportController extends Controller
         $rawLeads = $query->select(
                 'id', 'cn_name', 'carrier_name', 'assigned_partner',
                 'insurance_carrier_id', 'partner_id',
-                'monthly_premium', 'agent_commission', 'settlement_percentage',
+                'monthly_premium', 'agent_commission', 'agent_revenue', 'settlement_percentage',
                 'policy_type', 'settlement_type', 'state', 'sale_date',
                 'pending_contract_at', 'closer_name', 'issuance_status',
+                'policy_number',
                 'commission_calculation_notes', 'commission_calculated_at'
             )
             ->orderByDesc('sale_date')
             ->get();
 
-        $rateMap = $this->buildCommissionRateMap();
-
-        // Attach dynamic revenue info to each lead
-        $leads = $rawLeads->map(function ($lead) use ($rateMap) {
-            $calc = $this->calcLeadRevenue($lead, $rateMap);
-            $lead->eff_revenue = $calc['revenue'];
-            $lead->eff_rate    = $calc['rate'];
-            $lead->rev_source  = $calc['source'];
+        // Attach calculated revenue to each lead for display
+        $leads = $rawLeads->map(function ($lead) {
+            $lead->eff_revenue = $this->calcLeadRevenue($lead);
+            $lead->eff_rate    = null;
             return $lead;
         });
 

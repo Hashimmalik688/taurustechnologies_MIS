@@ -21,6 +21,11 @@
     const CSRF        = document.querySelector('meta[name="csrf-token"]')?.content;
     const REPORT_URL  = '/api/security/report-suspect';
 
+    // ── Chat page exemption ───────────────────────────────────────────
+    // Allow full text selection and copying on the /chat page so users
+    // can copy message content.
+    const isChatPage = window.location.pathname.startsWith('/chat');
+
     // ── SELF-CONTAINED WARNING TOAST ──────────────────────────────────
     // No dependency on toastr/sweetalert — works on every page.
     var toastContainer = null;
@@ -158,7 +163,7 @@
     // ── 1. DISABLE TEXT SELECTION (CSS injection) ─────────────────────
     var noSelectStyle = document.createElement('style');
     noSelectStyle.id  = 'crm-security-no-select';
-    noSelectStyle.textContent = [
+    var baseStyles = [
         'body {',
         '    -webkit-user-select: none !important;',
         '    -moz-user-select:    none !important;',
@@ -169,6 +174,17 @@
         '    -webkit-user-select: text !important;',
         '    user-select:         text !important;',
         '}',
+    ];
+    var chatOverrideStyles = isChatPage ? [
+        '/* Chat page — allow selecting and copying message text */',
+        '.message-text, .message-bubble, .chat-message-content, .msg-text {',
+        '    -webkit-user-select: text !important;',
+        '    -moz-user-select:    text !important;',
+        '    -ms-user-select:     text !important;',
+        '    user-select:         text !important;',
+        '}',
+    ] : [];
+    noSelectStyle.textContent = baseStyles.concat(chatOverrideStyles).concat([
         '@media print {',
         '    body > * { display: none !important; }',
         '    body::before {',
@@ -180,7 +196,7 @@
         '        color: #1e293b;',
         '    }',
         '}',
-    ].join('\n');
+    ]).join('\n');
     document.head.appendChild(noSelectStyle);
 
     // ── 2. DISABLE RIGHT-CLICK ────────────────────────────────────────
@@ -194,6 +210,7 @@
     // ── 3. DISABLE COPY / CUT ─────────────────────────────────────────
     document.addEventListener('copy', function (e) {
         if (isEditable(e.target)) return;
+        if (isChatPage) return; // allow copying message text in chat
         e.preventDefault();
         if (e.clipboardData) e.clipboardData.clearData();
         throttledReport('copy_attempt');
@@ -202,6 +219,7 @@
 
     document.addEventListener('cut', function (e) {
         if (isEditable(e.target)) return;
+        if (isChatPage) return; // allow cut in chat
         e.preventDefault();
         if (e.clipboardData) e.clipboardData.clearData();
         throttledReport('cut_attempt');
@@ -274,6 +292,7 @@
 
         // ── Ctrl+C / Ctrl+X / Ctrl+A outside form fields ─────────────
         if (ctrl && ['c', 'x', 'a'].includes(key) && !isEditable(document.activeElement)) {
+            if (isChatPage) return; // allow Ctrl+C/X/A on the chat page
             e.preventDefault();
             var triggerMap = { c: 'ctrl_c', x: 'ctrl_x', a: 'ctrl_a' };
             var msgs = { c: 'Copying data is not allowed.', x: 'Cutting data is not allowed.', a: 'Select-all is disabled on protected content.' };

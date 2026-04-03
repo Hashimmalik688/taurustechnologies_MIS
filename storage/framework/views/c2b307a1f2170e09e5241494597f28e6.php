@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'QA Scoring Dashboard'); ?>
 
-@section('title', 'QA Scoring Dashboard')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════
    QA Dashboard v3 — Enterprise Clean
@@ -545,9 +543,9 @@
   .qa-page-header { flex-direction:column; align-items:flex-start; }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <!-- ═══ Page Header ═══ -->
 <div class="qa-page-header">
@@ -669,9 +667,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════
@@ -1149,7 +1147,7 @@ function renderCloserTable(closers, leaderboard) {
         </tr></thead>
         <tbody>${rows.map((c, i) => {
         const name     = useCloser ? c.closer_name : c.agent_name;
-        const agentId  = useCloser ? c.closer_id : c.agent_user_id;
+        const agentId  = useCloser ? c.closer_user_id : c.agent_user_id;
         const calls    = useCloser ? (c.total_calls||0) : (c.calls_scored||0);
         const avgScore = parseFloat(c.avg_score || 0);
         const sales    = useCloser ? (c.total_sales||0) : (c.sales_count||0);
@@ -1704,4 +1702,6 @@ if (autoCallId && !isNaN(autoCallId)) {
 
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/qa/dashboard.blade.php ENDPATH**/ ?>
