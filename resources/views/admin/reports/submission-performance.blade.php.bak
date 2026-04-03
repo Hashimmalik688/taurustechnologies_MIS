@@ -1,0 +1,284 @@
+@extends('layouts.master')
+
+@section('title')
+    Submission Performance
+@endsection
+
+@section('css')
+@include('partials.pipeline-dashboard-styles')
+<style>
+/* ── Page header ── */
+.sp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.35rem}
+.sp-hdr h5{margin:0;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.35rem}
+.sp-hdr h5 i{color:var(--bs-gold,#d4af37)}
+.sp-hdr .sp-sub{font-size:.68rem;color:var(--bs-surface-500,#64748b);margin-left:.2rem;font-weight:400}
+/* ── Filter bar ── */
+.sp-filter{display:flex;flex-wrap:wrap;gap:.35rem;align-items:flex-end;background:var(--bs-card-bg,#fff);border:1px solid rgba(0,0,0,.06);border-radius:.5rem;padding:.5rem .65rem;margin-bottom:.65rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sp-filter label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-surface-400,#94a3b8);display:block;margin-bottom:.15rem}
+.sp-filter input[type=date]{font-size:.75rem;padding:.28rem .5rem;border-radius:.4rem;border:1px solid rgba(0,0,0,.1);background:var(--bs-input-bg,#fff);color:var(--bs-body-color,#212529);outline:none}
+.sp-filter input[type=date]:focus{border-color:var(--bs-gold,#d4af37);box-shadow:0 0 0 2px rgba(212,175,55,.12)}
+.sp-btn{font-size:.72rem;font-weight:700;padding:.3rem .7rem;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.25rem;transition:all .15s}
+.sp-btn-gold{background:linear-gradient(135deg,#d4af37,#b8941f);color:#0f172a}
+.sp-btn-gold:hover{box-shadow:0 2px 8px rgba(212,175,55,.3);transform:translateY(-1px)}
+.sp-btn-ghost{background:transparent;border:1px solid rgba(0,0,0,.1)!important;color:var(--bs-surface-500,#64748b);font-size:.7rem}
+.sp-btn-ghost:hover{border-color:var(--bs-gold,#d4af37)!important;color:#92760d}
+.sp-date-range{font-size:.65rem;color:var(--bs-surface-500,#64748b);display:flex;align-items:center;gap:.25rem;margin-left:.15rem}
+.sp-date-range strong{color:var(--bs-surface-800,#1e293b)}
+/* ── KPI strip ── */
+.sp-kpi{display:flex;gap:.45rem;margin-bottom:.65rem;flex-wrap:wrap}
+.sp-kpi-box{flex:1;min-width:120px;background:var(--bs-card-bg,#fff);border:1px solid rgba(0,0,0,.06);border-radius:.5rem;padding:.5rem .7rem;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sp-kpi-box::before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:linear-gradient(180deg,#d4af37,#b8941f);border-radius:3px 0 0 3px}
+.sp-kpi-box .lbl{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--bs-surface-400,#94a3b8);margin-bottom:.15rem}
+.sp-kpi-box .val{font-size:1.2rem;font-weight:800;color:var(--bs-surface-900,#1e293b);line-height:1;font-variant-numeric:tabular-nums}
+.sp-kpi-box .sub{font-size:.6rem;color:var(--bs-surface-400,#94a3b8);margin-top:.12rem}
+/* ── Layout ── */
+.sp-body{display:grid;grid-template-columns:1fr 196px;gap:.65rem;align-items:start}
+@media(max-width:720px){.sp-body{grid-template-columns:1fr}.sp-donut-panel{display:none}}
+/* ── Card ── */
+.sp-card{background:var(--bs-card-bg,#fff);border:1px solid rgba(0,0,0,.06);border-radius:.5rem;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sp-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:.42rem .65rem;border-bottom:1px solid rgba(0,0,0,.05)}
+.sp-card-hdr h6{margin:0;font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:.3rem}
+.sp-card-hdr h6 i{color:var(--bs-gold,#d4af37);font-size:.88rem}
+.sp-card-meta{font-size:.62rem;color:var(--bs-surface-400,#94a3b8)}
+/* ── Table ── */
+.sp-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:.72rem}
+.sp-tbl thead th{padding:.38rem .55rem;font-size:.59rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-surface-500,#64748b);background:rgba(248,250,252,.9);border-bottom:2px solid rgba(0,0,0,.06);white-space:nowrap;position:sticky;top:0;z-index:2}
+.sp-tbl tbody td{padding:.38rem .55rem;border-bottom:1px solid rgba(0,0,0,.03);vertical-align:middle}
+.sp-tbl tbody tr:last-child td{border-bottom:none}
+.sp-tbl tbody tr.sp-click{cursor:pointer}
+.sp-tbl tbody tr.sp-click:hover td{background:rgba(212,175,55,.04)}
+.sp-tbl tfoot td{padding:.42rem .55rem;border-top:2px solid rgba(0,0,0,.07);font-weight:700;background:rgba(212,175,55,.035)}
+/* ── Carrier cell ── */
+.sp-carrier-cell{display:flex;align-items:center;gap:.35rem;text-decoration:none}
+.sp-c-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sp-c-name{font-weight:600;color:var(--bs-surface-900,#1e293b);font-size:.73rem;white-space:nowrap}
+.sp-c-partner{font-size:.59rem;font-weight:700;padding:.07rem .3rem;border-radius:8px;background:rgba(212,175,55,.12);color:#92760d;white-space:nowrap;margin-left:.05rem}
+.sp-c-none{font-size:.59rem;font-weight:600;padding:.07rem .3rem;border-radius:8px;background:rgba(108,117,125,.07);color:var(--bs-surface-400,#94a3b8)}
+tr:hover .sp-c-name{color:var(--bs-gold-dark,#92760d)}
+/* ── Rank ── */
+.sp-rank{text-align:center;font-size:.65rem;font-weight:700;color:var(--bs-surface-400,#94a3b8);width:30px}
+.sp-r1{color:#d4af37}.sp-r2{color:#94a3b8}.sp-r3{color:#cd7f32}
+/* ── Numbers ── */
+.sp-num{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.sp-num-big{font-size:.82rem;font-weight:700}
+.sp-premium{display:inline-flex;align-items:center;gap:.18rem;background:rgba(52,195,143,.09);color:#1a8754;font-size:.64rem;font-weight:700;padding:.09rem .35rem;border-radius:14px}
+/* ── Mini bar ── */
+.sp-bar-wrap{display:flex;align-items:center;gap:.3rem}
+.sp-bar-bg{flex:1;height:4px;border-radius:4px;background:rgba(0,0,0,.06);overflow:hidden;min-width:45px}
+.sp-bar-fill{height:100%;border-radius:4px;transition:width .35s ease}
+.sp-pct{font-size:.61rem;color:var(--bs-surface-400,#94a3b8);min-width:28px;text-align:right}
+/* ── Donut panel ── */
+.sp-donut-panel{background:var(--bs-card-bg,#fff);border:1px solid rgba(0,0,0,.06);border-radius:.5rem;padding:.5rem .55rem;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.sp-donut-title{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-surface-400,#94a3b8);margin-bottom:.4rem}
+.sp-legend-item{display:flex;align-items:center;gap:.3rem;margin-bottom:.24rem}
+.sp-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sp-legend-lbl{font-size:.63rem;color:var(--bs-surface-700,#334155);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-legend-pct{font-size:.61rem;font-weight:700;color:var(--bs-surface-500,#64748b)}
+/* ── Empty ── */
+.sp-empty{text-align:center;padding:2.5rem 1rem;color:var(--bs-surface-400,#94a3b8)}
+.sp-empty i{font-size:2rem;display:block;margin-bottom:.4rem;opacity:.2}
+.sp-empty h6{font-size:.78rem;font-weight:700;margin-bottom:.2rem}
+.sp-empty p{font-size:.68rem;max-width:220px;margin:0 auto}
+/* ── Dark mode ── */
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-tbl thead th{background:rgba(15,23,42,.65);color:#94a3b8;border-bottom-color:rgba(255,255,255,.06)}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-tbl tfoot td{background:rgba(212,175,55,.05);border-top-color:rgba(255,255,255,.08)}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-card,.sp-kpi-box,.sp-filter,.sp-donut-panel{background:rgba(15,23,42,.45);border-color:rgba(255,255,255,.06)}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-filter input[type=date]{background:rgba(15,23,42,.5);border-color:rgba(255,255,255,.1);color:#e2e8f0}
+</style>
+@endsection
+
+@section('content')
+@php
+$palette=['#d4af37','#34c38f','#556ee6','#f46a6a','#7c69ef','#50a5f1','#f1b44c','#e83e8c','#20c997','#fd7e14'];
+$grandTotal=$grandTotalSales;
+@endphp
+
+{{-- Header --}}
+<div class="sp-hdr">
+    <h5>
+        <i class="bx bx-award"></i>
+        Submission Performance
+        <span class="sp-sub">— carrier &amp; partner breakdown · approved sales sent to Pending Contract</span>
+    </h5>
+    <a href="{{ route('settings.reports.hub') }}" class="sp-btn sp-btn-ghost" style="text-decoration:none"><i class="bx bx-arrow-back"></i> Hub</a>
+</div>
+
+{{-- Filter --}}
+<div class="sp-filter">
+    <form method="GET" action="{{ route('settings.reports.submission-performance') }}" style="display:contents">
+        <div><label for="sp-df">From</label><input type="date" id="sp-df" name="date_from" value="{{ $dateFrom }}"></div>
+        <div><label for="sp-dt">To</label><input type="date" id="sp-dt" name="date_to" value="{{ $dateTo }}"></div>
+        <button type="submit" class="sp-btn sp-btn-gold" style="align-self:flex-end"><i class="bx bx-search-alt"></i> Apply</button>
+        <a href="{{ route('settings.reports.submission-performance') }}" class="sp-btn sp-btn-ghost" style="align-self:flex-end;text-decoration:none"><i class="bx bx-reset"></i> Reset</a>
+        @if($dateFrom||$dateTo)
+        <span class="sp-date-range" style="align-self:flex-end">
+            <i class="bx bx-calendar-check" style="color:var(--bs-gold,#d4af37);font-size:.8rem"></i>
+            <strong>{{ $dateFrom?\Carbon\Carbon::parse($dateFrom)->format('M d, Y'):'—' }}</strong>
+            <span>→</span>
+            <strong>{{ $dateTo?\Carbon\Carbon::parse($dateTo)->format('M d, Y'):'—' }}</strong>
+        </span>
+        @endif
+    </form>
+</div>
+
+{{-- KPIs --}}
+<div class="sp-kpi">
+    <div class="sp-kpi-box">
+        <div class="lbl">Total Submissions</div>
+        <div class="val">{{ number_format($grandTotalSales) }}</div>
+        <div class="sub">Sent to Pending Contract</div>
+    </div>
+    <div class="sp-kpi-box">
+        <div class="lbl">Total Premium</div>
+        <div class="val">${{ number_format($grandTotalPremium,2) }}</div>
+        <div class="sub">Monthly premium / all carriers</div>
+    </div>
+    <div class="sp-kpi-box">
+        <div class="lbl">Rows</div>
+        <div class="val">{{ $carriersData->count() }}</div>
+        <div class="sub">Carrier · Partner combos</div>
+    </div>
+    @if($carriersData->count()>0)
+    <div class="sp-kpi-box">
+        <div class="lbl">Avg Premium / Sale</div>
+        <div class="val">${{ $grandTotalSales>0?number_format($grandTotalPremium/$grandTotalSales,2):'0.00' }}</div>
+        <div class="sub">Across all carriers</div>
+    </div>
+    @endif
+</div>
+
+{{-- Body grid --}}
+<div class="sp-body">
+
+    {{-- Table --}}
+    <div class="sp-card">
+        <div class="sp-card-hdr">
+            <h6><i class="bx bx-building"></i> Carrier · Partner Breakdown</h6>
+            <span class="sp-card-meta">Click row → Pending Contract pre-filtered</span>
+        </div>
+        @if($carriersData->isEmpty())
+        <div class="sp-empty">
+            <i class="bx bx-bar-chart-alt-2"></i>
+            <h6>No submissions found</h6>
+            <p>No leads sent to Pending Contract for this date range.</p>
+        </div>
+        @else
+        <div style="overflow-x:auto">
+            <table class="sp-tbl">
+                <thead>
+                    <tr>
+                        <th style="width:28px">#</th>
+                        <th style="min-width:178px">Carrier · Partner</th>
+                        <th style="min-width:105px">Share</th>
+                        <th class="sp-num" style="min-width:60px">Sales</th>
+                        <th class="sp-num" style="min-width:110px">Monthly Premium</th>
+                        <th class="sp-num" style="min-width:90px">Avg / Sale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($carriersData as $idx=>$row)
+                    @php
+                        $rank=$idx+1;
+                        $pct=$grandTotal>0?round(($row->total_sales/$grandTotal)*100,1):0;
+                        $avg=$row->total_sales>0?$row->total_premium/$row->total_sales:0;
+                        $color=$palette[$idx%count($palette)];
+                        $pcParams=['date_from'=>$dateFrom,'date_to'=>$dateTo];
+                        if($row->insurance_carrier_id) $pcParams['carrier']=$row->insurance_carrier_id;
+                        if($row->partner_id)           $pcParams['partner']=$row->partner_id;
+                        $pcUrl=route('issuance.index',$pcParams);
+                    @endphp
+                    <tr class="sp-click" onclick="window.location='{{ $pcUrl }}'">
+                        <td class="sp-rank @if($rank===1)sp-r1 @elseif($rank===2)sp-r2 @elseif($rank===3)sp-r3 @endif">
+                            @if($rank===1)<i class="bx bxs-crown"></i>@else{{ $rank }}@endif
+                        </td>
+                        <td>
+                            <a href="{{ $pcUrl }}" class="sp-carrier-cell" onclick="event.stopPropagation()">
+                                <span class="sp-c-dot" style="background:{{ $color }}"></span>
+                                <span class="sp-c-name">{{ $row->carrier_name ?: 'Unknown' }}</span>
+                                @if($row->assigned_partner)
+                                    <span class="sp-c-partner">{{ $row->assigned_partner }}</span>
+                                @else
+                                    <span class="sp-c-none">No partner</span>
+                                @endif
+                            </a>
+                        </td>
+                        <td>
+                            <div class="sp-bar-wrap">
+                                <div class="sp-bar-bg"><div class="sp-bar-fill" style="width:{{ $pct }}%;background:{{ $color }}"></div></div>
+                                <span class="sp-pct">{{ $pct }}%</span>
+                            </div>
+                        </td>
+                        <td class="sp-num"><span class="sp-num-big">{{ number_format($row->total_sales) }}</span></td>
+                        <td class="sp-num">
+                            <span class="sp-premium"><i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($row->total_premium,2) }}</span>
+                        </td>
+                        <td class="sp-num" style="font-size:.68rem;color:var(--bs-surface-500,#64748b)">${{ number_format($avg,2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td></td>
+                        <td style="font-size:.7rem;font-weight:800"><span style="display:inline-flex;align-items:center;gap:.22rem"><i class="bx bx-sum" style="color:var(--bs-gold,#d4af37)"></i>TOTAL</span></td>
+                        <td></td>
+                        <td class="sp-num sp-num-big">{{ number_format($grandTotalSales) }}</td>
+                        <td class="sp-num">
+                            <span class="sp-premium" style="background:rgba(212,175,55,.12);color:#92760d"><i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($grandTotalPremium,2) }}</span>
+                        </td>
+                        <td class="sp-num" style="font-size:.68rem;color:var(--bs-surface-500,#64748b)">${{ $grandTotalSales>0?number_format($grandTotalPremium/$grandTotalSales,2):'0.00' }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        @endif
+    </div>
+
+    {{-- Donut chart --}}
+    @if($carriersData->isNotEmpty())
+    <div class="sp-donut-panel">
+        <div class="sp-donut-title">Sales Distribution</div>
+        @php
+            $cx=80;$cy=80;$innerR=51;$circumference=2*M_PI*$innerR;
+            $cumPct=0;$slices=[];
+            foreach($carriersData as $i=>$row){
+                $pct=$grandTotal>0?$row->total_sales/$grandTotal:0;
+                $slices[]=['pct'=>$pct,'color'=>$palette[$i%count($palette)],'cum'=>$cumPct,'label'=>($row->carrier_name?:'?').($row->assigned_partner?' · '.$row->assigned_partner:'')];
+                $cumPct+=$pct;
+            }
+        @endphp
+        <svg viewBox="0 0 160 160" style="width:100%;max-width:160px;display:block;margin:0 auto">
+            <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $innerR }}" fill="none" stroke="rgba(0,0,0,.06)" stroke-width="20"/>
+            @foreach($slices as $sl)
+            @php
+                $dash=$circumference*$sl['pct'];
+                $gap=$circumference-$dash;
+                $startOff=$circumference*0.25-$circumference*$sl['cum'];
+            @endphp
+            <circle cx="{{ $cx }}" cy="{{ $cy }}" r="{{ $innerR }}" fill="none" stroke="{{ $sl['color'] }}" stroke-width="20"
+                stroke-dasharray="{{ number_format($dash,4,'.',''). ' ' .number_format($gap,4,'.','')}}"
+                stroke-dashoffset="{{ number_format($startOff,4,'.','')}}" />
+            @endforeach
+            <text x="{{ $cx }}" y="{{ $cy-6 }}" text-anchor="middle" font-size="17" font-weight="800" fill="var(--bs-surface-900,#1e293b)">{{ number_format($grandTotalSales) }}</text>
+            <text x="{{ $cx }}" y="{{ $cy+10 }}" text-anchor="middle" font-size="8" fill="var(--bs-surface-400,#94a3b8)" font-weight="600" letter-spacing=".4">SALES</text>
+        </svg>
+        <div style="margin-top:.45rem">
+            @foreach($carriersData->take(7) as $i=>$row)
+            @php $lPct=$grandTotal>0?round(($row->total_sales/$grandTotal)*100,1):0 @endphp
+            <div class="sp-legend-item">
+                <span class="sp-legend-dot" style="background:{{ $palette[$i%count($palette)] }}"></span>
+                <span class="sp-legend-lbl">{{ $row->carrier_name?:'Unknown' }}@if($row->assigned_partner) <span style="opacity:.6">· {{ $row->assigned_partner }}</span>@endif</span>
+                <span class="sp-legend-pct">{{ $lPct }}%</span>
+            </div>
+            @endforeach
+            @if($carriersData->count()>7)<div style="font-size:.58rem;color:var(--bs-surface-400,#94a3b8);margin-top:.15rem">+{{ $carriersData->count()-7 }} more</div>@endif
+        </div>
+    </div>
+    @endif
+
+</div>
+
+<p style="font-size:.6rem;color:var(--bs-surface-400,#94a3b8);text-align:center;margin-top:.45rem">
+    <i class="bx bx-info-circle"></i>
+    Read-only — sourced from Pending Contract (<code>pending_contract_at IS NOT NULL</code>). No lead data modified.
+</p>
+@endsection

@@ -261,8 +261,15 @@ class LeadController extends Controller
 
     public function sales(Request $request)
     {
-        // Default to current month if no date filter is applied
-        if (!$request->filled('date_from') && !$request->filled('date_to')) {
+        // Default to current month only when no other specific filters are active.
+        // If the user is filtering by partner, carrier, or searching, show all-time
+        // so the results aren't silently cut off by the month boundary.
+        $hasSpecificFilter = $request->filled('partner')
+            || $request->filled('carrier')
+            || $request->filled('search')
+            || $request->filled('policy_type');
+
+        if (!$request->filled('date_from') && !$request->filled('date_to') && !$hasSpecificFilter) {
             $request->merge([
                 'date_from' => now()->startOfMonth()->toDateString(),
                 'date_to'   => now()->endOfMonth()->toDateString(),
@@ -315,6 +322,11 @@ class LeadController extends Controller
             $query->whereNotNull('recall_requested_at');
         }
         // 'all' = no additional filter
+
+        // Filter by partner
+        if ($request->filled('partner')) {
+            $query->where('partner_id', $request->partner);
+        }
 
         // Filter by policy type
         if ($request->filled('policy_type')) {
@@ -1182,11 +1194,6 @@ class LeadController extends Controller
             $query->where('insurance_carrier_id', $request->carrier);
         }
 
-        // Filter by partner
-        if ($request->filled('partner')) {
-            $query->where('partner_id', $request->partner);
-        }
-        
         // Filter by issuance status
         if ($request->filled('issuance_status')) {
             if ($request->issuance_status === 'pending') {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
+use App\Models\Partner;
 use App\Support\Statuses;
 use Illuminate\Http\Request;
 
@@ -29,6 +30,7 @@ class PendingDraftController extends Controller
     {
         $search   = $request->get('search');
         $carrier  = $request->get('carrier');
+        $partner  = $request->get('partner');
         $dateFrom = $request->get('date_from');
         $dateTo   = $request->get('date_to');
         $tab      = $request->get('tab', 'pending'); // pending | not_paid
@@ -57,6 +59,10 @@ class PendingDraftController extends Controller
             $baseQuery->where('insurance_carrier_id', $carrier);
         }
 
+        if ($partner) {
+            $baseQuery->where('partner_id', $partner);
+        }
+
         if ($dateFrom) {
             $baseQuery->whereDate('sale_date', '>=', $dateFrom);
         }
@@ -81,11 +87,12 @@ class PendingDraftController extends Controller
         }
 
         $carriers   = InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $partners   = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
         $fdfpTypes  = Statuses::FDFP_TYPES;
         $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
 
         return view('admin.pending-draft.index', compact(
-            'leads', 'carriers', 'search', 'carrier',
+            'leads', 'carriers', 'partners', 'search', 'carrier', 'partner',
             'dateFrom', 'dateTo', 'tab',
             'pendingCount', 'notPaidCount', 'totalCount',
             'fdfpTypes', 'niDispositions'

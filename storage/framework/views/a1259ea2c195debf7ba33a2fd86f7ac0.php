@@ -427,6 +427,12 @@
                     <option value="<?php echo e($carrier->id); ?>" <?php echo e(request('carrier') == $carrier->id ? 'selected' : ''); ?>><?php echo e($carrier->name); ?></option>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
+            <select name="partner" class="sl-pill-select">
+                <option value="">All Partners</option>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $partners; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($p->id); ?>" <?php echo e(request('partner') == $p->id ? 'selected' : ''); ?>><?php echo e($p->code ?: $p->name); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </select>
             <select name="issuance_status" class="sl-pill-select">
                 <option value="">All Status</option>
                 <option value="pending" <?php echo e(request('issuance_status') == 'pending' ? 'selected' : ''); ?>>Pending</option>
@@ -446,7 +452,7 @@
                 <option value="Modified" <?php echo e(request('policy_type') == 'Modified' ? 'selected' : ''); ?>>Modified</option>
             </select>
             <button type="submit" class="f-btn"><i class="bx bx-search"></i> Filter</button>
-            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','carrier','issuance_status','followup_status','policy_type','date_from','date_to'])): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','carrier','partner','issuance_status','followup_status','policy_type','date_from','date_to'])): ?>
                 <a href="<?php echo e(route('issuance.index')); ?>" class="f-reset"><i class="bx bx-reset"></i> Clear</a>
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </form>

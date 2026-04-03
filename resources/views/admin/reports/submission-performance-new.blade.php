@@ -450,7 +450,7 @@ $grandTotal = $grandTotalSales;
     <div class="sp-card">
         <div class="sp-card-head">
             <h6><i class="bx bx-building"></i> Carrier · Partner Breakdown</h6>
-            <span class="sp-card-hint">Click row → view individual sales detail</span>
+            <span class="sp-card-hint">Click row → Pending Contract pre-filtered</span>
         </div>
 
         @if($carriersData->isEmpty())
@@ -486,11 +486,11 @@ $grandTotal = $grandTotalSales;
                         $avgSale  = $row->total_sales > 0 ? $row->total_premium / $row->total_sales : 0;
                         $hasRev   = $row->total_revenue > 0;
 
-                        /* Build drilldown URL */
+                        /* Build pending-contract URL */
                         $pcParams = ['date_from' => $dateFrom, 'date_to' => $dateTo];
                         if ($row->insurance_carrier_id) $pcParams['carrier'] = $row->insurance_carrier_id;
                         if ($row->partner_id)           $pcParams['partner'] = $row->partner_id;
-                        $pcUrl = route('settings.reports.submission-performance.drilldown', $pcParams);
+                        $pcUrl = route('issuance.index', $pcParams);
 
                         /* Partner badge variant */
                         $badgeClass = $row->partner_id ? $badgeVariants[$row->partner_id % count($badgeVariants)] : 'sp-pb-none';

@@ -5,366 +5,575 @@
 <?php $__env->startSection('css'); ?>
 <?php echo $__env->make('partials.pipeline-dashboard-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 <style>
-/* ── Page header ── */
-.rp-page-hdr { display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;flex-wrap:wrap;gap:.5rem }
-.rp-page-hdr h5 { margin:0;font-size:1.1rem;font-weight:700;display:flex;align-items:center;gap:.4rem }
-.rp-page-hdr h5 i { color:var(--bs-gold,#d4af37) }
-.rp-page-hdr .rp-sub { font-size:.72rem;color:var(--bs-surface-500,#64748b);margin-left:.25rem }
+/* ════════════════════════════════════════════════════════
+   SUBMISSION PERFORMANCE — Design System
+   Aesthetic: Dark-accented data dashboard, insurance-grade
+   ════════════════════════════════════════════════════════ */
 
-/* ── Filter card ── */
-.sp-filter-card {
-    background:var(--bs-card-bg,#fff);
-    border:1px solid rgba(0,0,0,.06);
-    border-radius:.65rem;
-    padding:.85rem 1rem;
-    margin-bottom:1rem;
-    box-shadow:0 1px 4px rgba(0,0,0,.04);
+/* ── Variables & Resets ───────────────────────────────── */
+:root {
+    --sp-gold:         #d4af37;
+    --sp-gold-dim:     rgba(212,175,55,.12);
+    --sp-gold-dark:    #92760d;
+    --sp-teal:         #0ea5a0;
+    --sp-teal-dim:     rgba(14,165,160,.12);
+    --sp-indigo:       #6366f1;
+    --sp-indigo-dim:   rgba(99,102,241,.12);
+    --sp-orange:       #f97316;
+    --sp-orange-dim:   rgba(249,115,22,.12);
+    --sp-green:        #22c55e;
+    --sp-green-dim:    rgba(34,197,94,.11);
+    --sp-red:          #ef4444;
+    --sp-surface:      var(--bs-card-bg, #ffffff);
+    --sp-border:       rgba(0,0,0,.07);
+    --sp-shadow:       0 1px 4px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.03);
+    --sp-text-1:       var(--bs-surface-900, #0f172a);
+    --sp-text-2:       var(--bs-surface-700, #374151);
+    --sp-text-3:       var(--bs-surface-500, #64748b);
+    --sp-text-4:       var(--bs-surface-400, #94a3b8);
 }
-.sp-filter-card .form-label {
-    font-size:.68rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.5px;color:var(--bs-surface-500,#64748b);margin-bottom:.3rem;
-}
-.sp-filter-card .form-control {
-    font-size:.78rem;padding:.35rem .6rem;border-radius:.45rem;
-    border:1px solid rgba(0,0,0,.1);background:var(--bs-input-bg,#fff);
-    color:var(--bs-body-color,#212529);
-}
-.sp-filter-card .form-control:focus { border-color:var(--bs-gold,#d4af37);box-shadow:0 0 0 3px rgba(212,175,55,.15) }
-.sp-filter-btn {
-    display:inline-flex;align-items:center;gap:.35rem;
-    font-size:.76rem;font-weight:700;padding:.38rem .85rem;
-    border-radius:22px;transition:all .18s;cursor:pointer;
-    border:none;
-}
-.sp-filter-btn-primary {
-    background:linear-gradient(135deg,#d4af37,#b8941f);color:#0f172a;
-}
-.sp-filter-btn-primary:hover { transform:translateY(-1px);box-shadow:0 3px 10px rgba(212,175,55,.35) }
-.sp-filter-btn-secondary {
-    background:transparent;color:var(--bs-surface-500,#64748b);
-    border:1px solid rgba(0,0,0,.1)!important;
-}
-.sp-filter-btn-secondary:hover { border-color:var(--bs-gold,#d4af37)!important;color:#92760d }
 
-/* ── KPI summary strip ── */
-.sp-kpi-strip {
-    display:flex;gap:.65rem;margin-bottom:1rem;flex-wrap:wrap;
+/* ── Page header ─────────────────────────────────────── */
+.sp-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: .6rem; flex-wrap: wrap; gap: .35rem;
 }
-.sp-kpi-card {
-    flex:1;min-width:140px;
-    background:var(--bs-card-bg,#fff);
-    border:1px solid rgba(0,0,0,.06);border-radius:.6rem;
-    padding:.65rem .9rem;
-    box-shadow:0 1px 4px rgba(0,0,0,.04);
-    position:relative;overflow:hidden;
+.sp-hdr-title {
+    display: flex; align-items: center; gap: .45rem; flex-wrap: wrap;
 }
-.sp-kpi-card::before {
-    content:'';position:absolute;inset:0 auto 0 0;width:3px;
-    background:linear-gradient(180deg,#d4af37,#b8941f);border-radius:3px 0 0 3px;
+.sp-hdr-icon {
+    width: 28px; height: 28px; border-radius: .4rem; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--sp-gold), #b8941f);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(212,175,55,.35);
 }
-.sp-kpi-label { font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--bs-surface-500,#64748b);margin-bottom:.2rem }
-.sp-kpi-value { font-size:1.35rem;font-weight:800;color:var(--bs-surface-900,#1e293b);line-height:1;font-variant-numeric:tabular-nums }
-.sp-kpi-sub { font-size:.62rem;color:var(--bs-surface-500,#64748b);margin-top:.15rem }
+.sp-hdr-icon i { font-size: .95rem; color: #0f172a; }
+.sp-hdr h5 { margin: 0; font-size: .95rem; font-weight: 800; color: var(--sp-text-1); }
+.sp-hdr-sub {
+    font-size: .67rem; color: var(--sp-text-3); font-weight: 400;
+    border-left: 2px solid var(--sp-border); padding-left: .45rem; margin-left: .1rem;
+}
+.sp-back {
+    font-size: .7rem; font-weight: 700; padding: .28rem .6rem; border-radius: 20px;
+    border: 1.5px solid var(--sp-border); background: transparent;
+    color: var(--sp-text-3); text-decoration: none; display: inline-flex;
+    align-items: center; gap: .22rem; transition: all .15s;
+}
+.sp-back:hover { border-color: var(--sp-gold); color: var(--sp-gold-dark); }
 
-/* ── Results card ── */
-.sp-results-card {
-    background:var(--bs-card-bg,#fff);
-    border:1px solid rgba(0,0,0,.06);border-radius:.65rem;
-    box-shadow:0 1px 4px rgba(0,0,0,.04);overflow:hidden;
+/* ── Filter bar ──────────────────────────────────────── */
+.sp-filter {
+    display: flex; flex-wrap: wrap; gap: .4rem; align-items: flex-end;
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: .55rem; padding: .5rem .7rem; margin-bottom: .7rem;
+    box-shadow: var(--sp-shadow);
 }
-.sp-results-hdr {
-    padding:.65rem .9rem;border-bottom:1px solid rgba(0,0,0,.06);
-    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;
+.sp-filter label {
+    font-size: .58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .6px; color: var(--sp-text-4); display: block; margin-bottom: .12rem;
 }
-.sp-results-hdr h6 { margin:0;font-size:.82rem;font-weight:700;display:flex;align-items:center;gap:.35rem }
-.sp-results-hdr h6 i { color:var(--bs-gold,#d4af37) }
-.sp-results-meta { font-size:.7rem;color:var(--bs-surface-500,#64748b) }
+.sp-filter input[type=date] {
+    font-size: .73rem; padding: .28rem .45rem; border-radius: .4rem;
+    border: 1.5px solid var(--sp-border); background: var(--bs-input-bg, #f8fafc);
+    color: var(--sp-text-1); outline: none; transition: border-color .15s;
+}
+.sp-filter input[type=date]:focus { border-color: var(--sp-gold); box-shadow: 0 0 0 2px var(--sp-gold-dim); }
+.sp-btn {
+    font-size: .7rem; font-weight: 700; padding: .3rem .65rem; border-radius: 20px;
+    border: none; cursor: pointer; display: inline-flex; align-items: center;
+    gap: .22rem; transition: all .15s; text-decoration: none;
+}
+.sp-btn-apply { background: linear-gradient(135deg, var(--sp-gold), #b8941f); color: #0f172a; }
+.sp-btn-apply:hover { box-shadow: 0 2px 10px rgba(212,175,55,.4); transform: translateY(-1px); }
+.sp-btn-reset { background: transparent; border: 1.5px solid var(--sp-border) !important; color: var(--sp-text-3); }
+.sp-btn-reset:hover { border-color: var(--sp-gold) !important; color: var(--sp-gold-dark); }
+.sp-daterange {
+    font-size: .63rem; color: var(--sp-text-3); display: flex; align-items: center;
+    gap: .22rem; margin-left: .1rem; align-self: flex-end;
+}
+.sp-daterange strong { color: var(--sp-text-2); font-weight: 700; }
 
-/* ── Table ── */
-.sp-table { width:100%;border-collapse:separate;border-spacing:0;font-size:.73rem }
-.sp-table thead th {
-    padding:.55rem .75rem;font-size:.63rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.5px;color:var(--bs-surface-500,#64748b);
-    background:rgba(248,250,252,.9);border-bottom:2px solid rgba(0,0,0,.06);
-    white-space:nowrap;position:sticky;top:0;z-index:2;
+/* ── KPI Strip ───────────────────────────────────────── */
+.sp-kpis {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: .45rem; margin-bottom: .7rem;
 }
-.sp-table tbody td {
-    padding:.55rem .75rem;border-bottom:1px solid rgba(0,0,0,.035);
-    color:var(--bs-surface-900,#1e293b);vertical-align:middle;
-}
-.sp-table tbody tr:last-child td { border-bottom:none }
-.sp-table tfoot td {
-    padding:.6rem .75rem;border-top:2px solid rgba(0,0,0,.08);
-    background:rgba(212,175,55,.04);font-weight:700;
-    color:var(--bs-surface-900,#1e293b);
-}
-.sp-th-rank { width:48px;text-align:center }
-.sp-th-carrier { min-width:180px }
-.sp-th-num { text-align:right }
-.sp-td-rank { text-align:center;font-size:.65rem;font-weight:700;color:var(--bs-surface-400,#94a3b8) }
-.sp-td-num { text-align:right;font-weight:600;font-variant-numeric:tabular-nums }
-.sp-td-total { text-align:right;font-weight:800;font-variant-numeric:tabular-nums }
+@media(max-width:860px) { .sp-kpis { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:480px) { .sp-kpis { grid-template-columns: 1fr; } }
 
-/* ── Carrier link row ── */
+.sp-kpi {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: .55rem; padding: .55rem .75rem; position: relative;
+    overflow: hidden; box-shadow: var(--sp-shadow);
+}
+.sp-kpi::before {
+    content: ''; position: absolute; inset: 0 auto 0 0; width: 3.5px;
+    border-radius: 2px 0 0 2px;
+}
+.sp-kpi-submissions::before { background: linear-gradient(180deg, var(--sp-gold), #b8941f); }
+.sp-kpi-premium::before     { background: linear-gradient(180deg, var(--sp-green), #16a34a); }
+.sp-kpi-revenue::before     { background: linear-gradient(180deg, var(--sp-indigo), #4338ca); }
+.sp-kpi-avg::before         { background: linear-gradient(180deg, var(--sp-teal), #0d9488); }
+
+.sp-kpi-icon {
+    position: absolute; right: .6rem; top: .5rem; font-size: 1.3rem; opacity: .06;
+    font-weight: 900;
+}
+.sp-kpi-lbl {
+    font-size: .57rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: .18rem;
+}
+.sp-kpi-submissions .sp-kpi-lbl { color: var(--sp-gold-dark); }
+.sp-kpi-premium .sp-kpi-lbl     { color: #16a34a; }
+.sp-kpi-revenue .sp-kpi-lbl     { color: #4338ca; }
+.sp-kpi-avg .sp-kpi-lbl         { color: #0d9488; }
+
+.sp-kpi-val {
+    font-size: 1.25rem; font-weight: 900; color: var(--sp-text-1);
+    line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+}
+.sp-kpi-sub { font-size: .6rem; color: var(--sp-text-4); margin-top: .14rem; }
+
+/* ── Body layout ─────────────────────────────────────── */
+.sp-body {
+    display: grid; grid-template-columns: 1fr 204px;
+    gap: .7rem; align-items: start;
+}
+@media(max-width:780px) {
+    .sp-body { grid-template-columns: 1fr; }
+    .sp-donut-panel { display: none; }
+}
+
+/* ── Main card ───────────────────────────────────────── */
+.sp-card {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: .55rem; overflow: hidden; box-shadow: var(--sp-shadow);
+}
+.sp-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .45rem .7rem; border-bottom: 1px solid var(--sp-border);
+    background: rgba(248,250,252,.5);
+}
+.sp-card-head h6 {
+    margin: 0; font-size: .76rem; font-weight: 800; color: var(--sp-text-1);
+    display: flex; align-items: center; gap: .28rem;
+}
+.sp-card-head h6 i { color: var(--sp-gold); font-size: .85rem; }
+.sp-card-hint { font-size: .61rem; color: var(--sp-text-4); }
+
+/* ── Table ───────────────────────────────────────────── */
+.sp-tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .71rem; }
+.sp-tbl thead th {
+    padding: .38rem .58rem; font-size: .58rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .55px; color: var(--sp-text-4);
+    background: rgba(248,250,252,.95); border-bottom: 2px solid var(--sp-border);
+    white-space: nowrap; position: sticky; top: 0; z-index: 2;
+}
+.sp-tbl thead th.th-r { text-align: right; }
+.sp-tbl tbody td {
+    padding: .4rem .58rem; border-bottom: 1px solid rgba(0,0,0,.025);
+    vertical-align: middle;
+}
+.sp-tbl tbody tr:last-child td { border-bottom: none; }
+.sp-tbl tbody tr.sp-row { cursor: pointer; }
+.sp-tbl tbody tr.sp-row:hover td { background: rgba(212,175,55,.035); }
+.sp-tbl tfoot td {
+    padding: .44rem .58rem; border-top: 2px solid rgba(0,0,0,.08);
+    font-weight: 800; background: rgba(212,175,55,.04);
+}
+
+/* ── Rank cell ───────────────────────────────────────── */
+.sp-rank {
+    text-align: center; font-size: .63rem; font-weight: 800;
+    color: var(--sp-text-4); width: 28px;
+}
+.rank-1 { color: var(--sp-gold); }
+.rank-2 { color: #94a3b8; }
+.rank-3 { color: #cd7f32; }
+
+/* ── Carrier·Partner cell ────────────────────────────── */
 .sp-carrier-link {
-    display:inline-flex;align-items:center;gap:.4rem;
-    color:var(--bs-surface-900,#1e293b);font-weight:600;
-    text-decoration:none;transition:color .15s;
+    display: inline-flex; align-items: center; gap: .38rem;
+    text-decoration: none; max-width: 260px;
 }
-.sp-carrier-link:hover { color:var(--bs-gold-dark,#92760d) }
-.sp-carrier-link .sp-carrier-icon {
-    width:26px;height:26px;border-radius:50%;
-    background:rgba(212,175,55,.1);display:inline-flex;align-items:center;justify-content:center;
-    font-size:.7rem;flex-shrink:0;
-    color:var(--bs-gold-dark,#92760d);
-    transition:background .15s;
+.sp-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.sp-cname {
+    font-weight: 700; color: var(--sp-text-1); font-size: .72rem;
+    white-space: nowrap; transition: color .12s;
 }
-tbody tr:hover .sp-carrier-icon { background:rgba(212,175,55,.2) }
-.sp-carrier-link .sp-carrier-name { flex:1 }
-.sp-carrier-link .sp-arrow {
-    opacity:0;font-size:.8rem;color:var(--bs-gold,#d4af37);transition:opacity .15s,transform .15s;
+.sp-row:hover .sp-cname { color: var(--sp-gold-dark); }
+.sp-partner-badge {
+    font-size: .58rem; font-weight: 800; padding: .06rem .3rem; border-radius: 10px;
+    white-space: nowrap; letter-spacing: .2px;
 }
-tbody tr:hover .sp-arrow { opacity:1;transform:translateX(2px) }
+.sp-pb-gold  { background: var(--sp-gold-dim);   color: var(--sp-gold-dark); }
+.sp-pb-teal  { background: var(--sp-teal-dim);   color: var(--sp-teal); }
+.sp-pb-indigo{ background: var(--sp-indigo-dim); color: var(--sp-indigo); }
+.sp-pb-none  { background: rgba(100,116,139,.08); color: var(--sp-text-4); }
 
-/* ── Row hover ── */
-.sp-row-clickable { cursor:pointer }
-.sp-row-clickable:hover td { background:rgba(212,175,55,.04) }
+/* ── Share bar ───────────────────────────────────────── */
+.sp-share { display: flex; align-items: center; gap: .32rem; }
+.sp-bar-track {
+    flex: 1; height: 5px; border-radius: 5px; background: rgba(0,0,0,.06);
+    overflow: hidden; min-width: 50px;
+}
+.sp-bar-fill { height: 100%; border-radius: 5px; transition: width .4s ease; }
+.sp-pct { font-size: .6rem; color: var(--sp-text-4); min-width: 30px; text-align: right; font-weight: 600; }
 
-/* ── Rank medals ── */
-.sp-rank-1 { color:#f4c430!important }
-.sp-rank-2 { color:var(--bs-surface-400,#94a3b8)!important }
-.sp-rank-3 { color:#cd7f32!important }
-.sp-rank-badge {
-    display:inline-flex;align-items:center;justify-content:center;
-    width:22px;height:22px;border-radius:50%;font-size:.65rem;font-weight:800;
-}
-.sp-rank-badge-1 { background:rgba(244,196,48,.15) }
-.sp-rank-badge-2 { background:rgba(148,163,184,.12) }
-.sp-rank-badge-3 { background:rgba(205,127,50,.12) }
+/* ── Number cells ────────────────────────────────────── */
+.td-r { text-align: right; font-variant-numeric: tabular-nums; }
+.sp-sales-num { font-size: .82rem; font-weight: 800; color: var(--sp-text-1); }
 
-/* ── Premium chip ── */
-.sp-premium-chip {
-    display:inline-flex;align-items:center;gap:.25rem;
-    background:rgba(52,195,143,.09);color:#1a8754;
-    font-size:.66rem;font-weight:700;padding:.15rem .45rem;border-radius:20px;
+/* ── Premium chip ────────────────────────────────────── */
+.sp-chip {
+    display: inline-flex; align-items: center; gap: .16rem;
+    font-size: .63rem; font-weight: 700; padding: .08rem .32rem; border-radius: 14px;
+}
+.sp-chip-green  { background: var(--sp-green-dim);  color: #15803d; }
+.sp-chip-indigo { background: var(--sp-indigo-dim); color: var(--sp-indigo); }
+.sp-chip-gold   { background: var(--sp-gold-dim);   color: var(--sp-gold-dark); }
+.sp-chip-none   { background: rgba(100,116,139,.07); color: var(--sp-text-4); }
+
+.sp-chip i { font-size: .68rem; }
+
+/* ── Revenue column header accent ───────────────────── */
+th.th-revenue { color: var(--sp-indigo) !important; }
+
+/* ── Avg-per-sale sub ────────────────────────────────── */
+.sp-avg { font-size: .67rem; color: var(--sp-text-3); text-align: right; }
+
+/* ── No-commission note ──────────────────────────────── */
+.sp-norev {
+    font-size: .6rem; color: var(--sp-text-4); font-style: italic;
+    display: inline-flex; align-items: center; gap: .15rem;
 }
 
-/* ── Progress bar ── */
-.sp-progress-wrap { display:flex;align-items:center;gap:.5rem }
-.sp-progress { flex:1;height:5px;border-radius:10px;background:rgba(0,0,0,.06);overflow:hidden;min-width:60px }
-.sp-progress-fill { height:100%;border-radius:10px;background:linear-gradient(90deg,#d4af37,#b8941f);transition:width .3s ease }
+/* ── Donut panel ─────────────────────────────────────── */
+.sp-donut-panel {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: .55rem; padding: .55rem .6rem; box-shadow: var(--sp-shadow);
+}
+.sp-donut-title {
+    font-size: .58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .55px; color: var(--sp-text-4); margin-bottom: .45rem;
+}
+.sp-legend-row { display: flex; align-items: center; gap: .3rem; margin-bottom: .22rem; }
+.sp-legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sp-legend-name {
+    font-size: .62rem; color: var(--sp-text-2); flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sp-legend-name .lp { opacity: .5; font-weight: 400; }
+.sp-legend-pct { font-size: .6rem; font-weight: 800; color: var(--sp-text-3); }
 
-/* ── Empty state ── */
-.sp-empty { text-align:center;padding:3.5rem 1rem;color:var(--bs-surface-500,#64748b) }
-.sp-empty i { font-size:2.8rem;display:block;margin-bottom:.6rem;opacity:.2 }
-.sp-empty h6 { font-size:.88rem;font-weight:700;margin-bottom:.3rem }
-.sp-empty p { font-size:.73rem;max-width:280px;margin:0 auto }
+/* ── Empty state ─────────────────────────────────────── */
+.sp-empty { text-align: center; padding: 3rem 1rem; color: var(--sp-text-4); }
+.sp-empty i { font-size: 2.5rem; display: block; margin-bottom: .5rem; opacity: .15; }
+.sp-empty strong { display: block; font-size: .82rem; margin-bottom: .25rem; color: var(--sp-text-3); }
+.sp-empty span { font-size: .7rem; }
 
-/* ── Dark mode ── */
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-table thead th {
-    background:rgba(15,23,42,.6);color:#94a3b8;border-bottom-color:rgba(255,255,255,.06);
+/* ── Footer note ─────────────────────────────────────── */
+.sp-footnote {
+    font-size: .59rem; color: var(--sp-text-4); text-align: center; margin-top: .5rem;
+    display: flex; align-items: center; justify-content: center; gap: .22rem;
 }
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-filter-card,
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-results-card,
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-kpi-card {
-    background:rgba(15,23,42,.45);border-color:rgba(255,255,255,.06);
+.sp-footnote code {
+    font-size: .58rem; background: rgba(0,0,0,.05); padding: .02rem .22rem;
+    border-radius: 3px; color: var(--sp-text-3);
 }
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-table tfoot td {
-    background:rgba(212,175,55,.06);border-top-color:rgba(255,255,255,.08);
+
+/* ── Dark mode overrides ─────────────────────────────── */
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"]) {
+    --sp-surface:  rgba(15,23,42,.55);
+    --sp-border:   rgba(255,255,255,.07);
+    --sp-shadow:   0 1px 4px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04);
+    --sp-text-1:   #f1f5f9;
+    --sp-text-2:   #cbd5e1;
+    --sp-text-3:   #94a3b8;
+    --sp-text-4:   #64748b;
 }
-:is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sp-filter-card .form-control {
-    background:rgba(15,23,42,.5);border-color:rgba(255,255,255,.1);color:#e2e8f0;
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-tbl thead th {
+    background: rgba(15,23,42,.8); border-color: rgba(255,255,255,.06);
 }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-tbl tfoot td {
+    background: rgba(212,175,55,.06); border-color: rgba(255,255,255,.08);
+}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-filter input[type=date] {
+    background: rgba(15,23,42,.6); border-color: rgba(255,255,255,.09); color: #e2e8f0;
+}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-card-head {
+    background: rgba(15,23,42,.4);
+}
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-chip-green { background: rgba(34,197,94,.12); color: #4ade80; }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-chip-indigo { background: rgba(99,102,241,.15); color: #a5b4fc; }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-chip-gold { background: rgba(212,175,55,.15); color: #fcd34d; }
+:is([data-theme="emerald-glass"],[data-theme="midnight-black"],
+    [data-theme="ocean-blue"],[data-theme="royal-purple"],
+    [data-theme="rose-gold"],[data-theme="copper-steel"])
+    .sp-footnote code { background: rgba(255,255,255,.07); color: #94a3b8; }
 </style>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-<div style="max-width:900px;margin:0 auto">
+<?php
+/* Vivid, high-contrast palette — each index is visually distinct */
+$palette = [
+    '#e11d48', /* 0 crimson       */
+    '#2563eb', /* 1 royal blue    */
+    '#16a34a', /* 2 emerald       */
+    '#ea580c', /* 3 orange        */
+    '#7c3aed', /* 4 violet        */
+    '#0891b2', /* 5 cyan          */
+    '#d97706', /* 6 amber         */
+    '#db2777', /* 7 rose          */
+    '#059669', /* 8 teal          */
+    '#6d28d9', /* 9 purple        */
+    '#dc2626', /* 10 red          */
+    '#1d4ed8', /* 11 blue         */
+];
 
-    
-    <div class="rp-page-hdr">
-        <h5>
-            <i class="bx bx-award"></i>
-            Submission Performance
-            <span class="rp-sub">Carrier-wise breakdown of approved sales sent to Pending Contract</span>
-        </h5>
-        <a href="<?php echo e(route('settings.reports.hub')); ?>" class="sp-filter-btn sp-filter-btn-secondary" style="font-size:.72rem;padding:.3rem .7rem;border-radius:20px;border:1px solid rgba(0,0,0,.1);text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;color:var(--bs-surface-500,#64748b)">
-            <i class="bx bx-arrow-back"></i> Reports Hub
+/* Partner badge variant cycling */
+$badgeVariants = ['sp-pb-gold','sp-pb-teal','sp-pb-indigo'];
+
+$grandTotal = $grandTotalSales;
+?>
+
+
+<div class="sp-hdr">
+    <div class="sp-hdr-title">
+        <div class="sp-hdr-icon"><i class="bx bx-award"></i></div>
+        <div>
+            <h5>Submission Performance</h5>
+            <span class="sp-hdr-sub">carrier &amp; partner breakdown · approved sales → Pending Contract</span>
+        </div>
+    </div>
+    <a href="<?php echo e(route('settings.reports.hub')); ?>" class="sp-back">
+        <i class="bx bx-arrow-back"></i> Hub
+    </a>
+</div>
+
+
+<div class="sp-filter">
+    <form method="GET" action="<?php echo e(route('settings.reports.submission-performance')); ?>" style="display:contents">
+        <div>
+            <label for="sp-from">From</label>
+            <input type="date" id="sp-from" name="date_from" value="<?php echo e($dateFrom); ?>">
+        </div>
+        <div>
+            <label for="sp-to">To</label>
+            <input type="date" id="sp-to" name="date_to" value="<?php echo e($dateTo); ?>">
+        </div>
+        <button type="submit" class="sp-btn sp-btn-apply" style="align-self:flex-end">
+            <i class="bx bx-search-alt"></i> Apply
+        </button>
+        <a href="<?php echo e(route('settings.reports.submission-performance')); ?>" class="sp-btn sp-btn-reset" style="align-self:flex-end">
+            <i class="bx bx-reset"></i> Reset
         </a>
-    </div>
-
-    
-    <div class="sp-filter-card">
-        <form method="GET" action="<?php echo e(route('settings.reports.submission-performance')); ?>" id="sp-filter-form">
-            <div class="row align-items-end g-2">
-                <div class="col-12 col-sm-auto">
-                    <label class="form-label" for="sp-date-from">Date From</label>
-                    <input type="date" id="sp-date-from" name="date_from" class="form-control"
-                           value="<?php echo e($dateFrom); ?>" style="min-width:140px">
-                </div>
-                <div class="col-12 col-sm-auto">
-                    <label class="form-label" for="sp-date-to">Date To</label>
-                    <input type="date" id="sp-date-to" name="date_to" class="form-control"
-                           value="<?php echo e($dateTo); ?>" style="min-width:140px">
-                </div>
-                <div class="col-12 col-sm-auto d-flex gap-2">
-                    <button type="submit" class="sp-filter-btn sp-filter-btn-primary">
-                        <i class="bx bx-search-alt"></i> Apply
-                    </button>
-                    <a href="<?php echo e(route('settings.reports.submission-performance')); ?>" class="sp-filter-btn sp-filter-btn-secondary">
-                        <i class="bx bx-reset"></i> Reset
-                    </a>
-                </div>
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo): ?>
-                <div class="col-12 col-sm" style="padding-bottom:.1rem">
-                    <span style="font-size:.68rem;color:var(--bs-surface-500,#64748b)">
-                        <i class="bx bx-calendar-check" style="color:var(--bs-gold,#d4af37)"></i>
-                        Showing:
-                        <strong><?php echo e($dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : '—'); ?></strong>
-                        &rarr;
-                        <strong><?php echo e($dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : '—'); ?></strong>
-                    </span>
-                </div>
-                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-            </div>
-        </form>
-    </div>
-
-    
-    <div class="sp-kpi-strip">
-        <div class="sp-kpi-card">
-            <div class="sp-kpi-label">Total Submissions</div>
-            <div class="sp-kpi-value"><?php echo e(number_format($grandTotalSales)); ?></div>
-            <div class="sp-kpi-sub">Sent to Pending Contract</div>
-        </div>
-        <div class="sp-kpi-card">
-            <div class="sp-kpi-label">Total Premium</div>
-            <div class="sp-kpi-value">$<?php echo e(number_format($grandTotalPremium, 2)); ?></div>
-            <div class="sp-kpi-sub">Monthly premium across all carriers</div>
-        </div>
-        <div class="sp-kpi-card">
-            <div class="sp-kpi-label">Carriers</div>
-            <div class="sp-kpi-value"><?php echo e($carriersData->count()); ?></div>
-            <div class="sp-kpi-sub">Unique carriers with submissions</div>
-        </div>
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carriersData->count() > 0): ?>
-        <div class="sp-kpi-card">
-            <div class="sp-kpi-label">Avg Premium / Sale</div>
-            <div class="sp-kpi-value">$<?php echo e($grandTotalSales > 0 ? number_format($grandTotalPremium / $grandTotalSales, 2) : '0.00'); ?></div>
-            <div class="sp-kpi-sub">Across all carriers</div>
-        </div>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo): ?>
+        <span class="sp-daterange">
+            <i class="bx bx-calendar-check" style="color:var(--sp-gold);font-size:.82rem"></i>
+            <strong><?php echo e($dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : '—'); ?></strong>
+            <span style="color:var(--sp-text-4)">→</span>
+            <strong><?php echo e($dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : '—'); ?></strong>
+        </span>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    </form>
+</div>
+
+
+<div class="sp-kpis">
+    
+    <div class="sp-kpi sp-kpi-submissions">
+        <i class="bx bx-check-double sp-kpi-icon"></i>
+        <div class="sp-kpi-lbl">Total Submissions</div>
+        <div class="sp-kpi-val"><?php echo e(number_format($grandTotalSales)); ?></div>
+        <div class="sp-kpi-sub">Sent to Pending Contract</div>
     </div>
+    
+    <div class="sp-kpi sp-kpi-premium">
+        <i class="bx bx-dollar-circle sp-kpi-icon"></i>
+        <div class="sp-kpi-lbl">Total Premium</div>
+        <div class="sp-kpi-val">$<?php echo e(number_format($grandTotalPremium, 2)); ?></div>
+        <div class="sp-kpi-sub">Monthly premium / all carriers</div>
+    </div>
+    
+    <div class="sp-kpi sp-kpi-revenue">
+        <i class="bx bx-trending-up sp-kpi-icon"></i>
+        <div class="sp-kpi-lbl">Est. Revenue</div>
+        <div class="sp-kpi-val">$<?php echo e(number_format($grandTotalRevenue, 2)); ?></div>
+        <div class="sp-kpi-sub">Σ (premium × 9 × commission%)</div>
+    </div>
+    
+    <div class="sp-kpi sp-kpi-avg">
+        <i class="bx bx-bar-chart-alt-2 sp-kpi-icon"></i>
+        <div class="sp-kpi-lbl">Avg Revenue / Sale</div>
+        <div class="sp-kpi-val">$<?php echo e($grandTotalSales > 0 ? number_format($grandTotalRevenue / $grandTotalSales, 2) : '0.00'); ?></div>
+        <div class="sp-kpi-sub">
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($grandTotalRevenue > 0 && $grandTotalPremium > 0): ?>
+                ~<?php echo e(number_format(($grandTotalRevenue / ($grandTotalPremium * 9)) * 100, 1)); ?>% avg commission
+            <?php else: ?>
+                Across all carriers
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+    </div>
+</div>
+
+
+<div class="sp-body">
 
     
-    <div class="sp-results-card">
-        <div class="sp-results-hdr">
-            <h6>
-                <i class="bx bx-building"></i>
-                Carrier Breakdown
-            </h6>
-            <span class="sp-results-meta">
-                Click a carrier to view its leads in Pending Contract
-            </span>
+    <div class="sp-card">
+        <div class="sp-card-head">
+            <h6><i class="bx bx-building"></i> Carrier · Partner Breakdown</h6>
+            <span class="sp-card-hint">Click row → view individual sales detail</span>
         </div>
 
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carriersData->isEmpty()): ?>
-            <div class="sp-empty">
-                <i class="bx bx-bar-chart-alt-2"></i>
-                <h6>No submissions found</h6>
-                <p>No leads have been sent to Pending Contract for the selected date range.</p>
-            </div>
+        <div class="sp-empty">
+            <i class="bx bx-bar-chart-alt-2"></i>
+            <strong>No submissions found</strong>
+            <span>No leads sent to Pending Contract for this date range.</span>
+        </div>
         <?php else: ?>
         <div style="overflow-x:auto">
-            <table class="sp-table">
+            <table class="sp-tbl">
                 <thead>
                     <tr>
-                        <th class="sp-th-rank">#</th>
-                        <th class="sp-th-carrier">Carrier</th>
-                        <th class="sp-th-num" style="min-width:140px">Sales Distribution</th>
-                        <th class="sp-th-num">Total Sales</th>
-                        <th class="sp-th-num">Total Monthly Premium</th>
-                        <th class="sp-th-num">Avg Premium / Sale</th>
+                        <th style="width:26px">#</th>
+                        <th style="min-width:175px">Carrier · Partner</th>
+                        <th style="min-width:100px">Share</th>
+                        <th class="th-r" style="min-width:58px">Sales</th>
+                        <th class="th-r" style="min-width:108px">Monthly Premium</th>
+                        <th class="th-r th-revenue" style="min-width:115px">
+                            <span style="display:inline-flex;align-items:center;gap:.18rem">
+                                <i class="bx bx-trending-up"></i> Est. Revenue
+                            </span>
+                        </th>
+                        <th class="th-r" style="min-width:85px">Avg / Sale</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriersData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
-                        $rank        = $idx + 1;
-                        $pct         = $grandTotalSales > 0 ? round(($row->total_sales / $grandTotalSales) * 100, 1) : 0;
-                        $avgPremium  = $row->total_sales > 0 ? $row->total_premium / $row->total_sales : 0;
-                        $carrierName = $row->carrier_name ?: 'Unknown Carrier';
+                        $rank   = $idx + 1;
+                        $pct    = $grandTotal > 0 ? round(($row->total_sales / $grandTotal) * 100, 1) : 0;
+                        $color  = $palette[$idx % count($palette)];
+                        $avgSale  = $row->total_sales > 0 ? $row->total_premium / $row->total_sales : 0;
+                        $hasRev   = $row->total_revenue > 0;
 
-                        // Build link to pending contracts page with carrier + date filters
+                        /* Build drilldown URL */
                         $pcParams = ['date_from' => $dateFrom, 'date_to' => $dateTo];
-                        if ($row->insurance_carrier_id) {
-                            $pcParams['carrier'] = $row->insurance_carrier_id;
-                        }
-                        $pcUrl = route('issuance.index', $pcParams);
+                        if ($row->insurance_carrier_id) $pcParams['carrier'] = $row->insurance_carrier_id;
+                        if ($row->partner_id)           $pcParams['partner'] = $row->partner_id;
+                        $pcUrl = route('settings.reports.submission-performance.drilldown', $pcParams);
+
+                        /* Partner badge variant */
+                        $badgeClass = $row->partner_id ? $badgeVariants[$row->partner_id % count($badgeVariants)] : 'sp-pb-none';
                     ?>
-                    <tr class="sp-row-clickable" onclick="window.location='<?php echo e($pcUrl); ?>'">
-                        <td class="sp-td-rank">
-                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($rank <= 3): ?>
-                                <span class="sp-rank-badge sp-rank-badge-<?php echo e($rank); ?> sp-rank-<?php echo e($rank); ?>">
-                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($rank === 1): ?><i class="bx bxs-crown"></i><?php else: ?><?php echo e($rank); ?><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                </span>
-                            <?php else: ?>
-                                <span style="color:var(--bs-surface-400,#94a3b8);font-size:.68rem;font-weight:700"><?php echo e($rank); ?></span>
-                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    <tr class="sp-row" onclick="window.location='<?php echo e($pcUrl); ?>'">
+                        
+                        <td class="sp-rank <?php echo e($rank===1?'rank-1':($rank===2?'rank-2':($rank===3?'rank-3':''))); ?>">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($rank===1): ?><i class="bx bxs-crown"></i><?php else: ?><?php echo e($rank); ?><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
+                        
                         <td>
                             <a href="<?php echo e($pcUrl); ?>" class="sp-carrier-link" onclick="event.stopPropagation()">
-                                <span class="sp-carrier-icon">
-                                    <i class="bx bx-building"></i>
-                                </span>
-                                <span class="sp-carrier-name"><?php echo e($carrierName); ?></span>
-                                <i class="bx bx-right-arrow-alt sp-arrow"></i>
+                                <span class="sp-dot" style="background:<?php echo e($color); ?>;box-shadow:0 0 0 2px <?php echo e($color); ?>30"></span>
+                                <span class="sp-cname"><?php echo e($row->carrier_name ?: 'Unknown'); ?></span>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($row->assigned_partner): ?>
+                                    <span class="sp-partner-badge <?php echo e($badgeClass); ?>"><?php echo e($row->assigned_partner); ?></span>
+                                <?php else: ?>
+                                    <span class="sp-partner-badge sp-pb-none">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </a>
                         </td>
-                        <td class="sp-td-num">
-                            <div class="sp-progress-wrap">
-                                <div class="sp-progress">
-                                    <div class="sp-progress-fill" style="width:<?php echo e($pct); ?>%"></div>
+                        
+                        <td>
+                            <div class="sp-share">
+                                <div class="sp-bar-track">
+                                    <div class="sp-bar-fill" style="width:<?php echo e($pct); ?>%;background:<?php echo e($color); ?>"></div>
                                 </div>
-                                <span style="font-size:.65rem;color:var(--bs-surface-500,#64748b);min-width:34px;text-align:right"><?php echo e($pct); ?>%</span>
+                                <span class="sp-pct"><?php echo e($pct); ?>%</span>
                             </div>
                         </td>
-                        <td class="sp-td-num">
-                            <span style="font-size:.85rem;font-weight:700;color:var(--bs-surface-900,#1e293b)"><?php echo e(number_format($row->total_sales)); ?></span>
+                        
+                        <td class="td-r">
+                            <span class="sp-sales-num"><?php echo e(number_format($row->total_sales)); ?></span>
                         </td>
-                        <td class="sp-td-num">
-                            <span class="sp-premium-chip">
-                                <i class="bx bx-dollar"></i>
-                                <?php echo e(number_format($row->total_premium, 2)); ?>
+                        
+                        <td class="td-r">
+                            <span class="sp-chip sp-chip-green">
+                                <i class="bx bx-dollar"></i><?php echo e(number_format($row->total_premium, 2)); ?>
 
                             </span>
                         </td>
-                        <td class="sp-td-num" style="font-size:.72rem;color:var(--bs-surface-600,#475569)">
-                            $<?php echo e(number_format($avgPremium, 2)); ?>
+                        
+                        <td class="td-r">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasRev): ?>
+                                <span class="sp-chip sp-chip-indigo">
+                                    <i class="bx bx-trending-up"></i><?php echo e(number_format($row->total_revenue, 2)); ?>
 
+                                </span>
+                            <?php else: ?>
+                                <span class="sp-norev"><i class="bx bx-minus"></i> no rate</span>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </td>
+                        
+                        <td class="sp-avg">$<?php echo e(number_format($avgSale, 2)); ?></td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td></td>
-                        <td style="font-weight:800;font-size:.75rem">
-                            <span style="display:inline-flex;align-items:center;gap:.3rem">
-                                <i class="bx bx-sum" style="color:var(--bs-gold,#d4af37)"></i>
-                                TOTAL
+                        <td colspan="2">
+                            <span style="display:inline-flex;align-items:center;gap:.22rem;font-size:.7rem">
+                                <i class="bx bx-sum" style="color:var(--sp-gold)"></i> TOTAL
                             </span>
                         </td>
                         <td></td>
-                        <td class="sp-td-total" style="font-size:.85rem"><?php echo e(number_format($grandTotalSales)); ?></td>
-                        <td class="sp-td-total">
-                            <span class="sp-premium-chip" style="background:rgba(212,175,55,.12);color:#92760d">
-                                <i class="bx bx-dollar"></i>
-                                <?php echo e(number_format($grandTotalPremium, 2)); ?>
+                        <td class="td-r">
+                            <span class="sp-sales-num"><?php echo e(number_format($grandTotalSales)); ?></span>
+                        </td>
+                        <td class="td-r">
+                            <span class="sp-chip sp-chip-green">
+                                <i class="bx bx-dollar"></i><?php echo e(number_format($grandTotalPremium, 2)); ?>
 
                             </span>
                         </td>
-                        <td class="sp-td-total" style="font-size:.72rem">
+                        <td class="td-r">
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($grandTotalRevenue > 0): ?>
+                            <span class="sp-chip sp-chip-indigo">
+                                <i class="bx bx-trending-up"></i><?php echo e(number_format($grandTotalRevenue, 2)); ?>
+
+                            </span>
+                            <?php else: ?>
+                            <span class="sp-norev"><i class="bx bx-minus"></i> —</span>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        </td>
+                        <td class="sp-avg">
                             $<?php echo e($grandTotalSales > 0 ? number_format($grandTotalPremium / $grandTotalSales, 2) : '0.00'); ?>
 
                         </td>
@@ -375,11 +584,71 @@ tbody tr:hover .sp-arrow { opacity:1;transform:translateX(2px) }
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 
-    <div style="margin-top:.65rem;font-size:.65rem;color:var(--bs-surface-400,#94a3b8);text-align:center">
-        <i class="bx bx-info-circle"></i>
-        Data sourced from Pending Contract — all leads where the sale was approved and sent to contract, regardless of final issuance status.
-    </div>
+    
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carriersData->isNotEmpty()): ?>
+    <div class="sp-donut-panel">
+        <div class="sp-donut-title">Sales Distribution</div>
+        <?php
+            $innerR       = 52;
+            $circum       = 2 * M_PI * $innerR;
+            $cumPct       = 0;
+            $donutSlices  = [];
+            foreach ($carriersData as $i => $r) {
+                $p = $grandTotal > 0 ? $r->total_sales / $grandTotal : 0;
+                $donutSlices[] = ['pct' => $p, 'color' => $palette[$i % count($palette)], 'cum' => $cumPct];
+                $cumPct += $p;
+            }
+        ?>
+        <svg viewBox="0 0 164 164" style="width:100%;max-width:164px;display:block;margin:0 auto">
+            <circle cx="82" cy="82" r="<?php echo e($innerR); ?>" fill="none" stroke="rgba(0,0,0,.05)" stroke-width="22"/>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $donutSlices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
+                $dash     = $circum * $sl['pct'];
+                $gap      = $circum - $dash;
+                $startOff = $circum * 0.25 - $circum * $sl['cum'];
+            ?>
+            <circle cx="82" cy="82" r="<?php echo e($innerR); ?>" fill="none"
+                stroke="<?php echo e($sl['color']); ?>" stroke-width="22"
+                stroke-dasharray="<?php echo e(number_format($dash,4,'.',''). ' '.number_format($gap,4,'.','')); ?>"
+                stroke-dashoffset="<?php echo e(number_format($startOff,4,'.','')); ?>" />
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <text x="82" y="77" text-anchor="middle" font-size="18" font-weight="900" fill="var(--sp-text-1)">
+                <?php echo e(number_format($grandTotalSales)); ?>
 
+            </text>
+            <text x="82" y="92" text-anchor="middle" font-size="7.5" fill="var(--sp-text-4)" font-weight="700" letter-spacing=".6">
+                SALES
+            </text>
+        </svg>
+        
+        <div style="margin-top:.5rem">
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriersData->take(7); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $lPct = $grandTotal > 0 ? round(($r->total_sales / $grandTotal) * 100, 1) : 0 ?>
+            <div class="sp-legend-row">
+                <span class="sp-legend-dot" style="background:<?php echo e($palette[$i % count($palette)]); ?>"></span>
+                <span class="sp-legend-name">
+                    <?php echo e($r->carrier_name ?: 'Unknown'); ?>
+
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($r->assigned_partner): ?><span class="lp"> · <?php echo e($r->assigned_partner); ?></span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                </span>
+                <span class="sp-legend-pct"><?php echo e($lPct); ?>%</span>
+            </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carriersData->count() > 7): ?>
+            <div style="font-size:.58rem;color:var(--sp-text-4);margin-top:.18rem;padding-left:1rem">
+                +<?php echo e($carriersData->count() - 7); ?> more
+            </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+</div>
+
+<div class="sp-footnote">
+    <i class="bx bx-info-circle"></i>
+    Read-only — sourced from leads where <code>pending_contract_at IS NOT NULL</code>.
+    Revenue = <code>monthly_premium × 9 × commission%</code> stored per-lead.
 </div>
 <?php $__env->stopSection(); ?>
 
