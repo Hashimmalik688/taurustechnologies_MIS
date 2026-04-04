@@ -1027,6 +1027,9 @@ Route::group(['prefix' => 'qa', 'middleware' => ['auth']], function () {
     // Dashboard page (serves the SPA frontend)
     Route::get('/scoring', [\App\Http\Controllers\QA\QADashboardController::class, 'index'])->name('qa.scoring');
 
+    // Personal QA report — closers see only their own scored calls
+    Route::get('/my-report', [\App\Http\Controllers\QA\QADashboardController::class, 'myReport'])->name('qa.my-report');
+
     // Script editor page
     Route::get('/script', [\App\Http\Controllers\QA\QADashboardController::class, 'showScript'])->name('qa.script');
 

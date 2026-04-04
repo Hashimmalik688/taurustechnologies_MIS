@@ -545,15 +545,28 @@
 </style>
 <?php $__env->stopSection(); ?>
 
+<?php
+    $myMode   = $myMode   ?? false;
+    $myUserId = $myUserId ?? null;
+    $myBackUrl = $myBackUrl ?? null;
+?>
+
 <?php $__env->startSection('content'); ?>
 
 <!-- ═══ Page Header ═══ -->
 <div class="qa-page-header">
     <h5 class="qa-page-title">
-        <i class="ri-shield-star-line"></i> QA Scoring
-        <button class="qa-info-btn" onclick="document.getElementById('qaInfoModal').classList.add('show')" title="How QA Scoring Works">
-            <i class="ri-question-line"></i>
-        </button>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($myMode): ?>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($myBackUrl): ?>
+                <a href="<?php echo e($myBackUrl); ?>" class="qa-action-btn qa-btn-ghost" style="margin-right:.25rem;" title="Back to Dashboard"><i class="ri-arrow-left-s-line"></i></a>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <i class="ri-shield-star-line"></i> My QA Report
+        <?php else: ?>
+            <i class="ri-shield-star-line"></i> QA Scoring
+            <button class="qa-info-btn" onclick="document.getElementById('qaInfoModal').classList.add('show')" title="How QA Scoring Works">
+                <i class="ri-question-line"></i>
+            </button>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </h5>
     <div class="qa-toolbar">
         <div class="qa-range-group">
@@ -571,11 +584,13 @@
             <input type="date" id="qaEndDate" onchange="QA.rangeChanged()">
         </div>
         <button class="qa-action-btn qa-btn-primary" onclick="QA.refresh()"><i class="ri-refresh-line"></i> Refresh</button>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$myMode): ?>
         <button class="qa-action-btn qa-btn-danger" id="rerunTodayBtn" onclick="QA.rerunToday()" title="Re-score today's calls"><i class="ri-restart-line"></i> Rerun</button>
         <button class="qa-action-btn qa-btn-success" id="qaToggleBtn" onclick="QA.toggleQa()" title="Pause/resume QA scoring"><i class="ri-pause-circle-line" id="qaToggleIcon"></i> <span id="qaToggleLabel">Active</span></button>
         <a href="/qa/script" class="qa-action-btn qa-btn-ghost" title="Edit AI scoring prompt"><i class="ri-code-s-slash-line"></i> Script</a>
         <a href="/qa/manual" class="qa-action-btn qa-btn-secondary" title="Manually paste &amp; score a Zoom transcript"><i class="ri-upload-cloud-line"></i> Manual</a>
         <a href="/qa/upload" class="qa-action-btn qa-btn-secondary" title="Upload audio recording — transcribe via AssemblyAI &amp; score with Claude"><i class="ri-mic-line"></i> Upload Recording</a>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </div>
 
@@ -1147,7 +1162,7 @@ function renderCloserTable(closers, leaderboard) {
         </tr></thead>
         <tbody>${rows.map((c, i) => {
         const name     = useCloser ? c.closer_name : c.agent_name;
-        const agentId  = useCloser ? c.closer_user_id : c.agent_user_id;
+        const agentId  = useCloser ? c.closer_id : c.agent_user_id;
         const calls    = useCloser ? (c.total_calls||0) : (c.calls_scored||0);
         const avgScore = parseFloat(c.avg_score || 0);
         const sales    = useCloser ? (c.total_sales||0) : (c.sales_count||0);
@@ -1687,9 +1702,25 @@ function loadQaStatus() {
 }
 
 /* ── Init ── */
+<?php if($myMode && $myUserId): ?>
+// Personal QA report mode — auto-load only this closer's detail
+const __myMode   = true;
+const __myUserId = <?php echo e((int) $myUserId); ?>;
+const __myBackUrl = <?php echo json_encode($myBackUrl ?? null, 15, 512) ?>;
+// Override backToDash to go back to the expected dashboard
+QA.backToDash = function() {
+    if (__myBackUrl) { window.location.href = __myBackUrl; }
+};
+S.currentView = 'agent-detail';
+S.agentId = __myUserId;
+S.currentRange = '30d';
+loadAgentDetail(__myUserId);
+<?php else: ?>
+const __myMode = false;
 loadDashboard();
 loadQaStatus();
 S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDashboard(); }, 60000);
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
 // Auto-open call detail if ?call= param is present (e.g. from upload page link)
 const urlParams = new URLSearchParams(window.location.search);

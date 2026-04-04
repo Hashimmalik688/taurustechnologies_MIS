@@ -8,6 +8,7 @@ use App\Models\LeadDial;
 use App\Models\LeadLock;
 use App\Models\BadLead;
 use App\Models\CallLog;
+use App\Models\QA\QaCall;
 use App\Services\NotificationService;
 use App\Models\AuditLog;
 use App\Models\User;
@@ -150,10 +151,65 @@ class RavensDashboardController extends Controller
             'WI' => 'Wisconsin', 'WY' => 'Wyoming', 'DC' => 'District of Columbia',
         ];
 
+        $qaStats = $this->getQaStats($user->id);
+
         return view('ravens.dashboard', compact(
             'stats', 'mySales', 'mySalesCounts', 'declinedChargebacks', 'filter', 'search',
-            'carrierPartnerData', 'insuranceCarriers', 'usStates'
+            'carrierPartnerData', 'insuranceCarriers', 'usStates', 'qaStats'
         ));
+    }
+
+    /**
+     * Fetch QA performance stats for the given closer (last 30 days).
+     */
+    private function getQaStats(int $userId): array
+    {
+        $base = QaCall::where('agent_user_id', $userId)
+            ->where('processing_status', 'completed')
+            ->whereHas('qaResult')
+            ->where('call_start_time', '>=', now()->subDays(30)->startOfDay());
+
+        $summary = (clone $base)
+            ->join('qa_results', 'qa_calls.id', '=', 'qa_results.qa_call_id')
+            ->selectRaw("
+                COUNT(*) as total_calls,
+                ROUND(AVG(qa_results.total_score), 1) as avg_score,
+                SUM(CASE WHEN qa_results.compliance_pass = 1 THEN 1 ELSE 0 END) as compliance_pass_count,
+                SUM(CASE WHEN qa_results.disposition IN ('EXCELLENT','GOOD') THEN 1 ELSE 0 END) as good_calls,
+                SUM(CASE WHEN qa_results.disposition = 'VOID_RISK' THEN 1 ELSE 0 END) as void_risks,
+                SUM(CASE WHEN qa_results.disposition = 'COMPLIANCE_FAIL' OR qa_results.compliance_pass = 0 THEN 1 ELSE 0 END) as compliance_fails
+            ")
+            ->first();
+
+        $recentCalls = (clone $base)
+            ->with('qaResult')
+            ->orderByDesc('call_start_time')
+            ->limit(5)
+            ->get()
+            ->map(fn ($call) => [
+                'id'          => $call->id,
+                'call_date'   => $call->call_start_time?->format('M j'),
+                'customer'    => $call->qaResult?->customer_name ?? 'Unknown',
+                'score'       => (float) ($call->qaResult?->total_score ?? 0),
+                'disposition' => $call->qaResult?->disposition ?? 'N/A',
+                'compliance'  => (bool) $call->qaResult?->compliance_pass,
+                'top_issue'   => $call->qaResult?->top_issue,
+            ])
+            ->toArray();
+
+        $totalCalls = $summary->total_calls ?? 0;
+
+        return [
+            'total_calls'      => $totalCalls,
+            'avg_score'        => (float) ($summary->avg_score ?? 0),
+            'compliance_rate'  => $totalCalls > 0
+                ? round(($summary->compliance_pass_count / $totalCalls) * 100, 1)
+                : 0,
+            'good_calls'       => $summary->good_calls ?? 0,
+            'void_risks'       => $summary->void_risks ?? 0,
+            'compliance_fails' => $summary->compliance_fails ?? 0,
+            'recent_calls'     => $recentCalls,
+        ];
     }
 
     public function calling(Request $request)

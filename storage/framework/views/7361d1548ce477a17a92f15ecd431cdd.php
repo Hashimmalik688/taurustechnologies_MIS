@@ -105,6 +105,122 @@
     </div>
 
     
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(isset($qaStats) && $qaStats['total_calls'] > 0): ?>
+    <div class="ex-card sec-card" style="margin-bottom:1rem;">
+        <div class="pipe-hdr" style="color:#6f42c1;">
+            <i class="bx bx-shield-quarter" style="color:#6f42c1;"></i> My QA Performance
+            <span style="font-size:.7rem;font-weight:500;color:var(--bs-surface-400);margin-left:.4rem;">Last 30 Days · <?php echo e($qaStats['total_calls']); ?> scored call<?php echo e($qaStats['total_calls'] !== 1 ? 's' : ''); ?></span>
+            <a href="<?php echo e(route('qa.my-report')); ?>" style="margin-left:auto;font-size:.72rem;font-weight:600;color:#6f42c1;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem;">
+                <i class="bx bx-link-external"></i> Full QA Report
+            </a>
+        </div>
+
+        
+        <div style="display:flex;flex-wrap:wrap;gap:.75rem;padding:.5rem .65rem 0;">
+            
+            <?php
+                $score = $qaStats['avg_score'];
+                $scoreColor = $score >= 75 ? '#16a34a' : ($score >= 50 ? '#d97706' : '#dc2626');
+                $scoreBg    = $score >= 75 ? 'rgba(16,185,129,.08)' : ($score >= 50 ? 'rgba(245,158,11,.08)' : 'rgba(239,68,68,.08)');
+            ?>
+            <div style="flex:1;min-width:110px;background:<?php echo e($scoreBg); ?>;border-radius:12px;padding:.6rem .85rem;border:1px solid <?php echo e($scoreColor); ?>22;text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:<?php echo e($scoreColor); ?>;line-height:1.1;"><?php echo e($qaStats['avg_score']); ?></div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-500);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem;">Avg Score</div>
+            </div>
+            
+            <?php
+                $compRate  = $qaStats['compliance_rate'];
+                $compColor = $compRate >= 80 ? '#16a34a' : ($compRate >= 60 ? '#d97706' : '#dc2626');
+                $compBg    = $compRate >= 80 ? 'rgba(16,185,129,.08)' : ($compRate >= 60 ? 'rgba(245,158,11,.08)' : 'rgba(239,68,68,.08)');
+            ?>
+            <div style="flex:1;min-width:110px;background:<?php echo e($compBg); ?>;border-radius:12px;padding:.6rem .85rem;border:1px solid <?php echo e($compColor); ?>22;text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:<?php echo e($compColor); ?>;line-height:1.1;"><?php echo e($qaStats['compliance_rate']); ?>%</div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-500);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem;">Compliance</div>
+            </div>
+            
+            <div style="flex:1;min-width:100px;background:rgba(16,185,129,.06);border-radius:12px;padding:.6rem .85rem;border:1px solid rgba(16,185,129,.12);text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:#16a34a;line-height:1.1;"><?php echo e($qaStats['good_calls']); ?></div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-500);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem;">Excellent/Good</div>
+            </div>
+            
+            <div style="flex:1;min-width:100px;background:rgba(239,68,68,.06);border-radius:12px;padding:.6rem .85rem;border:1px solid rgba(239,68,68,.10);text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:#dc2626;line-height:1.1;"><?php echo e($qaStats['void_risks']); ?></div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-500);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem;">Void Risks</div>
+            </div>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($qaStats['compliance_fails'] > 0): ?>
+            
+            <div style="flex:1;min-width:110px;background:rgba(239,68,68,.06);border-radius:12px;padding:.6rem .85rem;border:1px solid rgba(239,68,68,.10);text-align:center;">
+                <div style="font-size:1.4rem;font-weight:800;color:#dc2626;line-height:1.1;"><?php echo e($qaStats['compliance_fails']); ?></div>
+                <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-500);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem;">Comp. Fails</div>
+            </div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+
+        
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(count($qaStats['recent_calls']) > 0): ?>
+        <div style="padding:.6rem .65rem .65rem;">
+            <div style="font-size:.7rem;font-weight:700;color:var(--bs-surface-400);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.4rem;">Recent Scored Calls</div>
+            <div class="scroll-tbl" style="max-height:220px;">
+                <table class="ex-tbl">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th class="text-center">Score</th>
+                            <th class="text-center">Disposition</th>
+                            <th class="text-center">Compliance</th>
+                            <th>Top Issue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $qaStats['recent_calls']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $qc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
+                            $qcScore = $qc['score'];
+                            $qcColor = $qcScore >= 75 ? '#16a34a' : ($qcScore >= 50 ? '#d97706' : '#dc2626');
+                            $dispMap = [
+                                'EXCELLENT'       => ['bg'=>'rgba(16,185,129,.1)', 'color'=>'#059669'],
+                                'GOOD'            => ['bg'=>'rgba(59,130,246,.1)', 'color'=>'#2563eb'],
+                                'AVERAGE'         => ['bg'=>'rgba(245,158,11,.1)', 'color'=>'#d97706'],
+                                'POOR'            => ['bg'=>'rgba(239,68,68,.1)',  'color'=>'#dc2626'],
+                                'VOID_RISK'       => ['bg'=>'rgba(239,68,68,.1)',  'color'=>'#b91c1c'],
+                                'COMPLIANCE_FAIL' => ['bg'=>'rgba(107,114,128,.1)','color'=>'#4b5563'],
+                            ];
+                            $ds = $dispMap[strtoupper($qc['disposition'])] ?? ['bg'=>'rgba(107,114,128,.1)','color'=>'#6b7280'];
+                        ?>
+                        <tr>
+                            <td style="white-space:nowrap;font-size:.72rem;"><?php echo e($qc['call_date']); ?></td>
+                            <td style="font-size:.75rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?php echo e($qc['customer']); ?></td>
+                            <td class="text-center">
+                                <span style="font-weight:800;font-size:.82rem;color:<?php echo e($qcColor); ?>;"><?php echo e(number_format($qc['score'], 1)); ?></span>
+                            </td>
+                            <td class="text-center">
+                                <span class="st-pill" style="background:<?php echo e($ds['bg']); ?>;color:<?php echo e($ds['color']); ?>;border:1px solid <?php echo e($ds['color']); ?>22;">
+                                    <?php echo e(str_replace('_',' ', $qc['disposition'])); ?>
+
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($qc['compliance']): ?>
+                                    <i class="bx bx-check-circle" style="color:#16a34a;font-size:1rem;" title="Pass"></i>
+                                <?php else: ?>
+                                    <i class="bx bx-x-circle" style="color:#dc2626;font-size:1rem;" title="Fail"></i>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td style="font-size:.7rem;color:var(--bs-surface-500);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="<?php echo e($qc['top_issue'] ?? ''); ?>">
+                                <?php echo e($qc['top_issue'] ?? '—'); ?>
+
+                            </td>
+                        </tr>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    </div>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+    
     <div class="ex-card sec-card">
         <div class="pipe-hdr" style="color:#1a8754;">
             <i class="bx bx-dollar-circle" style="color:#34c38f;"></i> My Sales Records

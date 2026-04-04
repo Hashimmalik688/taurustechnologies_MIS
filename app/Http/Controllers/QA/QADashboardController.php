@@ -30,6 +30,28 @@ class QADashboardController extends Controller
         return view('qa.dashboard');
     }
 
+    // ── GET /qa/my-report ───────────────────────────────────────────────
+    // Personal QA report page for the authenticated closer — shows only
+    // their own scored calls, category scores, and coaching notes.
+
+    public function myReport()
+    {
+        $user = auth()->user();
+
+        // Determine back URL based on the user's role
+        if ($user->hasRole('Ravens Closer')) {
+            $backUrl = route('ravens.dashboard');
+        } else {
+            $backUrl = url()->previous(route('home'));
+        }
+
+        return view('qa.dashboard', [
+            'myMode'   => true,
+            'myUserId' => $user->id,
+            'myBackUrl' => $backUrl,
+        ]);
+    }
+
     // ── GET /qa/api/overview ────────────────────────────────────────────
 
     public function overview(Request $request): JsonResponse
@@ -184,7 +206,7 @@ class QADashboardController extends Controller
 
     public function agentDetail(Request $request, int $id): JsonResponse
     {
-        $range = $request->input('range', 'today');
+        $range = $request->input('range', '30d');
         $user = User::findOrFail($id);
 
         // Agent summary stats (extended)
@@ -414,7 +436,7 @@ class QADashboardController extends Controller
                 'caller_number' => $call->caller_number,
                 'callee_number' => $call->callee_number,
                 'lead_phone'    => $call->lead?->phone_number,
-                'customer_name' => $result?->customer_name ?? null,
+                'customer_name' => $call->lead?->cn_name ?? $result?->customer_name ?? null,
                 'duration_seconds' => $call->duration_seconds,
                 'call_start_time' => $call->call_start_time?->toIso8601String(),
                 'scored_by' => $call->scored_by,
@@ -622,7 +644,7 @@ class QADashboardController extends Controller
                 'top_issue'       => $qaResult->top_issue,
                 'strengths'       => $qaResult->strengths,
                 'improvements'    => $qaResult->improvements,
-                'customer_name'   => $qaResult->customer_name,
+                'customer_name'   => $qaCall->lead?->cn_name ?? $qaResult->customer_name,
                 'carrier_name'    => $qaResult->carrier_name,
                 'is_sale'         => $qaResult->is_sale,
                 'monthly_premium' => $qaResult->monthly_premium,
@@ -921,7 +943,7 @@ class QADashboardController extends Controller
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.sale_amount ELSE 0 END), 0) as total_coverage,
                 ROUND(SUM(CASE WHEN qa_results.is_sale = 1 THEN qa_results.monthly_premium ELSE 0 END), 2) as total_premium
             ')
-            ->orderByDesc('total_calls')
+            ->orderByDesc('avg_score')
             ->limit(30)
             ->get()
             ->map(fn ($row) => [
@@ -952,7 +974,7 @@ class QADashboardController extends Controller
             'agent_user_id' => $call->agent_user_id,
             'caller_number' => $call->caller_number,
             'callee_number' => $call->callee_number,
-            'customer_name' => $call->qaResult?->customer_name ?? null,
+            'customer_name' => $call->lead?->cn_name ?? $call->qaResult?->customer_name ?? null,
             'duration_seconds' => $call->duration_seconds,
             'call_start_time' => $call->call_start_time?->toIso8601String(),
             'disposition' => $call->qaResult?->disposition,
@@ -1123,13 +1145,13 @@ class QADashboardController extends Controller
 
         // Paginated call list with results
         $calls = (clone $filteredQuery)
-            ->with(['agent:id,name,email', 'qaResult'])
+            ->with(['agent:id,name,email', 'qaResult', 'lead:id,cn_name'])
             ->orderByDesc('call_start_time')
             ->paginate(20, ['*'], 'page', $page);
 
         $items = collect($calls->items())->map(fn (QaCall $call) => [
             'id' => $call->id,
-            'customer_name' => $call->qaResult?->customer_name ?? 'Unknown',
+            'customer_name' => $call->lead?->cn_name ?? $call->qaResult?->customer_name ?? 'Unknown',
             'customer_phone' => $call->callee_number,
             'closer_name' => $call->agent?->name ?? $call->qaResult?->closer_name_extracted ?? $call->agent_name ?? 'Unknown',
             'closer_id' => $call->agent_user_id,
@@ -1653,7 +1675,7 @@ class QADashboardController extends Controller
                 'top_issue'       => $result->top_issue,
                 'strengths'       => $result->strengths,
                 'improvements'    => $result->improvements,
-                'customer_name'   => $result->customer_name,
+                'customer_name'   => $qaCall->lead?->cn_name ?? $result->customer_name,
                 'carrier_name'    => $result->carrier_name,
                 'is_sale'         => (bool) $result->is_sale,
                 'monthly_premium' => $result->monthly_premium,

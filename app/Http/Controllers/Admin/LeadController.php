@@ -1244,42 +1244,52 @@ class LeadController extends Controller
         // Partners are managed separately in the Partner system
         $followupUsers = \App\Models\User::orderBy('name')->get(['id', 'name']);
         
-        // Get all leads that have been sent to pending draft
-        $sentToDraft = Lead::with(['pendingDraftBy'])
-            ->whereNotNull('pending_draft_at')
-            ->orderByDesc('pending_draft_at')
-            ->get(['id', 'cn_name', 'phone_number', 'pending_draft_at', 'pending_draft_by_id']);
-        
         // Get Not Issued dispositions for the modal
         $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
-        
-        // Calculate KPI counts from base query (before status filters)
+
+        // Base date-scoped query for all KPIs (consistent date filter)
         $baseKpiQuery = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_at')
-            ->whereNotNull('pending_contract_at')
-            ->whereNull('pending_draft_at'); // Only leads NOT yet sent to draft
-        
-        // Apply date filter to KPIs
+            ->whereNotNull('pending_contract_at');
+
         if ($request->filled('date_from')) {
             $baseKpiQuery->whereDate('sale_date', '>=', $request->date_from);
         }
         if ($request->filled('date_to')) {
             $baseKpiQuery->whereDate('sale_date', '<=', $request->date_to);
         }
-        
+
+        // Sent-to-draft KPI: date-scoped, only leads that were actually issued then drafted
+        // (Not Issued leads cannot be sent to draft — excluded by issuance_status check)
+        $sentToDraftKpi = (clone $baseKpiQuery)
+            ->whereNotNull('pending_draft_at')
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+            ->count();
+
+        // Sent-to-draft list for the detail table (date-scoped)
+        $sentToDraft = (clone $baseKpiQuery)
+            ->with(['pendingDraftBy'])
+            ->whereNotNull('pending_draft_at')
+            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
+            ->orderByDesc('pending_draft_at')
+            ->get(['id', 'cn_name', 'phone_number', 'pending_draft_at', 'pending_draft_by_id', 'sale_date']);
+
+        // Non-drafted leads KPI base (pending/issued/not-issued counters)
+        $baseActivKpiQuery = (clone $baseKpiQuery)->whereNull('pending_draft_at');
+
         $kpiCounts = [
-            'pending' => (clone $baseKpiQuery)->where(function($q) {
+            'pending' => (clone $baseActivKpiQuery)->where(function($q) {
                 $q->whereNull('issuance_status')
                   ->orWhere('issuance_status', 'Pending')
                   ->orWhere('issuance_status', 'Incomplete');
             })->count(),
-            'issued' => (clone $baseKpiQuery)->where('issuance_status', Statuses::ISSUANCE_ISSUED)->count(),
-            'not_issued' => (clone $baseKpiQuery)->where('issuance_status', 'Not Issued')->count(),
-            'ready_for_draft' => (clone $baseKpiQuery)
+            'issued' => (clone $baseActivKpiQuery)->where('issuance_status', Statuses::ISSUANCE_ISSUED)->count(),
+            'not_issued' => (clone $baseActivKpiQuery)->where('issuance_status', 'Not Issued')->count(),
+            'ready_for_draft' => (clone $baseActivKpiQuery)
                 ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
                 ->where('followup_status', Statuses::MIS_YES)
                 ->count(),
-            'sent_to_draft' => $sentToDraft->count(),
+            'sent_to_draft' => $sentToDraftKpi,
         ];
         
         $leads = $query->orderBy('sale_date', 'desc')->paginate(50);
