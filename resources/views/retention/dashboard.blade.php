@@ -357,7 +357,7 @@
                                 <td class="text-center">
                                     <span class="status-pill s-retained">Retained</span>
                                 </td>
-                                <td>{{ $lead->retained_at ? $lead->retained_at->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ $lead->retained_at ? $lead->retained_at->format('m/d/Y') : 'N/A' }}</td>
                             </tr>
                             @empty
                             <tr class="sales-row" data-type="retained">
@@ -384,7 +384,7 @@
                                 <td class="text-center">
                                     <span class="status-pill s-rewrite">Rewrite</span>
                                 </td>
-                                <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : ($lead->chargeback_marked_date ? $lead->chargeback_marked_date->format('M d, Y') : 'N/A') }}</td>
+                                <td>{{ $lead->sale_date ? $lead->sale_date->format('m/d/Y') : ($lead->chargeback_marked_date ? $lead->chargeback_marked_date->format('m/d/Y') : 'N/A') }}</td>
                             </tr>
                             @empty
                             <tr class="sales-row" data-type="rewrite" style="display:none">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLedgerEntryRequest;
 use App\Models\LedgerEntry;
+use App\Models\LedgerJournalEntry;
 use App\Models\Lead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +74,37 @@ class LedgerController extends Controller
         $totalDebits = LedgerEntry::where('type', 'debit')->sum('amount');
         $netBalance = $totalCredits - $totalDebits;
 
-        return view('admin.ledger.index', compact('totalCredits', 'totalDebits', 'netBalance'));
+        // Journal ledger stats (double-entry system)
+        $journalSalesTotal       = LedgerJournalEntry::where('type', 'sale')->sum('total_debit');
+        $journalSalesCount       = LedgerJournalEntry::where('type', 'sale')->count();
+        $journalChargebacksTotal = LedgerJournalEntry::where('type', 'chargeback')->sum('total_debit');
+        $journalNetRevenue       = $journalSalesTotal - $journalChargebacksTotal;
+
+        // Unposted paid sales (paid_at set but no journal entry created)
+        $unpostedPaidSales = Lead::whereNotNull('paid_at')
+            ->whereNull('ledger_journal_entry_id')
+            ->whereNotNull('partner_id')
+            ->count();
+
+        // This month journal sales
+        $journalSalesThisMonth = LedgerJournalEntry::where('type', 'sale')
+            ->where('entry_date', '>=', now()->startOfMonth())
+            ->sum('total_debit');
+
+        // Recent journal entries (sales)
+        $recentJournalSales = LedgerJournalEntry::with(['creator', 'lead'])
+            ->where('type', 'sale')
+            ->orderByDesc('entry_date')
+            ->orderByDesc('id')
+            ->limit(6)
+            ->get();
+
+        return view('admin.ledger.index', compact(
+            'totalCredits', 'totalDebits', 'netBalance',
+            'journalSalesTotal', 'journalSalesCount', 'journalChargebacksTotal',
+            'journalNetRevenue', 'unpostedPaidSales', 'journalSalesThisMonth',
+            'recentJournalSales'
+        ));
     }
 
     /**

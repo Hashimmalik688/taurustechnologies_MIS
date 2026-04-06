@@ -1942,6 +1942,10 @@ async function selectConversation(conversationId, conversationName, element) {
 
 // Load messages
 async function loadMessages(conversationId, conversationName) {
+    // Reset cursor state for this conversation
+    window.chatOldestId = null;
+    window.chatHasMore = false;
+
     try {
         const data = await apiCall(`/api/chat/conversations/${conversationId}/messages`);
         console.log('Messages data received:', data);
@@ -1959,13 +1963,90 @@ async function loadMessages(conversationId, conversationName) {
         // Handle different possible data structures
         let messages = data.messages || data.data || [];
         let conversationType = data.conversation?.type || 'direct';
-        let conversationObj = data.conversation || {};
+
+        // Store cursor state
+        window.chatOldestId = data.oldest_id || (messages.length ? messages[0].id : null);
+        window.chatHasMore = data.has_more || false;
         
-        console.log('Rendering messages:', messages.length, 'Type:', conversationType);
+        console.log('Rendering messages:', messages.length, 'Type:', conversationType, 'has_more:', window.chatHasMore);
         
         renderChatArea(conversationName, messages, conversationType, conversationId, communityId);
+
+        // Inject "Load older messages" button after render
+        setTimeout(() => updateLoadOlderButton(), 50);
     } catch (error) {
         console.error('Error loading messages:', error);
+    }
+}
+
+// Inject or remove the "Load older messages" button at the top of the chat
+function updateLoadOlderButton() {
+    const messagesEl = document.getElementById('chatMessages');
+    if (!messagesEl) return;
+
+    // Remove existing button if any
+    const existing = messagesEl.querySelector('.load-older-btn-wrap');
+    if (existing) existing.remove();
+
+    if (!window.chatHasMore) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'load-older-btn-wrap text-center py-2';
+    wrap.innerHTML = `<button class="btn btn-sm btn-outline-secondary load-older-btn" onclick="loadOlderMessages()">
+        <i class="bx bx-up-arrow-alt me-1"></i> Load older messages
+    </button>`;
+    messagesEl.prepend(wrap);
+}
+
+// Load older messages (cursor-based, prepend to chat)
+async function loadOlderMessages() {
+    const convId = window.currentConversationId;
+    if (!convId || !window.chatOldestId) return;
+
+    const btn = document.querySelector('.load-older-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Loading...';
+    }
+
+    try {
+        const data = await apiCall(`/api/chat/conversations/${convId}/messages?before_id=${window.chatOldestId}`);
+        const olderMessages = data.messages || data.data || [];
+
+        window.chatHasMore = data.has_more || false;
+        if (olderMessages.length > 0) {
+            window.chatOldestId = data.oldest_id || olderMessages[0].id;
+        }
+
+        const messagesEl = document.getElementById('chatMessages');
+        if (!messagesEl) return;
+
+        // Record scroll height before prepend to preserve scroll position
+        const prevScrollHeight = messagesEl.scrollHeight;
+
+        // Remove the button wrap before prepending messages
+        const btnWrap = messagesEl.querySelector('.load-older-btn-wrap');
+        if (btnWrap) btnWrap.remove();
+
+        // Prepend older messages HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderMessages(olderMessages);
+        while (tempDiv.firstChild) {
+            messagesEl.prepend(tempDiv.lastChild);
+        }
+
+        // Re-inject button at top if more messages exist
+        updateLoadOlderButton();
+
+        // Restore scroll position so the user stays where they were
+        messagesEl.scrollTop = messagesEl.scrollHeight - prevScrollHeight;
+
+    } catch (error) {
+        console.error('Error loading older messages:', error);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-up-arrow-alt me-1"></i> Load older messages';
+        }
     }
 }
 

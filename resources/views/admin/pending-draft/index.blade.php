@@ -279,7 +279,7 @@
             <input type="hidden" name="tab" value="{{ $tab }}">
             <div class="pd-filter-group">
                 <label>Search</label>
-                <input type="text" name="search" value="{{ $search }}" placeholder="Name, phone..." style="width:160px;">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Name, phone, policy#..." style="width:180px;">
             </div>
             <div class="pd-filter-group">
                 <label>Carrier</label>
@@ -395,6 +395,11 @@
                                 @if($lead->not_paid_fdfp_type === 'manual_action' && $lead->not_paid_manual_disposition)
                                     <div class="pd-meta">→ {{ $niDispositions[$lead->not_paid_manual_disposition] ?? $lead->not_paid_manual_disposition }}</div>
                                 @endif
+                                @if($lead->not_paid_comment)
+                                    <div class="pd-meta" style="font-style:italic;margin-top:2px;" title="{{ $lead->not_paid_comment }}">
+                                        💬 {{ Str::limit($lead->not_paid_comment, 60) }}
+                                    </div>
+                                @endif
                                 @if($lead->notPaidBy)
                                     <div class="pd-meta">by {{ $lead->notPaidBy->name }}</div>
                                 @endif
@@ -480,6 +485,10 @@
                             <option value="{{ $key }}">{{ $label }}</option>
                         @endforeach
                     </select>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Comment <span style="font-weight:400;color:var(--bs-surface-400);">(optional)</span></label>
+                    <textarea id="fdfp-comment" class="form-control form-control-sm" rows="2" maxlength="1000" placeholder="Describe the issue..."></textarea>
                 </div>
             </div>
             <div class="modal-footer py-2 px-3">
@@ -646,6 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('fdfp-lead-name').textContent = this.dataset.name;
             document.getElementById('fdfp-type').value = '';
             document.getElementById('fdfp-manual').value = '';
+            document.getElementById('fdfp-comment').value = '';
             document.getElementById('manual-disposition-wrap').style.display = 'none';
             document.getElementById('fdfp-confirm-btn').disabled = false;
             document.getElementById('fdfp-confirm-btn').innerHTML = 'Confirm Not Paid';
@@ -660,6 +670,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('fdfp-confirm-btn').addEventListener('click', function() {
         const type = document.getElementById('fdfp-type').value;
         const manual = document.getElementById('fdfp-manual').value;
+        const comment = document.getElementById('fdfp-comment').value.trim();
         if (!type) { alert('Please select an FDFP type.'); return; }
         if (type === 'manual_action' && !manual) { alert('Please select a manual action disposition.'); return; }
         
@@ -673,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({not_paid_fdfp_type: type, not_paid_manual_disposition: manual || null})
+            body: JSON.stringify({not_paid_fdfp_type: type, not_paid_manual_disposition: manual || null, not_paid_comment: comment || null})
         })
         .then(r => r.json())
         .then(d => {

@@ -325,6 +325,16 @@
         box-shadow: 0 1px 4px rgba(16,185,129,.45);
         flex-shrink: 0;
     }
+    .sl-qa-badge-bad {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff; font-size: .6rem; font-weight: 800;
+        letter-spacing: .3px; line-height: 1;
+        vertical-align: middle; margin-left: 4px;
+        box-shadow: 0 1px 4px rgba(239,68,68,.45);
+        flex-shrink: 0;
+    }
 
     /* ── Custom Dropdown (pill-shaped panels) ── */
     .sl-cdd { position: relative; display: inline-block; vertical-align: middle; }
@@ -692,6 +702,8 @@
                                                 <strong>{{ $lead->cn_name }}</strong>
                                                 @if(in_array($lead->qa_status ?? '', ['Good', 'Avg']))
                                                     <span class="sl-qa-badge" title="QA Cleared ({{ $lead->qa_status }})">QA</span>
+                                                @elseif(($lead->qa_status ?? '') === 'Bad')
+                                                    <span class="sl-qa-badge-bad" title="QA Bad">QA</span>
                                                 @endif
                                             </td>
                                             <td>{{ $lead->phone_number }}</td>
@@ -777,6 +789,8 @@
                                                 <strong>{{ $lead->cn_name }}</strong>
                                                 @if(in_array($lead->qa_status ?? '', ['Good', 'Avg']))
                                                     <span class="sl-qa-badge" title="QA Cleared ({{ $lead->qa_status }})">QA</span>
+                                                @elseif(($lead->qa_status ?? '') === 'Bad')
+                                                    <span class="sl-qa-badge-bad" title="QA Bad">QA</span>
                                                 @endif
                                             </td>
                                             <td class="sl-sticky-col sl-col-3">{{ $lead->phone_number }}</td>

@@ -1359,32 +1359,41 @@ class QADashboardController extends Controller
     public function uploadAndTranscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'audio'         => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
-            'audio2'        => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
-            'agent_user_id' => 'nullable|integer|exists:users,id',
-            'call_date'     => 'nullable|date',
-            'swap_speakers' => 'nullable|boolean',
+            'audio'           => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
+            'audio2'          => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
+            'audio_extra.*'   => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
+            'agent_user_id'   => 'nullable|integer|exists:users,id',
+            'call_date'       => 'nullable|date',
+            'swap_speakers'   => 'nullable|boolean',
         ]);
 
-        $file      = $request->file('audio');
-        $file2     = $request->file('audio2'); // optional 2nd recording (reconnected call)
-        $agentId   = $request->input('agent_user_id');
-        $callDate  = $request->input('call_date') ? now()->parse($request->input('call_date')) : now();
-        $agentUser = $agentId ? \App\Models\User::find($agentId) : null;
+        $file       = $request->file('audio');
+        $file2      = $request->file('audio2');          // optional Part 2
+        $extraFiles = $request->file('audio_extra', []); // optional Parts 3, 4, 5…
+        $agentId    = $request->input('agent_user_id');
+        $callDate   = $request->input('call_date') ? now()->parse($request->input('call_date')) : now();
+        $agentUser  = $agentId ? \App\Models\User::find($agentId) : null;
 
-        // Store both files
+        // Store all files up front so we can clean up on error
         $storedPath  = $file->store('qa_audio', 'local');
         $storedPath2 = $file2 ? $file2->store('qa_audio', 'local') : null;
+
+        $extraStored = [];
+        foreach ($extraFiles as $ef) {
+            $extraStored[] = $ef ? $ef->store('qa_audio', 'local') : null;
+        }
 
         Log::info('[QA:Upload] Audio received', [
             'original_name'  => $file->getClientOriginalName(),
             'original_name2' => $file2?->getClientOriginalName(),
+            'extra_parts'    => count(array_filter($extraFiles)),
             'size_kb'        => round($file->getSize() / 1024, 1),
             'stored_path'    => $storedPath,
             'by_user'        => auth()->user()?->name,
         ]);
 
         $transcriptId2 = null;
+        $extraPartsData = [];
         try {
             $assembly = new \App\Services\QA\AssemblyAIService();
 
@@ -1397,10 +1406,27 @@ class QADashboardController extends Controller
                 $uploadUrl2    = $assembly->uploadAudio($file2->getRealPath());
                 $transcriptId2 = $assembly->submitTranscription($uploadUrl2);
             }
+
+            // Upload Parts 3+ (if provided)
+            foreach ($extraFiles as $i => $ef) {
+                if (!$ef) continue;
+                $euUrl = $assembly->uploadAudio($ef->getRealPath());
+                $etId  = $assembly->submitTranscription($euUrl);
+                $extraPartsData[] = [
+                    'audio_file_path'          => $extraStored[$i] ?? null,
+                    'audio_original_name'      => $ef->getClientOriginalName(),
+                    'assemblyai_transcript_id' => $etId,
+                ];
+            }
+
         } catch (\Throwable $e) {
             Log::error('[QA:Upload] AssemblyAI error', ['error' => $e->getMessage()]);
 
-            \Illuminate\Support\Facades\Storage::disk('local')->delete(array_filter([$storedPath, $storedPath2]));
+            $allPaths = array_filter(array_merge(
+                [$storedPath, $storedPath2],
+                $extraStored,
+            ));
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($allPaths);
 
             return response()->json([
                 'success' => false,
@@ -1425,22 +1451,27 @@ class QADashboardController extends Controller
             'audio_file_path_2'          => $storedPath2,
             'audio_original_name_2'      => $file2?->getClientOriginalName(),
             'assemblyai_transcript_id_2' => $transcriptId2,
+            // Parts 3+ (JSON array, nullable)
+            'extra_parts'                => $extraPartsData ?: null,
         ]);
+
+        $totalParts = 1 + (int)(bool)$transcriptId2 + count($extraPartsData);
 
         Log::info('[QA:Upload] QaCall created, transcription queued', [
             'qa_call_id'     => $qaCall->id,
             'transcript_id'  => $transcriptId,
             'transcript_id2' => $transcriptId2,
-            'multi_part'     => (bool) $transcriptId2,
+            'extra_parts'    => count($extraPartsData),
+            'total_parts'    => $totalParts,
         ]);
 
         return response()->json([
             'success'       => true,
             'qa_call_id'    => $qaCall->id,
             'transcript_id' => $transcriptId,
-            'multi_part'    => (bool) $transcriptId2,
-            'message'       => $transcriptId2
-                ? 'Both audio files uploaded. Transcribing Part 1 & Part 2…'
+            'total_parts'   => $totalParts,
+            'message'       => $totalParts > 1
+                ? "All {$totalParts} audio parts uploaded. Transcribing…"
                 : 'Audio uploaded. Transcription in progress…',
         ]);
     }
@@ -1554,6 +1585,55 @@ class QADashboardController extends Controller
                 }
             }
 
+            // ─── Parts 3+: if extra_parts are stored, wait for each then merge ───
+            if (!empty($qaCall->extra_parts)) {
+                $swapExtra = request()->input('swap_extra', []);
+                foreach ($qaCall->extra_parts as $i => $extraPart) {
+                    $etId = $extraPart['assemblyai_transcript_id'] ?? null;
+                    if (!$etId) continue;
+
+                    $partNum  = $i + 3; // index 0 = Part 3, index 1 = Part 4 …
+                    $dataExt  = $assembly->getTranscript($etId);
+                    $statusExt = $dataExt['status'] ?? 'unknown';
+
+                    if ($statusExt === 'error') {
+                        Log::warning('[QA:Upload] Extra part transcript failed, skipping', [
+                            'qa_call_id' => $qaCall->id,
+                            'part'       => $partNum,
+                            'error'      => $dataExt['error'] ?? 'unknown',
+                        ]);
+                        continue;
+                    }
+
+                    if ($statusExt !== 'completed') {
+                        // Still processing — tell frontend to keep polling
+                        return response()->json([
+                            'success'    => true,
+                            'status'     => 'processing',
+                            'qa_call_id' => $qaCall->id,
+                            'message'    => "Parts 1–" . ($partNum - 1) . " transcribed. Waiting for Part {$partNum}…",
+                        ]);
+                    }
+
+                    $parsedExt   = $assembly->parseTranscriptResult($dataExt);
+                    $diarizedExt = $parsedExt['diarized'];
+
+                    // Apply per-part speaker swap if requested
+                    if (!empty($swapExtra[$i])) {
+                        $diarizedExt = \App\Services\QA\AssemblyAIService::swapSpeakers($diarizedExt);
+                    }
+
+                    $diarized    .= "\n\n[--- CALL DISCONNECTED — PART {$partNum} ---]\n\n" . $diarizedExt;
+                    $durationSec  = max($durationSec, $parsedExt['duration_seconds'] ?: 0);
+
+                    Log::info('[QA:Upload] Extra part transcript merged', [
+                        'qa_call_id'  => $qaCall->id,
+                        'part'        => $partNum,
+                        'seconds'     => $parsedExt['duration_seconds'],
+                    ]);
+                }
+            }
+
             // Optional speaker swap from the original upload request
             if (request()->boolean('swap_speakers')) {
                 $diarized = \App\Services\QA\AssemblyAIService::swapSpeakers($diarized);
@@ -1598,8 +1678,12 @@ class QADashboardController extends Controller
             $resultService->saveResult($qaCall, $aiResult);
 
             // Delete audio files from disk — no longer needed after scoring
+            $extraAudioPaths = array_column($qaCall->extra_parts ?? [], 'audio_file_path');
             \Illuminate\Support\Facades\Storage::disk('local')->delete(
-                array_filter([$qaCall->audio_file_path, $qaCall->audio_file_path_2])
+                array_filter(array_merge(
+                    [$qaCall->audio_file_path, $qaCall->audio_file_path_2],
+                    $extraAudioPaths,
+                ))
             );
 
             Log::info('[QA:Upload] Scoring complete', [

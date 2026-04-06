@@ -20,6 +20,7 @@ class LedgerJournalEntry extends Model
         'gross_amount',
         'our_share_percentage',
         'created_by',
+        'lead_id',
     ];
 
     protected $casts = [
@@ -41,6 +42,12 @@ class LedgerJournalEntry extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** The paid lead this journal entry was created from */
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Lead::class);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

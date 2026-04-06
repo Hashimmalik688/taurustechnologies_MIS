@@ -44,12 +44,14 @@ class QaCall extends Model
         'audio_file_path_2',
         'audio_original_name',
         'audio_original_name_2',
+        'extra_parts',
     ];
 
     protected $casts = [
-        'call_start_time' => 'datetime',
+        'call_start_time'  => 'datetime',
         'duration_seconds' => 'integer',
-        'retry_count' => 'integer',
+        'retry_count'      => 'integer',
+        'extra_parts'      => 'array',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────

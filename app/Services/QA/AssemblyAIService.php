@@ -226,14 +226,12 @@ class AssemblyAIService
         // If there are exactly 2 speakers (A & B), A = AGENT, B = CUSTOMER.
         // This matches how outbound call-center calls are typically recorded
         // (agent's audio track comes first).
+        // If AssemblyAI detects 3+ speakers (acoustic variation of the same person),
+        // we collapse them: first speaker = AGENT, all others = CUSTOMER.
         $speakers = collect($utterances)->pluck('speaker')->unique()->sort()->values()->toArray();
         $speakerMap = [];
         foreach ($speakers as $idx => $speaker) {
-            $speakerMap[$speaker] = match ($idx) {
-                0 => 'AGENT',
-                1 => 'CUSTOMER',
-                default => 'SPEAKER_' . $speaker,
-            };
+            $speakerMap[$speaker] = ($idx === 0) ? 'AGENT' : 'CUSTOMER';
         }
 
         foreach ($utterances as $utterance) {

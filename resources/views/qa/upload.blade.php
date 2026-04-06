@@ -168,6 +168,29 @@
 .qu-part2-clear { font-size:.65rem; color:var(--qa-red); cursor:pointer; margin-left:.5rem; opacity:.7; }
 .qu-part2-clear:hover { opacity:1; }
 
+/* ── More parts (Part 3+) ── */
+.qu-more-parts-toggle { margin-top:.55rem; }
+.qu-extra-parts-wrap { margin-top:.5rem; }
+.qu-extra-part-item {
+  display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
+  border:1px dashed rgba(85,110,230,.3); border-radius:.4rem;
+  padding:.6rem .85rem; margin-bottom:.4rem; font-size:.73rem; color:var(--qa-muted);
+  cursor:pointer; transition:border-color .15s, background .15s;
+}
+.qu-extra-part-item:hover { border-color:var(--qa-blue); background:var(--qa-blue-dim); }
+.qu-extra-part-item.has-file { border-color:rgba(52,195,143,.4); color:var(--qa-green); cursor:default; }
+.qu-extra-part-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.qu-extra-part-remove { font-size:.65rem; color:var(--qa-red); cursor:pointer; opacity:.7; flex-shrink:0; padding:.1rem .25rem; }
+.qu-extra-part-remove:hover { opacity:1; }
+.qu-add-extra-btn {
+  display:inline-flex; align-items:center; gap:.35rem;
+  font-size:.72rem; font-weight:600; color:var(--qa-muted);
+  background:rgba(255,255,255,.04); border:1px dashed rgba(255,255,255,.13);
+  border-radius:.4rem; padding:.35rem .75rem; cursor:pointer;
+  transition:border-color .15s, color .15s;
+}
+.qu-add-extra-btn:hover { border-color:rgba(85,110,230,.4); color:var(--qa-blue); }
+
 /* ── Sale Picker ── */
 .qu-sale-picker { display:none; }
 .qu-sale-picker.show { display:block; }
@@ -294,6 +317,7 @@
       {{-- Hidden file inputs --}}
       <input type="file" id="qu-file"  accept=".mp3,.wav,.m4a,.mp4,.ogg,.webm,.flac,.aac" style="display:none;" />
       <input type="file" id="qu-file2" accept=".mp3,.wav,.m4a,.mp4,.ogg,.webm,.flac,.aac" style="display:none;" />
+      {{-- Extra parts dynamic file inputs are injected by JS --}}
 
       {{-- Drop zone (Part 1) --}}
       <div class="qu-dropzone" id="qu-dropzone" onclick="document.getElementById('qu-file').click()">
@@ -321,6 +345,22 @@
             </label>
             <span class="qu-part2-clear" onclick="clearPart2(event)" title="Remove Part 2">✕</span>
           </div>
+        </div>
+
+        {{-- "More parts" checkbox — visible once Part 1 is picked --}}
+        <div class="qu-more-parts-toggle" id="qu-more-parts-toggle">
+          <label class="qu-toggle" style="cursor:pointer; font-size:.72rem;">
+            <input type="checkbox" id="qu-has-more-parts" onchange="toggleMoreParts(this.checked)">
+            <span>This call has more than 2 parts <span style="font-size:.6rem;opacity:.6;">(Part 3, 4, 5…)</span></span>
+          </label>
+        </div>
+
+        {{-- Dynamic extra parts container --}}
+        <div class="qu-extra-parts-wrap" id="qu-extra-parts-wrap" style="display:none;">
+          <div id="qu-extra-parts-list"></div>
+          <button type="button" class="qu-add-extra-btn" id="qu-add-extra-btn" onclick="addExtraPart()">
+            <i class="bx bx-plus-circle"></i> Add Part <span id="qu-next-part-num">3</span>
+          </button>
         </div>
       </div>
       <div class="qu-progress-wrap" id="qu-progress-wrap">
@@ -434,6 +474,7 @@ const MAX_POLL_ATTEMPTS = 180;  // 15 min max wait
 
 let selectedFile  = null;
 let selectedFile2 = null;
+let extraParts    = []; // array of { file, swapSpeakers } — Parts 3, 4, 5…
 let pollTimer     = null;
 let pollAttempts  = 0;
 let activeQaCallId = null;
@@ -553,6 +594,90 @@ function clearPart2(e) {
   document.getElementById('qu-part2-btn').style.display  = '';
 }
 
+// ── Extra Parts (3+) ─────────────────────────────────────────────
+
+function toggleMoreParts(checked) {
+  document.getElementById('qu-extra-parts-wrap').style.display = checked ? '' : 'none';
+  if (!checked) {
+    // Clear any added extra parts
+    extraParts = [];
+    document.getElementById('qu-extra-parts-list').innerHTML = '';
+    updateNextPartNum();
+  }
+}
+
+function updateNextPartNum() {
+  const num = extraParts.length + 3; // e.g. 0 items → next is "3"
+  document.getElementById('qu-next-part-num').textContent = num;
+}
+
+function addExtraPart() {
+  const idx = extraParts.length;
+  extraParts.push({ file: null, swapSpeakers: false });
+
+  // Create a hidden file input
+  const input = document.createElement('input');
+  input.type   = 'file';
+  input.accept = '.mp3,.wav,.m4a,.mp4,.ogg,.webm,.flac,.aac';
+  input.id     = `qu-extra-file-${idx}`;
+  input.style.display = 'none';
+  input.addEventListener('change', () => {
+    if (input.files && input.files[0]) selectExtraFile(idx, input.files[0]);
+  });
+  document.body.appendChild(input);
+
+  const partNum = idx + 3;
+  const list    = document.getElementById('qu-extra-parts-list');
+
+  const item = document.createElement('div');
+  item.className = 'qu-extra-part-item';
+  item.id        = `qu-extra-item-${idx}`;
+  item.innerHTML = `
+    <i class="bx bx-cloud-upload" style="color:var(--qa-blue);flex-shrink:0;"></i>
+    <span class="qu-extra-part-label" id="qu-extra-label-${idx}">
+      <strong style="color:var(--qa-blue);">Click to browse</strong> — Part ${partNum} audio file
+    </span>
+    <label class="qu-toggle" style="font-size:.63rem;cursor:pointer;white-space:nowrap;flex-shrink:0;" title="Use if Customer speaks first in Part ${partNum}">
+      <input type="checkbox" id="qu-extra-swap-${idx}" onchange="extraParts[${idx}].swapSpeakers=this.checked">
+      <span>Swap P${partNum}<br><span style="font-size:.57rem;opacity:.6;">Customer first</span></span>
+    </label>
+    <span class="qu-extra-part-remove" onclick="clearExtraPart(${idx})" title="Remove Part ${partNum}">✕</span>`;
+
+  // Clicking the item (but not the Swap label or remove button) opens file picker
+  item.addEventListener('click', (e) => {
+    if (e.target.closest('label') || e.target.closest('.qu-extra-part-remove')) return;
+    document.getElementById(`qu-extra-file-${idx}`).click();
+  });
+
+  list.appendChild(item);
+  updateNextPartNum();
+}
+
+function selectExtraFile(idx, file) {
+  extraParts[idx].file = file;
+  const sizeMB = (file.size / 1048576).toFixed(1);
+  const item   = document.getElementById(`qu-extra-item-${idx}`);
+  const label  = document.getElementById(`qu-extra-label-${idx}`);
+  const partNum = idx + 3;
+
+  item.classList.add('has-file');
+  label.innerHTML = `<i class="bx bx-check-circle" style="margin-right:.3rem;"></i>${escHtml(file.name)} <span style="opacity:.6;font-weight:400;">(${sizeMB} MB) — Part ${partNum}</span>`;
+}
+
+function clearExtraPart(idx) {
+  extraParts[idx] = { file: null, swapSpeakers: false };
+
+  const input = document.getElementById(`qu-extra-file-${idx}`);
+  if (input) input.value = '';
+
+  const item  = document.getElementById(`qu-extra-item-${idx}`);
+  const label = document.getElementById(`qu-extra-label-${idx}`);
+  const partNum = idx + 3;
+
+  item.classList.remove('has-file');
+  label.innerHTML = `<strong style="color:var(--qa-blue);">Click to browse</strong> — Part ${partNum} audio file`;
+}
+
 // Prevent default browser drag behaviour across the whole page
 document.addEventListener('dragover',  (e) => e.preventDefault());
 document.addEventListener('drop',      (e) => e.preventDefault());
@@ -603,12 +728,20 @@ async function startUpload() {
   const formData = new FormData();
   formData.append('audio',         selectedFile);
   if (selectedFile2) formData.append('audio2', selectedFile2);
+  // Append Parts 3+ (audio_extra[])
+  for (let i = 0; i < extraParts.length; i++) {
+    if (extraParts[i] && extraParts[i].file) {
+      formData.append('audio_extra[]', extraParts[i].file);
+    }
+  }
   formData.append('agent_user_id', document.getElementById('qu-agent').value || '');
   formData.append('call_date',     document.getElementById('qu-date').value   || '');
   formData.append('swap_speakers', document.getElementById('qu-swap').checked ? '1' : '0');
   formData.append('_token',        '{{ csrf_token() }}');
 
-  const partLabel = selectedFile2 ? 'both audio files (Part 1 + Part 2)…' : 'audio file…';
+  const extraCount = extraParts.filter(p => p && p.file).length;
+  const totalParts = 1 + (selectedFile2 ? 1 : 0) + extraCount;
+  const partLabel  = totalParts > 1 ? `all ${totalParts} audio files…` : 'audio file…';
   showProgress(10, `Uploading ${partLabel}`);;
 
   try {
@@ -650,7 +783,10 @@ async function pollStatus(qaCallId) {
 
   const swap1      = document.getElementById('qu-swap').checked   ? 'swap_speakers=1'   : '';
   const swap2      = document.getElementById('qu-swap2')?.checked ? 'swap_speakers_2=1' : '';
-  const swapParts  = [swap1, swap2].filter(Boolean).join('&');
+  const swapExtra  = extraParts
+    .map((p, i) => `swap_extra[${i}]=${p && p.swapSpeakers ? '1' : '0'}`)
+    .join('&');
+  const swapParts  = [swap1, swap2, swapExtra].filter(Boolean).join('&');
   const swapParam  = swapParts ? '?' + swapParts : '';
 
   try {
@@ -918,6 +1054,7 @@ function resetForm() {
   clearInterval(pollTimer);
   selectedFile    = null;
   selectedFile2   = null;
+  extraParts      = [];
   activeQaCallId  = null;
   selectedLeadId  = null;
   pollAttempts    = 0;
@@ -937,6 +1074,15 @@ function resetForm() {
   document.getElementById('qu-part2-zone').style.display = 'none';
   document.getElementById('qu-part2-zone').classList.remove('has-file');
   document.getElementById('qu-part2-btn').style.display  = '';
+
+  // Reset "more parts" checkbox + extra parts
+  const moreCheck = document.getElementById('qu-has-more-parts');
+  if (moreCheck) moreCheck.checked = false;
+  document.getElementById('qu-extra-parts-wrap').style.display = 'none';
+  document.getElementById('qu-extra-parts-list').innerHTML = '';
+  updateNextPartNum();
+  // Remove dynamic file inputs added for extra parts
+  document.querySelectorAll('[id^="qu-extra-file-"]').forEach(el => el.remove());
 
   // Reset sale picker
   salePicker.classList.remove('show');

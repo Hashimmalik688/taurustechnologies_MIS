@@ -29,6 +29,36 @@
                class="acct-nav-link {{ Str::startsWith($acctRoute,'admin.accounting.partner-ledger') ? 'active' : '' }}">
                 <i class="bx bx-user-circle"></i> Partner Ledger
             </a>
+
+            {{-- Reports dropdown --}}
+            <div class="acct-nav-dropdown">
+                <button class="acct-nav-link acct-nav-link-btn {{ Str::startsWith($acctRoute,'admin.accounting.reports') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                    <i class="bx bx-bar-chart-alt-2"></i> Reports <i class="bx bx-chevron-down" style="font-size:.8rem"></i>
+                </button>
+                <ul class="dropdown-menu shadow" style="font-size:.84rem;min-width:200px">
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.reports.trial-balance') }}">
+                            <i class="bx bx-scale" style="color:#0369a1"></i> Trial Balance
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.reports.profit-loss') }}">
+                            <i class="bx bx-line-chart" style="color:#059669"></i> Profit &amp; Loss
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.reports.balance-sheet') }}">
+                            <i class="bx bx-wallet" style="color:#7c3aed"></i> Balance Sheet
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.accounting.reports.expense-tracker') }}">
+                            <i class="bx bx-receipt" style="color:#d97706"></i> Expense Tracker
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </nav>
 
         {{-- New Entry button --}}
@@ -145,4 +175,14 @@
 }
 .acct-btn-new:hover { background: #b8941f; }
 .acct-btn-new.dropdown-toggle::after { margin-left: 4px; }
+/* Reports dropdown in nav */
+.acct-nav-dropdown { position: relative; display: flex; align-items: center; }
+.acct-nav-link-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+.acct-nav-link-btn::after { display:none; } /* hide BS caret, we use our own icon */
+.acct-nav-dropdown .dropdown-menu { top: 100%; margin-top: 0; border-radius: 4px; }
 </style>

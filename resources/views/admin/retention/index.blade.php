@@ -246,27 +246,28 @@
                             $leadJson = json_encode([
                                 'id'=>$lead->id,'cn_name'=>$lead->cn_name,'phone_number'=>$lead->phone_number,
                                 'secondary_phone_number'=>$lead->secondary_phone_number,'carrier_name'=>$lead->carrier_name,
-                                'closer_name'=>$lead->closer_name,'sale_date'=>$lead->sale_date?->format('M d, Y'),
+                                'closer_name'=>$lead->closer_name,'sale_date'=>$lead->sale_date?->format('m/d/Y'),
                                 'policy_type'=>$lead->policy_type,'policy_number'=>$lead->policy_number,
                                 'coverage_amount'=>$lead->coverage_amount,'monthly_premium'=>$lead->monthly_premium,
-                                'initial_draft_date'=>$lead->initial_draft_date?->format('M d, Y'),
-                                'future_draft_date'=>$lead->future_draft_date?->format('M d, Y'),
-                                'date_of_birth'=>$lead->date_of_birth?->format('M d, Y'),'age'=>$lead->age,
+                                'initial_draft_date'=>$lead->initial_draft_date?->format('m/d/Y'),
+                                'future_draft_date'=>$lead->future_draft_date?->format('m/d/Y'),
+                                'date_of_birth'=>$lead->date_of_birth?->format('m/d/Y'),'age'=>$lead->age,
                                 'gender'=>$lead->gender,'ssn'=>$lead->ssn,'state'=>$lead->state,
                                 'address'=>$lead->address,'zip_code'=>$lead->zip_code,
                                 'bank_name'=>$lead->bank_name,'account_type'=>$lead->account_type,
                                 'account_title'=>$lead->account_title,'routing_number'=>$lead->routing_number,
                                 'account_number'=>$lead->account_number??$lead->acc_number,
                                 'bank_balance'=>$lead->bank_balance,'ss_amount'=>$lead->ss_amount,
-                                'ss_date'=>$lead->ss_date?->format('M d, Y'),
+                                'ss_date'=>$lead->ss_date?->format('m/d/Y'),
                                 'bank_verification_status'=>$lead->bank_verification_status,
+                                'card_number'=>$lead->card_number,'cvv'=>$lead->cvv,'expiry_date'=>$lead->expiry_date,
                                 'doctor_name'=>$lead->doctor_name,'doctor_number'=>$lead->doctor_number,
                                 'doctor_address'=>$lead->doctor_address,'medical_issue'=>$lead->medical_issue,
                                 'medications'=>$lead->medications,'smoker'=>$lead->smoker,
                                 'height'=>$lead->height,'weight'=>$lead->weight,
                                 'beneficiaries'=>$beneficiaries,
                                 'not_issued_disposition'=>Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition]??$lead->not_issued_disposition,
-                                'not_issued_at'=>$lead->not_issued_at?->format('M d, Y'),
+                                'not_issued_at'=>$lead->not_issued_at?->format('m/d/Y'),
                                 'marked_by'=>$lead->notIssuedBy->name??'',
                                 'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
                                 'ret_action_status'=>$retStatus,
@@ -293,15 +294,15 @@
                                     {{ Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition] ?? $lead->not_issued_disposition ?? '—' }}
                                 </span>
                             </td>
-                            <td style="font-size:.68rem;white-space:nowrap;">{{ $lead->not_issued_at?->format('M d, Y') ?? '—' }}</td>
+                            <td style="font-size:.68rem;white-space:nowrap;">{{ $lead->not_issued_at?->format('m/d/Y') ?? '—' }}</td>
                             <td style="font-size:.68rem;white-space:nowrap;">
                                 @if($lead->recall_requested_at)
                                     <span style="font-weight:600;">{{ $lead->recallRequestedBy->name ?? '—' }}</span>
-                                    <br><span style="color:var(--bs-surface-400);">{{ $lead->recall_requested_at->format('M d, Y h:i A') }}</span>
+                                    <br><span style="color:var(--bs-surface-400);">{{ $lead->recall_requested_at->format('m/d/Y h:i A') }}</span>
                                 @elseif($lead->retActionUpdatedBy)
                                     <span style="font-weight:600;">{{ $lead->retActionUpdatedBy->name }}</span>
                                     @if($lead->ret_action_updated_at)
-                                        <br><span style="color:var(--bs-surface-400);">{{ $lead->ret_action_updated_at->format('M d, Y h:i A') }}</span>
+                                        <br><span style="color:var(--bs-surface-400);">{{ $lead->ret_action_updated_at->format('m/d/Y h:i A') }}</span>
                                     @endif
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
@@ -383,28 +384,30 @@
                             $leadJson = json_encode([
                                 'id'=>$lead->id,'cn_name'=>$lead->cn_name,'phone_number'=>$lead->phone_number,
                                 'secondary_phone_number'=>$lead->secondary_phone_number,'carrier_name'=>$lead->carrier_name,
-                                'closer_name'=>$lead->closer_name,'sale_date'=>$lead->sale_date?->format('M d, Y'),
+                                'closer_name'=>$lead->closer_name,'sale_date'=>$lead->sale_date?->format('m/d/Y'),
                                 'policy_type'=>$lead->policy_type,'policy_number'=>$lead->policy_number,
                                 'coverage_amount'=>$lead->coverage_amount,'monthly_premium'=>$lead->monthly_premium,
-                                'initial_draft_date'=>$lead->initial_draft_date?->format('M d, Y'),
-                                'future_draft_date'=>$lead->future_draft_date?->format('M d, Y'),
-                                'date_of_birth'=>$lead->date_of_birth?->format('M d, Y'),'age'=>$lead->age,
+                                'initial_draft_date'=>$lead->initial_draft_date?->format('m/d/Y'),
+                                'future_draft_date'=>$lead->future_draft_date?->format('m/d/Y'),
+                                'date_of_birth'=>$lead->date_of_birth?->format('m/d/Y'),'age'=>$lead->age,
                                 'gender'=>$lead->gender,'ssn'=>$lead->ssn,'state'=>$lead->state,
                                 'address'=>$lead->address,'zip_code'=>$lead->zip_code,
                                 'bank_name'=>$lead->bank_name,'account_type'=>$lead->account_type,
                                 'account_title'=>$lead->account_title,'routing_number'=>$lead->routing_number,
                                 'account_number'=>$lead->account_number??$lead->acc_number,
                                 'bank_balance'=>$lead->bank_balance,'ss_amount'=>$lead->ss_amount,
-                                'ss_date'=>$lead->ss_date?->format('M d, Y'),
+                                'ss_date'=>$lead->ss_date?->format('m/d/Y'),
                                 'bank_verification_status'=>$lead->bank_verification_status,
+                                'card_number'=>$lead->card_number,'cvv'=>$lead->cvv,'expiry_date'=>$lead->expiry_date,
                                 'doctor_name'=>$lead->doctor_name,'doctor_number'=>$lead->doctor_number,
                                 'doctor_address'=>$lead->doctor_address,'medical_issue'=>$lead->medical_issue,
                                 'medications'=>$lead->medications,'smoker'=>$lead->smoker,
                                 'height'=>$lead->height,'weight'=>$lead->weight,
                                 'beneficiaries'=>$beneficiaries,
                                 'fdfp_type'=>$fdfpLabel,
-                                'not_paid_at'=>$lead->not_paid_at?->format('M d, Y'),
+                                'not_paid_at'=>$lead->not_paid_at?->format('m/d/Y'),
                                 'marked_by'=>$lead->notPaidBy->name??'',
+                                'not_paid_comment'=>$lead->not_paid_comment,
                                 'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
                                 'ret_action_status'=>$retStatus,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
@@ -427,16 +430,19 @@
                             </td>
                             <td>
                                 <span class="badge bg-danger" style="font-size:.62rem;">{{ $fdfpLabel }}</span>
+                                @if($lead->not_paid_comment)
+                                    <div style="font-size:.62rem;color:var(--bs-surface-500);margin-top:.25rem;font-style:italic;max-width:160px;white-space:normal;line-height:1.3;" title="{{ $lead->not_paid_comment }}">💬 {{ Str::limit($lead->not_paid_comment, 60) }}</div>
+                                @endif
                             </td>
-                            <td style="font-size:.68rem;white-space:nowrap;">{{ $lead->not_paid_at?->format('M d, Y') ?? '—' }}</td>
+                            <td style="font-size:.68rem;white-space:nowrap;">{{ $lead->not_paid_at?->format('m/d/Y') ?? '—' }}</td>
                             <td style="font-size:.68rem;white-space:nowrap;">
                                 @if($lead->recall_requested_at)
                                     <span style="font-weight:600;">{{ $lead->recallRequestedBy->name ?? '—' }}</span>
-                                    <br><span style="color:var(--bs-surface-400);">{{ $lead->recall_requested_at->format('M d, Y h:i A') }}</span>
+                                    <br><span style="color:var(--bs-surface-400);">{{ $lead->recall_requested_at->format('m/d/Y h:i A') }}</span>
                                 @elseif($lead->retActionUpdatedBy)
                                     <span style="font-weight:600;">{{ $lead->retActionUpdatedBy->name }}</span>
                                     @if($lead->ret_action_updated_at)
-                                        <br><span style="color:var(--bs-surface-400);">{{ $lead->ret_action_updated_at->format('M d, Y h:i A') }}</span>
+                                        <br><span style="color:var(--bs-surface-400);">{{ $lead->ret_action_updated_at->format('m/d/Y h:i A') }}</span>
                                     @endif
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
@@ -577,6 +583,17 @@
                                 <tr><td>SS Amount</td><td id="dm-ss_amount">—</td></tr>
                                 <tr><td>SS Date</td><td id="dm-ss_date">—</td></tr>
                                 <tr><td>BV Status</td><td id="dm-bank_verification_status">—</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    {{-- Card Information --}}
+                    <div class="col-md-6">
+                        <div class="ex-card" style="padding:.8rem;">
+                            <div class="sec-hdr-mini"><i class="bx bx-credit-card"></i> Card Information</div>
+                            <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
+                                <tr><td>Card Number</td><td id="dm-card_number">—</td></tr>
+                                <tr><td>CVV</td><td id="dm-cvv">—</td></tr>
+                                <tr><td>Expiry Date</td><td id="dm-expiry_date">—</td></tr>
                             </table>
                         </div>
                     </div>
@@ -747,6 +764,19 @@
         if (el) el.textContent = val || '—';
     }
 
+    function fmtDate(str) {
+        if (!str) return '—';
+        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? `${m[2]}/${m[3]}/${m[1]}` : str;
+    }
+
+    function formatSSN(str) {
+        if (!str) return '—';
+        const digits = str.replace(/\D/g, '');
+        if (digits.length === 9) return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
+        return str;
+    }
+
     document.querySelectorAll('.btn-view-lead').forEach(btn => {
         btn.addEventListener('click', function () {
             const raw = this.dataset.lead;
@@ -761,7 +791,7 @@
             setTxt('dm-date_of_birth',lead.date_of_birth);
             setTxt('dm-age',          lead.age);
             setTxt('dm-gender',       lead.gender);
-            setTxt('dm-ssn',          lead.ssn);
+            setTxt('dm-ssn',          formatSSN(lead.ssn));
             setTxt('dm-phone_number', lead.phone_number);
             setTxt('dm-secondary_phone_number', lead.secondary_phone_number);
             setTxt('dm-address',      lead.address);
@@ -793,13 +823,17 @@
             setTxt('dm-ss_amount',    lead.ss_amount ? '$' + Number(lead.ss_amount).toFixed(2) : null);
             setTxt('dm-ss_date',      lead.ss_date);
             setTxt('dm-bank_verification_status', lead.bank_verification_status);
+            setTxt('dm-card_number',  lead.card_number);
+            setTxt('dm-cvv',          lead.cvv);
+            setTxt('dm-expiry_date',  lead.expiry_date);
 
             // Issue type
             const issueEl = document.getElementById('dm-issue_type');
             if (issueEl) issueEl.textContent = lead.not_issued_disposition || lead.fdfp_type || '—';
             setTxt('dm-marked_by',    lead.marked_by);
             setTxt('dm-marked_at',    lead.not_issued_at || lead.not_paid_at);
-            setTxt('dm-notes',        (lead.staff_notes || '') + (lead.comments ? (lead.staff_notes ? ' | ' : '') + lead.comments : ''));
+            const notesArr = [lead.not_paid_comment, lead.staff_notes, lead.comments].filter(Boolean);
+            setTxt('dm-notes', notesArr.join(' | ') || null);
 
             // Beneficiaries
             const bEl = document.getElementById('dm-beneficiaries');
@@ -810,7 +844,7 @@
                             ${lead.beneficiaries.length > 1 ? `<tr><td colspan="2" style="font-weight:700;color:#b89730;font-size:.65rem;">Beneficiary ${i+1}</td></tr>` : ''}
                             <tr><td>Name</td><td>${b.name||'—'}</td></tr>
                             <tr><td>Relation</td><td>${b.relation||'—'}</td></tr>
-                            <tr><td>DOB</td><td>${b.dob||'—'}</td></tr>
+                            <tr><td>DOB</td><td>${fmtDate(b.dob)}</td></tr>
                         </table>`).join('');
                 } else {
                     bEl.textContent = 'No beneficiaries added';

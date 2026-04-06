@@ -13,6 +13,8 @@
 .kpi-card.k-gold{background:rgba(212,175,55,.06)}.kpi-card.k-gold::before{background:linear-gradient(90deg,#d4af37,#e8c84a)}.kpi-card.k-gold .k-val{color:#b89730}
 .kpi-card.k-green{background:rgba(52,195,143,.06)}.kpi-card.k-green::before{background:linear-gradient(90deg,#34c38f,#6eddb8)}.kpi-card.k-green .k-val{color:#1a8754}
 .kpi-card.k-blue{background:rgba(85,110,230,.06)}.kpi-card.k-blue::before{background:linear-gradient(90deg,#556ee6,#8b9cf7)}.kpi-card.k-blue .k-val{color:#556ee6}
+.kpi-card.k-purple{background:rgba(114,46,209,.06)}.kpi-card.k-purple::before{background:linear-gradient(90deg,#722ed1,#9d5ef5)}.kpi-card.k-purple .k-val{color:#722ed1}
+.kpi-card.k-orange{background:rgba(240,150,9,.06)}.kpi-card.k-orange::before{background:linear-gradient(90deg,#f09609,#f5b83e)}.kpi-card.k-orange .k-val{color:#c47a05}
 .sec-card{padding:0;margin-bottom:.65rem;overflow:hidden;background:var(--bs-card-bg);border:1px solid rgba(255,255,255,.08);border-radius:.6rem;box-shadow:0 1px 4px rgba(0,0,0,.05);}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;border-bottom:1px solid rgba(0,0,0,.05);flex-wrap:wrap;gap:.4rem;}
 .sec-hdr h6{margin:0;font-size:.78rem;font-weight:600;}
@@ -21,6 +23,11 @@
 .ex-tbl tbody td{padding:.4rem .6rem;vertical-align:middle;border-bottom:1px solid rgba(0,0,0,.04);}
 .ex-tbl tbody tr:last-child td{border-bottom:0;}
 .bd-paid{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.25);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;}
+.bd-posted{background:rgba(99,102,241,.12);color:#4338ca;border:1px solid rgba(99,102,241,.3);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;display:inline-flex;align-items:center;gap:.2rem;white-space:nowrap;}
+.bd-posted i{font-size:.7rem;}
+.btn-post-ledger{font-size:.62rem;background:rgba(99,102,241,.12);color:#4338ca;border:1px solid rgba(99,102,241,.3);}
+.btn-post-ledger:hover{background:rgba(99,102,241,.22);}
+.kpi-card.k-indigo{background:rgba(99,102,241,.06)}.kpi-card.k-indigo::before{background:linear-gradient(90deg,#6366f1,#818cf8)}.kpi-card.k-indigo .k-val{color:#4338ca}
 .a-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.28rem .55rem;border-radius:.35rem;font-size:.68rem;font-weight:500;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:all .15s;}
 .filter-form{display:flex;flex-wrap:wrap;gap:.4rem;align-items:flex-end;padding:.65rem .75rem;border-bottom:1px solid rgba(0,0,0,.04);}
 .filter-form .form-control,.filter-form .form-select{font-size:.72rem;padding:.3rem .5rem;height:2rem;}
@@ -50,20 +57,36 @@
             <div class="k-val">{{ $totalCount }}</div>
             <div class="k-lbl">Total Paid</div>
         </div>
-        <div class="kpi-card k-green">
-            <div class="k-val">${{ number_format($totalPremium, 2) }}</div>
-            <div class="k-lbl">Monthly Premium</div>
+        <div class="kpi-card k-purple">
+            <div class="k-val">${{ number_format($totalCommission, 2) }}</div>
+            <div class="k-lbl">Total Commission</div>
         </div>
-        <div class="kpi-card k-blue">
-            <div class="k-val">${{ number_format($totalCoverage, 0) }}</div>
-            <div class="k-lbl">Total Coverage</div>
+        <div class="kpi-card k-orange">
+            <div class="k-val">${{ number_format($totalOurShare, 2) }}</div>
+            <div class="k-lbl">Our Share</div>
+        </div>
+        <div class="kpi-card k-indigo">
+            <div class="k-val">{{ $unpostedCount }}</div>
+            <div class="k-lbl">Not in Ledger</div>
         </div>
     </div>
 
     <div class="sec-card">
         <div class="sec-hdr">
             <h6><i class="bx bx-trophy me-1"></i> Paid Sales Records</h6>
-            <span style="font-size:.68rem;color:var(--bs-surface-400);">Read-only</span>
+            <div class="d-flex align-items-center gap-2">
+                @canViewModule('accounting')
+                @if($unpostedCount > 0)
+                <button id="btn-post-all" class="a-btn" style="font-size:.63rem;background:rgba(99,102,241,.15);color:#4338ca;border-color:rgba(99,102,241,.3);">
+                    <i class="bx bx-book-open"></i> Post All to Ledger
+                    <span class="badge rounded-pill" style="background:#4338ca;color:#fff;font-size:.58rem;padding:.15rem .4rem;margin-left:.2rem;">{{ $unpostedCount }}</span>
+                </button>
+                @endif
+                @endcanViewModule
+                <a href="{{ route('admin.accounting.dashboard') }}" class="a-btn" style="font-size:.63rem;background:rgba(212,175,55,.1);color:#b89730;border-color:rgba(212,175,55,.25);">
+                    <i class="bx bx-line-chart"></i> Accounting
+                </a>
+            </div>
         </div>
 
         {{-- Filters --}}
@@ -78,6 +101,15 @@
                     <option value="">All Carriers</option>
                     @foreach($carriers as $c)
                         <option value="{{ $c->id }}" {{ $carrier == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label>Partner</label>
+                <select name="partner" class="form-select" style="width:150px;">
+                    <option value="">All Partners</option>
+                    @foreach($partners as $p)
+                        <option value="{{ $p->id }}" {{ $partnerId == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -101,11 +133,15 @@
                     <tr>
                         <th>#</th>
                         <th>Client</th>
-                        <th>Phone</th>
+                        <th>Policy Number</th>
+                        <th>Partner</th>
                         <th>Carrier</th>
                         <th>Premium</th>
+                        <th>Commission</th>
+                        <th>Our Share</th>
                         <th>Coverage</th>
                         <th>Status</th>
+                        <th>Ledger</th>
                         <th>Closer</th>
                         <th>Paid By</th>
                         <th>Paid At</th>
@@ -121,9 +157,35 @@
                                     {{ $lead->cn_name ?? '—' }}
                                 </a>
                             </td>
-                            <td>{{ $lead->phone_number ?? '—' }}</td>
+                            <td>{{ $lead->policy_number ?? '—' }}</td>
+                            <td>
+                                @if($lead->partner)
+                                    <span style="font-size:.7rem;font-weight:500;">{{ $lead->partner->name }}</span>
+                                    @if($lead->partner->code)
+                                        <span style="font-size:.6rem;color:var(--bs-surface-400);display:block;">{{ $lead->partner->code }}</span>
+                                    @endif
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
                             <td>{{ $lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—') }}</td>
                             <td>${{ number_format($lead->monthly_premium, 2) }}</td>
+                            <td>
+                                @if($lead->calculated_commission > 0)
+                                    <span style="color:#722ed1;font-weight:600;">${{ number_format($lead->calculated_commission, 2) }}</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($lead->calculated_our_share > 0)
+                                    @php $sharePct = $lead->partner ? ($lead->partner->our_commission_percentage ?? 15.0) : 15.0; @endphp
+                                    <span style="color:#c47a05;font-weight:600;">${{ number_format($lead->calculated_our_share, 2) }}</span>
+                                    <span style="font-size:.6rem;color:var(--bs-surface-400);display:block;">{{ rtrim(rtrim(number_format($sharePct, 2), '0'), '.') }}%</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($lead->coverage_amount)
                                     ${{ number_format($lead->coverage_amount, 0) }}
@@ -132,6 +194,22 @@
                                 @endif
                             </td>
                             <td><span class="bd-paid">Paid</span></td>
+                            <td>
+                                @if($lead->ledger_journal_entry_id && $lead->ledgerJournalEntry)
+                                    <a href="{{ route('admin.accounting.journal.show', $lead->ledger_journal_entry_id) }}" target="_blank"
+                                       class="bd-posted" title="{{ $lead->ledgerJournalEntry->entry_number }}">
+                                        <i class="bx bx-check-circle"></i> {{ $lead->ledgerJournalEntry->entry_number }}
+                                    </a>
+                                @else
+                                    @canViewModule('accounting')
+                                    <button class="a-btn btn-post-ledger" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
+                                        <i class="bx bx-upload"></i> Post
+                                    </button>
+                                    @else
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;">—</span>
+                                    @endcanViewModule
+                                @endif
+                            </td>
                             <td>{{ $lead->closer_name ?? '—' }}</td>
                             <td>{{ $lead->paidBy->name ?? '—' }}</td>
                             <td>{{ $lead->paid_at ? $lead->paid_at->format('M d, Y') : '—' }}</td>
@@ -148,7 +226,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
+                            <td colspan="14" class="text-center py-4" style="color:var(--bs-surface-400);font-size:.75rem;">
                                 <i class="bx bx-inbox" style="font-size:1.5rem;display:block;margin-bottom:.4rem;opacity:.4;"></i>
                                 No paid sales records for the selected period.
                             </td>
@@ -169,6 +247,87 @@
 <script>
 (function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // ── Post single sale to Ledger ──
+    document.querySelectorAll('.btn-post-ledger').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.dataset.processing === 'true') return;
+            const id   = this.dataset.id;
+            const name = this.dataset.name;
+            this.dataset.processing = 'true';
+            if (!confirm('Post "' + name + '" commission to the accounting ledger?\nA journal entry (Dr AR / Cr Sales) will be created.')) {
+                this.dataset.processing = 'false';
+                return;
+            }
+            const button = this;
+            button.disabled = true;
+            button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+            fetch('/paid-sales/' + id + '/post-to-ledger', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bx bx-upload"></i> Post';
+                    button.dataset.processing = 'false';
+                    alert(data.message || 'Error posting to ledger.');
+                }
+            })
+            .catch(err => {
+                button.disabled = false;
+                button.innerHTML = '<i class="bx bx-upload"></i> Post';
+                button.dataset.processing = 'false';
+                alert('Network error: ' + err.message);
+            });
+        });
+    });
+
+    // ── Post All Unposted Sales to Ledger ──
+    const postAllBtn = document.getElementById('btn-post-all');
+    if (postAllBtn) {
+        postAllBtn.addEventListener('click', function() {
+            if (this.dataset.processing === 'true') return;
+            const params = new URLSearchParams(window.location.search);
+            const dateFrom = params.get('date_from') || '';
+            const dateTo   = params.get('date_to') || '';
+            const countBadge = this.querySelector('.badge');
+            const count = countBadge ? parseInt(countBadge.textContent) : '?';
+            if (!confirm('Post ' + count + ' unposted sale(s) to the accounting ledger?\n\n• Creates journal entries (Dr AR / Cr Sales) for each sale.\n• Sales already in the ledger are skipped.\n• This processes up to 200 records.')) return;
+            this.dataset.processing = 'true';
+            this.disabled = true;
+            this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Posting…';
+            const body = {};
+            if (dateFrom) body.date_from = dateFrom;
+            if (dateTo)   body.date_to   = dateTo;
+            fetch('/paid-sales/post-all-to-ledger', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(body)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message + (data.errors && data.errors.length ? '\n\nErrors:\n' + data.errors.slice(0,5).join('\n') : ''));
+                    location.reload();
+                } else {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bx bx-book-open"></i> Post All to Ledger';
+                    this.dataset.processing = 'false';
+                    alert(data.message || 'Error.');
+                }
+            })
+            .catch(err => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bx bx-book-open"></i> Post All to Ledger';
+                this.dataset.processing = 'false';
+                alert('Network error: ' + err.message);
+            });
+        });
+    }
 
     // ── Mark as Chargeback ──
     document.querySelectorAll('.btn-chargeback').forEach(btn => {

@@ -206,10 +206,15 @@ class Lead extends Model
         'not_paid_manual_disposition',
         'not_paid_at',
         'not_paid_by_id',
+        'not_paid_comment',
 
         // Paid Sales
         'paid_at',
         'paid_by_id',
+
+        // Accounting Ledger links
+        'ledger_journal_entry_id',
+        'ledger_sales_return_entry_id',
 
         // Policy Died
         'policy_died_reason',
@@ -571,6 +576,18 @@ class Lead extends Model
     public function paidBy()
     {
         return $this->belongsTo(User::class, 'paid_by_id');
+    }
+
+    /** The accounting journal entry created when this paid sale was posted to the ledger */
+    public function ledgerJournalEntry()
+    {
+        return $this->belongsTo(\App\Models\LedgerJournalEntry::class, 'ledger_journal_entry_id');
+    }
+
+    /** The sales-return journal entry posted when this lead is chargebacked */
+    public function ledgerSalesReturnEntry()
+    {
+        return $this->belongsTo(\App\Models\LedgerJournalEntry::class, 'ledger_sales_return_entry_id');
     }
 
     /** User who marked lead as Policy Died */

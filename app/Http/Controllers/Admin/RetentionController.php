@@ -54,6 +54,29 @@ class RetentionController extends Controller
             return $query;
         };
 
+        // For Not Paid leads, filter by not_paid_at date (when the lead was flagged),
+        // not sale_date — so a lead sold in a prior month still appears in the retention queue.
+        $applyNpFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('cn_name',      'like', "%{$search}%")
+                      ->orWhere('phone_number','like', "%{$search}%")
+                      ->orWhere('carrier_name','like', "%{$search}%")
+                      ->orWhere('closer_name', 'like', "%{$search}%");
+                });
+            }
+            if ($date_from) $query->whereDate('not_paid_at', '>=', $date_from);
+            if ($date_to)   $query->whereDate('not_paid_at', '<=', $date_to);
+            if (!$date_from && !$date_to) {
+                if ($month && $year) {
+                    $query->whereMonth('not_paid_at', $month)->whereYear('not_paid_at', $year);
+                } elseif ($year) {
+                    $query->whereYear('not_paid_at', $year);
+                }
+            }
+            return $query;
+        };
+
         // Disposed = fixed / cancelled / recalled
         $disposedStatuses = Statuses::RET_DISPOSED_STATUSES;
 
@@ -85,13 +108,10 @@ class RetentionController extends Controller
         }
 
         // ----- Active counts (filter for the counts KPI numbers above the tabs) -----
-        $not_issued_count = $niBase->clone()->whereNotIn('ret_action_status', $disposedStatuses)->whereNotNull('pending_contract_at')->count()
-                          + $niBase->clone()->whereNull('ret_action_status')->count();
-        // simplify:
-        $not_issued_count = $niBase->clone()
+        $not_issued_count = $applyFilters($niBase->clone())
             ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
             ->count();
-        $not_paid_count   = $npBase->clone()
+        $not_paid_count   = $applyNpFilters($npBase->clone())
             ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
             ->count();
 
@@ -123,7 +143,7 @@ class RetentionController extends Controller
         }
 
         $ni_query = $applyFilters($ni_query);
-        $np_query = $applyFilters($np_query);
+        $np_query = $applyNpFilters($np_query);
 
         $not_issued_leads = $ni_query->latest('not_issued_at')->paginate(50, ['*'], 'not_issued_page');
         $not_paid_leads   = $np_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');

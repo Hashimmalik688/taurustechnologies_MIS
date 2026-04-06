@@ -191,9 +191,10 @@
                     'payment_received' => ['label' => 'Payment Received',    'cls' => 'acct-badge-payment'],
                     'opening_balance'  => ['label' => 'Opening Balance',     'cls' => 'acct-badge-opening'],
                     'chargeback'       => ['label' => 'ChargeBack',          'cls' => 'acct-badge-chargeback'],
+                    'sales_return'     => ['label' => 'Sales Return',        'cls' => 'acct-badge-chargeback'],
                     'general'          => ['label' => 'General Journal',     'cls' => 'acct-badge-general'],
                 ];
-                $badge = $typeMap[$entry->type] ?? ['label' => $entry->type_label, 'cls' => 'acct-badge-general'];
+                $badge = $typeMap[$entry->type] ?? ['label' => ucwords(str_replace('_',' ',$entry->type)), 'cls' => 'acct-badge-general'];
             @endphp
             <div class="voucher-doc-header">
                 <div class="vdh-left">

@@ -248,5 +248,84 @@ body { background: var(--acct-surface); }
         </div>
         @endif
     </div>
+
+    {{-- ── All Sales Entries (flat table) ────────────────────────────── --}}
+    <div class="sl-card mt-4">
+        <div class="sl-card-header">
+            <span class="sl-card-title"><i class="bx bx-list-ul"></i> All Credit Entries</span>
+            <span style="font-size:.75rem;color:var(--acct-muted)">{{ number_format($allEntriesTotal) }} entries (sales &amp; returns)</span>
+        </div>
+        @if($allEntries->count())
+        <div style="overflow-x:auto">
+            <table class="sl-table">
+                <thead>
+                    <tr>
+                        <th>Entry #</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Insured / Description</th>
+                        <th class="text-end">Amount</th>
+                        <th>Reference</th>
+                        <th>Recorded By</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($allEntries as $je)
+                    @php $isSale = $je->type === 'sale'; @endphp
+                    <tr>
+                        <td>
+                            <a href="{{ route('admin.accounting.journal.show', $je->id) }}"
+                               class="font-monospace fw-semibold text-decoration-none"
+                               style="color:#1e40af;font-size:.82rem">
+                                {{ $je->entry_number }}
+                            </a>
+                        </td>
+                        <td style="font-size:.82rem;white-space:nowrap">
+                            {{ \Carbon\Carbon::parse($je->entry_date)->format('d M Y') }}
+                        </td>
+                        <td>
+                            @if($isSale)
+                                <span style="background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700">Sale</span>
+                            @else
+                                <span style="background:#fee2e2;color:#b91c1c;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700">Return</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($je->insured_name)
+                                <div style="font-weight:600;font-size:.84rem">{{ $je->insured_name }}</div>
+                            @endif
+                            <div style="font-size:.75rem;color:var(--acct-muted)" class="text-truncate" style="max-width:260px">
+                                {{ $je->description }}
+                            </div>
+                        </td>
+                        <td class="text-end num-cell {{ $isSale ? 'num-dr' : 'num-neg' }}">
+                            {{ $isSale ? '' : '-' }}${{ number_format($je->total_debit, 2) }}
+                        </td>
+                        <td style="font-size:.78rem;color:var(--acct-muted)">{{ $je->reference ?? '—' }}</td>
+                        <td style="font-size:.78rem;color:var(--acct-muted)">{{ $je->creator?->name ?? '—' }}</td>
+                        <td>
+                            <a href="{{ route('admin.accounting.journal.show', $je->id) }}"
+                               class="btn-view-ledger py-1">
+                                <i class="bx bx-show"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="p-3 d-flex justify-content-center">
+            {{ $allEntries->withQueryString()->links() }}
+        </div>
+        @else
+        <div class="sl-empty">
+            <i class="bx bx-receipt"></i>
+            <p style="font-size:.9rem;font-weight:600;color:#374151;margin-bottom:4px">No entries yet</p>
+            <p style="font-size:.82rem">Post paid sales to the ledger from the <a href="{{ route('admin.paid-sales.index') }}">Paid Sales</a> page.</p>
+        </div>
+        @endif
+    </div>
+
 </div>
 @endsection

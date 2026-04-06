@@ -881,7 +881,8 @@
                 <select class="form-select form-select-sm ns-ben-relation">
                     <option value="">Relation</option>
                     <option value="Spouse">Spouse</option>
-                    <option value="Child">Child</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
                     <option value="Parent">Parent</option>
                     <option value="Sibling">Sibling</option>
                     <option value="Grandchild">Grandchild</option>

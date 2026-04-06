@@ -2281,7 +2281,8 @@
                 <select class="form-select beneficiary-relation-ravens">
                     <option value="">Relation</option>
                     <option value="Spouse">Spouse</option>
-                    <option value="Child">Child</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
                     <option value="Parent">Parent</option>
                     <option value="Sibling">Sibling</option>
                     <option value="Grandchild">Grandchild</option>
@@ -2321,7 +2322,8 @@
                 <select class="form-select form-select-sm beneficiary-relation-phase3">
                     <option value="">Relation</option>
                     <option value="Spouse">Spouse</option>
-                    <option value="Child">Child</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
                     <option value="Parent">Parent</option>
                     <option value="Sibling">Sibling</option>
                     <option value="Grandchild">Grandchild</option>
@@ -2395,7 +2397,8 @@
                     <select class="form-select form-select-sm beneficiary-relation-phase3">
                         <option value="">Relation</option>
                         <option value="Spouse" ${relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
-                        <option value="Child" ${relation === 'Child' ? 'selected' : ''}>Child</option>
+                        <option value="Son" ${relation === 'Son' ? 'selected' : ''}>Son</option>
+                        <option value="Daughter" ${relation === 'Daughter' ? 'selected' : ''}>Daughter</option>
                         <option value="Parent" ${relation === 'Parent' ? 'selected' : ''}>Parent</option>
                         <option value="Sibling" ${relation === 'Sibling' ? 'selected' : ''}>Sibling</option>
                         <option value="Grandchild" ${relation === 'Grandchild' ? 'selected' : ''}>Grandchild</option>
@@ -2723,7 +2726,8 @@
                         <select class="form-select beneficiary-relation-ravens">
                             <option value="">Relation</option>
                             <option value="Spouse" ${(beneficiary.relation || '') === 'Spouse' ? 'selected' : ''}>Spouse</option>
-                            <option value="Child" ${(beneficiary.relation || '') === 'Child' ? 'selected' : ''}>Child</option>
+                            <option value="Son" ${(beneficiary.relation || '') === 'Son' ? 'selected' : ''}>Son</option>
+                            <option value="Daughter" ${(beneficiary.relation || '') === 'Daughter' ? 'selected' : ''}>Daughter</option>
                             <option value="Parent" ${(beneficiary.relation || '') === 'Parent' ? 'selected' : ''}>Parent</option>
                             <option value="Sibling" ${(beneficiary.relation || '') === 'Sibling' ? 'selected' : ''}>Sibling</option>
                             <option value="Grandchild" ${(beneficiary.relation || '') === 'Grandchild' ? 'selected' : ''}>Grandchild</option>
@@ -2755,7 +2759,8 @@
                         <select class="form-select beneficiary-relation-ravens">
                             <option value="">Relation</option>
                             <option value="Spouse">Spouse</option>
-                            <option value="Child">Child</option>
+                            <option value="Son">Son</option>
+                            <option value="Daughter">Daughter</option>
                             <option value="Parent">Parent</option>
                             <option value="Sibling">Sibling</option>
                             <option value="Grandchild">Grandchild</option>

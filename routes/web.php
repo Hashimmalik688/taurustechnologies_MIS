@@ -307,6 +307,8 @@ Route::group(['prefix' => 'pending-draft', 'as' => 'pending-draft.', 'middleware
 Route::group(['prefix' => 'paid-sales', 'as' => 'paid-sales.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PaidSalesController::class, 'index'])->name('index')->middleware('role.permission:paid-sales,view');
     Route::post('/{id}/mark-chargeback', [PaidSalesController::class, 'markChargeback'])->name('markChargeback')->middleware('role.permission:paid-sales,edit');
+    Route::post('/{id}/post-to-ledger', [PaidSalesController::class, 'postToLedger'])->name('postToLedger')->middleware('role.permission:accounting,edit');
+    Route::post('/post-all-to-ledger', [PaidSalesController::class, 'postAllToLedger'])->name('postAllToLedger')->middleware('role.permission:accounting,edit');
 });
 
 // QA Review — access controlled by role.permission:qa-review,level
@@ -625,6 +627,12 @@ Route::group(['prefix' => 'admin/accounting', 'as' => 'admin.accounting.', 'midd
 
     // AJAX: fetch carriers for a partner
     Route::get('/partner/{partnerId}/carriers', [LedgerJournalController::class, 'getPartnerCarriers'])->name('partner.carriers');
+
+    // Financial Reports
+    Route::get('/reports/trial-balance',   [LedgerJournalController::class, 'trialBalance'])->name('reports.trial-balance')->middleware('role.permission:accounting,view');
+    Route::get('/reports/profit-loss',     [LedgerJournalController::class, 'profitAndLoss'])->name('reports.profit-loss')->middleware('role.permission:accounting,view');
+    Route::get('/reports/balance-sheet',   [LedgerJournalController::class, 'balanceSheet'])->name('reports.balance-sheet')->middleware('role.permission:accounting,view');
+    Route::get('/reports/expense-tracker', [LedgerJournalController::class, 'expenseTracker'])->name('reports.expense-tracker')->middleware('role.permission:accounting,view');
 });
 
 // Revenue Analytics — access controlled by role.permission:revenue-analytics,level

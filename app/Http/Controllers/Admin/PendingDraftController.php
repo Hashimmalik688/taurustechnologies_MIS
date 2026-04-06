@@ -48,10 +48,11 @@ class PendingDraftController extends Controller
 
         if ($search) {
             $baseQuery->where(function ($q) use ($search) {
-                $q->where('cn_name',      'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%")
-                  ->orWhere('carrier_name', 'like', "%{$search}%")
-                  ->orWhere('closer_name',  'like', "%{$search}%");
+                $q->where('cn_name',        'like', "%{$search}%")
+                  ->orWhere('phone_number',   'like', "%{$search}%")
+                  ->orWhere('carrier_name',   'like', "%{$search}%")
+                  ->orWhere('closer_name',    'like', "%{$search}%")
+                  ->orWhere('policy_number',  'like', "%{$search}%");
             });
         }
 
@@ -63,11 +64,14 @@ class PendingDraftController extends Controller
             $baseQuery->where('partner_id', $partner);
         }
 
-        if ($dateFrom) {
-            $baseQuery->whereDate('sale_date', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $baseQuery->whereDate('sale_date', '<=', $dateTo);
+        // Skip date range when searching so policy numbers are found regardless of dates
+        if (!$search) {
+            if ($dateFrom) {
+                $baseQuery->whereDate('sale_date', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $baseQuery->whereDate('sale_date', '<=', $dateTo);
+            }
         }
 
         // Stats
@@ -108,6 +112,7 @@ class PendingDraftController extends Controller
         $request->validate([
             'not_paid_fdfp_type'          => 'required|in:' . implode(',', array_keys(Statuses::FDFP_TYPES)),
             'not_paid_manual_disposition' => 'required_if:not_paid_fdfp_type,manual_action|nullable|in:' . implode(',', array_keys(Statuses::NOT_ISSUED_DISPOSITIONS)),
+            'not_paid_comment'            => 'nullable|string|max:1000',
         ]);
 
         $lead = Lead::findOrFail($id);
@@ -124,6 +129,7 @@ class PendingDraftController extends Controller
         $lead->not_paid_manual_disposition = $request->not_paid_fdfp_type === Statuses::FDFP_MANUAL_ACTION
             ? $request->not_paid_manual_disposition
             : null;
+        $lead->not_paid_comment = $request->not_paid_comment;
         $lead->not_paid_at   = now();
         $lead->not_paid_by_id = auth()->id();
         $lead->save();
@@ -157,6 +163,7 @@ class PendingDraftController extends Controller
         $lead->not_paid_by_id           = null;
         $lead->not_paid_fdfp_type       = null;
         $lead->not_paid_manual_disposition = null;
+        $lead->not_paid_comment         = null;
         $lead->save();
 
         return response()->json([
@@ -209,6 +216,7 @@ class PendingDraftController extends Controller
         $lead->not_paid_by_id           = null;
         $lead->not_paid_fdfp_type       = null;
         $lead->not_paid_manual_disposition = null;
+        $lead->not_paid_comment         = null;
         $lead->save();
 
         return response()->json([

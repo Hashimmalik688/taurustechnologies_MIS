@@ -38,7 +38,8 @@ class LedgerService
         ?int   $carrierId        = null,
         ?float $grossAmount      = null,
         ?float $sharePercentage  = null,
-        ?string $insuredName     = null
+        ?string $insuredName     = null,
+        ?int   $leadId           = null
     ): LedgerJournalEntry {
         $ar    = $this->account(self::ACCOUNT_AR);
         $sales = $this->account(self::ACCOUNT_SALES);
@@ -52,6 +53,7 @@ class LedgerService
             'gross_amount'         => $grossAmount,
             'our_share_percentage' => $sharePercentage,
             'insured_name'         => $insuredName,
+            'lead_id'              => $leadId,
         ]);
     }
 
@@ -84,6 +86,44 @@ class LedgerService
             'insured_name'         => $insuredName,
             'gross_amount'         => $grossAmount,
             'our_share_percentage' => $sharePercentage,
+        ]);
+    }
+
+    /**
+     * Record a Sales Return (pipeline chargeback reversal).
+     *
+     * Dr  4200 Sales Returns / Chargebacks   (contra-revenue)
+     * Cr  1200 Accounts Receivable           (partner's AR is reduced)
+     *
+     * This is the correct double-entry reversal of a sale entry:
+     *   Original sale:   Dr 1200 AR / Cr 4100 Sales
+     *   Return entry:    Dr 4200 Returns / Cr 1200 AR
+     */
+    public function createSalesReturnEntry(
+        int    $partnerId,
+        float  $amount,
+        string $date,
+        string $description,
+        ?string $reference      = null,
+        ?int   $carrierId       = null,
+        ?string $insuredName    = null,
+        ?float $grossAmount     = null,
+        ?float $sharePercentage = null,
+        ?int   $leadId          = null
+    ): LedgerJournalEntry {
+        $salesReturns = $this->account(self::ACCOUNT_SALES_RETURNS);
+        $ar           = $this->account(self::ACCOUNT_AR);
+
+        $lines = [
+            $this->line($salesReturns->id, $partnerId, $amount, 0,      $description, 1, $carrierId),
+            $this->line($ar->id,           $partnerId, 0,       $amount, $description, 2, $carrierId),
+        ];
+
+        return $this->persist('sales_return', $date, $description, $reference, $lines, [
+            'insured_name'         => $insuredName,
+            'gross_amount'         => $grossAmount,
+            'our_share_percentage' => $sharePercentage,
+            'lead_id'              => $leadId,
         ]);
     }
 

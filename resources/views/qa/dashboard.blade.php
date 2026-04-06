@@ -204,6 +204,14 @@
 .qa-cat-fill.f-blue   { background: linear-gradient(90deg, #556ee6, #8b9cf7); }
 .qa-cat-fill.f-warn   { background: linear-gradient(90deg, #f1b44c, #f7d38a); }
 .qa-cat-fill.f-red    { background: linear-gradient(90deg, #f46a6a, #f99898); }
+/* Per-category dedicated colors */
+.qa-cat-fill.c-opening     { background: linear-gradient(90deg, #556ee6, #8b9cf7); }
+.qa-cat-fill.c-discovery   { background: linear-gradient(90deg, #20c4dd, #5fd9ea); }
+.qa-cat-fill.c-presentation{ background: linear-gradient(90deg, #d4af37, #f0d060); }
+.qa-cat-fill.c-objections  { background: linear-gradient(90deg, #f46a6a, #f99898); }
+.qa-cat-fill.c-closing     { background: linear-gradient(90deg, #7c3aed, #a87ff5); }
+.qa-cat-fill.c-soft        { background: linear-gradient(90deg, #34c38f, #6eddb8); }
+.qa-cat-fill.c-control     { background: linear-gradient(90deg, #f1b44c, #f7d38a); }
 .qa-cat-score { width:28px; font-size:.7rem; font-weight:600; text-align:right; flex-shrink:0; }
 
 /* ── Compliance bars ── */
@@ -212,7 +220,7 @@
 .qa-comp-lbl { width:40px; font-weight:700; color:var(--qa-muted); font-size:.65rem; flex-shrink:0; }
 .qa-comp-name { flex:0 0 130px; font-size:.65rem; color:var(--qa-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .qa-comp-track { flex:1; height:6px; background:var(--qa-surface); border-radius:3px; overflow:hidden; }
-.qa-comp-fill { height:100%; background:linear-gradient(90deg,#f46a6a,#f99898); border-radius:3px; transition:width .3s; }
+.qa-comp-fill { height:100%; background:linear-gradient(90deg,#ef4444,#f97a7a); border-radius:3px; transition:width .3s; }
 .qa-comp-count { width:24px; text-align:right; font-weight:700; color:#c84646; font-size:.65rem; }
 
 /* ── Closer Table row ── */
@@ -755,7 +763,7 @@ window.QA = {
         this.load(); 
     },
     refresh()      { this.load(); },
-    load()         { S.currentView === 'dashboard' ? loadDashboard() : loadAgentDetail(S.agentId); },
+    load(silent)   { S.currentView === 'dashboard' ? loadDashboard(silent) : loadAgentDetail(S.agentId); },
     viewAgent(id)  { S.agentId = id; S.currentView = 'agent-detail'; loadAgentDetail(id); },
     backToDash()   { S.currentView = 'dashboard'; S.currentPage = 1; loadDashboard(); },
     filterCalls(f) { S.currentFilter = f; S.currentPage = 1; loadDashboard(); },
@@ -838,13 +846,22 @@ window.QA = {
 /* ══════════════════════════════════════════════════
    MAIN DASHBOARD
    ══════════════════════════════════════════════════ */
-function loadDashboard() {
+function loadDashboard(silent) {
     const el = $('#qa-content');
-    el.innerHTML = '<div class="qa-loading"><span class="qa-spin"></span> Loading dashboard…</div>';
+    // Silent (auto-refresh): just show a small spinner on the Refresh button — don't wipe the content
+    const refreshBtn = document.querySelector('[onclick="QA.refresh()"]');
+    if (silent && el.innerHTML.trim() && !el.innerHTML.includes('qa-loading')) {
+        if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.innerHTML = '<span class="qa-spin" style="display:inline-block;width:11px;height:11px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:qaSpin .65s linear infinite;vertical-align:middle;"></span> Refreshing…'; }
+    } else {
+        el.innerHTML = '<div class="qa-loading"><span class="qa-spin"></span> Loading dashboard…</div>';
+    }
 
     const callsRangeParam = S.callsRange ? `&calls_range=${S.callsRange},${S.callsRange}` : '';
     const url = `${API_BASE}/overview?range=${S.currentRange}&page=${S.currentPage}&qa_filter=${S.currentFilter}${callsRangeParam}`;
     api(url).then(d => {
+        // Restore Refresh button if it was in loading state
+        const refreshBtn2 = document.querySelector('[onclick="QA.refresh()"]');
+        if (refreshBtn2 && refreshBtn2.disabled) { refreshBtn2.disabled = false; refreshBtn2.innerHTML = '<i class="ri-refresh-line"></i> Refresh'; }
         S.data = d;
         const ts = d.team_stats    || {};
         const ex = d.extended_kpis || {};
@@ -908,7 +925,7 @@ function loadDashboard() {
                     <div class="qa-stat-val">${ts.poor_count||0}</div>
                     <div class="qa-stat-lbl">Poor</div>
                 </div>
-                <div class="qa-stat st-void">
+                <div class="qa-stat st-poor">
                     <div class="qa-stat-val">${ts.compliance_fails||0}</div>
                     <div class="qa-stat-lbl">Comp Issues</div>
                 </div>
@@ -1017,6 +1034,8 @@ function loadDashboard() {
         renderProcStatus(d);
 
     }).catch(e => {
+        const refreshBtnErr = document.querySelector('[onclick="QA.refresh()"]');
+        if (refreshBtnErr && refreshBtnErr.disabled) { refreshBtnErr.disabled = false; refreshBtnErr.innerHTML = '<i class="ri-refresh-line"></i> Refresh'; }
         el.innerHTML = `<div class="qa-empty"><i class="ri-error-warning-line"></i> Failed to load — ${esc(e.message)}</div>`;
     });
 }
@@ -1044,11 +1063,22 @@ function renderCharts(d) {
                     label: 'Avg Score',
                     data: vals,
                     borderColor: '#d4af37',
-                    backgroundColor: 'rgba(212,175,55,.07)',
+                    backgroundColor: (ctx) => {
+                        const chart = ctx.chart;
+                        const {ctx: canvasCtx, chartArea} = chart;
+                        if (!chartArea) return 'rgba(212,175,55,.08)';
+                        const grad = canvasCtx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                        grad.addColorStop(0, 'rgba(212,175,55,.28)');
+                        grad.addColorStop(1, 'rgba(212,175,55,.02)');
+                        return grad;
+                    },
                     fill: true, tension: .4,
-                    pointRadius: vals.length <= 10 ? 4 : 2,
-                    pointBackgroundColor: '#d4af37',
-                    borderWidth: 2
+                    pointRadius: vals.length <= 10 ? 5 : 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#d4af37',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    borderWidth: 2.5
                 }]
             },
             options: {
@@ -1079,14 +1109,14 @@ function renderCharts(d) {
     const dispObj = d.disposition_chart || {};
     const dispKeys = Object.keys(dispObj);
     if (dispKeys.length && document.getElementById('dispChart')) {
-        const colors = { EXCEPTIONAL:'#7c3aed', EXCELLENT:'#34c38f', GOOD:'#556ee6', AVERAGE:'#f1b44c', POOR:'#f46a6a', COMPLIANCE_FAIL:'#d63031', VOID_RISK:'#7c69ef' };
+        const colors = { EXCEPTIONAL:'#9b59b6', EXCELLENT:'#2ecc71', GOOD:'#3498db', AVERAGE:'#f39c12', POOR:'#e74c3c', COMPLIANCE_FAIL:'#c0392b', VOID_RISK:'#8e44ad' };
         S.charts.disp = new Chart(document.getElementById('dispChart'), {
             type: 'doughnut',
             data: {
                 labels: dispKeys.map(k => dispLabel(k)),
-                datasets: [{ data: dispKeys.map(k => dispObj[k]), backgroundColor: dispKeys.map(k => colors[k]||'#6c757d'), borderWidth: 0 }]
+                datasets: [{ data: dispKeys.map(k => dispObj[k]), backgroundColor: dispKeys.map(k => colors[k]||'#6c757d'), borderWidth: 2, borderColor: 'transparent', hoverOffset: 6 }]
             },
-            options: { responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:9, font:{size:9}, color:'#888', padding:5 } } } }
+            options: { responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:9.5}, padding:7 } }, tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.parsed} call${ctx.parsed !== 1 ? 's' : ''}` } } } }
         });
     }
 }
@@ -1117,7 +1147,8 @@ function renderCategoryBars(catsObj, containerId) {
         const val = parseFloat(catsObj[k] || 0);
         const maxVal = catMaxScores[k] || 10;
         const pct = Math.min(100, Math.max(0, (val / maxVal) * 100));
-        const cls = pct >= 80 ? 'f-green' : pct >= 65 ? 'f-blue' : pct >= 50 ? 'f-warn' : 'f-red';
+        const catColors = { opening:'c-opening', discovery:'c-discovery', presentation:'c-presentation', objection_handling:'c-objections', closing:'c-closing', soft_skills:'c-soft', call_control:'c-control' };
+        const cls = catColors[k] || (pct >= 80 ? 'f-green' : pct >= 65 ? 'f-blue' : pct >= 50 ? 'f-warn' : 'f-red');
         return `<div class="qa-cat-row">
             <div class="qa-cat-lbl">${esc(catLabels[k]||k)}</div>
             <div class="qa-cat-track"><div class="qa-cat-fill ${cls}" style="width:${pct.toFixed(0)}%"></div></div>
@@ -1721,7 +1752,7 @@ loadAgentDetail(__myUserId);
 const __myMode = false;
 loadDashboard();
 loadQaStatus();
-S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDashboard(); }, 60000);
+S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDashboard(true); }, 60000);
 @endif
 
 // Auto-open call detail if ?call= param is present (e.g. from upload page link)

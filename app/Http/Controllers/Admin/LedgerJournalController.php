@@ -29,7 +29,7 @@ class LedgerJournalController extends Controller
     public function dashboard()
     {
         $totalSales      = LedgerJournalEntry::where('type', 'sale')->sum('total_debit');
-        $totalChargebacks= LedgerJournalEntry::where('type', 'chargeback')->sum('total_debit');
+        $totalChargebacks= LedgerJournalEntry::whereIn('type', ['chargeback', 'sales_return'])->sum('total_debit');
         $totalPayments   = LedgerJournalEntry::where('type', 'payment_received')->sum('total_debit');
         $totalEntries    = LedgerJournalEntry::count();
         $netAR           = $totalSales - $totalChargebacks - $totalPayments;
@@ -37,7 +37,7 @@ class LedgerJournalController extends Controller
         $thisMonth = now()->startOfMonth()->toDateString();
         $salesThisMonth  = LedgerJournalEntry::where('type', 'sale')
                             ->where('entry_date', '>=', $thisMonth)->sum('total_debit');
-        $chargesThisMonth= LedgerJournalEntry::where('type', 'chargeback')
+        $chargesThisMonth= LedgerJournalEntry::whereIn('type', ['chargeback', 'sales_return'])
                             ->where('entry_date', '>=', $thisMonth)->sum('total_debit');
 
         $recentEntries = LedgerJournalEntry::with('creator')
@@ -48,7 +48,7 @@ class LedgerJournalController extends Controller
         $trend = DB::table('ledger_journal_entries')
             ->selectRaw("DATE_FORMAT(entry_date, '%b %Y') as month, DATE_FORMAT(entry_date, '%Y-%m') as ym,
                 SUM(CASE WHEN type='sale' THEN total_debit ELSE 0 END) as sales,
-                SUM(CASE WHEN type='chargeback' THEN total_debit ELSE 0 END) as chargebacks")
+                SUM(CASE WHEN type IN ('chargeback','sales_return') THEN total_debit ELSE 0 END) as chargebacks")
             ->where('entry_date', '>=', now()->subMonths(5)->startOfMonth())
             ->groupBy('ym', 'month')
             ->orderBy('ym')
@@ -105,8 +105,17 @@ class LedgerJournalController extends Controller
 
         $partners = \App\Models\Partner::where('is_active', true)->orderBy('name')->get(['id','name','code']);
 
+        // ── All Sales / Sales-Return Entries (flat table) ──────────────────
+        $entryQuery = LedgerJournalEntry::with(['creator'])
+            ->whereIn('type', ['sale', 'sales_return'])
+            ->orderByDesc('entry_date')
+            ->orderByDesc('id');
+
+        $allEntriesTotal = (clone $entryQuery)->count();
+        $allEntries      = $entryQuery->paginate(50, ['*'], 'epage');
+
         return view('admin.accounting.sales-ledger.index',
-            compact('partnersWithAR','totalDr','totalCr','totalBalance','partners'));
+            compact('partnersWithAR','totalDr','totalCr','totalBalance','partners','allEntries','allEntriesTotal'));
     }
 
     public function salesLedgerPartner(Request $request, int $partnerId)
@@ -518,4 +527,201 @@ class LedgerJournalController extends Controller
 
         return view('admin.accounting.partner-ledger.carrier-show',
             compact('partner', 'carrier', 'carrierId', 'lines', 'totalDr', 'totalCr', 'closingBalance'));
-    }}
+    }
+
+    // ── Financial Reports ───────────────────────────────────────────────────
+
+    /**
+     * Trial Balance — sum all debits and credits per account as of a date.
+     */
+    public function trialBalance(Request $request)
+    {
+        $asOf      = $request->get('as_of', now()->toDateString());
+        $partnerId = $request->get('partner_id');
+
+        $query = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->join('chart_of_accounts as coa', 'l.account_id', '=', 'coa.id')
+            ->where('je.entry_date', '<=', $asOf)
+            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
+            ->selectRaw('coa.id, coa.account_code, coa.account_name, coa.account_type,
+                         SUM(l.debit) as total_debit,
+                         SUM(l.credit) as total_credit')
+            ->orderBy('coa.account_code');
+
+        if ($partnerId) {
+            $query->where('l.partner_id', $partnerId);
+        }
+
+        $rows = $query->get();
+
+        $grandDebit  = $rows->sum('total_debit');
+        $grandCredit = $rows->sum('total_credit');
+        $balanced    = abs($grandDebit - $grandCredit) < 0.01;
+
+        $partners = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+
+        return view('admin.accounting.reports.trial-balance', compact(
+            'rows', 'grandDebit', 'grandCredit', 'balanced', 'asOf', 'partnerId', 'partners'
+        ));
+    }
+
+    /**
+     * Profit & Loss Statement — Revenue vs Expenses for a date range.
+     */
+    public function profitAndLoss(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo   = $request->get('date_to',   now()->toDateString());
+
+        $lines = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->join('chart_of_accounts as coa', 'l.account_id', '=', 'coa.id')
+            ->whereBetween('je.entry_date', [$dateFrom, $dateTo])
+            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
+            ->selectRaw('coa.id, coa.account_code, coa.account_name, coa.account_type,
+                         SUM(l.debit) as total_debit, SUM(l.credit) as total_credit')
+            ->orderBy('coa.account_code')
+            ->get();
+
+        // Sales Income (4100): normal balance = credit
+        $salesIncome   = (float) $lines->where('account_code', '4100')->sum(fn($r) => $r->total_credit - $r->total_debit);
+        // Sales Returns (4200): normal balance = debit (contra-revenue)
+        $salesReturns  = (float) $lines->where('account_code', '4200')->sum(fn($r) => $r->total_debit - $r->total_credit);
+        $grossProfit   = $salesIncome - $salesReturns;
+
+        // Expense accounts (5xxx): normal balance = debit
+        $expenseRows = $lines->filter(fn($r) => str_starts_with($r->account_code, '5'));
+        $totalExpenses = (float) $expenseRows->sum(fn($r) => $r->total_debit - $r->total_credit);
+        $netProfit     = $grossProfit - $totalExpenses;
+
+        return view('admin.accounting.reports.profit-loss', compact(
+            'salesIncome', 'salesReturns', 'grossProfit',
+            'expenseRows', 'totalExpenses', 'netProfit',
+            'dateFrom', 'dateTo'
+        ));
+    }
+
+    /**
+     * Balance Sheet — Assets, Liabilities, Equity as of a date.
+     */
+    public function balanceSheet(Request $request)
+    {
+        $asOf = $request->get('as_of', now()->toDateString());
+
+        $rows = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->join('chart_of_accounts as coa', 'l.account_id', '=', 'coa.id')
+            ->where('je.entry_date', '<=', $asOf)
+            ->groupBy('coa.id', 'coa.account_code', 'coa.account_name', 'coa.account_type')
+            ->selectRaw('coa.id, coa.account_code, coa.account_name, coa.account_type,
+                         SUM(l.debit) as total_debit, SUM(l.credit) as total_credit')
+            ->orderBy('coa.account_code')
+            ->get();
+
+        // Assets (1xxx): normal debit = debit - credit
+        $assetRows  = $rows->filter(fn($r) => str_starts_with($r->account_code, '1'));
+        $totalAssets = (float) $assetRows->sum(fn($r) => $r->total_debit - $r->total_credit);
+
+        // Liabilities (2xxx): normal credit = credit - debit
+        $liabilityRows    = $rows->filter(fn($r) => str_starts_with($r->account_code, '2'));
+        $totalLiabilities = (float) $liabilityRows->sum(fn($r) => $r->total_credit - $r->total_debit);
+
+        // Equity (3xxx): normal credit = credit - debit
+        $equityRows    = $rows->filter(fn($r) => str_starts_with($r->account_code, '3'));
+        $baseEquity    = (float) $equityRows->sum(fn($r) => $r->total_credit - $r->total_debit);
+
+        // Retained Earnings = total revenue - total expenses (as of date)
+        $revenue  = (float) $rows->filter(fn($r) => str_starts_with($r->account_code, '4'))
+                        ->sum(fn($r) => $r->total_credit - $r->total_debit);
+        $expenses = (float) $rows->filter(fn($r) => str_starts_with($r->account_code, '5'))
+                        ->sum(fn($r) => $r->total_debit - $r->total_credit);
+        $retainedEarnings = $revenue - $expenses;
+        $totalEquity      = $baseEquity + $retainedEarnings;
+
+        $totalLiabilitiesAndEquity = $totalLiabilities + $totalEquity;
+        $balanced = abs($totalAssets - $totalLiabilitiesAndEquity) < 0.01;
+
+        return view('admin.accounting.reports.balance-sheet', compact(
+            'assetRows', 'totalAssets',
+            'liabilityRows', 'totalLiabilities',
+            'equityRows', 'baseEquity', 'retainedEarnings', 'totalEquity',
+            'totalLiabilitiesAndEquity', 'balanced', 'asOf'
+        ));
+    }
+
+    /**
+     * Expense Tracker — monthly breakdown of all 5xxx expense accounts.
+     */
+    public function expenseTracker(Request $request)
+    {
+        $year = (int) $request->get('year', now()->year);
+
+        // Get all expense accounts
+        $expenseAccounts = ChartOfAccount::where('account_type', 'Expense')
+            ->orderBy('account_code')
+            ->get();
+
+        if ($expenseAccounts->isEmpty()) {
+            return view('admin.accounting.reports.expense-tracker', [
+                'expenseAccounts' => collect(),
+                'months'          => [],
+                'matrix'          => [],
+                'monthTotals'     => [],
+                'accountTotals'   => [],
+                'grandTotal'      => 0,
+                'year'            => $year,
+                'availableYears'  => [now()->year],
+            ]);
+        }
+
+        $accountIds = $expenseAccounts->pluck('id')->toArray();
+
+        $rows = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->whereIn('l.account_id', $accountIds)
+            ->whereYear('je.entry_date', $year)
+            ->selectRaw('l.account_id, MONTH(je.entry_date) as month_num,
+                         SUM(l.debit - l.credit) as net_debit')
+            ->groupBy('l.account_id', 'month_num')
+            ->get();
+
+        // Build month-label array
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[$m] = now()->setMonth($m)->format('M');
+        }
+
+        // Build matrix[accountId][monthNum] = amount
+        $matrix       = [];
+        $accountTotals = [];
+        $monthTotals  = array_fill(1, 12, 0.0);
+        $grandTotal   = 0.0;
+
+        foreach ($expenseAccounts as $acct) {
+            $matrix[$acct->id]        = array_fill(1, 12, 0.0);
+            $accountTotals[$acct->id] = 0.0;
+        }
+
+        foreach ($rows as $row) {
+            $amt = (float) $row->net_debit;
+            $matrix[$row->account_id][$row->month_num]  = $amt;
+            $accountTotals[$row->account_id]            += $amt;
+            $monthTotals[$row->month_num]               += $amt;
+            $grandTotal                                  += $amt;
+        }
+
+        $availableYears = DB::table('ledger_journal_entries')
+            ->selectRaw('YEAR(entry_date) as yr')
+            ->groupBy('yr')
+            ->orderByDesc('yr')
+            ->pluck('yr')
+            ->toArray();
+
+        return view('admin.accounting.reports.expense-tracker', compact(
+            'expenseAccounts', 'months', 'matrix',
+            'monthTotals', 'accountTotals', 'grandTotal',
+            'year', 'availableYears'
+        ));
+    }
+}

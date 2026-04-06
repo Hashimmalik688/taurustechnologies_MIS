@@ -275,9 +275,9 @@ class ChatController extends Controller
     }
 
     /**
-     * Get messages for a conversation
+     * Get messages for a conversation (cursor-based pagination via before_id)
      */
-    public function getMessages($conversationId)
+    public function getMessages($conversationId, Request $request)
     {
         $userId = Auth::id();
 
@@ -286,30 +286,41 @@ class ChatController extends Controller
             $query->where('user_id', $userId);
         })->findOrFail($conversationId);
 
-        $messages = ChatMessage::where('conversation_id', $conversationId)
+        $query = ChatMessage::where('conversation_id', $conversationId)
             ->with(['user', 'attachments'])
             ->orderBy('created_at', 'desc')
-            ->take(50)
-            ->get()
-            ->reverse()
-            ->values();
+            ->orderBy('id', 'desc');
 
-        // Mark as read
-        $participant = ChatParticipant::where('conversation_id', $conversationId)
-            ->where('user_id', $userId)
-            ->first();
+        // Cursor: load messages older than the given message ID
+        if ($request->filled('before_id')) {
+            $query->where('id', '<', (int) $request->before_id);
+        }
 
-        if ($participant) {
-            $participant->update(['last_read_at' => now()]);
+        $messages = $query->take(50)->get()->reverse()->values();
+
+        $hasMore = $messages->count() === 50;
+        $oldestId = $messages->first()?->id;
+
+        // Mark as read (only on initial load, not when paginating backwards)
+        if (!$request->filled('before_id')) {
+            $participant = ChatParticipant::where('conversation_id', $conversationId)
+                ->where('user_id', $userId)
+                ->first();
+
+            if ($participant) {
+                $participant->update(['last_read_at' => now()]);
+            }
         }
 
         return response()->json([
-            'success' => true,
-            'messages' => $messages,  // Latest 50 messages in ascending order
+            'success'    => true,
+            'messages'   => $messages,
+            'has_more'   => $hasMore,
+            'oldest_id'  => $oldestId,
             'conversation' => [
-                'id' => $conversation->id,
-                'name' => $conversation->name,
-                'type' => $conversation->type,
+                'id'           => $conversation->id,
+                'name'         => $conversation->name,
+                'type'         => $conversation->type,
                 'community_id' => $conversation->community_id,
             ],
         ]);
