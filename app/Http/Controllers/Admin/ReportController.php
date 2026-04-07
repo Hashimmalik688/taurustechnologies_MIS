@@ -1539,4 +1539,171 @@ class ReportController extends Controller
             'carrierId', 'partnerId'
         ));
     }
+
+    /* ─────────────────────────────────────────────────────────────
+     * SALES STATUS REPORT
+     * Pivot table: one row per carrier, columns = 8 pipeline stages
+     * ────────────────────────────────────────────────────────────── */
+    public function salesStatus(Request $request)
+    {
+        $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $dateField = $request->get('date_field', 'sale_date'); // 'sale_date' | 'paid_at'
+        $carrierId = $request->get('carrier_id'); // optional single carrier filter
+
+        // Allowed date fields (whitelist)
+        if (!in_array($dateField, ['sale_date', 'paid_at'])) {
+            $dateField = 'sale_date';
+        }
+
+        // Base: any lead that reached a sale
+        $baseQuery = Lead::whereNotNull('sale_at');
+
+        if ($dateFrom) $baseQuery->whereDate($dateField, '>=', $dateFrom);
+        if ($dateTo)   $baseQuery->whereDate($dateField, '<=', $dateTo);
+        if ($carrierId) $baseQuery->where('insurance_carrier_id', $carrierId);
+
+        // Pull all leads with necessary columns
+        $leads = $baseQuery->select(
+            'id', 'insurance_carrier_id', 'carrier_name',
+            'partner_id', 'assigned_partner',
+            'sale_at', 'sale_date', 'paid_at',
+            'pending_contract_at', 'submission_at',
+            'issuance_status', 'not_issued_at',
+            'not_paid_at', 'policy_died_at', 'declined_at', 'status'
+        )->get();
+
+        // Helper closures for each stage
+        $stages = [
+            'total_sales'       => fn($l) => true,
+            'pending_contract'  => fn($l) => !is_null($l->pending_contract_at),
+            'submitted'         => fn($l) => !is_null($l->submission_at),
+            'issued'            => fn($l) => $l->issuance_status === 'Issued',
+            'not_issued'        => fn($l) => !is_null($l->not_issued_at),
+            'paid'              => fn($l) => !is_null($l->paid_at),
+            'not_paid'          => fn($l) => !is_null($l->not_paid_at),
+            'policy_died'       => fn($l) => !is_null($l->policy_died_at) || $l->status === 'chargeback',
+            'declined'          => fn($l) => !is_null($l->declined_at),
+        ];
+
+        // Group by carrier_name + partner_id so same-named carriers stay split by partner
+        $carriersData = $leads
+            ->groupBy(fn($l) => strtolower(trim($l->carrier_name ?? 'unknown')) . '||' . ($l->partner_id ?? 'none'))
+            ->map(function ($group) use ($stages) {
+                $first  = $group->first();
+                $counts = [];
+                foreach ($stages as $key => $fn) {
+                    $counts[$key] = $group->filter($fn)->count();
+                }
+                return (object) array_merge([
+                    'insurance_carrier_id' => $first->insurance_carrier_id,
+                    'carrier_name'         => $first->carrier_name ?: 'Unknown',
+                    'partner_id'           => $first->partner_id,
+                    'assigned_partner'     => $first->assigned_partner,
+                ], $counts);
+            })
+            ->sortByDesc('total_sales')
+            ->values();  // re-index AFTER sort so keys are 0,1,2...
+
+        // Grand totals
+        $grandTotals = [];
+        foreach (array_keys($stages) as $key) {
+            $grandTotals[$key] = $carriersData->sum($key);
+        }
+
+        // Carrier list for filter dropdown
+        $allCarriers = \App\Models\InsuranceCarrier::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        return view('admin.reports.sales-status', compact(
+            'carriersData', 'grandTotals',
+            'dateFrom', 'dateTo', 'dateField',
+            'carrierId', 'allCarriers'
+        ));
+    }
+
+    /**
+     * Drilldown: individual leads for a carrier + stage combination.
+     */
+    public function salesStatusDrilldown(Request $request)
+    {
+        $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $dateField   = $request->get('date_field', 'sale_date');
+        $carrierName = $request->get('carrier_name');
+        $carrierId   = $request->get('carrier_id');   // fallback (legacy)
+        $partnerId   = $request->get('partner_id');   // optional partner filter
+        $stage       = $request->get('stage', 'total_sales');
+
+        if (!in_array($dateField, ['sale_date', 'paid_at'])) {
+            $dateField = 'sale_date';
+        }
+
+        $allowedStages = ['total_sales', 'pending_contract', 'submitted', 'issued', 'not_issued', 'paid', 'not_paid', 'policy_died', 'declined'];
+        if (!in_array($stage, $allowedStages)) {
+            $stage = 'total_sales';
+        }
+
+        $query = Lead::whereNotNull('sale_at');
+
+        if ($dateFrom) $query->whereDate($dateField, '>=', $dateFrom);
+        if ($dateTo)   $query->whereDate($dateField, '<=', $dateTo);
+        // carrier filter
+        if ($carrierName)    $query->whereRaw('LOWER(carrier_name) = ?', [strtolower($carrierName)]);
+        elseif ($carrierId)  $query->where('insurance_carrier_id', $carrierId);
+        // partner filter (null partner_id = leads with no partner)
+        if ($partnerId === 'none') $query->whereNull('partner_id');
+        elseif ($partnerId)        $query->where('partner_id', $partnerId);
+
+        // Stage-specific filter
+        match ($stage) {
+            'pending_contract' => $query->whereNotNull('pending_contract_at'),
+            'submitted'        => $query->whereNotNull('submission_at'),
+            'issued'           => $query->where('issuance_status', 'Issued'),
+            'not_issued'       => $query->whereNotNull('not_issued_at'),
+            'paid'             => $query->whereNotNull('paid_at'),
+            'not_paid'         => $query->whereNotNull('not_paid_at'),
+            'policy_died'      => $query->where(fn($q) => $q->whereNotNull('policy_died_at')->orWhere('status', 'chargeback')),
+            'declined'         => $query->whereNotNull('declined_at'),
+            default            => null,
+        };
+
+        $leads = $query->select(
+            'id', 'cn_name', 'carrier_name', 'assigned_partner',
+            'insurance_carrier_id', 'partner_id',
+            'monthly_premium', 'policy_number',
+            'sale_date', 'paid_at', 'pending_contract_at', 'not_issued_at',
+            'declined_at',
+            'issuance_status', 'not_issued_disposition',
+            'closer_name', 'status',
+            'policy_type', 'settlement_type', 'state'
+        )->orderByDesc('sale_date')->get();
+
+        $stageLabelMap = [
+            'total_sales'      => 'Total Sales',
+            'pending_contract' => 'Pending Contract',
+            'submitted'        => 'Submitted',
+            'issued'           => 'Issued',
+            'not_issued'       => 'Not Issued',
+            'paid'             => 'Paid',
+            'not_paid'         => 'Not Paid',
+            'policy_died'      => 'Policy Died / Chargeback',
+            'declined'         => 'Declined',
+        ];
+
+        $carrierLabel = $carrierName ?: ($leads->first()?->carrier_name ?? (\App\Models\InsuranceCarrier::find($carrierId)?->name ?? 'All Carriers'));
+        $partnerLabel = $leads->first()?->assigned_partner ?? null;
+        $stageLabel   = $stageLabelMap[$stage] ?? $stage;
+
+        $totalSales   = $leads->count();
+        $totalPremium = $leads->sum('monthly_premium');
+
+        return view('admin.reports.sales-status-drilldown', compact(
+            'leads', 'totalSales', 'totalPremium',
+            'carrierLabel', 'partnerLabel', 'stageLabel', 'stage',
+            'dateFrom', 'dateTo', 'dateField',
+            'carrierId', 'carrierName', 'partnerId'
+        ));
+    }
 }
