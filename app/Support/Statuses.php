@@ -70,6 +70,7 @@ class Statuses
     public const NI_DOCTOR_INFO_MISSING    = 'doctor_info_missing';
     public const NI_UNDERWRITING_BY_LAW    = 'underwriting_by_law';
     public const NI_CANCELLED_BY_CUSTOMER  = 'cancelled_by_customer';
+    public const NI_OTHER_REASON           = 'other_reason';
 
     /** Human-readable labels for Not Issued dispositions */
     public const NOT_ISSUED_DISPOSITIONS = [
@@ -80,6 +81,7 @@ class Statuses
         self::NI_DOCTOR_INFO_MISSING    => 'Doctor Info Missing',
         self::NI_UNDERWRITING_BY_LAW    => 'Underwriting by Law',
         self::NI_CANCELLED_BY_CUSTOMER  => 'Cancelled by Customer',
+        self::NI_OTHER_REASON           => 'Other Reason',
     ];
 
     // ═══════════════════════════════════════════════════════════════════

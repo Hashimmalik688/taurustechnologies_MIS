@@ -1,8 +1,6 @@
-@extends('layouts.master')
+<?php $__env->startSection('title', 'QA — Upload & Score Call'); ?>
 
-@section('title', 'QA — Upload & Score Call')
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ── Design tokens (match QA dashboard) ── */
 :root {
@@ -216,12 +214,12 @@
 .qu-linked-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.66rem; font-weight:700; padding:.18rem .55rem; border-radius:.8rem; background:rgba(85,110,230,.12); color:var(--qa-blue); border:1px solid rgba(85,110,230,.3); }
 
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="qu-wrap">
 
-  {{-- Header --}}
+  
   <div class="qu-header">
     <h1 class="qu-title">
       <i class="bx bxs-microphone"></i>
@@ -229,16 +227,16 @@
       <span class="qu-badge">AssemblyAI + Claude</span>
     </h1>
     <div class="d-flex gap-2">
-      <a href="{{ route('qa.manual') }}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;">
+      <a href="<?php echo e(route('qa.manual')); ?>" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;">
         <i class="bx bx-text me-1"></i>Paste Transcript
       </a>
-      <a href="{{ route('qa.scoring') }}" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;">
+      <a href="<?php echo e(route('qa.scoring')); ?>" class="btn btn-sm btn-outline-secondary" style="font-size:.72rem;">
         <i class="bx bx-bar-chart-alt-2 me-1"></i>Dashboard
       </a>
     </div>
   </div>
 
-  {{-- Pipeline info strip --}}
+  
   <div class="qu-card mb-3">
     <div class="qu-card-body" style="padding:.65rem .9rem;">
       <div class="d-flex gap-3 flex-wrap align-items-center">
@@ -265,7 +263,7 @@
     </div>
   </div>
 
-  {{-- Upload form --}}
+  
   <div class="qu-card">
     <div class="qu-card-hdr">
       <h6><i class="bx bx-upload"></i> Audio File</h6>
@@ -273,20 +271,20 @@
     </div>
     <div class="qu-card-body">
 
-      {{-- Controls row --}}
+      
       <div class="qu-controls">
         <div class="qu-field">
           <label>Agent</label>
           <select id="qu-agent">
             <option value="">— Unknown / unassigned —</option>
-            @foreach($agents as $agent)
-              <option value="{{ $agent->id }}">{{ $agent->name }}</option>
-            @endforeach
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $agents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $agent): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <option value="<?php echo e($agent->id); ?>"><?php echo e($agent->name); ?></option>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
           </select>
         </div>
         <div class="qu-field">
           <label>Call Date</label>
-          <input type="date" id="qu-date" value="{{ now()->toDateString() }}">
+          <input type="date" id="qu-date" value="<?php echo e(now()->toDateString()); ?>">
         </div>
         <div class="qu-field" style="display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:.1rem;">
           <label for="qu-swap" class="qu-toggle" style="margin-bottom:.3rem;">
@@ -296,7 +294,7 @@
         </div>
       </div>
 
-      {{-- Sale Picker — appears when agent + date are set --}}
+      
       <div class="qu-sale-picker" id="qu-sale-picker">
         <div class="qu-card" style="margin-bottom:.75rem;">
           <div class="qu-card-hdr">
@@ -308,18 +306,18 @@
               Select a sale to link this QA call. The QA status will be auto-set on the sale after scoring.
             </p>
             <div class="qu-sale-list" id="qu-sale-list">
-              {{-- Populated by JS --}}
+              
             </div>
           </div>
         </div>
       </div>
 
-      {{-- Hidden file inputs --}}
+      
       <input type="file" id="qu-file"  accept=".mp3,.wav,.m4a,.mp4,.ogg,.webm,.flac,.aac" style="display:none;" />
       <input type="file" id="qu-file2" accept=".mp3,.wav,.m4a,.mp4,.ogg,.webm,.flac,.aac" style="display:none;" />
-      {{-- Extra parts dynamic file inputs are injected by JS --}}
+      
 
-      {{-- Drop zone (Part 1) --}}
+      
       <div class="qu-dropzone" id="qu-dropzone" onclick="document.getElementById('qu-file').click()">
         <i class="bx bx-cloud-upload" id="qu-dz-icon"></i>
         <p class="qu-dz-label" id="qu-dz-label">
@@ -328,7 +326,7 @@
         <p class="qu-file-name" id="qu-file-name" style="display:none;"></p>
       </div>
 
-      {{-- Part 2 add-on (shown after Part 1 is selected) --}}
+      
       <div class="qu-part2-wrap" id="qu-part2-wrap" style="display:none;">
         <div class="qu-part2-btn" id="qu-part2-btn" onclick="document.getElementById('qu-file2').click()">
           <i class="bx bx-plus-circle"></i> Add Part 2 recording <span style="font-size:.6rem;opacity:.6;">(optional — if call was disconnected &amp; reconnected)</span>
@@ -347,7 +345,7 @@
           </div>
         </div>
 
-        {{-- "More parts" checkbox — visible once Part 1 is picked --}}
+        
         <div class="qu-more-parts-toggle" id="qu-more-parts-toggle">
           <label class="qu-toggle" style="cursor:pointer; font-size:.72rem;">
             <input type="checkbox" id="qu-has-more-parts" onchange="toggleMoreParts(this.checked)">
@@ -355,7 +353,7 @@
           </label>
         </div>
 
-        {{-- Dynamic extra parts container --}}
+        
         <div class="qu-extra-parts-wrap" id="qu-extra-parts-wrap" style="display:none;">
           <div id="qu-extra-parts-list"></div>
           <button type="button" class="qu-add-extra-btn" id="qu-add-extra-btn" onclick="addExtraPart()">
@@ -370,7 +368,7 @@
         <p class="qu-status-msg" id="qu-status-msg">Uploading audio to AssemblyAI…</p>
       </div>
 
-      {{-- Actions --}}
+      
       <div class="d-flex gap-2 mt-3">
         <button class="qu-btn" id="qu-submit-btn" disabled>
           <i class="bx bx-play-circle"></i>
@@ -384,12 +382,12 @@
     </div>
   </div>
 
-  {{-- Scored result panel (hidden until scoring completes) --}}
+  
   <div class="qu-result" id="qu-result">
 
     <div class="row g-2">
 
-      {{-- Score hero --}}
+      
       <div class="col-md-3">
         <div class="qu-card h-100">
           <div class="qu-card-hdr"><h6><i class="bx bx-trophy"></i> Score</h6></div>
@@ -404,7 +402,7 @@
         </div>
       </div>
 
-      {{-- Score breakdown --}}
+      
       <div class="col-md-5">
         <div class="qu-card h-100">
           <div class="qu-card-hdr"><h6><i class="bx bx-bar-chart-alt-2"></i> Score Breakdown</h6></div>
@@ -414,7 +412,7 @@
         </div>
       </div>
 
-      {{-- Compliance checks --}}
+      
       <div class="col-md-4">
         <div class="qu-card h-100">
           <div class="qu-card-hdr"><h6><i class="bx bx-shield-check"></i> Compliance</h6></div>
@@ -425,7 +423,7 @@
         </div>
       </div>
 
-      {{-- Coaching notes --}}
+      
       <div class="col-12">
         <div class="qu-card">
           <div class="qu-card-hdr">
@@ -443,7 +441,7 @@
         </div>
       </div>
 
-      {{-- Transcript --}}
+      
       <div class="col-12">
         <div class="qu-card">
           <div class="qu-card-hdr" style="cursor:pointer;" onclick="document.getElementById('res-transcript-body').classList.toggle('collapsed'); this.querySelector('.qu-toggle-icon').classList.toggle('open');">
@@ -460,9 +458,9 @@
   </div>
 
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 // ─────────────────────────────────────────────────────────────────
 // QA Upload & Score — frontend logic
@@ -737,7 +735,7 @@ async function startUpload() {
   formData.append('agent_user_id', document.getElementById('qu-agent').value || '');
   formData.append('call_date',     document.getElementById('qu-date').value   || '');
   formData.append('swap_speakers', document.getElementById('qu-swap').checked ? '1' : '0');
-  formData.append('_token',        '{{ csrf_token() }}');
+  formData.append('_token',        '<?php echo e(csrf_token()); ?>');
 
   const extraCount = extraParts.filter(p => p && p.file).length;
   const totalParts = 1 + (selectedFile2 ? 1 : 0) + extraCount;
@@ -745,7 +743,7 @@ async function startUpload() {
   showProgress(10, `Uploading ${partLabel}`);;
 
   try {
-    const res   = await fetch('{{ route("qa.api.upload.transcribe") }}', { method: 'POST', body: formData });
+    const res   = await fetch('<?php echo e(route("qa.api.upload.transcribe")); ?>', { method: 'POST', body: formData });
     const data  = await res.json();
 
     if (!data.success) {
@@ -977,7 +975,7 @@ async function linkSaleToCall(qaCallId, leadId) {
   try {
     const res  = await fetch(`/qa/api/calls/${qaCallId}/link-sale`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
       body: JSON.stringify({ lead_id: leadId }),
     });
     const data = await res.json();
@@ -1098,4 +1096,6 @@ function resetForm() {
   hideResult();
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/qa/upload.blade.php ENDPATH**/ ?>

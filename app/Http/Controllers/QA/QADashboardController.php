@@ -481,6 +481,11 @@ class QADashboardController extends Controller
                 'improvements' => $result->improvements,
                 'void_risk_reason' => $result->void_risk_reason,
                 'informational_notes' => $result->raw_ai_response['informational_notes'] ?? [],
+                'dnc_judge' => [
+                    'risk_level' => $result->dnc_risk_level ?? 'NONE',
+                    'verdict'    => $result->dnc_judge_verdict ?? 'Clean',
+                    'reasoning'  => $result->dnc_judge_reasoning,
+                ],
             ] : null,
             'compliance_flags' => $call->complianceFlags->map(fn ($f) => [
                 'check_code' => $f->check_code,

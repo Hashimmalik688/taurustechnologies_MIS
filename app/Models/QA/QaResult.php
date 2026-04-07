@@ -61,6 +61,10 @@ class QaResult extends Model
         'customer_state',
         'call_type',
         'score_disposition',
+        // DNC Risk Judge (standalone — does not affect score)
+        'dnc_risk_level',
+        'dnc_judge_verdict',
+        'dnc_judge_reasoning',
     ];
 
     protected $casts = [
@@ -80,6 +84,9 @@ class QaResult extends Model
         'is_sale' => 'boolean',
         'sale_amount' => 'decimal:2',
         'monthly_premium' => 'decimal:2',
+        'dnc_risk_level' => 'string',
+        'dnc_judge_verdict' => 'string',
+        'dnc_judge_reasoning' => 'string',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────

@@ -1178,15 +1178,20 @@ class LeadController extends Controller
             ->whereNotNull('sale_at')
             ->whereNotNull('pending_contract_at');  // Stage gate: must be sent from Submissions
         
-        // Search functionality
+        // Search functionality — when searching, bypass date/carrier/status filters
+        // so users can find any lead by policy number, name, phone etc. across all time
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('cn_name', 'like', "%{$search}%")
                   ->orWhere('phone_number', 'like', "%{$search}%")
                   ->orWhere('carrier_name', 'like', "%{$search}%")
-                  ->orWhere('closer_name', 'like', "%{$search}%");
+                  ->orWhere('closer_name', 'like', "%{$search}%")
+                  ->orWhere('policy_number', 'like', "%{$search}%")
+                  ->orWhere('app_id', 'like', "%{$search}%");
             });
+            // Skip all other filters when searching
+            goto build_view;
         }
         
         // Filter by carrier
@@ -1229,6 +1234,8 @@ class LeadController extends Controller
         if ($request->filled('date_to')) {
             $query->whereDate('sale_date', '<=', $request->date_to);
         }
+
+        build_view:
         
         // Get unique carriers for filter dropdown from InsuranceCarrier model
         $carriers = \App\Models\InsuranceCarrier::where('is_active', true)
@@ -1486,12 +1493,16 @@ class LeadController extends Controller
     {
         $request->validate([
             'not_issued_disposition' => 'required|in:' . implode(',', array_keys(Statuses::NOT_ISSUED_DISPOSITIONS)),
+            'not_issued_comment'     => 'nullable|string|max:500|required_if:not_issued_disposition,' . Statuses::NI_OTHER_REASON,
         ]);
         
         $lead = Lead::findOrFail($id);
         
         $lead->issuance_status = 'Not Issued';
         $lead->not_issued_disposition = $request->not_issued_disposition;
+        $lead->not_issued_comment = ($request->not_issued_disposition === Statuses::NI_OTHER_REASON)
+            ? trim($request->not_issued_comment)
+            : null;
         $lead->not_issued_at = now();
         $lead->not_issued_by_id = auth()->id();
         $lead->not_issued_resolved_at = null;

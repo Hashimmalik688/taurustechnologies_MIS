@@ -11,6 +11,17 @@ class GeminiService
     private string $model = 'gemini-2.5-flash';
     private string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
+    /**
+     * System instruction injected on every QA scoring request.
+     * Mirrors the system prompt used in ClaudeService for consistent behavior
+     * across primary and fallback AI providers.
+     */
+    private const SYSTEM_INSTRUCTION = 'You are a certified QA analyst for a life insurance resale call center. ' .
+        'You evaluate outbound sales calls using a precise scoring rubric. ' .
+        'Your evaluations must be consistent, evidence-based, and anchored to the specific behavioral descriptions in the rubric. ' .
+        'You always return a single valid JSON object exactly as specified — no markdown, no preamble, no trailing text. ' .
+        'Never invent transcript content. If something is unclear or inaudible, default to the most favorable reasonable interpretation for the closer.';
+
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key');
@@ -35,6 +46,9 @@ class GeminiService
         $response = Http::timeout(120)
             ->withHeaders(['Content-Type' => 'application/json'])
             ->post($url, [
+                'systemInstruction' => [
+                    'parts' => [['text' => self::SYSTEM_INSTRUCTION]],
+                ],
                 'contents' => [
                     [
                         'parts' => [
@@ -113,6 +127,9 @@ class GeminiService
         $response = Http::timeout(300)
             ->withHeaders(['Content-Type' => 'application/json'])
             ->post($url, [
+                'systemInstruction' => [
+                    'parts' => [['text' => self::SYSTEM_INSTRUCTION]],
+                ],
                 'contents' => [
                     [
                         'parts' => [

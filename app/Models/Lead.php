@@ -188,6 +188,7 @@ class Lead extends Model
 
         // Not Issued (Retention exception at Pendings Approved)
         'not_issued_disposition',
+        'not_issued_comment',
         'not_issued_at',
         'not_issued_by_id',
         'not_issued_resolved_by_id',

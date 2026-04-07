@@ -1463,6 +1463,10 @@ function openCallDetail(callId) {
         const voidReason = r.void_risk_reason || null;
         const compFailures = r.compliance_failures || [];
         const audioNote  = (r.informational_notes || {}).audio_quality || null;
+        const dncJudge   = r.dnc_judge || {};
+        const dncRisk    = dncJudge.risk_level || 'NONE';
+        const dncVerdict = dncJudge.verdict    || 'Clean';
+        const dncReason  = dncJudge.reasoning  || null;
 
         // Sale info block
         const saleBlock = c.is_sale ? `
@@ -1552,6 +1556,35 @@ function openCallDetail(callId) {
         if (coaching) {
             coachingText = Array.isArray(coaching) ? coaching.join('\n') : String(coaching);
         }
+
+        // DNC Judge card
+        const dncColorMap = { HIGH: 'var(--qa-red)', MEDIUM: '#f97316', LOW: '#eab308', NONE: 'var(--qa-green)' };
+        const dncBgMap    = { HIGH: 'rgba(244,106,106,.07)', MEDIUM: 'rgba(249,115,22,.06)', LOW: 'rgba(234,179,8,.06)', NONE: 'rgba(52,195,143,.05)' };
+        const dncBorderMap= { HIGH: 'rgba(244,106,106,.25)', MEDIUM: 'rgba(249,115,22,.2)', LOW: 'rgba(234,179,8,.2)', NONE: 'rgba(52,195,143,.18)' };
+        const dncIconMap  = { HIGH: 'bx-error', MEDIUM: 'bx-error-circle', LOW: 'bx-info-circle', NONE: 'bx-check-circle' };
+        const dncColor    = dncColorMap[dncRisk]   || dncColorMap.NONE;
+        const dncBg       = dncBgMap[dncRisk]      || dncBgMap.NONE;
+        const dncBorder   = dncBorderMap[dncRisk]  || dncBorderMap.NONE;
+        const dncIcon     = dncIconMap[dncRisk]    || dncIconMap.NONE;
+        const dncBlock = `
+            <div class="col-12">
+                <div class="qu-card" style="border:1px solid ${dncBorder};background:${dncBg};">
+                    <div class="qu-card-hdr" style="border-bottom:1px solid ${dncBorder};">
+                        <h6 style="color:${dncColor};"><i class="bx ${dncIcon}"></i> DNC Risk Judge <span style="font-size:.65rem;font-weight:500;opacity:.7;">(standalone — does not affect score)</span></h6>
+                        <span style="font-size:.7rem;font-weight:700;padding:.15rem .5rem;border-radius:1rem;background:${dncBg};color:${dncColor};border:1px solid ${dncBorder};">${esc(dncRisk)}</span>
+                    </div>
+                    <div class="qu-card-body" style="display:flex;gap:1.2rem;align-items:flex-start;flex-wrap:wrap;">
+                        <div style="flex-shrink:0;">
+                            <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--qa-muted);margin-bottom:.2rem;">Verdict</div>
+                            <div style="font-size:.88rem;font-weight:700;color:${dncColor};">${esc(dncVerdict)}</div>
+                        </div>
+                        ${dncReason ? `<div style="flex:1;min-width:200px;">
+                            <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--qa-muted);margin-bottom:.2rem;">AI Analysis</div>
+                            <div style="font-size:.77rem;line-height:1.5;color:var(--bs-body-color);">${esc(dncReason)}</div>
+                        </div>` : ''}
+                    </div>
+                </div>
+            </div>`;
 
         // Transcript
         const transcriptLines = !transcript.length
@@ -1647,6 +1680,9 @@ function openCallDetail(callId) {
                             </div>
                         </div>
                     </div>
+
+                    <!-- DNC Risk Judge -->
+                    ${dncBlock}
 
                     <!-- Transcript (collapsed) -->
                     <div class="col-12">

@@ -269,6 +269,7 @@
                                 'beneficiaries'=>$beneficiaries,
                                 'not_issued_disposition'=>Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition]??$lead->not_issued_disposition,
                                 'not_issued_at'=>$lead->not_issued_at?->format('m/d/Y'),
+                                'not_issued_comment'=>$lead->not_issued_comment,
                                 'marked_by'=>$lead->notIssuedBy->name??'',
                                 'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
                                 'ret_action_status'=>$retStatus,
@@ -296,6 +297,9 @@
                                     <?php echo e(Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition] ?? $lead->not_issued_disposition ?? '—'); ?>
 
                                 </span>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->not_issued_disposition === \App\Support\Statuses::NI_OTHER_REASON && $lead->not_issued_comment): ?>
+                                    <br><span style="font-size:.65rem;color:var(--bs-surface-500);font-style:italic;white-space:normal;display:inline-block;max-width:180px;margin-top:.15rem;"><?php echo e($lead->not_issued_comment); ?></span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td style="font-size:.68rem;white-space:nowrap;"><?php echo e($lead->not_issued_at?->format('m/d/Y') ?? '—'); ?></td>
                             <td style="font-size:.68rem;white-space:nowrap;">

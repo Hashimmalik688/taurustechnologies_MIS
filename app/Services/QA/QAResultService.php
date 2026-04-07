@@ -66,21 +66,47 @@ class QAResultService
             // Extract business data (names, sale info) from AI response
             $extracted = $aiResponse['extracted_data'] ?? [];
 
-            // Recalculate total_score from sub-scores if AI returned 0 but sub-scores exist.
+            // ── ALWAYS recalculate total_score from sub-scores ──────────────
+            // The AI frequently miscalculates the formula. Sub-scores are the
+            // authoritative source of truth. This guarantees the displayed total
+            // always matches the breakdown bars exactly.
             // Formula: total_score = round((S1+S2+S3+S4+S5+S6+S7) / 70 * 100)
-            // Compliance is a hard gate (disposition), not a score component.
-            $totalScore = floatval($aiResponse['total_score'] ?? 0);
-            $compliancePass = (bool) ($aiResponse['compliance_pass'] ?? false);
-            if ($totalScore == 0 && !empty($scores)) {
+
+            // ── compliance_pass computed from C-check results ONLY ───────────
+            // VOID_RISK does NOT automatically mean compliance_pass=false.
+            // Compliance is a separate axis: it reflects whether the closer
+            // followed the 11 procedural checks (C1-C11). A call can be
+            // VOID_RISK (misrepresentation) while still having passed all
+            // compliance checks, and vice versa.
+            // We compute this from the actual check values rather than trusting
+            // the AI-supplied compliance_pass boolean, which tends to be
+            // contaminated when the AI assigns VOID_RISK.
+            $hasComplianceFail = false;
+            foreach ($complianceChecks as $checkValue) {
+                if ($checkValue === 'fail') {
+                    $hasComplianceFail = true;
+                    break;
+                }
+            }
+            $compliancePass = !$hasComplianceFail;
+            $totalScore = 0.0;
+            if (!empty($scores)) {
                 $subScoreSum = array_sum(array_values($scores));
                 if ($subScoreSum > 0) {
                     $totalScore = round($subScoreSum / 70 * 100, 2);
-                    Log::info('[QA:Result] Recalculated total_score from sub-scores', [
-                        'qa_call_id'  => $qaCall->id,
-                        'sub_sum'     => $subScoreSum,
-                        'total_score' => $totalScore,
-                    ]);
                 }
+            }
+            // Fall back to AI-provided total only if sub-scores are all missing/zero
+            if ($totalScore == 0) {
+                $totalScore = floatval($aiResponse['total_score'] ?? 0);
+            }
+            if ($totalScore > 0) {
+                Log::info('[QA:Result] total_score calculated from sub-scores', [
+                    'qa_call_id'  => $qaCall->id,
+                    'sub_sum'     => $scores ? array_sum(array_values($scores)) : 0,
+                    'ai_reported' => $aiResponse['total_score'] ?? 0,
+                    'calculated'  => $totalScore,
+                ]);
             }
 
             // Create or update the QA result (handles retries gracefully)
@@ -116,6 +142,10 @@ class QAResultService
                 'policy_type' => $extracted['policy_type'] ?? null,
                 'customer_state' => $extracted['customer_state'] ?? null,
                 'call_type' => $extracted['call_type'] ?? null,
+                // DNC Risk Judge — standalone, does not affect score
+                'dnc_risk_level'     => $this->normalizeDncRiskLevel($aiResponse['dnc_judge']['risk_level'] ?? null),
+                'dnc_judge_verdict'  => $this->normalizeDncVerdict($aiResponse['dnc_judge']['verdict'] ?? null),
+                'dnc_judge_reasoning' => $aiResponse['dnc_judge']['reasoning'] ?? null,
             ]));
 
             // Create individual compliance flag rows for failed items
@@ -248,7 +278,7 @@ class QAResultService
      * Resolve the score-based disposition label regardless of VOID_RISK.
      * Prefers the AI-supplied score_disposition, falls back to computing from total_score.
      */
-    private function resolveScoreDisposition(array $aiResponse, int $totalScore): string
+    private function resolveScoreDisposition(array $aiResponse, float $totalScore): string
     {
         $scoreDisp = $aiResponse['score_disposition'] ?? null;
         $scoreValid = ['EXCEPTIONAL', 'EXCELLENT', 'GOOD', 'AVERAGE', 'POOR'];
@@ -266,5 +296,21 @@ class QAResultService
     private function clampScore(mixed $score): int
     {
         return max(0, min(10, intval($score)));
+    }
+
+    private function normalizeDncRiskLevel(?string $level): string
+    {
+        $valid = ['HIGH', 'MEDIUM', 'LOW', 'NONE'];
+        $upper = strtoupper(trim($level ?? ''));
+        return in_array($upper, $valid) ? $upper : 'NONE';
+    }
+
+    private function normalizeDncVerdict(?string $verdict): string
+    {
+        $valid = ['Litigator', 'DNC Risk', 'Aggressive Opt-Out', 'Clean'];
+        if ($verdict && in_array($verdict, $valid)) {
+            return $verdict;
+        }
+        return 'Clean';
     }
 }

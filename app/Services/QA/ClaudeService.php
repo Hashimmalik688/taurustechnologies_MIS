@@ -11,6 +11,17 @@ class ClaudeService
     private string $model = 'claude-sonnet-4-6';
     private string $baseUrl = 'https://api.anthropic.com/v1';
 
+    /**
+     * System prompt injected on every QA scoring request.
+     * Sets the model's role before it sees any user content, improving
+     * consistency and preventing preamble/markdown in the output.
+     */
+    private const SYSTEM_PROMPT = 'You are a certified QA analyst for a life insurance resale call center. ' .
+        'You evaluate outbound sales calls using a precise scoring rubric. ' .
+        'Your evaluations must be consistent, evidence-based, and anchored to the specific behavioral descriptions in the rubric. ' .
+        'You always return a single valid JSON object exactly as specified — no markdown, no preamble, no trailing text. ' .
+        'Never invent transcript content. If something is unclear or inaudible, default to the most favorable reasonable interpretation for the closer.';
+
     public function __construct()
     {
         $this->apiKey = config('services.anthropic.api_key');
@@ -40,6 +51,7 @@ class ClaudeService
                 'model' => $this->model,
                 'max_tokens' => 8192,
                 'temperature' => 0.1,
+                'system' => self::SYSTEM_PROMPT,
                 'messages' => [
                     [
                         'role' => 'user',
@@ -116,6 +128,7 @@ class ClaudeService
                 'model'       => $this->model,
                 'max_tokens'  => 8192,
                 'temperature' => 0.1,
+                'system'      => self::SYSTEM_PROMPT,
                 'messages' => [
                     [
                         'role'    => 'user',
