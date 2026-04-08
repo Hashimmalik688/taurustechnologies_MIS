@@ -1364,9 +1364,9 @@ class QADashboardController extends Controller
     public function uploadAndTranscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'audio'           => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
-            'audio2'          => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
-            'audio_extra.*'   => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:51200',
+            'audio'           => 'required|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:153600',
+            'audio2'          => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:153600',
+            'audio_extra.*'   => 'nullable|file|mimes:mp3,wav,m4a,mp4,ogg,webm,flac,aac|max:153600',
             'agent_user_id'   => 'nullable|integer|exists:users,id',
             'call_date'       => 'nullable|date',
             'swap_speakers'   => 'nullable|boolean',

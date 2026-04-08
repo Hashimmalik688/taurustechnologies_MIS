@@ -21,6 +21,10 @@
                class="acct-nav-link {{ Str::startsWith($acctRoute,'admin.accounting.sales-ledger') ? 'active' : '' }}">
                 <i class="bx bx-trending-up"></i> Sales Ledger
             </a>
+            <a href="{{ route('admin.accounting.sales-returns') }}"
+               class="acct-nav-link {{ $acctRoute === 'admin.accounting.sales-returns' ? 'active' : '' }}">
+                <i class="bx bx-undo"></i> Sales Returns
+            </a>
             <a href="{{ route('admin.accounting.journal.index') }}"
                class="acct-nav-link {{ $acctRoute === 'admin.accounting.journal.index' ? 'active' : '' }}">
                 <i class="bx bx-list-ul"></i> Journal

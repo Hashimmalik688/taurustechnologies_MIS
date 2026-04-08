@@ -18,16 +18,16 @@
 .ret-kpi-pill .rk-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.82rem;}
 .ret-kpi-pill .rk-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;line-height:1.1;}
 .ret-kpi-pill .rk-val{font-size:1rem;font-weight:800;line-height:1;}
-.ret-kpi-pill.k-pending .rk-icon{background:rgba(241,180,76,.15);color:#b87a14;}
-.ret-kpi-pill.k-pending .rk-val{color:#b87a14;}
-.ret-kpi-pill.k-inprog .rk-icon{background:rgba(85,110,230,.12);color:#556ee6;}
-.ret-kpi-pill.k-inprog .rk-val{color:#556ee6;}
-.ret-kpi-pill.k-waitcx .rk-icon{background:rgba(80,165,241,.12);color:#2b81c9;}
-.ret-kpi-pill.k-waitcx .rk-val{color:#2b81c9;}
+.ret-kpi-pill.k-pending .rk-icon{background:rgba(148,163,184,.15);color:#64748b;}
+.ret-kpi-pill.k-pending .rk-val{color:#64748b;}
+.ret-kpi-pill.k-retained .rk-icon{background:rgba(52,195,143,.15);color:#1a8754;}
+.ret-kpi-pill.k-retained .rk-val{color:#1a8754;}
+.ret-kpi-pill.k-resold .rk-icon{background:rgba(85,110,230,.12);color:#556ee6;}
+.ret-kpi-pill.k-resold .rk-val{color:#556ee6;}
+.ret-kpi-pill.k-rewrite .rk-icon{background:rgba(241,180,76,.12);color:#b87a14;}
+.ret-kpi-pill.k-rewrite .rk-val{color:#b87a14;}
 .ret-kpi-pill.k-recalled .rk-icon{background:rgba(139,92,246,.12);color:#7c3aed;}
 .ret-kpi-pill.k-recalled .rk-val{color:#7c3aed;}
-.ret-kpi-pill.k-fixed .rk-icon{background:rgba(52,195,143,.12);color:#1a8754;}
-.ret-kpi-pill.k-fixed .rk-val{color:#1a8754;}
 .ret-kpi-pill.k-cancelled .rk-icon{background:rgba(244,106,106,.12);color:#c84646;}
 .ret-kpi-pill.k-cancelled .rk-val{color:#c84646;}
 
@@ -67,17 +67,49 @@
 /* Action buttons */
 .a-btn{display:inline-flex;align-items:center;gap:2px;font-size:.63rem;font-weight:600;padding:.18rem .42rem;border-radius:.3rem;border:1px solid;cursor:pointer;text-decoration:none;transition:all .12s;white-space:nowrap;}
 .a-view{background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);}.a-view:hover{background:rgba(85,110,230,.2);}
-.a-call{background:rgba(52,195,143,.1);color:#1a8754;border-color:rgba(52,195,143,.25);}.a-call:hover{background:rgba(52,195,143,.2);}
 .a-recall{background:rgba(139,92,246,.08);color:#7c3aed;border-color:rgba(139,92,246,.25);}.a-recall:hover{background:rgba(139,92,246,.18);}
 
-/* Action status badge */
+/* Retention disposition badge (in table rows) */
 .ret-status-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:10px;text-transform:uppercase;letter-spacing:.3px;}
-.rsb-pending{background:rgba(241,180,76,.12);color:#b87a14;border:1px solid rgba(241,180,76,.25);}
-.rsb-in_progress{background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.2);}
-.rsb-waiting_on_cx{background:rgba(80,165,241,.12);color:#2b81c9;border:1px solid rgba(80,165,241,.2);}
-.rsb-recalled{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.2);}
-.rsb-fixed{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.2);}
-.rsb-cancelled{background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.2);}
+.rdb-pending{background:rgba(148,163,184,.12);color:#64748b;border:1px solid rgba(148,163,184,.25);}
+.rdb-retained{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.2);}
+.rdb-resold{background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.2);}
+.rdb-rewrite{background:rgba(241,180,76,.12);color:#b87a14;border:1px solid rgba(241,180,76,.25);}
+.rdb-recalled_to_closer{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.2);}
+.rdb-cancelled{background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.2);}
+
+/* Disposition buttons in modal footer */
+.ret-disp-btn{display:inline-flex;align-items:center;gap:.25rem;font-size:.67rem;font-weight:700;padding:.28rem .6rem;border-radius:1rem;border:2px solid;cursor:pointer;transition:all .15s;white-space:nowrap;background:transparent;}
+.ret-disp-btn.disp-pending{color:#64748b;border-color:rgba(148,163,184,.4);}
+.ret-disp-btn.disp-pending.active,.ret-disp-btn.disp-pending:hover{background:rgba(148,163,184,.15);border-color:#94a3b8;}
+.ret-disp-btn.disp-retained{color:#1a8754;border-color:rgba(52,195,143,.4);}
+.ret-disp-btn.disp-retained.active,.ret-disp-btn.disp-retained:hover{background:rgba(52,195,143,.15);border-color:#34c38f;}
+.ret-disp-btn.disp-resold{color:#556ee6;border-color:rgba(85,110,230,.4);}
+.ret-disp-btn.disp-resold.active,.ret-disp-btn.disp-resold:hover{background:rgba(85,110,230,.15);border-color:#556ee6;}
+.ret-disp-btn.disp-rewrite{color:#b87a14;border-color:rgba(241,180,76,.4);}
+.ret-disp-btn.disp-rewrite.active,.ret-disp-btn.disp-rewrite:hover{background:rgba(241,180,76,.15);border-color:#f1b44c;}
+.ret-disp-btn.disp-recalled_to_closer{color:#7c3aed;border-color:rgba(139,92,246,.4);}
+.ret-disp-btn.disp-recalled_to_closer.active,.ret-disp-btn.disp-recalled_to_closer:hover{background:rgba(139,92,246,.15);border-color:#8b5cf6;}
+.ret-disp-btn.disp-cancelled{color:#c84646;border-color:rgba(244,106,106,.4);}
+.ret-disp-btn.disp-cancelled.active,.ret-disp-btn.disp-cancelled:hover{background:rgba(244,106,106,.15);border-color:#f46a6a;}
+
+/* Field highlight badge (cross-page updated indicator) */
+.fh-badge{display:inline-flex;align-items:center;gap:.2rem;font-size:.58rem;font-weight:600;padding:.08rem .32rem;border-radius:8px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.25);white-space:nowrap;margin-left:.3rem;cursor:default;vertical-align:middle;}
+
+/* Editable inputs inside modal detail table */
+.ret-edit-input{font-size:.73rem!important;padding:.2rem .38rem!important;border-radius:.3rem!important;border:1px solid rgba(0,0,0,.12)!important;width:100%;min-width:100px;background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#334155);}
+.ret-edit-input:focus{border-color:#d4af37!important;box-shadow:0 0 0 2px rgba(212,175,55,.12)!important;outline:none!important;}
+textarea.ret-edit-input{resize:vertical;min-height:54px;}
+/* CURRENT value display above each field (mirrors calling form style) */
+.ph-cur{display:flex;align-items:center;gap:.35rem;margin-bottom:.3rem;font-size:.72rem}
+.ph-cur-tag{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff;font-size:.6rem;padding:.15rem .4rem;border-radius:6px;font-weight:700;letter-spacing:.3px}
+.ph-cur-val{font-weight:700;color:var(--bs-heading-color);font-size:.78rem}
+
+/* Save status feedback */
+#dm-save-feedback{display:none;font-size:.68rem;font-weight:600;padding:.22rem .55rem;border-radius:.3rem;}
+
+/* Recall note inline in modal footer */
+#dm-recall-note-wrap{display:none;margin-top:.4rem;width:100%;}
 
 /* Detail modal */
 .modal-header-ret{background:linear-gradient(135deg,var(--bs-card-bg) 0%,rgba(212,175,55,.08) 100%);border-bottom:1px solid rgba(212,175,55,.15);}
@@ -90,9 +122,6 @@
 .disposed-toggle{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:600;color:var(--bs-surface-500);padding:.25rem .6rem;border-radius:22px;border:1px solid rgba(0,0,0,.08);background:var(--bs-card-bg);cursor:pointer;text-decoration:none;transition:all .15s;}
 .disposed-toggle:hover,.disposed-toggle.active{border-color:rgba(212,175,55,.3);color:#b89730;background:rgba(212,175,55,.06);}
 .disposed-toggle input{width:14px;height:14px;accent-color:#d4af37;cursor:pointer;}
-
-/* Zoom warning */
-.zoom-warn{display:flex;align-items:center;gap:.6rem;padding:.55rem .85rem;margin-bottom:.7rem;background:rgba(241,180,76,.08);border:1px solid rgba(241,180,76,.25);border-radius:.6rem;font-size:.75rem;font-weight:600;color:#b87a14;}
 
 /* Dark themes */
 :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sl-page-title{color:#f1f5f9;}
@@ -128,38 +157,27 @@
     </div>
 </div>
 
-{{-- Zoom warning --}}
-@if(!$hasZoomToken)
-<div class="zoom-warn">
-    <i class="bx bx-phone-off" style="font-size:1rem;"></i>
-    <span><strong>Zoom Phone not connected.</strong> Connect your account to enable call buttons.</span>
-    <a href="/zoom/authorize" class="ms-auto" style="font-size:.72rem;padding:.25rem .65rem;background:rgba(241,180,76,.15);border:1px solid rgba(241,180,76,.3);border-radius:1rem;color:#b87a14;text-decoration:none;font-weight:700;">
-        <i class="bx bx-link-external me-1"></i> Connect
-    </a>
-</div>
-@endif
-
 {{-- KPI Row --}}
 <div class="ret-kpi-row">
     <div class="ret-kpi-pill k-pending">
         <div class="rk-icon"><i class="bx bx-time-five"></i></div>
         <div><div class="rk-lbl">Pending</div><div class="rk-val">{{ $kpi['pending'] ?? 0 }}</div></div>
     </div>
-    <div class="ret-kpi-pill k-inprog">
-        <div class="rk-icon"><i class="bx bx-loader-alt"></i></div>
-        <div><div class="rk-lbl">In Progress</div><div class="rk-val">{{ $kpi['in_progress'] ?? 0 }}</div></div>
+    <div class="ret-kpi-pill k-retained">
+        <div class="rk-icon"><i class="bx bx-check-shield"></i></div>
+        <div><div class="rk-lbl">Retained</div><div class="rk-val">{{ $kpi['retained'] ?? 0 }}</div></div>
     </div>
-    <div class="ret-kpi-pill k-waitcx">
-        <div class="rk-icon"><i class="bx bx-user-voice"></i></div>
-        <div><div class="rk-lbl">Waiting On Cx</div><div class="rk-val">{{ $kpi['waiting_on_cx'] ?? 0 }}</div></div>
+    <div class="ret-kpi-pill k-resold">
+        <div class="rk-icon"><i class="bx bx-store"></i></div>
+        <div><div class="rk-lbl">Resold</div><div class="rk-val">{{ $kpi['resold'] ?? 0 }}</div></div>
+    </div>
+    <div class="ret-kpi-pill k-rewrite">
+        <div class="rk-icon"><i class="bx bx-edit-alt"></i></div>
+        <div><div class="rk-lbl">Rewrite</div><div class="rk-val">{{ $kpi['rewrite'] ?? 0 }}</div></div>
     </div>
     <div class="ret-kpi-pill k-recalled">
         <div class="rk-icon"><i class="bx bx-undo"></i></div>
-        <div><div class="rk-lbl">Recalled</div><div class="rk-val">{{ $kpi['recalled'] ?? 0 }}</div></div>
-    </div>
-    <div class="ret-kpi-pill k-fixed">
-        <div class="rk-icon"><i class="bx bx-check-circle"></i></div>
-        <div><div class="rk-lbl">Fixed</div><div class="rk-val">{{ $kpi['fixed'] ?? 0 }}</div></div>
+        <div><div class="rk-lbl">Recalled</div><div class="rk-val">{{ $kpi['recalled_to_closer'] ?? 0 }}</div></div>
     </div>
     <div class="ret-kpi-pill k-cancelled">
         <div class="rk-icon"><i class="bx bx-x-circle"></i></div>
@@ -238,7 +256,7 @@
                     <tbody>
                         @forelse($not_issued_leads as $lead)
                         @php
-                            $retStatus = $lead->ret_action_status ?: 'pending';
+                            $retDisp = $lead->retention_disposition ?: 'pending';
                             $beneficiaries = $lead->beneficiaries ?? [];
                             if(is_string($beneficiaries)){$d=json_decode($beneficiaries,true);$beneficiaries=is_array($d)?$d:[];}
                             if(!is_array($beneficiaries))$beneficiaries=[];
@@ -251,14 +269,14 @@
                                 'coverage_amount'=>$lead->coverage_amount,'monthly_premium'=>$lead->monthly_premium,
                                 'initial_draft_date'=>$lead->initial_draft_date?->format('m/d/Y'),
                                 'future_draft_date'=>$lead->future_draft_date?->format('m/d/Y'),
-                                'date_of_birth'=>$lead->date_of_birth?->format('m/d/Y'),'age'=>$lead->age,
+                                'date_of_birth'=>$lead->date_of_birth?->format('Y-m-d'),'age'=>$lead->age,
                                 'gender'=>$lead->gender,'ssn'=>$lead->ssn,'state'=>$lead->state,
                                 'address'=>$lead->address,'zip_code'=>$lead->zip_code,
                                 'bank_name'=>$lead->bank_name,'account_type'=>$lead->account_type,
                                 'account_title'=>$lead->account_title,'routing_number'=>$lead->routing_number,
                                 'account_number'=>$lead->account_number??$lead->acc_number,
                                 'bank_balance'=>$lead->bank_balance,'ss_amount'=>$lead->ss_amount,
-                                'ss_date'=>$lead->ss_date?->format('m/d/Y'),
+                                'ss_date'=>$lead->ss_date?->format('Y-m-d'),
                                 'bank_verification_status'=>$lead->bank_verification_status,
                                 'card_number'=>$lead->card_number,'cvv'=>$lead->cvv,'expiry_date'=>$lead->expiry_date,
                                 'doctor_name'=>$lead->doctor_name,'doctor_number'=>$lead->doctor_number,
@@ -271,18 +289,19 @@
                                 'not_issued_comment'=>$lead->not_issued_comment,
                                 'marked_by'=>$lead->notIssuedBy->name??'',
                                 'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
-                                'ret_action_status'=>$retStatus,
+                                'retention_notes'=>$lead->retention_notes,
+                                'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
+                                'recall_note'=>$lead->recall_note,
+                                'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         @endphp
                         <tr>
                             <td style="color:var(--bs-surface-400);">{{ $loop->iteration }}</td>
                             <td>
                                 <strong style="font-size:.74rem;">{{ $lead->cn_name ?? '—' }}</strong>
-                                @if($lead->recall_requested_at)
-                                    <br><span class="ret-status-badge rsb-recalled" style="margin-top:.15rem;"><i class="bx bx-undo" style="font-size:.6rem;"></i> Recalled</span>
-                                @elseif($retStatus !== 'pending')
-                                    <br><span class="ret-status-badge rsb-{{ $retStatus }}" style="margin-top:.15rem;">{{ Statuses::RET_ACTION_STATUSES[$retStatus] ?? $retStatus }}</span>
+                                @if($retDisp !== 'pending')
+                                    <br><span class="ret-status-badge rdb-{{ $retDisp }}" style="margin-top:.15rem;">{{ Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp }}</span>
                                 @endif
                             </td>
                             <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
@@ -321,16 +340,11 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <button type="button" class="a-btn a-call btn-call-lead"
-                                        data-phone="{{ preg_replace('/\D/', '', $lead->phone_number ?? '') }}"
-                                        title="Call {{ $lead->cn_name }}">
-                                        <i class="bx bx-phone-call"></i>
-                                    </button>
                                     <button type="button" class="a-btn a-view btn-view-lead"
                                         data-lead='@json($leadJson)'
                                         data-lead-id="{{ $lead->id }}"
                                         data-type="not_issued">
-                                        <i class="bx bx-show"></i> View
+                                        <i class="bx bx-show"></i> View / Edit
                                     </button>
                                     @if(!$lead->recall_requested_at && !$disposed)
                                         <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
@@ -376,7 +390,7 @@
                     <tbody>
                         @forelse($not_paid_leads as $lead)
                         @php
-                            $retStatus = $lead->ret_action_status ?: 'pending';
+                            $retDisp = $lead->retention_disposition ?: 'pending';
                             $beneficiaries = $lead->beneficiaries ?? [];
                             if(is_string($beneficiaries)){$d=json_decode($beneficiaries,true);$beneficiaries=is_array($d)?$d:[];}
                             if(!is_array($beneficiaries))$beneficiaries=[];
@@ -393,14 +407,14 @@
                                 'coverage_amount'=>$lead->coverage_amount,'monthly_premium'=>$lead->monthly_premium,
                                 'initial_draft_date'=>$lead->initial_draft_date?->format('m/d/Y'),
                                 'future_draft_date'=>$lead->future_draft_date?->format('m/d/Y'),
-                                'date_of_birth'=>$lead->date_of_birth?->format('m/d/Y'),'age'=>$lead->age,
+                                'date_of_birth'=>$lead->date_of_birth?->format('Y-m-d'),'age'=>$lead->age,
                                 'gender'=>$lead->gender,'ssn'=>$lead->ssn,'state'=>$lead->state,
                                 'address'=>$lead->address,'zip_code'=>$lead->zip_code,
                                 'bank_name'=>$lead->bank_name,'account_type'=>$lead->account_type,
                                 'account_title'=>$lead->account_title,'routing_number'=>$lead->routing_number,
                                 'account_number'=>$lead->account_number??$lead->acc_number,
                                 'bank_balance'=>$lead->bank_balance,'ss_amount'=>$lead->ss_amount,
-                                'ss_date'=>$lead->ss_date?->format('m/d/Y'),
+                                'ss_date'=>$lead->ss_date?->format('Y-m-d'),
                                 'bank_verification_status'=>$lead->bank_verification_status,
                                 'card_number'=>$lead->card_number,'cvv'=>$lead->cvv,'expiry_date'=>$lead->expiry_date,
                                 'doctor_name'=>$lead->doctor_name,'doctor_number'=>$lead->doctor_number,
@@ -413,18 +427,19 @@
                                 'marked_by'=>$lead->notPaidBy->name??'',
                                 'not_paid_comment'=>$lead->not_paid_comment,
                                 'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
-                                'ret_action_status'=>$retStatus,
+                                'retention_notes'=>$lead->retention_notes,
+                                'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
+                                'recall_note'=>$lead->recall_note,
+                                'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         @endphp
                         <tr>
                             <td style="color:var(--bs-surface-400);">{{ $loop->iteration }}</td>
                             <td>
                                 <strong style="font-size:.74rem;">{{ $lead->cn_name ?? '—' }}</strong>
-                                @if($lead->recall_requested_at)
-                                    <br><span class="ret-status-badge rsb-recalled" style="margin-top:.15rem;"><i class="bx bx-undo" style="font-size:.6rem;"></i> Recalled</span>
-                                @elseif($retStatus !== 'pending')
-                                    <br><span class="ret-status-badge rsb-{{ $retStatus }}" style="margin-top:.15rem;">{{ Statuses::RET_ACTION_STATUSES[$retStatus] ?? $retStatus }}</span>
+                                @if($retDisp !== 'pending')
+                                    <br><span class="ret-status-badge rdb-{{ $retDisp }}" style="margin-top:.15rem;">{{ Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp }}</span>
                                 @endif
                             </td>
                             <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
@@ -461,16 +476,11 @@
                             </td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <button type="button" class="a-btn a-call btn-call-lead"
-                                        data-phone="{{ preg_replace('/\D/', '', $lead->phone_number ?? '') }}"
-                                        title="Call {{ $lead->cn_name }}">
-                                        <i class="bx bx-phone-call"></i>
-                                    </button>
                                     <button type="button" class="a-btn a-view btn-view-lead"
                                         data-lead='@json($leadJson)'
                                         data-lead-id="{{ $lead->id }}"
                                         data-type="not_paid">
-                                        <i class="bx bx-show"></i> View
+                                        <i class="bx bx-show"></i> View / Edit
                                     </button>
                                     @if(!$lead->recall_requested_at && !$disposed)
                                         <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
@@ -513,17 +523,39 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body px-3 py-3">
+                <form id="dm-edit-form" autocomplete="off">
                 <div class="row g-3">
                     {{-- Personal --}}
                     <div class="col-md-6">
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-user"></i> Personal Information</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Full Name</td><td id="dm-cn_name">—</td></tr>
-                                <tr><td>Date of Birth</td><td id="dm-date_of_birth">—</td></tr>
-                                <tr><td>Age</td><td id="dm-age">—</td></tr>
-                                <tr><td>Gender</td><td id="dm-gender">—</td></tr>
-                                <tr><td>SSN</td><td id="dm-ssn">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-cn_name" style="font-size:.73rem;font-weight:600;">Full Name <span class="fh-badge" id="fh-cn_name" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-cn_name" name="cn_name" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-date_of_birth" style="font-size:.73rem;font-weight:600;">Date of Birth <span class="fh-badge" id="fh-date_of_birth" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-date_of_birth" name="date_of_birth" type="date"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-age" style="font-size:.73rem;font-weight:600;">Age <span class="fh-badge" id="fh-age" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-age" name="age" type="number" min="0" max="120"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-gender" style="font-size:.73rem;font-weight:600;">Gender <span class="fh-badge" id="fh-gender" style="display:none;"></span></label></td>
+                                    <td>
+                                        <select class="ret-edit-input" id="dm-input-gender" name="gender">
+                                            <option value="">—</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-ssn" style="font-size:.73rem;font-weight:600;">SSN <span class="fh-badge" id="fh-ssn" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-ssn" name="ssn" type="text" autocomplete="off"></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -532,11 +564,26 @@
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-phone"></i> Contact</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Primary Phone</td><td id="dm-phone_number">—</td></tr>
-                                <tr><td>Secondary Phone</td><td id="dm-secondary_phone_number">—</td></tr>
-                                <tr><td>Address</td><td id="dm-address">—</td></tr>
-                                <tr><td>State</td><td id="dm-state">—</td></tr>
-                                <tr><td>Zip Code</td><td id="dm-zip_code">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-phone_number" style="font-size:.73rem;font-weight:600;">Primary Phone <span class="fh-badge" id="fh-phone_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-phone_number" name="phone_number" type="tel"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-secondary_phone_number" style="font-size:.73rem;font-weight:600;">Secondary Phone <span class="fh-badge" id="fh-secondary_phone_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-secondary_phone_number" name="secondary_phone_number" type="tel"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-address" style="font-size:.73rem;font-weight:600;">Address <span class="fh-badge" id="fh-address" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-address" name="address" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-state" style="font-size:.73rem;font-weight:600;">State <span class="fh-badge" id="fh-state" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-state" name="state" type="text" maxlength="30"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-zip_code" style="font-size:.73rem;font-weight:600;">Zip Code <span class="fh-badge" id="fh-zip_code" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-zip_code" name="zip_code" type="text" maxlength="10"></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -545,15 +592,42 @@
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-shield-check"></i> Policy</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Plan Type</td><td id="dm-policy_type">—</td></tr>
-                                <tr><td>Policy #</td><td id="dm-policy_number">—</td></tr>
-                                <tr><td>Carrier</td><td id="dm-carrier_name">—</td></tr>
-                                <tr><td>Coverage</td><td id="dm-coverage_amount">—</td></tr>
-                                <tr><td>Premium</td><td id="dm-monthly_premium">—</td></tr>
-                                <tr><td>Initial Draft</td><td id="dm-initial_draft_date">—</td></tr>
-                                <tr><td>Future Draft</td><td id="dm-future_draft_date">—</td></tr>
-                                <tr><td>Closer</td><td id="dm-closer_name">—</td></tr>
-                                <tr><td>Sale Date</td><td id="dm-sale_date">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-policy_type" style="font-size:.73rem;font-weight:600;">Plan Type <span class="fh-badge" id="fh-policy_type" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-policy_type" name="policy_type" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-policy_number" style="font-size:.73rem;font-weight:600;">Policy # <span class="fh-badge" id="fh-policy_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-policy_number" name="policy_number" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-carrier_name" style="font-size:.73rem;font-weight:600;">Carrier <span class="fh-badge" id="fh-carrier_name" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-carrier_name" name="carrier_name" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-coverage_amount" style="font-size:.73rem;font-weight:600;">Coverage <span class="fh-badge" id="fh-coverage_amount" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-coverage_amount" name="coverage_amount" type="number" step="0.01" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-monthly_premium" style="font-size:.73rem;font-weight:600;">Premium/mo <span class="fh-badge" id="fh-monthly_premium" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-monthly_premium" name="monthly_premium" type="number" step="0.01" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-initial_draft_date" style="font-size:.73rem;font-weight:600;">Initial Draft <span class="fh-badge" id="fh-initial_draft_date" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-initial_draft_date" name="initial_draft_date" type="date"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-future_draft_date" style="font-size:.73rem;font-weight:600;">Future Draft <span class="fh-badge" id="fh-future_draft_date" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-future_draft_date" name="future_draft_date" type="date"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-closer_name" style="font-size:.73rem;font-weight:600;">Closer <span class="fh-badge" id="fh-closer_name" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-closer_name" name="closer_name" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-sale_date" style="font-size:.73rem;font-weight:600;">Sale Date <span class="fh-badge" id="fh-sale_date" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-sale_date" name="sale_date" type="date"></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -562,14 +636,43 @@
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-heart"></i> Health</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Nicotine</td><td id="dm-smoker">—</td></tr>
-                                <tr><td>Height</td><td id="dm-height">—</td></tr>
-                                <tr><td>Weight</td><td id="dm-weight">—</td></tr>
-                                <tr><td>Medical Issues</td><td id="dm-medical_issue">—</td></tr>
-                                <tr><td>Medications</td><td id="dm-medications">—</td></tr>
-                                <tr><td>Doctor Name</td><td id="dm-doctor_name">—</td></tr>
-                                <tr><td>Doctor Phone</td><td id="dm-doctor_number">—</td></tr>
-                                <tr><td>Doctor Address</td><td id="dm-doctor_address">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-smoker" style="font-size:.73rem;font-weight:600;">Nicotine Use <span class="fh-badge" id="fh-smoker" style="display:none;"></span></label></td>
+                                    <td>
+                                        <select class="ret-edit-input" id="dm-input-smoker" name="smoker">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-height" style="font-size:.73rem;font-weight:600;">Height <span class="fh-badge" id="fh-height" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-height" name="height" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-weight" style="font-size:.73rem;font-weight:600;">Weight (lbs) <span class="fh-badge" id="fh-weight" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-weight" name="weight" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-medical_issue" style="font-size:.73rem;font-weight:600;">Medical Issues <span class="fh-badge" id="fh-medical_issue" style="display:none;"></span></label></td>
+                                    <td><textarea class="ret-edit-input" id="dm-input-medical_issue" name="medical_issue" rows="2"></textarea></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-medications" style="font-size:.73rem;font-weight:600;">Medications <span class="fh-badge" id="fh-medications" style="display:none;"></span></label></td>
+                                    <td><textarea class="ret-edit-input" id="dm-input-medications" name="medications" rows="2"></textarea></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-doctor_name" style="font-size:.73rem;font-weight:600;">Doctor Name <span class="fh-badge" id="fh-doctor_name" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-doctor_name" name="doctor_name" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-doctor_number" style="font-size:.73rem;font-weight:600;">Doctor Phone <span class="fh-badge" id="fh-doctor_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-doctor_number" name="doctor_number" type="tel"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-doctor_address" style="font-size:.73rem;font-weight:600;">Doctor Address <span class="fh-badge" id="fh-doctor_address" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-doctor_address" name="doctor_address" type="text"></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -578,40 +681,142 @@
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-bank"></i> Banking</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Bank Name</td><td id="dm-bank_name">—</td></tr>
-                                <tr><td>Account Type</td><td id="dm-account_type">—</td></tr>
-                                <tr><td>Account Title</td><td id="dm-account_title">—</td></tr>
-                                <tr><td>Routing #</td><td id="dm-routing_number">—</td></tr>
-                                <tr><td>Account #</td><td id="dm-account_number">—</td></tr>
-                                <tr><td>Balance</td><td id="dm-bank_balance">—</td></tr>
-                                <tr><td>SS Amount</td><td id="dm-ss_amount">—</td></tr>
-                                <tr><td>SS Date</td><td id="dm-ss_date">—</td></tr>
-                                <tr><td>BV Status</td><td id="dm-bank_verification_status">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-bank_name" style="font-size:.73rem;font-weight:600;">Bank Name <span class="fh-badge" id="fh-bank_name" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-bank_name" name="bank_name" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-account_type" style="font-size:.73rem;font-weight:600;">Account Type <span class="fh-badge" id="fh-account_type" style="display:none;"></span></label></td>
+                                    <td>
+                                        <select class="ret-edit-input" id="dm-input-account_type" name="account_type">
+                                            <option value="">—</option>
+                                            <option value="Checking">Checking</option>
+                                            <option value="Savings">Savings</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-account_title" style="font-size:.73rem;font-weight:600;">Account Title <span class="fh-badge" id="fh-account_title" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-account_title" name="account_title" type="text"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-routing_number" style="font-size:.73rem;font-weight:600;">Routing # <span class="fh-badge" id="fh-routing_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-routing_number" name="routing_number" type="text" autocomplete="off"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-account_number" style="font-size:.73rem;font-weight:600;">Account # <span class="fh-badge" id="fh-account_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-account_number" name="account_number" type="text" autocomplete="off"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-bank_balance" style="font-size:.73rem;font-weight:600;">Balance <span class="fh-badge" id="fh-bank_balance" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-bank_balance" name="bank_balance" type="number" step="0.01" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-ss_amount" style="font-size:.73rem;font-weight:600;">SS Amount <span class="fh-badge" id="fh-ss_amount" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-ss_amount" name="ss_amount" type="number" step="0.01" min="0"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-ss_date" style="font-size:.73rem;font-weight:600;">SS Date <span class="fh-badge" id="fh-ss_date" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-ss_date" name="ss_date" type="date"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-bank_verification_status" style="font-size:.73rem;font-weight:600;">BV Status <span class="fh-badge" id="fh-bank_verification_status" style="display:none;"></span></label></td>
+                                    <td>
+                                        <select class="ret-edit-input" id="dm-input-bank_verification_status" name="bank_verification_status">
+                                            <option value="">—</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Average">Average</option>
+                                            <option value="Bad">Bad</option>
+                                        </select>
+                                    </td>
+                                </tr>
                             </table>
                         </div>
                     </div>
-                    {{-- Card Information --}}
+                    {{-- Card --}}
                     <div class="col-md-6">
                         <div class="ex-card" style="padding:.8rem;">
                             <div class="sec-hdr-mini"><i class="bx bx-credit-card"></i> Card Information</div>
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
-                                <tr><td>Card Number</td><td id="dm-card_number">—</td></tr>
-                                <tr><td>CVV</td><td id="dm-cvv">—</td></tr>
-                                <tr><td>Expiry Date</td><td id="dm-expiry_date">—</td></tr>
+                                <tr>
+                                    <td><label for="dm-input-card_number" style="font-size:.73rem;font-weight:600;">Card Number <span class="fh-badge" id="fh-card_number" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-card_number" name="card_number" type="text" autocomplete="off"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-cvv" style="font-size:.73rem;font-weight:600;">CVV <span class="fh-badge" id="fh-cvv" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-cvv" name="cvv" type="text" maxlength="4" autocomplete="off"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="dm-input-expiry_date" style="font-size:.73rem;font-weight:600;">Expiry Date <span class="fh-badge" id="fh-expiry_date" style="display:none;"></span></label></td>
+                                    <td><input class="ret-edit-input" id="dm-input-expiry_date" name="expiry_date" type="text" placeholder="MM/YY"></td>
+                                </tr>
                             </table>
                         </div>
                     </div>
                     {{-- Beneficiary --}}
                     <div class="col-md-6">
                         <div class="ex-card" style="padding:.8rem;">
-                            <div class="sec-hdr-mini"><i class="bx bx-heart-circle"></i> Beneficiary</div>
-                            <div id="dm-beneficiaries">—</div>
+                            <div class="sec-hdr-mini"><i class="bx bx-heart-circle"></i> Beneficiary <span class="fh-badge" id="fh-beneficiaries" style="display:none;"></span></div>
+                            <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
+                                <tr><td colspan="2" style="font-size:.65rem;font-weight:700;color:#b89730;padding-bottom:.15rem;">Beneficiary 1</td></tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">Name</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben1-name" type="text" placeholder="Name"></td>
+                                </tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">Relation</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben1-relation" type="text" placeholder="Relation"></td>
+                                </tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">DOB</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben1-dob" type="date"></td>
+                                </tr>
+                                <tr><td colspan="2" style="font-size:.65rem;font-weight:700;color:#b89730;padding-top:.4rem;padding-bottom:.15rem;">Beneficiary 2</td></tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">Name</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben2-name" type="text" placeholder="Name"></td>
+                                </tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">Relation</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben2-relation" type="text" placeholder="Relation"></td>
+                                </tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">DOB</label></td>
+                                    <td><input class="ret-edit-input" id="dm-ben2-dob" type="date"></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-                    {{-- Retention Issue --}}
+                    {{-- Notes --}}
                     <div class="col-12">
                         <div class="ex-card" style="padding:.8rem;">
-                            <div class="sec-hdr-mini"><i class="bx bx-error-circle"></i> Retention Issue</div>
+                            <div class="sec-hdr-mini"><i class="bx bx-note"></i> Notes</div>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label for="dm-input-retention_notes" style="font-size:.65rem;font-weight:700;color:var(--bs-surface-400);text-transform:uppercase;">
+                                        Retention Notes <span class="fh-badge" id="fh-retention_notes" style="display:none;"></span>
+                                    </label>
+                                    <textarea class="ret-edit-input mt-1" id="dm-input-retention_notes" name="retention_notes" rows="3" placeholder="Retention officer notes…"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="dm-input-staff_notes" style="font-size:.65rem;font-weight:700;color:var(--bs-surface-400);text-transform:uppercase;">
+                                        Staff Notes <span class="fh-badge" id="fh-staff_notes" style="display:none;"></span>
+                                    </label>
+                                    <textarea class="ret-edit-input mt-1" id="dm-input-staff_notes" name="staff_notes" rows="3" placeholder="Internal staff notes…"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="dm-input-comments" style="font-size:.65rem;font-weight:700;color:var(--bs-surface-400);text-transform:uppercase;">
+                                        Comments <span class="fh-badge" id="fh-comments" style="display:none;"></span>
+                                    </label>
+                                    <textarea class="ret-edit-input mt-1" id="dm-input-comments" name="comments" rows="3" placeholder="General comments…"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Retention Issue (read-only summary) --}}
+                    <div class="col-12">
+                        <div class="ex-card" style="padding:.8rem;">
+                            <div class="sec-hdr-mini"><i class="bx bx-error-circle"></i> Retention Issue Summary</div>
                             <div class="row g-2">
                                 <div class="col-md-3">
                                     <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-400);text-transform:uppercase;">Issue Type</div>
@@ -626,38 +831,51 @@
                                     <div id="dm-marked_at" style="font-size:.78rem;margin-top:.2rem;">—</div>
                                 </div>
                                 <div class="col-md-3">
-                                    <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-400);text-transform:uppercase;">Notes</div>
-                                    <div id="dm-notes" style="font-size:.75rem;color:var(--bs-surface-400);margin-top:.2rem;font-style:italic;">—</div>
+                                    <div style="font-size:.65rem;font-weight:600;color:var(--bs-surface-400);text-transform:uppercase;">Recall Note</div>
+                                    <div id="dm-recall-note-display" style="font-size:.75rem;color:var(--bs-surface-400);margin-top:.2rem;font-style:italic;">—</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                </form>
             </div>
-            <div class="modal-footer py-2 px-3 justify-content-between">
-                {{-- Left: call + link --}}
-                <div class="d-flex gap-2 align-items-center">
-                    <button type="button" class="btn btn-sm" id="dm-call-btn"
-                        style="background:rgba(52,195,143,.1);color:#1a8754;border:1px solid rgba(52,195,143,.25);border-radius:.4rem;font-size:.74rem;font-weight:600;display:inline-flex;align-items:center;gap:.3rem;">
-                        <i class="bx bx-phone-call"></i> Call
-                    </button>
-                    <a id="dm-view-link" href="#" target="_blank"
-                        style="font-size:.72rem;font-weight:600;color:#556ee6;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem;">
-                        <i class="bx bx-external-link"></i> Full Lead
-                    </a>
+            <div class="modal-footer py-2 px-3 flex-column align-items-stretch gap-1">
+                {{-- Row 1: Disposition buttons --}}
+                <div class="d-flex gap-1 flex-wrap align-items-center">
+                    <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:var(--bs-surface-400);letter-spacing:.5px;margin-right:.2rem;">Disposition:</span>
+                    @foreach($retentionDispositions as $dispKey => $dispLabel)
+                    <button type="button" class="ret-disp-btn disp-{{ $dispKey }}" data-disp="{{ $dispKey }}">{{ $dispLabel }}</button>
+                    @endforeach
                 </div>
-                {{-- Right: status update + close --}}
-                <div class="d-flex gap-2 align-items-center">
-                    <select id="dm-status-select" class="form-select form-select-sm" style="font-size:.72rem;width:auto;border-radius:.4rem;">
-                        @foreach(Statuses::RET_ACTION_STATUSES as $key => $label)
-                            <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <button type="button" id="dm-status-save" class="btn btn-sm"
-                        style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#0f172a;border:none;border-radius:.4rem;font-size:.74rem;font-weight:700;white-space:nowrap;">
-                        <i class="bx bx-save me-1"></i> Save Status
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                {{-- Recalled-to-closer inline note (shown only when that button is clicked) --}}
+                <div id="dm-recall-note-wrap">
+                    <div class="d-flex gap-2 align-items-start">
+                        <textarea id="dm-recall-note-inline" class="form-control form-control-sm" rows="2"
+                            style="font-size:.72rem;resize:none;flex:1;" placeholder="Recall note / instructions (required)…"></textarea>
+                        <button type="button" id="dm-recall-confirm" class="btn btn-sm"
+                            style="background:rgba(139,92,246,.9);color:#fff;border:none;font-size:.72rem;font-weight:600;white-space:nowrap;">
+                            <i class="bx bx-send me-1"></i> Confirm Recall
+                        </button>
+                    </div>
+                    <div id="dm-recall-note-error" style="display:none;font-size:.65rem;color:#c84646;margin-top:.2rem;">Please enter a recall note.</div>
+                </div>
+                {{-- Row 2: Save changes + links --}}
+                <div class="d-flex gap-2 align-items-center justify-content-between">
+                    <div class="d-flex gap-2 align-items-center">
+                        <a id="dm-view-link" href="#" target="_blank"
+                            style="font-size:.72rem;font-weight:600;color:#556ee6;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem;">
+                            <i class="bx bx-external-link"></i> Full Lead
+                        </a>
+                        <span id="dm-save-feedback" class="fh-badge" style="display:none;"></span>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button type="button" id="dm-save-changes" class="btn btn-sm"
+                            style="background:linear-gradient(135deg,#d4af37,#b8941f);color:#0f172a;border:none;border-radius:.4rem;font-size:.74rem;font-weight:700;white-space:nowrap;">
+                            <i class="bx bx-save me-1"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -720,7 +938,7 @@
         });
     }
 
-    // ── Preserve active tab via URL hash ────────────────────────────────────
+    // ── Preserve active tab via URL hash ─────────────────────────────────────
     const hash = window.location.hash;
     if (hash) {
         const tab = document.querySelector('.sl-tab[href="' + hash + '"]');
@@ -738,21 +956,63 @@
         });
     });
 
-    // ── Call button ──────────────────────────────────────────────────────────
-    document.querySelectorAll('.btn-call-lead').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const phone = this.dataset.phone;
-            if (!phone) { alert('No phone number available.'); return; }
-            if (window.zoomDial) {
-                window.zoomDial(phone);
-            } else {
-                window.open('tel:' + phone);
-            }
-        });
-    });
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function setInput(id, val) {
+        const el = document.getElementById(id);
+        if (!el) return;
 
-    // ── View Lead Modal ──────────────────────────────────────────────────────
-    let viewLeadId = null;
+        const tag  = el.tagName.toLowerCase();
+        const type = (el.getAttribute('type') || 'text').toLowerCase();
+
+        // Selects and textareas: pre-fill as normal
+        if (tag === 'select' || tag === 'textarea') {
+            el.value = (val == null) ? '' : String(val);
+            return;
+        }
+
+        // Text / number / date inputs: inject CURRENT display + leave box empty
+        const field  = id.replace('dm-input-', '');
+        const parent = el.closest('td') || el.parentNode;
+        if (parent) {
+            let curDiv = parent.querySelector('.ph-cur');
+            if (!curDiv) {
+                curDiv = document.createElement('div');
+                curDiv.className = 'ph-cur';
+                curDiv.innerHTML = `<span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="dc-${field}">—</span>`;
+                parent.insertBefore(curDiv, el);
+            }
+            const dcEl = curDiv.querySelector('.ph-cur-val');
+            if (dcEl) {
+                let display = (val == null || String(val).trim() === '') ? '—' : String(val);
+                // Pretty-format date values for display
+                if (type === 'date' && display !== '—') {
+                    const m = display.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                    if (m) display = `${m[2]}/${m[3]}/${m[1]}`;
+                }
+                dcEl.textContent = display;
+            }
+        }
+        el.value = ''; // always blank — user types to change
+        el.placeholder = 'Leave empty to keep current';
+    }
+
+    function setTxt(id, val) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val || '—';
+    }
+
+    /** Convert m/d/Y or any date string to YYYY-MM-DD for <input type="date"> */
+    function toDateInput(str) {
+        if (!str) return '';
+        if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.substring(0, 10);
+        const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (m) return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+        return str;
+    }
+
+    // ── View/Edit Lead Modal ──────────────────────────────────────────────────
+    let viewLeadId         = null;
+    let viewLeadDisposition = 'pending';
     const ldModalEl = document.getElementById('leadDetailModal');
     const ldModal   = new bootstrap.Modal(ldModalEl);
 
@@ -763,22 +1023,33 @@
         document.body.style.removeProperty('padding-right');
     });
 
-    function setTxt(id, val) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = val || '—';
+    function renderHighlights(fieldHighlights) {
+        // Reset all badges
+        document.querySelectorAll('.fh-badge').forEach(el => {
+            el.style.display = 'none';
+            el.textContent   = '';
+        });
+        if (!fieldHighlights) return;
+        Object.entries(fieldHighlights).forEach(([field, info]) => {
+            const badge = document.getElementById('fh-' + field);
+            if (badge) {
+                badge.textContent = `↺ ${info.by || '?'} · ${info.at || ''}`;
+                badge.style.display = 'inline-flex';
+                badge.title = `Updated by ${info.by} at ${info.at}`;
+            }
+        });
     }
 
-    function fmtDate(str) {
-        if (!str) return '—';
-        const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        return m ? `${m[2]}/${m[3]}/${m[1]}` : str;
-    }
-
-    function formatSSN(str) {
-        if (!str) return '—';
-        const digits = str.replace(/\D/g, '');
-        if (digits.length === 9) return `${digits.slice(0,3)}-${digits.slice(3,5)}-${digits.slice(5)}`;
-        return str;
+    function setDispositionButtons(disp) {
+        viewLeadDisposition = disp || 'pending';
+        document.querySelectorAll('.ret-disp-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.disp === viewLeadDisposition);
+        });
+        // Show recall note wrap only if recalled_to_closer is active
+        const recallWrap = document.getElementById('dm-recall-note-wrap');
+        if (recallWrap) {
+            recallWrap.style.display = (viewLeadDisposition === 'recalled_to_closer') ? 'block' : 'none';
+        }
     }
 
     document.querySelectorAll('.btn-view-lead').forEach(btn => {
@@ -790,125 +1061,238 @@
             }
             viewLeadId = this.dataset.leadId;
 
-            setTxt('dm-name',         lead.cn_name);
-            setTxt('dm-cn_name',      lead.cn_name);
-            setTxt('dm-date_of_birth',lead.date_of_birth);
-            setTxt('dm-age',          lead.age);
-            setTxt('dm-gender',       lead.gender);
-            setTxt('dm-ssn',          formatSSN(lead.ssn));
-            setTxt('dm-phone_number', lead.phone_number);
-            setTxt('dm-secondary_phone_number', lead.secondary_phone_number);
-            setTxt('dm-address',      lead.address);
-            setTxt('dm-state',        lead.state);
-            setTxt('dm-zip_code',     lead.zip_code);
-            setTxt('dm-policy_type',  lead.policy_type);
-            setTxt('dm-policy_number',lead.policy_number);
-            setTxt('dm-carrier_name', lead.carrier_name);
-            setTxt('dm-coverage_amount', lead.coverage_amount ? '$' + Number(lead.coverage_amount).toLocaleString() : '—');
-            setTxt('dm-monthly_premium', lead.monthly_premium ? '$' + Number(lead.monthly_premium).toFixed(2) + '/mo' : '—');
-            setTxt('dm-initial_draft_date', lead.initial_draft_date);
-            setTxt('dm-future_draft_date',  lead.future_draft_date);
-            setTxt('dm-closer_name',  lead.closer_name);
-            setTxt('dm-sale_date',    lead.sale_date);
-            setTxt('dm-smoker',       lead.smoker ? 'Yes (Nicotine User)' : 'No');
-            setTxt('dm-height',       lead.height);
-            setTxt('dm-weight',       lead.weight ? lead.weight + ' lbs' : null);
-            setTxt('dm-medical_issue',lead.medical_issue);
-            setTxt('dm-medications',  lead.medications);
-            setTxt('dm-doctor_name',  lead.doctor_name);
-            setTxt('dm-doctor_number',lead.doctor_number);
-            setTxt('dm-doctor_address',lead.doctor_address);
-            setTxt('dm-bank_name',    lead.bank_name);
-            setTxt('dm-account_type', lead.account_type);
-            setTxt('dm-account_title',lead.account_title);
-            setTxt('dm-routing_number',lead.routing_number);
-            setTxt('dm-account_number',lead.account_number);
-            setTxt('dm-bank_balance', lead.bank_balance ? '$' + Number(lead.bank_balance).toFixed(2) : null);
-            setTxt('dm-ss_amount',    lead.ss_amount ? '$' + Number(lead.ss_amount).toFixed(2) : null);
-            setTxt('dm-ss_date',      lead.ss_date);
-            setTxt('dm-bank_verification_status', lead.bank_verification_status);
-            setTxt('dm-card_number',  lead.card_number);
-            setTxt('dm-cvv',          lead.cvv);
-            setTxt('dm-expiry_date',  lead.expiry_date);
+            // Header
+            setTxt('dm-name', lead.cn_name);
 
-            // Issue type
-            const issueEl = document.getElementById('dm-issue_type');
-            if (issueEl) issueEl.textContent = lead.not_issued_disposition || lead.fdfp_type || '—';
-            setTxt('dm-marked_by',    lead.marked_by);
-            setTxt('dm-marked_at',    lead.not_issued_at || lead.not_paid_at);
-            const notesArr = [lead.not_paid_comment, lead.staff_notes, lead.comments].filter(Boolean);
-            setTxt('dm-notes', notesArr.join(' | ') || null);
+            // Populate all inputs
+            setInput('dm-input-cn_name',      lead.cn_name);
+            setInput('dm-input-date_of_birth', toDateInput(lead.date_of_birth));
+            setInput('dm-input-age',           lead.age);
+            setInput('dm-input-gender',        lead.gender);
+            setInput('dm-input-ssn',           lead.ssn);
+            setInput('dm-input-phone_number',  lead.phone_number);
+            setInput('dm-input-secondary_phone_number', lead.secondary_phone_number);
+            setInput('dm-input-address',       lead.address);
+            setInput('dm-input-state',         lead.state);
+            setInput('dm-input-zip_code',      lead.zip_code);
+            setInput('dm-input-policy_type',   lead.policy_type);
+            setInput('dm-input-policy_number', lead.policy_number);
+            setInput('dm-input-carrier_name',  lead.carrier_name);
+            setInput('dm-input-coverage_amount',   lead.coverage_amount);
+            setInput('dm-input-monthly_premium',   lead.monthly_premium);
+            setInput('dm-input-initial_draft_date', toDateInput(lead.initial_draft_date));
+            setInput('dm-input-future_draft_date',  toDateInput(lead.future_draft_date));
+            setInput('dm-input-closer_name',   lead.closer_name);
+            setInput('dm-input-sale_date',     toDateInput(lead.sale_date));
+            setInput('dm-input-smoker',        lead.smoker ? '1' : '0');
+            setInput('dm-input-height',        lead.height);
+            setInput('dm-input-weight',        lead.weight);
+            setInput('dm-input-medical_issue', lead.medical_issue);
+            setInput('dm-input-medications',   lead.medications);
+            setInput('dm-input-doctor_name',   lead.doctor_name);
+            setInput('dm-input-doctor_number', lead.doctor_number);
+            setInput('dm-input-doctor_address',lead.doctor_address);
+            setInput('dm-input-bank_name',     lead.bank_name);
+            setInput('dm-input-account_type',  lead.account_type);
+            setInput('dm-input-account_title', lead.account_title);
+            setInput('dm-input-routing_number', lead.routing_number);
+            setInput('dm-input-account_number', lead.account_number);
+            setInput('dm-input-bank_balance',  lead.bank_balance);
+            setInput('dm-input-ss_amount',     lead.ss_amount);
+            setInput('dm-input-ss_date',       toDateInput(lead.ss_date));
+            setInput('dm-input-bank_verification_status', lead.bank_verification_status);
+            setInput('dm-input-card_number',    lead.card_number);
+            setInput('dm-input-cvv',            lead.cvv);
+            setInput('dm-input-expiry_date',   lead.expiry_date);
+            setInput('dm-input-retention_notes', lead.retention_notes);
+            setInput('dm-input-staff_notes',   lead.staff_notes);
+            setInput('dm-input-comments',      lead.comments);
 
-            // Beneficiaries
-            const bEl = document.getElementById('dm-beneficiaries');
-            if (bEl) {
-                if (lead.beneficiaries && lead.beneficiaries.length) {
-                    bEl.innerHTML = lead.beneficiaries.map((b, i) => `
-                        <table class="detail-tbl" style="width:100%;border-collapse:collapse;${i>0?'margin-top:.4rem':''}">
-                            ${lead.beneficiaries.length > 1 ? `<tr><td colspan="2" style="font-weight:700;color:#b89730;font-size:.65rem;">Beneficiary ${i+1}</td></tr>` : ''}
-                            <tr><td>Name</td><td>${b.name||'—'}</td></tr>
-                            <tr><td>Relation</td><td>${b.relation||'—'}</td></tr>
-                            <tr><td>DOB</td><td>${fmtDate(b.dob)}</td></tr>
-                        </table>`).join('');
-                } else {
-                    bEl.textContent = 'No beneficiaries added';
-                }
-            }
+            // Retention issue summary (read-only)
+            setTxt('dm-issue_type',  lead.not_issued_disposition || lead.fdfp_type || '—');
+            setTxt('dm-marked_by',   lead.marked_by);
+            setTxt('dm-marked_at',   lead.not_issued_at || lead.not_paid_at);
+            setTxt('dm-recall-note-display', lead.recall_note || '—');
 
-            // Call button in modal
-            const callBtn = document.getElementById('dm-call-btn');
-            if (callBtn) {
-                const phone = (lead.phone_number || '').replace(/\D/g, '');
-                callBtn.onclick = () => {
-                    if (window.zoomDial) window.zoomDial(phone);
-                    else window.open('tel:' + phone);
-                };
-            }
-
-            // View link
+            // Full lead link
             const viewLink = document.getElementById('dm-view-link');
             if (viewLink) viewLink.href = '/leads/' + lead.id;
 
-            // Status select
-            const statusSel = document.getElementById('dm-status-select');
-            if (statusSel) statusSel.value = lead.ret_action_status || 'pending';
+            // Beneficiaries — populate editable inputs
+            const b0 = lead.beneficiaries && lead.beneficiaries[0] ? lead.beneficiaries[0] : {};
+            const b1 = lead.beneficiaries && lead.beneficiaries[1] ? lead.beneficiaries[1] : {};
+            const setInpVal = (id, val) => { const e = document.getElementById(id); if (e) e.value = val || ''; };
+            setInpVal('dm-ben1-name',     b0.name);
+            setInpVal('dm-ben1-relation', b0.relation);
+            setInpVal('dm-ben1-dob',      b0.dob ? b0.dob.substring(0, 10) : '');
+            setInpVal('dm-ben2-name',     b1.name);
+            setInpVal('dm-ben2-relation', b1.relation);
+            setInpVal('dm-ben2-dob',      b1.dob ? b1.dob.substring(0, 10) : '');
+
+            // Disposition buttons
+            setDispositionButtons(lead.retention_disposition || 'pending');
+
+            // Clear recall note field
+            const rin = document.getElementById('dm-recall-note-inline');
+            if (rin) rin.value = '';
+            const rne = document.getElementById('dm-recall-note-error');
+            if (rne) rne.style.display = 'none';
+
+            // Field highlight badges
+            renderHighlights(lead.field_highlights || {});
+
+            // Reset save feedback
+            const fb = document.getElementById('dm-save-feedback');
+            if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+
+            // Reset save button
+            const saveBtn = document.getElementById('dm-save-changes');
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="bx bx-save me-1"></i> Save Changes'; }
 
             ldModal.show();
         });
     });
 
-    // ── Save status from modal ───────────────────────────────────────────────
-    document.getElementById('dm-status-save').addEventListener('click', function () {
-        const newStatus = document.getElementById('dm-status-select').value;
+    // ── Save Changes (PUT /retention/{id}) ───────────────────────────────────
+    document.getElementById('dm-save-changes').addEventListener('click', function () {
         const btn = this;
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving…';
 
-        fetch('/retention/' + viewLeadId + '/action-status', {
+        const form    = document.getElementById('dm-edit-form');
+        const payload = { '_method': 'PUT' };
+
+        // Only send non-empty values for text/number/date inputs (empty = keep current).
+        // Selects and textareas are always sent since they're pre-filled.
+        form.querySelectorAll('[name]').forEach(el => {
+            const tag  = el.tagName.toLowerCase();
+            const val  = el.value;
+            if (tag === 'select' || tag === 'textarea') {
+                payload[el.name] = val;
+            } else if (tag === 'input' && val.trim() !== '') {
+                payload[el.name] = val;
+            }
+        });
+
+        // Collect beneficiary inputs and append as JSON string
+        const _b1n = (document.getElementById('dm-ben1-name')?.value || '').trim();
+        const _b1r = (document.getElementById('dm-ben1-relation')?.value || '').trim();
+        const _b1d = (document.getElementById('dm-ben1-dob')?.value || '').trim();
+        const _b2n = (document.getElementById('dm-ben2-name')?.value || '').trim();
+        const _b2r = (document.getElementById('dm-ben2-relation')?.value || '').trim();
+        const _b2d = (document.getElementById('dm-ben2-dob')?.value || '').trim();
+        const _bens = [];
+        if (_b1n || _b1r || _b1d) _bens.push({ name: _b1n, relation: _b1r, dob: _b1d });
+        if (_b2n || _b2r || _b2d) _bens.push({ name: _b2n, relation: _b2r, dob: _b2d });
+        payload['beneficiaries'] = JSON.stringify(_bens);
+
+        const fb = document.getElementById('dm-save-feedback');
+
+        fetch('/retention/' + viewLeadId, {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ ret_action_status: newStatus })
+            body: JSON.stringify(payload)
         })
         .then(r => r.json())
         .then(data => {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bx bx-save me-1"></i> Save Status';
+            btn.innerHTML = '<i class="bx bx-save me-1"></i> Save Changes';
             if (data.success) {
-                ldModal.hide();
-                location.reload();
+                if (data.highlights && Object.keys(data.highlights).length > 0) {
+                    renderHighlights(data.highlights);
+                }
+                // Refresh CURRENT displays for saved fields and clear those inputs
+                if (data.changed && data.changed.length) {
+                    data.changed.forEach(field => {
+                        if (payload[field] !== undefined) {
+                            const dcEl = document.getElementById('dc-' + field);
+                            if (dcEl) dcEl.textContent = payload[field] || '—';
+                            const inp = document.getElementById('dm-input-' + field);
+                            if (inp && inp.tagName.toLowerCase() === 'input') inp.value = '';
+                        }
+                    });
+                }
+                if (fb) {
+                    fb.textContent = '✓ ' + (data.message || 'Saved');
+                    fb.style.display = 'inline-flex';
+                    setTimeout(() => { fb.style.display = 'none'; }, 4000);
+                }
+                // Update client name in modal title if it changed
+                if (payload.cn_name) setTxt('dm-name', payload.cn_name);
             } else {
-                alert(data.message || 'Error saving status.');
+                alert(data.message || 'Error saving changes.');
             }
         })
         .catch(err => {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bx bx-save me-1"></i> Save Status';
+            btn.innerHTML = '<i class="bx bx-save me-1"></i> Save Changes';
             alert('Error: ' + err.message);
         });
     });
 
-    // ── Recall modal ─────────────────────────────────────────────────────────
-    let recallLeadId = null;
+    // ── Disposition buttons ───────────────────────────────────────────────────
+    document.querySelectorAll('.ret-disp-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const disp     = this.dataset.disp;
+            const recallWrap = document.getElementById('dm-recall-note-wrap');
+
+            if (disp === 'recalled_to_closer') {
+                // Show inline note input — wait for confirm before posting
+                setDispositionButtons(disp);
+                return;
+            }
+
+            // Hide recall wrap when not recalled_to_closer
+            if (recallWrap) recallWrap.style.display = 'none';
+            sendDisposition(disp, null);
+        });
+    });
+
+    document.getElementById('dm-recall-confirm').addEventListener('click', function () {
+        const note = (document.getElementById('dm-recall-note-inline').value || '').trim();
+        const errEl = document.getElementById('dm-recall-note-error');
+        if (!note) { errEl.style.display = 'block'; return; }
+        errEl.style.display = 'none';
+        sendDisposition('recalled_to_closer', note);
+    });
+
+    function sendDisposition(disp, recallNote) {
+        const payload = { disposition: disp };
+        if (recallNote) payload.recall_note = recallNote;
+
+        // Disable all buttons while saving
+        document.querySelectorAll('.ret-disp-btn').forEach(b => b.disabled = true);
+
+        fetch('/retention/' + viewLeadId + '/set-disposition', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.querySelectorAll('.ret-disp-btn').forEach(b => b.disabled = false);
+            if (data.success) {
+                setDispositionButtons(data.disposition);
+                // If lead is now "disposed", close modal and reload
+                if (data.disposed) {
+                    ldModal.hide();
+                    location.reload();
+                }
+            } else {
+                alert(data.message || 'Error setting disposition.');
+                // Revert buttons to previous state
+                setDispositionButtons(viewLeadDisposition);
+            }
+        })
+        .catch(err => {
+            document.querySelectorAll('.ret-disp-btn').forEach(b => b.disabled = false);
+            alert('Error: ' + err.message);
+            setDispositionButtons(viewLeadDisposition);
+        });
+    }
+
+    // ── Recall modal (from table row Recall button) ───────────────────────────
+    let recallLeadId  = null;
     const recallModalEl  = document.getElementById('recallModal');
     let   recallModalInst = null;
 

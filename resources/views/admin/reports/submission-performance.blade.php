@@ -486,14 +486,14 @@ $grandTotal = $grandTotalSales;
                         $avgSale  = $row->total_sales > 0 ? $row->total_premium / $row->total_sales : 0;
                         $hasRev   = $row->total_revenue > 0;
 
-                        /* Build drilldown URL */
+                        /* Build drilldown URL — use text values so merged rows always match */
                         $pcParams = ['date_from' => $dateFrom, 'date_to' => $dateTo];
-                        if ($row->insurance_carrier_id) $pcParams['carrier'] = $row->insurance_carrier_id;
-                        if ($row->partner_id)           $pcParams['partner'] = $row->partner_id;
+                        if ($row->carrier_name)     $pcParams['carrier_name']     = $row->carrier_name;
+                        $pcParams['assigned_partner'] = $row->assigned_partner ?? '';
                         $pcUrl = route('settings.reports.submission-performance.drilldown', $pcParams);
 
-                        /* Partner badge variant */
-                        $badgeClass = $row->partner_id ? $badgeVariants[$row->partner_id % count($badgeVariants)] : 'sp-pb-none';
+                        /* Partner badge variant — hash from text since partner_id may be absent */
+                        $badgeClass = $row->assigned_partner ? $badgeVariants[abs(crc32($row->assigned_partner)) % count($badgeVariants)] : 'sp-pb-none';
                     @endphp
                     <tr class="sp-row" onclick="window.location='{{ $pcUrl }}'">
                         {{-- Rank --}}

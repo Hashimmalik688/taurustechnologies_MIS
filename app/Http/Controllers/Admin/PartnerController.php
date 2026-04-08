@@ -188,22 +188,22 @@ class PartnerController extends Controller
                 continue;
             }
 
-            // Get carrier-level commission rates
-            $carrierLevelPct = $settlementLevel[$carrierId] ?? null;
-            $carrierGradedPct = $settlementGraded[$carrierId] ?? null;
-            $carrierGiPct = $settlementGi[$carrierId] ?? null;
-            $carrierModifiedPct = $settlementModified[$carrierId] ?? null;
-
             foreach ($states as $state) {
+                // Rates may be keyed by [carrierId][state] or just [carrierId] (scalar fallback)
+                $levelRaw    = $settlementLevel[$carrierId]    ?? null;
+                $gradedRaw   = $settlementGraded[$carrierId]   ?? null;
+                $giRaw       = $settlementGi[$carrierId]       ?? null;
+                $modifiedRaw = $settlementModified[$carrierId] ?? null;
+
                 AgentCarrierState::create([
-                    'partner_id' => $partner->id,
-                    'user_id' => null, // Partners don't have user_id
-                    'insurance_carrier_id' => $carrierId,
-                    'state' => $state,
-                    'settlement_level_pct' => $carrierLevelPct,
-                    'settlement_graded_pct' => $carrierGradedPct,
-                    'settlement_gi_pct' => $carrierGiPct,
-                    'settlement_modified_pct' => $carrierModifiedPct,
+                    'partner_id'              => $partner->id,
+                    'user_id'                 => null,
+                    'insurance_carrier_id'    => $carrierId,
+                    'state'                   => $state,
+                    'settlement_level_pct'    => is_array($levelRaw)    ? ($levelRaw[$state]    ?? null) : $levelRaw,
+                    'settlement_graded_pct'   => is_array($gradedRaw)   ? ($gradedRaw[$state]   ?? null) : $gradedRaw,
+                    'settlement_gi_pct'       => is_array($giRaw)       ? ($giRaw[$state]       ?? null) : $giRaw,
+                    'settlement_modified_pct' => is_array($modifiedRaw) ? ($modifiedRaw[$state] ?? null) : $modifiedRaw,
                 ]);
             }
         }

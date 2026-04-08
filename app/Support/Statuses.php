@@ -157,6 +157,38 @@ class Statuses
     ];
 
     // ═══════════════════════════════════════════════════════════════════
+    //  Retention Disposition  (leads.retention_disposition — snake_case)
+    //  Replaces ret_action_status in the Retention Management UI.
+    //  All values except 'pending' are considered "disposed" (hidden from active list).
+    // ═══════════════════════════════════════════════════════════════════
+
+    public const RET_DISP_PENDING             = 'pending';
+    public const RET_DISP_RETAINED            = 'retained';
+    public const RET_DISP_RESOLD              = 'resold';
+    public const RET_DISP_REWRITE             = 'rewrite';
+    public const RET_DISP_RECALLED_TO_CLOSER  = 'recalled_to_closer';
+    public const RET_DISP_CANCELLED           = 'cancelled';
+
+    /** Human-readable labels for retention dispositions */
+    public const RETENTION_DISPOSITIONS = [
+        self::RET_DISP_PENDING            => 'Pending',
+        self::RET_DISP_RETAINED           => 'Retained',
+        self::RET_DISP_RESOLD             => 'Resold',
+        self::RET_DISP_REWRITE            => 'Rewrite',
+        self::RET_DISP_RECALLED_TO_CLOSER => 'Recalled to Closer',
+        self::RET_DISP_CANCELLED          => 'Cancelled',
+    ];
+
+    /** Disposition values that are "disposed" — hidden from the active retention list */
+    public const RETENTION_DISPOSED_STATUSES = [
+        self::RET_DISP_RETAINED,
+        self::RET_DISP_RESOLD,
+        self::RET_DISP_REWRITE,
+        self::RET_DISP_RECALLED_TO_CLOSER,
+        self::RET_DISP_CANCELLED,
+    ];
+
+    // ═══════════════════════════════════════════════════════════════════
     //  Bank Verification Status  (leads.bank_verification_status — Title Case)
     // ═══════════════════════════════════════════════════════════════════
 

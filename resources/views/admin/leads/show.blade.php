@@ -180,6 +180,20 @@
     50% { box-shadow: 0 0 0 4px rgba(52,195,143,0); }
 }
 
+/* Chargeback step */
+.ld-sp.s-chargeback {
+    background: rgba(220,53,69,.1);
+    color: #dc3545;
+    border-color: rgba(220,53,69,.25);
+    animation: spGlowRed 2.5s ease-in-out infinite;
+}
+.ld-sp.s-chargeback i.sp-icon { color: #dc3545; opacity: .9; }
+.ld-sp.s-chargeback .sp-check { display: inline; font-size: .6rem; color: #dc3545; }
+@keyframes spGlowRed {
+    0%,100% { box-shadow: 0 0 0 0 rgba(220,53,69,.15); }
+    50% { box-shadow: 0 0 0 4px rgba(220,53,69,0); }
+}
+
 /* ── Info Cards ── */
 .ld-card {
     background: var(--bs-card-bg);
@@ -311,6 +325,7 @@
             ['key'=>'followup',   'label'=>'Followup Done',       'icon'=>'mdi-phone-check'],
             ['key'=>'draft',      'label'=>'Pending Draft',       'icon'=>'mdi-clock-check-outline'],
             ['key'=>'paid',       'label'=>'Paid',                'icon'=>'mdi-cash-check'],
+            ['key'=>'chargeback', 'label'=>'Sent to Chargeback',  'icon'=>'mdi-alert-circle-outline', 'danger'=>true],
         ];
 
         $done = [];
@@ -347,12 +362,19 @@
         if ($insurance->paid_at) {
             $done[] = 'sale'; $done[] = 'validated'; $done[] = 'submission'; $done[] = 'contract'; $done[] = 'issued'; $done[] = 'followup'; $done[] = 'draft'; $done[] = 'paid';
         }
+        // Chargeback
+        if ($insurance->status === 'chargeback') {
+            $done[] = 'chargeback';
+        }
 
         $done = array_unique($done);
         $currentStep = null;
         foreach ($steps as $s) {
+            // Never treat a "danger" branch step as the current active step
+            if (!empty($s['danger'])) continue;
             if (!in_array($s['key'], $done)) { $currentStep = $s['key']; break; }
         }
+        $isChargeback = $insurance->status === 'chargeback';
     @endphp
 
     {{-- ══ HERO BANNER ══ --}}
@@ -397,14 +419,20 @@
         <div class="ld-stepper">
             @foreach($steps as $step)
                 @php
+                    $isDanger = !empty($step['danger']);
+                    // Hide the chargeback step entirely for non-chargeback leads
+                    if ($isDanger && !$isChargeback) continue;
+
                     $isDone = in_array($step['key'], $done);
                     $isCurr = $step['key'] === $currentStep;
                     $isFuture = !empty($step['future']);
-                    $cls = $isDone ? 's-done' : ($isCurr ? 's-current' : ($isFuture ? 's-future' : ''));
+                    // Danger steps (chargeback) always render red when reached
+                    $cls = ($isDanger && $isChargeback) ? 's-chargeback' : ($isDone ? 's-done' : ($isCurr ? 's-current' : ($isFuture ? 's-future' : '')));
                 @endphp
                 <span class="ld-sp {{ $cls }}">
                     <span class="sp-check">
-                        @if($isDone) <i class="mdi mdi-check-bold"></i>
+                        @if($isDanger) <i class="mdi mdi-alert-circle" style="color:#dc3545;"></i>
+                        @elseif($isDone) <i class="mdi mdi-check-bold"></i>
                         @elseif($isCurr) <i class="mdi mdi-dots-horizontal"></i>
                         @endif
                     </span>

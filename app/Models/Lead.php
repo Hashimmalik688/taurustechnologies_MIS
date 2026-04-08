@@ -79,12 +79,16 @@ class Lead extends Model
         'retention_status',
         'retained_at',
         'chargeback_marked_date',
+        'chargeback_marked_by_id',
+        'chargeback_paid_at',
+        'chargeback_paid_by_id',
         'is_rewrite',
         'retention_notes',
         'retention_officer_id',
         'ret_action_status',
         'ret_action_updated_at',
         'ret_action_updated_by',
+        'retention_disposition',
 
         // QA fields
         'qa_status',
@@ -216,6 +220,7 @@ class Lead extends Model
         // Accounting Ledger links
         'ledger_journal_entry_id',
         'ledger_sales_return_entry_id',
+        'ledger_chargeback_paid_entry_id',
 
         // Policy Died
         'policy_died_reason',
@@ -252,6 +257,7 @@ class Lead extends Model
         'future_draft_date' => 'date',
         'ss_date' => 'date',
         'chargeback_marked_date' => 'datetime',
+        'chargeback_paid_at'     => 'datetime',
         'retained_at' => 'datetime',
         'smoker' => 'boolean',
         'is_rewrite' => 'boolean',
@@ -294,6 +300,7 @@ class Lead extends Model
         'not_paid_at'              => 'datetime',
         'paid_at'                  => 'datetime',
         'policy_died_at'           => 'datetime',
+        'chargeback_paid_at'       => 'datetime',
     ];
 
     /**
@@ -573,10 +580,28 @@ class Lead extends Model
         return $this->belongsTo(User::class, 'recall_requested_by');
     }
 
+    /** Field-level highlight records (cross-page updated indicator) */
+    public function fieldHighlights()
+    {
+        return $this->hasMany(LeadFieldHighlight::class)->with('updatedBy');
+    }
+
     /** Manager/Finance who marked lead as Paid */
     public function paidBy()
     {
         return $this->belongsTo(User::class, 'paid_by_id');
+    }
+
+    /** User who marked this lead as chargeback */
+    public function chargebackMarkedBy()
+    {
+        return $this->belongsTo(User::class, 'chargeback_marked_by_id');
+    }
+
+    /** User who marked the chargeback as recovered/paid */
+    public function chargebackPaidBy()
+    {
+        return $this->belongsTo(User::class, 'chargeback_paid_by_id');
     }
 
     /** The accounting journal entry created when this paid sale was posted to the ledger */
@@ -589,6 +614,12 @@ class Lead extends Model
     public function ledgerSalesReturnEntry()
     {
         return $this->belongsTo(\App\Models\LedgerJournalEntry::class, 'ledger_sales_return_entry_id');
+    }
+
+    /** The chargeback recovery journal entry posted when a chargebacked lead is marked paid */
+    public function ledgerChargebackPaidEntry()
+    {
+        return $this->belongsTo(\App\Models\LedgerJournalEntry::class, 'ledger_chargeback_paid_entry_id');
     }
 
     /** User who marked lead as Policy Died */

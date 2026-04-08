@@ -1449,9 +1449,10 @@ class ReportController extends Controller
             'monthly_premium', 'settlement_type', 'policy_type', 'state'
         )->get();
 
-        // Group by carrier+partner, aggregating with dynamic revenue
+        // Group by carrier name + assigned_partner text so rows always merge by display value,
+        // regardless of whether the partner_id FK is populated on each lead.
         $carriersData = $leads
-            ->groupBy(fn ($l) => ($l->insurance_carrier_id ?? 'null') . '_' . ($l->partner_id ?? 'null'))
+            ->groupBy(fn ($l) => trim(strtolower($l->carrier_name ?? '')) . '||' . trim(strtolower($l->assigned_partner ?? '')))
             ->map(function ($group) {
                 $first        = $group->first();
                 $totalRevenue = 0;
@@ -1461,7 +1462,6 @@ class ReportController extends Controller
                 return (object) [
                     'insurance_carrier_id' => $first->insurance_carrier_id,
                     'carrier_name'         => $first->carrier_name,
-                    'partner_id'           => $first->partner_id,
                     'assigned_partner'     => $first->assigned_partner,
                     'total_sales'          => $group->count(),
                     'total_premium'        => $group->sum('monthly_premium'),
@@ -1492,16 +1492,16 @@ class ReportController extends Controller
     {
         $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
-        $carrierId = $request->get('carrier');
-        $partnerId = $request->get('partner');
+        $carrierName    = $request->get('carrier_name');
+        $assignedPartner = $request->get('assigned_partner');
 
         $query = Lead::whereNotNull('pending_contract_at')
             ->whereNotNull('closer_name');
 
-        if ($dateFrom)  $query->whereDate('sale_date', '>=', $dateFrom);
-        if ($dateTo)    $query->whereDate('sale_date', '<=', $dateTo);
-        if ($carrierId) $query->where('insurance_carrier_id', $carrierId);
-        if ($partnerId) $query->where('partner_id', $partnerId);
+        if ($dateFrom)        $query->whereDate('sale_date', '>=', $dateFrom);
+        if ($dateTo)          $query->whereDate('sale_date', '<=', $dateTo);
+        if ($carrierName)     $query->where('carrier_name', $carrierName);
+        if ($assignedPartner !== null) $query->where('assigned_partner', $assignedPartner ?: null);
 
         $rawLeads = $query->select(
                 'id', 'cn_name', 'carrier_name', 'assigned_partner',
@@ -1536,7 +1536,7 @@ class ReportController extends Controller
             'hasRevCount', 'noRevCount',
             'carrierLabel', 'partnerLabel',
             'dateFrom', 'dateTo',
-            'carrierId', 'partnerId'
+            'carrierName', 'assignedPartner'
         ));
     }
 

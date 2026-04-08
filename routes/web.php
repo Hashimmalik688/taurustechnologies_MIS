@@ -307,6 +307,7 @@ Route::group(['prefix' => 'pending-draft', 'as' => 'pending-draft.', 'middleware
 Route::group(['prefix' => 'paid-sales', 'as' => 'paid-sales.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PaidSalesController::class, 'index'])->name('index')->middleware('role.permission:paid-sales,view');
     Route::post('/{id}/mark-chargeback', [PaidSalesController::class, 'markChargeback'])->name('markChargeback')->middleware('role.permission:paid-sales,edit');
+    Route::post('/{id}/mark-chargeback-paid', [PaidSalesController::class, 'markChargebackPaid'])->name('markChargebackPaid')->middleware('role.permission:accounting,edit');
     Route::post('/{id}/post-to-ledger', [PaidSalesController::class, 'postToLedger'])->name('postToLedger')->middleware('role.permission:accounting,edit');
     Route::post('/post-all-to-ledger', [PaidSalesController::class, 'postAllToLedger'])->name('postAllToLedger')->middleware('role.permission:accounting,edit');
 });
@@ -597,6 +598,9 @@ Route::group(['prefix' => 'admin/accounting', 'as' => 'admin.accounting.', 'midd
     Route::get('/sales-ledger', [LedgerJournalController::class, 'salesLedger'])->name('sales-ledger')->middleware('role.permission:accounting,view');
     Route::get('/sales-ledger/{partnerId}', [LedgerJournalController::class, 'salesLedgerPartner'])->name('sales-ledger.partner')->middleware('role.permission:accounting,view');
 
+    // Sales Returns sub-ledger (separate page)
+    Route::get('/sales-returns', [LedgerJournalController::class, 'salesReturnLedger'])->name('sales-returns')->middleware('role.permission:accounting,view');
+
     // Journal Entries list + detail
     Route::get('/journal', [LedgerJournalController::class, 'index'])->name('journal.index')->middleware('role.permission:accounting,view');
     Route::get('/journal/create', [LedgerJournalController::class, 'createGeneral'])->name('journal.create')->middleware('role.permission:accounting,edit');
@@ -844,6 +848,7 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
 Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [ChargebackController::class, 'index'])->name('index')->middleware('role.permission:chargebacks,view');
     Route::get('/show/{id}', [ChargebackController::class, 'show'])->name('show')->middleware('role.permission:chargebacks,view');
+    Route::post('/{id}/send-to-retention', [ChargebackController::class, 'sendToRetention'])->name('sendToRetention')->middleware('role.permission:chargebacks,view');
 });
 
 // Retention — access controlled by role.permission:retention,level
@@ -856,6 +861,8 @@ Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['a
     Route::get('/check-other-insurances/{id}', [RetentionController::class, 'checkOtherInsurances'])->name('checkOtherInsurances')->middleware('role.permission:retention,view');
     Route::post('/{id}/recall-to-closer', [RetentionController::class, 'recallToCloser'])->name('recallToCloser')->middleware('role.permission:retention,edit');
     Route::post('/{id}/action-status', [RetentionController::class, 'updateActionStatus'])->name('updateActionStatus')->middleware('role.permission:retention,edit');
+    Route::put('/{id}', [RetentionController::class, 'update'])->name('update')->middleware('role.permission:retention,edit');
+    Route::post('/{id}/set-disposition', [RetentionController::class, 'setDisposition'])->name('setDisposition')->middleware('role.permission:retention,edit');
 });
 
 // Retention Officer Dashboard

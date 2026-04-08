@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Lead;
+use App\Models\LeadFieldHighlight;
 use App\Support\Statuses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,8 +78,8 @@ class RetentionController extends Controller
             return $query;
         };
 
-        // Disposed = fixed / cancelled / recalled
-        $disposedStatuses = Statuses::RET_DISPOSED_STATUSES;
+        // Disposed = all retention_disposition values except 'pending'
+        $disposedStatuses = Statuses::RETENTION_DISPOSED_STATUSES;
 
         // NOT ISSUED base scope
         $niBase = Lead::whereNotNull('not_issued_at')
@@ -94,52 +95,49 @@ class RetentionController extends Controller
         // A lead is "recalled" if recall_requested_at is set OR ret_action_status = 'recalled'.
         // A lead is "pending" only when it has no ret_action_status (or = 'pending') AND is NOT recalled.
         $kpi = [];
-        foreach (array_keys(Statuses::RET_ACTION_STATUSES) as $s) {
-            if ($s === 'recalled') {
-                $kpi[$s] = $niBase->clone()->where(fn($q) => $q->whereNotNull('recall_requested_at')->orWhere('ret_action_status', 'recalled'))->count()
-                         + $npBase->clone()->where(fn($q) => $q->whereNotNull('recall_requested_at')->orWhere('ret_action_status', 'recalled'))->count();
-            } elseif ($s === 'pending') {
-                $kpi[$s] = $niBase->clone()->where(fn($q) => $q->whereNull('ret_action_status')->orWhere('ret_action_status', 'pending'))->whereNull('recall_requested_at')->count()
-                         + $npBase->clone()->where(fn($q) => $q->whereNull('ret_action_status')->orWhere('ret_action_status', 'pending'))->whereNull('recall_requested_at')->count();
+        foreach (array_keys(Statuses::RETENTION_DISPOSITIONS) as $s) {
+            if ($s === 'pending') {
+                $kpi[$s] = $niBase->clone()->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'))->count()
+                         + $npBase->clone()->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'))->count();
             } else {
-                $kpi[$s] = $niBase->clone()->where('ret_action_status', $s)->count()
-                         + $npBase->clone()->where('ret_action_status', $s)->count();
+                $kpi[$s] = $niBase->clone()->where('retention_disposition', $s)->count()
+                         + $npBase->clone()->where('retention_disposition', $s)->count();
             }
         }
 
         // ----- Active counts (filter for the counts KPI numbers above the tabs) -----
         $not_issued_count = $applyFilters($niBase->clone())
-            ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
+            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
             ->count();
         $not_paid_count   = $applyNpFilters($npBase->clone())
-            ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses))
+            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
             ->count();
 
         // ----- Table queries -----
         if ($disposed) {
             // Show disposed leads
-            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
-                ->whereIn('ret_action_status', $disposedStatuses);
-            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->whereIn('retention_disposition', $disposedStatuses);
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
                 ->whereNull('paid_at')
                 ->whereNull('policy_died_at')
-                ->whereIn('ret_action_status', $disposedStatuses);
+                ->whereIn('retention_disposition', $disposedStatuses);
         } else {
             // Show active (non-disposed) leads
-            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
-                ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses));
-            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy'])
+                ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
                 ->whereNull('paid_at')
                 ->whereNull('policy_died_at')
-                ->where(fn($q) => $q->whereNull('ret_action_status')->orWhereNotIn('ret_action_status', $disposedStatuses));
+                ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
         }
 
         $ni_query = $applyFilters($ni_query);
@@ -152,6 +150,8 @@ class RetentionController extends Controller
             ->where('expires_at', '>', now())
             ->exists();
 
+        $retentionDispositions = Statuses::RETENTION_DISPOSITIONS;
+
         return view('admin.retention.index', compact(
             'not_issued_leads',
             'not_paid_leads',
@@ -159,7 +159,7 @@ class RetentionController extends Controller
             'not_paid_count',
             'kpi',
             'disposed',
-            'hasZoomToken',
+            'retentionDispositions',
             'search',
             'month',
             'year',
@@ -470,6 +470,155 @@ class RetentionController extends Controller
         }
         
         return 0;
+    }
+
+    /**
+     * Update all editable lead fields from the Retention Management modal.
+     * Detects changed fields, saves them to lead_field_highlights for cross-page badges.
+     */
+    public function update(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+
+        $fillable = [
+            'cn_name', 'phone_number', 'secondary_phone_number', 'date_of_birth',
+            'age', 'gender', 'ssn', 'address', 'state', 'zip_code',
+            'policy_type', 'policy_number', 'carrier_name', 'coverage_amount',
+            'monthly_premium', 'initial_draft_date', 'future_draft_date',
+            'closer_name', 'sale_date',
+            'smoker', 'height', 'weight', 'medical_issue', 'medications',
+            'doctor_name', 'doctor_number', 'doctor_address',
+            'bank_name', 'account_type', 'account_title', 'routing_number',
+            'account_number', 'bank_balance', 'ss_amount', 'ss_date',
+            'bank_verification_status', 'card_number', 'cvv', 'expiry_date',
+            'beneficiaries', 'staff_notes', 'comments', 'retention_notes',
+        ];
+
+        $request->validate([
+            'cn_name'       => 'nullable|string|max:255',
+            'phone_number'  => 'nullable|string|max:30',
+            'coverage_amount'  => 'nullable|numeric|min:0',
+            'monthly_premium'  => 'nullable|numeric|min:0',
+            'bank_balance'     => 'nullable|numeric|min:0',
+            'ss_amount'        => 'nullable|numeric|min:0',
+            'beneficiaries'    => 'nullable|json',
+            'smoker'           => 'nullable|boolean',
+        ]);
+
+        $changedFields = [];
+        $oldValues     = [];
+        $newValues     = [];
+
+        foreach ($fillable as $field) {
+            if (!$request->has($field)) continue;
+
+            $newVal = $request->input($field);
+            $oldVal = $lead->{$field};
+
+            // Normalize for comparison (cast to string)
+            $oldStr = is_null($oldVal) ? '' : (string) $oldVal;
+            $newStr = is_null($newVal) ? '' : (string) $newVal;
+
+            if ($oldStr !== $newStr) {
+                $changedFields[]       = $field;
+                $oldValues[$field]     = $oldVal;
+                $newValues[$field]     = $newVal;
+                $lead->{$field}        = $newVal;
+            }
+        }
+
+        if (empty($changedFields)) {
+            return response()->json(['success' => true, 'message' => 'No changes detected.', 'changed' => []]);
+        }
+
+        $lead->save();
+
+        // Upsert highlight records
+        $now = now();
+        foreach ($changedFields as $field) {
+            LeadFieldHighlight::updateOrCreate(
+                ['lead_id' => $lead->id, 'field_name' => $field],
+                ['updated_by_id' => Auth::id(), 'updated_at' => $now]
+            );
+        }
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Retention — Edit Lead Fields',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode($oldValues),
+            'new_values' => json_encode($newValues),
+            'ip_address' => $request->ip(),
+        ]);
+
+        // Return highlights map: field => {by, at}
+        $highlightsMap = [];
+        foreach ($changedFields as $field) {
+            $highlightsMap[$field] = [
+                'by' => Auth::user()->name,
+                'at' => $now->format('m/d/Y h:i A'),
+            ];
+        }
+
+        return response()->json([
+            'success'    => true,
+            'message'    => count($changedFields) . ' field(s) updated.',
+            'changed'    => $changedFields,
+            'highlights' => $highlightsMap,
+        ]);
+    }
+
+    /**
+     * Set the retention disposition for a lead.
+     * Replaces the old ret_action_status workflow in the UI.
+     */
+    public function setDisposition(Request $request, int $id)
+    {
+        $validDispositions = array_keys(Statuses::RETENTION_DISPOSITIONS);
+
+        $request->validate([
+            'disposition' => 'required|in:' . implode(',', $validDispositions),
+            'recall_note' => 'required_if:disposition,recalled_to_closer|nullable|string|max:1000',
+        ]);
+
+        $lead = Lead::findOrFail($id);
+        $old  = $lead->retention_disposition;
+
+        $lead->retention_disposition = $request->disposition;
+
+        // When recalled to closer, also populate the recall fields
+        if ($request->disposition === Statuses::RET_DISP_RECALLED_TO_CLOSER) {
+            $lead->recall_requested_at = now();
+            $lead->recall_requested_by = Auth::id();
+            $lead->recall_note         = $request->recall_note;
+            $lead->ret_action_status   = 'recalled'; // keep legacy field in sync
+        }
+
+        $lead->ret_action_updated_at = now();
+        $lead->ret_action_updated_by = Auth::id();
+        $lead->save();
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Retention — Set Disposition',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['retention_disposition' => $old]),
+            'new_values' => json_encode(['retention_disposition' => $request->disposition]),
+            'ip_address' => $request->ip(),
+        ]);
+
+        $label    = Statuses::RETENTION_DISPOSITIONS[$request->disposition] ?? $request->disposition;
+        $disposed = in_array($request->disposition, Statuses::RETENTION_DISPOSED_STATUSES);
+
+        return response()->json([
+            'success'     => true,
+            'message'     => "Disposition set to \"$label\".",
+            'disposition' => $request->disposition,
+            'label'       => $label,
+            'disposed'    => $disposed,
+        ]);
     }
 
     /**

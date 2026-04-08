@@ -252,8 +252,8 @@ body { background: var(--acct-surface); }
     {{-- ── All Sales Entries (flat table) ────────────────────────────── --}}
     <div class="sl-card mt-4">
         <div class="sl-card-header">
-            <span class="sl-card-title"><i class="bx bx-list-ul"></i> All Credit Entries</span>
-            <span style="font-size:.75rem;color:var(--acct-muted)">{{ number_format($allEntriesTotal) }} entries (sales &amp; returns)</span>
+            <span class="sl-card-title"><i class="bx bx-list-ul"></i> All Sales Entries</span>
+            <span style="font-size:.75rem;color:var(--acct-muted)">{{ number_format($allEntriesTotal) }} entries &nbsp;·&nbsp; <a href="{{ route('admin.accounting.sales-returns') }}" style="color:var(--acct-gold);text-decoration:none">View Sales Returns &rarr;</a></span>
         </div>
         @if($allEntries->count())
         <div style="overflow-x:auto">
@@ -262,7 +262,7 @@ body { background: var(--acct-surface); }
                     <tr>
                         <th>Entry #</th>
                         <th>Date</th>
-                        <th>Type</th>
+                        <th>Status</th>
                         <th>Insured / Description</th>
                         <th class="text-end">Amount</th>
                         <th>Reference</th>
@@ -272,7 +272,7 @@ body { background: var(--acct-surface); }
                 </thead>
                 <tbody>
                     @foreach($allEntries as $je)
-                    @php $isSale = $je->type === 'sale'; @endphp
+                    @php $hasReturn = isset($returnedLeads[$je->id]); @endphp
                     <tr>
                         <td>
                             <a href="{{ route('admin.accounting.journal.show', $je->id) }}"
@@ -285,22 +285,25 @@ body { background: var(--acct-surface); }
                             {{ \Carbon\Carbon::parse($je->entry_date)->format('d M Y') }}
                         </td>
                         <td>
-                            @if($isSale)
-                                <span style="background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700">Sale</span>
-                            @else
-                                <span style="background:#fee2e2;color:#b91c1c;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700">Return</span>
+                            <span style="background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 8px;font-size:.72rem;font-weight:700">Sale</span>
+                            @if($hasReturn)
+                                <a href="{{ route('admin.accounting.sales-returns') }}"
+                                   title="This sale has a chargeback / sales return recorded"
+                                   style="background:#fee2e2;color:#b91c1c;border-radius:4px;padding:2px 7px;font-size:.72rem;font-weight:700;text-decoration:none;display:inline-block;margin-left:3px">
+                                    <i class="bx bx-undo" style="font-size:.8rem"></i> Returned
+                                </a>
                             @endif
                         </td>
                         <td>
                             @if($je->insured_name)
                                 <div style="font-weight:600;font-size:.84rem">{{ $je->insured_name }}</div>
                             @endif
-                            <div style="font-size:.75rem;color:var(--acct-muted)" class="text-truncate" style="max-width:260px">
+                            <div style="font-size:.75rem;color:var(--acct-muted);word-break:break-word;white-space:normal;">
                                 {{ $je->description }}
                             </div>
                         </td>
-                        <td class="text-end num-cell {{ $isSale ? 'num-dr' : 'num-neg' }}">
-                            {{ $isSale ? '' : '-' }}${{ number_format($je->total_debit, 2) }}
+                        <td class="text-end num-cell num-dr">
+                            ${{ number_format($je->total_debit, 2) }}
                         </td>
                         <td style="font-size:.78rem;color:var(--acct-muted)">{{ $je->reference ?? '—' }}</td>
                         <td style="font-size:.78rem;color:var(--acct-muted)">{{ $je->creator?->name ?? '—' }}</td>

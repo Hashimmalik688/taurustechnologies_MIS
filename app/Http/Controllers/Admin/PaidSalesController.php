@@ -8,6 +8,7 @@ use App\Models\Lead;
 use App\Models\Partner;
 use App\Services\CommissionCalculationService;
 use App\Services\LedgerService;
+use App\Traits\CommissionResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class PaidSalesController extends Controller
 {
+    use CommissionResolver;
+
     public function index(Request $request)
     {
         $search    = $request->get('search');
@@ -37,10 +40,11 @@ class PaidSalesController extends Controller
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('cn_name',      'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%")
-                  ->orWhere('carrier_name', 'like', "%{$search}%")
-                  ->orWhere('closer_name',  'like', "%{$search}%");
+                $q->where('cn_name',       'like', "%{$search}%")
+                  ->orWhere('phone_number',  'like', "%{$search}%")
+                  ->orWhere('carrier_name',  'like', "%{$search}%")
+                  ->orWhere('closer_name',   'like', "%{$search}%")
+                  ->orWhere('policy_number', 'like', "%{$search}%");
             });
         }
 
@@ -52,11 +56,15 @@ class PaidSalesController extends Controller
             $query->where('partner_id', $partnerId);
         }
 
-        if ($dateFrom) {
-            $query->whereDate('sale_date', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $query->whereDate('sale_date', '<=', $dateTo);
+        // Skip date filters when a search term is active so searching by
+        // policy number (or name) returns results regardless of date range.
+        if (!$search) {
+            if ($dateFrom) {
+                $query->whereDate('sale_date', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $query->whereDate('sale_date', '<=', $dateTo);
+            }
         }
 
         // Stats — KPI totals must reflect ALL filtered leads, not just the current page.
@@ -84,6 +92,9 @@ class PaidSalesController extends Controller
         // Unposted count (for "Post All" button badge)
         $unpostedCount = (clone $query)->whereNull('ledger_journal_entry_id')->count();
 
+        // Chargeback count — paid leads that were later chargebacked
+        $chargebackCount = (clone $query)->where('status', 'chargeback')->count();
+
         // Annotate each paginated row with its calculated values
         foreach ($leads as $lead) {
             $c = $this->calcLeadCommission($lead, $commissionService);
@@ -94,7 +105,7 @@ class PaidSalesController extends Controller
         return view('admin.paid-sales.index', compact(
             'leads', 'carriers', 'partners', 'search', 'carrier', 'partnerId',
             'dateFrom', 'dateTo',
-            'totalCount', 'totalCommission', 'totalOurShare', 'unpostedCount'
+            'totalCount', 'totalCommission', 'totalOurShare', 'unpostedCount', 'chargebackCount'
         ));
     }
 
@@ -113,13 +124,24 @@ class PaidSalesController extends Controller
             return response()->json(['success' => false, 'message' => 'Lead is already marked as chargeback.'], 422);
         }
 
+        // A sale must be posted to the ledger before it can be chargebacked —
+        // the sales return entry is the double-entry reversal of the original sale.
+        if (!$lead->ledger_journal_entry_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This sale has not been posted to the ledger yet. Post it to the ledger before marking as Chargeback.',
+            ], 422);
+        }
+
         $lead->status                = \App\Support\Statuses::LEAD_CHARGEBACK;
         $lead->retention_status      = \App\Support\Statuses::RETENTION_PENDING;
+        $lead->chargeback_marked_by_id = \Illuminate\Support\Facades\Auth::id();
         // chargeback_marked_date is auto-set by the model boot observer
         $lead->save();
 
         // Auto-post a Sales Return entry to the accounting ledger
-        if ($lead->ledger_journal_entry_id && !$lead->ledger_sales_return_entry_id && $lead->partner_id) {
+        // (the guard above already ensures ledger_journal_entry_id is set)
+        if (!$lead->ledger_sales_return_entry_id && $lead->partner_id) {
             try {
                 $ledger  = app(LedgerService::class);
                 $calc    = $this->calcLeadCommission($lead, app(CommissionCalculationService::class));
@@ -309,41 +331,78 @@ class PaidSalesController extends Controller
         ]);
     }
 
-    // ── Private helpers ─────────────────────────────────────────────────────
-
     /**
-     * Resolve the policy type string from a lead's settlement_type / policy_type.
-     * Returns one of: 'gi', 'graded', 'modified', 'level'.
+     * Mark a chargebacked lead as recovered/paid.
+     *
+     * When a partner pays back a chargebacked commission, record a recovery entry:
+     *   Dr  1200 Accounts Receivable  (partner owes us — reinstated)
+     *   Cr  4100 Sales Income         (income recovered on the date of recovery)
+     *
+     * The original sales return entry is kept intact for the full audit trail.
      */
-    private function resolveCommissionType(Lead $lead): string
+    public function markChargebackPaid(Request $request, int $id)
     {
-        $raw = strtolower(trim($lead->settlement_type ?: $lead->policy_type ?: ''));
-        if (str_contains($raw, 'g.i') || str_contains($raw, 'gi')) return 'gi';
-        if (str_contains($raw, 'grad'))                             return 'graded';
-        if (str_contains($raw, 'modif'))                            return 'modified';
-        return 'level';
-    }
+        $lead = Lead::with('partner', 'insuranceCarrier')->findOrFail($id);
 
-    /**
-     * Calculate commission totals for a lead.
-     * Returns ['commission' => float, 'our_share' => float, 'our_share_pct' => float].
-     */
-    private function calcLeadCommission(Lead $lead, CommissionCalculationService $commSvc): array
-    {
-        $result     = $commSvc->calculateCommission(
-            $lead->partner_id ?? 0,
-            $lead->insurance_carrier_id ?? 0,
-            $lead->state ?? '',
-            $this->resolveCommissionType($lead),
-            (float) ($lead->monthly_premium ?? 0)
-        );
-        $commission  = $result['success'] ? (float) ($result['commission'] ?? 0) : 0;
-        $ourSharePct = $lead->partner ? (float) ($lead->partner->our_commission_percentage ?? 15.0) : 15.0;
+        if ($lead->status !== \App\Support\Statuses::LEAD_CHARGEBACK) {
+            return response()->json(['success' => false, 'message' => 'Lead is not in Chargeback status.'], 422);
+        }
 
-        return [
-            'commission'    => round($commission, 2),
-            'our_share'     => round($commission * ($ourSharePct / 100), 2),
-            'our_share_pct' => $ourSharePct,
-        ];
+        if ($lead->ledger_chargeback_paid_entry_id) {
+            return response()->json(['success' => false, 'message' => 'Chargeback recovery has already been recorded.'], 422);
+        }
+
+        if (!$lead->ledger_sales_return_entry_id) {
+            return response()->json(['success' => false, 'message' => 'No Sales Return entry found for this chargeback.'], 422);
+        }
+
+        try {
+            $ledger  = app(LedgerService::class);
+            $commSvc = app(CommissionCalculationService::class);
+            $calc    = $this->calcLeadCommission($lead, $commSvc);
+
+            $ourShare    = $calc['our_share'];
+            $commission  = $calc['commission'];
+            $ourSharePct = $calc['our_share_pct'];
+
+            if ($ourShare <= 0) {
+                return response()->json(['success' => false, 'message' => 'Calculated share is $0 — cannot record recovery.'], 422);
+            }
+
+            $description = "Chargeback Recovery — {$lead->cn_name}" .
+                ($lead->carrier_name ? " | {$lead->carrier_name}" : '') .
+                ($lead->policy_number ? " | #{$lead->policy_number}" : '');
+
+            $recoveryEntry = $ledger->createChargebackRecoveryEntry(
+                partnerId:       $lead->partner_id,
+                amount:          $ourShare,
+                date:            now()->toDateString(),
+                description:     $description,
+                reference:       $lead->policy_number,
+                carrierId:       $lead->insurance_carrier_id,
+                insuredName:     $lead->cn_name,
+                grossAmount:     $commission,
+                sharePercentage: $ourSharePct,
+                leadId:          $lead->id
+            );
+
+            $lead->ledger_chargeback_paid_entry_id = $recoveryEntry->id;
+            $lead->chargeback_paid_at  = now();
+            $lead->chargeback_paid_by_id = \Illuminate\Support\Facades\Auth::id();
+            $lead->saveQuietly();
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'Chargeback recovery posted: ' . $recoveryEntry->entry_number,
+                'entry_number' => $recoveryEntry->entry_number,
+                'amount'       => number_format($ourShare, 2),
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('PaidSales markChargebackPaid error', [
+                'lead_id' => $id,
+                'error'   => $e->getMessage(),
+            ]);
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 }

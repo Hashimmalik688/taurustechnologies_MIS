@@ -149,6 +149,26 @@
     }
     .sl-act-group .btn:hover { transform: scale(1.1); box-shadow: 0 3px 10px rgba(0,0,0,.15); }
     .sl-act-group .btn-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .sl-act-mark-paid {
+        display: inline-flex; align-items: center; gap: .25rem;
+        font-size: .63rem; font-weight: 600; cursor: pointer;
+        padding: .28rem .55rem; border-radius: .35rem;
+        background: rgba(5,150,105,.12); color: #059669;
+        border: 1px solid rgba(5,150,105,.3);
+        transition: all .15s; white-space: nowrap;
+    }
+    .sl-act-mark-paid:hover { background: rgba(5,150,105,.22); }
+    .sl-act-mark-paid:disabled { opacity: .5; cursor: not-allowed; }
+    .sl-act-send-retention {
+        display: inline-flex; align-items: center; gap: .25rem;
+        font-size: .63rem; font-weight: 600; cursor: pointer;
+        padding: .28rem .55rem; border-radius: .35rem;
+        background: rgba(14,165,233,.1); color: #0ea5e9;
+        border: 1px solid rgba(14,165,233,.35);
+        transition: all .15s; white-space: nowrap;
+    }
+    .sl-act-send-retention:hover { background: rgba(14,165,233,.22); }
+    .sl-act-send-retention:disabled { opacity: .5; cursor: not-allowed; }
 
     /* Badges */
     .sl-tbl .badge { font-size: .68rem; font-weight: 600; padding: .25rem .55rem; border-radius: 22px; }
@@ -219,6 +239,14 @@
             <h5 class="sl-page-title"><i class="bx bx-error"></i> Chargebacks</h5>
         </div>
         <div class="sl-topbar-right">
+            <!-- Policy number search (bypasses date filters) -->
+            <form method="GET" action="{{ route('chargebacks.index') }}" id="policySearchForm" class="sl-search-wrap" style="margin-right:.25rem;">
+                <i class="bx bx-file-find sl-search-icon"></i>
+                <input type="text" name="policy_search" id="cbPolicySearch"
+                    class="sl-search-input" placeholder="Policy # search..."
+                    value="{{ $policySearch ?? '' }}"
+                    style="width:160px;border-color:{{ ($policySearch ?? '') ? '#d4af37' : '' }}">
+            </form>
             <div class="sl-search-wrap">
                 <i class="bx bx-search sl-search-icon"></i>
                 <input type="text" id="cbSearch" class="sl-search-input" placeholder="Search name, phone, carrier, closer..." value="{{ $search }}">
@@ -269,8 +297,13 @@
             <input type="date" name="date_from" class="sl-pill-date" value="{{ request('date_from') }}" onchange="this.form.submit()">
             <span class="sl-pill-label">TO</span>
             <input type="date" name="date_to" class="sl-pill-date" value="{{ request('date_to') }}" onchange="this.form.submit()">
-            @if(request()->hasAny(['search', 'month', 'year', 'date_from', 'date_to']))
+            @if(request()->hasAny(['search', 'month', 'year', 'date_from', 'date_to', 'policy_search']))
                 <a href="{{ route('chargebacks.index') }}" class="sl-pill-clear" title="Clear filters"><i class="bx bx-x"></i> Clear</a>
+            @endif
+            @if($policySearch ?? null)
+                <span style="font-size:.68rem;font-weight:600;color:#d4af37;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);padding:.25rem .6rem;border-radius:22px;">
+                    <i class="bx bx-file-find"></i> Policy: {{ $policySearch }}
+                </span>
             @endif
             <span class="sl-result-count">{{ $chargebacks->total() }} chargebacks</span>
         </form>
@@ -280,6 +313,7 @@
                 <thead>
                     <tr>
                         <th style="min-width:100px">Sale Date</th>
+                        <th style="min-width:120px">Policy #</th>
                         <th style="min-width:150px">Customer</th>
                         <th style="min-width:120px">Closer</th>
                         <th style="min-width:120px">Agent Assigned</th>
@@ -287,13 +321,20 @@
                         <th style="min-width:120px">CB Amount</th>
                         <th style="min-width:180px">Comments</th>
                         <th style="min-width:180px">Manager Reason</th>
-                        <th style="min-width:70px">Actions</th>
+                        <th style="min-width:110px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($chargebacks as $lead)
-                        <tr>
+                        <tr style="background:rgba(220,53,69,.03);">
                             <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : 'N/A' }}</td>
+                            <td>
+                                @if($lead->policy_number)
+                                    <span style="font-size:.72rem;font-weight:600;color:#334155;">{{ $lead->policy_number }}</span>
+                                @else
+                                    <span class="text-muted" style="font-size:.72rem;">—</span>
+                                @endif
+                            </td>
                             <td>
                                 <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
                                 <br><small class="text-muted">{{ $lead->phone_number ?? '' }}</small>
@@ -305,16 +346,64 @@
                             <td><span class="text-muted" style="font-size:.74rem">{{ Str::limit($lead->comments ?? 'No reason provided', 50) }}</span></td>
                             <td><span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span></td>
                             <td>
+                                {{-- Audit trail --}}
+                                <div style="font-size:.68rem;color:#64748b;margin-bottom:.4rem;line-height:1.65;">
+                                    @if($lead->chargeback_marked_date)
+                                        <div>
+                                            <i class="bx bx-flag" style="color:#dc3545;"></i>
+                                            <span style="color:#dc3545;font-weight:600;">Marked:</span>
+                                            {{ $lead->chargeback_marked_date->format('M d, Y H:i') }}
+                                            @if($lead->chargebackMarkedBy)
+                                                <br><span style="padding-left:1rem;">by {{ $lead->chargebackMarkedBy->name }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    @if($lead->chargeback_paid_at)
+                                        <div style="margin-top:.15rem;">
+                                            <i class="bx bx-check-circle" style="color:#059669;"></i>
+                                            <span style="color:#059669;font-weight:600;">Paid:</span>
+                                            {{ $lead->chargeback_paid_at->format('M d, Y H:i') }}
+                                            @if($lead->chargebackPaidBy)
+                                                <br><span style="padding-left:1rem;">by {{ $lead->chargebackPaidBy->name }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                                {{-- Action buttons --}}
                                 <div class="sl-act-group">
                                     <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View Details" target="_blank">
                                         <i class="bx bx-show"></i>
                                     </a>
                                 </div>
+                                @if(!$lead->ledger_chargeback_paid_entry_id)
+                                    <button class="sl-act-mark-paid mt-1"
+                                        data-id="{{ $lead->id }}"
+                                        data-name="{{ $lead->cn_name }}"
+                                        title="Mark chargeback as recovered/paid">
+                                        <i class="bx bx-dollar-circle"></i> Mark Paid
+                                    </button>
+                                @else
+                                    <span style="font-size:.62rem;color:#059669;font-weight:600;display:block;margin-top:.2rem;">
+                                        <i class="bx bx-check-circle"></i> Recovered
+                                    </span>
+                                @endif
+                                {{-- Send to Retention --}}
+                                <button class="sl-act-send-retention mt-1"
+                                    data-id="{{ $lead->id }}"
+                                    data-name="{{ $lead->cn_name }}"
+                                    data-not-issued-disp="{{ $lead->not_issued_disposition ?? '' }}"
+                                    data-not-issued-comment="{{ $lead->not_issued_comment ?? '' }}"
+                                    data-not-paid-type="{{ $lead->not_paid_fdfp_type ?? '' }}"
+                                    data-not-paid-disp="{{ $lead->not_paid_manual_disposition ?? '' }}"
+                                    data-not-paid-comment="{{ $lead->not_paid_comment ?? '' }}"
+                                    title="Send this lead to the Retention team">
+                                    <i class="bx bx-transfer-alt"></i> Retention
+                                </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <i class="bx bx-info-circle" style="font-size:2rem;color:#94a3b8"></i>
                                 <p class="mb-0 text-muted" style="font-size:.82rem">No chargebacks found for the selected period</p>
                             </td>
@@ -324,7 +413,7 @@
                 @if($chargebacks->count() > 0)
                     <tfoot>
                         <tr>
-                            <td colspan="5" class="text-end">Total:</td>
+                            <td colspan="6" class="text-end">Total:</td>
                             <td><span class="badge bg-danger">${{ number_format($total_amount, 2) }}</span></td>
                             <td colspan="3"></td>
                         </tr>
@@ -334,15 +423,79 @@
         </div>
 
         <div class="mt-3">
-            {{ $chargebacks->appends(['search' => $search, 'month' => $month, 'year' => $year, 'date_from' => $date_from ?? '', 'date_to' => $date_to ?? ''])->links() }}
+            {{ $chargebacks->appends(['search' => $search, 'policy_search' => $policySearch ?? '', 'month' => $month, 'year' => $year, 'date_from' => $date_from ?? '', 'date_to' => $date_to ?? ''])->links() }}
         </div>
     </div>
 @endsection
+
+{{-- ═══════════════ SEND TO RETENTION MODAL ═══════════════ --}}
+<div class="modal fade" id="retentionModal" tabindex="-1" aria-labelledby="retentionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#0f172a;color:#fff;">
+                <h5 class="modal-title" id="retentionModalLabel">
+                    <i class="bx bx-transfer-alt me-2"></i>Send to Retention
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3" style="font-size:.82rem;color:#64748b;">
+                    Sending <strong id="ret_lead_name"></strong> to Retention. Review existing dispositions below, then add any additional notes before confirming.
+                </p>
+
+                {{-- Not Issued section --}}
+                <div id="ret_not_issued_section" style="display:none;margin-bottom:.85rem;">
+                    <div style="background:rgba(220,53,69,.06);border-left:3px solid #dc3545;padding:.65rem .85rem;border-radius:4px;">
+                        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#dc3545;margin-bottom:.3rem;">Not Issued Disposition</div>
+                        <div style="font-size:.82rem;color:#334155;font-weight:600;" id="ret_not_issued_disp"></div>
+                        <div style="font-size:.78rem;color:#64748b;margin-top:.2rem;" id="ret_not_issued_comment"></div>
+                    </div>
+                </div>
+
+                {{-- Not Paid section --}}
+                <div id="ret_not_paid_section" style="display:none;margin-bottom:.85rem;">
+                    <div style="background:rgba(245,158,11,.06);border-left:3px solid #f59e0b;padding:.65rem .85rem;border-radius:4px;">
+                        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;margin-bottom:.3rem;">Not Paid (FDFP)</div>
+                        <div style="font-size:.82rem;color:#334155;">
+                            <span id="ret_not_paid_type" style="font-weight:600;"></span>
+                            <span id="ret_not_paid_disp" style="margin-left:.4rem;"></span>
+                        </div>
+                        <div style="font-size:.78rem;color:#64748b;margin-top:.2rem;" id="ret_not_paid_comment"></div>
+                    </div>
+                </div>
+
+                {{-- No dispositions notice --}}
+                <div id="ret_no_disp_notice" style="display:none;margin-bottom:.85rem;">
+                    <div style="background:rgba(100,116,139,.06);border-left:3px solid #94a3b8;padding:.65rem .85rem;border-radius:4px;font-size:.8rem;color:#64748b;">
+                        <i class="bx bx-info-circle me-1"></i>No prior Not Issued or Not Paid disposition recorded for this lead.
+                    </div>
+                </div>
+
+                {{-- Additional notes --}}
+                <div class="mb-1">
+                    <label style="font-size:.78rem;font-weight:600;color:#334155;" for="ret_notes">
+                        Additional Notes <span style="font-weight:400;color:#94a3b8;">(optional)</span>
+                    </label>
+                    <textarea id="ret_notes" class="form-control mt-1" rows="3"
+                        placeholder="Add any notes for the Retention team…"
+                        style="font-size:.82rem;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="retentionSubmitBtn" class="btn btn-primary btn-sm">
+                    <i class="bx bx-transfer-alt me-1"></i> Send to Retention
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section('script')
 @include('partials.sl-filter-assets')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ── Main search (name/phone/carrier/closer) ──
     const searchInput = document.getElementById('cbSearch');
     let debounceTimer;
     if (searchInput) {
@@ -356,6 +509,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     hidden.type = 'hidden'; hidden.name = 'search';
                     form.appendChild(hidden);
                 }
+                // Clear policy search when using main search
+                let policyHidden = form.querySelector('input[name="policy_search"]');
+                if (policyHidden) policyHidden.value = '';
                 hidden.value = this.value.trim();
                 form.submit();
             }, 600);
@@ -364,6 +520,135 @@ document.addEventListener('DOMContentLoaded', function() {
             searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
         }
     }
+
+    // ── Policy number search (debounced, bypasses date filters) ──
+    const policyInput = document.getElementById('cbPolicySearch');
+    let policyTimer;
+    if (policyInput) {
+        policyInput.addEventListener('input', function() {
+            clearTimeout(policyTimer);
+            policyTimer = setTimeout(() => {
+                document.getElementById('policySearchForm').submit();
+            }, 600);
+        });
+        if (policyInput.value) {
+            policyInput.setSelectionRange(policyInput.value.length, policyInput.value.length);
+        }
+    }
+
+    // ── Send to Retention ──
+    const retentionModal = new bootstrap.Modal(document.getElementById('retentionModal'));
+    let retentionLeadId = null;
+
+    document.querySelectorAll('.sl-act-send-retention').forEach(btn => {
+        btn.addEventListener('click', function() {
+            retentionLeadId = this.dataset.id;
+            document.getElementById('ret_lead_name').textContent = this.dataset.name;
+            document.getElementById('ret_notes').value = '';
+
+            const notIssuedDisp    = (this.dataset.notIssuedDisp    || '').trim();
+            const notIssuedComment = (this.dataset.notIssuedComment || '').trim();
+            const notPaidType      = (this.dataset.notPaidType      || '').trim();
+            const notPaidDispVal   = (this.dataset.notPaidDisp      || '').trim();
+            const notPaidComment   = (this.dataset.notPaidComment   || '').trim();
+
+            const hasNotIssued = notIssuedDisp || notIssuedComment;
+            const hasNotPaid   = notPaidType   || notPaidDispVal || notPaidComment;
+
+            document.getElementById('ret_not_issued_section').style.display = hasNotIssued ? '' : 'none';
+            document.getElementById('ret_not_issued_disp').textContent     = notIssuedDisp;
+            document.getElementById('ret_not_issued_comment').textContent  = notIssuedComment;
+
+            document.getElementById('ret_not_paid_section').style.display = hasNotPaid ? '' : 'none';
+            document.getElementById('ret_not_paid_type').textContent    = notPaidType;
+            document.getElementById('ret_not_paid_disp').textContent    = notPaidDispVal;
+            document.getElementById('ret_not_paid_comment').textContent = notPaidComment;
+
+            document.getElementById('ret_no_disp_notice').style.display = (!hasNotIssued && !hasNotPaid) ? '' : 'none';
+
+            retentionModal.show();
+        });
+    });
+
+    document.getElementById('retentionSubmitBtn').addEventListener('click', function() {
+        if (!retentionLeadId) return;
+        const btn   = this;
+        const notes = document.getElementById('ret_notes').value;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Sending…';
+
+        fetch('/chargebacks/' + retentionLeadId + '/send-to-retention', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept':       'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notes: notes }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                retentionModal.hide();
+                const origBtn = document.querySelector('.sl-act-send-retention[data-id="' + retentionLeadId + '"]');
+                if (origBtn) {
+                    const badge = document.createElement('span');
+                    badge.style.cssText = 'font-size:.62rem;color:#0ea5e9;font-weight:600;display:block;margin-top:.2rem;';
+                    badge.innerHTML = '<i class="bx bx-check-circle"></i> Sent to Retention';
+                    origBtn.replaceWith(badge);
+                }
+                alert('✓ ' + (data.message || 'Lead sent to Retention.'));
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-transfer-alt me-1"></i> Send to Retention';
+                alert('Error: ' + (data.message || 'Could not process.'));
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-transfer-alt me-1"></i> Send to Retention';
+            alert('Network error. Please try again.');
+        });
+    });
+
+    // ── Mark as Paid (Chargeback Recovery) ──
+    document.querySelectorAll('.sl-act-mark-paid').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id   = this.dataset.id;
+            const name = this.dataset.name;
+            if (!confirm('Mark chargeback for "' + name + '" as Paid?\n\nThis will post a Chargeback Recovery entry to the accounting ledger.\nThe original Sales Return entry remains for audit.\n\nContinue?')) return;
+
+            this.disabled = true;
+            this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Processing...';
+
+            fetch('/paid-sales/' + id + '/mark-chargeback-paid', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest('td').querySelector('.sl-act-group') &&
+                        this.closest('td').querySelector('.sl-act-group').insertAdjacentHTML('afterend',
+                            '<span style="font-size:.62rem;color:#059669;font-weight:600;display:block;margin-top:.2rem;"><i class="bx bx-check-circle"></i> Recovered</span>');
+                    this.remove();
+                    alert('✓ ' + (data.message || 'Chargeback marked as recovered.'));
+                } else {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bx bx-dollar-circle"></i> Mark Paid';
+                    alert('Error: ' + (data.message || 'Could not process.'));
+                }
+            })
+            .catch(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bx bx-dollar-circle"></i> Mark Paid';
+                alert('Network error. Please try again.');
+            });
+        });
+    });
 });
 </script>
 @endsection

@@ -93,8 +93,7 @@ class LedgerService
      * Record a Sales Return (pipeline chargeback reversal).
      *
      * Dr  4200 Sales Returns / Chargebacks   (contra-revenue)
-     * Cr  1200 Accounts Receivable           (partner's AR is reduced)
-     *
+     * Cr  1200 Accounts Receivable           (partner's AR is reduced)     *
      * This is the correct double-entry reversal of a sale entry:
      *   Original sale:   Dr 1200 AR / Cr 4100 Sales
      *   Return entry:    Dr 4200 Returns / Cr 1200 AR
@@ -120,6 +119,43 @@ class LedgerService
         ];
 
         return $this->persist('sales_return', $date, $description, $reference, $lines, [
+            'insured_name'         => $insuredName,
+            'gross_amount'         => $grossAmount,
+            'our_share_percentage' => $sharePercentage,
+            'lead_id'              => $leadId,
+        ]);
+    }
+
+    /**
+     * Record a Chargeback Recovery (partner pays back a clawed-back commission).
+     *
+     * Dr  1200 Accounts Receivable  (partner owes us again — income reinstated)
+     * Cr  4100 Sales Income         (commission income recovered)
+     *
+     * The original sales return entry is kept intact for the full audit trail.
+     * The date is the date of recovery, not the original sale date.
+     */
+    public function createChargebackRecoveryEntry(
+        int    $partnerId,
+        float  $amount,
+        string $date,
+        string $description,
+        ?string $reference      = null,
+        ?int   $carrierId       = null,
+        ?string $insuredName    = null,
+        ?float $grossAmount     = null,
+        ?float $sharePercentage = null,
+        ?int   $leadId          = null
+    ): LedgerJournalEntry {
+        $ar    = $this->account(self::ACCOUNT_AR);
+        $sales = $this->account(self::ACCOUNT_SALES);
+
+        $lines = [
+            $this->line($ar->id,    $partnerId, $amount, 0,      $description, 1, $carrierId),
+            $this->line($sales->id, null,       0,       $amount, $description, 2),
+        ];
+
+        return $this->persist('chargeback_recovery', $date, $description, $reference, $lines, [
             'insured_name'         => $insuredName,
             'gross_amount'         => $grossAmount,
             'our_share_percentage' => $sharePercentage,

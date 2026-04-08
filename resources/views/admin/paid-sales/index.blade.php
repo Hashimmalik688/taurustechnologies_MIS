@@ -22,12 +22,16 @@
 .ex-tbl thead th{padding:.35rem .6rem;font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.3px;color:var(--bs-surface-500);white-space:nowrap;border-bottom:1px solid rgba(0,0,0,.07);}
 .ex-tbl tbody td{padding:.4rem .6rem;vertical-align:middle;border-bottom:1px solid rgba(0,0,0,.04);}
 .ex-tbl tbody tr:last-child td{border-bottom:0;}
+.ex-tbl tbody tr.tr-chargeback td{background:rgba(220,53,69,.04) !important;border-bottom-color:rgba(220,53,69,.08);}
+.ex-tbl tbody tr.tr-chargeback:hover td{background:rgba(220,53,69,.08) !important;}
+.ex-tbl tbody tr.tr-chargeback td:first-child{border-left:3px solid #dc3545;}
 .bd-paid{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.25);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;}
 .bd-posted{background:rgba(99,102,241,.12);color:#4338ca;border:1px solid rgba(99,102,241,.3);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;display:inline-flex;align-items:center;gap:.2rem;white-space:nowrap;}
 .bd-posted i{font-size:.7rem;}
 .btn-post-ledger{font-size:.62rem;background:rgba(99,102,241,.12);color:#4338ca;border:1px solid rgba(99,102,241,.3);}
 .btn-post-ledger:hover{background:rgba(99,102,241,.22);}
 .kpi-card.k-indigo{background:rgba(99,102,241,.06)}.kpi-card.k-indigo::before{background:linear-gradient(90deg,#6366f1,#818cf8)}.kpi-card.k-indigo .k-val{color:#4338ca}
+.kpi-card.k-red{background:rgba(220,53,69,.06)}.kpi-card.k-red::before{background:linear-gradient(90deg,#dc3545,#f56475)}.kpi-card.k-red .k-val{color:#dc3545}
 .a-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.28rem .55rem;border-radius:.35rem;font-size:.68rem;font-weight:500;border:1px solid transparent;cursor:pointer;text-decoration:none;transition:all .15s;}
 .filter-form{display:flex;flex-wrap:wrap;gap:.4rem;align-items:flex-end;padding:.65rem .75rem;border-bottom:1px solid rgba(0,0,0,.04);}
 .filter-form .form-control,.filter-form .form-select{font-size:.72rem;padding:.3rem .5rem;height:2rem;}
@@ -69,6 +73,10 @@
             <div class="k-val">{{ $unpostedCount }}</div>
             <div class="k-lbl">Not in Ledger</div>
         </div>
+        <a href="{{ route('chargebacks.index') }}" class="kpi-card k-red" style="text-decoration:none;" title="View all chargebacks">
+            <div class="k-val">{{ $chargebackCount }}</div>
+            <div class="k-lbl">Sent to Chargeback</div>
+        </a>
     </div>
 
     <div class="sec-card">
@@ -150,7 +158,7 @@
                 </thead>
                 <tbody>
                     @forelse($leads as $lead)
-                        <tr>
+                        <tr class="{{ $lead->status === 'chargeback' ? 'tr-chargeback' : '' }}">
                             <td style="color:var(--bs-surface-400);">{{ $lead->id }}</td>
                             <td>
                                 <a href="{{ route('issuance.show', $lead->id) }}" style="font-weight:500;font-size:.73rem;">
@@ -193,7 +201,13 @@
                                     —
                                 @endif
                             </td>
-                            <td><span class="bd-paid">Paid</span></td>
+                            <td>
+                                @if($lead->status === 'chargeback')
+                                    <span class="bd-paid" style="background:rgba(220,53,69,.12);color:#dc3545;border-color:rgba(220,53,69,.3);">Chargeback</span>
+                                @else
+                                    <span class="bd-paid">Paid</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($lead->ledger_journal_entry_id && $lead->ledgerJournalEntry)
                                     <a href="{{ route('admin.accounting.journal.show', $lead->ledger_journal_entry_id) }}" target="_blank"
@@ -215,12 +229,26 @@
                             <td>{{ $lead->paid_at ? $lead->paid_at->format('M d, Y') : '—' }}</td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
-                                    <button class="a-btn btn-chargeback" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.12);color:#dc3545;border-color:rgba(220,53,69,.3);">
-                                        <i class="bx bx-error"></i> Chargeback
-                                    </button>
-                                    <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(100,116,139,.1);color:#64748b;border-color:rgba(100,116,139,.25);">
-                                        <i class="bx bx-arrow-back"></i> Back
-                                    </button>
+                                    @if($lead->status === 'chargeback')
+                                        @if($lead->ledger_chargeback_paid_entry_id)
+                                            <span style="font-size:.63rem;background:rgba(5,150,105,.1);color:#059669;border:1px solid rgba(5,150,105,.3);border-radius:4px;padding:3px 8px;font-weight:600;">
+                                                <i class="bx bx-check-circle"></i> Recovered
+                                            </span>
+                                        @else
+                                            @canEditModule('accounting')
+                                            <button class="a-btn btn-chargeback-paid" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(5,150,105,.12);color:#059669;border-color:rgba(5,150,105,.3);">
+                                                <i class="bx bx-dollar"></i> Mark Paid
+                                            </button>
+                                            @endcanEditModule
+                                        @endif
+                                    @else
+                                        <button class="a-btn btn-chargeback" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(220,53,69,.12);color:#dc3545;border-color:rgba(220,53,69,.3);">
+                                            <i class="bx bx-error"></i> Chargeback
+                                        </button>
+                                        <button class="a-btn btn-send-back" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}" style="font-size:.63rem;background:rgba(100,116,139,.1);color:#64748b;border-color:rgba(100,116,139,.25);">
+                                            <i class="bx bx-arrow-back"></i> Back
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -401,6 +429,45 @@
             .catch(err => {
                 button.disabled = false;
                 button.innerHTML = '<i class="bx bx-arrow-back"></i> Back';
+                button.dataset.processing = 'false';
+                alert('Error: ' + err.message);
+            });
+        });
+    });
+
+    // ── Mark Chargeback as Paid (Recovery) ──
+    document.querySelectorAll('.btn-chargeback-paid').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.dataset.processing === 'true') return;
+            const id   = this.dataset.id;
+            const name = this.dataset.name;
+            this.dataset.processing = 'true';
+            if (!confirm('Mark chargeback for "' + name + '" as Paid?\n\nThis will post a Chargeback Recovery entry:\n  Dr 1200 Accounts Receivable\n  Cr 4100 Sales Income\n\nDated today (' + new Date().toLocaleDateString() + '). The original Sales Return remains for audit.')) {
+                this.dataset.processing = 'false';
+                return;
+            }
+            const button = this;
+            button.disabled = true;
+            button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+            fetch('/paid-sales/' + id + '/mark-chargeback-paid', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Recovery posted: ' + data.entry_number + ' ($' + data.amount + ')');
+                    location.reload();
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bx bx-dollar"></i> Mark Paid';
+                    button.dataset.processing = 'false';
+                    alert(data.message || 'Error recording recovery.');
+                }
+            })
+            .catch(err => {
+                button.disabled = false;
+                button.innerHTML = '<i class="bx bx-dollar"></i> Mark Paid';
                 button.dataset.processing = 'false';
                 alert('Error: ' + err.message);
             });

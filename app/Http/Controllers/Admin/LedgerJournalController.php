@@ -105,17 +105,23 @@ class LedgerJournalController extends Controller
 
         $partners = \App\Models\Partner::where('is_active', true)->orderBy('name')->get(['id','name','code']);
 
-        // ── All Sales / Sales-Return Entries (flat table) ──────────────────
+        // ── All Sales Entries (flat table — sales only, returns on separate page) ──
         $entryQuery = LedgerJournalEntry::with(['creator'])
-            ->whereIn('type', ['sale', 'sales_return'])
+            ->where('type', 'sale')
             ->orderByDesc('entry_date')
             ->orderByDesc('id');
 
         $allEntriesTotal = (clone $entryQuery)->count();
         $allEntries      = $entryQuery->paginate(50, ['*'], 'epage');
 
+        // Flag which entries have a corresponding sales return (chargebacked)
+        $entryIds      = $allEntries->pluck('id');
+        $returnedLeads = \App\Models\Lead::whereIn('ledger_journal_entry_id', $entryIds)
+            ->whereNotNull('ledger_sales_return_entry_id')
+            ->pluck('ledger_sales_return_entry_id', 'ledger_journal_entry_id');
+
         return view('admin.accounting.sales-ledger.index',
-            compact('partnersWithAR','totalDr','totalCr','totalBalance','partners','allEntries','allEntriesTotal'));
+            compact('partnersWithAR','totalDr','totalCr','totalBalance','partners','allEntries','allEntriesTotal','returnedLeads'));
     }
 
     public function salesLedgerPartner(Request $request, int $partnerId)
@@ -162,6 +168,86 @@ class LedgerJournalController extends Controller
 
         return view('admin.accounting.sales-ledger.partner',
             compact('partner','lines','totalDr','totalCr','closingBalance','carriers'));
+    }
+
+    /**
+     * Sales Returns sub-ledger — shows all 'sales_return' type entries.
+     * Each row links back to its originating lead for full context.
+     */
+    public function salesReturnLedger(Request $request)
+    {
+        $dateFrom  = $request->get('date_from');
+        $dateTo    = $request->get('date_to');
+        $partnerId = $request->get('partner_id');
+        $search    = $request->get('search');
+
+        if (!$dateFrom && !$dateTo) {
+            $dateFrom = now()->startOfYear()->toDateString();
+            $dateTo   = now()->toDateString();
+        }
+
+        $entryQuery = LedgerJournalEntry::with(['creator'])
+            ->where('type', 'sales_return');
+
+        if (!$search) {
+            if ($dateFrom) {
+                $entryQuery->whereDate('entry_date', '>=', $dateFrom);
+            }
+            if ($dateTo) {
+                $entryQuery->whereDate('entry_date', '<=', $dateTo);
+            }
+        }
+
+        if ($partnerId) {
+            $entryQuery->whereHas('lines', function ($q) use ($partnerId) {
+                $q->where('partner_id', $partnerId);
+            });
+        }
+
+        if ($search) {
+            $entryQuery->where(function ($q) use ($search) {
+                $q->where('insured_name', 'like', "%{$search}%")
+                  ->orWhere('reference',   'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $entryQuery->orderByDesc('entry_date')->orderByDesc('id');
+
+        $totalAmount  = (clone $entryQuery)->sum('total_debit');
+        $totalEntries = (clone $entryQuery)->count();
+        $entries      = $entryQuery->paginate(50);
+
+        // Partner breakdown: group total_debit by partner via lines
+        $arCode    = \App\Models\ChartOfAccount::where('account_code', '1200')->value('id');
+        $partnerBreakdown = collect();
+        if ($arCode) {
+            $partnerBreakdown = DB::table('ledger_journal_entry_lines as l')
+                ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+                ->join('partners as p', 'l.partner_id', '=', 'p.id')
+                ->where('je.type', 'sales_return')
+                ->where('l.account_id', $arCode)
+                ->when(!$search && $dateFrom, fn($q) => $q->where('je.entry_date', '>=', $dateFrom))
+                ->when(!$search && $dateTo,   fn($q) => $q->where('je.entry_date', '<=', $dateTo))
+                ->groupBy('l.partner_id', 'p.name', 'p.code')
+                ->selectRaw('l.partner_id, p.name as partner_name, p.code as partner_code, SUM(l.credit) as total_amount, COUNT(DISTINCT l.journal_entry_id) as tx_count')
+                ->orderByDesc('total_amount')
+                ->get();
+        }
+
+        // Map entry_id → lead for linking back to the pipeline
+        $entryIds    = $entries->pluck('id');
+        $leadsByEntry = \App\Models\Lead::whereIn('ledger_sales_return_entry_id', $entryIds)
+            ->get(['id', 'ledger_sales_return_entry_id', 'ledger_chargeback_paid_entry_id', 'cn_name'])
+            ->keyBy('ledger_sales_return_entry_id');
+
+        $partners = \App\Models\Partner::where('is_active', true)->orderBy('name')->get(['id','name','code']);
+
+        return view('admin.accounting.sales-ledger.returns', compact(
+            'entries', 'totalAmount', 'totalEntries',
+            'partnerBreakdown', 'leadsByEntry',
+            'partners', 'dateFrom', 'dateTo', 'partnerId', 'search'
+        ));
     }
 
     // ── Journal Entries List ───────────────────────────────────────────────

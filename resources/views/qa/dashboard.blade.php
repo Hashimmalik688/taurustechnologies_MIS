@@ -325,10 +325,11 @@
 .dot-fail { background:var(--qa-red); }
 .dot-na   { background:rgba(255,255,255,.2); }
 .qu-coaching { background:rgba(212,175,55,.06); border:1px solid rgba(212,175,55,.18); border-radius:.4rem; padding:.7rem .85rem; font-size:.73rem; line-height:1.65; white-space:pre-wrap; box-shadow:inset 0 1px 0 rgba(212,175,55,.12); }
-.qu-transcript .t-line { padding:.15rem 0; border-bottom:1px solid rgba(0,0,0,.05); }
-.qu-transcript .t-speaker { font-weight:700; margin-right:.35rem; }
-.qu-transcript .t-agent    { color:var(--qa-blue); text-shadow:0 0 6px rgba(85,110,230,.5); }
-.qu-transcript .t-customer { color:var(--qa-gold); text-shadow:0 0 6px rgba(212,175,55,.4); }
+.qu-transcript .t-line { padding:.35rem 0; border-bottom:1px solid rgba(0,0,0,.07); line-height:1.7; }
+.qu-transcript .t-speaker { font-weight:700; margin-right:.4rem; font-size:.7rem; letter-spacing:.03em; text-transform:uppercase; }
+.qu-transcript .t-agent    { color:#3b5bdb; }
+.qu-transcript .t-customer { color:#c47a00; }
+.qu-transcript .t-text { color:#1e293b; font-size:.82rem; }
 .qu-toggle-icon.open { transform:rotate(0deg); }
 .qu-toggle-icon:not(.open) { transform:rotate(-90deg); }
 .comp-badge { display:inline-flex; align-items:center; gap:.3rem; font-size:.68rem; font-weight:700; padding:.18rem .55rem; border-radius:.8rem; }
@@ -1594,7 +1595,7 @@ function openCallDetail(callId) {
                 const isCust  = line.speaker === 'CUSTOMER';
                 const spCls   = isAgent ? 't-agent' : isCust ? 't-customer' : '';
                 const spLbl   = isAgent ? 'AGENT' : isCust ? 'CUSTOMER' : (line.speaker || 'UNKNOWN');
-                return `<div class="t-line"><span class="t-speaker ${spCls}">${esc(spLbl)}:</span>${esc(line.text)}</div>`;
+                return `<div class="t-line"><span class="t-speaker ${spCls}">${esc(spLbl)}:</span><span class="t-text">${esc(line.text)}</span></div>`;
             }).join('');
 
         content.innerHTML = `
@@ -1684,15 +1685,14 @@ function openCallDetail(callId) {
                     <!-- DNC Risk Judge -->
                     ${dncBlock}
 
-                    <!-- Transcript (collapsed) -->
+                    <!-- Transcript (always open) -->
                     <div class="col-12">
                         <div class="qu-card">
-                            <div class="qu-card-hdr" style="cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('collapsed');const ic=this.querySelector('.qu-toggle-icon');ic.classList.toggle('open');">
+                            <div class="qu-card-hdr">
                                 <h6><i class="bx bx-file"></i> Transcript <span style="font-weight:400;opacity:.6;">(${transcript.length} lines)</span></h6>
-                                <span class="qu-toggle-icon" style="font-size:.7rem;transition:transform .2s;">▼</span>
                             </div>
-                            <div class="qu-card-body collapsed">
-                                <div class="qu-transcript" style="max-height:500px;overflow-y:auto;font-size:.75rem;line-height:1.65;font-family:'Fira Code',monospace,Consolas,monospace;background:rgba(0,0,0,.25);border-radius:.35rem;padding:.65rem .75rem;">${transcriptLines}</div>
+                            <div class="qu-card-body">
+                                <div class="qu-transcript" style="max-height:500px;overflow-y:auto;background:#fff;border:1px solid #e2e8f0;border-radius:.4rem;padding:.75rem 1rem;">${transcriptLines}</div>
                             </div>
                         </div>
                     </div>

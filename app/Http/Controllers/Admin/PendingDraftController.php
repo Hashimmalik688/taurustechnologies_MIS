@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
 use App\Models\Partner;
+use App\Services\CommissionCalculationService;
+use App\Services\LedgerService;
 use App\Support\Statuses;
+use App\Traits\CommissionResolver;
 use Illuminate\Http\Request;
 
 /**
@@ -26,6 +29,8 @@ use Illuminate\Http\Request;
  */
 class PendingDraftController extends Controller
 {
+    use CommissionResolver;
+
     public function index(Request $request)
     {
         $search   = $request->get('search');
@@ -165,6 +170,46 @@ class PendingDraftController extends Controller
         $lead->not_paid_manual_disposition = null;
         $lead->not_paid_comment         = null;
         $lead->save();
+
+        // ── Auto-post to accounting ledger ────────────────────────────────
+        // As soon as a sale is marked Paid, create a double-entry journal entry
+        // (Dr 1200 AR / Cr 4100 Sales Income) so the ledger is always up to date.
+        if ($lead->partner_id && !$lead->ledger_journal_entry_id) {
+            try {
+                $lead->loadMissing('partner', 'insuranceCarrier');
+                $ledger  = app(LedgerService::class);
+                $commSvc = app(CommissionCalculationService::class);
+                $calc    = $this->calcLeadCommission($lead, $commSvc);
+
+                if ($calc['our_share'] > 0) {
+                    $description = "Sale — {$lead->cn_name}" .
+                        ($lead->carrier_name ? " | {$lead->carrier_name}" : '') .
+                        ($lead->policy_number ? " | #{$lead->policy_number}" : '');
+
+                    $journalEntry = $ledger->createSaleEntry(
+                        partnerId:       $lead->partner_id,
+                        amount:          $calc['our_share'],
+                        date:            $lead->paid_at->toDateString(),
+                        description:     $description,
+                        reference:       $lead->policy_number,
+                        carrierId:       $lead->insurance_carrier_id,
+                        grossAmount:     $calc['commission'],
+                        sharePercentage: $calc['our_share_pct'],
+                        insuredName:     $lead->cn_name,
+                        leadId:          $lead->id
+                    );
+
+                    $lead->ledger_journal_entry_id = $journalEntry->id;
+                    $lead->saveQuietly();
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('PendingDraft markPaid: auto-post to ledger failed', [
+                    'lead_id' => $lead->id,
+                    'error'   => $e->getMessage(),
+                ]);
+                // Never let a ledger failure block the payment action
+            }
+        }
 
         return response()->json([
             'success' => true,
