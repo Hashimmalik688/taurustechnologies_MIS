@@ -348,7 +348,7 @@
                             <td><span class="text-muted" style="font-size:.74rem"><?php echo e($lead->submission_reason ?? 'No comments'); ?></span></td>
                             <td>
                                 
-                                <div style="font-size:.68rem;color:#64748b;margin-bottom:.4rem;line-height:1.65;">
+                                <div style="font-size:.68rem;color:#64748b;margin-bottom:.5rem;line-height:1.65;">
                                     <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->chargeback_marked_date): ?>
                                         <div>
                                             <i class="bx bx-flag" style="color:#dc3545;"></i>
@@ -373,35 +373,35 @@
                                     <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                                 </div>
                                 
-                                <div class="sl-act-group">
-                                    <a href="<?php echo e(route('leads.show', $lead->id)); ?>" class="btn btn-info" title="View Details" target="_blank">
+                                <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                                    <a href="<?php echo e(route('leads.show', $lead->id)); ?>" class="btn btn-info" title="View Details" target="_blank"
+                                        style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.68rem;border:none;color:#fff;background:linear-gradient(135deg,#06b6d4,#0891b2);box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0;">
                                         <i class="bx bx-show"></i>
                                     </a>
-                                </div>
-                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->ledger_chargeback_paid_entry_id): ?>
-                                    <button class="sl-act-mark-paid mt-1"
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->ledger_chargeback_paid_entry_id): ?>
+                                        <button class="sl-act-mark-paid"
+                                            data-id="<?php echo e($lead->id); ?>"
+                                            data-name="<?php echo e($lead->cn_name); ?>"
+                                            title="Mark chargeback as recovered/paid">
+                                            <i class="bx bx-dollar-circle"></i> Mark Paid
+                                        </button>
+                                    <?php else: ?>
+                                        <span style="font-size:.62rem;color:#059669;font-weight:600;">
+                                            <i class="bx bx-check-circle"></i> Recovered
+                                        </span>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                    <button class="sl-act-send-retention"
                                         data-id="<?php echo e($lead->id); ?>"
                                         data-name="<?php echo e($lead->cn_name); ?>"
-                                        title="Mark chargeback as recovered/paid">
-                                        <i class="bx bx-dollar-circle"></i> Mark Paid
+                                        data-not-issued-disp="<?php echo e($lead->not_issued_disposition ?? ''); ?>"
+                                        data-not-issued-comment="<?php echo e($lead->not_issued_comment ?? ''); ?>"
+                                        data-not-paid-type="<?php echo e($lead->not_paid_fdfp_type ?? ''); ?>"
+                                        data-not-paid-disp="<?php echo e($lead->not_paid_manual_disposition ?? ''); ?>"
+                                        data-not-paid-comment="<?php echo e($lead->not_paid_comment ?? ''); ?>"
+                                        title="Send this lead to the Retention team">
+                                        <i class="bx bx-transfer-alt"></i> Retention
                                     </button>
-                                <?php else: ?>
-                                    <span style="font-size:.62rem;color:#059669;font-weight:600;display:block;margin-top:.2rem;">
-                                        <i class="bx bx-check-circle"></i> Recovered
-                                    </span>
-                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
-                                
-                                <button class="sl-act-send-retention mt-1"
-                                    data-id="<?php echo e($lead->id); ?>"
-                                    data-name="<?php echo e($lead->cn_name); ?>"
-                                    data-not-issued-disp="<?php echo e($lead->not_issued_disposition ?? ''); ?>"
-                                    data-not-issued-comment="<?php echo e($lead->not_issued_comment ?? ''); ?>"
-                                    data-not-paid-type="<?php echo e($lead->not_paid_fdfp_type ?? ''); ?>"
-                                    data-not-paid-disp="<?php echo e($lead->not_paid_manual_disposition ?? ''); ?>"
-                                    data-not-paid-comment="<?php echo e($lead->not_paid_comment ?? ''); ?>"
-                                    title="Send this lead to the Retention team">
-                                    <i class="bx bx-transfer-alt"></i> Retention
-                                </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -434,60 +434,75 @@
 
 
 <div class="modal fade" id="retentionModal" tabindex="-1" aria-labelledby="retentionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content">
-            <div class="modal-header" style="background:#0f172a;color:#fff;">
-                <h5 class="modal-title" id="retentionModalLabel">
-                    <i class="bx bx-transfer-alt me-2"></i>Send to Retention
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header py-2 px-3">
+                <h6 class="modal-title mb-0" style="font-size:.85rem;">
+                    <i class="bx bx-transfer-alt me-1 text-primary"></i> Send to Retention
+                </h6>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p class="mb-3" style="font-size:.82rem;color:#64748b;">
-                    Sending <strong id="ret_lead_name"></strong> to Retention. Review existing dispositions below, then add any additional notes before confirming.
+            <div class="modal-body px-3 py-3">
+                <p class="mb-2" style="font-size:.75rem;color:var(--bs-surface-500,#64748b);">
+                    Lead: <strong id="ret_lead_name"></strong>
                 </p>
 
                 
-                <div id="ret_not_issued_section" style="display:none;margin-bottom:.85rem;">
-                    <div style="background:rgba(220,53,69,.06);border-left:3px solid #dc3545;padding:.65rem .85rem;border-radius:4px;">
-                        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#dc3545;margin-bottom:.3rem;">Not Issued Disposition</div>
-                        <div style="font-size:.82rem;color:#334155;font-weight:600;" id="ret_not_issued_disp"></div>
-                        <div style="font-size:.78rem;color:#64748b;margin-top:.2rem;" id="ret_not_issued_comment"></div>
+                <div id="ret_not_issued_section" style="display:none;margin-bottom:.6rem;">
+                    <div style="background:rgba(220,38,38,.05);border-left:3px solid #ef4444;padding:.45rem .7rem;border-radius:4px;font-size:.75rem;">
+                        <div style="font-weight:700;color:#ef4444;margin-bottom:.15rem;">Prior Not Issued</div>
+                        <div style="color:#334155;font-weight:600;" id="ret_not_issued_disp"></div>
+                        <div style="color:#64748b;" id="ret_not_issued_comment"></div>
+                    </div>
+                </div>
+                <div id="ret_not_paid_section" style="display:none;margin-bottom:.6rem;">
+                    <div style="background:rgba(245,158,11,.05);border-left:3px solid #f59e0b;padding:.45rem .7rem;border-radius:4px;font-size:.75rem;">
+                        <div style="font-weight:700;color:#b45309;margin-bottom:.15rem;">Prior Not Paid (FDFP)</div>
+                        <div style="color:#334155;"><span id="ret_not_paid_type" style="font-weight:600;"></span> <span id="ret_not_paid_disp"></span></div>
+                        <div style="color:#64748b;" id="ret_not_paid_comment"></div>
+                    </div>
+                </div>
+                <div id="ret_no_disp_notice" style="display:none;margin-bottom:.6rem;">
+                    <div style="background:#f8fafc;border-left:3px solid #cbd5e1;padding:.45rem .7rem;border-radius:4px;font-size:.75rem;color:#64748b;">
+                        <i class="bx bx-info-circle me-1"></i>No prior Not Issued or Not Paid disposition recorded.
                     </div>
                 </div>
 
                 
-                <div id="ret_not_paid_section" style="display:none;margin-bottom:.85rem;">
-                    <div style="background:rgba(245,158,11,.06);border-left:3px solid #f59e0b;padding:.65rem .85rem;border-radius:4px;">
-                        <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#b45309;margin-bottom:.3rem;">Not Paid (FDFP)</div>
-                        <div style="font-size:.82rem;color:#334155;">
-                            <span id="ret_not_paid_type" style="font-weight:600;"></span>
-                            <span id="ret_not_paid_disp" style="margin-left:.4rem;"></span>
-                        </div>
-                        <div style="font-size:.78rem;color:#64748b;margin-top:.2rem;" id="ret_not_paid_comment"></div>
+                <div class="mb-2">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Chargeback <span class="text-danger">*</span></label>
+                    <select id="ret_fdfp_type" class="form-select form-select-sm">
+                        <option value="">— Select type —</option>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $fdfpTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($key); ?>"><?php echo e($label); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </select>
+                    <div id="ret_disp_error" style="display:none;font-size:.72rem;color:#dc2626;margin-top:.3rem;">
+                        <i class="bx bx-error-circle me-1"></i>Please select an FDFP type.
                     </div>
                 </div>
 
                 
-                <div id="ret_no_disp_notice" style="display:none;margin-bottom:.85rem;">
-                    <div style="background:rgba(100,116,139,.06);border-left:3px solid #94a3b8;padding:.65rem .85rem;border-radius:4px;font-size:.8rem;color:#64748b;">
-                        <i class="bx bx-info-circle me-1"></i>No prior Not Issued or Not Paid disposition recorded for this lead.
-                    </div>
+                <div id="ret_manual_wrap" style="display:none;" class="mb-2">
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Manual Action — Select Disposition</label>
+                    <select id="ret_manual_disp" class="form-select form-select-sm">
+                        <option value="">— Select disposition —</option>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $niDispositions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($key); ?>"><?php echo e($label); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </select>
                 </div>
 
                 
                 <div class="mb-1">
-                    <label style="font-size:.78rem;font-weight:600;color:#334155;" for="ret_notes">
-                        Additional Notes <span style="font-weight:400;color:#94a3b8;">(optional)</span>
-                    </label>
-                    <textarea id="ret_notes" class="form-control mt-1" rows="3"
-                        placeholder="Add any notes for the Retention team…"
-                        style="font-size:.82rem;"></textarea>
+                    <label class="form-label" style="font-size:.72rem;font-weight:600;">Comment <span style="font-weight:400;color:var(--bs-surface-400,#94a3b8);">(optional)</span></label>
+                    <textarea id="ret_notes" class="form-control form-control-sm" rows="2"
+                        maxlength="1000" placeholder="Describe the issue or add context…"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="retentionSubmitBtn" class="btn btn-primary btn-sm">
+            <div class="modal-footer py-2 px-3">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="retentionSubmitBtn" class="btn btn-sm btn-primary">
                     <i class="bx bx-transfer-alt me-1"></i> Send to Retention
                 </button>
             </div>
@@ -542,13 +557,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ── Send to Retention ──
     const retentionModal = new bootstrap.Modal(document.getElementById('retentionModal'));
+    document.getElementById('retentionModal').addEventListener('hidden.bs.modal', function() {
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    });
     let retentionLeadId = null;
+
+    // Show/hide manual disposition when fdfp type changes
+    document.getElementById('ret_fdfp_type').addEventListener('change', function() {
+        document.getElementById('ret_manual_wrap').style.display = this.value === 'manual_action' ? '' : 'none';
+        if (this.value !== 'manual_action') document.getElementById('ret_manual_disp').value = '';
+    });
 
     document.querySelectorAll('.sl-act-send-retention').forEach(btn => {
         btn.addEventListener('click', function() {
             retentionLeadId = this.dataset.id;
             document.getElementById('ret_lead_name').textContent = this.dataset.name;
             document.getElementById('ret_notes').value = '';
+            document.getElementById('ret_fdfp_type').value = '';
+            document.getElementById('ret_manual_disp').value = '';
+            document.getElementById('ret_manual_wrap').style.display = 'none';
+            document.getElementById('ret_disp_error').style.display = 'none';
 
             const notIssuedDisp    = (this.dataset.notIssuedDisp    || '').trim();
             const notIssuedComment = (this.dataset.notIssuedComment || '').trim();
@@ -576,8 +607,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('retentionSubmitBtn').addEventListener('click', function() {
         if (!retentionLeadId) return;
-        const btn   = this;
-        const notes = document.getElementById('ret_notes').value;
+        const btn        = this;
+        const fdfpType   = document.getElementById('ret_fdfp_type').value;
+        const manualDisp = document.getElementById('ret_manual_disp').value;
+        const comment    = document.getElementById('ret_notes').value;
+
+        if (!fdfpType) {
+            document.getElementById('ret_disp_error').style.display = 'block';
+            return;
+        }
+        document.getElementById('ret_disp_error').style.display = 'none';
+
         btn.disabled = true;
         btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Sending…';
 
@@ -588,7 +628,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Accept':       'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ notes: notes }),
+            body: JSON.stringify({ fdfp_type: fdfpType, manual_disp: manualDisp || null, comment: comment || null }),
         })
         .then(r => r.json())
         .then(data => {

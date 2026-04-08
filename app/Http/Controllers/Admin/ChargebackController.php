@@ -78,6 +78,9 @@ class ChargebackController extends Controller
         
         $total_amount = $totalQuery->sum('monthly_premium');
 
+        $fdfpTypes     = Statuses::FDFP_TYPES;
+        $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
+
         return view('admin.chargebacks.index', compact(
             'chargebacks',
             'search',
@@ -87,7 +90,9 @@ class ChargebackController extends Controller
             'date_from',
             'date_to',
             'total_count',
-            'total_amount'
+            'total_amount',
+            'fdfpTypes',
+            'niDispositions'
         ));
     }
 
@@ -108,22 +113,25 @@ class ChargebackController extends Controller
      */
     public function sendToRetention(Request $request, int $id)
     {
+        $request->validate([
+            'fdfp_type'        => 'required|in:unstable_to_locate,insufficient_fund,unauthorized_payments,manual_action',
+            'manual_disp'      => 'nullable|string|max:100',
+            'comment'          => 'nullable|string|max:1000',
+        ]);
+
         $lead = Lead::findOrFail($id);
 
         if ($lead->status !== Statuses::LEAD_CHARGEBACK) {
             return response()->json(['success' => false, 'message' => 'Lead is not in chargeback status.'], 422);
         }
 
-        $notes = $request->input('notes', '');
-
-        $lead->retention_status       = Statuses::RETENTION_PENDING;
-        $lead->ret_action_status      = null;
-        $lead->ret_action_updated_at  = now();
-        $lead->ret_action_updated_by  = Auth::id();
-        if ($notes) {
-            $existing = $lead->retention_notes ? trim($lead->retention_notes) . "\n" : '';
-            $lead->retention_notes = $existing . '[' . now()->format('M d Y H:i') . ' — ' . Auth::user()->name . '] ' . $notes;
-        }
+        $lead->retention_status             = Statuses::RETENTION_PENDING;
+        $lead->not_paid_fdfp_type           = $request->input('fdfp_type');
+        $lead->not_paid_manual_disposition  = $request->input('fdfp_type') === 'manual_action' ? $request->input('manual_disp') : null;
+        $lead->not_paid_comment             = $request->input('comment');
+        $lead->ret_action_status            = null;
+        $lead->ret_action_updated_at        = now();
+        $lead->ret_action_updated_by        = Auth::id();
         $lead->save();
 
         return response()->json(['success' => true, 'message' => 'Lead sent to Retention queue.']);
