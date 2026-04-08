@@ -82,6 +82,8 @@ class Lead extends Model
         'chargeback_marked_by_id',
         'chargeback_paid_at',
         'chargeback_paid_by_id',
+        'cb_sent_to_retention_at',
+        'cb_sent_to_retention_by_id',
         'is_rewrite',
         'retention_notes',
         'retention_officer_id',
@@ -300,7 +302,8 @@ class Lead extends Model
         'not_paid_at'              => 'datetime',
         'paid_at'                  => 'datetime',
         'policy_died_at'           => 'datetime',
-        'chargeback_paid_at'       => 'datetime',
+        'chargeback_paid_at'          => 'datetime',
+        'cb_sent_to_retention_at'    => 'datetime',
     ];
 
     /**
@@ -602,6 +605,12 @@ class Lead extends Model
     public function chargebackPaidBy()
     {
         return $this->belongsTo(User::class, 'chargeback_paid_by_id');
+    }
+
+    /** User who sent this chargeback to the Retention team */
+    public function cbSentToRetentionBy()
+    {
+        return $this->belongsTo(User::class, 'cb_sent_to_retention_by_id');
     }
 
     /** The accounting journal entry created when this paid sale was posted to the ledger */

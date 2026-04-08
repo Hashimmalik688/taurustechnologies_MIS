@@ -87,8 +87,9 @@ class RetentionController extends Controller
                       ->whereNotNull('pending_contract_at');
 
         // NOT PAID base scope
+        // Allow chargeback leads sent to retention (paid_at is set but cb_sent_to_retention_at overrides)
         $npBase = Lead::whereNotNull('not_paid_at')
-                      ->whereNull('paid_at')
+                      ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                       ->whereNull('policy_died_at');
 
         // ----- KPI counts (all time, across both scopes) -----
@@ -123,7 +124,7 @@ class RetentionController extends Controller
                 ->whereIn('retention_disposition', $disposedStatuses);
             $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
-                ->whereNull('paid_at')
+                ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
                 ->whereIn('retention_disposition', $disposedStatuses);
         } else {
@@ -135,7 +136,7 @@ class RetentionController extends Controller
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
             $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
-                ->whereNull('paid_at')
+                ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
         }

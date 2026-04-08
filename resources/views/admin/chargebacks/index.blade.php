@@ -261,8 +261,26 @@
                 <i class="bx bx-error"></i>
             </div>
             <div>
-                <div class="kpi-label">Total Chargebacks</div>
-                <div class="kpi-value text-danger">{{ $total_count }}</div>
+                <div class="kpi-label">Total CB</div>
+                <div class="kpi-value text-danger">{{ $kpi_total_all }}</div>
+            </div>
+        </div>
+        <div class="sl-kpi-pill">
+            <div class="kpi-icon" style="background:rgba(245,158,11,.12);color:#f59e0b;">
+                <i class="bx bx-time-five"></i>
+            </div>
+            <div>
+                <div class="kpi-label">Current</div>
+                <div class="kpi-value" style="color:#f59e0b;">{{ $kpi_current }}</div>
+            </div>
+        </div>
+        <div class="sl-kpi-pill">
+            <div class="kpi-icon" style="background:rgba(14,165,233,.12);color:#0ea5e9;">
+                <i class="bx bx-transfer-alt"></i>
+            </div>
+            <div>
+                <div class="kpi-label">Sent to Retention</div>
+                <div class="kpi-value" style="color:#0ea5e9;">{{ $kpi_sent_to_retention }}</div>
             </div>
         </div>
         <div class="sl-kpi-pill">
@@ -270,7 +288,7 @@
                 <i class="bx bx-dollar-circle"></i>
             </div>
             <div>
-                <div class="kpi-label">Total Amount</div>
+                <div class="kpi-label">Total Premium</div>
                 <div class="kpi-value text-warning">${{ number_format($total_amount, 2) }}</div>
             </div>
         </div>
@@ -321,7 +339,9 @@
                         <th style="min-width:120px">CB Amount</th>
                         <th style="min-width:180px">Comments</th>
                         <th style="min-width:180px">Manager Reason</th>
-                        <th style="min-width:110px">Actions</th>
+                        <th style="min-width:145px">Marked as CB</th>
+                        <th style="min-width:145px">Sent to Retention</th>
+                        <th style="min-width:90px">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -345,31 +365,56 @@
                             <td><span class="badge bg-danger">${{ number_format($lead->monthly_premium ?? 0, 2) }}</span></td>
                             <td><span class="text-muted" style="font-size:.74rem">{{ Str::limit($lead->comments ?? 'No reason provided', 50) }}</span></td>
                             <td><span class="text-muted" style="font-size:.74rem">{{ $lead->submission_reason ?? 'No comments' }}</span></td>
-                            <td>
-                                {{-- Audit trail --}}
-                                <div style="font-size:.68rem;color:#64748b;margin-bottom:.5rem;line-height:1.65;">
-                                    @if($lead->chargeback_marked_date)
-                                        <div>
-                                            <i class="bx bx-flag" style="color:#dc3545;"></i>
-                                            <span style="color:#dc3545;font-weight:600;">Marked:</span>
-                                            {{ $lead->chargeback_marked_date->format('M d, Y H:i') }}
-                                            @if($lead->chargebackMarkedBy)
-                                                <br><span style="padding-left:1rem;">by {{ $lead->chargebackMarkedBy->name }}</span>
-                                            @endif
-                                        </div>
-                                    @endif
+
+                            {{-- ── Marked as CB column ── --}}
+                            <td style="font-size:.72rem;line-height:1.6;">
+                                @if($lead->chargeback_marked_date)
+                                    <div style="color:#dc3545;font-weight:600;">
+                                        <i class="bx bx-flag"></i>
+                                        {{ $lead->chargeback_marked_date->format('M d, Y') }}
+                                    </div>
+                                    <div style="color:#64748b;">{{ $lead->chargeback_marked_date->format('H:i') }}</div>
+                                    <div style="color:#64748b;margin-top:.15rem;">by {{ $lead->chargebackMarkedBy->name ?? '—' }}</div>
                                     @if($lead->chargeback_paid_at)
-                                        <div style="margin-top:.15rem;">
-                                            <i class="bx bx-check-circle" style="color:#059669;"></i>
-                                            <span style="color:#059669;font-weight:600;">Paid:</span>
-                                            {{ $lead->chargeback_paid_at->format('M d, Y H:i') }}
-                                            @if($lead->chargebackPaidBy)
-                                                <br><span style="padding-left:1rem;">by {{ $lead->chargebackPaidBy->name }}</span>
-                                            @endif
+                                        <div style="margin-top:.4rem;padding-top:.35rem;border-top:1px solid rgba(0,0,0,.06);color:#059669;font-weight:600;">
+                                            <i class="bx bx-check-circle"></i> Paid
                                         </div>
+                                        <div style="color:#64748b;">{{ $lead->chargeback_paid_at->format('M d, Y H:i') }}</div>
+                                        <div style="color:#64748b;">by {{ $lead->chargebackPaidBy->name ?? '—' }}</div>
                                     @endif
-                                </div>
-                                {{-- Action buttons: all in one row --}}
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
+
+                            {{-- ── Sent to Retention column ── --}}
+                            <td>
+                                @if($lead->cb_sent_to_retention_at)
+                                    <div style="font-size:.72rem;line-height:1.6;">
+                                        <div style="color:#0ea5e9;font-weight:600;">
+                                            <i class="bx bx-transfer-alt"></i>
+                                            {{ $lead->cb_sent_to_retention_at->format('M d, Y') }}
+                                        </div>
+                                        <div style="color:#64748b;">{{ $lead->cb_sent_to_retention_at->format('H:i') }}</div>
+                                        <div style="color:#64748b;margin-top:.15rem;">by {{ $lead->cbSentToRetentionBy->name ?? '—' }}</div>
+                                    </div>
+                                @else
+                                    <button class="sl-act-send-retention"
+                                        data-id="{{ $lead->id }}"
+                                        data-name="{{ $lead->cn_name }}"
+                                        data-not-issued-disp="{{ $lead->not_issued_disposition ?? '' }}"
+                                        data-not-issued-comment="{{ $lead->not_issued_comment ?? '' }}"
+                                        data-not-paid-type="{{ $lead->not_paid_fdfp_type ?? '' }}"
+                                        data-not-paid-disp="{{ $lead->not_paid_manual_disposition ?? '' }}"
+                                        data-not-paid-comment="{{ $lead->not_paid_comment ?? '' }}"
+                                        title="Send this lead to the Retention team">
+                                        <i class="bx bx-transfer-alt"></i> Retention
+                                    </button>
+                                @endif
+                            </td>
+
+                            {{-- ── Actions column ── --}}
+                            <td>
                                 <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
                                     <a href="{{ route('leads.show', $lead->id) }}" class="btn btn-info" title="View Details" target="_blank"
                                         style="width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.68rem;border:none;color:#fff;background:linear-gradient(135deg,#06b6d4,#0891b2);box-shadow:0 1px 3px rgba(0,0,0,.1);flex-shrink:0;">
@@ -387,23 +432,12 @@
                                             <i class="bx bx-check-circle"></i> Recovered
                                         </span>
                                     @endif
-                                    <button class="sl-act-send-retention"
-                                        data-id="{{ $lead->id }}"
-                                        data-name="{{ $lead->cn_name }}"
-                                        data-not-issued-disp="{{ $lead->not_issued_disposition ?? '' }}"
-                                        data-not-issued-comment="{{ $lead->not_issued_comment ?? '' }}"
-                                        data-not-paid-type="{{ $lead->not_paid_fdfp_type ?? '' }}"
-                                        data-not-paid-disp="{{ $lead->not_paid_manual_disposition ?? '' }}"
-                                        data-not-paid-comment="{{ $lead->not_paid_comment ?? '' }}"
-                                        title="Send this lead to the Retention team">
-                                        <i class="bx bx-transfer-alt"></i> Retention
-                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center py-4">
+                            <td colspan="12" class="text-center py-4">
                                 <i class="bx bx-info-circle" style="font-size:2rem;color:#94a3b8"></i>
                                 <p class="mb-0 text-muted" style="font-size:.82rem">No chargebacks found for the selected period</p>
                             </td>
@@ -415,7 +449,7 @@
                         <tr>
                             <td colspan="6" class="text-end">Total:</td>
                             <td><span class="badge bg-danger">${{ number_format($total_amount, 2) }}</span></td>
-                            <td colspan="3"></td>
+                            <td colspan="5"></td>
                         </tr>
                     </tfoot>
                 @endif
@@ -632,10 +666,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 retentionModal.hide();
                 const origBtn = document.querySelector('.sl-act-send-retention[data-id="' + retentionLeadId + '"]');
                 if (origBtn) {
-                    const badge = document.createElement('span');
-                    badge.style.cssText = 'font-size:.62rem;color:#0ea5e9;font-weight:600;display:block;margin-top:.2rem;';
-                    badge.innerHTML = '<i class="bx bx-check-circle"></i> Sent to Retention';
-                    origBtn.replaceWith(badge);
+                    const cell = origBtn.closest('td');
+                    cell.innerHTML =
+                        '<div style="font-size:.72rem;line-height:1.6;">' +
+                            '<div style="color:#0ea5e9;font-weight:600;"><i class="bx bx-transfer-alt"></i> ' + data.sent_at + '</div>' +
+                            '<div style="color:#64748b;">' + data.sent_time + '</div>' +
+                            '<div style="color:#64748b;margin-top:.15rem;">by ' + data.sent_by + '</div>' +
+                        '</div>';
                 }
                 alert('✓ ' + (data.message || 'Lead sent to Retention.'));
             } else {
