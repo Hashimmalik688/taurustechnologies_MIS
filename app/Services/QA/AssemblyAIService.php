@@ -81,8 +81,6 @@ class AssemblyAIService
             'audio_url'          => $audioUrl,
             'speaker_labels'     => true,      // Diarization — identifies speakers
             'speakers_expected'  => 2,         // Typically Agent + Customer
-            'language_detection' => true,      // Auto-detect language
-            'speech_models'      => ['universal-3-pro', 'universal-2'], // universal-3-pro for en/es/de/fr/it/pt, else universal-2
             'punctuate'          => true,
             'format_text'        => true,
             'filter_profanity'   => false,

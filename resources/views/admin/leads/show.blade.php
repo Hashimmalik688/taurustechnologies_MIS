@@ -1202,5 +1202,6 @@
             const zoomUrl = `zoomphonenumber://call?to=${cleanNumber}`;
             window.location.href = zoomUrl;
         }
+
     </script>
 @endsection

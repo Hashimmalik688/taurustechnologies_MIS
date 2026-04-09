@@ -12,8 +12,9 @@
 
 /* KPI pills row */
 .ret-kpi-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem;}
-.ret-kpi-pill{display:flex;align-items:center;gap:.45rem;padding:.45rem .8rem;border-radius:20px;border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.9);backdrop-filter:blur(10px);cursor:default;transition:box-shadow .15s;}
-.ret-kpi-pill:hover{box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.ret-kpi-pill{display:flex;align-items:center;gap:.45rem;padding:.45rem .8rem;border-radius:20px;border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.9);backdrop-filter:blur(10px);cursor:pointer;transition:box-shadow .15s,transform .15s;text-decoration:none;color:inherit;}
+.ret-kpi-pill:hover{box-shadow:0 2px 10px rgba(0,0,0,.1);transform:translateY(-1px);text-decoration:none;color:inherit;}
+.ret-kpi-pill.kpi-active{box-shadow:0 0 0 2px currentColor,0 2px 8px rgba(0,0,0,.12)!important;}
 .ret-kpi-pill .rk-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.82rem;}
 .ret-kpi-pill .rk-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;line-height:1.1;}
 .ret-kpi-pill .rk-val{font-size:1rem;font-weight:800;line-height:1;}
@@ -21,8 +22,8 @@
 .ret-kpi-pill.k-pending .rk-val{color:#64748b;}
 .ret-kpi-pill.k-retained .rk-icon{background:rgba(52,195,143,.15);color:#1a8754;}
 .ret-kpi-pill.k-retained .rk-val{color:#1a8754;}
-.ret-kpi-pill.k-resold .rk-icon{background:rgba(85,110,230,.12);color:#556ee6;}
-.ret-kpi-pill.k-resold .rk-val{color:#556ee6;}
+.ret-kpi-pill.k-in_progress .rk-icon{background:rgba(85,110,230,.12);color:#556ee6;}
+.ret-kpi-pill.k-in_progress .rk-val{color:#556ee6;}
 .ret-kpi-pill.k-rewrite .rk-icon{background:rgba(241,180,76,.12);color:#b87a14;}
 .ret-kpi-pill.k-rewrite .rk-val{color:#b87a14;}
 .ret-kpi-pill.k-recalled .rk-icon{background:rgba(139,92,246,.12);color:#7c3aed;}
@@ -72,7 +73,7 @@
 .ret-status-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:10px;text-transform:uppercase;letter-spacing:.3px;}
 .rdb-pending{background:rgba(148,163,184,.12);color:#64748b;border:1px solid rgba(148,163,184,.25);}
 .rdb-retained{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.2);}
-.rdb-resold{background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.2);}
+.rdb-in_progress,.rdb-resold{background:rgba(85,110,230,.12);color:#556ee6;border:1px solid rgba(85,110,230,.2);}
 .rdb-rewrite{background:rgba(241,180,76,.12);color:#b87a14;border:1px solid rgba(241,180,76,.25);}
 .rdb-recalled_to_closer{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.2);}
 .rdb-cancelled{background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.2);}
@@ -83,8 +84,8 @@
 .ret-disp-btn.disp-pending.active,.ret-disp-btn.disp-pending:hover{background:rgba(148,163,184,.15);border-color:#94a3b8;}
 .ret-disp-btn.disp-retained{color:#1a8754;border-color:rgba(52,195,143,.4);}
 .ret-disp-btn.disp-retained.active,.ret-disp-btn.disp-retained:hover{background:rgba(52,195,143,.15);border-color:#34c38f;}
-.ret-disp-btn.disp-resold{color:#556ee6;border-color:rgba(85,110,230,.4);}
-.ret-disp-btn.disp-resold.active,.ret-disp-btn.disp-resold:hover{background:rgba(85,110,230,.15);border-color:#556ee6;}
+.ret-disp-btn.disp-in_progress{color:#556ee6;border-color:rgba(85,110,230,.4);}
+.ret-disp-btn.disp-in_progress.active,.ret-disp-btn.disp-in_progress:hover{background:rgba(85,110,230,.15);border-color:#556ee6;}
 .ret-disp-btn.disp-rewrite{color:#b87a14;border-color:rgba(241,180,76,.4);}
 .ret-disp-btn.disp-rewrite.active,.ret-disp-btn.disp-rewrite:hover{background:rgba(241,180,76,.15);border-color:#f1b44c;}
 .ret-disp-btn.disp-recalled_to_closer{color:#7c3aed;border-color:rgba(139,92,246,.4);}
@@ -99,6 +100,13 @@
 .ret-edit-input{font-size:.73rem!important;padding:.2rem .38rem!important;border-radius:.3rem!important;border:1px solid rgba(0,0,0,.12)!important;width:100%;min-width:100px;background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#334155);}
 .ret-edit-input:focus{border-color:#d4af37!important;box-shadow:0 0 0 2px rgba(212,175,55,.12)!important;outline:none!important;}
 textarea.ret-edit-input{resize:vertical;min-height:54px;}
+.ret-copy-btn{flex-shrink:0;width:22px;height:22px;border-radius:4px;border:1px solid rgba(0,0,0,.1);background:transparent;cursor:pointer;color:#94a3b8;font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:all .12s;}
+.ret-copy-btn:hover{background:rgba(212,175,55,.1);color:#d4af37;border-color:rgba(212,175,55,.3);}
+.ret-copy-btn.copied{color:#1a8754;border-color:rgba(52,195,143,.3);}
+/* Copy-field wrapper: CURRENT tag stacks above the input+button row */
+.ret-copy-wrap{display:flex;flex-direction:column;gap:.15rem;}
+.ret-input-row{display:flex;align-items:center;gap:.25rem;}
+.ret-input-row .ret-edit-input{flex:1;min-width:0;}
 /* CURRENT value display above each field (mirrors calling form style) */
 .ph-cur{display:flex;align-items:center;gap:.35rem;margin-bottom:.3rem;font-size:.72rem}
 .ph-cur-tag{background:linear-gradient(135deg,#d4af37,#c5a028);color:#fff;font-size:.6rem;padding:.15rem .4rem;border-radius:6px;font-weight:700;letter-spacing:.3px}
@@ -157,32 +165,42 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     </div>
 </div>
 
+<?php
+    $kpiLinks = [
+        'pending'            => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'pending'])),
+        'retained'           => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'retained'])),
+        'in_progress'        => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'in_progress'])),
+        'rewrite'            => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'rewrite'])),
+        'recalled_to_closer' => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'recalled_to_closer'])),
+        'cancelled'          => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'cancelled'])),
+    ];
+?>
 
 <div class="ret-kpi-row">
-    <div class="ret-kpi-pill k-pending">
+    <a href="<?php echo e($kpiLinks['pending']); ?>" class="ret-kpi-pill k-pending <?php echo e(($disp_filter ?? '') === 'pending' ? 'kpi-active' : ''); ?>">
         <div class="rk-icon"><i class="bx bx-time-five"></i></div>
         <div><div class="rk-lbl">Pending</div><div class="rk-val"><?php echo e($kpi['pending'] ?? 0); ?></div></div>
-    </div>
-    <div class="ret-kpi-pill k-retained">
+    </a>
+    <a href="<?php echo e($kpiLinks['retained']); ?>" class="ret-kpi-pill k-retained <?php echo e(($disp_filter ?? '') === 'retained' ? 'kpi-active' : ''); ?>">
         <div class="rk-icon"><i class="bx bx-check-shield"></i></div>
         <div><div class="rk-lbl">Retained</div><div class="rk-val"><?php echo e($kpi['retained'] ?? 0); ?></div></div>
-    </div>
-    <div class="ret-kpi-pill k-resold">
-        <div class="rk-icon"><i class="bx bx-store"></i></div>
-        <div><div class="rk-lbl">Resold</div><div class="rk-val"><?php echo e($kpi['resold'] ?? 0); ?></div></div>
-    </div>
-    <div class="ret-kpi-pill k-rewrite">
+    </a>
+    <a href="<?php echo e($kpiLinks['in_progress']); ?>" class="ret-kpi-pill k-in_progress <?php echo e(($disp_filter ?? '') === 'in_progress' ? 'kpi-active' : ''); ?>">
+        <div class="rk-icon"><i class="bx bx-loader-circle"></i></div>
+        <div><div class="rk-lbl">In Progress</div><div class="rk-val"><?php echo e($kpi['in_progress'] ?? 0); ?></div></div>
+    </a>
+    <a href="<?php echo e($kpiLinks['rewrite']); ?>" class="ret-kpi-pill k-rewrite <?php echo e(($disp_filter ?? '') === 'rewrite' ? 'kpi-active' : ''); ?>">
         <div class="rk-icon"><i class="bx bx-edit-alt"></i></div>
         <div><div class="rk-lbl">Rewrite</div><div class="rk-val"><?php echo e($kpi['rewrite'] ?? 0); ?></div></div>
-    </div>
-    <div class="ret-kpi-pill k-recalled">
+    </a>
+    <a href="<?php echo e($kpiLinks['recalled_to_closer']); ?>" class="ret-kpi-pill k-recalled <?php echo e(($disp_filter ?? '') === 'recalled_to_closer' ? 'kpi-active' : ''); ?>">
         <div class="rk-icon"><i class="bx bx-undo"></i></div>
         <div><div class="rk-lbl">Recalled</div><div class="rk-val"><?php echo e($kpi['recalled_to_closer'] ?? 0); ?></div></div>
-    </div>
-    <div class="ret-kpi-pill k-cancelled">
+    </a>
+    <a href="<?php echo e($kpiLinks['cancelled']); ?>" class="ret-kpi-pill k-cancelled <?php echo e(($disp_filter ?? '') === 'cancelled' ? 'kpi-active' : ''); ?>">
         <div class="rk-icon"><i class="bx bx-x-circle"></i></div>
         <div><div class="rk-lbl">Cancelled</div><div class="rk-val"><?php echo e($kpi['cancelled'] ?? 0); ?></div></div>
-    </div>
+    </a>
 </div>
 
 
@@ -192,6 +210,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     <form method="GET" action="<?php echo e(route('retention.index')); ?>" id="retFilterForm" class="sl-filter-pills">
         <input type="hidden" name="search" id="retSearchHidden" value="<?php echo e($search ?? ''); ?>">
         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($disposed): ?><input type="hidden" name="disposed" value="1"><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($disp_filter ?? null): ?><input type="hidden" name="disp_filter" value="<?php echo e($disp_filter); ?>"><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         <select name="month" class="sl-pill-select" onchange="this.form.submit()">
             <option value="">All Months</option>
             <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php for($m=1;$m<=12;$m++): ?>
@@ -208,7 +227,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         <input type="date" name="date_from" class="sl-pill-date" value="<?php echo e($date_from ?? ''); ?>" onchange="this.form.submit()">
         <span class="sl-pill-label">TO</span>
         <input type="date" name="date_to" class="sl-pill-date" value="<?php echo e($date_to ?? ''); ?>" onchange="this.form.submit()">
-        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','month','year','date_from','date_to'])): ?>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request()->hasAny(['search','month','year','date_from','date_to','disp_filter'])): ?>
             <a href="<?php echo e(route('retention.index')); ?>" class="sl-pill-clear"><i class="bx bx-x"></i> Clear</a>
         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </form>
@@ -224,9 +243,13 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                 <i class="bx bx-error-circle"></i> Not Paid / FDFP
                 <span class="badge bg-danger"><?php echo e($not_paid_count); ?></span>
             </a>
+            <a class="sl-tab" data-bs-toggle="tab" href="#tab-cancelled" role="tab">
+                <i class="bx bx-user-x"></i> Cancelled by Customer
+                <span class="badge bg-secondary"><?php echo e($cancelled_count); ?></span>
+            </a>
         </div>
         
-        <a href="<?php echo e(route('retention.index', array_merge(request()->except('disposed'), $disposed ? [] : ['disposed' => 1]))); ?>"
+        <a href="<?php echo e(route('retention.index', array_merge(request()->except(['disposed', 'disp_filter']), $disposed && !($disp_filter ?? null) ? [] : ['disposed' => 1]))); ?>"
            class="disposed-toggle <?php echo e($disposed ? 'active' : ''); ?>">
             <i class="bx <?php echo e($disposed ? 'bx-hide' : 'bx-archive'); ?>"></i>
             <?php echo e($disposed ? 'Hide Disposed' : 'View Disposed'); ?>
@@ -344,7 +367,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
                                     <button type="button" class="a-btn a-view btn-view-lead"
-                                        data-lead='<?php echo json_encode($leadJson, 15, 512) ?>'
+                                        data-lead="<?php echo e($leadJson); ?>"
                                         data-lead-id="<?php echo e($lead->id); ?>"
                                         data-type="not_issued">
                                         <i class="bx bx-show"></i> View / Edit
@@ -482,7 +505,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <td>
                                 <div class="d-flex gap-1 flex-wrap">
                                     <button type="button" class="a-btn a-view btn-view-lead"
-                                        data-lead='<?php echo json_encode($leadJson, 15, 512) ?>'
+                                        data-lead="<?php echo e($leadJson); ?>"
                                         data-lead-id="<?php echo e($lead->id); ?>"
                                         data-type="not_paid">
                                         <i class="bx bx-show"></i> View / Edit
@@ -512,6 +535,143 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
             <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
         </div>
 
+        
+        <div class="tab-pane" id="tab-cancelled" role="tabpanel">
+            <div class="sl-tbl-wrap">
+                <table class="sl-tbl">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client</th>
+                            <th>Phone</th>
+                            <th>Carrier / Closer</th>
+                            <th>Not Issued Reason</th>
+                            <th>Marked At</th>
+                            <th>Done By / Time</th>
+                            <th>Recall Note</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $cancelled_leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
+                            $retDisp = $lead->retention_disposition ?: 'pending';
+                            $beneficiaries = $lead->beneficiaries ?? [];
+                            if(is_string($beneficiaries)){$d=json_decode($beneficiaries,true);$beneficiaries=is_array($d)?$d:[];}
+                            if(!is_array($beneficiaries))$beneficiaries=[];
+                            if(empty($beneficiaries)&&($lead->beneficiary||$lead->beneficiary_dob))$beneficiaries=[['name'=>$lead->beneficiary??'','dob'=>$lead->beneficiary_dob??'','relation'=>'']];
+                            $leadJson = json_encode([
+                                'id'=>$lead->id,'cn_name'=>$lead->cn_name,'phone_number'=>$lead->phone_number,
+                                'secondary_phone_number'=>$lead->secondary_phone_number,'carrier_name'=>$lead->carrier_name,
+                                'closer_name'=>$lead->closer_name,'sale_date'=>$lead->sale_date?->format('m/d/Y'),
+                                'policy_type'=>$lead->policy_type,'policy_number'=>$lead->policy_number,
+                                'coverage_amount'=>$lead->coverage_amount,'monthly_premium'=>$lead->monthly_premium,
+                                'initial_draft_date'=>$lead->initial_draft_date?->format('m/d/Y'),
+                                'future_draft_date'=>$lead->future_draft_date?->format('m/d/Y'),
+                                'date_of_birth'=>$lead->date_of_birth?->format('Y-m-d'),'age'=>$lead->age,
+                                'gender'=>$lead->gender,'ssn'=>$lead->ssn,'state'=>$lead->state,
+                                'address'=>$lead->address,'zip_code'=>$lead->zip_code,
+                                'bank_name'=>$lead->bank_name,'account_type'=>$lead->account_type,
+                                'account_title'=>$lead->account_title,'routing_number'=>$lead->routing_number,
+                                'account_number'=>$lead->account_number??$lead->acc_number,
+                                'bank_balance'=>$lead->bank_balance,'ss_amount'=>$lead->ss_amount,
+                                'ss_date'=>$lead->ss_date?->format('Y-m-d'),
+                                'bank_verification_status'=>$lead->bank_verification_status,
+                                'card_number'=>$lead->card_number,'cvv'=>$lead->cvv,'expiry_date'=>$lead->expiry_date,
+                                'doctor_name'=>$lead->doctor_name,'doctor_number'=>$lead->doctor_number,
+                                'doctor_address'=>$lead->doctor_address,'medical_issue'=>$lead->medical_issue,
+                                'medications'=>$lead->medications,'smoker'=>$lead->smoker,
+                                'height'=>$lead->height,'weight'=>$lead->weight,
+                                'beneficiaries'=>$beneficiaries,
+                                'not_issued_disposition'=>Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition]??$lead->not_issued_disposition,
+                                'not_issued_at'=>$lead->not_issued_at?->format('m/d/Y'),
+                                'not_issued_comment'=>$lead->not_issued_comment,
+                                'marked_by'=>$lead->notIssuedBy->name??'',
+                                'staff_notes'=>$lead->staff_notes,'comments'=>$lead->comments,
+                                'retention_notes'=>$lead->retention_notes,
+                                'retention_disposition'=>$retDisp,
+                                'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
+                                'recall_note'=>$lead->recall_note,
+                                'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
+                            ]);
+                        ?>
+                        <tr>
+                            <td style="color:var(--bs-surface-400);"><?php echo e($loop->iteration); ?></td>
+                            <td>
+                                <strong style="font-size:.74rem;"><?php echo e($lead->cn_name ?? '—'); ?></strong>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($retDisp !== 'pending'): ?>
+                                    <br><span class="ret-status-badge rdb-<?php echo e($retDisp); ?>" style="margin-top:.15rem;"><?php echo e(Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp); ?></span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td style="font-size:.7rem;"><?php echo e($lead->phone_number ?? '—'); ?></td>
+                            <td style="font-size:.7rem;">
+                                <?php echo e($lead->carrier_name ?? '—'); ?>
+
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->closer_name): ?><br><span style="color:var(--bs-surface-400);"><?php echo e($lead->closer_name); ?></span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger text-white" style="font-size:.62rem;">
+                                    <?php echo e(Statuses::NOT_ISSUED_DISPOSITIONS[$lead->not_issued_disposition] ?? $lead->not_issued_disposition ?? '—'); ?>
+
+                                </span>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->not_issued_comment): ?>
+                                    <br><span style="font-size:.65rem;color:var(--bs-surface-500);font-style:italic;white-space:normal;display:inline-block;max-width:180px;margin-top:.15rem;"><?php echo e($lead->not_issued_comment); ?></span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td style="font-size:.68rem;white-space:nowrap;"><?php echo e($lead->not_issued_at?->format('m/d/Y') ?? '—'); ?></td>
+                            <td style="font-size:.68rem;white-space:nowrap;">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->recall_requested_at): ?>
+                                    <span style="font-weight:600;"><?php echo e($lead->recallRequestedBy->name ?? '—'); ?></span>
+                                    <br><span style="color:var(--bs-surface-400);"><?php echo e($lead->recall_requested_at->format('m/d/Y h:i A')); ?></span>
+                                <?php elseif($lead->retActionUpdatedBy): ?>
+                                    <span style="font-weight:600;"><?php echo e($lead->retActionUpdatedBy->name); ?></span>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->ret_action_updated_at): ?>
+                                        <br><span style="color:var(--bs-surface-400);"><?php echo e($lead->ret_action_updated_at->format('m/d/Y h:i A')); ?></span>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                <?php else: ?>
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td style="font-size:.7rem;max-width:180px;white-space:normal;line-height:1.4;">
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($lead->recall_note): ?>
+                                    <span style="color:#7c3aed;font-style:italic;"><?php echo e($lead->recall_note); ?></span>
+                                <?php else: ?>
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <button type="button" class="a-btn a-view btn-view-lead"
+                                        data-lead="<?php echo e($leadJson); ?>"
+                                        data-lead-id="<?php echo e($lead->id); ?>"
+                                        data-type="not_issued">
+                                        <i class="bx bx-show"></i> View / Edit
+                                    </button>
+                                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$lead->recall_requested_at && !$disposed): ?>
+                                        <button class="a-btn a-recall btn-recall-closer" data-id="<?php echo e($lead->id); ?>" data-name="<?php echo e($lead->cn_name); ?>">
+                                            <i class="bx bx-undo"></i> Recall
+                                        </button>
+                                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                        <tr class="sl-empty-row">
+                            <td colspan="9">
+                                <i class="bx bx-inbox" style="font-size:1.8rem;display:block;margin-bottom:.3rem;opacity:.4;"></i>
+                                <?php echo e($disposed ? 'No disposed Cancelled by Customer leads.' : 'No active Cancelled by Customer leads.'); ?>
+
+                            </td>
+                        </tr>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($cancelled_leads->hasPages()): ?>
+                <div class="px-3 py-2"><?php echo e($cancelled_leads->withQueryString()->links()); ?></div>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+        </div>
+
     </div>
 </div>
 
@@ -538,7 +698,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td><label for="dm-input-cn_name" style="font-size:.73rem;font-weight:600;">Full Name <span class="fh-badge" id="fh-cn_name" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-cn_name" name="cn_name" type="text"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-cn_name" name="cn_name" type="text"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-cn_name',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-date_of_birth" style="font-size:.73rem;font-weight:600;">Date of Birth <span class="fh-badge" id="fh-date_of_birth" style="display:none;"></span></label></td>
@@ -560,7 +720,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-ssn" style="font-size:.73rem;font-weight:600;">SSN <span class="fh-badge" id="fh-ssn" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-ssn" name="ssn" type="text" autocomplete="off"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-ssn" name="ssn" type="text" autocomplete="off"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-ssn',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                             </table>
                         </div>
@@ -572,7 +732,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td><label for="dm-input-phone_number" style="font-size:.73rem;font-weight:600;">Primary Phone <span class="fh-badge" id="fh-phone_number" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-phone_number" name="phone_number" type="tel"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-phone_number" name="phone_number" type="tel"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-phone_number',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-secondary_phone_number" style="font-size:.73rem;font-weight:600;">Secondary Phone <span class="fh-badge" id="fh-secondary_phone_number" style="display:none;"></span></label></td>
@@ -580,7 +740,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-address" style="font-size:.73rem;font-weight:600;">Address <span class="fh-badge" id="fh-address" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-address" name="address" type="text"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-address" name="address" type="text"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-address',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-state" style="font-size:.73rem;font-weight:600;">State <span class="fh-badge" id="fh-state" style="display:none;"></span></label></td>
@@ -669,7 +829,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-doctor_name" style="font-size:.73rem;font-weight:600;">Doctor Name <span class="fh-badge" id="fh-doctor_name" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-doctor_name" name="doctor_name" type="text"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-doctor_name" name="doctor_name" type="text"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-doctor_name',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-doctor_number" style="font-size:.73rem;font-weight:600;">Doctor Phone <span class="fh-badge" id="fh-doctor_number" style="display:none;"></span></label></td>
@@ -677,7 +837,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-doctor_address" style="font-size:.73rem;font-weight:600;">Doctor Address <span class="fh-badge" id="fh-doctor_address" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-doctor_address" name="doctor_address" type="text"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-doctor_address" name="doctor_address" type="text"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-doctor_address',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                             </table>
                         </div>
@@ -689,7 +849,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td><label for="dm-input-bank_name" style="font-size:.73rem;font-weight:600;">Bank Name <span class="fh-badge" id="fh-bank_name" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-bank_name" name="bank_name" type="text"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-bank_name" name="bank_name" type="text"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-bank_name',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-account_type" style="font-size:.73rem;font-weight:600;">Account Type <span class="fh-badge" id="fh-account_type" style="display:none;"></span></label></td>
@@ -707,11 +867,11 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-routing_number" style="font-size:.73rem;font-weight:600;">Routing # <span class="fh-badge" id="fh-routing_number" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-routing_number" name="routing_number" type="text" autocomplete="off"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-routing_number" name="routing_number" type="text" autocomplete="off"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-routing_number',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-account_number" style="font-size:.73rem;font-weight:600;">Account # <span class="fh-badge" id="fh-account_number" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-account_number" name="account_number" type="text" autocomplete="off"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-account_number" name="account_number" type="text" autocomplete="off"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-account_number',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-bank_balance" style="font-size:.73rem;font-weight:600;">Balance <span class="fh-badge" id="fh-bank_balance" style="display:none;"></span></label></td>
@@ -746,7 +906,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                             <table class="detail-tbl" style="width:100%;border-collapse:collapse;">
                                 <tr>
                                     <td><label for="dm-input-card_number" style="font-size:.73rem;font-weight:600;">Card Number <span class="fh-badge" id="fh-card_number" style="display:none;"></span></label></td>
-                                    <td><input class="ret-edit-input" id="dm-input-card_number" name="card_number" type="text" autocomplete="off"></td>
+                                    <td><div class="ret-copy-wrap"><div class="ret-input-row"><input class="ret-edit-input" id="dm-input-card_number" name="card_number" type="text" autocomplete="off"><button type="button" class="ret-copy-btn" onclick="copyFieldValue('dm-input-card_number',this)" title="Copy"><i class="bx bx-copy"></i></button></div></div></td>
                                 </tr>
                                 <tr>
                                     <td><label for="dm-input-cvv" style="font-size:.73rem;font-weight:600;">CVV <span class="fh-badge" id="fh-cvv" style="display:none;"></span></label></td>
@@ -977,15 +1137,21 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         }
 
         // Text / number / date inputs: inject CURRENT display + leave box empty
-        const field  = id.replace('dm-input-', '');
-        const parent = el.closest('td') || el.parentNode;
-        if (parent) {
-            let curDiv = parent.querySelector('.ph-cur');
+        const field      = id.replace('dm-input-', '');
+        const directParent = el.parentNode; // always the immediate parent so insertBefore works
+        // For copy-button fields, el is inside .ret-input-row → insert .ph-cur above that row
+        const isInRow      = directParent.classList && directParent.classList.contains('ret-input-row');
+        const insertHost   = isInRow ? directParent.parentNode : directParent; // column wrapper or plain parent
+        const insertBefore = isInRow ? directParent : el;                     // insert before the row/el
+        const container    = el.closest('td') || directParent;
+        if (insertHost) {
+            let curDiv = container.querySelector('.ph-cur[data-field="' + field + '"]');
             if (!curDiv) {
                 curDiv = document.createElement('div');
                 curDiv.className = 'ph-cur';
+                curDiv.dataset.field = field;
                 curDiv.innerHTML = `<span class="ph-cur-tag">CURRENT</span> <span class="ph-cur-val" id="dc-${field}">—</span>`;
-                parent.insertBefore(curDiv, el);
+                insertHost.insertBefore(curDiv, insertBefore);
             }
             const dcEl = curDiv.querySelector('.ph-cur-val');
             if (dcEl) {
@@ -1000,6 +1166,8 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         }
         el.value = ''; // always blank — user types to change
         el.placeholder = 'Leave empty to keep current';
+        // Store the raw current value so the copy button can read it directly
+        el.dataset.currentVal = (val == null || String(val).trim() === '') ? '' : String(val);
     }
 
     function setTxt(id, val) {
@@ -1058,14 +1226,15 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         }
     }
 
-    document.querySelectorAll('.btn-view-lead').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const raw = this.dataset.lead;
-            let lead;
-            try { lead = JSON.parse(JSON.parse(raw)); } catch(e) {
-                try { lead = JSON.parse(raw); } catch(e2) { console.error('Lead parse error', e2); return; }
-            }
-            viewLeadId = this.dataset.leadId;
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-view-lead');
+        if (!btn) return;
+        const raw = btn.dataset.lead;
+        if (!raw) return;
+        let lead;
+        try { lead = JSON.parse(raw); } catch(err) { console.error('Lead parse error', err, raw); return; }
+        if (!lead || typeof lead !== 'object') return;
+        viewLeadId = btn.dataset.leadId;
 
             // Header
             setTxt('dm-name', lead.cn_name);
@@ -1156,7 +1325,6 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
             if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="bx bx-save me-1"></i> Save Changes'; }
 
             ldModal.show();
-        });
     });
 
     // ── Save Changes (PUT /retention/{id}) ───────────────────────────────────
@@ -1351,6 +1519,24 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
             alert('Error: ' + err.message);
         });
     });
+
+    // Copy field value to clipboard (reads from the CURRENT display, not the empty input)
+    window.copyFieldValue = function copyFieldValue(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const val   = (input?.dataset?.currentVal || '').trim();
+        if (!val || val === '—') return;
+        const finish = () => {
+            btn.classList.add('copied');
+            const i = btn.querySelector('i'); if (i) i.className = 'bx bx-check';
+            setTimeout(() => { btn.classList.remove('copied'); if (i) i.className = 'bx bx-copy'; }, 1500);
+        };
+        navigator.clipboard ? navigator.clipboard.writeText(val).then(finish).catch(() => {
+            const el = document.createElement('textarea');
+            el.value = val; el.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+            finish();
+        }) : (()=>{ const el = document.createElement('textarea'); el.value = val; el.style.cssText='position:fixed;opacity:0'; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); finish(); })();
+    }
 
 })();
 </script>

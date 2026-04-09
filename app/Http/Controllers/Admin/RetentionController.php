@@ -27,12 +27,16 @@ class RetentionController extends Controller
             ]);
         }
 
-        $search    = $request->get('search');
-        $month     = $request->get('month');
-        $year      = $request->get('year');
-        $date_from = $request->get('date_from');
-        $date_to   = $request->get('date_to');
-        $disposed  = $request->boolean('disposed', false); // show disposed leads?
+        $search      = $request->get('search');
+        $month       = $request->get('month');
+        $year        = $request->get('year');
+        $date_from   = $request->get('date_from');
+        $date_to     = $request->get('date_to');
+        $disp_filter = $request->get('disp_filter'); // filter by specific retention disposition (for KPI click)
+        // If a specific disposed disposition is clicked, auto-enable disposed view
+        $disposed = $disp_filter && $disp_filter !== 'pending'
+            ? true
+            : $request->boolean('disposed', false);
 
         $applyFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
             if ($search) {
@@ -92,6 +96,12 @@ class RetentionController extends Controller
                       ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                       ->whereNull('policy_died_at');
 
+        // CANCELLED BY CUSTOMER base scope (subset of Not Issued, separated into own tab)
+        $cancelledBase = Lead::whereNotNull('not_issued_at')
+                             ->whereNull('not_issued_resolved_at')
+                             ->whereNotNull('pending_contract_at')
+                             ->where('not_issued_disposition', Statuses::NI_CANCELLED_BY_CUSTOMER);
+
         // ----- KPI counts (all time, across both scopes) -----
         // A lead is "recalled" if recall_requested_at is set OR ret_action_status = 'recalled'.
         // A lead is "pending" only when it has no ret_action_status (or = 'pending') AND is NOT recalled.
@@ -108,9 +118,13 @@ class RetentionController extends Controller
 
         // ----- Active counts (filter for the counts KPI numbers above the tabs) -----
         $not_issued_count = $applyFilters($niBase->clone())
+            ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
             ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
             ->count();
         $not_paid_count   = $applyNpFilters($npBase->clone())
+            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
+            ->count();
+        $cancelled_count  = $applyFilters($cancelledBase->clone())
             ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
             ->count();
 
@@ -121,11 +135,18 @@ class RetentionController extends Controller
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->whereIn('retention_disposition', $disposedStatuses);
             $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
                 ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
+                ->whereIn('retention_disposition', $disposedStatuses);
+            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->whereIn('retention_disposition', $disposedStatuses);
         } else {
             // Show active (non-disposed) leads
@@ -133,19 +154,40 @@ class RetentionController extends Controller
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
             $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
                 ->whereNotNull('not_paid_at')
                 ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
+            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', Statuses::NI_CANCELLED_BY_CUSTOMER)
+                ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
+        }
+        // Further narrow by specific disposition if a KPI pill was clicked
+        if ($disp_filter) {
+            if ($disp_filter === 'pending') {
+                $ni_query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
+                $np_query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
+                $cancelled_query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
+            } else {
+                $ni_query->where('retention_disposition', $disp_filter);
+                $np_query->where('retention_disposition', $disp_filter);
+                $cancelled_query->where('retention_disposition', $disp_filter);
+            }
         }
 
-        $ni_query = $applyFilters($ni_query);
-        $np_query = $applyNpFilters($np_query);
+        $ni_query        = $applyFilters($ni_query);
+        $np_query        = $applyNpFilters($np_query);
+        $cancelled_query = $applyFilters($cancelled_query);
 
         $not_issued_leads = $ni_query->latest('not_issued_at')->paginate(50, ['*'], 'not_issued_page');
         $not_paid_leads   = $np_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
+        $cancelled_leads  = $cancelled_query->latest('not_issued_at')->paginate(50, ['*'], 'cancelled_page');
 
         $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
             ->where('expires_at', '>', now())
@@ -156,10 +198,13 @@ class RetentionController extends Controller
         return view('admin.retention.index', compact(
             'not_issued_leads',
             'not_paid_leads',
+            'cancelled_leads',
             'not_issued_count',
             'not_paid_count',
+            'cancelled_count',
             'kpi',
             'disposed',
+            'disp_filter',
             'retentionDispositions',
             'search',
             'month',
