@@ -51,6 +51,17 @@
             @endcanViewModule
 
             @canViewModule('reports')
+            <a href="{{ route('settings.reports.policy-type-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-category"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Policy Type Report</div>
+                    <p class="hub-card-desc">Sales breakdown by policy type (Level, Graded, G.I, Modified) — premium &amp; revenue per type</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
+            @canViewModule('reports')
             <a href="{{ route('settings.reports.sales-status') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-table"></i></div>
                 <div class="hub-card-body">

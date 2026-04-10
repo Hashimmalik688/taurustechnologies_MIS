@@ -1235,20 +1235,22 @@
     <!-- Shared Delete Confirmation Modal -->
     <?php if(auth()->check() && auth()->user()->canDeleteInModule('sales')): ?>
     <div class="modal fade" id="sharedDeleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title text-gold">Confirm Delete</h5>
+                    <h5 class="modal-title text-gold">Remove Sale</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete <strong id="sharedDeleteLeadName"></strong>?
+                    Are you sure you want to remove the sale for <strong id="sharedDeleteLeadName"></strong>?<br>
+                    <small class="text-muted">The lead record will be kept; only the sale data will be cleared.</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                     <form id="sharedDeleteForm" method="POST">
                         <?php echo csrf_field(); ?>
                         <?php echo method_field('DELETE'); ?>
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Remove Sale</button>
                     </form>
                 </div>
             </div>

@@ -881,9 +881,21 @@ class LeadController extends Controller
 
     public function destroy($id)
     {
-        Lead::destroy($id);
+        $lead = Lead::findOrFail($id);
 
-        return redirect()->route('leads.index')->with('success', 'Lead deleted successfully.');
+        // Remove sale data only — do NOT delete the lead record.
+        $lead->update([
+            'sale_at'         => null,
+            'sale_date'       => null,
+            'closer_name'     => null,
+            'closer_user_id'  => null,
+            'carrier_name'    => null,
+            'monthly_premium' => null,
+            'policy_number'   => null,
+            'status'          => 'unassigned',
+        ]);
+
+        return redirect()->route('sales.index')->with('success', 'Sale removed successfully. Lead record preserved.');
     }
 
     public function updateStatus(Request $request, $id)

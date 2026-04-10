@@ -1418,11 +1418,14 @@ class ReportController extends Controller
         $premium = (float) ($lead->monthly_premium ?? 0);
         if ($premium <= 0) return 0.0;
 
+        // Cannot calculate without both partner and carrier
+        if (empty($lead->partner_id) || empty($lead->insurance_carrier_id)) return 0.0;
+
         $settlementType = $this->resolveSettlementKey($lead);
 
         $result = app(CommissionCalculationService::class)->calculateCommission(
-            $lead->partner_id,
-            $lead->insurance_carrier_id,
+            (int) $lead->partner_id,
+            (int) $lead->insurance_carrier_id,
             $lead->state ?? '',
             $settlementType,
             $premium
@@ -1704,6 +1707,189 @@ class ReportController extends Controller
             'carrierLabel', 'partnerLabel', 'stageLabel', 'stage',
             'dateFrom', 'dateTo', 'dateField',
             'carrierId', 'carrierName', 'partnerId'
+        ));
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+     * POLICY TYPE REPORT
+     * Summary table: one row per policy type (G.I, Graded, Level, Modified, …)
+     * ────────────────────────────────────────────────────────────── */
+    public function policyTypeReport(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
+
+        $query = Lead::whereNotNull('sale_at')
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name');
+
+        if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
+        if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+
+        $leads = $query->select(
+            'id', 'policy_type', 'monthly_premium', 'settlement_type',
+            'carrier_name', 'insurance_carrier_id', 'partner_id', 'assigned_partner',
+            'state', 'sale_date'
+        )->get();
+
+        // Group by policy_type + carrier_name + assigned_partner
+        $policyData = $leads
+            ->groupBy(fn($l) =>
+                $this->normalizePolicyType($l->policy_type) . '||' .
+                trim(strtolower($l->carrier_name ?? '')) . '||' .
+                trim(strtolower($l->assigned_partner ?? ''))
+            )
+            ->map(function ($group) {
+                $first        = $group->first();
+                $totalRevenue = 0;
+                foreach ($group as $lead) {
+                    $totalRevenue += $this->calcLeadRevenue($lead);
+                }
+                return (object) [
+                    'policy_type'          => $this->normalizePolicyType($first->policy_type),
+                    'carrier_name'         => $first->carrier_name,
+                    'insurance_carrier_id' => $first->insurance_carrier_id,
+                    'assigned_partner'     => $first->assigned_partner,
+                    'partner_id'           => $first->partner_id,
+                    'total_sales'          => $group->count(),
+                    'total_premium'        => $group->sum('monthly_premium'),
+                    'total_revenue'        => round($totalRevenue, 2),
+                ];
+            })
+            ->sortByDesc('total_sales')
+            ->values();
+
+        $grandTotalSales   = $policyData->sum('total_sales');
+        $grandTotalPremium = $policyData->sum('total_premium');
+        $grandTotalRevenue = $policyData->sum('total_revenue');
+
+        return view('admin.reports.policy-type-report', compact(
+            'policyData',
+            'grandTotalSales',
+            'grandTotalPremium',
+            'grandTotalRevenue',
+            'dateFrom',
+            'dateTo'
+        ));
+    }
+
+    /**
+     * Return all known raw DB values that map to a given canonical policy type.
+     * If $canonical is null, returns a flat array of ALL known raw values (any type).
+     */
+    private function rawVariantsForPolicyType(?string $canonical = null): array
+    {
+        $map = [
+            'Level'    => ['Level', 'level', 'level (pref)', 'level pref', 'level preferred', 'lvl',
+                           'Std', 'std', 'Standard', 'standard', 'Standard Benefit', 'standard benefit',
+                           'Preferred', 'preferred', 'Pref', 'pref'],
+            'Graded'   => ['Graded', 'graded', 'Graded Benefit', 'graded benefit'],
+            'G.I'      => ['G.I', 'G.I.', 'GI', 'gi', 'Gi', 'g.i', 'g.i.',
+                           'Guaranteed Issue', 'guaranteed issue', 'Guaranteed', 'guaranteed', 'GU Issue'],
+            'Modified' => ['Modified', 'modified', 'Modified Benefit', 'modified benefit', 'Mod', 'mod'],
+        ];
+
+        if ($canonical === null) {
+            return array_merge(...array_values($map));
+        }
+
+        return $map[$canonical] ?? [$canonical];
+    }
+
+    /**
+     * Normalize free-text policy_type values to canonical dropdown options.
+     * Canonical: Level | Graded | G.I | Modified | Unknown
+     */
+    private function normalizePolicyType(?string $raw): string
+    {
+        if (empty($raw)) return 'Unknown';
+        $v = strtolower(trim($raw));
+
+        if (str_starts_with($v, 'level') || in_array($v, ['std', 'standard', 'standard benefit', 'preferred', 'pref'])) {
+            return 'Level';
+        }
+        if (str_starts_with($v, 'graded')) {
+            return 'Graded';
+        }
+        if (in_array($v, ['g.i', 'gi', 'g.i.', 'guaranteed issue', 'guaranteed', 'gu issue'])) {
+            return 'G.I';
+        }
+        if (str_starts_with($v, 'modified') || str_starts_with($v, 'mod ')) {
+            return 'Modified';
+        }
+
+        // already canonical
+        $canonical = ['Level' => 1, 'Graded' => 1, 'G.I' => 1, 'Modified' => 1];
+        if (isset($canonical[$raw])) return $raw;
+
+        return 'Unknown';
+    }
+
+    /**
+     * Drilldown: individual sales for a specific policy type.
+     */
+    public function policyTypeReportDrilldown(Request $request)
+    {
+        $dateFrom        = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo          = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $policyType      = $request->get('policy_type', 'Unknown');
+        $carrierName     = $request->get('carrier_name');
+        $assignedPartner = $request->get('assigned_partner');
+
+        $query = Lead::whereNotNull('sale_at')
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name');
+
+        if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
+        if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+
+        if ($policyType === 'Unknown') {
+            // All sales whose policy_type doesn't map to a canonical value
+            $allKnown = $this->rawVariantsForPolicyType();
+            $query->where(fn($q) =>
+                $q->whereNull('policy_type')
+                  ->orWhere('policy_type', '')
+                  ->orWhereNotIn('policy_type', $allKnown)
+            );
+        } else {
+            $variants = $this->rawVariantsForPolicyType($policyType);
+            $query->whereIn('policy_type', $variants);
+        }
+
+        if ($carrierName !== null) $query->whereRaw('LOWER(carrier_name) = ?', [strtolower($carrierName)]);
+        if ($assignedPartner !== null) {
+            if ($assignedPartner === '') $query->where(fn($q) => $q->whereNull('assigned_partner')->orWhere('assigned_partner', ''));
+            else $query->whereRaw('LOWER(assigned_partner) = ?', [strtolower($assignedPartner)]);
+        }
+
+        $rawLeads = $query->select(
+            'id', 'cn_name', 'policy_type', 'carrier_name', 'assigned_partner',
+            'insurance_carrier_id', 'partner_id',
+            'monthly_premium', 'settlement_type', 'state', 'sale_date',
+            'policy_number', 'closer_name', 'issuance_status',
+            'agent_commission', 'agent_revenue', 'settlement_percentage',
+            'commission_calculation_notes', 'commission_calculated_at'
+        )->orderByDesc('sale_date')->get();
+
+        $leads = $rawLeads->map(function ($lead) {
+            $lead->eff_revenue = $this->calcLeadRevenue($lead);
+            return $lead;
+        });
+
+        $totalSales   = $leads->count();
+        $totalPremium = $leads->sum('monthly_premium');
+        $totalRevenue = $leads->sum('eff_revenue');
+
+        $carrierLabel = $carrierName ?: 'All Carriers';
+        $partnerLabel = ($assignedPartner !== null && $assignedPartner !== '') ? $assignedPartner : null;
+
+        return view('admin.reports.policy-type-report-drilldown', compact(
+            'leads', 'totalSales', 'totalPremium', 'totalRevenue',
+            'policyType', 'carrierLabel', 'partnerLabel',
+            'dateFrom', 'dateTo',
+            'carrierName', 'assignedPartner'
         ));
     }
 }
