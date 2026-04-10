@@ -78,6 +78,7 @@
             $canSeeSalesOps = auth()->check() && (
                 auth()->user()->canViewModule('sales') ||
                 auth()->user()->canViewModule('qa-review') ||
+                auth()->user()->canViewModule('qa-scoring') ||
                 auth()->user()->canViewModule('issuance') ||
                 auth()->user()->canViewModule('pendings-approved') ||
                 auth()->user()->canViewModule('pending-draft') ||

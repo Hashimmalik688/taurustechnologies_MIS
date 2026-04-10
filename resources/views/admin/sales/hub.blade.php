@@ -97,9 +97,11 @@
         @endif
 
         {{-- Quality Assurance --}}
-        @canViewModule('qa-review')
+        @php $canSeeQaSection = auth()->user()->canViewModule('qa-review') || auth()->user()->canViewModule('qa-scoring'); @endphp
+        @if($canSeeQaSection)
         <div class="hub-section-label">Quality Assurance</div>
         <div class="hub-grid">
+            @canViewModule('qa-review')
             <a href="{{ route('qa.review') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-check-circle"></i></div>
                 <div class="hub-card-body">
@@ -108,7 +110,9 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
+            @endcanViewModule
 
+            @canViewModule('qa-scoring')
             <a href="{{ route('qa.scoring') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-shield-quarter"></i></div>
                 <div class="hub-card-body">
@@ -117,8 +121,9 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
+            @endcanViewModule
         </div>
-        @endcanViewModule
+        @endif
 
         {{-- Verification --}}
         @if(\Illuminate\Support\Facades\Route::has('bank-verification.index'))

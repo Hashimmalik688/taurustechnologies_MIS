@@ -78,7 +78,8 @@ class AssemblyAIService
     public function submitTranscription(string $audioUrl, array $options = []): string
     {
         $payload = array_merge([
-            'audio_url'          => $audioUrl,
+            'audio_url'     => $audioUrl,
+            'speech_models' => ['universal-3-pro', 'universal-2'], // plural array — required by AssemblyAI v2 API (universal-3-pro preferred, falls back to universal-2)
             'speaker_labels'     => true,      // Diarization — identifies speakers
             'speakers_expected'  => 2,         // Typically Agent + Customer
             'punctuate'          => true,

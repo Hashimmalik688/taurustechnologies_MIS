@@ -94,6 +94,8 @@ class Statuses
     public const FDFP_INSUFFICIENT_FUND     = 'insufficient_fund';
     public const FDFP_UNAUTHORIZED_PAYMENTS = 'unauthorized_payments';
     public const FDFP_MANUAL_ACTION         = 'manual_action';
+    public const FDFP_PAYMENT_STOPPED       = 'payment_stopped';
+    public const FDFP_ACCOUNT_CLOSED        = 'account_closed';
 
     /** Human-readable labels for FDFP types */
     public const FDFP_TYPES = [
@@ -101,6 +103,8 @@ class Statuses
         self::FDFP_INSUFFICIENT_FUND     => 'Insufficient Fund',
         self::FDFP_UNAUTHORIZED_PAYMENTS => 'Unauthorized Payments',
         self::FDFP_MANUAL_ACTION         => 'Manual Action',
+        self::FDFP_PAYMENT_STOPPED       => 'Payment Stopped',
+        self::FDFP_ACCOUNT_CLOSED        => 'Account Closed',
     ];
 
     // ═══════════════════════════════════════════════════════════════════
@@ -164,25 +168,37 @@ class Statuses
 
     public const RET_DISP_PENDING             = 'pending';
     public const RET_DISP_RETAINED            = 'retained';
-    public const RET_DISP_IN_PROGRESS         = 'in_progress';
     public const RET_DISP_REWRITE             = 'rewrite';
     public const RET_DISP_RECALLED_TO_CLOSER  = 'recalled_to_closer';
     public const RET_DISP_CANCELLED           = 'cancelled';
+    // Contact-attempt statuses (active — not disposed)
+    public const RET_DISP_IN_PROGRESS         = 'in_progress';
+    public const RET_DISP_UNABLE_TO_CONNECT   = 'unable_to_connect';
+    public const RET_DISP_NOT_ANSWERING       = 'not_answering';
 
     /** Human-readable labels for retention dispositions */
     public const RETENTION_DISPOSITIONS = [
         self::RET_DISP_PENDING            => 'Pending',
         self::RET_DISP_RETAINED           => 'Retained',
-        self::RET_DISP_IN_PROGRESS        => 'In Progress',
         self::RET_DISP_REWRITE            => 'Rewrite',
         self::RET_DISP_RECALLED_TO_CLOSER => 'Recalled to Closer',
         self::RET_DISP_CANCELLED          => 'Cancelled',
+        // Contact-attempt group (shown in bottom row of modal)
+        self::RET_DISP_IN_PROGRESS        => 'In Progress',
+        self::RET_DISP_UNABLE_TO_CONNECT  => 'Unable to Connect',
+        self::RET_DISP_NOT_ANSWERING      => 'Not Answering',
+    ];
+
+    /** Contact-attempt dispositions (active, not resolved — shown in bottom row of modal) */
+    public const RETENTION_CONTACT_ATTEMPT_DISPOSITIONS = [
+        self::RET_DISP_IN_PROGRESS,
+        self::RET_DISP_UNABLE_TO_CONNECT,
+        self::RET_DISP_NOT_ANSWERING,
     ];
 
     /** Disposition values that are "disposed" — hidden from the active retention list */
     public const RETENTION_DISPOSED_STATUSES = [
         self::RET_DISP_RETAINED,
-        self::RET_DISP_IN_PROGRESS,
         self::RET_DISP_REWRITE,
         self::RET_DISP_RECALLED_TO_CLOSER,
         self::RET_DISP_CANCELLED,

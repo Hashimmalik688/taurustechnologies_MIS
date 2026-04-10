@@ -31,6 +31,10 @@
 .ret-kpi-pill.k-recalled .rk-val{color:#7c3aed;}
 .ret-kpi-pill.k-cancelled .rk-icon{background:rgba(244,106,106,.12);color:#c84646;}
 .ret-kpi-pill.k-cancelled .rk-val{color:#c84646;}
+.ret-kpi-pill.k-unable_to_connect .rk-icon{background:rgba(251,146,60,.12);color:#c2410c;}
+.ret-kpi-pill.k-unable_to_connect .rk-val{color:#c2410c;}
+.ret-kpi-pill.k-not_answering .rk-icon{background:rgba(156,163,175,.12);color:#6b7280;}
+.ret-kpi-pill.k-not_answering .rk-val{color:#6b7280;}
 
 /* Card & filter */
 .sl-card{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.06);border-radius:16px;overflow:hidden;}
@@ -69,6 +73,9 @@
 .a-btn{display:inline-flex;align-items:center;gap:2px;font-size:.63rem;font-weight:600;padding:.18rem .42rem;border-radius:.3rem;border:1px solid;cursor:pointer;text-decoration:none;transition:all .12s;white-space:nowrap;}
 .a-view{background:rgba(85,110,230,.1);color:#556ee6;border-color:rgba(85,110,230,.25);}.a-view:hover{background:rgba(85,110,230,.2);}
 .a-recall{background:rgba(139,92,246,.08);color:#7c3aed;border-color:rgba(139,92,246,.25);}.a-recall:hover{background:rgba(139,92,246,.18);}
+.a-send-back{background:rgba(251,146,60,.08);color:#c2410c;border-color:rgba(251,146,60,.25);}.a-send-back:hover{background:rgba(251,146,60,.18);}
+.ret-note-pop-btn{background:rgba(85,110,230,.08);color:#556ee6;border:1px solid rgba(85,110,230,.2);border-radius:.4rem;padding:.25rem .45rem;font-size:.82rem;line-height:1;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;}
+.ret-note-pop-btn:hover{background:rgba(85,110,230,.18);border-color:#556ee6;}
 
 /* Retention disposition badge (in table rows) */
 .ret-status-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:10px;text-transform:uppercase;letter-spacing:.3px;}
@@ -78,6 +85,8 @@
 .rdb-rewrite{background:rgba(241,180,76,.12);color:#b87a14;border:1px solid rgba(241,180,76,.25);}
 .rdb-recalled_to_closer{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.2);}
 .rdb-cancelled{background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.2);}
+.rdb-unable_to_connect{background:rgba(251,146,60,.12);color:#c2410c;border:1px solid rgba(251,146,60,.2);}
+.rdb-not_answering{background:rgba(156,163,175,.12);color:#6b7280;border:1px solid rgba(156,163,175,.2);}
 
 /* Disposition buttons in modal footer */
 .ret-disp-btn{display:inline-flex;align-items:center;gap:.25rem;font-size:.67rem;font-weight:700;padding:.28rem .6rem;border-radius:1rem;border:2px solid;cursor:pointer;transition:all .15s;white-space:nowrap;background:transparent;}
@@ -93,6 +102,10 @@
 .ret-disp-btn.disp-recalled_to_closer.active,.ret-disp-btn.disp-recalled_to_closer:hover{background:rgba(139,92,246,.15);border-color:#8b5cf6;}
 .ret-disp-btn.disp-cancelled{color:#c84646;border-color:rgba(244,106,106,.4);}
 .ret-disp-btn.disp-cancelled.active,.ret-disp-btn.disp-cancelled:hover{background:rgba(244,106,106,.15);border-color:#f46a6a;}
+.ret-disp-btn.disp-unable_to_connect{color:#c2410c;border-color:rgba(251,146,60,.4);}
+.ret-disp-btn.disp-unable_to_connect.active,.ret-disp-btn.disp-unable_to_connect:hover{background:rgba(251,146,60,.15);border-color:#fb923c;}
+.ret-disp-btn.disp-not_answering{color:#6b7280;border-color:rgba(156,163,175,.4);}
+.ret-disp-btn.disp-not_answering.active,.ret-disp-btn.disp-not_answering:hover{background:rgba(156,163,175,.15);border-color:#9ca3af;}
 
 /* Field highlight badge (cross-page updated indicator) */
 .fh-badge{display:inline-flex;align-items:center;gap:.2rem;font-size:.58rem;font-weight:600;padding:.08rem .32rem;border-radius:8px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.25);white-space:nowrap;margin-left:.3rem;cursor:default;vertical-align:middle;}
@@ -173,6 +186,8 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         'rewrite'            => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'rewrite'])),
         'recalled_to_closer' => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'recalled_to_closer'])),
         'cancelled'          => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'cancelled'])),
+        'unable_to_connect'  => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'unable_to_connect'])),
+        'not_answering'      => route('retention.index', array_merge(request()->only(['search','month','year','date_from','date_to']), ['disp_filter' => 'not_answering'])),
     ];
 @endphp
 {{-- KPI Row --}}
@@ -200,6 +215,14 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     <a href="{{ $kpiLinks['cancelled'] }}" class="ret-kpi-pill k-cancelled {{ ($disp_filter ?? '') === 'cancelled' ? 'kpi-active' : '' }}">
         <div class="rk-icon"><i class="bx bx-x-circle"></i></div>
         <div><div class="rk-lbl">Cancelled</div><div class="rk-val">{{ $kpi['cancelled'] ?? 0 }}</div></div>
+    </a>
+    <a href="{{ $kpiLinks['unable_to_connect'] }}" class="ret-kpi-pill k-unable_to_connect {{ ($disp_filter ?? '') === 'unable_to_connect' ? 'kpi-active' : '' }}">
+        <div class="rk-icon"><i class="bx bx-phone-off"></i></div>
+        <div><div class="rk-lbl">Unable to Connect</div><div class="rk-val">{{ $kpi['unable_to_connect'] ?? 0 }}</div></div>
+    </a>
+    <a href="{{ $kpiLinks['not_answering'] }}" class="ret-kpi-pill k-not_answering {{ ($disp_filter ?? '') === 'not_answering' ? 'kpi-active' : '' }}">
+        <div class="rk-icon"><i class="bx bx-phone-x"></i></div>
+        <div><div class="rk-lbl">Not Answering</div><div class="rk-val">{{ $kpi['not_answering'] ?? 0 }}</div></div>
     </a>
 </div>
 
@@ -235,15 +258,15 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     {{-- Tabs + disposed toggle --}}
     <div class="sl-tabs" role="tablist">
         <div style="display:flex;gap:2px;flex-wrap:wrap;">
-            <a class="sl-tab active" data-bs-toggle="tab" href="#tab-not-issued" role="tab">
+            <a class="sl-tab {{ $activeTab === 'not-issued' ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-not-issued" role="tab">
                 <i class="bx bx-x-circle"></i> Not Issued
                 <span class="badge bg-warning text-dark">{{ $not_issued_count }}</span>
             </a>
-            <a class="sl-tab" data-bs-toggle="tab" href="#tab-not-paid" role="tab">
+            <a class="sl-tab {{ $activeTab === 'not-paid' ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-not-paid" role="tab">
                 <i class="bx bx-error-circle"></i> Not Paid / FDFP
                 <span class="badge bg-danger">{{ $not_paid_count }}</span>
             </a>
-            <a class="sl-tab" data-bs-toggle="tab" href="#tab-cancelled" role="tab">
+            <a class="sl-tab {{ $activeTab === 'cancelled' ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-cancelled" role="tab">
                 <i class="bx bx-user-x"></i> Cancelled by Customer
                 <span class="badge bg-secondary">{{ $cancelled_count }}</span>
             </a>
@@ -260,19 +283,21 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     <div class="tab-content">
 
         {{-- NOT ISSUED TAB --}}
-        <div class="tab-pane show active" id="tab-not-issued" role="tabpanel">
+        <div class="tab-pane {{ $activeTab === 'not-issued' ? 'show active' : '' }}" id="tab-not-issued" role="tabpanel">
             <div class="sl-tbl-wrap">
                 <table class="sl-tbl">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Client</th>
-                            <th>Phone</th>
+                            <th>Policy #</th>
                             <th>Carrier / Closer</th>
                             <th>Not Issued Reason</th>
                             <th>Marked At</th>
                             <th>Done By / Time</th>
+                            <th>Last Updated</th>
                             <th>Recall Note</th>
+                            <th style="min-width:160px;">Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -327,7 +352,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <br><span class="ret-status-badge rdb-{{ $retDisp }}" style="margin-top:.15rem;">{{ Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp }}</span>
                                 @endif
                             </td>
-                            <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
+                            <td style="font-size:.7rem;font-family:monospace;">{{ $lead->policy_number ?? '—' }}</td>
                             <td style="font-size:.7rem;">
                                 {{ $lead->carrier_name ?? '—' }}
                                 @if($lead->closer_name)<br><span style="color:var(--bs-surface-400);">{{ $lead->closer_name }}</span>@endif
@@ -354,11 +379,39 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 @endif
                             </td>
+                            <td style="font-size:.7rem;min-width:140px;">
+                                @php $lastHL = $lead->fieldHighlights->sortByDesc('updated_at')->first(); @endphp
+                                @if($lastHL && $lastHL->updatedBy)
+                                    <strong style="font-size:.7rem;color:#334155;display:block;white-space:nowrap;">{{ $lastHL->updatedBy->name }}</strong>
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lastHL->updated_at->format('m/d/Y h:i A') }}</span>
+                                @elseif($lead->updated_at)
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lead->updated_at->format('m/d/Y h:i A') }}</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
                             <td style="font-size:.7rem;max-width:180px;white-space:normal;line-height:1.4;">
                                 @if($lead->recall_note)
                                     <span style="color:#7c3aed;font-style:italic;">{{ $lead->recall_note }}</span>
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
+                            <td style="min-width:180px;max-width:220px;vertical-align:middle;">
+                                @if($lead->retention_notes)
+                                    <div style="display:flex;align-items:center;gap:.35rem;min-width:0;">
+                                        <button type="button" class="ret-note-pop-btn" style="flex-shrink:0;margin-top:.05rem;"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="click"
+                                            data-bs-placement="left"
+                                            data-bs-content="{{ nl2br(e($lead->retention_notes)) }}"
+                                            title="Retention Notes">
+                                            <i class="bx bx-notepad"></i>
+                                        </button>
+                                        <span style="font-size:.68rem;color:#334155;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">{{ Str::limit(str_replace(["\r\n", "\n", "\r"], ' ', $lead->retention_notes), 55) }}</span>
+                                    </div>
+                                @else
+                                    <span style="color:var(--bs-surface-400);font-size:.75rem;">—</span>
                                 @endif
                             </td>
                             <td>
@@ -369,7 +422,11 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                         data-type="not_issued">
                                         <i class="bx bx-show"></i> View / Edit
                                     </button>
-                                    @if(!$lead->recall_requested_at && !$disposed)
+                                    @if($lead->retention_disposition === 'rewrite')
+                                        <button class="a-btn a-send-back btn-send-back-rewrite" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
+                                            <i class="bx bx-left-arrow-circle"></i> Revert
+                                        </button>
+                                    @elseif(!$lead->recall_requested_at && !$disposed)
                                         <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
                                             <i class="bx bx-undo"></i> Recall
                                         </button>
@@ -379,7 +436,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                         </tr>
                         @empty
                         <tr class="sl-empty-row">
-                            <td colspan="9">
+                            <td colspan="11">
                                 <i class="bx bx-inbox" style="font-size:1.8rem;display:block;margin-bottom:.3rem;opacity:.4;"></i>
                                 {{ $disposed ? 'No disposed Not Issued leads.' : 'No active Not Issued leads.' }}
                             </td>
@@ -394,19 +451,21 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         </div>
 
         {{-- NOT PAID TAB --}}
-        <div class="tab-pane" id="tab-not-paid" role="tabpanel">
+        <div class="tab-pane {{ $activeTab === 'not-paid' ? 'show active' : '' }}" id="tab-not-paid" role="tabpanel">
             <div class="sl-tbl-wrap">
                 <table class="sl-tbl">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Client</th>
-                            <th>Phone</th>
+                            <th>Policy #</th>
                             <th>Carrier / Closer</th>
                             <th>FDFP Type</th>
                             <th>Marked At</th>
                             <th>Done By / Time</th>
+                            <th>Last Updated</th>
                             <th>Recall Note</th>
+                            <th style="min-width:160px;">Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -465,7 +524,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <br><span class="ret-status-badge rdb-{{ $retDisp }}" style="margin-top:.15rem;">{{ Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp }}</span>
                                 @endif
                             </td>
-                            <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
+                            <td style="font-size:.7rem;font-family:monospace;">{{ $lead->policy_number ?? '—' }}</td>
                             <td style="font-size:.7rem;">
                                 {{ $lead->carrier_name ?? '—' }}
                                 @if($lead->closer_name)<br><span style="color:var(--bs-surface-400);">{{ $lead->closer_name }}</span>@endif
@@ -490,11 +549,39 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 @endif
                             </td>
+                            <td style="font-size:.7rem;min-width:140px;">
+                                @php $lastHL = $lead->fieldHighlights->sortByDesc('updated_at')->first(); @endphp
+                                @if($lastHL && $lastHL->updatedBy)
+                                    <strong style="font-size:.7rem;color:#334155;display:block;white-space:nowrap;">{{ $lastHL->updatedBy->name }}</strong>
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lastHL->updated_at->format('m/d/Y h:i A') }}</span>
+                                @elseif($lead->updated_at)
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lead->updated_at->format('m/d/Y h:i A') }}</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
                             <td style="font-size:.7rem;max-width:180px;white-space:normal;line-height:1.4;">
                                 @if($lead->recall_note)
                                     <span style="color:#7c3aed;font-style:italic;">{{ $lead->recall_note }}</span>
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
+                            <td style="min-width:180px;max-width:220px;vertical-align:middle;">
+                                @if($lead->retention_notes)
+                                    <div style="display:flex;align-items:center;gap:.35rem;min-width:0;">
+                                        <button type="button" class="ret-note-pop-btn" style="flex-shrink:0;margin-top:.05rem;"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="click"
+                                            data-bs-placement="left"
+                                            data-bs-content="{{ nl2br(e($lead->retention_notes)) }}"
+                                            title="Retention Notes">
+                                            <i class="bx bx-notepad"></i>
+                                        </button>
+                                        <span style="font-size:.68rem;color:#334155;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">{{ Str::limit(str_replace(["\r\n", "\n", "\r"], ' ', $lead->retention_notes), 55) }}</span>
+                                    </div>
+                                @else
+                                    <span style="color:var(--bs-surface-400);font-size:.75rem;">—</span>
                                 @endif
                             </td>
                             <td>
@@ -505,7 +592,11 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                         data-type="not_paid">
                                         <i class="bx bx-show"></i> View / Edit
                                     </button>
-                                    @if(!$lead->recall_requested_at && !$disposed)
+                                    @if($lead->retention_disposition === 'rewrite')
+                                        <button class="a-btn a-send-back btn-send-back-rewrite" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
+                                            <i class="bx bx-left-arrow-circle"></i> Revert
+                                        </button>
+                                    @elseif(!$lead->recall_requested_at && !$disposed)
                                         <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
                                             <i class="bx bx-undo"></i> Recall
                                         </button>
@@ -515,7 +606,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                         </tr>
                         @empty
                         <tr class="sl-empty-row">
-                            <td colspan="9">
+                            <td colspan="11">
                                 <i class="bx bx-inbox" style="font-size:1.8rem;display:block;margin-bottom:.3rem;opacity:.4;"></i>
                                 {{ $disposed ? 'No disposed Not Paid / FDFP leads.' : 'No active Not Paid / FDFP leads.' }}
                             </td>
@@ -530,19 +621,21 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         </div>
 
         {{-- CANCELLED BY CUSTOMER TAB --}}
-        <div class="tab-pane" id="tab-cancelled" role="tabpanel">
+        <div class="tab-pane {{ $activeTab === 'cancelled' ? 'show active' : '' }}" id="tab-cancelled" role="tabpanel">
             <div class="sl-tbl-wrap">
                 <table class="sl-tbl">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Client</th>
-                            <th>Phone</th>
+                            <th>Policy #</th>
                             <th>Carrier / Closer</th>
                             <th>Not Issued Reason</th>
                             <th>Marked At</th>
                             <th>Done By / Time</th>
+                            <th>Last Updated</th>
                             <th>Recall Note</th>
+                            <th style="min-width:160px;">Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -597,7 +690,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <br><span class="ret-status-badge rdb-{{ $retDisp }}" style="margin-top:.15rem;">{{ Statuses::RETENTION_DISPOSITIONS[$retDisp] ?? $retDisp }}</span>
                                 @endif
                             </td>
-                            <td style="font-size:.7rem;">{{ $lead->phone_number ?? '—' }}</td>
+                            <td style="font-size:.7rem;font-family:monospace;">{{ $lead->policy_number ?? '—' }}</td>
                             <td style="font-size:.7rem;">
                                 {{ $lead->carrier_name ?? '—' }}
                                 @if($lead->closer_name)<br><span style="color:var(--bs-surface-400);">{{ $lead->closer_name }}</span>@endif
@@ -624,11 +717,39 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 @endif
                             </td>
+                            <td style="font-size:.7rem;min-width:140px;">
+                                @php $lastHL = $lead->fieldHighlights->sortByDesc('updated_at')->first(); @endphp
+                                @if($lastHL && $lastHL->updatedBy)
+                                    <strong style="font-size:.7rem;color:#334155;display:block;white-space:nowrap;">{{ $lastHL->updatedBy->name }}</strong>
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lastHL->updated_at->format('m/d/Y h:i A') }}</span>
+                                @elseif($lead->updated_at)
+                                    <span style="color:var(--bs-surface-400);font-size:.65rem;white-space:nowrap;">{{ $lead->updated_at->format('m/d/Y h:i A') }}</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
                             <td style="font-size:.7rem;max-width:180px;white-space:normal;line-height:1.4;">
                                 @if($lead->recall_note)
                                     <span style="color:#7c3aed;font-style:italic;">{{ $lead->recall_note }}</span>
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
+                            </td>
+                            <td style="min-width:180px;max-width:220px;vertical-align:middle;">
+                                @if($lead->retention_notes)
+                                    <div style="display:flex;align-items:center;gap:.35rem;min-width:0;">
+                                        <button type="button" class="ret-note-pop-btn" style="flex-shrink:0;margin-top:.05rem;"
+                                            data-bs-toggle="popover"
+                                            data-bs-trigger="click"
+                                            data-bs-placement="left"
+                                            data-bs-content="{{ nl2br(e($lead->retention_notes)) }}"
+                                            title="Retention Notes">
+                                            <i class="bx bx-notepad"></i>
+                                        </button>
+                                        <span style="font-size:.68rem;color:#334155;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;">{{ Str::limit(str_replace(["\r\n", "\n", "\r"], ' ', $lead->retention_notes), 55) }}</span>
+                                    </div>
+                                @else
+                                    <span style="color:var(--bs-surface-400);font-size:.75rem;">—</span>
                                 @endif
                             </td>
                             <td>
@@ -639,7 +760,11 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                         data-type="not_issued">
                                         <i class="bx bx-show"></i> View / Edit
                                     </button>
-                                    @if(!$lead->recall_requested_at && !$disposed)
+                                    @if($lead->retention_disposition === 'rewrite')
+                                        <button class="a-btn a-send-back btn-send-back-rewrite" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
+                                            <i class="bx bx-left-arrow-circle"></i> Revert
+                                        </button>
+                                    @elseif(!$lead->recall_requested_at && !$disposed)
                                         <button class="a-btn a-recall btn-recall-closer" data-id="{{ $lead->id }}" data-name="{{ $lead->cn_name }}">
                                             <i class="bx bx-undo"></i> Recall
                                         </button>
@@ -649,7 +774,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                         </tr>
                         @empty
                         <tr class="sl-empty-row">
-                            <td colspan="9">
+                            <td colspan="11">
                                 <i class="bx bx-inbox" style="font-size:1.8rem;display:block;margin-bottom:.3rem;opacity:.4;"></i>
                                 {{ $disposed ? 'No disposed Cancelled by Customer leads.' : 'No active Cancelled by Customer leads.' }}
                             </td>
@@ -998,10 +1123,13 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                 </form>
             </div>
             <div class="modal-footer py-2 px-3 flex-column align-items-stretch gap-1">
-                {{-- Row 1: Disposition buttons --}}
+                {{-- All disposition buttons in one row (Recalled to Closer excluded — handled via separate Recall button) --}}
+                @php
+                    $allModalDisps = array_filter($retentionDispositions, fn($k) => $k !== 'recalled_to_closer', ARRAY_FILTER_USE_KEY);
+                @endphp
                 <div class="d-flex gap-1 flex-wrap align-items-center">
                     <span style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:var(--bs-surface-400);letter-spacing:.5px;margin-right:.2rem;">Disposition:</span>
-                    @foreach($retentionDispositions as $dispKey => $dispLabel)
+                    @foreach($allModalDisps as $dispKey => $dispLabel)
                     <button type="button" class="ret-disp-btn disp-{{ $dispKey }}" data-disp="{{ $dispKey }}">{{ $dispLabel }}</button>
                     @endforeach
                 </div>
@@ -1017,13 +1145,18 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                     </div>
                     <div id="dm-recall-note-error" style="display:none;font-size:.65rem;color:#c84646;margin-top:.2rem;">Please enter a recall note.</div>
                 </div>
-                {{-- Row 2: Save changes + links --}}
+                {{-- Row 3: Save changes + Revert Rewrite + links --}}
                 <div class="d-flex gap-2 align-items-center justify-content-between">
                     <div class="d-flex gap-2 align-items-center">
                         <a id="dm-view-link" href="#" target="_blank"
                             style="font-size:.72rem;font-weight:600;color:#556ee6;text-decoration:none;display:inline-flex;align-items:center;gap:.25rem;">
                             <i class="bx bx-external-link"></i> Full Lead
                         </a>
+                        {{-- Revert Rewrite — only visible when lead has disposition=rewrite --}}
+                        <button type="button" id="dm-revert-rewrite-btn"
+                            style="display:none;background:rgba(251,146,60,.1);color:#c2410c;border:1px solid rgba(251,146,60,.3);font-size:.67rem;font-weight:700;border-radius:1rem;padding:.25rem .6rem;">
+                            <i class="bx bx-left-arrow-circle me-1"></i> Revert Rewrite
+                        </button>
                         <span id="dm-save-feedback" class="fh-badge" style="display:none;"></span>
                     </div>
                     <div class="d-flex gap-2 align-items-center">
@@ -1215,6 +1348,11 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
         if (recallWrap) {
             recallWrap.style.display = (viewLeadDisposition === 'recalled_to_closer') ? 'block' : 'none';
         }
+        // Show Revert Rewrite button only when disposition is 'rewrite'
+        const revertBtn = document.getElementById('dm-revert-rewrite-btn');
+        if (revertBtn) {
+            revertBtn.style.display = (viewLeadDisposition === 'rewrite') ? 'inline-block' : 'none';
+        }
     }
 
     document.addEventListener('click', function(e) {
@@ -1384,6 +1522,23 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                 }
                 // Update client name in modal title if it changed
                 if (payload.cn_name) setTxt('dm-name', payload.cn_name);
+                // Patch the data-lead JSON on the row button so re-opening the modal reflects saved values
+                const rowBtn = document.querySelector('.btn-view-lead[data-lead-id="' + viewLeadId + '"]');
+                if (rowBtn) {
+                    try {
+                        const stored = JSON.parse(rowBtn.dataset.lead);
+                        // Update all sent textarea/select fields in the stored JSON
+                        ['retention_notes','staff_notes','comments','bank_verification_status',
+                         'account_type','policy_type','gender','smoker'].forEach(f => {
+                            if (payload[f] !== undefined) stored[f] = payload[f];
+                        });
+                        // Also update any other changed fields
+                        if (data.changed && data.changed.length) {
+                            data.changed.forEach(f => { if (payload[f] !== undefined) stored[f] = payload[f]; });
+                        }
+                        rowBtn.dataset.lead = JSON.stringify(stored);
+                    } catch(e) { /* ignore */ }
+                }
             } else {
                 alert(data.message || 'Error saving changes.');
             }
@@ -1461,6 +1616,57 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
     const recallModalEl  = document.getElementById('recallModal');
     let   recallModalInst = null;
 
+    // ── Send Back from Rewrite (table row Revert button via event delegation) ──
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-send-back-rewrite');
+        if (!btn) return;
+        const id   = btn.dataset.id;
+        const name = btn.dataset.name;
+        if (!confirm(`Revert "${name}" back to the retention queue? The associated rewrite sale will be hidden from sales.`)) return;
+        btn.disabled = true;
+        const origHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        fetch('/retention/' + id + '/send-back-from-rewrite', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({})
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false; btn.innerHTML = origHtml;
+            if (data.success) { location.reload(); }
+            else { alert(data.message || 'Error reverting rewrite.'); }
+        })
+        .catch(err => { btn.disabled = false; btn.innerHTML = origHtml; alert('Error: ' + err.message); });
+    });
+
+    // ── Revert Rewrite from modal footer button ───────────────────────────────
+    document.getElementById('dm-revert-rewrite-btn').addEventListener('click', function () {
+        const btn = this;
+        if (!viewLeadId) return;
+        const name = document.getElementById('dm-name')?.textContent || 'this lead';
+        if (!confirm(`Revert "${name}" back to the retention queue? The associated rewrite sale will be hidden from sales.`)) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Reverting…';
+        fetch('/retention/' + viewLeadId + '/send-back-from-rewrite', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({})
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-left-arrow-circle me-1"></i> Revert Rewrite';
+            if (data.success) { ldModal.hide(); location.reload(); }
+            else { alert(data.message || 'Error reverting.'); }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-left-arrow-circle me-1"></i> Revert Rewrite';
+            alert('Error: ' + err.message);
+        });
+    });
+
     document.querySelectorAll('.btn-recall-closer').forEach(btn => {
         btn.addEventListener('click', function () {
             recallLeadId = this.dataset.id;
@@ -1528,6 +1734,25 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
             finish();
         }) : (()=>{ const el = document.createElement('textarea'); el.value = val; el.style.cssText='position:fixed;opacity:0'; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); finish(); })();
     }
+
+    // ── Retention note popovers ──────────────────────────────────────────────
+    document.querySelectorAll('.ret-note-pop-btn').forEach(el => {
+        new bootstrap.Popover(el, {
+            trigger: 'click',
+            container: 'body',
+            html: true,
+            placement: 'left',
+            customClass: 'ret-note-popover',
+        });
+    });
+    // Close popover when clicking outside
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.ret-note-pop-btn') && !e.target.closest('.popover')) {
+            document.querySelectorAll('.ret-note-pop-btn').forEach(el => {
+                bootstrap.Popover.getInstance(el)?.hide();
+            });
+        }
+    });
 
 })();
 </script>

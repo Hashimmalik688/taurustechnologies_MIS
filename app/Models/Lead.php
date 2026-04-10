@@ -85,6 +85,8 @@ class Lead extends Model
         'cb_sent_to_retention_at',
         'cb_sent_to_retention_by_id',
         'is_rewrite',
+        'rewrite_source_lead_id',
+        'rewrite_sent_back_at',
         'retention_notes',
         'retention_officer_id',
         'ret_action_status',

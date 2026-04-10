@@ -121,7 +121,7 @@ class ChargebackController extends Controller
     public function sendToRetention(Request $request, int $id)
     {
         $request->validate([
-            'fdfp_type'   => 'nullable|in:unstable_to_locate,insufficient_fund,unauthorized_payments,manual_action',
+            'fdfp_type'   => 'nullable|in:' . implode(',', array_keys(Statuses::FDFP_TYPES)),
             'manual_disp' => 'nullable|string|max:100',
             'comment'     => 'nullable|string|max:1000',
             'notes'       => 'nullable|string|max:1000',

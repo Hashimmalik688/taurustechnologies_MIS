@@ -283,6 +283,7 @@ class LeadController extends Controller
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
+            ->whereNull('rewrite_sent_back_at') // hide rewrite sales that have been sent back to retention
             ->where(function($q) {
                 $q->whereNotNull('sale_at')
                   ->orWhereNotNull('sale_date');
@@ -357,6 +358,7 @@ class LeadController extends Controller
         $statsBase = Lead::whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
+            ->whereNull('rewrite_sent_back_at')
             ->where(function($q) {
                 $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
             })
@@ -1721,6 +1723,7 @@ class LeadController extends Controller
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
             ->whereNotNull('sale_at')
+            ->whereNull('rewrite_sent_back_at') // hide rewrite sales sent back to retention
             ->where(function($q) {
                 $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
                   ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
@@ -1732,6 +1735,7 @@ class LeadController extends Controller
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')
             ->whereNotNull('sale_at')
+            ->whereNull('rewrite_sent_back_at')
             ->where(function($q) {
                 $q->where(function($sub) { $sub->whereNotNull('ssn')->where('ssn', '!=', ''); })
                   ->orWhere(function($sub) { $sub->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })

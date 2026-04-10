@@ -18,6 +18,29 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// ══════════════════════════════════════════════════════════════════════
+// Partner Portal API Routes (Partner Guard)
+// ══════════════════════════════════════════════════════════════════════
+Route::prefix('partner')->middleware(['auth:partner', 'prevent.user'])->group(function () {
+    // Revenue & Balance Metrics
+    Route::get('/metrics/revenue', [App\Http\Controllers\Api\PartnerApiController::class, 'getRevenueMetrics'])->name('api.partner.metrics.revenue');
+    Route::get('/metrics/balance', [App\Http\Controllers\Api\PartnerApiController::class, 'getBalance'])->name('api.partner.metrics.balance');
+
+    // Analytics & Breakdown
+    Route::get('/analytics/carriers', [App\Http\Controllers\Api\PartnerApiController::class, 'getCarrierBreakdown'])->name('api.partner.analytics.carriers');
+    Route::get('/analytics/states', [App\Http\Controllers\Api\PartnerApiController::class, 'getStateBreakdown'])->name('api.partner.analytics.states');
+    Route::get('/analytics/ytd', [App\Http\Controllers\Api\PartnerApiController::class, 'getYearToDate'])->name('api.partner.analytics.ytd');
+    Route::get('/analytics/monthly', [App\Http\Controllers\Api\PartnerApiController::class, 'getMonthlyBreakdown'])->name('api.partner.analytics.monthly');
+
+    // Transactions & Ledger
+    Route::get('/transactions', [App\Http\Controllers\Api\PartnerApiController::class, 'getTransactions'])->name('api.partner.transactions');
+    Route::get('/ledger', [App\Http\Controllers\Api\PartnerApiController::class, 'getLedger'])->name('api.partner.ledger');
+
+    // Partnerships & Commissions
+    Route::get('/partnerships', [App\Http\Controllers\Api\PartnerApiController::class, 'getPartnerships'])->name('api.partner.partnerships');
+    Route::post('/estimate-commission', [App\Http\Controllers\Api\PartnerApiController::class, 'estimateCommission'])->name('api.partner.estimate-commission');
+});
+
 // Quick add insurance carrier
 Route::middleware(['auth'])->post('/carriers/quick-add', function (Request $request) {
     $validated = $request->validate([

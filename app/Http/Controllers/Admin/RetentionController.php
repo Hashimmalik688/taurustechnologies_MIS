@@ -18,23 +18,17 @@ class RetentionController extends Controller
      */
     public function index(Request $request)
     {
-        // Default to current month/year if no date filter is applied
-        if (!$request->filled('month') && !$request->filled('year')
-            && !$request->filled('date_from') && !$request->filled('date_to')) {
-            $request->merge([
-                'month' => now()->month,
-                'year'  => now()->year,
-            ]);
-        }
-
+        // Show all leads by default (no date filter pre-applied)
         $search      = $request->get('search');
         $month       = $request->get('month');
         $year        = $request->get('year');
         $date_from   = $request->get('date_from');
         $date_to     = $request->get('date_to');
         $disp_filter = $request->get('disp_filter'); // filter by specific retention disposition (for KPI click)
-        // If a specific disposed disposition is clicked, auto-enable disposed view
-        $disposed = $disp_filter && $disp_filter !== 'pending'
+        // If a specifically *disposed* disposition is clicked, auto-enable disposed view.
+        // Contact-attempt dispositions (in_progress, not_answering, unable_to_connect) are NOT disposed —
+        // they stay in the active list even when filtered.
+        $disposed = ($disp_filter && in_array($disp_filter, Statuses::RETENTION_DISPOSED_STATUSES))
             ? true
             : $request->boolean('disposed', false);
 
@@ -116,17 +110,32 @@ class RetentionController extends Controller
             }
         }
 
-        // ----- Active counts (filter for the counts KPI numbers above the tabs) -----
-        $not_issued_count = $applyFilters($niBase->clone())
-            ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
-            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
-            ->count();
-        $not_paid_count   = $applyNpFilters($npBase->clone())
-            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
-            ->count();
-        $cancelled_count  = $applyFilters($cancelledBase->clone())
-            ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses))
-            ->count();
+        // ----- Active counts (filter for the counts shown on the tabs) -----
+        // Apply disp_filter here too so tab badges reflect what's actually in each tab for the current KPI selection.
+        $buildDispCondition = function($query) use ($disp_filter, $disposed, $disposedStatuses) {
+            if ($disp_filter) {
+                if ($disp_filter === 'pending') {
+                    $query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
+                } else {
+                    $query->where('retention_disposition', $disp_filter);
+                }
+            } elseif ($disposed) {
+                $query->whereIn('retention_disposition', $disposedStatuses);
+            } else {
+                $query->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
+            }
+            return $query;
+        };
+
+        $not_issued_count = $buildDispCondition(
+            $applyFilters($niBase->clone())->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
+        )->count();
+        $not_paid_count   = $buildDispCondition(
+            $applyNpFilters($npBase->clone())
+        )->count();
+        $cancelled_count  = $buildDispCondition(
+            $applyFilters($cancelledBase->clone())
+        )->count();
 
         // ----- Table queries -----
         if ($disposed) {
@@ -189,6 +198,15 @@ class RetentionController extends Controller
         $not_paid_leads   = $np_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
         $cancelled_leads  = $cancelled_query->latest('not_issued_at')->paginate(50, ['*'], 'cancelled_page');
 
+        // Auto-activate the first tab that has results when a KPI filter is applied
+        if ($disp_filter && $not_issued_leads->isEmpty() && !$not_paid_leads->isEmpty()) {
+            $activeTab = 'not-paid';
+        } elseif ($disp_filter && $not_issued_leads->isEmpty() && $not_paid_leads->isEmpty() && !$cancelled_leads->isEmpty()) {
+            $activeTab = 'cancelled';
+        } else {
+            $activeTab = 'not-issued';
+        }
+
         $hasZoomToken = \App\Models\ZoomToken::where('user_id', Auth::id())
             ->where('expires_at', '>', now())
             ->exists();
@@ -205,6 +223,7 @@ class RetentionController extends Controller
             'kpi',
             'disposed',
             'disp_filter',
+            'activeTab',
             'retentionDispositions',
             'search',
             'month',
@@ -320,6 +339,8 @@ class RetentionController extends Controller
             $newSale->submission_reason = null;
             $newSale->submission_by = null;
             $newSale->comments = 'Rewritten from chargeback by ' . $retentionOfficer;
+            $newSale->rewrite_source_lead_id = $lead->id; // track which original lead spawned this sale
+            $newSale->rewrite_sent_back_at = null;
             $newSale->save();
             
             // Mark the original as rewrite
@@ -664,6 +685,57 @@ class RetentionController extends Controller
             'disposition' => $request->disposition,
             'label'       => $label,
             'disposed'    => $disposed,
+        ]);
+    }
+
+    /**
+     * Revert a "Rewrite" lead back to the retention queue.
+     * - Resets the original lead's retention_disposition to 'pending' so it re-appears in the active list.
+     * - Marks the rewrite sale (the new sale that was created) as "sent back" to hide it from sales views.
+     */
+    public function sendBackFromRewrite(Request $request, int $id)
+    {
+        $lead = Lead::findOrFail($id);
+
+        if ($lead->retention_disposition !== Statuses::RET_DISP_REWRITE) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This lead is not marked as Rewrite.',
+            ], 422);
+        }
+
+        // Reset the original lead back to active retention queue
+        $old = $lead->retention_disposition;
+        $lead->retention_disposition    = Statuses::RET_DISP_PENDING;
+        $lead->is_rewrite               = false;
+        $lead->ret_action_updated_at    = now();
+        $lead->ret_action_updated_by    = Auth::id();
+        $lead->save();
+
+        // Mark the associated rewrite sale so it hides from sales views
+        $rewriteSale = Lead::where('rewrite_source_lead_id', $lead->id)
+            ->whereNull('rewrite_sent_back_at')
+            ->latest('created_at')
+            ->first();
+
+        if ($rewriteSale) {
+            $rewriteSale->rewrite_sent_back_at = now();
+            $rewriteSale->save();
+        }
+
+        AuditLog::create([
+            'user_id'    => Auth::id(),
+            'action'     => 'Retention — Send Back from Rewrite',
+            'model'      => 'Lead',
+            'model_id'   => $lead->id,
+            'old_values' => json_encode(['retention_disposition' => $old, 'is_rewrite' => true]),
+            'new_values' => json_encode(['retention_disposition' => Statuses::RET_DISP_PENDING, 'is_rewrite' => false]),
+            'ip_address' => $request->ip(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Lead \"{$lead->cn_name}\" sent back to retention queue.",
         ]);
     }
 

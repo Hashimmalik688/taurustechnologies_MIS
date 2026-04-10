@@ -5,14 +5,29 @@ namespace App\Http\Controllers\Partner;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCarrierState;
 use App\Models\Lead;
+use App\Services\PartnerRevenueService;
+use App\Repositories\PartnerLedgerRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class PartnerDashboardController extends Controller
 {
+    protected PartnerRevenueService $revenueService;
+    protected PartnerLedgerRepository $ledgerRepository;
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $partner = Auth::guard('partner')->user();
+            $this->revenueService = new PartnerRevenueService($partner);
+            $this->ledgerRepository = new PartnerLedgerRepository();
+            return $next($request);
+        });
+    }
+
     /**
-     * Partner dashboard
+     * Advanced Partner Dashboard with Revenue Analytics
      */
     public function index(Request $request)
     {
@@ -33,7 +48,34 @@ class PartnerDashboardController extends Controller
             $periodEnd = Carbon::parse($month . '-01')->endOfMonth();
         }
 
-        // Get partner's assigned carriers with states grouped
+        // ── Revenue Metrics ────────────────────────────────────────────
+        $projectedRevenue = $this->revenueService->getProjectedRevenue($periodStart, $periodEnd);
+        $earnedRevenue = $this->revenueService->getEarnedRevenue($periodStart, $periodEnd);
+        $chargebacks = $this->revenueService->getTotalChargebacks($periodStart, $periodEnd);
+        
+        $partnerEarnedShare = $this->revenueService->getPartnerEarnedShare($periodStart, $periodEnd);
+        $partnerProjectedShare = $this->revenueService->getPartnerProjectedShare($periodStart, $periodEnd);
+
+        // ── Balance & Ledger ────────────────────────────────────────────
+        $currentBalance = $this->ledgerRepository->getBalance($partner);
+        $ledgerStats = $this->ledgerRepository->getDashboardStats($partner);
+        $paymentsSummary = $this->ledgerRepository->getPaymentsSummary($partner, $periodStart, $periodEnd);
+        $chargebackSummary = $this->ledgerRepository->getChargebacksSummary($partner, $periodStart, $periodEnd);
+
+        // ── Performance Breakdowns ──────────────────────────────────
+        $revenueByCarrier = $this->revenueService->getEarnedRevenueByCarrier($periodStart, $periodEnd);
+        $revenueByState = $this->revenueService->getEarnedRevenueByState($periodStart, $periodEnd);
+        $activeCarriers = $this->revenueService->getActiveCarriers();
+        $authorizedStates = $this->revenueService->getAuthorizedStates();
+
+        // ── Transaction History ────────────────────────────────────
+        $recentTransactions = $this->revenueService->getRecentTransactions(20);
+
+        // ── YTD Summary ─────────────────────────────────────────────
+        $ytdMetrics = $this->revenueService->getYearToDateMetrics();
+        $monthlyBreakdown = $this->revenueService->getMonthlyBreakdown();
+
+        // ── Lead Details ────────────────────────────────────────────
         $carrierStates = AgentCarrierState::where('partner_id', $partner->id)
             ->with('insuranceCarrier')
             ->get()
@@ -72,48 +114,18 @@ class PartnerDashboardController extends Controller
             ->whereIn('status', ['pending', 'Pending'])
             ->count();
 
-        // Calculate total revenue (check multiple premium fields)
-        $salesQuery = (clone $baseQuery)->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done']);
-        
-        // Get all sales for this partner in the period
-        $sales = $salesQuery->with('insuranceCarrier')->get();
-        
-        // Calculate actual revenue from commissions
-        $totalCommissionRevenue = 0;
-        $totalPremiumRevenue = 0;
-        
-        foreach($sales as $lead) {
-            $premium = $lead->monthly_premium ?? $lead->premium_amount ?? $lead->issued_premium ?? 0;
-            $commission = $lead->agent_commission ?? 0;
-            
-            $totalCommissionRevenue += $commission;
-            $totalPremiumRevenue += $premium;
-        }
-
-        // Calculate Taurus Share in dollars
-        $ourCommissionPercentage = $partner->our_commission_percentage ?? 15.0;
-        $taurusShareDollars = $totalCommissionRevenue * ($ourCommissionPercentage / 100);
-        
-        // Partner gets the remaining commission after Taurus share
-        $partnerCommission = $totalCommissionRevenue - $taurusShareDollars;
-        
-        // For display purposes, total revenue is the commission revenue
-        $totalRevenue = $totalCommissionRevenue;
-
         // Commission paid/unpaid tracking
         $paidSalesQuery = Lead::where('partner_id', $partner->id)
-            ->whereNotNull('partner_id')
             ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
             ->whereBetween('created_at', [$periodStart, $periodEnd]);
         
+        $allPeriodSales = $paidSalesQuery->get();
         $paidCommissionTotal = 0;
         $unpaidCommissionTotal = 0;
         
-        $allPeriodSales = (clone $paidSalesQuery)->get();
         foreach ($allPeriodSales as $sale) {
             $saleCommission = $sale->agent_commission ?? 0;
-            // Deduct taurus share from each sale's commission
-            $partnerShare = $saleCommission - ($saleCommission * ($ourCommissionPercentage / 100));
+            $partnerShare = $saleCommission - ($saleCommission * ($partner->our_commission_percentage ?? 15.0) / 100);
             
             if ($sale->commission_paid_to_partner) {
                 $paidCommissionTotal += $partnerShare;
@@ -121,7 +133,7 @@ class PartnerDashboardController extends Controller
                 $unpaidCommissionTotal += $partnerShare;
             }
         }
-        
+
         $commissionPaid = $paidCommissionTotal;
         $commissionUnpaid = $unpaidCommissionTotal;
 
@@ -132,19 +144,47 @@ class PartnerDashboardController extends Controller
             ->limit(100)
             ->get();
 
-        return view('partner.dashboard', compact(
+        return view('partner.dashboard-advanced', compact(
             'partner',
             'carrierStates',
+            'activeCarriers',
+            'authorizedStates',
+            
+            // Lead metrics
             'totalLeads',
             'monthlyLeads',
             'totalSales',
             'pendingLeads',
-            'totalRevenue',
-            'partnerCommission',
-            'ourCommissionPercentage',
-            'taurusShareDollars',
+            
+            // Revenue metrics
+            'projectedRevenue',
+            'earnedRevenue',
+            'chargebacks',
+            'partnerEarnedShare',
+            'partnerProjectedShare',
+            
+            // Balance & Ledger
+            'currentBalance',
+            'ledgerStats',
+            'paymentsSummary',
+            'chargebackSummary',
+            
+            // Performance breakdown
+            'revenueByCarrier',
+            'revenueByState',
+            
+            // Transaction history
+            'recentTransactions',
+            
+            // YTD summary
+            'ytdMetrics',
+            'monthlyBreakdown',
+            
+            // Commission tracking
             'commissionPaid',
             'commissionUnpaid',
+            
+            // Recent leads
             'recentLeads',
             'month'
         ));

@@ -865,6 +865,7 @@ Route::group(['prefix' => 'retention', 'as' => 'retention.', 'middleware' => ['a
     Route::post('/{id}/action-status', [RetentionController::class, 'updateActionStatus'])->name('updateActionStatus')->middleware('role.permission:retention,edit');
     Route::put('/{id}', [RetentionController::class, 'update'])->name('update')->middleware('role.permission:retention,edit');
     Route::post('/{id}/set-disposition', [RetentionController::class, 'setDisposition'])->name('setDisposition')->middleware('role.permission:retention,edit');
+    Route::post('/{id}/send-back-from-rewrite', [RetentionController::class, 'sendBackFromRewrite'])->name('sendBackFromRewrite')->middleware('role.permission:retention,edit');
 });
 
 // Retention Officer Dashboard
