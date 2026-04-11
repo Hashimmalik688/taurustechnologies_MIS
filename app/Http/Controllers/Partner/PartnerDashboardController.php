@@ -69,7 +69,7 @@ class PartnerDashboardController extends Controller
         $authorizedStates = $this->revenueService->getAuthorizedStates();
 
         // ── Transaction History ────────────────────────────────────
-        $recentTransactions = $this->revenueService->getRecentTransactions(20);
+        $recentTransactions = $this->revenueService->getRecentTransactions(20, $periodStart, $periodEnd);
 
         // ── YTD Summary ─────────────────────────────────────────────
         $ytdMetrics = $this->revenueService->getYearToDateMetrics();

@@ -105,7 +105,8 @@ class PartnerRevenueService
     /**
      * Get partner's balance from ledger (AR account 1200)
      * Running balance of what partner owes us
-     * 
+     * EXCLUDES chargeback/sales_return entries — those are shared losses, not partner debt
+     *
      * @return float Positive = partner owes us, Negative = we owe partner
      */
     public function getPartnerBalance(): float
@@ -118,11 +119,14 @@ class PartnerRevenueService
             return 0;
         }
 
-        // Sum all debits (partner owes us) and credits (they paid or we owed them)
-        $balance = DB::table('ledger_journal_entry_lines')
-            ->where('partner_id', $this->partner->id)
-            ->where('account_id', $arAccount->id)
-            ->selectRaw('SUM(debit) - SUM(credit) as balance')
+        // Exclude chargeback/sales_return — those are shared industry losses,
+        // not money the partner owes Taurus
+        $balance = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->where('l.partner_id', $this->partner->id)
+            ->where('l.account_id', $arAccount->id)
+            ->whereNotIn('je.type', ['sales_return', 'chargeback'])
+            ->selectRaw('SUM(l.debit) - SUM(l.credit) as balance')
             ->pluck('balance')
             ->first() ?? 0;
 
@@ -311,12 +315,18 @@ class PartnerRevenueService
      * @param int $limit
      * @return Collection
      */
-    public function getRecentTransactions(int $limit = 50): Collection
+    public function getRecentTransactions(int $limit = 50, ?\Carbon\Carbon $periodStart = null, ?\Carbon\Carbon $periodEnd = null): Collection
     {
-        return DB::table('ledger_journal_entry_lines as l')
+        $query = DB::table('ledger_journal_entry_lines as l')
             ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
             ->leftJoin('insurance_carriers as ic', 'l.insurance_carrier_id', '=', 'ic.id')
-            ->where('l.partner_id', $this->partner->id)
+            ->where('l.partner_id', $this->partner->id);
+
+        if ($periodStart && $periodEnd) {
+            $query->whereBetween('je.entry_date', [$periodStart->toDateString(), $periodEnd->toDateString()]);
+        }
+
+        return $query
             ->orderByDesc('je.entry_date')
             ->orderByDesc('l.id')
             ->limit($limit)

@@ -1,24 +1,24 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
     <meta charset="utf-8" />
-    <title>@yield('title') | Taurus Partner Portal</title>
+    <title><?php echo $__env->yieldContent('title'); ?> | Taurus Partner Portal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="shortcut icon" href="{{ URL::asset('images/favicon.ico') }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <link rel="shortcut icon" href="<?php echo e(URL::asset('images/favicon.ico')); ?>">
 
-    {{-- Same CSS stack as main CRM so themes apply --}}
-    <link href="{{ URL::asset('build/css/bootstrap.min.css') }}" rel="stylesheet" />
-    <link href="{{ URL::asset('build/css/icons.min.css') }}" rel="stylesheet" />
-    <link href="{{ URL::asset('build/css/app.min.css') }}" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ URL::asset('css/light-theme.css') }}">
-    <link rel="stylesheet" href="{{ URL::asset('css/modern-white-theme.css') }}">
+    
+    <link href="<?php echo e(URL::asset('build/css/bootstrap.min.css')); ?>" rel="stylesheet" />
+    <link href="<?php echo e(URL::asset('build/css/icons.min.css')); ?>" rel="stylesheet" />
+    <link href="<?php echo e(URL::asset('build/css/app.min.css')); ?>" rel="stylesheet" />
+    <link rel="stylesheet" href="<?php echo e(URL::asset('css/light-theme.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(URL::asset('css/modern-white-theme.css')); ?>">
 
-    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ time() }}">
-    @vite(['resources/css/custom-layout.css'])
-    <link rel="stylesheet" href="{{ URL::asset('css/admin-ui.css') }}">
+    <link rel="stylesheet" href="<?php echo e(URL::asset('css/themes.css')); ?>?v=<?php echo e(time()); ?>">
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/custom-layout.css']); ?>
+    <link rel="stylesheet" href="<?php echo e(URL::asset('css/admin-ui.css')); ?>">
 
-    {{-- Apply saved theme immediately --}}
+    
     <script>
         (function(){
             var t = localStorage.getItem('theme') || 'light';
@@ -195,14 +195,14 @@
             .pp-content{padding:.8rem;}
         }
     </style>
-    @yield('css')
+    <?php echo $__env->yieldContent('css'); ?>
 </head>
 <body>
     <nav class="pp-nav">
 
-        {{-- Top tier: Brand + User controls --}}
+        
         <div class="pp-nav-top">
-            <a href="{{ route('partner.dashboard') }}" class="pp-brand">
+            <a href="<?php echo e(route('partner.dashboard')); ?>" class="pp-brand">
                 <div class="pp-brand-icon"><i class="bx bx-building-house"></i></div>
                 <span class="pp-brand-name">Taurus</span>
                 <div class="pp-brand-divider"></div>
@@ -210,58 +210,58 @@
             </a>
 
             <div class="pp-nav-right">
-                {{-- Live status --}}
+                
                 <span class="pp-live-pill"><span class="pp-live-dot"></span> Live</span>
 
-                {{-- Current date --}}
-                <span class="pp-date-chip"><i class="bx bx-calendar"></i> {{ now()->format('M j, Y') }}</span>
+                
+                <span class="pp-date-chip"><i class="bx bx-calendar"></i> <?php echo e(now()->format('M j, Y')); ?></span>
 
-                {{-- Optional badges pushed from child views (e.g. balance alert) --}}
-                @stack('nav-badges')
+                
+                <?php echo $__env->yieldPushContent('nav-badges'); ?>
 
-                {{-- Theme cycle --}}
+                
                 <button class="pp-theme-btn" onclick="toggleTheme()" title="Cycle theme">
                     <i class="bx bx-moon" id="themeIcon"></i>
                 </button>
 
-                {{-- User capsule --}}
-                @php $__pUser = Auth::guard('partner')->user(); @endphp
+                
+                <?php $__pUser = Auth::guard('partner')->user(); ?>
                 <div class="pp-user-capsule">
-                    <div class="pp-user-avatar">{{ strtoupper(substr($__pUser->name ?? 'P', 0, 2)) }}</div>
+                    <div class="pp-user-avatar"><?php echo e(strtoupper(substr($__pUser->name ?? 'P', 0, 2))); ?></div>
                     <div>
-                        <div class="pp-user-name">{{ $__pUser->name }}</div>
-                        <div class="pp-user-code">{{ $__pUser->code }}</div>
+                        <div class="pp-user-name"><?php echo e($__pUser->name); ?></div>
+                        <div class="pp-user-code"><?php echo e($__pUser->code); ?></div>
                     </div>
                 </div>
 
-                {{-- Logout --}}
-                <form action="{{ route('partner.logout') }}" method="POST" style="margin:0;">
-                    @csrf
+                
+                <form action="<?php echo e(route('partner.logout')); ?>" method="POST" style="margin:0;">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="pp-logout" title="Logout"><i class="bx bx-log-out"></i> Logout</button>
                 </form>
             </div>
         </div>
 
-        {{-- Bottom tier: navigation tabs --}}
+        
         <div class="pp-nav-bottom">
-            <a href="{{ route('partner.dashboard') }}" class="pp-nav-tab active">
+            <a href="<?php echo e(route('partner.dashboard')); ?>" class="pp-nav-tab active">
                 <i class="bx bx-grid-alt"></i> Dashboard
             </a>
-            {{-- Future nav items can be added here --}}
+            
             <div class="pp-nav-spacer"></div>
-            {{-- Right-side nav extras from child views --}}
-            @stack('nav-right')
+            
+            <?php echo $__env->yieldPushContent('nav-right'); ?>
         </div>
 
     </nav>
 
     <div class="pp-content">
-        @yield('content')
+        <?php echo $__env->yieldContent('content'); ?>
     </div>
 
-    <div class="pp-footer">&copy; {{ date('Y') }} Taurus CRM. All rights reserved.</div>
+    <div class="pp-footer">&copy; <?php echo e(date('Y')); ?> Taurus CRM. All rights reserved.</div>
 
-    {{-- Theme-aware overrides for partner portal --}}
+    
     <style>
         /* Dark theme overrides for partner portal */
         :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pp-nav {
@@ -349,8 +349,8 @@
         }
     </style>
 
-    <script src="{{ URL::asset('build/libs/jquery/jquery.min.js') }}"></script>
-    <script src="{{ URL::asset('build/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="<?php echo e(URL::asset('build/libs/jquery/jquery.min.js')); ?>"></script>
+    <script src="<?php echo e(URL::asset('build/libs/bootstrap/js/bootstrap.bundle.min.js')); ?>"></script>
     <script>
         // All available themes in cycle order
         var _allThemes = ['light', 'emerald-glass', 'midnight-black', 'ocean-blue', 'royal-purple', 'rose-gold', 'copper-steel'];
@@ -386,6 +386,7 @@
             }
         })();
     </script>
-    @yield('script')
+    <?php echo $__env->yieldContent('script'); ?>
 </body>
 </html>
+<?php /**PATH /var/www/taurus-crm/resources/views/layouts/partner.blade.php ENDPATH**/ ?>

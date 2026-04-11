@@ -19,7 +19,8 @@ class PartnerLedgerRepository
     /**
      * Get partner's current balance from AR account
      * Positive = partner owes us, Negative = we owe them
-     * 
+     * EXCLUDES chargeback/sales_return entries — shared industry losses, not partner debt
+     *
      * @param Partner $partner
      * @return float
      */
@@ -31,10 +32,12 @@ class PartnerLedgerRepository
             return 0;
         }
 
-        $balance = DB::table('ledger_journal_entry_lines')
-            ->where('partner_id', $partner->id)
-            ->where('account_id', $arAccount->id)
-            ->selectRaw('SUM(debit) as total_debit, SUM(credit) as total_credit')
+        $balance = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->where('l.partner_id', $partner->id)
+            ->where('l.account_id', $arAccount->id)
+            ->whereNotIn('je.type', ['sales_return', 'chargeback'])
+            ->selectRaw('SUM(l.debit) as total_debit, SUM(l.credit) as total_credit')
             ->first();
 
         return ((float) ($balance->total_debit ?? 0)) - ((float) ($balance->total_credit ?? 0));
