@@ -750,6 +750,20 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/policy-type-report/drilldown', [ReportController::class, 'policyTypeReportDrilldown'])->name('policy-type-report.drilldown')->middleware('role.permission:reports,view');
     Route::get('/sales-status', [ReportController::class, 'salesStatus'])->name('sales-status')->middleware('role.permission:reports,view');
     Route::get('/sales-status/drilldown', [ReportController::class, 'salesStatusDrilldown'])->name('sales-status.drilldown')->middleware('role.permission:reports,view');
+
+    // ── Carrier Commission Sheet (standalone) ──────────
+    Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {
+        Route::get('/',      [\App\Http\Controllers\Admin\CarrierSheetController::class, 'dashboard'])->name('dashboard')->middleware('role.permission:carrier-sheet,view');
+        Route::get('/rates', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'rates'])->name('rates')->middleware('role.permission:carrier-sheet,view');
+        Route::put('/rates/{rate}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'updateRate'])->name('rates.update')->middleware('role.permission:carrier-sheet,edit');
+        Route::post('/import', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'import'])->name('import')->middleware('role.permission:carrier-sheet,edit');
+        Route::get('/{rate}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'show'])->name('show')->middleware('role.permission:carrier-sheet,view');
+        Route::get('/{rate}/export', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'export'])->name('export')->middleware('role.permission:carrier-sheet,view');
+        Route::post('/{rate}/entries', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'storeEntry'])->name('entries.store')->middleware('role.permission:carrier-sheet,edit');
+        Route::put('/entries/{entry}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'updateEntry'])->name('entries.update')->middleware('role.permission:carrier-sheet,edit');
+        Route::delete('/entries/{entry}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'deleteEntry'])->name('entries.destroy')->middleware('role.permission:carrier-sheet,edit');
+        Route::put('/{rate}/opening-chargeback', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'updateOpeningChargeback'])->name('opening-cb.update')->middleware('role.permission:carrier-sheet,edit');
+    });
 });
 
 // Permission Management (Super Admin only)

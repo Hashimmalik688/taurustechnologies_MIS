@@ -1,14 +1,12 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Reports
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
-@include('components.hub-styles')
-@endsection
+<?php $__env->startSection('css'); ?>
+<?php echo $__env->make('components.hub-styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <div class="hub-page">
         <div class="hub-header">
             <h4><i class="bx bx-bar-chart-alt-2"></i> Reports</h4>
@@ -17,8 +15,8 @@
 
         <div class="hub-section-label">Sales &amp; Performance</div>
         <div class="hub-grid">
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.index') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.index')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-file-find"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Sales Reports</div>
@@ -26,10 +24,10 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
 
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.per-closer') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.per-closer')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-phone-call"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Per-Closer Performance</div>
@@ -37,10 +35,10 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
 
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.submission-performance') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.submission-performance')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-award"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Submission Performance</div>
@@ -48,10 +46,10 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
 
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.policy-type-report') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.policy-type-report')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-category"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Policy Type Report</div>
@@ -59,10 +57,10 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
 
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.sales-status') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.sales-status')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-table"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Sales Status Report</div>
@@ -70,13 +68,13 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
         </div>
 
         <div class="hub-section-label">Call Tracking</div>
         <div class="hub-grid">
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('reports')): ?>
+            <a href="<?php echo e(route('settings.reports.zoom-logs')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Zoom Logs</div>
@@ -84,13 +82,13 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
         </div>
 
         <div class="hub-section-label">Commission Tracking</div>
         <div class="hub-grid">
-            @canViewModule('carrier-sheet')
-            <a href="{{ route('settings.reports.carrier-sheet.dashboard') }}" class="hub-card">
+            <?php if(auth()->check() && auth()->user()->canViewModule('carrier-sheet')): ?>
+            <a href="<?php echo e(route('settings.reports.carrier-sheet.dashboard')); ?>" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-spreadsheet"></i></div>
                 <div class="hub-card-body">
                     <div class="hub-card-title">Carrier Sheet</div>
@@ -98,7 +96,9 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
-            @endcanViewModule
+            <?php endif; ?>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/reports/hub.blade.php ENDPATH**/ ?>

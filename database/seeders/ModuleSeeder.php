@@ -365,6 +365,15 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 15,
             ],
 
+            // 13. Commission Tracking
+            [
+                'name' => 'Carrier Sheet',
+                'slug' => 'carrier-sheet',
+                'description' => 'Commission tracking workbook — carrier sheets, rates & dashboard',
+                'category' => 'Reports',
+                'sort_order' => 145,
+            ],
+
         ];
 
         foreach ($modules as $module) {
