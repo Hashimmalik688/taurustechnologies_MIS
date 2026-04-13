@@ -13,11 +13,13 @@ class CarrierSheetOpeningCb extends Model
         'carrier_sheet_rate_id',
         'period_month',
         'amount',
+        'opening_balance',
     ];
 
     protected $casts = [
-        'period_month' => 'date',
-        'amount'       => 'decimal:2',
+        'period_month'    => 'date',
+        'amount'          => 'decimal:2',
+        'opening_balance' => 'decimal:2',
     ];
 
     public function carrierRate(): BelongsTo

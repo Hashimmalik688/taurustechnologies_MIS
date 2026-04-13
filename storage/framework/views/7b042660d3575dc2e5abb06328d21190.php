@@ -67,7 +67,7 @@
     font-size:.56rem; font-weight:800; text-transform:uppercase;
     letter-spacing:.6px; color:var(--cs-text-3); display:block; margin-bottom:.12rem;
 }
-.cs-filter select, .cs-filter input[type=month] {
+.cs-filter select, .cs-filter input[type=month], .cs-filter input[type=search] {
     font-size:.72rem; padding:.26rem .4rem; border-radius:.38rem;
     border:1.5px solid var(--cs-border); background:var(--bs-input-bg, #f8fafc);
     color:var(--cs-text-1); outline:none;
@@ -81,20 +81,38 @@
 .cs-btn-primary:hover { box-shadow:0 2px 8px rgba(0,0,0,.3); color:#fff; }
 .cs-btn-success { background:linear-gradient(135deg, #2E7D32, #1B5E20); color:#fff; }
 .cs-btn-success:hover { box-shadow:0 2px 10px rgba(46,125,50,.4); color:#fff; }
+.cs-btn-danger { background:linear-gradient(135deg, #C62828, #8b1a1a); color:#fff; }
+.cs-btn-danger:hover { box-shadow:0 2px 10px rgba(198,40,40,.4); color:#fff; }
 .cs-btn-outline { background:transparent; border:1.5px solid var(--cs-border)!important; color:var(--cs-text-3); }
 .cs-btn-outline:hover { border-color:var(--cs-title)!important; color:var(--cs-title); }
 
-/* ── Opening CB row ────────────────────────────────── */
-.cs-opening-cb {
-    display:flex; align-items:center; gap:.5rem; background:#FFF3CD;
-    border:1px solid #ffe69c; border-radius:.45rem; padding:.35rem .7rem;
-    margin-bottom:.5rem; font-size:.72rem;
+/* ── Pinned opening rows ───────────────────────────── */
+.cs-pinned-row td {
+    font-size:.66rem; font-weight:700; border-bottom:2px solid var(--cs-border);
+    white-space:nowrap;
 }
-.cs-opening-cb label { font-weight:700; margin:0; color:#856404; }
-.cs-opening-cb input {
-    width:100px; padding:.2rem .35rem; font-size:.72rem; border:1px solid #ffe69c;
-    border-radius:.3rem; text-align:right;
+.cs-pinned-bal  { background:#E8EAF6 !important; }
+.cs-pinned-cb   { background:#FFF3CD !important; }
+.cs-pinned-label {
+    text-align:left !important; font-size:.64rem; font-weight:800;
+    letter-spacing:.2px;
 }
+.cs-pinned-val {
+    font-variant-numeric:tabular-nums;
+}
+.cs-inline-edit-wrap { display:flex; align-items:center; justify-content:center; gap:.3rem; }
+.cs-inline-input {
+    width:100px; padding:.15rem .3rem; font-size:.68rem; font-weight:700;
+    border:1.5px solid #9fa8da; border-radius:.3rem; text-align:right;
+    display:none;
+}
+.cs-inline-input.active { display:inline-block; }
+.cs-save-btn {
+    display:none; background:#283593; color:#fff; border:none; border-radius:.3rem;
+    padding:.15rem .35rem; font-size:.6rem; cursor:pointer;
+}
+.cs-save-btn.active { display:inline-flex; align-items:center; gap:.15rem; }
+.cs-no-period-note { font-size:.6rem; color:#999; font-style:italic; }
 
 /* ── Data table ────────────────────────────────────── */
 .cs-card {
@@ -115,10 +133,14 @@
 .cs-dtable tbody tr:hover { background:rgba(0,0,0,.04); }
 
 /* Status row colors */
-.cs-dtable tr.cs-row-approved   { background:#FFF8E1 !important; }
-.cs-dtable tr.cs-row-chargeback { background:#FFEBEE !important; }
-.cs-dtable tr.cs-row-declined   { background:#FFF3E0 !important; }
-.cs-dtable tr.cs-row-paid:nth-child(even) { background:var(--cs-row-alt); }
+.cs-dtable tr.cs-row-approved             { background:#ffffff !important; }
+.cs-dtable tr.cs-row-approved:hover       { background:#f5f5f5 !important; }
+.cs-dtable tr.cs-row-paid                 { background:#e8f5e9 !important; }
+.cs-dtable tr.cs-row-paid:hover           { background:#c8e6c9 !important; }
+.cs-dtable tr.cs-row-chargeback           { background:#ffebee !important; }
+.cs-dtable tr.cs-row-chargeback:hover     { background:#ffcdd2 !important; }
+.cs-dtable tr.cs-row-declined             { background:#eeeeee !important; }
+.cs-dtable tr.cs-row-declined:hover       { background:#e0e0e0 !important; }
 
 /* Status cell badges */
 .cs-status {
@@ -180,19 +202,19 @@
     
     <div class="cs-badges" id="summaryBadges">
         <div class="cs-badge cs-badge-commission">
-            <span class="cs-badge-val" id="badge-commission"><?php echo e(number_format($summary['commission'], 4)); ?></span>
+            <span class="cs-badge-val" id="badge-commission"><?php echo e(number_format($summary['commission'], 2)); ?></span>
             <span class="cs-badge-lbl">Commission</span>
         </div>
         <div class="cs-badge cs-badge-paid">
-            <span class="cs-badge-val" id="badge-paid"><?php echo e(number_format($summary['paid'], 4)); ?></span>
+            <span class="cs-badge-val" id="badge-paid"><?php echo e(number_format($summary['paid'], 2)); ?></span>
             <span class="cs-badge-lbl">Paid</span>
         </div>
         <div class="cs-badge cs-badge-balance">
-            <span class="cs-badge-val" id="badge-balance"><?php echo e(number_format($summary['balance'], 4)); ?></span>
+            <span class="cs-badge-val" id="badge-balance"><?php echo e(number_format($summary['balance'], 2)); ?></span>
             <span class="cs-badge-lbl">Balance</span>
         </div>
         <div class="cs-badge cs-badge-cb-total">
-            <span class="cs-badge-val" id="badge-cb-total"><?php echo e(number_format($summary['chargeback_total'], 4)); ?></span>
+            <span class="cs-badge-val" id="badge-cb-total"><?php echo e(number_format($summary['chargeback_total'], 2)); ?></span>
             <span class="cs-badge-lbl">Chargeback $</span>
         </div>
         <div style="width:1px; background:var(--cs-border); margin:0 .2rem;"></div>
@@ -232,10 +254,17 @@
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </select>
         </div>
+        <div>
+            <label>Search Policy #</label>
+            <input type="search" id="policySearch" placeholder="e.g. FEXB357429" autocomplete="off" style="min-width:160px;">
+        </div>
         <div style="margin-left:auto; display:flex; gap:.4rem; align-items:flex-end;">
             <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
             <button type="button" class="cs-btn cs-btn-success" data-bs-toggle="modal" data-bs-target="#addEntryModal">
                 <i class="bx bx-plus"></i> Add Entry
+            </button>
+            <button type="button" class="cs-btn cs-btn-danger" data-bs-toggle="modal" data-bs-target="#manualCbModal">
+                <i class="bx bx-minus-circle"></i> Add Manual CB
             </button>
             <?php endif; ?>
             <a href="<?php echo e(route('settings.reports.carrier-sheet.export', ['rate' => $rate, 'month' => $periodMonth])); ?>" class="cs-btn cs-btn-outline">
@@ -243,20 +272,6 @@
             </a>
         </div>
     </form>
-
-    
-    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($openingCb): ?>
-    <div class="cs-opening-cb">
-        <label><i class="bx bx-error-circle me-1"></i> Opening Chargeback:</label>
-        <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
-        <input type="number" step="0.01" min="0" value="<?php echo e($openingCb->amount); ?>" id="openingCbAmount"
-               onchange="updateOpeningCb(this.value)">
-        <span style="font-size:.6rem; color:#856404;">(Previous chargeback balance carried forward)</span>
-        <?php else: ?>
-        <span class="fw-bold"><?php echo e(number_format($openingCb->amount, 4)); ?></span>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     
     <div class="cs-card">
@@ -283,6 +298,95 @@
                 </tr>
             </thead>
             <tbody>
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth || $openingCb->opening_balance != 0): ?>
+                <tr class="cs-pinned-row cs-pinned-bal">
+                    <td style="color:#9fa8da;">&#x2605;</td>
+                    <td></td>
+                    <td class="cs-pinned-label" colspan="10" style="color:#283593;">Opening Balance <span style="font-weight:400; color:#888;">(carried forward)</span></td>
+                    <td class="cs-money cs-pinned-val <?php echo e($openingCb->opening_balance >= 0 ? 'cs-money-pos' : 'cs-money-neg'); ?>" id="pinned-bal-display">
+                        <?php echo e(number_format($openingCb->opening_balance, 2)); ?>
+
+                    </td>
+                    <td></td>
+                    <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                    <td>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth): ?>
+                        <div class="cs-row-actions">
+                            <button class="cs-row-btn cs-row-btn-edit" onclick="editPinnedBal()" id="pinnedBalEditBtn" title="Edit Opening Balance">
+                                <i class="bx bx-pencil"></i>
+                            </button>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth): ?>
+                <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                <tr id="pinnedBalEditRow" style="display:none; background:#E8EAF6;">
+                    <td></td>
+                    <td></td>
+                    <td colspan="10" style="color:#555; font-size:.65rem; font-style:italic; text-align:left;">Enter the starting balance to carry forward (+ adds to balance, − subtracts)</td>
+                    <td>
+                        <input type="number" step="0.01" id="pinnedBalInput" value="<?php echo e($openingCb->opening_balance); ?>" class="form-control form-control-sm" style="width:110px; font-size:.72rem; text-align:right;">
+                    </td>
+                    <td></td>
+                    <td>
+                        <div style="display:flex; gap:.2rem;">
+                            <button class="cs-row-btn cs-row-btn-edit" onclick="savePinnedBal()" title="Save"><i class="bx bx-check"></i></button>
+                            <button class="cs-row-btn cs-row-btn-del" onclick="cancelPinnedBal()" title="Cancel"><i class="bx bx-x"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth || $openingCb->amount != 0): ?>
+                <tr class="cs-pinned-row cs-pinned-cb">
+                    <td style="color:#ffe69c;">&#x2605;</td>
+                    <td></td>
+                    <td class="cs-pinned-label" colspan="10" style="color:#856404;">Opening Chargeback <span style="font-weight:400; color:#888;">(previous balance carried forward)</span></td>
+                    <td></td>
+                    <td class="cs-money cs-pinned-val cs-money-neg" id="pinned-cb-display">
+                        <?php echo e($openingCb->amount > 0 ? number_format($openingCb->amount, 2) : ''); ?>
+
+                    </td>
+                    <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                    <td>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth): ?>
+                        <div class="cs-row-actions">
+                            <button class="cs-row-btn cs-row-btn-edit" onclick="editPinnedCb()" id="pinnedCbEditBtn" title="Edit Opening Chargeback">
+                                <i class="bx bx-pencil"></i>
+                            </button>
+                        </div>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                    </td>
+                    <?php endif; ?>
+                </tr>
+                
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth): ?>
+                <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                <tr id="pinnedCbEditRow" style="display:none; background:#FFF3CD;">
+                    <td></td>
+                    <td></td>
+                    <td colspan="10" style="color:#555; font-size:.65rem; font-style:italic; text-align:left;">Enter the previous chargeback balance to carry forward (subtracts from balance)</td>
+                    <td></td>
+                    <td>
+                        <input type="number" step="0.01" min="0" id="pinnedCbInput" value="<?php echo e($openingCb->amount); ?>" class="form-control form-control-sm" style="width:110px; font-size:.72rem; text-align:right;">
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:.2rem;">
+                            <button class="cs-row-btn cs-row-btn-edit" onclick="savePinnedCb()" title="Save"><i class="bx bx-check"></i></button>
+                            <button class="cs-row-btn cs-row-btn-del" onclick="cancelPinnedCb()" title="Cancel"><i class="bx bx-x"></i></button>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__empty_1 = true; $__currentLoopData = $entries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $entry): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr class="cs-row-<?php echo e(strtolower($entry->status)); ?>" data-entry-id="<?php echo e($entry->id); ?>">
                     <td><?php echo e($entry->sr_number); ?></td>
@@ -290,7 +394,7 @@
                     <td class="cs-left"><?php echo e($entry->policy_number); ?></td>
                     <td class="cs-left"><?php echo e($entry->name); ?></td>
                     <td><?php echo e($entry->face_value); ?></td>
-                    <td class="cs-money"><?php echo e(number_format($entry->premium, 4)); ?></td>
+                    <td class="cs-money"><?php echo e(number_format($entry->premium, 2)); ?></td>
                     <td>
                         <span style="text-transform:uppercase; font-size:.6rem; font-weight:600;"><?php echo e($entry->policy_type); ?></span>
                     </td>
@@ -300,19 +404,19 @@
                     <td><?php echo e($entry->draft_date?->format('d M')); ?></td>
                     <td><?php echo e($entry->payment_date?->format('d M')); ?></td>
                     <td class="cs-money <?php echo e($entry->commission ? 'cs-money-pos' : ''); ?>">
-                        <?php echo e($entry->commission !== null ? number_format($entry->commission, 4) : ''); ?>
+                        <?php echo e($entry->commission !== null ? number_format($entry->commission, 2) : ''); ?>
 
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($entry->rate_override): ?>
                         <span class="cs-override-indicator" title="Rate override: <?php echo e($entry->rate_override); ?>">★</span>
                         <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
-                    <td class="cs-money"><?php echo e($entry->paid_amount > 0 ? number_format($entry->paid_amount, 4) : ''); ?></td>
+                    <td class="cs-money"><?php echo e($entry->paid_amount > 0 ? number_format($entry->paid_amount, 2) : ''); ?></td>
                     <td class="cs-money <?php echo e($entry->balance >= 0 ? 'cs-money-pos' : 'cs-money-neg'); ?>">
-                        <?php echo e(number_format($entry->balance, 4)); ?>
+                        <?php echo e(number_format($entry->balance, 2)); ?>
 
                     </td>
                     <td class="cs-money <?php echo e($entry->chargeback_amount > 0 ? 'cs-money-neg' : ''); ?>">
-                        <?php echo e($entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 4) : ''); ?>
+                        <?php echo e($entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 2) : ''); ?>
 
                     </td>
                     <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
@@ -349,7 +453,7 @@
                     <tr>
                         <td><?php echo e($day['date'] ? \Carbon\Carbon::parse($day['date'])->format('d M Y') : '—'); ?></td>
                         <td style="text-align:center;"><?php echo e($day['apps']); ?></td>
-                        <td style="text-align:right;" class="cs-money cs-money-pos"><?php echo e(number_format($day['commission'], 4)); ?></td>
+                        <td style="text-align:right;" class="cs-money cs-money-pos"><?php echo e(number_format($day['commission'], 2)); ?></td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </tbody>
@@ -379,9 +483,10 @@
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Policy #</label>
                             <input type="text" name="policy_number" class="form-control form-control-sm">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" style="position:relative;">
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Name</label>
-                            <input type="text" name="name" class="form-control form-control-sm">
+                            <input type="text" name="name" id="add_name" class="form-control form-control-sm" autocomplete="off" placeholder="Type to search leads...">
+                            <div id="leadSuggestions" style="display:none;position:absolute;z-index:9999;left:0;right:0;background:#fff;border:1px solid #dee2e6;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;"></div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Face Value</label>
@@ -525,7 +630,11 @@
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Rate Override</label>
                             <input type="number" step="0.0001" name="rate_override" id="edit_rate_override" class="form-control form-control-sm">
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-2">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Commission <span style="font-size:.6rem;color:#e53935;font-weight:400;">override</span></label>
+                            <input type="number" step="0.01" name="commission" id="edit_commission" class="form-control form-control-sm" placeholder="auto">
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Notes</label>
                             <input type="text" name="notes" id="edit_notes" class="form-control form-control-sm">
                         </div>
@@ -536,6 +645,61 @@
                 <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary" onclick="submitEditEntry()">
                     <i class="bx bx-save me-1"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+
+<?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+<div class="modal fade" id="manualCbModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#C62828; color:#fff;">
+                <h6 class="modal-title fw-bold"><i class="bx bx-minus-circle me-1"></i> Add Manual Chargeback</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:.68rem; color:#666; margin-bottom:.8rem;">For old chargebacks not in the sheet — just the key details. Commission will be $0.</p>
+                <form id="manualCbForm">
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Client Name *</label>
+                            <input type="text" name="name" class="form-control form-control-sm" required placeholder="Full name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Date *</label>
+                            <input type="date" name="entry_date" class="form-control form-control-sm" required value="<?php echo e(now()->format('Y-m-d')); ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Chargeback Amount *</label>
+                            <input type="number" step="0.01" min="0.01" name="chargeback_amount" class="form-control form-control-sm" required placeholder="0.00">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Policy # <span style="color:#999;">(optional)</span></label>
+                            <input type="text" name="policy_number" class="form-control form-control-sm" placeholder="If known">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Face Value <span style="color:#999;">(optional)</span></label>
+                            <input type="text" name="face_value" class="form-control form-control-sm" placeholder="e.g. 10K">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:.68rem; font-weight:700;">Notes <span style="color:#999;">(optional)</span></label>
+                            <input type="text" name="notes" class="form-control form-control-sm" placeholder="Reason or reference">
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="status" value="chargeback">
+                    <input type="hidden" name="premium" value="0">
+                    <input type="hidden" name="period_month" value="<?php echo e($periodMonth); ?>">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="submitManualCb()">
+                    <i class="bx bx-check me-1"></i> Save Chargeback
                 </button>
             </div>
         </div>
@@ -593,7 +757,7 @@
     }
 
     function fmtMoney(v) {
-        return Number(v).toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4});
+        return Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     }
 
     // ── Add Entry ───────────────────────────────────────
@@ -617,7 +781,97 @@
         }
     };
 
+    // ── Policy # search (client-side) ────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        // ── Lead name autocomplete ───────────────────
+        const nameInput    = document.getElementById('add_name');
+        const suggestions  = document.getElementById('leadSuggestions');
+        let acTimer = null;
+
+        if (nameInput) {
+            nameInput.addEventListener('input', function() {
+                clearTimeout(acTimer);
+                const q = this.value.trim();
+                if (q.length < 2) { suggestions.style.display = 'none'; return; }
+                acTimer = setTimeout(async () => {
+                    try {
+                        const res = await fetch(`<?php echo e(route('settings.reports.carrier-sheet.lead-lookup')); ?>?q=` + encodeURIComponent(q), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                        });
+                        const leads = await res.json();
+                        if (!leads.length) { suggestions.style.display = 'none'; return; }
+                        suggestions.innerHTML = leads.map(l => `
+                            <div class="lead-ac-item" data-lead='${JSON.stringify(l).replace(/'/g,"&#39;")}' style="padding:6px 10px;cursor:pointer;font-size:.8rem;border-bottom:1px solid #f0f0f0;">
+                                <span style="font-weight:600;">${l.name}</span>
+                                ${l.policy_number ? `<span style="color:#888;margin-left:6px;">${l.policy_number}</span>` : ''}
+                                ${l.premium ? `<span style="color:#2E7D32;margin-left:6px;">$${l.premium}</span>` : ''}
+                            </div>`).join('');
+                        suggestions.style.display = 'block';
+                        suggestions.querySelectorAll('.lead-ac-item').forEach(item => {
+                            item.addEventListener('mouseenter', () => item.style.background = '#f0f7ff');
+                            item.addEventListener('mouseleave', () => item.style.background = '');
+                            item.addEventListener('mousedown', function(e) {
+                                e.preventDefault();
+                                const lead = JSON.parse(this.dataset.lead);
+                                const form = document.getElementById('addEntryForm');
+                                nameInput.value = lead.name || '';
+                                if (lead.policy_number) form.querySelector('[name=policy_number]').value = lead.policy_number;
+                                if (lead.face_value)    form.querySelector('[name=face_value]').value    = lead.face_value;
+                                if (lead.premium)       form.querySelector('[name=premium]').value       = lead.premium;
+                                if (lead.draft_date)    form.querySelector('[name=draft_date]').value    = lead.draft_date;
+                                if (lead.payment_date)  form.querySelector('[name=payment_date]').value  = lead.payment_date;
+                                if (lead.policy_type) {
+                                    const sel = form.querySelector('[name=policy_type]');
+                                    const opt = [...sel.options].find(o => o.value.toLowerCase() === lead.policy_type.toLowerCase());
+                                    if (opt) sel.value = opt.value;
+                                }
+                                suggestions.style.display = 'none';
+                            });
+                        });
+                    } catch(e) { suggestions.style.display = 'none'; }
+                }, 280);
+            });
+            nameInput.addEventListener('blur', () => setTimeout(() => suggestions.style.display = 'none', 150));
+            document.getElementById('addEntryModal').addEventListener('hidden.bs.modal', () => suggestions.style.display = 'none');
+        }
+
+        const searchInput = document.getElementById('policySearch');
+        if (!searchInput) return;
+        searchInput.addEventListener('input', function() {
+            const needle = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#carrierTable tbody tr[data-entry-id]');
+            rows.forEach(function(row) {
+                const policyCell = row.querySelector('td:nth-child(3)');
+                const policyText = policyCell ? policyCell.textContent.trim().toLowerCase() : '';
+                row.style.display = (!needle || policyText.includes(needle)) ? '' : 'none';
+            });
+        });
+    });
+
     // ── Edit Entry ──────────────────────────────────────
+    // Status change helpers: auto-fill/clear chargeback amount
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSel = document.getElementById('edit_status');
+        if (statusSel) {
+            statusSel.addEventListener('change', function() {
+                const cbField   = document.getElementById('edit_chargeback_amount');
+                const paidField = document.getElementById('edit_paid_amount');
+                if (this.value === 'chargeback') {
+                    // Pre-fill CB with paid amount if CB is currently 0
+                    if (parseFloat(cbField.value) === 0 && parseFloat(paidField.value) > 0) {
+                        cbField.value = paidField.value;
+                        cbField.focus();
+                        cbField.select();
+                    }
+                } else if (this.value === 'paid' || this.value === 'approved') {
+                    // Clear chargeback when reverting to paid/approved
+                    // (paid_amount is preserved — it's just not counted for approved)
+                    cbField.value = 0;
+                }
+            });
+        }
+    });
+
     window.editEntry = function(id) {
         const e = entries[id];
         if (!e) return alert('Entry not found');
@@ -634,6 +888,7 @@
         document.getElementById('edit_paid_amount').value = e.paid_amount || 0;
         document.getElementById('edit_chargeback_amount').value = e.chargeback_amount || 0;
         document.getElementById('edit_rate_override').value = e.rate_override || '';
+        document.getElementById('edit_commission').value = e.commission !== null ? e.commission : '';
         document.getElementById('edit_notes').value = e.notes || '';
         new bootstrap.Modal(document.getElementById('editEntryModal')).show();
     };
@@ -644,7 +899,7 @@
         const data = Object.fromEntries(fd.entries());
         const id = data.entry_id;
         delete data.entry_id;
-        for (const k of ['rate_override']) {
+        for (const k of ['rate_override', 'commission']) {
             if (data[k] === '') data[k] = null;
         }
 
@@ -674,15 +929,72 @@
         }
     };
 
-    // ── Opening Chargeback ──────────────────────────────
-    window.updateOpeningCb = async function(val) {
-        if (!PERIOD) return alert('Please select a month first');
+    // ── Opening Chargeback (pinned row) ───────────────────
+    window.editPinnedCb = function() {
+        document.getElementById('pinnedCbEditRow').style.display = '';
+        document.getElementById('pinnedCbInput').focus();
+    };
+    window.cancelPinnedCb = function() {
+        document.getElementById('pinnedCbEditRow').style.display = 'none';
+    };
+    window.savePinnedCb = async function() {
+        const val = parseFloat(document.getElementById('pinnedCbInput').value) || 0;
         try {
             const res = await ajax(`${BASE}/${RATE_ID}/opening-chargeback`, 'PUT', {
-                amount: parseFloat(val) || 0,
-                period_month: PERIOD
+                amount: val, period_month: PERIOD
             });
-            if (res.success) updateBadges(res.summary);
+            if (res.success) {
+                const disp = document.getElementById('pinned-cb-display');
+                if (disp) disp.textContent = val > 0 ? val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '';
+                updateBadges(res.summary);
+                cancelPinnedCb();
+            }
+        } catch (e) { alert('Error: ' + e.message); }
+    };
+
+    // ── Opening Balance (pinned row) ──────────────────────
+    window.editPinnedBal = function() {
+        document.getElementById('pinnedBalEditRow').style.display = '';
+        document.getElementById('pinnedBalInput').focus();
+    };
+    window.cancelPinnedBal = function() {
+        document.getElementById('pinnedBalEditRow').style.display = 'none';
+    };
+    window.savePinnedBal = async function() {
+        const val = parseFloat(document.getElementById('pinnedBalInput').value) || 0;
+        try {
+            const res = await ajax(`${BASE}/${RATE_ID}/opening-balance`, 'PUT', {
+                opening_balance: val, period_month: PERIOD
+            });
+            if (res.success) {
+                const disp = document.getElementById('pinned-bal-display');
+                if (disp) {
+                    disp.textContent = val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+                    disp.className = 'cs-money cs-pinned-val ' + (val >= 0 ? 'cs-money-pos' : 'cs-money-neg');
+                }
+                updateBadges(res.summary);
+                cancelPinnedBal();
+            }
+        } catch (e) { alert('Error: ' + e.message); }
+    };
+
+    // ── Manual Chargeback ───────────────────────────────
+    window.submitManualCb = async function() {
+        const form = document.getElementById('manualCbForm');
+        const fd = new FormData(form);
+        const data = Object.fromEntries(fd.entries());
+
+        if (!data.name || !data.entry_date || !data.chargeback_amount) {
+            return alert('Name, date, and chargeback amount are required.');
+        }
+
+        try {
+            const res = await ajax(`${BASE}/${RATE_ID}/entries`, 'POST', data);
+            if (res.success) {
+                updateBadges(res.summary);
+                bootstrap.Modal.getInstance(document.getElementById('manualCbModal'))?.hide();
+                location.reload();
+            }
         } catch (e) {
             alert('Error: ' + e.message);
         }

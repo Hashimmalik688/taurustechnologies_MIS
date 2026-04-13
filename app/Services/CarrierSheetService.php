@@ -60,9 +60,17 @@ class CarrierSheetService
 
     /* ================================================================
      *  BALANCE FORMULA
-     *  CHARGEBACK → -chargeback_amount
-     *  normal     → commission - paid - chargeback
-     *  DECLINED   → commission is null, so: -chargeback (usually 0)
+     *  balance = (commission ?? 0) - effectivePaid - chargeback
+     *
+     *  paid_amount is only counted when status = paid or chargeback.
+     *  For approved/declined the paid_amount field may be stored but
+     *  should not affect balance or the PAID badge total.
+     *
+     *  APPROVED  → commission  (paid ignored)
+     *  PAID      → commission - paid
+     *  CHARGEBACK was-paid → commission - paid - cb
+     *  CHARGEBACK unpaid   → 0 - 0 - cb = -cb
+     *  DECLINED  → 0
      * ================================================================ */
     public function calculateBalance(
         string $status,
@@ -70,17 +78,9 @@ class CarrierSheetService
         float $paidAmount,
         float $chargebackAmount
     ): float {
-        $status = strtolower(trim($status));
-
-        if ($status === 'chargeback') {
-            return round(-$chargebackAmount, 2);
-        }
-
-        if ($commission !== null && is_numeric($commission)) {
-            return round($commission - $paidAmount - $chargebackAmount, 2);
-        }
-
-        return round(-$chargebackAmount, 2);
+        $s = strtolower(trim($status));
+        $effectivePaid = ($s === 'paid' || $s === 'chargeback') ? $paidAmount : 0.0;
+        return round(($commission ?? 0) - $effectivePaid - $chargebackAmount, 2);
     }
 
     /* ================================================================
@@ -163,23 +163,28 @@ class CarrierSheetService
             }
         }
 
-        $paidTotal       = $entries->sum(fn ($e) => (float) $e->paid_amount);
+        // Only count paid_amount for entries that are actually paid or chargeback-of-paid
+        $paidTotal = $entries
+            ->filter(fn ($e) => in_array(strtolower($e->status), ['paid', 'chargeback']))
+            ->sum(fn ($e) => (float) $e->paid_amount);
         $chargebackTotal = $entries->sum(fn ($e) => (float) $e->chargeback_amount);
 
-        // Add opening chargeback
+        // Add opening chargeback and opening balance
         $openingCb = 0;
+        $openingBalance = 0;
         if ($periodMonth) {
             $ocb = CarrierSheetOpeningCb::where('carrier_sheet_rate_id', $rate->id)
                 ->where('period_month', $periodMonth)
                 ->first();
-            $openingCb = $ocb ? (float) $ocb->amount : 0;
+            $openingCb      = $ocb ? (float) $ocb->amount : 0;
+            $openingBalance = $ocb ? (float) $ocb->opening_balance : 0;
         } else {
-            $openingCb = CarrierSheetOpeningCb::where('carrier_sheet_rate_id', $rate->id)
-                ->sum('amount');
+            $openingCb      = CarrierSheetOpeningCb::where('carrier_sheet_rate_id', $rate->id)->sum('amount');
+            $openingBalance = CarrierSheetOpeningCb::where('carrier_sheet_rate_id', $rate->id)->sum('opening_balance');
         }
 
         $chargebackTotal += $openingCb;
-        $balanceTotal = round($commissionTotal - $paidTotal - $chargebackTotal, 2);
+        $balanceTotal = round($commissionTotal - $paidTotal - $chargebackTotal + $openingBalance, 2);
 
         return [
             'commission'       => round($commissionTotal, 2),    // K1
@@ -187,6 +192,7 @@ class CarrierSheetService
             'balance'          => $balanceTotal,                   // M1
             'chargeback_total' => round($chargebackTotal, 2),     // N1
             'opening_cb'       => round($openingCb, 2),
+            'opening_balance'  => round($openingBalance, 2),
             'total_apps'       => $entries->count(),               // P1
             'paid_count'       => $entries->where('status', 'paid')->count(),          // Q1
             'approved_count'   => $entries->where('status', 'approved')->count(),      // R1

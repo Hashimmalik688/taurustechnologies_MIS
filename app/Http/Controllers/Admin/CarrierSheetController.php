@@ -51,13 +51,15 @@ class CarrierSheetController extends Controller
         $summary = $this->service->getCarrierSummary($rate, $periodMonth);
         $months = $this->service->getAvailableMonths($rate->id);
 
-        // Opening chargeback for this carrier/month
-        $openingCb = null;
+        // Opening chargeback for this carrier/month (always load; period=null returns a default stub)
         if ($periodMonth) {
             $openingCb = CarrierSheetOpeningCb::firstOrCreate(
                 ['carrier_sheet_rate_id' => $rate->id, 'period_month' => $periodMonth],
-                ['amount' => 0]
+                ['amount' => 0, 'opening_balance' => 0]
             );
+        } else {
+            // Stub object so the view always renders the fields
+            $openingCb = new CarrierSheetOpeningCb(['amount' => 0, 'opening_balance' => 0]);
         }
 
         $dailySummary = $this->service->getDailySummary($rate, $periodMonth);
@@ -83,7 +85,7 @@ class CarrierSheetController extends Controller
             'policy_number'     => 'nullable|string|max:60',
             'name'              => 'nullable|string|max:120',
             'face_value'        => 'nullable|string|max:20',
-            'premium'           => 'required|numeric|min:0',
+            'premium'           => 'nullable|numeric|min:0',
             'policy_type'       => 'nullable|string|max:30',
             'status'            => 'required|string|in:approved,paid,chargeback,declined',
             'draft_date'        => 'nullable|date',
@@ -102,6 +104,7 @@ class CarrierSheetController extends Controller
         $validated['sr_number'] = ($maxSr ?? 0) + 1;
         $validated['carrier_sheet_rate_id'] = $rate->id;
         $validated['created_by'] = auth()->id();
+        $validated['premium'] = $validated['premium'] ?? 0;
         $validated['paid_amount'] = $validated['paid_amount'] ?? 0;
         $validated['chargeback_amount'] = $validated['chargeback_amount'] ?? 0;
 
@@ -139,11 +142,29 @@ class CarrierSheetController extends Controller
             'paid_amount'       => 'nullable|numeric|min:0',
             'chargeback_amount' => 'nullable|numeric|min:0',
             'rate_override'     => 'nullable|numeric',
+            'commission'        => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string|max:500',
         ]);
 
+        $commissionOverride = array_key_exists('commission', $validated) && $validated['commission'] !== null
+            ? (float) $validated['commission']
+            : null;
+        unset($validated['commission']); // don't let fill() overwrite yet
+
         $entry->fill($validated);
-        $this->service->recalculateEntry($entry);
+
+        if ($commissionOverride !== null) {
+            // User forced commission — just recalculate balance with the given commission
+            $entry->commission = round($commissionOverride, 2);
+            $entry->balance = $this->service->calculateBalance(
+                $entry->status,
+                $entry->commission,
+                (float) $entry->paid_amount,
+                (float) $entry->chargeback_amount
+            );
+        } else {
+            $this->service->recalculateEntry($entry);
+        }
         $entry->save();
 
         if ($request->expectsJson()) {
@@ -200,6 +221,29 @@ class CarrierSheetController extends Controller
     }
 
     /* ================================================================
+     *  UPDATE OPENING BALANCE
+     * ================================================================ */
+    public function updateOpeningBalance(CarrierSheetRate $rate, Request $request)
+    {
+        $validated = $request->validate([
+            'opening_balance' => 'required|numeric',
+            'period_month'    => 'required|date',
+        ]);
+
+        $cb = CarrierSheetOpeningCb::updateOrCreate(
+            ['carrier_sheet_rate_id' => $rate->id, 'period_month' => $validated['period_month']],
+            ['opening_balance' => $validated['opening_balance']]
+        );
+
+        if ($request->expectsJson()) {
+            $summary = $this->service->getCarrierSummary($rate, $validated['period_month']);
+            return response()->json(['success' => true, 'record' => $cb, 'summary' => $summary]);
+        }
+
+        return back()->with('success', 'Opening balance updated.');
+    }
+
+    /* ================================================================
      *  RATES MANAGEMENT
      * ================================================================ */
     public function rates()
@@ -232,6 +276,48 @@ class CarrierSheetController extends Controller
         }
 
         return back()->with('success', "Rates updated. {$recalculated} entries recalculated.");
+    }
+
+    /* ================================================================
+     *  LEAD LOOKUP  (autocomplete for Add Entry modal)
+     * ================================================================ */
+    public function leadLookup(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = trim($request->input('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $leads = \App\Models\Lead::query()
+            ->where(function ($query) use ($q) {
+                $query->where('cn_name', 'like', "%{$q}%")
+                      ->orWhere('policy_number', 'like', "%{$q}%");
+            })
+            ->whereNotNull('cn_name')
+            ->whereNotNull('sale_at')
+            ->select(['id', 'cn_name', 'policy_number', 'coverage_amount', 'monthly_premium', 'policy_type', 'initial_draft_date', 'future_draft_date'])
+            ->orderBy('cn_name')
+            ->limit(12)
+            ->get()
+            ->map(function ($lead) {
+                $fv = null;
+                if ($lead->coverage_amount) {
+                    $amt = (float) $lead->coverage_amount;
+                    $fv  = $amt >= 1000 ? round($amt / 1000) . 'K' : (string) $amt;
+                }
+                return [
+                    'id'            => $lead->id,
+                    'name'          => $lead->cn_name,
+                    'policy_number' => $lead->policy_number,
+                    'face_value'    => $fv,
+                    'premium'       => $lead->monthly_premium ? round((float) $lead->monthly_premium, 2) : null,
+                    'policy_type'   => $lead->policy_type,
+                    'draft_date'    => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
+                    'payment_date'  => $lead->future_draft_date  ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d')  : null,
+                ];
+            });
+
+        return response()->json($leads);
     }
 
     /* ================================================================
@@ -284,6 +370,9 @@ class CarrierSheetController extends Controller
             $sheet = $spreadsheet->getSheetByName($sheetName);
             $highestRow = $sheet->getHighestRow();
 
+            // Delete all existing entries for this carrier before re-importing to avoid duplicates.
+            CarrierSheetEntry::where('carrier_sheet_rate_id', $rate->id)->forceDelete();
+
             // Opening chargeback (row 3, col N) is skipped during multi-month import.
             // Users can set it per-period manually from the carrier sheet view.
 
@@ -291,21 +380,21 @@ class CarrierSheetController extends Controller
             $skipped = 0;
 
             for ($row = 4; $row <= $highestRow; $row++) {
-                // Read columns A–N
+                // Read columns A–N — use getCalculatedValue() so formula cells return their result
                 $srNum       = $sheet->getCellByColumnAndRow(1, $row)->getValue();
                 $dateVal     = $sheet->getCellByColumnAndRow(2, $row)->getValue();
                 $policyNum   = $sheet->getCellByColumnAndRow(3, $row)->getValue();
                 $nameVal     = $sheet->getCellByColumnAndRow(4, $row)->getValue();
                 $fvVal       = $sheet->getCellByColumnAndRow(5, $row)->getValue();
-                $premVal     = $sheet->getCellByColumnAndRow(6, $row)->getValue();
+                $premVal     = $sheet->getCellByColumnAndRow(6, $row)->getCalculatedValue();
                 $policyType  = $sheet->getCellByColumnAndRow(7, $row)->getValue();
                 $statusVal   = $sheet->getCellByColumnAndRow(8, $row)->getValue();
                 $draftDate   = $sheet->getCellByColumnAndRow(9, $row)->getValue();
                 $paymentDate = $sheet->getCellByColumnAndRow(10, $row)->getValue();
                 // Column K (11) = Commission — skip (server-calculated)
-                $paidVal     = $sheet->getCellByColumnAndRow(12, $row)->getValue();
+                $paidVal     = $sheet->getCellByColumnAndRow(12, $row)->getCalculatedValue();
                 // Column M (13) = Balance — skip (server-calculated)
-                $cbVal       = $sheet->getCellByColumnAndRow(14, $row)->getValue();
+                $cbVal       = $sheet->getCellByColumnAndRow(14, $row)->getCalculatedValue();
 
                 // Skip empty rows
                 if (!$srNum && !$policyNum && !$nameVal) {

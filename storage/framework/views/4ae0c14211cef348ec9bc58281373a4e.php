@@ -222,13 +222,13 @@
                     <td><span class="cs-pill cs-pill-cb"><?php echo e($row['chargeback_count']); ?></span></td>
                     <td><span class="cs-pill cs-pill-dec"><?php echo e($row['declined_count']); ?></span></td>
                     <td class="cs-money <?php echo e($row['commission'] >= 0 ? 'cs-money-pos' : 'cs-money-neg'); ?>">
-                        <?php echo e(number_format($row['commission'], 4)); ?>
+                        <?php echo e(number_format($row['commission'], 2)); ?>
 
                     </td>
-                    <td class="cs-money"><?php echo e(number_format($row['paid'], 4)); ?></td>
-                    <td class="cs-money cs-money-neg"><?php echo e(number_format($row['chargeback_total'], 4)); ?></td>
+                    <td class="cs-money"><?php echo e(number_format($row['paid'], 2)); ?></td>
+                    <td class="cs-money cs-money-neg"><?php echo e(number_format($row['chargeback_total'], 2)); ?></td>
                     <td class="cs-money <?php echo e($row['balance'] >= 0 ? 'cs-money-pos' : 'cs-money-neg'); ?>">
-                        <?php echo e(number_format($row['balance'], 4)); ?>
+                        <?php echo e(number_format($row['balance'], 2)); ?>
 
                     </td>
                 </tr>
@@ -242,10 +242,10 @@
                     <td><span class="cs-pill cs-pill-appr"><?php echo e($totals['approved_count']); ?></span></td>
                     <td><span class="cs-pill cs-pill-cb"><?php echo e($totals['chargeback_count']); ?></span></td>
                     <td><span class="cs-pill cs-pill-dec"><?php echo e($totals['declined_count']); ?></span></td>
-                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['commission'], 4)); ?></td>
-                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['paid'], 4)); ?></td>
-                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['chargeback_total'], 4)); ?></td>
-                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['balance'], 4)); ?></td>
+                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['commission'], 2)); ?></td>
+                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['paid'], 2)); ?></td>
+                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['chargeback_total'], 2)); ?></td>
+                    <td class="cs-money" style="color:#fff;"><?php echo e(number_format($totals['balance'], 2)); ?></td>
                 </tr>
             </tfoot>
         </table>
