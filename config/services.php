@@ -59,4 +59,27 @@ return [
         'api_key' => env('ASSEMBLYAI_API_KEY'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Google Sheets — Ravens Sales Integration
+    |--------------------------------------------------------------------------
+    | Set these three values in .env to enable automatic row-appending every
+    | time a Ravens Closer submits a sale.
+    |
+    |  GOOGLE_SERVICE_ACCOUNT_JSON  – absolute path to the service account
+    |                                  JSON key file downloaded from Google Cloud
+    |                                  Console. Store it outside the web root,
+    |                                  e.g. storage/app/google-service-account.json
+    |
+    |  GOOGLE_SHEETS_SPREADSHEET_ID – the long ID in the sheet URL:
+    |                                  .../spreadsheets/d/{ID}/edit
+    |
+    |  GOOGLE_SHEETS_TAB_NAME       – the tab/worksheet name (default: Ravens Sales)
+    */
+    'google_sheets' => [
+        'service_account_json' => env('GOOGLE_SERVICE_ACCOUNT_JSON', storage_path('app/google-service-account.json')),
+        'spreadsheet_id'       => env('GOOGLE_SHEETS_SPREADSHEET_ID'),
+        'tab_name'             => env('GOOGLE_SHEETS_TAB_NAME', 'Ravens Sales'),
+    ],
+
 ];

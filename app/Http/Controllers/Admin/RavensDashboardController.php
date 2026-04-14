@@ -12,6 +12,7 @@ use App\Models\QA\QaCall;
 use App\Services\NotificationService;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Jobs\SyncSaleToGoogleSheets;
 use App\Support\Roles;
 use App\Support\Teams;
 use Illuminate\Http\Request;
@@ -972,6 +973,9 @@ class RavensDashboardController extends Controller
 
             $lead->update($updateData);
 
+            // Sync sale to Google Sheets (async — never blocks the closer's response)
+            SyncSaleToGoogleSheets::dispatch($lead->fresh());
+
             // Send notifications to QA and Managers
             $this->sendSaleNotifications($lead);
 
@@ -1105,6 +1109,9 @@ class RavensDashboardController extends Controller
             $data['date']        = now()->format('Y-m-d');
 
             $lead = Lead::create($data);
+
+            // Sync sale to Google Sheets (async — never blocks the closer's response)
+            SyncSaleToGoogleSheets::dispatch($lead);
 
             // Repeat-sale audit log (if applicable)
             if ($repeatSale) {
