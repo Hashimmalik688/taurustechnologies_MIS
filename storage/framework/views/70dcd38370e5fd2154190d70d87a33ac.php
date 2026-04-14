@@ -136,6 +136,150 @@
     border-radius: 99px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
 }
 
+/* ── Closed pill + dropdown ────────────────────────────────────────────── */
+.cp-closed-wrap {
+    position: relative;
+    flex-shrink: 0;
+    border-left: 1px solid rgba(0,0,0,.09);
+    padding-left: 1rem;
+    margin-left: .25rem;
+}
+.cp-closed-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 26px;
+    padding: 0 10px 0 7px;
+    border-radius: 99px;
+    border: 1.5px solid rgba(22,163,74,.45);
+    background: rgba(22,163,74,.08);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, border-color .15s;
+    user-select: none;
+}
+.cp-closed-pill:hover,
+.cp-closed-pill.open {
+    background: rgba(22,163,74,.16);
+    border-color: rgba(22,163,74,.7);
+}
+.cp-closed-pill-avatars {
+    display: flex;
+    align-items: center;
+}
+.cp-closed-pill-avatars .cp-pav {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid rgba(22,163,74,.5);
+    margin-left: -5px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg,#16a34a,#10b981);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .45rem;
+    font-weight: 800;
+    color: #fff;
+}
+.cp-closed-pill-avatars .cp-pav:first-child { margin-left: 0; }
+.cp-closed-pill-label {
+    font-size: .68rem;
+    font-weight: 700;
+    color: #15803d;
+}
+.cp-closed-pill-caret {
+    font-size: .55rem;
+    color: #16a34a;
+    opacity: .7;
+    transition: transform .2s;
+}
+.cp-closed-pill.open .cp-closed-pill-caret { transform: rotate(180deg); }
+/* Dropdown panel */
+.cp-closed-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    background: var(--bs-card-bg, #fff);
+    border: 1px solid rgba(22,163,74,.2);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.18), 0 0 0 1px rgba(22,163,74,.08);
+    z-index: 1050;
+    overflow: hidden;
+    animation: cpDdIn .18s ease-out;
+}
+.cp-closed-dropdown.open { display: block; }
+@keyframes cpDdIn {
+    from { opacity:0; transform: translateY(-6px) scale(.98); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+}
+.cp-dd-header {
+    padding: .55rem .85rem .4rem;
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: #16a34a;
+    border-bottom: 1px solid rgba(22,163,74,.12);
+    background: rgba(22,163,74,.05);
+}
+.cp-dd-list {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: .35rem 0;
+}
+.cp-dd-list::-webkit-scrollbar { width: 3px; }
+.cp-dd-list::-webkit-scrollbar-thumb { background: rgba(22,163,74,.3); border-radius: 3px; }
+.cp-dd-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .38rem .85rem;
+    cursor: pointer;
+    transition: background .12s;
+}
+.cp-dd-row:hover { background: rgba(22,163,74,.06); }
+.cp-dd-photo {
+    width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+    border: 2px solid rgba(22,163,74,.4); flex-shrink: 0;
+}
+.cp-dd-init {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #16a34a, #10b981);
+    color: #fff; font-size: .6rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 2px solid rgba(22,163,74,.4);
+}
+.cp-dd-info { flex: 1; min-width: 0; }
+.cp-dd-name {
+    font-size: .75rem; font-weight: 700;
+    color: var(--bs-body-color, #1e293b);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cp-dd-sub {
+    font-size: .62rem; color: #64748b; margin-top: 1px;
+}
+.cp-dd-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, #16a34a, #10b981);
+    color: #fff; font-size: .62rem; font-weight: 800;
+    padding: 0 5px; flex-shrink: 0;
+}
+/* dark overrides */
+:is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],
+    [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .cp-closed-wrap {
+    border-left-color: rgba(255,255,255,.08);
+}
+:is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],
+    [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .cp-closed-pill-label {
+    color: #4ade80;
+}
+
 /* dark chipname */
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],
     [data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .cp-chip-name {
@@ -155,7 +299,19 @@
             <span style="font-size:.65rem;color:#94a3b8">Loading…</span>
         </div>
     </div>
-    <span class="cp-sold-badge d-none" id="cpSoldBadge">0 sold</span>
+</div>
+
+
+<div class="cp-closed-wrap d-none" id="cpClosedWrap">
+    <div class="cp-closed-pill" id="cpClosedPill" onclick="window.toggleCpClosed()">
+        <span class="cp-closed-pill-avatars" id="cpClosedAvatars"></span>
+        <span class="cp-closed-pill-label" id="cpClosedLabel">0 closed</span>
+        <span class="cp-closed-pill-caret">▾</span>
+    </div>
+    <div class="cp-closed-dropdown" id="cpClosedDropdown">
+        <div class="cp-dd-header">🔥 Closed today</div>
+        <div class="cp-dd-list" id="cpClosedList"></div>
+    </div>
 </div>
 
 <script>
@@ -243,6 +399,11 @@
             if (pho && pho.style.display === 'flex' && !document.getElementById('cpPhotoCard').contains(e.target)) {
                 window.closeCpPhoto();
             }
+            /* Close closed-pill dropdown on outside click */
+            var cpw = document.getElementById('cpClosedWrap');
+            if (cpw && !cpw.contains(e.target)) {
+                window.closeCpClosed();
+            }
         });
     }
 
@@ -326,20 +487,55 @@
     }
 
     function renderStrip() {
-        var rail      = document.getElementById('cpRail');
-        var soldBadge = document.getElementById('cpSoldBadge');
-        var closers   = cpData.allClosers || [];
-        var noSale    = closers.filter(function(c){ return !c.hasSale; });
-        var sold      = closers.filter(function(c){ return  c.hasSale; });
+        var rail    = document.getElementById('cpRail');
+        var closers = cpData.allClosers || [];
+        var noSale       = closers.filter(function(c){ return !c.hasSale; });
+        var sold         = closers.filter(function(c){ return  c.hasSale; });
 
-        /* Sold badge */
-        if (sold.length) {
-            soldBadge.textContent = '✅ ' + sold.length + ' sold';
-            soldBadge.classList.remove('d-none');
-        } else {
-            soldBadge.classList.add('d-none');
+/* ── Closed pill ────────────────────────────────────────────────── */
+        var closedWrap = document.getElementById('cpClosedWrap');
+        var closedList = document.getElementById('cpClosedList');
+        var closedLabel  = document.getElementById('cpClosedLabel');
+        var closedAvatars = document.getElementById('cpClosedAvatars');
+
+        if (sold.length && closedWrap) {
+            /* Update pill label */
+            var totalSales = sold.reduce(function(sum, c){ return sum + (c.saleCount || 1); }, 0);
+            closedLabel.textContent = sold.length + ' closed · ' + totalSales + ' sale' + (totalSales !== 1 ? 's' : '');
+
+            /* Stacked mini-avatars in pill (max 4) */
+            var avatarSlice = sold.slice(0, 4);
+            closedAvatars.innerHTML = avatarSlice.map(function(c) {
+                var initials = c.name.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+                return c.photo
+                    ? '<img class="cp-pav" src="' + esc(c.photo) + '" alt="' + esc(c.name) + '">'
+                    : '<span class="cp-pav">' + esc(initials) + '</span>';
+            }).join('');
+
+            /* Dropdown rows — sorted by saleCount desc */
+            var sortedSold = sold.slice().sort(function(a,b){ return b.saleCount - a.saleCount; });
+            closedList.innerHTML = sortedSold.map(function(c) {
+                var initials = c.name.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+                var avatar   = c.photo
+                    ? '<img class="cp-dd-photo" src="' + esc(c.photo) + '" alt="' + esc(c.name) + '">'
+                    : '<div class="cp-dd-init">' + esc(initials) + '</div>';
+                var saleWord = c.saleCount === 1 ? 'sale' : 'sales';
+                return '<div class="cp-dd-row" onclick="window.showCpPhoto(' + JSON.stringify(c.name) + ',' + JSON.stringify(c.photo || '') + ');window.closeCpClosed();">'
+                    + avatar
+                    + '<div class="cp-dd-info">'
+                        + '<div class="cp-dd-name">' + esc(c.name) + '</div>'
+                        + '<div class="cp-dd-sub">Today\'s closer</div>'
+                    + '</div>'
+                    + '<span class="cp-dd-badge">' + c.saleCount + '</span>'
+                    + '</div>';
+            }).join('');
+
+            closedWrap.classList.remove('d-none');
+        } else if (closedWrap) {
+            closedWrap.classList.add('d-none');
         }
 
+        /* ── Chill Party strip ──────────────────────────────────────────── */
         if (!noSale.length) {
             rail.className = 'cp-rail';
             rail.style.animation = '';
@@ -380,7 +576,8 @@
 
         var closer = (cpData.allClosers || []).filter(function(c){ return c.name === name; })[0];
         if (closer && closer.hasSale) {
-            statusEl.innerHTML = '<span style="color:#16a34a">✅ Sale closed today</span>';
+            var cnt = closer.saleCount || 1;
+            statusEl.innerHTML = '<span style="color:#16a34a">🔥 ' + cnt + ' sale' + (cnt !== 1 ? 's' : '') + ' closed today</span>';
         } else if (closer) {
             statusEl.innerHTML = '<span style="color:#f97316">🏖️ In Chill Party — no sale yet</span>';
         } else {
@@ -407,6 +604,27 @@
     window.closeCpPhoto = function() {
         var o = document.getElementById('cpPhotoOverlay');
         if (o) o.style.display = 'none';
+    };
+
+    /* ── Closed pill dropdown toggle ─────────────────────────────────── */
+    window.toggleCpClosed = function() {
+        var pill = document.getElementById('cpClosedPill');
+        var dd   = document.getElementById('cpClosedDropdown');
+        if (!pill || !dd) return;
+        var isOpen = dd.classList.contains('open');
+        if (isOpen) {
+            dd.classList.remove('open');
+            pill.classList.remove('open');
+        } else {
+            dd.classList.add('open');
+            pill.classList.add('open');
+        }
+    };
+    window.closeCpClosed = function() {
+        var pill = document.getElementById('cpClosedPill');
+        var dd   = document.getElementById('cpClosedDropdown');
+        if (pill) pill.classList.remove('open');
+        if (dd)   dd.classList.remove('open');
     };
 
     /* ─────────────────────────────────────────────────────────────────────

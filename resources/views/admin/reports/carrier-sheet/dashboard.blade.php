@@ -99,7 +99,7 @@
 /* ── Grand total row ───────────────────────────────── */
 .cs-table .cs-total td {
     background: #1B5E20; color: #fff; font-weight: 800; font-size: .74rem;
-    border: none; padding: .5rem;
+    border: none; padding: .5rem; text-align: center; vertical-align: middle;
 }
 
 /* ── Number formatting ─────────────────────────────── */
@@ -133,6 +133,36 @@
 .cs-actions {
     display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem;
 }
+
+/* ── Money column alignment ───────────────────────── */
+.cs-table th.cs-th-right,
+.cs-table td.cs-money {
+    text-align:right !important;
+    padding-right:1rem !important;
+    font-variant-numeric:tabular-nums;
+}
+
+/* ── Charts ────────────────────────────────────────── */
+.cs-charts-row {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+    margin-top:1rem;
+}
+@media(max-width:768px){ .cs-charts-row{ grid-template-columns:1fr; } }
+.cs-chart-card {
+    background:var(--cs-surface); border:1px solid var(--cs-border);
+    border-radius:.55rem; box-shadow:var(--cs-shadow); padding:1rem;
+}
+.cs-chart-wrap {
+    position:relative; height:260px;
+}
+.cs-chart-title {
+    font-size:.68rem; font-weight:800; text-transform:uppercase;
+    letter-spacing:.6px; color:var(--cs-text-3); margin-bottom:.75rem;
+    display:flex; align-items:center; gap:.35rem;
+}
+.cs-chart-title i { font-size:.85rem; }
 </style>
 @endsection
 
@@ -200,10 +230,10 @@
                     <th>Approved</th>
                     <th>Chargeback</th>
                     <th>Declined</th>
-                    <th>Commission ($)</th>
-                    <th>Paid Amt ($)</th>
-                    <th>Chargeback ($)</th>
-                    <th>Balance ($)</th>
+                    <th class="cs-th-right">Commission ($)</th>
+                    <th class="cs-th-right">Paid Amt ($)</th>
+                    <th class="cs-th-right">Chargeback ($)</th>
+                    <th class="cs-th-right">Balance ($)</th>
                 </tr>
             </thead>
             <tbody>
@@ -240,13 +270,27 @@
                     <td><span class="cs-pill cs-pill-appr">{{ $totals['approved_count'] }}</span></td>
                     <td><span class="cs-pill cs-pill-cb">{{ $totals['chargeback_count'] }}</span></td>
                     <td><span class="cs-pill cs-pill-dec">{{ $totals['declined_count'] }}</span></td>
-                    <td class="cs-money" style="color:#fff;">{{ number_format($totals['commission'], 2) }}</td>
-                    <td class="cs-money" style="color:#fff;">{{ number_format($totals['paid'], 2) }}</td>
-                    <td class="cs-money" style="color:#fff;">{{ number_format($totals['chargeback_total'], 2) }}</td>
-                    <td class="cs-money" style="color:#fff;">{{ number_format($totals['balance'], 2) }}</td>
+                    <td class="cs-money" style="color:#fff; text-align:right !important; padding-right:1rem;">{{ number_format($totals['commission'], 2) }}</td>
+                    <td class="cs-money" style="color:#fff; text-align:right !important; padding-right:1rem;">{{ number_format($totals['paid'], 2) }}</td>
+                    <td class="cs-money" style="color:#fff; text-align:right !important; padding-right:1rem;">{{ number_format($totals['chargeback_total'], 2) }}</td>
+                    <td class="cs-money" style="color:#fff; text-align:right !important; padding-right:1rem;">{{ number_format($totals['balance'], 2) }}</td>
                 </tr>
             </tfoot>
         </table>
+    </div>
+
+    {{-- Charts row --}}
+    <div class="cs-charts-row">
+        {{-- Paid Amount chart --}}
+        <div class="cs-chart-card">
+            <div class="cs-chart-title"><i class="bx bx-dollar-circle" style="color:var(--cs-green);"></i> Paid Amount by Carrier</div>
+            <div class="cs-chart-wrap"><canvas id="chartPaid"></canvas></div>
+        </div>
+        {{-- Balance chart --}}
+        <div class="cs-chart-card">
+            <div class="cs-chart-title"><i class="bx bx-bar-chart-alt-2" style="color:var(--cs-indigo);"></i> Balance by Carrier</div>
+            <div class="cs-chart-wrap"><canvas id="chartBalance"></canvas></div>
+        </div>
     </div>
 </div>
 
@@ -283,3 +327,103 @@
 </div>
 @endcanEditModule
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    const rows = @json($rows);
+
+    const labels  = rows.map(r => r.carrier.carrier_label);
+    const colors  = rows.map(r => r.carrier.title_color || '#1565C0');
+    const paidAmt = rows.map(r => parseFloat(r.paid)    || 0);
+    const balance = rows.map(r => parseFloat(r.balance) || 0);
+
+    // ── Paid Amount chart ─────────────────────────────────────────────────
+    new Chart(document.getElementById('chartPaid'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Paid ($)',
+                data: paidAmt,
+                backgroundColor: colors.map(c => c + 'cc'),
+                borderColor:     colors,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' $' + ctx.parsed.x.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        font:{size:10},
+                        callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v)
+                    },
+                    grid: { color:'rgba(0,0,0,.05)' }
+                },
+                y: { ticks:{ font:{size:10} }, grid:{ display:false } }
+            }
+        }
+    });
+
+    // ── Balance chart ─────────────────────────────────────────────────────
+    const balanceBg     = balance.map(v => v >= 0 ? 'rgba(46,125,50,.80)' : 'rgba(198,40,40,.80)');
+    const balanceBorder = balance.map(v => v >= 0 ? '#2E7D32' : '#C62828');
+
+    new Chart(document.getElementById('chartBalance'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Balance ($)',
+                data: balance,
+                backgroundColor: balanceBg,
+                borderColor:     balanceBorder,
+                borderWidth: 1.5,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' $' + ctx.parsed.x.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        font:{size:10},
+                        callback: v => {
+                            const abs = Math.abs(v);
+                            const fmt = abs >= 1000 ? (abs/1000).toFixed(1)+'k' : abs;
+                            return (v < 0 ? '-$' : '$') + fmt;
+                        }
+                    },
+                    grid: { color:'rgba(0,0,0,.05)' }
+                },
+                y: { ticks:{ font:{size:10} }, grid:{ display:false } }
+            }
+        }
+    });
+})();
+</script>
+@endpush

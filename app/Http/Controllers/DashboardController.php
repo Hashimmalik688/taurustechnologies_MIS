@@ -587,12 +587,15 @@ class DashboardController extends Controller
             ->where('status', '!=', Statuses::USER_INACTIVE)
             ->get(['id', 'name', 'email']);
 
-        $closersWithSaleToday = Lead::whereNotNull('closer_name')
+        $salesCountByName = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
             ->whereDate('sale_date', today())
             ->whereIn('closer_name', $allRavensClosers->pluck('name'))
-            ->pluck('closer_name')
-            ->unique();
+            ->selectRaw('closer_name, COUNT(*) as sale_count')
+            ->groupBy('closer_name')
+            ->pluck('sale_count', 'closer_name');
+
+        $closersWithSaleToday = $salesCountByName->keys();
 
         // Fetch passport photos for Ravens Closers (matched by email → employees table)
         // Only include photo when show_strip_photo = true
@@ -607,15 +610,16 @@ class DashboardController extends Controller
             ->pluck('name')
             ->values();
 
-        // Return all closers: no-sale first, then sold — each with hasSale flag
+        // Return all closers: no-sale first, then sold — each with hasSale flag + saleCount
         $allClosers = $allRavensClosers
             ->sortBy(fn($u) => $closersWithSaleToday->contains($u->name) ? 1 : 0) // no-sale first
             ->map(fn($u) => [
-                'name'    => $u->name,
-                'photo'   => $photosByEmail->get($u->email)
-                                ? asset('storage/' . $photosByEmail->get($u->email))
-                                : null,
-                'hasSale' => $closersWithSaleToday->contains($u->name),
+                'name'      => $u->name,
+                'photo'     => $photosByEmail->get($u->email)
+                                    ? asset('storage/' . $photosByEmail->get($u->email))
+                                    : null,
+                'hasSale'   => $closersWithSaleToday->contains($u->name),
+                'saleCount' => (int) ($salesCountByName->get($u->name) ?? 0),
             ])
             ->values();
 

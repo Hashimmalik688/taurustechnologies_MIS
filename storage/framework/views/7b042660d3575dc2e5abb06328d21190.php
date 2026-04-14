@@ -134,13 +134,20 @@
 
 /* Status row colors */
 .cs-dtable tr.cs-row-approved             { background:#ffffff !important; }
-.cs-dtable tr.cs-row-approved:hover       { background:#f5f5f5 !important; }
-.cs-dtable tr.cs-row-paid                 { background:#e8f5e9 !important; }
-.cs-dtable tr.cs-row-paid:hover           { background:#c8e6c9 !important; }
-.cs-dtable tr.cs-row-chargeback           { background:#ffebee !important; }
-.cs-dtable tr.cs-row-chargeback:hover     { background:#ffcdd2 !important; }
-.cs-dtable tr.cs-row-declined             { background:#eeeeee !important; }
-.cs-dtable tr.cs-row-declined:hover       { background:#e0e0e0 !important; }
+.cs-dtable tr.cs-row-approved:hover       { background:#f0f0f0 !important; }
+.cs-dtable tr.cs-row-paid                 { background:#c8e6c9 !important; }
+.cs-dtable tr.cs-row-paid:hover           { background:#a5d6a7 !important; }
+.cs-dtable tr.cs-row-chargeback           { background:#ffcdd2 !important; }
+.cs-dtable tr.cs-row-chargeback:hover     { background:#ef9a9a !important; }
+.cs-dtable tr.cs-row-declined             { background:#e0e0e0 !important; }
+.cs-dtable tr.cs-row-declined:hover       { background:#bdbdbd !important; }
+/* Policy type badges */
+.cs-ptype { display:inline-block; padding:.15rem .45rem; border-radius:3px; font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+.cs-ptype-level    { background:#BBDEFB; color:#0D47A1; }
+.cs-ptype-graded   { background:#E1BEE7; color:#6A1B9A; }
+.cs-ptype-gi       { background:#B2EBF2; color:#006064; }
+.cs-ptype-modified { background:#FFE0B2; color:#E65100; }
+.cs-ptype-default  { background:#F5F5F5; color:#424242; }
 
 /* Status cell badges */
 .cs-status {
@@ -255,8 +262,27 @@
             </select>
         </div>
         <div>
-            <label>Search Policy #</label>
-            <input type="search" id="policySearch" placeholder="e.g. FEXB357429" autocomplete="off" style="min-width:160px;">
+            <label>Search</label>
+            <input type="search" id="tableSearch" placeholder="Name, Policy #, Type..." autocomplete="off" style="min-width:180px;">
+        </div>
+        <div>
+            <label>Type</label>
+            <select id="filterType">
+                <option value="">All Types</option>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $rate->getPolicyTypes(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e(strtolower($pt)); ?>"><?php echo e(strtoupper(str_replace('_',' ',$pt))); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            </select>
+        </div>
+        <div>
+            <label>Status</label>
+            <select id="filterStatus">
+                <option value="">All Statuses</option>
+                <option value="approved">Approved</option>
+                <option value="paid">Paid</option>
+                <option value="chargeback">Chargeback</option>
+                <option value="declined">Declined</option>
+            </select>
         </div>
         <div style="margin-left:auto; display:flex; gap:.4rem; align-items:flex-end;">
             <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
@@ -299,7 +325,7 @@
             </thead>
             <tbody>
                 
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth || $openingCb->opening_balance != 0): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(true): ?>
                 <tr class="cs-pinned-row cs-pinned-bal">
                     <td style="color:#9fa8da;">&#x2605;</td>
                     <td></td>
@@ -344,7 +370,7 @@
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
                 
-                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth || $openingCb->amount != 0): ?>
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(true): ?>
                 <tr class="cs-pinned-row cs-pinned-cb">
                     <td style="color:#ffe69c;">&#x2605;</td>
                     <td></td>
@@ -396,7 +422,19 @@
                     <td><?php echo e($entry->face_value); ?></td>
                     <td class="cs-money"><?php echo e(number_format($entry->premium, 2)); ?></td>
                     <td>
-                        <span style="text-transform:uppercase; font-size:.6rem; font-weight:600;"><?php echo e($entry->policy_type); ?></span>
+                        <?php
+                            $ptSlug = strtolower(trim($entry->policy_type ?? ''));
+                            $ptClass = match(true) {
+                                str_contains($ptSlug, 'level')    => 'cs-ptype-level',
+                                str_contains($ptSlug, 'graded')   => 'cs-ptype-graded',
+                                str_contains($ptSlug, 'gi') || str_contains($ptSlug, 'guaranteed') => 'cs-ptype-gi',
+                                str_contains($ptSlug, 'modified') => 'cs-ptype-modified',
+                                default => 'cs-ptype-default',
+                            };
+                        ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($entry->policy_type): ?>
+                        <span class="cs-ptype <?php echo e($ptClass); ?>"><?php echo e($entry->policy_type); ?></span>
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
                         <span class="cs-status cs-status-<?php echo e(strtolower($entry->status)); ?>"><?php echo e(ucfirst($entry->status)); ?></span>
@@ -835,17 +873,31 @@
             document.getElementById('addEntryModal').addEventListener('hidden.bs.modal', () => suggestions.style.display = 'none');
         }
 
-        const searchInput = document.getElementById('policySearch');
-        if (!searchInput) return;
-        searchInput.addEventListener('input', function() {
-            const needle = this.value.trim().toLowerCase();
+        const searchInput = document.getElementById('tableSearch');
+        const filterType   = document.getElementById('filterType');
+        const filterStatus = document.getElementById('filterStatus');
+
+        function applyFilters() {
+            const needle = (searchInput ? searchInput.value.trim().toLowerCase() : '');
+            const typeVal   = filterType   ? filterType.value.toLowerCase()   : '';
+            const statusVal = filterStatus ? filterStatus.value.toLowerCase() : '';
             const rows = document.querySelectorAll('#carrierTable tbody tr[data-entry-id]');
             rows.forEach(function(row) {
-                const policyCell = row.querySelector('td:nth-child(3)');
-                const policyText = policyCell ? policyCell.textContent.trim().toLowerCase() : '';
-                row.style.display = (!needle || policyText.includes(needle)) ? '' : 'none';
+                const rowText   = row.textContent.trim().toLowerCase();
+                const typeCell  = row.querySelector('td:nth-child(7)');
+                const statusCell= row.querySelector('td:nth-child(8)');
+                const typeText  = typeCell   ? typeCell.textContent.trim().toLowerCase()   : '';
+                const statusText= statusCell ? statusCell.textContent.trim().toLowerCase() : '';
+                const matchSearch = !needle   || rowText.includes(needle);
+                const matchType   = !typeVal  || typeText.includes(typeVal);
+                const matchStatus = !statusVal|| statusText.includes(statusVal);
+                row.style.display = (matchSearch && matchType && matchStatus) ? '' : 'none';
             });
-        });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', applyFilters);
+        if (filterType)   filterType.addEventListener('change', applyFilters);
+        if (filterStatus) filterStatus.addEventListener('change', applyFilters);
     });
 
     // ── Edit Entry ──────────────────────────────────────

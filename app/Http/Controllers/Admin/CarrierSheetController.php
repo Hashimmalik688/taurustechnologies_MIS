@@ -105,7 +105,7 @@ class CarrierSheetController extends Controller
         $validated['carrier_sheet_rate_id'] = $rate->id;
         $validated['created_by'] = auth()->id();
         $validated['premium'] = $validated['premium'] ?? 0;
-        $validated['paid_amount'] = $validated['paid_amount'] ?? 0;
+        $validated['paid_amount'] = round(($validated['paid_amount'] ?? 0) / 2, 2);
         $validated['chargeback_amount'] = $validated['chargeback_amount'] ?? 0;
 
         $entry = new CarrierSheetEntry($validated);

@@ -216,6 +216,11 @@
 .pd-empty i{font-size:2rem;display:block;margin-bottom:.4rem;opacity:.2;color:#9ca3af;}
 .pd-empty p{font-size:.84rem;color:#9ca3af;margin:0;}
 
+/* Quick-link shortcut cards */
+.pd-shortcut{transition:transform .18s,box-shadow .18s,border-color .18s;}
+.pd-shortcut:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.09);border-color:rgba(79,70,229,.25);}
+:is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-shortcut div[style*="color:#111827"]{color:var(--text-primary,#e0e0e0)!important;}
+
 /* Dark themes */
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-card{background:var(--bg-card,#1e1e2e);border-color:var(--border-color,rgba(255,255,255,.08));}
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-head{background:var(--bg-secondary,#16162a);border-color:var(--border-color,rgba(255,255,255,.06));}
@@ -338,6 +343,9 @@
 </div>
 @endif
 
+{{-- Carrier filter pills --}}
+@include('partner.partials.carrier-filter')
+
 {{-- ═══════════════════════════════════════════
      STATS STRIP
 ═══════════════════════════════════════════ --}}
@@ -371,235 +379,45 @@
         <div>
             <div class="pd-stat-val">{{ $activeCarriers->count() }}</div>
             <div class="pd-stat-lbl">Active carriers</div>
-            <div class="pd-stat-sub">{{ $authorizedStates->count() }} states</div>
+            <div class="pd-stat-sub">{{ $activeCarriers->sum('state_count') }} states</div>
         </div>
     </div>
 </div>
 
-{{-- ═══════════════════════════════════════════
-     CARRIERS + LEDGER
-═══════════════════════════════════════════ --}}
-<div class="row g-3 pd-anim pd-d3 mb-0">
 
-    <div class="col-lg-4">
-        <div class="pd-card h-100">
-            <div class="pd-head">
-                <h6><i class="bx bx-briefcase"></i> Carriers &amp; States</h6>
-                <span class="pd-count">{{ $activeCarriers->count() }}</span>
+{{-- Quick links to the split-out sections --}}
+<div class="row g-3 pd-anim pd-d4" style="margin-top:1rem;">
+    <div class="col-md-4">
+        <a href="{{ route('partner.carriers', request()->only(['carrier_id'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+            <div class="pd-stat-icon si-violet" style="flex-shrink:0;"><i class="bx bx-briefcase"></i></div>
+            <div>
+                <div style="font-size:.88rem;font-weight:800;color:#111827;">Carriers &amp; States</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $activeCarriers->count() }} {{ $activeCarriers->count() == 1 ? 'carrier' : 'carriers' }} linked</div>
             </div>
-            <div class="pd-body">
-                @if($activeCarriers->count() > 0)
-                <div class="pd-carriers">
-                    @foreach($activeCarriers as $c)
-                    <div class="pd-carrier-card">
-                        <div class="pd-carrier-name">{{ $c['name'] }}</div>
-                        <div>@foreach($c['states'] as $st)<span class="pd-state-pill">{{ $st }}</span>@endforeach</div>
-                        <div class="pd-carrier-meta">{{ $c['state_count'] }} {{ $c['state_count'] == 1 ? 'state' : 'states' }}</div>
-                    </div>
-                    @endforeach
+            <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ route('partner.sales', request()->only(['carrier_id','month','date_from','date_to'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+            <div class="pd-stat-icon si-green" style="flex-shrink:0;"><i class="bx bx-trending-up"></i></div>
+            <div>
+                <div style="font-size:.88rem;font-weight:800;color:#111827;">Sales</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $totalSales }} sales · {{ $monthlyLeads }} leads this period</div>
+            </div>
+            <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ route('partner.ledger', request()->only(['carrier_id'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+            <div class="pd-stat-icon si-blue" style="flex-shrink:0;"><i class="bx bx-receipt"></i></div>
+            <div>
+                <div style="font-size:.88rem;font-weight:800;color:#111827;">Ledger</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">
+                    {{ $currentBalance > 0 ? 'Owed: $'.number_format($currentBalance,2) : ($currentBalance < 0 ? 'Credit: $'.number_format(abs($currentBalance),2) : 'Balance: $0') }}
                 </div>
-                @else
-                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No carriers linked yet</p></div>
-                @endif
             </div>
-            @if($authorizedStates->count() > 0)
-            <div class="pd-states-footer">
-                <span style="font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;white-space:nowrap;margin-right:.3rem;">All</span>
-                @foreach($authorizedStates as $st)<span class="pd-state-pill">{{ $st }}</span>@endforeach
-            </div>
-            @endif
-        </div>
-    </div>
-
-    <div class="col-lg-8">
-        <div class="pd-card h-100">
-            <div class="pd-head">
-                <h6><i class="bx bx-history"></i> Ledger Activity</h6>
-                <span style="font-size:.7rem;color:#9ca3af;font-weight:600;">Running balance · excl. chargebacks</span>
-            </div>
-            <div class="pd-body np" style="overflow-x:auto;">
-                @if($recentTransactions->count() > 0)
-                @php $runBal = 0; @endphp
-                <table class="pd-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Carrier / Note</th>
-                            <th class="text-end">Debit</th>
-                            <th class="text-end">Credit</th>
-                            <th class="text-end">Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($recentTransactions->take(15) as $txn)
-                        @php
-                            $runBal += ($txn['debit'] ?? 0) - ($txn['credit'] ?? 0);
-                            $tk = strtolower(str_replace([' ','_','-'],'',$txn['type'] ?? ''));
-                            $tc = match(true) {
-                                str_contains($tk,'sale') && !str_contains($tk,'return') => 'tc-sale',
-                                str_contains($tk,'payment') => 'tc-pay',
-                                str_contains($tk,'chargeback') || str_contains($tk,'return') => 'tc-cb',
-                                default => 'tc-other',
-                            };
-                        @endphp
-                        <tr>
-                            <td style="white-space:nowrap;color:#6b7280;font-size:.78rem;">{{ \Carbon\Carbon::parse($txn['date'])->format('M d') }}</td>
-                            <td><span class="tc {{ $tc }}">{{ str_replace('_',' ',$txn['type'] ?? '—') }}</span></td>
-                            <td style="font-size:.8rem;color:#6b7280;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                                {{ $txn['carrier'] ?? '' }}{{ ($txn['carrier'] && ($txn['description'] ?? $txn['reference'] ?? '')) ? ' · ' : '' }}{{ \Illuminate\Support\Str::limit($txn['description'] ?? $txn['reference'] ?? '', 22) }}
-                            </td>
-                            <td class="text-end {{ ($txn['debit']??0)>0?'col-dr':'col-dim' }}">{{ ($txn['debit']??0)>0?'$'.number_format($txn['debit'],2):'—' }}</td>
-                            <td class="text-end {{ ($txn['credit']??0)>0?'col-cr':'col-dim' }}">{{ ($txn['credit']??0)>0?'$'.number_format($txn['credit'],2):'—' }}</td>
-                            <td class="text-end">
-                                <span class="{{ $runBal>0?'rb-pos':($runBal<0?'rb-neg':'rb-zero') }}">
-                                    {{ $runBal>0?'+':($runBal<0?'−':'') }}${{ number_format(abs($runBal),2) }}
-                                </span>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @else
-                <div class="pd-empty"><i class="bx bx-receipt"></i><p>No ledger entries yet</p></div>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- ═══════════════════════════════════════════
-     REVENUE BY CARRIER (compact) + LEADS
-═══════════════════════════════════════════ --}}
-<div class="row g-3 pd-anim pd-d4" style="margin-top:1.25rem;">
-
-    @if($revenueByCarrier->count() > 0)
-    <div class="col-lg-4">
-        <div class="pd-card">
-            <div class="pd-head">
-                <h6><i class="bx bx-bar-chart-alt-2"></i> Revenue by Carrier</h6>
-            </div>
-            <div class="pd-body np">
-                @php $maxR = $revenueByCarrier->max('partner_share') ?: 1; @endphp
-                <table class="pd-table">
-                    <thead><tr><th>Carrier</th><th class="text-end">Your Share</th><th class="text-end">Sales</th></tr></thead>
-                    <tbody>
-                        @foreach($revenueByCarrier as $r)
-                        <tr>
-                            <td>
-                                <div style="font-weight:700;font-size:.82rem;">{{ $r['carrier']->name ?? 'Unknown' }}</div>
-                                <div class="mbar"><div class="mbar-fill" style="width:{{ $maxR>0?min(100,($r['partner_share']/$maxR)*100):0 }}%;"></div></div>
-                            </td>
-                            <td class="text-end col-cr">${{ number_format($r['partner_share'],0) }}</td>
-                            <td class="text-end" style="color:#6b7280;">{{ $r['sales_count'] }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>Total</td>
-                            <td class="text-end col-cr">${{ number_format($revenueByCarrier->sum('partner_share'),0) }}</td>
-                            <td class="text-end">{{ $revenueByCarrier->sum('sales_count') }}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <div class="{{ $revenueByCarrier->count() > 0 ? 'col-lg-8' : 'col-lg-12' }}">
-        <div class="pd-card">
-            <div class="pd-head">
-                <h6><i class="bx bx-list-ul"></i> Recent Leads &amp; Sales</h6>
-                <span class="pd-count">{{ $recentLeads->count() }}</span>
-            </div>
-            <div class="pd-body np" style="overflow-x:auto;">
-                @if($recentLeads->count() > 0)
-                <div style="padding:.4rem .85rem;font-size:.68rem;color:#9ca3af;background:#fafafa;border-bottom:1px solid rgba(0,0,0,.04);">
-                    <span style="color:#a78bfa;font-weight:800;">~</span> = estimated (premium &times; 9 &times; carrier%) — finalised once policy is accepted
-                </div>
-                <table class="pd-table">
-                    <thead>
-                        <tr>
-                            <th>Client</th>
-                            <th>Carrier</th>
-                            <th>State</th>
-                            <th>Status</th>
-                            <th class="text-end">Commission</th>
-                            <th class="text-end">Your Share</th>
-                            <th>Paid</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($recentLeads as $lead)
-                        @php
-                            $scCls = match(strtolower($lead->status ?? '')) {
-                                'sale','approved','accepted','done' => 'sc-ok',
-                                'pending' => 'sc-warn',
-                                'issued'  => 'sc-info',
-                                'declined','cancelled' => 'sc-danger',
-                                default => 'sc-def',
-                            };
-                            $comm      = (float)($lead->agent_commission ?? 0);
-                            $premium   = (float)($lead->monthly_premium ?? 0);
-                            $carrierPct = (float)($lead->insuranceCarrier->base_commission_percentage ?? 0);
-
-                            // If agent_commission is not yet set, estimate from premium × 9 × carrier%
-                            $isEstimate = false;
-                            if ($comm <= 0 && $premium > 0 && $carrierPct > 0) {
-                                $comm = $premium * 9 * ($carrierPct / 100);
-                                $isEstimate = true;
-                            }
-                            $hasComm = $comm > 0;
-                            $share   = $hasComm ? $comm - ($comm * $taurusPct / 100) : null;
-                        @endphp
-                        <tr>
-                            <td>
-                                <div style="font-weight:700;">{{ $lead->first_name }} {{ $lead->last_name }}</div>
-                                @if($premium > 0)<div style="font-size:.7rem;color:#9ca3af;">${{ number_format($premium,2) }}/mo premium</div>@endif
-                            </td>
-                            <td style="font-size:.8rem;color:#6b7280;">{{ $lead->insuranceCarrier->name ?? '—' }}</td>
-                            <td><span class="pd-state-pill" style="font-size:.7rem;padding:.12rem .4rem;">{{ $lead->state ?? '—' }}</span></td>
-                            <td><span class="sc {{ $scCls }}">{{ ucfirst($lead->status ?? '—') }}</span></td>
-                            <td class="text-end">
-                                @if($hasComm)
-                                    <span class="{{ $isEstimate ? '' : 'col-dr' }}" style="{{ $isEstimate ? 'color:#a78bfa;' : '' }}"
-                                          @if($isEstimate) title="Estimated: premium × 9 × {{ $carrierPct }}% carrier rate" @endif>
-                                        {{ $isEstimate ? '~' : '' }}${{ number_format($comm, 2) }}
-                                    </span>
-                                @else
-                                    <span style="color:#d1d5db;font-size:.78rem;">—</span>
-                                @endif
-                            </td>
-                            <td class="text-end">
-                                @if($share !== null)
-                                    <span class="{{ $isEstimate ? '' : 'col-cr' }}" style="{{ $isEstimate ? 'color:#818cf8;' : '' }}"
-                                          @if($isEstimate) title="Estimated partner share after {{ $taurusPct }}% Taurus fee" @endif>
-                                        {{ $isEstimate ? '~' : '' }}${{ number_format($share, 2) }}
-                                    </span>
-                                @else
-                                    <span style="color:#d1d5db;font-size:.78rem;">—</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($lead->commission_paid_to_partner)
-                                    <span class="tc tc-sale">Paid</span>
-                                @elseif($hasComm && !$isEstimate)
-                                    <span class="tc tc-other">Unpaid</span>
-                                @else
-                                    <span class="tc" style="background:rgba(167,139,250,.1);color:#a78bfa;font-size:.6rem;">Est.</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                @else
-                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No leads this period</p></div>
-                @endif
-            </div>
-        </div>
+            <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
+        </a>
     </div>
 </div>
 
@@ -636,7 +454,7 @@ function toggleFilterMode() {
         },16);
     });
     setTimeout(function(){
-        document.querySelectorAll('.pd-bar-fill,.mbar-fill').forEach(function(b){
+        document.querySelectorAll('.pd-bar-fill').forEach(function(b){
             var w=b.style.width; b.style.width='0';
             requestAnimationFrame(function(){
                 b.style.transition='width 1s cubic-bezier(.22,1,.36,1)';

@@ -176,6 +176,32 @@
         .pp-nav-badge-warn{background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.35);color:#fca5a5;}
         .pp-nav-badge-ok{background:rgba(5,150,105,.2);border:1px solid rgba(5,150,105,.35);color:#6ee7b7;}
 
+        /* ─── Carrier filter pills ─── */
+        .pp-carrier-filter{
+            display:flex;align-items:center;flex-wrap:wrap;gap:.4rem;
+            padding:.55rem 0 .65rem;
+            border-bottom:1px solid rgba(0,0,0,.06);
+            margin-bottom:1.1rem;
+        }
+        .pp-cf-label{
+            font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;
+            color:#9ca3af;margin-right:.2rem;display:flex;align-items:center;gap:.25rem;
+        }
+        .pp-cf-pill{
+            font-size:.73rem;font-weight:700;padding:.25rem .7rem;border-radius:999px;
+            background:#f3f4f6;border:1px solid rgba(0,0,0,.08);color:#6b7280;
+            text-decoration:none;transition:all .15s;white-space:nowrap;
+        }
+        .pp-cf-pill:hover{background:#e5e7eb;color:#374151;border-color:rgba(0,0,0,.15);}
+        .pp-cf-active{
+            background:rgba(79,70,229,.1);border-color:rgba(79,70,229,.3);
+            color:#4f46e5 !important;font-weight:800;
+        }
+        :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pp-carrier-filter{border-color:var(--border-color,rgba(255,255,255,.06));}
+        :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pp-cf-pill{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5);}
+        :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pp-cf-pill:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85);}
+        :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pp-cf-active{background:rgba(99,102,241,.18);border-color:rgba(99,102,241,.4);color:#a5b4fc !important;}
+
         /* ─── Content ─── */
         .pp-content{padding:1.5rem 2rem;max-width:1500px;margin:0 auto;}
 
@@ -244,10 +270,18 @@
 
         {{-- Bottom tier: navigation tabs --}}
         <div class="pp-nav-bottom">
-            <a href="{{ route('partner.dashboard') }}" class="pp-nav-tab active">
+            <a href="{{ route('partner.dashboard') }}" class="pp-nav-tab {{ request()->routeIs('partner.dashboard') ? 'active' : '' }}">
                 <i class="bx bx-grid-alt"></i> Dashboard
             </a>
-            {{-- Future nav items can be added here --}}
+            <a href="{{ route('partner.sales') }}" class="pp-nav-tab {{ request()->routeIs('partner.sales') ? 'active' : '' }}">
+                <i class="bx bx-trending-up"></i> Sales
+            </a>
+            <a href="{{ route('partner.ledger') }}" class="pp-nav-tab {{ request()->routeIs('partner.ledger') ? 'active' : '' }}">
+                <i class="bx bx-receipt"></i> Ledger
+            </a>
+            <a href="{{ route('partner.carriers') }}" class="pp-nav-tab {{ request()->routeIs('partner.carriers') ? 'active' : '' }}">
+                <i class="bx bx-briefcase"></i> Carriers &amp; States
+            </a>
             <div class="pp-nav-spacer"></div>
             {{-- Right-side nav extras from child views --}}
             @stack('nav-right')

@@ -67,6 +67,9 @@ Route::prefix('partner')->group(function () {
     // Protected partner routes (only partners can access)
     Route::middleware(['partner.auth', 'prevent.user'])->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'index'])->name('partner.dashboard');
+        Route::get('carriers', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'carriers'])->name('partner.carriers');
+        Route::get('sales', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'sales'])->name('partner.sales');
+        Route::get('ledger', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'ledger'])->name('partner.ledger');
         Route::post('mark-commission-paid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionPaid'])->name('partner.mark-commission-paid');
         Route::post('mark-commission-unpaid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionUnpaid'])->name('partner.mark-commission-unpaid');
         Route::post('logout', [App\Http\Controllers\Partner\PartnerAuthController::class, 'logout'])->name('partner.logout');
