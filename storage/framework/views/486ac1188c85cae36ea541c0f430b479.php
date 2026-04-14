@@ -1,10 +1,8 @@
-@extends('layouts.master')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
     Carrier Sheet — Rates
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 :root {
     --cs-surface: var(--bs-card-bg, #ffffff);
@@ -96,9 +94,9 @@
 }
 .cs-color-preset:hover, .cs-color-preset.active { border-color:#000; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="cs-page">
     <div class="cs-hdr">
         <div class="cs-hdr-left">
@@ -106,23 +104,24 @@
             <h5>Commission Rates</h5>
         </div>
         <div style="display:flex; gap:.5rem; align-items:center;">
-            @canEditModule('carrier-sheet')
+            <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
             <button class="cs-add-btn" data-bs-toggle="modal" data-bs-target="#addCarrierModal">
                 <i class="bx bx-plus"></i> Add Carrier
             </button>
-            @endcanEditModule
-            <a href="{{ route('settings.reports.carrier-sheet.dashboard') }}" class="cs-back">
+            <?php endif; ?>
+            <a href="<?php echo e(route('settings.reports.carrier-sheet.dashboard')); ?>" class="cs-back">
                 <i class="bx bx-arrow-back"></i> Dashboard
             </a>
         </div>
     </div>
 
-    @if(session('success'))
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(session('success')): ?>
     <div class="alert alert-success alert-dismissible fade show" style="font-size:.72rem;">
-        {{ session('success') }}
+        <?php echo e(session('success')); ?>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="cs-card">
         <table class="cs-rates-table">
@@ -135,93 +134,99 @@
                     <th>Modified</th>
                     <th>GI ×</th>
                     <th>Notes</th>
-                    @canEditModule('carrier-sheet')
+                    <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <th></th>
-                    @endcanEditModule
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
-                @foreach($carriers as $carrier)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $carriers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $carrier): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td style="text-align:left; font-weight:700;">
-                        <span class="cs-carrier-dot" style="background:{{ $carrier->title_color }};"></span>
-                        {{ $carrier->carrier_label }}
+                        <span class="cs-carrier-dot" style="background:<?php echo e($carrier->title_color); ?>;"></span>
+                        <?php echo e($carrier->carrier_label); ?>
+
                     </td>
                     <td>
-                        @if($carrier->level_rate !== null)
-                            @canEditModule('carrier-sheet')
-                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="{{ $carrier->id }}" data-field="level_rate" value="{{ $carrier->level_rate }}">
-                            @else
-                            {{ $carrier->level_rate }}
-                            @endcanEditModule
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrier->level_rate !== null): ?>
+                            <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="<?php echo e($carrier->id); ?>" data-field="level_rate" value="<?php echo e($carrier->level_rate); ?>">
+                            <?php else: ?>
+                            <?php echo e($carrier->level_rate); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             <span class="cs-rate-na">—</span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
-                        @if($carrier->graded_rate !== null)
-                            @canEditModule('carrier-sheet')
-                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="{{ $carrier->id }}" data-field="graded_rate" value="{{ $carrier->graded_rate }}">
-                            @else
-                            {{ $carrier->graded_rate }}
-                            @endcanEditModule
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrier->graded_rate !== null): ?>
+                            <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="<?php echo e($carrier->id); ?>" data-field="graded_rate" value="<?php echo e($carrier->graded_rate); ?>">
+                            <?php else: ?>
+                            <?php echo e($carrier->graded_rate); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             <span class="cs-rate-na">—</span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
-                        @if($carrier->gi_rate !== null)
-                            @canEditModule('carrier-sheet')
-                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="{{ $carrier->id }}" data-field="gi_rate" value="{{ $carrier->gi_rate }}">
-                            @else
-                            {{ $carrier->gi_rate }}
-                            @endcanEditModule
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrier->gi_rate !== null): ?>
+                            <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="<?php echo e($carrier->id); ?>" data-field="gi_rate" value="<?php echo e($carrier->gi_rate); ?>">
+                            <?php else: ?>
+                            <?php echo e($carrier->gi_rate); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             <span class="cs-rate-na">—</span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
-                        @if($carrier->modified_rate !== null)
-                            @canEditModule('carrier-sheet')
-                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="{{ $carrier->id }}" data-field="modified_rate" value="{{ $carrier->modified_rate }}">
-                            @else
-                            {{ $carrier->modified_rate }}
-                            @endcanEditModule
-                        @else
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrier->modified_rate !== null): ?>
+                            <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                            <input type="number" step="0.0001" class="cs-rate-input" data-carrier="<?php echo e($carrier->id); ?>" data-field="modified_rate" value="<?php echo e($carrier->modified_rate); ?>">
+                            <?php else: ?>
+                            <?php echo e($carrier->modified_rate); ?>
+
+                            <?php endif; ?>
+                        <?php else: ?>
                             <span class="cs-rate-na">—</span>
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
                     <td>
-                        @canEditModule('carrier-sheet')
-                        <select class="cs-rate-input" data-carrier="{{ $carrier->id }}" data-field="gi_multiplier" style="width:50px;">
-                            <option value="9" {{ $carrier->gi_multiplier == 9 ? 'selected' : '' }}>×9</option>
-                            <option value="1" {{ $carrier->gi_multiplier == 1 ? 'selected' : '' }}>×1</option>
+                        <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
+                        <select class="cs-rate-input" data-carrier="<?php echo e($carrier->id); ?>" data-field="gi_multiplier" style="width:50px;">
+                            <option value="9" <?php echo e($carrier->gi_multiplier == 9 ? 'selected' : ''); ?>>×9</option>
+                            <option value="1" <?php echo e($carrier->gi_multiplier == 1 ? 'selected' : ''); ?>>×1</option>
                         </select>
-                        @else
-                        ×{{ $carrier->gi_multiplier }}
-                        @endcanEditModule
+                        <?php else: ?>
+                        ×<?php echo e($carrier->gi_multiplier); ?>
+
+                        <?php endif; ?>
                     </td>
                     <td style="font-size:.62rem; color:var(--cs-text-3); text-align:left; max-width:200px;">
-                        @if($carrier->uses_hardcoded_rates)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrier->uses_hardcoded_rates): ?>
                             Hardcoded: Pref/Std/Super Pref = Level rate, Modified = Modified rate
-                        @elseif($carrier->carrier_slug === 'sec-f1')
+                        <?php elseif($carrier->carrier_slug === 'sec-f1'): ?>
                             GI uses ×1 multiplier
-                        @else
+                        <?php else: ?>
                             —
-                        @endif
+                        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </td>
-                    @canEditModule('carrier-sheet')
+                    <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <td style="white-space:nowrap;">
-                        <button class="cs-save-btn" onclick="saveRate({{ $carrier->id }}, this)">
+                        <button class="cs-save-btn" onclick="saveRate(<?php echo e($carrier->id); ?>, this)">
                             <i class="bx bx-save"></i> Save
                         </button>
-                        <button class="cs-del-btn ms-1" onclick="deleteCarrier({{ $carrier->id }}, '{{ addslashes($carrier->carrier_label) }}', this)">
+                        <button class="cs-del-btn ms-1" onclick="deleteCarrier(<?php echo e($carrier->id); ?>, '<?php echo e(addslashes($carrier->carrier_label)); ?>', this)">
                             <i class="bx bx-trash"></i>
                         </button>
                     </td>
-                    @endcanEditModule
+                    <?php endif; ?>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </tbody>
         </table>
         <div class="cs-note">
@@ -233,12 +238,12 @@
     </div>
 </div>
 
-{{-- Add Carrier Modal --}}
-@canEditModule('carrier-sheet')
+
+<?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
 <div class="modal fade" id="addCarrierModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form class="modal-content" id="addCarrierForm">
-            @csrf
+            <?php echo csrf_field(); ?>
             <div class="modal-header">
                 <h6 class="modal-title fw-bold"><i class="bx bx-plus-circle me-1"></i> Add New Carrier</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -260,9 +265,9 @@
                             <code id="ac_colorCode" style="font-size:.7rem;">#283593</code>
                         </div>
                         <div class="cs-color-presets" id="ac_presets">
-                            @foreach(['#283593','#1565C0','#2E7D32','#6A1B9A','#C62828','#E65100','#F57F17','#00695C','#37474F','#880E4F','#1A237E','#004D40'] as $c)
-                            <span class="cs-color-preset" style="background:{{ $c }};" data-color="{{ $c }}"></span>
-                            @endforeach
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = ['#283593','#1565C0','#2E7D32','#6A1B9A','#C62828','#E65100','#F57F17','#00695C','#37474F','#880E4F','#1A237E','#004D40']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <span class="cs-color-preset" style="background:<?php echo e($c); ?>;" data-color="<?php echo e($c); ?>"></span>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -306,10 +311,10 @@
         </form>
     </div>
 </div>
-@endcanEditModule
-@endsection
+<?php endif; ?>
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 (function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -332,7 +337,7 @@
         });
 
         try {
-            const res = await fetch(`{{ url('settings/reports/carrier-sheet/rates') }}/${carrierId}`, {
+            const res = await fetch(`<?php echo e(url('settings/reports/carrier-sheet/rates')); ?>/${carrierId}`, {
                 method: 'PUT',
                 headers: {
                     'X-CSRF-TOKEN': CSRF,
@@ -364,7 +369,7 @@
         if (!confirm(`Delete carrier "${label}" and ALL its entries? This cannot be undone.`)) return;
         btn.disabled = true;
         try {
-            const res = await fetch(`{{ url('settings/reports/carrier-sheet/rates') }}/${carrierId}`, {
+            const res = await fetch(`<?php echo e(url('settings/reports/carrier-sheet/rates')); ?>/${carrierId}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
             });
@@ -421,7 +426,7 @@
             });
 
             try {
-                const res = await fetch('{{ route("settings.reports.carrier-sheet.rates.store") }}', {
+                const res = await fetch('<?php echo e(route("settings.reports.carrier-sheet.rates.store")); ?>', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': CSRF,
@@ -454,4 +459,6 @@
 
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/admin/reports/carrier-sheet/rates.blade.php ENDPATH**/ ?>

@@ -77,9 +77,8 @@ return [
     |  GOOGLE_SHEETS_TAB_NAME       – the tab/worksheet name (default: Ravens Sales)
     */
     'google_sheets' => [
-        'service_account_json' => env('GOOGLE_SERVICE_ACCOUNT_JSON', storage_path('app/google-service-account.json')),
-        'spreadsheet_id'       => env('GOOGLE_SHEETS_SPREADSHEET_ID'),
-        'tab_name'             => env('GOOGLE_SHEETS_TAB_NAME', 'Ravens Sales'),
+        // Apps Script Web App deployment URL — set GOOGLE_SHEETS_SCRIPT_URL in .env
+        'script_url' => env('GOOGLE_SHEETS_SCRIPT_URL'),
     ],
 
 ];

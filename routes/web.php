@@ -758,7 +758,9 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {
         Route::get('/',      [\App\Http\Controllers\Admin\CarrierSheetController::class, 'dashboard'])->name('dashboard')->middleware('role.permission:carrier-sheet,view');
         Route::get('/rates', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'rates'])->name('rates')->middleware('role.permission:carrier-sheet,view');
+        Route::post('/rates', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'storeCarrier'])->name('rates.store')->middleware('role.permission:carrier-sheet,edit');
         Route::put('/rates/{rate}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'updateRate'])->name('rates.update')->middleware('role.permission:carrier-sheet,edit');
+        Route::delete('/rates/{rate}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'deleteCarrier'])->name('rates.destroy')->middleware('role.permission:carrier-sheet,edit');
         Route::post('/import', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'import'])->name('import')->middleware('role.permission:carrier-sheet,edit');
         Route::get('/lead-lookup', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'leadLookup'])->name('lead-lookup')->middleware('role.permission:carrier-sheet,view');
         Route::get('/{rate}', [\App\Http\Controllers\Admin\CarrierSheetController::class, 'show'])->name('show')->middleware('role.permission:carrier-sheet,view');

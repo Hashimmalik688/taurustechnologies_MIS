@@ -1,8 +1,6 @@
-@extends('layouts.partner')
+<?php $__env->startSection('title'); ?> Partner Dashboard <?php $__env->stopSection(); ?>
 
-@section('title') Partner Dashboard @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 /* ═══════════════════════════════════════════════════════════
    PARTNER DASHBOARD  ·  Clean & Focused
@@ -235,156 +233,152 @@
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-balance-alert.owe{background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.25);color:#fca5a5;}
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-balance-alert.credit{background:rgba(5,150,105,.1);border-color:rgba(5,150,105,.25);color:#6ee7b7;}
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $earnedRatio = $projectedRevenue > 0 ? min(100, ($earnedRevenue / $projectedRevenue) * 100) : 0;
     $taurusPct   = $partner->our_commission_percentage ?? 15;
-@endphp
+?>
 
-{{-- ═══════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════ --}}
+
 <div class="pd-hero pd-anim">
     <div class="pd-hero-body">
 
         <div class="pd-hero-top">
             <div>
-                <div class="pd-hero-name">{{ $partner->name }}</div>
+                <div class="pd-hero-name"><?php echo e($partner->name); ?></div>
                 <div class="pd-hero-meta">
-                    <span class="pd-chip pd-chip-glass">{{ $partner->code }}</span>
-                    <span class="pd-chip pd-chip-glass">{{ number_format($totalLeads) }} leads total</span>
+                    <span class="pd-chip pd-chip-glass"><?php echo e($partner->code); ?></span>
+                    <span class="pd-chip pd-chip-glass"><?php echo e(number_format($totalLeads)); ?> leads total</span>
                     <span class="pd-chip pd-chip-green"><span class="pd-pulse"></span> Live</span>
-                    @if($chargebacks > 0)
-                    <span class="pd-chip pd-chip-amber">CB: ${{ number_format($chargebacks,0) }} shared</span>
-                    @endif
+                    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($chargebacks > 0): ?>
+                    <span class="pd-chip pd-chip-amber">CB: $<?php echo e(number_format($chargebacks,0)); ?> shared</span>
+                    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                 </div>
             </div>
-            <form method="GET" action="{{ route('partner.dashboard') }}" class="pd-period-form" id="pd-filter-form">
+            <form method="GET" action="<?php echo e(route('partner.dashboard')); ?>" class="pd-period-form" id="pd-filter-form">
                 <span class="pd-period-label">View by</span>
                 <select class="pd-period-input" id="pd-filter-mode" style="width:auto;padding-right:1.6rem;" onchange="toggleFilterMode()">
-                    <option value="month" {{ !request('date_from') ? 'selected' : '' }}>Month</option>
-                    <option value="range" {{ request('date_from') ? 'selected' : '' }}>Date range</option>
+                    <option value="month" <?php echo e(!request('date_from') ? 'selected' : ''); ?>>Month</option>
+                    <option value="range" <?php echo e(request('date_from') ? 'selected' : ''); ?>>Date range</option>
                 </select>
 
-                {{-- Month mode --}}
-                <span id="pd-month-wrap" style="{{ request('date_from') ? 'display:none' : 'display:flex' }};align-items:center;gap:.4rem;">
-                    <input type="month" name="month" class="pd-period-input" value="{{ $month }}">
+                
+                <span id="pd-month-wrap" style="<?php echo e(request('date_from') ? 'display:none' : 'display:flex'); ?>;align-items:center;gap:.4rem;">
+                    <input type="month" name="month" class="pd-period-input" value="<?php echo e($month); ?>">
                 </span>
 
-                {{-- Date range mode --}}
-                <span id="pd-range-wrap" style="{{ request('date_from') ? 'display:flex' : 'display:none' }};align-items:center;gap:.35rem;">
-                    <input type="date" name="date_from" class="pd-period-input" style="width:130px;" value="{{ request('date_from') }}" placeholder="From">
+                
+                <span id="pd-range-wrap" style="<?php echo e(request('date_from') ? 'display:flex' : 'display:none'); ?>;align-items:center;gap:.35rem;">
+                    <input type="date" name="date_from" class="pd-period-input" style="width:130px;" value="<?php echo e(request('date_from')); ?>" placeholder="From">
                     <span style="color:rgba(255,255,255,.35);font-size:.8rem;">→</span>
-                    <input type="date" name="date_to" class="pd-period-input" style="width:130px;" value="{{ request('date_to') }}" placeholder="To">
+                    <input type="date" name="date_to" class="pd-period-input" style="width:130px;" value="<?php echo e(request('date_to')); ?>" placeholder="To">
                 </span>
 
                 <button type="submit" class="pd-period-btn"><i class="bx bx-filter-alt"></i> Apply</button>
-                @if(request('date_from') || request('month'))
-                <a href="{{ route('partner.dashboard') }}" class="pd-period-btn" style="text-decoration:none;background:rgba(255,100,100,.15);border-color:rgba(255,100,100,.3);"><i class="bx bx-reset"></i></a>
-                @endif
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request('date_from') || request('month')): ?>
+                <a href="<?php echo e(route('partner.dashboard')); ?>" class="pd-period-btn" style="text-decoration:none;background:rgba(255,100,100,.15);border-color:rgba(255,100,100,.3);"><i class="bx bx-reset"></i></a>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </form>
         </div>
 
         <div class="pd-hero-kpis">
-            {{-- Earned Revenue --}}
+            
             <div class="pd-kpi k-green pd-anim pd-d1">
                 <i class="bx bx-check-circle pd-kpi-icon"></i>
-                <div class="pd-kpi-val">$<span class="cval" data-target="{{ (int)$earnedRevenue }}">{{ number_format($earnedRevenue,0) }}</span></div>
+                <div class="pd-kpi-val">$<span class="cval" data-target="<?php echo e((int)$earnedRevenue); ?>"><?php echo e(number_format($earnedRevenue,0)); ?></span></div>
                 <div class="pd-kpi-lbl">Earned Revenue</div>
                 <div class="pd-kpi-sub">Commissions confirmed &amp; paid out</div>
-                <div class="pd-bar"><div class="pd-bar-fill" style="width:{{ $earnedRatio }}%;"></div></div>
+                <div class="pd-bar"><div class="pd-bar-fill" style="width:<?php echo e($earnedRatio); ?>%;"></div></div>
             </div>
 
-            {{-- Your Share (after Taurus cut) --}}
+            
             <div class="pd-kpi k-indigo pd-anim pd-d2">
                 <i class="bx bx-wallet pd-kpi-icon"></i>
-                <div class="pd-kpi-val">$<span class="cval" data-target="{{ (int)$partnerEarnedShare }}">{{ number_format($partnerEarnedShare,0) }}</span></div>
+                <div class="pd-kpi-val">$<span class="cval" data-target="<?php echo e((int)$partnerEarnedShare); ?>"><?php echo e(number_format($partnerEarnedShare,0)); ?></span></div>
                 <div class="pd-kpi-lbl">Your (Partner) Net Share</div>
-                <div class="pd-kpi-sub">Your cut after {{ $taurusPct }}% Taurus fee</div>
-                <div class="pd-bar"><div class="pd-bar-fill" style="width:{{ $earnedRatio }}%;"></div></div>
+                <div class="pd-kpi-sub">Your cut after <?php echo e($taurusPct); ?>% Taurus fee</div>
+                <div class="pd-bar"><div class="pd-bar-fill" style="width:<?php echo e($earnedRatio); ?>%;"></div></div>
             </div>
 
-            {{-- Ledger Balance --}}
+            
             <div class="pd-kpi k-slate pd-anim pd-d3">
                 <i class="bx bx-receipt pd-kpi-icon"></i>
                 <div class="pd-kpi-val"
-                     style="color:{{ $currentBalance > 0 ? '#fbbf24' : ($currentBalance < 0 ? '#34d399' : '#94a3b8') }};">
-                    {{ $currentBalance > 0 ? '+' : ($currentBalance < 0 ? '−' : '') }}$<span class="cval" data-target="{{ (int)abs($currentBalance) }}">{{ number_format(abs($currentBalance),0) }}</span>
+                     style="color:<?php echo e($currentBalance > 0 ? '#fbbf24' : ($currentBalance < 0 ? '#34d399' : '#94a3b8')); ?>;">
+                    <?php echo e($currentBalance > 0 ? '+' : ($currentBalance < 0 ? '−' : '')); ?>$<span class="cval" data-target="<?php echo e((int)abs($currentBalance)); ?>"><?php echo e(number_format(abs($currentBalance),0)); ?></span>
                 </div>
-                <div class="pd-kpi-lbl">{{ $currentBalance > 0 ? 'Ledger — Owed to Taurus' : ($currentBalance < 0 ? 'Ledger — Credit' : 'Ledger Balance') }}</div>
+                <div class="pd-kpi-lbl"><?php echo e($currentBalance > 0 ? 'Ledger — Owed to Taurus' : ($currentBalance < 0 ? 'Ledger — Credit' : 'Ledger Balance')); ?></div>
                 <div class="pd-kpi-sub">Excludes chargebacks (shared)</div>
             </div>
         </div>
 
-        @if($chargebacks > 0)
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($chargebacks > 0): ?>
         <div class="pd-cb-note pd-anim pd-d4">
             <i class="bx bx-info-circle"></i>
             <span>
-                <strong>${{ number_format($chargebacks,2) }}</strong> in chargebacks (sales returns) this period.
+                <strong>$<?php echo e(number_format($chargebacks,2)); ?></strong> in chargebacks (sales returns) this period.
             </span>
         </div>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
 </div>
 
-{{-- Balance alert --}}
-@if($currentBalance > 0)
+
+<?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($currentBalance > 0): ?>
 <div class="pd-balance-alert owe pd-anim">
     <i class="bx bx-error-circle"></i>
-    <span>Your ledger shows <span class="amt">${{ number_format($currentBalance,2) }}</span> owed to Taurus — this is from prior advances or settlements (not chargebacks).</span>
+    <span>Your ledger shows <span class="amt">$<?php echo e(number_format($currentBalance,2)); ?></span> owed to Taurus — this is from prior advances or settlements (not chargebacks).</span>
 </div>
-@elseif($currentBalance < 0)
+<?php elseif($currentBalance < 0): ?>
 <div class="pd-balance-alert credit pd-anim">
     <i class="bx bx-check-shield"></i>
-    <span>You have a credit balance of <span class="amt">${{ number_format(abs($currentBalance),2) }}</span> with Taurus — applied to your next settlement.</span>
+    <span>You have a credit balance of <span class="amt">$<?php echo e(number_format(abs($currentBalance),2)); ?></span> with Taurus — applied to your next settlement.</span>
 </div>
-@endif
+<?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
-{{-- Carrier filter pills --}}
-@include('partner.partials.carrier-filter')
 
-{{-- ═══════════════════════════════════════════
-     STATS STRIP
-═══════════════════════════════════════════ --}}
+<?php echo $__env->make('partner.partials.carrier-filter', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+
 <div class="pd-stats pd-anim pd-d2">
     <div class="pd-stat">
         <div class="pd-stat-icon si-violet"><i class="bx bx-file"></i></div>
         <div>
-            <div class="pd-stat-val cval" data-target="{{ $monthlyLeads }}">{{ $monthlyLeads }}</div>
+            <div class="pd-stat-val cval" data-target="<?php echo e($monthlyLeads); ?>"><?php echo e($monthlyLeads); ?></div>
             <div class="pd-stat-lbl">Leads this period</div>
-            <div class="pd-stat-sub">{{ number_format($totalLeads) }} all-time</div>
+            <div class="pd-stat-sub"><?php echo e(number_format($totalLeads)); ?> all-time</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-green"><i class="bx bx-check-shield"></i></div>
         <div>
-            <div class="pd-stat-val cval" data-target="{{ $totalSales }}">{{ $totalSales }}</div>
+            <div class="pd-stat-val cval" data-target="<?php echo e($totalSales); ?>"><?php echo e($totalSales); ?></div>
             <div class="pd-stat-lbl">Sales this period</div>
-            <div class="pd-stat-sub">{{ $pendingLeads }} pending</div>
+            <div class="pd-stat-sub"><?php echo e($pendingLeads); ?> pending</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-amber"><i class="bx bx-trending-up"></i></div>
         <div>
-            <div class="pd-stat-val">${{ number_format($partnerProjectedShare,0) }}</div>
+            <div class="pd-stat-val">$<?php echo e(number_format($partnerProjectedShare,0)); ?></div>
             <div class="pd-stat-lbl">Partner Projected Share</div>
-            <div class="pd-stat-sub">Your cut after {{ $taurusPct }}% Taurus fee</div>
+            <div class="pd-stat-sub">Your cut after <?php echo e($taurusPct); ?>% Taurus fee</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-blue"><i class="bx bx-buildings"></i></div>
         <div>
-            <div class="pd-stat-val">{{ $activeCarriers->count() }}</div>
+            <div class="pd-stat-val"><?php echo e($activeCarriers->count()); ?></div>
             <div class="pd-stat-lbl">Active carriers</div>
-            <div class="pd-stat-sub">{{ $activeCarriers->sum('state_count') }} states</div>
+            <div class="pd-stat-sub"><?php echo e($activeCarriers->sum('state_count')); ?> states</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-red" style="background:rgba(239,68,68,.15);color:#ef4444;"><i class="bx bx-undo"></i></div>
         <div>
-            <div class="pd-stat-val">${{ number_format($chargebacks,0) }}</div>
+            <div class="pd-stat-val">$<?php echo e(number_format($chargebacks,0)); ?></div>
             <div class="pd-stat-lbl">Sales Returns</div>
             <div class="pd-stat-sub">Chargebacks this period</div>
         </div>
@@ -392,35 +386,36 @@
 </div>
 
 
-{{-- Quick links to the split-out sections --}}
+
 <div class="row g-3 pd-anim pd-d4" style="margin-top:1rem;">
     <div class="col-md-4">
-        <a href="{{ route('partner.carriers', request()->only(['carrier_id'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+        <a href="<?php echo e(route('partner.carriers', request()->only(['carrier_id']))); ?>" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
             <div class="pd-stat-icon si-violet" style="flex-shrink:0;"><i class="bx bx-briefcase"></i></div>
             <div>
                 <div style="font-size:.88rem;font-weight:800;color:#111827;">Carriers &amp; States</div>
-                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $activeCarriers->count() }} {{ $activeCarriers->count() == 1 ? 'carrier' : 'carriers' }} linked</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;"><?php echo e($activeCarriers->count()); ?> <?php echo e($activeCarriers->count() == 1 ? 'carrier' : 'carriers'); ?> linked</div>
             </div>
             <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
         </a>
     </div>
     <div class="col-md-4">
-        <a href="{{ route('partner.sales', request()->only(['carrier_id','month','date_from','date_to'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+        <a href="<?php echo e(route('partner.sales', request()->only(['carrier_id','month','date_from','date_to']))); ?>" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
             <div class="pd-stat-icon si-green" style="flex-shrink:0;"><i class="bx bx-trending-up"></i></div>
             <div>
                 <div style="font-size:.88rem;font-weight:800;color:#111827;">Sales</div>
-                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $totalSales }} sales · {{ $monthlyLeads }} leads this period</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;"><?php echo e($totalSales); ?> sales · <?php echo e($monthlyLeads); ?> leads this period</div>
             </div>
             <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
         </a>
     </div>
     <div class="col-md-4">
-        <a href="{{ route('partner.ledger', request()->only(['carrier_id'])) }}" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
+        <a href="<?php echo e(route('partner.ledger', request()->only(['carrier_id']))); ?>" class="pd-card pd-shortcut text-decoration-none d-flex align-items-center gap-3 p-3">
             <div class="pd-stat-icon si-blue" style="flex-shrink:0;"><i class="bx bx-receipt"></i></div>
             <div>
                 <div style="font-size:.88rem;font-weight:800;color:#111827;">Ledger</div>
                 <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">
-                    {{ $currentBalance > 0 ? 'Owed: $'.number_format($currentBalance,2) : ($currentBalance < 0 ? 'Credit: $'.number_format(abs($currentBalance),2) : 'Balance: $0') }}
+                    <?php echo e($currentBalance > 0 ? 'Owed: $'.number_format($currentBalance,2) : ($currentBalance < 0 ? 'Credit: $'.number_format(abs($currentBalance),2) : 'Balance: $0')); ?>
+
                 </div>
             </div>
             <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
@@ -428,9 +423,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 function toggleFilterMode() {
     var mode = document.getElementById('pd-filter-mode').value;
@@ -471,4 +466,6 @@ function toggleFilterMode() {
     },250);
 })();
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.partner', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/partner/dashboard-advanced.blade.php ENDPATH**/ ?>

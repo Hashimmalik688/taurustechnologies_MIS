@@ -140,8 +140,10 @@ class PartnerDashboardController extends Controller
      */
     public function sales(Request $request)
     {
-        $partner   = Auth::guard('partner')->user();
-        $carrierId = $request->get('carrier_id');
+        $partner      = Auth::guard('partner')->user();
+        $carrierId    = $request->get('carrier_id');
+        $statusFilter = $request->get('status');
+        $search       = $request->get('search');
 
         $month    = $request->get('month', Carbon::now()->format('Y-m'));
         $dateFrom = $request->get('date_from');
@@ -162,6 +164,8 @@ class PartnerDashboardController extends Controller
         $baseQuery = Lead::where('partner_id', $partner->id)
             ->whereNotNull('partner_id')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId))
+            ->when($statusFilter, fn ($q) => $q->where('status', $statusFilter))
+            ->when($search, fn ($q) => $q->where('cn_name', 'like', '%' . $search . '%'))
             ->where('status', '!=', 'unassigned')
             ->whereBetween('created_at', [$periodStart, $periodEnd]);
 

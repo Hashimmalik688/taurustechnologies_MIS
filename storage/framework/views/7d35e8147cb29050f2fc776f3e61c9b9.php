@@ -1,8 +1,6 @@
-@extends('layouts.partner')
+<?php $__env->startSection('title'); ?> Ledger <?php $__env->stopSection(); ?>
 
-@section('title') Ledger @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 :root {
     --pd-indigo: #4f46e5;
@@ -94,68 +92,70 @@
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pl-note{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.2);color:#fde68a;}
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pl-count-bar{background:var(--bg-secondary,rgba(255,255,255,.04));border-color:var(--border-color,rgba(255,255,255,.04));}
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="pl-hdr">
     <div class="pl-hdr-left">
         <h4><i class="bx bx-receipt" style="color:#4f46e5;margin-right:.35rem;"></i>Ledger</h4>
         <p>Complete transaction history — all debits, credits, and running balance.</p>
     </div>
-    @php
+    <?php
         $balClass = $currentBalance > 0 ? 'owe' : ($currentBalance < 0 ? 'credit' : 'zero');
         $balIcon  = $currentBalance > 0 ? 'bx-error-circle' : ($currentBalance < 0 ? 'bx-check-shield' : 'bx-check');
         $balLabel = $currentBalance > 0 ? 'Owed to Taurus' : ($currentBalance < 0 ? 'Credit Balance' : 'Balanced');
-    @endphp
-    <div class="pl-balance {{ $balClass }}">
-        <i class="bx {{ $balIcon }}"></i>
-        <span>{{ $balLabel }}: <span class="amt">
-            {{ $currentBalance != 0 ? ($currentBalance > 0 ? '' : '−') . '$' . number_format(abs($currentBalance), 2) : '$0.00' }}
+    ?>
+    <div class="pl-balance <?php echo e($balClass); ?>">
+        <i class="bx <?php echo e($balIcon); ?>"></i>
+        <span><?php echo e($balLabel); ?>: <span class="amt">
+            <?php echo e($currentBalance != 0 ? ($currentBalance > 0 ? '' : '−') . '$' . number_format(abs($currentBalance), 2) : '$0.00'); ?>
+
         </span></span>
     </div>
 </div>
 
-{{-- Date range filter --}}
-<form method="GET" action="{{ route('partner.ledger') }}" class="pd-filter-form">
-    @if($carrierId)<input type="hidden" name="carrier_id" value="{{ $carrierId }}">@endif
+
+<form method="GET" action="<?php echo e(route('partner.ledger')); ?>" class="pd-filter-form">
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrierId): ?><input type="hidden" name="carrier_id" value="<?php echo e($carrierId); ?>"><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <span class="pd-filter-label"><i class="bx bx-calendar"></i> Date Range</span>
-    <input type="date" name="date_from" class="pd-filter-input" style="width:135px;" value="{{ $dateFrom }}" placeholder="From">
+    <input type="date" name="date_from" class="pd-filter-input" style="width:135px;" value="<?php echo e($dateFrom); ?>" placeholder="From">
     <span style="color:#9ca3af;font-size:.8rem;">→</span>
-    <input type="date" name="date_to"   class="pd-filter-input" style="width:135px;" value="{{ $dateTo }}" placeholder="To">
+    <input type="date" name="date_to"   class="pd-filter-input" style="width:135px;" value="<?php echo e($dateTo); ?>" placeholder="To">
     <button type="submit" class="pd-filter-btn"><i class="bx bx-filter-alt"></i> Apply</button>
-    @if($dateFrom || $dateTo)
-    <a href="{{ route('partner.ledger', $carrierId ? ['carrier_id' => $carrierId] : []) }}" class="pd-filter-btn pd-filter-btn-reset" style="text-decoration:none;"><i class="bx bx-reset"></i> All time</a>
-    @endif
-    @if(!$dateFrom && !$dateTo)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo): ?>
+    <a href="<?php echo e(route('partner.ledger', $carrierId ? ['carrier_id' => $carrierId] : [])); ?>" class="pd-filter-btn pd-filter-btn-reset" style="text-decoration:none;"><i class="bx bx-reset"></i> All time</a>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$dateFrom && !$dateTo): ?>
     <span style="font-size:.7rem;color:#9ca3af;margin-left:.25rem;">Showing all entries</span>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </form>
 
-{{-- Carrier filter pills --}}
-@include('partner.partials.carrier-filter')
 
-{{-- Ledger table --}}
+<?php echo $__env->make('partner.partials.carrier-filter', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+
 <div class="pd-card">
     <div class="pd-head">
         <h6><i class="bx bx-history"></i> Transaction History</h6>
         <div style="display:flex;align-items:center;gap:.5rem;">
-            @if($carrierId)
-            <span style="font-size:.72rem;color:#6b7280;font-style:italic;">Filtered: {{ $activeCarriers->where('id', $carrierId)->first()['name'] ?? 'Carrier' }}</span>
-            @endif
-            <span class="pd-count">{{ $ledgerEntries->count() }}</span>
+            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrierId): ?>
+            <span style="font-size:.72rem;color:#6b7280;font-style:italic;">Filtered: <?php echo e($activeCarriers->where('id', $carrierId)->first()['name'] ?? 'Carrier'); ?></span>
+            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+            <span class="pd-count"><?php echo e($ledgerEntries->count()); ?></span>
         </div>
     </div>
 
-    @if($ledgerEntries->count() > 0)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($ledgerEntries->count() > 0): ?>
     <div class="pl-note">
         <i class="bx bx-info-circle"></i>
         Running balance follows standard double-entry (Dr/Cr) — same as your MIS ledger.
         <strong>Dr (positive) = Taurus holds this amount against your account</strong> &nbsp;·&nbsp;
         <strong>Cr (negative) = credit in your favour</strong>
     </div>
-    <div class="pl-count-bar">{{ $ledgerEntries->count() }} {{ $ledgerEntries->count() == 1 ? 'entry' : 'entries' }}
-        @if($dateFrom || $dateTo) · {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'All' }} → {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'Present' }}@endif
+    <div class="pl-count-bar"><?php echo e($ledgerEntries->count()); ?> <?php echo e($ledgerEntries->count() == 1 ? 'entry' : 'entries'); ?>
+
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo): ?> · <?php echo e($dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : 'All'); ?> → <?php echo e($dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : 'Present'); ?><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
     <div style="overflow-x:auto;max-height:75vh;overflow-y:auto;">
         <table class="pd-table">
@@ -171,8 +171,8 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($ledgerEntries as $txn)
-                @php
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $ledgerEntries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $txn): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php
                     $tk  = strtolower(str_replace([' ','_','-'], '', $txn['type'] ?? ''));
                     $tc  = match(true) {
                         str_contains($tk, 'sale') && !str_contains($tk, 'return') => 'tc-sale',
@@ -183,56 +183,61 @@
                     $rb  = $txn['running_balance'];
                     $rbCls = $rb > 0 ? 'rb-pos' : ($rb < 0 ? 'rb-neg' : 'rb-zero');
                     $rbPfx = $rb > 0 ? '+' : ($rb < 0 ? '−' : '');
-                @endphp
+                ?>
                 <tr>
-                    <td style="white-space:nowrap;color:#6b7280;font-size:.78rem;">{{ \Carbon\Carbon::parse($txn['date'])->format('M d, Y') }}</td>
-                    <td><span class="tc {{ $tc }}">{{ str_replace('_', ' ', $txn['type'] ?? '—') }}</span></td>
-                    <td style="font-size:.8rem;color:#6b7280;">{{ $txn['carrier'] ?? '—' }}</td>
+                    <td style="white-space:nowrap;color:#6b7280;font-size:.78rem;"><?php echo e(\Carbon\Carbon::parse($txn['date'])->format('M d, Y')); ?></td>
+                    <td><span class="tc <?php echo e($tc); ?>"><?php echo e(str_replace('_', ' ', $txn['type'] ?? '—')); ?></span></td>
+                    <td style="font-size:.8rem;color:#6b7280;"><?php echo e($txn['carrier'] ?? '—'); ?></td>
                     <td style="font-size:.78rem;color:#6b7280;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                        @if($txn['reference']) <span style="font-weight:600;color:#374151;">{{ $txn['reference'] }}</span> @endif
-                        @if($txn['reference'] && $txn['description']) &nbsp;·&nbsp; @endif
-                        {{ \Illuminate\Support\Str::limit($txn['description'] ?? '', 35) }}
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($txn['reference']): ?> <span style="font-weight:600;color:#374151;"><?php echo e($txn['reference']); ?></span> <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($txn['reference'] && $txn['description']): ?> &nbsp;·&nbsp; <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                        <?php echo e(\Illuminate\Support\Str::limit($txn['description'] ?? '', 35)); ?>
+
                     </td>
-                    <td class="text-end {{ ($txn['debit'] ?? 0) > 0 ? 'col-dr' : 'col-dim' }}">{{ ($txn['debit'] ?? 0) > 0 ? '$' . number_format($txn['debit'], 2) : '—' }}</td>
-                    <td class="text-end {{ ($txn['credit'] ?? 0) > 0 ? 'col-cr' : 'col-dim' }}">{{ ($txn['credit'] ?? 0) > 0 ? '$' . number_format($txn['credit'], 2) : '—' }}</td>
+                    <td class="text-end <?php echo e(($txn['debit'] ?? 0) > 0 ? 'col-dr' : 'col-dim'); ?>"><?php echo e(($txn['debit'] ?? 0) > 0 ? '$' . number_format($txn['debit'], 2) : '—'); ?></td>
+                    <td class="text-end <?php echo e(($txn['credit'] ?? 0) > 0 ? 'col-cr' : 'col-dim'); ?>"><?php echo e(($txn['credit'] ?? 0) > 0 ? '$' . number_format($txn['credit'], 2) : '—'); ?></td>
                     <td class="text-end">
-                        <span class="{{ $rbCls }}">{{ $rbPfx }}${{ number_format(abs($rb), 2) }}<small style="font-size:.65rem;font-weight:500;opacity:.65;margin-left:.2rem;">{{ $rb > 0 ? 'Dr' : ($rb < 0 ? 'Cr' : '') }}</small></span>
+                        <span class="<?php echo e($rbCls); ?>"><?php echo e($rbPfx); ?>$<?php echo e(number_format(abs($rb), 2)); ?><small style="font-size:.65rem;font-weight:500;opacity:.65;margin-left:.2rem;"><?php echo e($rb > 0 ? 'Dr' : ($rb < 0 ? 'Cr' : '')); ?></small></span>
                     </td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </tbody>
             <tfoot>
-                @php $finalBal = $ledgerEntries->last()['running_balance'] ?? 0; @endphp
+                <?php $finalBal = $ledgerEntries->last()['running_balance'] ?? 0; ?>
                 <tr>
                     <td colspan="4">Closing Balance</td>
                     <td class="text-end">
-                        ${{ number_format($ledgerEntries->sum('debit'), 2) }}
+                        $<?php echo e(number_format($ledgerEntries->sum('debit'), 2)); ?>
+
                     </td>
                     <td class="text-end">
-                        ${{ number_format($ledgerEntries->sum('credit'), 2) }}
+                        $<?php echo e(number_format($ledgerEntries->sum('credit'), 2)); ?>
+
                     </td>
                     <td class="text-end">
-                        <span class="{{ $finalBal > 0 ? 'rb-pos' : ($finalBal < 0 ? 'rb-neg' : 'rb-zero') }}">
-                            {{ $finalBal > 0 ? '+' : ($finalBal < 0 ? '−' : '') }}${{ number_format(abs($finalBal), 2) }}<small style="font-size:.65rem;font-weight:500;opacity:.65;margin-left:.2rem;">{{ $finalBal > 0 ? 'Dr' : ($finalBal < 0 ? 'Cr' : '') }}</small>
+                        <span class="<?php echo e($finalBal > 0 ? 'rb-pos' : ($finalBal < 0 ? 'rb-neg' : 'rb-zero')); ?>">
+                            <?php echo e($finalBal > 0 ? '+' : ($finalBal < 0 ? '−' : '')); ?>$<?php echo e(number_format(abs($finalBal), 2)); ?><small style="font-size:.65rem;font-weight:500;opacity:.65;margin-left:.2rem;"><?php echo e($finalBal > 0 ? 'Dr' : ($finalBal < 0 ? 'Cr' : '')); ?></small>
                         </span>
                     </td>
                 </tr>
             </tfoot>
         </table>
     </div>
-    @else
+    <?php else: ?>
     <div class="pd-empty">
         <i class="bx bx-receipt"></i>
-        <p>No ledger entries found{{ ($dateFrom || $dateTo || $carrierId) ? ' for the selected filters.' : ' yet.' }}</p>
-        @if($dateFrom || $dateTo || $carrierId)
+        <p>No ledger entries found<?php echo e(($dateFrom || $dateTo || $carrierId) ? ' for the selected filters.' : ' yet.'); ?></p>
+        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($dateFrom || $dateTo || $carrierId): ?>
         <p style="margin-top:.5rem;">
-            <a href="{{ route('partner.ledger') }}" style="color:#4f46e5;text-decoration:none;font-size:.82rem;font-weight:700;">
+            <a href="<?php echo e(route('partner.ledger')); ?>" style="color:#4f46e5;text-decoration:none;font-size:.82rem;font-weight:700;">
                 <i class="bx bx-reset"></i> Clear all filters
             </a>
         </p>
-        @endif
+        <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.partner', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/partner/ledger.blade.php ENDPATH**/ ?>

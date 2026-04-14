@@ -252,6 +252,65 @@ class CarrierSheetController extends Controller
         return view('admin.reports.carrier-sheet.rates', compact('carriers'));
     }
 
+    public function storeCarrier(Request $request)
+    {
+        $validated = $request->validate([
+            'carrier_label'  => 'required|string|max:80',
+            'title_color'    => 'required|string|max:20',
+            'level_rate'     => 'nullable|numeric|min:0|max:9.9999',
+            'graded_rate'    => 'nullable|numeric|min:0|max:9.9999',
+            'gi_rate'        => 'nullable|numeric|min:0|max:9.9999',
+            'modified_rate'  => 'nullable|numeric|min:0|max:9.9999',
+            'gi_multiplier'  => 'nullable|integer|in:1,9',
+        ]);
+
+        $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $validated['carrier_label']));
+        $slug = trim($slug, '-');
+        // ensure unique slug
+        $base = $slug;
+        $i = 2;
+        while (CarrierSheetRate::where('carrier_slug', $slug)->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+
+        $maxOrder = CarrierSheetRate::max('sort_order') ?? 0;
+
+        $carrier = CarrierSheetRate::create([
+            'carrier_label'  => $validated['carrier_label'],
+            'carrier_slug'   => $slug,
+            'partner_code'   => $slug,
+            'title_color'    => $validated['title_color'],
+            'level_rate'     => $validated['level_rate'] ?? null,
+            'graded_rate'    => $validated['graded_rate'] ?? null,
+            'gi_rate'        => $validated['gi_rate'] ?? null,
+            'modified_rate'  => $validated['modified_rate'] ?? null,
+            'gi_multiplier'  => $validated['gi_multiplier'] ?? 9,
+            'is_active'      => true,
+            'sort_order'     => $maxOrder + 1,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'carrier' => $carrier]);
+        }
+
+        return back()->with('success', "Carrier '{$carrier->carrier_label}' created successfully.");
+    }
+
+    public function deleteCarrier(CarrierSheetRate $rate, Request $request)
+    {
+        $label = $rate->carrier_label;
+        // Also delete all entries for this carrier
+        $rate->entries()->forceDelete();
+        $rate->openingChargebacks()->delete();
+        $rate->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', "Carrier '{$label}' deleted.");
+    }
+
     public function updateRate(CarrierSheetRate $rate, Request $request)
     {
         $validated = $request->validate([

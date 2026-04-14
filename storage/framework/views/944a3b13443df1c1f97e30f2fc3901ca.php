@@ -1,8 +1,6 @@
-@extends('layouts.partner')
+<?php $__env->startSection('title'); ?> Sales <?php $__env->stopSection(); ?>
 
-@section('title') Sales @endsection
-
-@section('css')
+<?php $__env->startSection('css'); ?>
 <style>
 :root {
     --pd-indigo: #4f46e5;
@@ -89,128 +87,128 @@
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .pd-stat-val{color:var(--text-primary,#e0e0e0);}
 :is([data-theme="midnight-black"],[data-theme="emerald-glass"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .ps-hdr h4{color:var(--text-primary,#e0e0e0);}
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="ps-hdr">
     <h4><i class="bx bx-trending-up" style="color:#059669;margin-right:.35rem;"></i>Sales</h4>
     <p>Your leads and sales performance for the selected period.</p>
 </div>
 
-{{-- Period filter --}}
-<form method="GET" action="{{ route('partner.sales') }}" class="pd-period-form" id="ps-filter-form">
-    @if($carrierId)<input type="hidden" name="carrier_id" value="{{ $carrierId }}">@endif
+
+<form method="GET" action="<?php echo e(route('partner.sales')); ?>" class="pd-period-form" id="ps-filter-form">
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($carrierId): ?><input type="hidden" name="carrier_id" value="<?php echo e($carrierId); ?>"><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
     <span class="pd-period-label"><i class="bx bx-calendar-alt"></i> Period</span>
     <select class="pd-period-input" id="ps-filter-mode" style="width:auto;" onchange="toggleFilterMode()">
-        <option value="month" {{ !request('date_from') ? 'selected' : '' }}>Month</option>
-        <option value="range" {{ request('date_from') ? 'selected' : '' }}>Date range</option>
+        <option value="month" <?php echo e(!request('date_from') ? 'selected' : ''); ?>>Month</option>
+        <option value="range" <?php echo e(request('date_from') ? 'selected' : ''); ?>>Date range</option>
     </select>
-    <span id="ps-month-wrap" style="{{ request('date_from') ? 'display:none' : 'display:flex' }};align-items:center;gap:.4rem;">
-        <input type="month" name="month" class="pd-period-input" value="{{ $month }}">
+    <span id="ps-month-wrap" style="<?php echo e(request('date_from') ? 'display:none' : 'display:flex'); ?>;align-items:center;gap:.4rem;">
+        <input type="month" name="month" class="pd-period-input" value="<?php echo e($month); ?>">
     </span>
-    <span id="ps-range-wrap" style="{{ request('date_from') ? 'display:flex' : 'display:none' }};align-items:center;gap:.35rem;">
-        <input type="date" name="date_from" class="pd-period-input" style="width:130px;" value="{{ request('date_from') }}" placeholder="From">
+    <span id="ps-range-wrap" style="<?php echo e(request('date_from') ? 'display:flex' : 'display:none'); ?>;align-items:center;gap:.35rem;">
+        <input type="date" name="date_from" class="pd-period-input" style="width:130px;" value="<?php echo e(request('date_from')); ?>" placeholder="From">
         <span style="color:#9ca3af;font-size:.8rem;">→</span>
-        <input type="date" name="date_to"   class="pd-period-input" style="width:130px;" value="{{ request('date_to') }}" placeholder="To">
+        <input type="date" name="date_to"   class="pd-period-input" style="width:130px;" value="<?php echo e(request('date_to')); ?>" placeholder="To">
     </span>
 
     <span class="pd-period-label" style="margin-left:.35rem;"><i class="bx bx-filter"></i> Status</span>
     <select name="status" class="pd-period-input" style="width:auto;">
         <option value="">All</option>
-        <option value="pending"   {{ request('status') === 'pending'   ? 'selected' : '' }}>Pending</option>
-        <option value="accepted"  {{ request('status') === 'accepted'  ? 'selected' : '' }}>Approved</option>
-        <option value="sale"      {{ request('status') === 'sale'      ? 'selected' : '' }}>Sale</option>
-        <option value="declined"  {{ request('status') === 'declined'  ? 'selected' : '' }}>Declined</option>
-        <option value="chargeback" {{ request('status') === 'chargeback' ? 'selected' : '' }}>Chargeback</option>
-        <option value="closed"    {{ request('status') === 'closed'    ? 'selected' : '' }}>Closed</option>
+        <option value="pending"   <?php echo e(request('status') === 'pending'   ? 'selected' : ''); ?>>Pending</option>
+        <option value="accepted"  <?php echo e(request('status') === 'accepted'  ? 'selected' : ''); ?>>Approved</option>
+        <option value="sale"      <?php echo e(request('status') === 'sale'      ? 'selected' : ''); ?>>Sale</option>
+        <option value="declined"  <?php echo e(request('status') === 'declined'  ? 'selected' : ''); ?>>Declined</option>
+        <option value="chargeback" <?php echo e(request('status') === 'chargeback' ? 'selected' : ''); ?>>Chargeback</option>
+        <option value="closed"    <?php echo e(request('status') === 'closed'    ? 'selected' : ''); ?>>Closed</option>
     </select>
 
-    <input type="text" name="search" class="pd-period-input" style="width:160px;" placeholder="Search customer…" value="{{ request('search') }}">
+    <input type="text" name="search" class="pd-period-input" style="width:160px;" placeholder="Search customer…" value="<?php echo e(request('search')); ?>">
 
     <button type="submit" class="pd-period-btn"><i class="bx bx-filter-alt"></i> Apply</button>
-    @if(request('date_from') || request('status') || request('search') || (request('month') && request('month') !== now()->format('Y-m')))
-    <a href="{{ route('partner.sales', $carrierId ? ['carrier_id' => $carrierId] : []) }}" class="pd-period-btn pd-period-btn-reset" style="text-decoration:none;"><i class="bx bx-reset"></i></a>
-    @endif
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(request('date_from') || request('status') || request('search') || (request('month') && request('month') !== now()->format('Y-m'))): ?>
+    <a href="<?php echo e(route('partner.sales', $carrierId ? ['carrier_id' => $carrierId] : [])); ?>" class="pd-period-btn pd-period-btn-reset" style="text-decoration:none;"><i class="bx bx-reset"></i></a>
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 </form>
 
-{{-- Carrier filter pills --}}
-@include('partner.partials.carrier-filter')
 
-{{-- Stats strip --}}
+<?php echo $__env->make('partner.partials.carrier-filter', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+
+
 <div class="pd-stats">
     <div class="pd-stat">
         <div class="pd-stat-icon si-violet"><i class="bx bx-file"></i></div>
         <div>
-            <div class="pd-stat-val">{{ $monthlyLeads }}</div>
+            <div class="pd-stat-val"><?php echo e($monthlyLeads); ?></div>
             <div class="pd-stat-lbl">Leads this period</div>
-            <div class="pd-stat-sub">{{ $pendingLeads }} pending</div>
+            <div class="pd-stat-sub"><?php echo e($pendingLeads); ?> pending</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-green"><i class="bx bx-check-shield"></i></div>
         <div>
-            <div class="pd-stat-val">{{ $totalSales }}</div>
+            <div class="pd-stat-val"><?php echo e($totalSales); ?></div>
             <div class="pd-stat-lbl">Sales this period</div>
-            <div class="pd-stat-sub">{{ $monthlyLeads > 0 ? number_format($totalSales / $monthlyLeads * 100, 1) : 0 }}% close rate</div>
+            <div class="pd-stat-sub"><?php echo e($monthlyLeads > 0 ? number_format($totalSales / $monthlyLeads * 100, 1) : 0); ?>% close rate</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-amber"><i class="bx bx-wallet"></i></div>
         <div>
-            <div class="pd-stat-val">${{ number_format($revenueByCarrier->sum('partner_share'), 0) }}</div>
+            <div class="pd-stat-val">$<?php echo e(number_format($revenueByCarrier->sum('partner_share'), 0)); ?></div>
             <div class="pd-stat-lbl">Your earned share</div>
-            <div class="pd-stat-sub">After {{ $taurusPct }}% Taurus fee</div>
+            <div class="pd-stat-sub">After <?php echo e($taurusPct); ?>% Taurus fee</div>
         </div>
     </div>
 </div>
 
-{{-- Revenue by carrier + leads table --}}
+
 <div class="row g-3">
 
-    @if($revenueByCarrier->count() > 0 && !$carrierId)
+    <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($revenueByCarrier->count() > 0 && !$carrierId): ?>
     <div class="col-12">
         <div class="pd-card">
             <div class="pd-head">
                 <h6><i class="bx bx-bar-chart-alt-2"></i> Revenue by Carrier</h6>
             </div>
             <div class="pd-body" style="padding:0;">
-                @php $maxR = $revenueByCarrier->max('partner_share') ?: 1; @endphp
+                <?php $maxR = $revenueByCarrier->max('partner_share') ?: 1; ?>
                 <table class="pd-table">
                     <thead><tr><th>Carrier</th><th class="text-end">Your Share</th><th class="text-end">Sales</th></tr></thead>
                     <tbody>
-                        @foreach($revenueByCarrier->sortByDesc('partner_share') as $r)
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $revenueByCarrier->sortByDesc('partner_share'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
-                                <div style="font-weight:700;font-size:.82rem;">{{ $r['carrier']->name ?? 'Unknown' }}</div>
-                                <div class="mbar"><div class="mbar-fill" style="width:{{ min(100, ($r['partner_share'] / $maxR) * 100) }}%;"></div></div>
+                                <div style="font-weight:700;font-size:.82rem;"><?php echo e($r['carrier']->name ?? 'Unknown'); ?></div>
+                                <div class="mbar"><div class="mbar-fill" style="width:<?php echo e(min(100, ($r['partner_share'] / $maxR) * 100)); ?>%;"></div></div>
                             </td>
-                            <td class="text-end col-cr">${{ number_format($r['partner_share'], 0) }}</td>
-                            <td class="text-end" style="color:#6b7280;">{{ $r['sales_count'] }}</td>
+                            <td class="text-end col-cr">$<?php echo e(number_format($r['partner_share'], 0)); ?></td>
+                            <td class="text-end" style="color:#6b7280;"><?php echo e($r['sales_count']); ?></td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td>Total</td>
-                            <td class="text-end col-cr">${{ number_format($revenueByCarrier->sum('partner_share'), 0) }}</td>
-                            <td class="text-end">{{ $revenueByCarrier->sum('sales_count') }}</td>
+                            <td class="text-end col-cr">$<?php echo e(number_format($revenueByCarrier->sum('partner_share'), 0)); ?></td>
+                            <td class="text-end"><?php echo e($revenueByCarrier->sum('sales_count')); ?></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
 
     <div class="col-12">
         <div class="pd-card">
             <div class="pd-head">
                 <h6><i class="bx bx-list-ul"></i> Leads &amp; Sales</h6>
-                <span class="pd-count">{{ $leads->count() }}</span>
+                <span class="pd-count"><?php echo e($leads->count()); ?></span>
             </div>
             <div style="overflow-x:auto;">
-                @if($leads->count() > 0)
+                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($leads->count() > 0): ?>
                 <div style="padding:.35rem .85rem;font-size:.68rem;color:#9ca3af;background:#fafafa;border-bottom:1px solid rgba(0,0,0,.04);">
                     <span style="color:#a78bfa;font-weight:800;">~</span> = estimated (premium &times; 9 &times; carrier%) — finalised once policy is accepted
                 </div>
@@ -218,7 +216,7 @@
                     <thead>
                         <tr>
                             <th>Customer</th>
-                            @if(!$carrierId)<th>Carrier</th>@endif
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$carrierId): ?><th>Carrier</th><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             <th>State</th>
                             <th>Status</th>
                             <th class="text-end">Commission</th>
@@ -227,8 +225,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($leads as $lead)
-                        @php
+                        <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $scCls = match(strtolower($lead->status ?? '')) {
                                 'sale','approved','accepted','done' => 'sc-ok',
                                 'pending' => 'sc-warn',
@@ -254,50 +252,52 @@
                             }
                             $hasComm = $comm > 0;
                             $share   = $hasComm ? $comm - ($comm * $taurusPct / 100) : null;
-                        @endphp
+                        ?>
                         <tr>
                             <td>
-                                <div style="font-weight:700;font-size:.84rem;">{{ $lead->cn_name ?? '—' }}</div>
-                                @if($premium > 0)<div style="font-size:.7rem;color:#9ca3af;">${{ number_format($premium,2) }}/mo</div>@endif
+                                <div style="font-weight:700;font-size:.84rem;"><?php echo e($lead->cn_name ?? '—'); ?></div>
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($premium > 0): ?><div style="font-size:.7rem;color:#9ca3af;">$<?php echo e(number_format($premium,2)); ?>/mo</div><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            @if(!$carrierId)
-                            <td style="font-size:.8rem;color:#6b7280;">{{ $lead->insuranceCarrier->name ?? '—' }}</td>
-                            @endif
-                            <td><span class="pd-state-pill">{{ $lead->state ?? '—' }}</span></td>
-                            <td><span class="sc {{ $scCls }}">{{ $statusLabel }}</span></td>
+                            <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if(!$carrierId): ?>
+                            <td style="font-size:.8rem;color:#6b7280;"><?php echo e($lead->insuranceCarrier->name ?? '—'); ?></td>
+                            <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
+                            <td><span class="pd-state-pill"><?php echo e($lead->state ?? '—'); ?></span></td>
+                            <td><span class="sc <?php echo e($scCls); ?>"><?php echo e($statusLabel); ?></span></td>
                             <td class="text-end">
-                                @if($hasComm)
-                                <span class="{{ $isEst ? '' : 'col-dr' }}" style="{{ $isEst ? 'color:#a78bfa;' : '' }}"
-                                      @if($isEst) title="Estimated: premium × 9 × {{ $cPct }}%" @endif>
-                                    {{ $isEst ? '~' : '' }}${{ number_format($comm, 2) }}
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($hasComm): ?>
+                                <span class="<?php echo e($isEst ? '' : 'col-dr'); ?>" style="<?php echo e($isEst ? 'color:#a78bfa;' : ''); ?>"
+                                      <?php if($isEst): ?> title="Estimated: premium × 9 × <?php echo e($cPct); ?>%" <?php endif; ?>>
+                                    <?php echo e($isEst ? '~' : ''); ?>$<?php echo e(number_format($comm, 2)); ?>
+
                                 </span>
-                                @else<span class="col-dim">—</span>@endif
+                                <?php else: ?><span class="col-dim">—</span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
                             <td class="text-end">
-                                @if($share !== null)
-                                <span class="{{ $isEst ? '' : 'col-cr' }}" style="{{ $isEst ? 'color:#818cf8;' : '' }}"
-                                      @if($isEst) title="Est. partner share after {{ $taurusPct }}% fee" @endif>
-                                    {{ $isEst ? '~' : '' }}${{ number_format($share, 2) }}
+                                <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($share !== null): ?>
+                                <span class="<?php echo e($isEst ? '' : 'col-cr'); ?>" style="<?php echo e($isEst ? 'color:#818cf8;' : ''); ?>"
+                                      <?php if($isEst): ?> title="Est. partner share after <?php echo e($taurusPct); ?>% fee" <?php endif; ?>>
+                                    <?php echo e($isEst ? '~' : ''); ?>$<?php echo e(number_format($share, 2)); ?>
+
                                 </span>
-                                @else<span class="col-dim">—</span>@endif
+                                <?php else: ?><span class="col-dim">—</span><?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                             </td>
-                            <td style="font-size:.75rem;color:#9ca3af;white-space:nowrap;">{{ $lead->created_at->format('M d, Y') }}</td>
+                            <td style="font-size:.75rem;color:#9ca3af;white-space:nowrap;"><?php echo e($lead->created_at->format('M d, Y')); ?></td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
                     </tbody>
                 </table>
-                @else
-                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No leads for this period{{ $carrierId ? ' and carrier' : '' }}.</p></div>
-                @endif
+                <?php else: ?>
+                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No leads for this period<?php echo e($carrierId ? ' and carrier' : ''); ?>.</p></div>
+                <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </div>
         </div>
     </div>
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('script')
+<?php $__env->startSection('script'); ?>
 <script>
 function toggleFilterMode() {
     var mode = document.getElementById('ps-filter-mode').value;
@@ -318,4 +318,6 @@ function toggleFilterMode() {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.partner', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/taurus-crm/resources/views/partner/sales.blade.php ENDPATH**/ ?>
