@@ -1346,9 +1346,13 @@ class QADashboardController extends Controller
 
     public function showUploadScore()
     {
-        $agents = \App\Models\User::whereHas('roles', fn ($q) => $q->whereIn('name', [
-            'Ravens Closer', 'Peregrine Closer', 'Agent', 'Employee',
-        ]))->orderBy('name')->get(['id', 'name']);
+        $agents = \App\Models\User::where(function ($q) {
+            $q->whereHas('roles', fn ($r) => $r->whereIn('name', [
+                'Ravens Closer', 'Peregrine Closer', 'Agent', 'Employee',
+            ]))
+            ->where('id', '!=', 53); // exclude Saleem Masih
+        })->orWhere('id', 54) // include Qasim Raja (Co-ordinator)
+        ->orderBy('name')->get(['id', 'name']);
 
         return view('qa.upload', compact('agents'));
     }
