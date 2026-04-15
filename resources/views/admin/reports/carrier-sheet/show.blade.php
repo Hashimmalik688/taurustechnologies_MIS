@@ -189,6 +189,18 @@
 .cs-money-pos { color:#2E7D32; }
 .cs-money-neg { color:#C62828; }
 
+/* ── Copy feedback on cell click ───────────────── */
+.cs-dtable tbody tr[data-entry-id] td {
+    cursor: pointer;
+    transition: background .1s;
+}
+.cs-dtable tbody tr[data-entry-id] td:hover {
+    background: rgba(25,118,210,.09) !important;
+}
+.cs-dtable tbody tr[data-entry-id] td.cs-cell-copied {
+    background: rgba(46,125,50,.18) !important;
+}
+
 /* ── Daily summary ─────────────────────────────────── */
 .cs-daily { margin-top:1.2rem; }
 .cs-daily h6 { font-size:.72rem; font-weight:800; color:var(--cs-text-1); margin-bottom:.5rem; }
@@ -746,6 +758,33 @@
 
 @section('script')
 <script>
+// ── Click any data cell to copy its text ──────────────────────────────────
+(function () {
+    const table = document.getElementById('carrierTable');
+    if (!table) return;
+    table.addEventListener('click', function (e) {
+        const td = e.target.closest('td');
+        if (!td) return;
+        const row = td.closest('tr[data-entry-id]');
+        if (!row) return;
+        // Skip the actions column (contains buttons)
+        if (td.querySelector('button, input')) return;
+        const text = td.textContent.trim();
+        if (!text) return;
+        navigator.clipboard.writeText(text).catch(function () {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        });
+        td.classList.add('cs-cell-copied');
+        setTimeout(() => td.classList.remove('cs-cell-copied'), 700);
+    });
+}());
+
 (function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
     const RATE_ID = {{ $rate->id }};

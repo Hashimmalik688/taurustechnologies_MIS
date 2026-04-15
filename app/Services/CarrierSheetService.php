@@ -115,9 +115,7 @@ class CarrierSheetService
     public function recalculateAllEntries(CarrierSheetRate $rate, ?string $periodMonth = null): int
     {
         $query = $rate->entries();
-        if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
-        }
+        $this->scopeByPeriodMonth($query, $periodMonth);
 
         $entries = $query->get();
         $count = 0;
@@ -148,9 +146,7 @@ class CarrierSheetService
     public function getCarrierSummary(CarrierSheetRate $rate, ?string $periodMonth = null): array
     {
         $query = $rate->entries()->withoutTrashed();
-        if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
-        }
+        $this->scopeByPeriodMonth($query, $periodMonth);
         $entries = $query->get();
 
         // K1: commission for non-chargeback statuses + commission for paid chargebacks
@@ -238,9 +234,7 @@ class CarrierSheetService
     public function getDailySummary(CarrierSheetRate $rate, ?string $periodMonth = null): Collection
     {
         $query = $rate->entries()->withoutTrashed();
-        if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
-        }
+        $this->scopeByPeriodMonth($query, $periodMonth);
 
         return $query->get()
             ->groupBy(fn ($e) => $e->entry_date?->format('Y-m-d'))
@@ -269,5 +263,19 @@ class CarrierSheetService
         }
 
         return $query->pluck('period_month')->map(fn ($d) => \Carbon\Carbon::parse($d)->format('Y-m-01'));
+    }
+
+    /* ================================================================
+     *  SCOPE BY PERIOD MONTH — uses year+month to avoid datetime
+     *  precision mismatches (period_month stored as full timestamp)
+     * ================================================================ */
+    private function scopeByPeriodMonth($query, ?string $periodMonth)
+    {
+        if (!$periodMonth) {
+            return $query;
+        }
+        $parsed = \Carbon\Carbon::parse($periodMonth);
+        return $query->whereYear('period_month', $parsed->year)
+                     ->whereMonth('period_month', $parsed->month);
     }
 }

@@ -99,7 +99,11 @@ class CarrierSheetController extends Controller
 
         // Auto-assign SR number
         $maxSr = $rate->entries()->withoutTrashed()
-            ->when($validated['period_month'] ?? null, fn ($q, $m) => $q->where('period_month', $m))
+            ->when($validated['period_month'] ?? null, function ($q, $m) {
+                $parsed = \Carbon\Carbon::parse($m);
+                $q->whereYear('period_month', $parsed->year)
+                  ->whereMonth('period_month', $parsed->month);
+            })
             ->max('sr_number');
         $validated['sr_number'] = ($maxSr ?? 0) + 1;
         $validated['carrier_sheet_rate_id'] = $rate->id;
