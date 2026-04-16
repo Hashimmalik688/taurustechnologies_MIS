@@ -1049,24 +1049,114 @@
 
                 </div>
                 <div class="modal-footer">
-                    <!-- Disposition Dropdown (on the left) -->
-                    <div class="btn-group dropup me-auto mf-dropdown">
-                        <button type="button" class="mf-btn mf-dispose dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bx bx-block"></i> Dispose Lead
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('no_answer'); return false;"><i class="bx bx-phone-off me-2"></i> No Answer</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_number'); return false;"><i class="bx bx-x-circle me-2"></i> Wrong Number</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="disposeCurrentLead('wrong_details'); return false;"><i class="bx bx-error me-2"></i> Wrong Details</a></li>
-                        </ul>
-                    </div>
-
-                    <button type="button" class="mf-btn mf-vm" onclick="markVoicemailAndClose()"><i class="bx bx-voicemail"></i> Left Voicemail</button>
-
-                    <!-- Action buttons (on the right) -->
-                    <button type="button" class="mf-btn mf-end" onclick="closeCallModal()"><i class="bx bx-phone-off"></i> End Call</button>
-                    <button type="button" class="mf-btn mf-save" onclick="saveAndExit()"><i class="bx bx-save"></i> Save & Exit</button>
+                    <!-- Action buttons -->
+                    <button type="button" class="mf-btn mf-end" onclick="showEndCallDispositionModal()"><i class="bx bx-phone-off"></i> End Call</button>
+                    <button type="button" class="mf-btn mf-save" onclick="showSaveExitDispositionModal()"><i class="bx bx-save"></i> Save & Exit</button>
                     <button type="button" class="mf-btn mf-submit" onclick="submitSale()"><i class="bx bx-check-circle"></i> Submit Sale</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══════════════════════════════════════════════════════════════
+         END CALL DISPOSITION MODAL
+    ═══════════════════════════════════════════════════════════════ --}}
+    <div class="modal fade" id="endCallDispositionModal" tabindex="-1" aria-labelledby="endCallDispositionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border-bottom:none;border-radius:.5rem .5rem 0 0;padding:.85rem 1.2rem;">
+                    <h6 class="modal-title fw-700" id="endCallDispositionModalLabel" style="font-size:.88rem;letter-spacing:.02em;">
+                        <i class="bx bx-phone-off me-2"></i> End Call — Select Disposition
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding:1.1rem 1.2rem;">
+                    <p style="font-size:.72rem;color:var(--bs-surface-500);margin-bottom:.9rem;">Why are you ending this call?</p>
+                    <div id="endCallDispositionGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem;">
+                        @php
+                            $endCallOptions = [
+                                ['key'=>'answering_machine','label'=>'A','desc'=>'Answering Machine','icon'=>'bx-volume-mute','color'=>'#6366f1'],
+                                ['key'=>'busy','label'=>'B','desc'=>'Busy','icon'=>'bx-time-five','color'=>'#f59e0b'],
+                                ['key'=>'dead_air','label'=>'DAIR','desc'=>'Dead Air','icon'=>'bx-radio','color'=>'#64748b'],
+                                ['key'=>'disconnected','label'=>'DC','desc'=>'Disconnected Number','icon'=>'bx-plug','color'=>'#ef4444'],
+                                ['key'=>'declined_sale','label'=>'DEC','desc'=>'Declined Sale','icon'=>'bx-x-circle','color'=>'#dc2626'],
+                                ['key'=>'dnc','label'=>'DNC','desc'=>'Do Not Call','icon'=>'bx-block','color'=>'#7c3aed'],
+                                ['key'=>'no_answer_ec','label'=>'N','desc'=>'No Answer','icon'=>'bx-phone-off','color'=>'#b45309'],
+                                ['key'=>'not_interested','label'=>'NI','desc'=>'Not Interested','icon'=>'bx-dislike','color'=>'#0369a1'],
+                                ['key'=>'no_pitch','label'=>'NP','desc'=>'No Pitch No Price','icon'=>'bx-microphone-off','color'=>'#065f46'],
+                                ['key'=>'business_number','label'=>'BN','desc'=>'Business Number','icon'=>'bx-buildings','color'=>'#0891b2'],
+                                ['key'=>'not_in_service','label'=>'NNIS','desc'=>'Number Not In Service','icon'=>'bx-signal-1','color'=>'#9f1239'],
+                            ];
+                        @endphp
+                        @foreach($endCallOptions as $opt)
+                        <label class="ec-disp-option" data-key="{{ $opt['key'] }}" onclick="selectEndCallDisposition('{{ $opt['key'] }}', this)" style="display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;border-radius:.4rem;border:2px solid rgba(0,0,0,.07);cursor:pointer;transition:all .15s;background:var(--bs-card-bg);">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:{{ $opt['color'] }}15;flex-shrink:0;">
+                                <i class="bx {{ $opt['icon'] }}" style="color:{{ $opt['color'] }};font-size:.88rem;"></i>
+                            </span>
+                            <span>
+                                <strong style="font-size:.75rem;display:block;color:var(--bs-surface-700);">{{ $opt['label'] }}</strong>
+                                <span style="font-size:.65rem;color:var(--bs-surface-400);">{{ $opt['desc'] }}</span>
+                            </span>
+                        </label>
+                        @endforeach
+                    </div>
+                    <div style="margin-top:.75rem;">
+                        <textarea id="endCallDispositionNotes" class="form-control" placeholder="Notes (optional)…" rows="2" style="font-size:.72rem;resize:none;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid rgba(0,0,0,.06);padding:.65rem 1.2rem;gap:.5rem;">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal" style="font-size:.73rem;">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="confirmEndCallBtn" onclick="confirmEndCallDisposition()" disabled style="font-size:.73rem;font-weight:700;">
+                        <i class="bx bx-phone-off me-1"></i> Confirm & End Call
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ═══════════════════════════════════════════════════════════════
+         SAVE & EXIT DISPOSITION MODAL
+    ═══════════════════════════════════════════════════════════════ --}}
+    <div class="modal fade" id="saveExitDispositionModal" tabindex="-1" aria-labelledby="saveExitDispositionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;border-bottom:none;border-radius:.5rem .5rem 0 0;padding:.85rem 1.2rem;">
+                    <h6 class="modal-title fw-700" id="saveExitDispositionModalLabel" style="font-size:.88rem;letter-spacing:.02em;">
+                        <i class="bx bx-save me-2"></i> Save & Exit
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding:1.1rem 1.2rem;">
+                    {{-- Disposition selector --}}
+                    <div id="seDispOptions" style="display:flex;gap:.45rem;margin-bottom:.8rem;">
+                        <label id="seOpt-callback_set" onclick="selectSeDisposition('callback_set')"
+                               style="flex:1;display:flex;align-items:center;gap:.55rem;padding:.6rem .75rem;border-radius:.4rem;border:2px solid rgba(5,150,105,.4);cursor:pointer;background:rgba(5,150,105,.07);transition:all .15s;">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(5,150,105,.15);flex-shrink:0;">
+                                <i class="bx bx-calendar-check" style="color:#059669;font-size:.9rem;"></i>
+                            </span>
+                            <span>
+                                <strong style="font-size:.75rem;display:block;color:var(--bs-surface-700);">Callback Set</strong>
+                                <span style="font-size:.63rem;color:var(--bs-surface-400);">Scheduled follow-up call</span>
+                            </span>
+                        </label>
+                        <label id="seOpt-updated_data" onclick="selectSeDisposition('updated_data')"
+                               style="flex:1;display:flex;align-items:center;gap:.55rem;padding:.6rem .75rem;border-radius:.4rem;border:2px solid rgba(0,0,0,.07);cursor:pointer;background:var(--bs-card-bg);transition:all .15s;">
+                            <span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:rgba(100,116,139,.12);flex-shrink:0;">
+                                <i class="bx bx-edit-alt" style="color:#475569;font-size:.9rem;"></i>
+                            </span>
+                            <span>
+                                <strong style="font-size:.75rem;display:block;color:var(--bs-surface-700);">Updated Data</strong>
+                                <span style="font-size:.63rem;color:var(--bs-surface-400);">New info saved, no sale / callback</span>
+                            </span>
+                        </label>
+                    </div>
+                    <textarea id="saveExitDispositionNotes" class="form-control" placeholder="Notes / callback details (optional)…" rows="2" style="font-size:.72rem;resize:none;"></textarea>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid rgba(0,0,0,.06);padding:.65rem 1.2rem;gap:.5rem;">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal" style="font-size:.73rem;">Cancel</button>
+                    <button type="button" class="btn btn-sm" id="confirmSaveExitBtn" onclick="confirmSaveExitDisposition()" style="font-size:.73rem;font-weight:700;background:#059669;color:#fff;">
+                        <i class="bx bx-save me-1"></i> Save & Exit
+                    </button>
                 </div>
             </div>
         </div>
@@ -1484,6 +1574,7 @@
             if (data.success) {
                 console.log('✅ Call record created — dialling via Zoom Phone Smart Embed');
 
+                window.isCallActive = true;
                 window.zoomDial(phoneNumber);
                 window.dialedLeads.add(leadId);
                 recordDial(leadId, 'dialed');
@@ -1689,16 +1780,19 @@
                 const connAc = window.currentCallInfo;
                 if (connAc) {
                     toastr.success('✅ Call Connected — ' + connAc.leadName, 'Connected', { timeOut: 3000 });
-                    // Auto-open on connected disabled — form opens via 10s fallback timer after dial button click
-                    // showRavensFormForCall(connAc.leadId, connAc.phoneNumber, connAc.leadName, 'connected', 0);
+                    // Auto-open form on connected — cancel fallback timer since we're opening now
+                    if (window._formFallbackTimer) { clearTimeout(window._formFallbackTimer); window._formFallbackTimer = null; }
+                    const modalEl = document.getElementById('callDetailsModal');
+                    if (!modalEl || !modalEl.classList.contains('show')) {
+                        showRavensFormForCall(connAc.leadId, connAc.phoneNumber, connAc.leadName, 'connected', 0);
+                    }
                 } else {
-                    // Inbound connected — auto-open disabled
-                    // showRavensFormForCall(...) disabled for inbound callbacks
                     toastr.success('✅ Call Connected', 'Connected', { timeOut: 3000 });
                 }
 
             } else if (s.status === 'ended') {
                 toastr.clear();
+                window.isCallActive = false;
                 const endedLabels = { ended: '✅ Call ended', rejected: '📵 Call declined', missed: '⏰ No answer' };
                 toastr.info(endedLabels[s.result] || ('Call ' + (s.result || 'ended')), 'Call Status');
                 // Auto-close on ended disabled — closer must click a button to close
@@ -1777,6 +1871,9 @@
     window.closeRavensForm = function() {
         console.log('🚪 Closing Ravens form');
 
+        // Cancel fallback form-open timer
+        if (window._formFallbackTimer) { clearTimeout(window._formFallbackTimer); window._formFallbackTimer = null; }
+
         // Release the call lock so the live badge clears immediately
         const lockLeadId = window.currentLeadData?.id || window.currentCallInfo?.leadId;
         if (lockLeadId) releaseLock(lockLeadId);
@@ -1788,6 +1885,10 @@
             console.log('🛑 Auto-save interval cleared');
         }
         autoSaveFormData(true); // Final save before closing
+
+        window.isCallActive = false;
+        window.currentCallInfo = null;
+        window.currentLeadData = null;
         
         const modalElement = document.getElementById('callDetailsModal');
         if (modalElement) {
@@ -1801,8 +1902,12 @@
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
-        window.currentCallInfo = null;
-        window.currentLeadData = null;
+
+        // Advance auto-dial to next lead if active
+        if (window.autoDialActive) {
+            window.currentLeadIndex++;
+            setTimeout(autoDialNext, 1500); // small pause before next dial
+        }
     }
     
     // Show Ravens form when call is connected
@@ -2187,6 +2292,9 @@
     // Note: currentLeadData is already declared globally at line 477 as window.currentLeadData
 
     function closeCallModal() {
+        // Cancel fallback form-open timer
+        if (window._formFallbackTimer) { clearTimeout(window._formFallbackTimer); window._formFallbackTimer = null; }
+
         // Stop auto-save and save one final time before closing
         if (window.autoSaveInterval) {
             clearInterval(window.autoSaveInterval);
@@ -2202,6 +2310,10 @@
 
         // Final save before closing
         autoSaveFormData(true); // true = silent save on close
+
+        window.isCallActive = false;
+        window.currentCallInfo = null;
+        window.currentLeadData = null;
         
         const modalElement = document.getElementById('callDetailsModal');
         if (modalElement) {
@@ -2217,7 +2329,17 @@
                 if (backdrop) backdrop.remove();
             }
         }
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
         console.log('Call modal closed');
+
+        // Advance auto-dial to next lead if active
+        if (window.autoDialActive) {
+            window.currentLeadIndex++;
+            setTimeout(autoDialNext, 1500); // small pause before next dial
+        }
     }
 
     function updatePhaseDots(activePhase) {
@@ -3509,68 +3631,184 @@
         });
     });
 
-    /**
-     * Dispose current lead with a disposition reason
-     */
-    function disposeCurrentLead(disposition) {
+    // ─── End Call Disposition ───────────────────────────────────────────
+    let _selectedEndCallDisposition = null;
+
+    function showEndCallDispositionModal() {
         if (!window.currentLeadData || !window.currentLeadData.id) {
-            toastr.error('No active lead to dispose');
+            toastr.error('No active lead');
             return;
         }
+        _selectedEndCallDisposition = null;
+        // Reset UI
+        document.querySelectorAll('.ec-disp-option').forEach(el => {
+            el.style.borderColor = 'rgba(0,0,0,.07)';
+            el.style.background  = 'var(--bs-card-bg)';
+        });
+        document.getElementById('endCallDispositionNotes').value = '';
+        document.getElementById('confirmEndCallBtn').disabled = true;
 
-        const dispositionLabels = {
-            'no_answer': 'No Answer',
-            'wrong_number': 'Wrong Number',
-            'wrong_details': 'Wrong Details'
-        };
+        const modal = new bootstrap.Modal(document.getElementById('endCallDispositionModal'));
+        modal.show();
+    }
 
-        const confirmMessage = `Are you sure you want to dispose this lead as "${dispositionLabels[disposition]}"?`;
-        
-        if (!confirm(confirmMessage)) {
-            return;
-        }
+    function selectEndCallDisposition(key, el) {
+        _selectedEndCallDisposition = key;
+        document.querySelectorAll('.ec-disp-option').forEach(e => {
+            e.style.borderColor = 'rgba(0,0,0,.07)';
+            e.style.background  = 'var(--bs-card-bg)';
+        });
+        el.style.borderColor = '#dc2626';
+        el.style.background  = 'rgba(220,38,38,.05)';
+        document.getElementById('confirmEndCallBtn').disabled = false;
+    }
 
-        // Optional: Ask for notes
-        const notes = prompt('Add notes (optional):');
+    function confirmEndCallDisposition() {
+        if (!_selectedEndCallDisposition) return;
+        const leadId = window.currentLeadData?.id;
+        if (!leadId) { toastr.error('No active lead'); return; }
 
-        // Send disposition request
-        fetch('{{ route('ravens.leads.dispose') }}', {
+        const notes = document.getElementById('endCallDispositionNotes').value.trim();
+        const btn   = document.getElementById('confirmEndCallBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Saving…';
+
+        fetch('{{ route('ravens.leads.call-dispose') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
-                lead_id: window.currentLeadData.id,
-                disposition: disposition,
-                notes: notes || ''
+                lead_id:     leadId,
+                disposition: _selectedEndCallDisposition,
+                trigger:     'end_call',
+                notes:       notes
             })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
-                toastr.success('Lead disposed successfully as ' + data.disposition);
-
-                // Release lock before closing
-                releaseLock(window.currentLeadData.id);
-
-                // Close modal and remove from list
-                $('#callingModal').modal('hide');
-                window.currentLeadData = null;
-                window.isCallActive = false;
-                
-                // Reload page to refresh lead list
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                bootstrap.Modal.getInstance(document.getElementById('endCallDispositionModal'))?.hide();
+                toastr.success('Disposition recorded: ' + data.disposition);
+                releaseLock(leadId);
+                closeCallModal();
             } else {
-                toastr.error(data.message || 'Failed to dispose lead');
+                toastr.error(data.message || 'Failed to record disposition');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-phone-off me-1"></i> Confirm & End Call';
             }
         })
-        .catch(error => {
-            console.error('Error disposing lead:', error);
-            toastr.error('An error occurred while disposing the lead');
+        .catch(() => {
+            toastr.error('An error occurred');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bx bx-phone-off me-1"></i> Confirm & End Call';
         });
+    }
+
+    // ─── Save & Exit Disposition ─────────────────────────────────────────
+    window.selectedSeDisposition = 'callback_set';
+
+    function selectSeDisposition(key) {
+        window.selectedSeDisposition = key;
+        ['callback_set', 'updated_data'].forEach(k => {
+            const el = document.getElementById('seOpt-' + k);
+            if (!el) return;
+            if (k === key) {
+                el.style.borderColor = k === 'callback_set' ? 'rgba(5,150,105,.5)' : 'rgba(100,116,139,.5)';
+                el.style.background  = k === 'callback_set' ? 'rgba(5,150,105,.1)' : 'rgba(100,116,139,.08)';
+            } else {
+                el.style.borderColor = 'rgba(0,0,0,.07)';
+                el.style.background  = 'var(--bs-card-bg)';
+            }
+        });
+        const btn = document.getElementById('confirmSaveExitBtn');
+        if (btn) {
+            btn.style.background = key === 'callback_set' ? '#059669' : '#475569';
+            btn.innerHTML = key === 'callback_set'
+                ? '<i class="bx bx-save me-1"></i> Save & Set Callback'
+                : '<i class="bx bx-save me-1"></i> Save & Exit';
+        }
+    }
+
+    function showSaveExitDispositionModal() {
+        if (!window.currentLeadData || !window.currentLeadData.id) {
+            toastr.error('No active lead');
+            return;
+        }
+        document.getElementById('saveExitDispositionNotes').value = '';
+        // Reset to default
+        selectSeDisposition('callback_set');
+        const modal = new bootstrap.Modal(document.getElementById('saveExitDispositionModal'));
+        modal.show();
+    }
+
+    function confirmSaveExitDisposition() {
+        const leadId = window.currentLeadData?.id;
+        if (!leadId) { toastr.error('No active lead'); return; }
+
+        const notes = document.getElementById('saveExitDispositionNotes').value.trim();
+
+        // Collect form data (same logic as saveAndExit)
+        const beneficiaries = [];
+        document.querySelectorAll('.beneficiary-phase3-row').forEach((row) => {
+            const name     = row.querySelector('.beneficiary-name-phase3')?.value;
+            const dob      = row.querySelector('.beneficiary-dob-phase3')?.value;
+            const relation = row.querySelector('.beneficiary-relation-phase3')?.value;
+            if (name) beneficiaries.push({ name, dob: dob || null, relation: relation || null });
+        });
+
+        const formFields = {
+            cn_name: document.getElementById('change_name')?.value || null,
+            phone_number: document.getElementById('change_phone')?.value || null,
+            secondary_phone_number: document.getElementById('change_secondary_phone')?.value || null,
+            state: document.getElementById('change_state')?.value || null,
+            zip_code: document.getElementById('change_zip')?.value || null,
+            date_of_birth: document.getElementById('change_dob')?.value || null,
+            ssn: document.getElementById('change_ssn')?.value || null,
+            gender: document.getElementById('change_gender')?.value || null,
+            address: document.getElementById('change_address')?.value || null,
+            policy_type: document.getElementById('change_policy_type')?.value || null,
+            carrier_name: document.getElementById('change_carrier')?.value || null,
+            coverage_amount: document.getElementById('change_coverage')?.value || null,
+            monthly_premium: document.getElementById('change_premium')?.value || null,
+            bank_name: document.getElementById('change_bank_name')?.value || null,
+            routing_number: document.getElementById('change_routing')?.value || null,
+            account_number: document.getElementById('change_account')?.value || null,
+            closer_name: document.getElementById('change_closer')?.value || null,
+            source: document.getElementById('change_source')?.value || null,
+        };
+
+        fetch('{{ route('ravens.leads.call-dispose') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                lead_id:     leadId,
+                disposition: window.selectedSeDisposition || 'callback_set',
+                trigger:     'save_exit',
+                notes:       notes,
+                form_data:   formFields
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('saveExitDispositionModal'))?.hide();
+                toastr.success(
+                    window.selectedSeDisposition === 'updated_data'
+                        ? 'Lead saved — Updated Data recorded'
+                        : 'Lead saved — Callback Set recorded'
+                );
+                releaseLock(leadId);
+                closeCallModal();
+            } else {
+                toastr.error(data.message || 'Failed to save');
+            }
+        })
+        .catch(() => toastr.error('An error occurred while saving'));
     }
 
     /**

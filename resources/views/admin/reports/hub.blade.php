@@ -75,6 +75,26 @@
 
         <div class="hub-section-label">Call Tracking</div>
         <div class="hub-grid">
+            @canViewModule('ravens-bad-leads')
+            <a href="{{ route('settings.reports.disposition-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-phone-call"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Dialer Report</div>
+                    <p class="hub-card-desc">Per-closer breakdown of End Call &amp; Save &amp; Exit dispositions — volume, type &amp; trends over time</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+
+            <a href="{{ route('settings.reports.manager-submission-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-user-check"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Manager Submission Report</div>
+                    <p class="hub-card-desc">Per-manager count of sales approved to Pending Contract or marked Declined — click any manager to view individual leads</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
             @canViewModule('reports')
             <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>

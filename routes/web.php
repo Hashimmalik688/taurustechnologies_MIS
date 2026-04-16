@@ -697,6 +697,94 @@ Route::get('/sales/hub', function () {
     return view('admin.sales.hub');
 })->name('sales.hub')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
 
+Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
+    $q = trim($request->get('q', ''));
+    if (strlen($q) < 2) {
+        return response()->json(['results' => []]);
+    }
+    $leads = \App\Models\Lead::where(function ($query) use ($q) {
+            $query->where('cn_name', 'like', "%{$q}%")
+                  ->orWhere('phone_number', 'like', "%{$q}%")
+                  ->orWhere('policy_number', 'like', "%{$q}%")
+                  ->orWhere('ssn', 'like', "%{$q}%");
+        })
+        ->whereNotNull('closer_name')
+        ->where(function ($q2) {
+            $q2->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+        })
+        ->select([
+            'id', 'cn_name', 'phone_number', 'policy_number', 'carrier_name',
+            'sale_date', 'sale_at', 'closer_name',
+            'paid_at', 'policy_died_at', 'followup_done_at',
+            'pending_draft_at', 'pending_contract_at', 'submission_status',
+            'issuance_status', 'not_paid_at', 'status',
+        ])
+        ->orderByDesc('sale_at')
+        ->limit(15)
+        ->get()
+        ->map(function ($lead) {
+            // Determine current pipeline stage (most specific first)
+            if ($lead->policy_died_at) {
+                $stage  = 'Policy Died';
+                $badge  = 'danger';
+                $icon   = 'bx-x-circle';
+                $url    = null;
+            } elseif ($lead->paid_at) {
+                $stage  = 'Paid Sales';
+                $badge  = 'success';
+                $icon   = 'bx-badge-check';
+                $url    = route('paid-sales.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->followup_done_at && !$lead->pending_draft_at) {
+                $stage  = 'Followup Done';
+                $badge  = 'info';
+                $icon   = 'bx-check-circle';
+                $url    = route('followup.followup-done') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->pending_draft_at) {
+                $stageName = $lead->not_paid_at ? 'Pending Draft (Not Paid)' : 'Pending Draft';
+                $stage  = $stageName;
+                $badge  = $lead->not_paid_at ? 'warning' : 'primary';
+                $icon   = 'bx-time-five';
+                $url    = route('pending-draft.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->issuance_status === \App\Support\Statuses::ISSUANCE_ISSUED) {
+                $stage  = 'Issued – My Followups';
+                $badge  = 'primary';
+                $icon   = 'bx-phone-outgoing';
+                $url    = route('followup.my-followups') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->pending_contract_at) {
+                $stage  = 'Pending Contract';
+                $badge  = 'warning';
+                $icon   = 'bx-send';
+                $url    = route('issuance.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->submission_status === \App\Support\Statuses::SUB_APPROVED || !$lead->pending_contract_at) {
+                $stage  = 'Pending Submission';
+                $badge  = 'secondary';
+                $icon   = 'bx-task';
+                $url    = route('submissions.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            } else {
+                $stage  = 'Sales Records';
+                $badge  = 'secondary';
+                $icon   = 'bx-dollar-circle';
+                $url    = route('sales.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            }
+
+            return [
+                'id'           => $lead->id,
+                'cn_name'      => $lead->cn_name,
+                'phone_number' => $lead->phone_number,
+                'policy_number'=> $lead->policy_number,
+                'carrier_name' => $lead->carrier_name,
+                'sale_date'    => $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M j, Y') : null,
+                'closer_name'  => $lead->closer_name,
+                'stage'        => $stage,
+                'badge'        => $badge,
+                'icon'         => $icon,
+                'url'          => $url,
+            ];
+        });
+
+    return response()->json(['results' => $leads]);
+})->name('sales.hub.search')->middleware(['auth', Roles::middleware(...Roles::ALL)]);
+
 // Settings (access controlled by role.permission:settings,level — Permission Management remains Super Admin only)
 Route::group(['prefix' => 'settings', 'as' => 'settings.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index')->middleware('role.permission:settings,view');
@@ -753,6 +841,9 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/policy-type-report/drilldown', [ReportController::class, 'policyTypeReportDrilldown'])->name('policy-type-report.drilldown')->middleware('role.permission:reports,view');
     Route::get('/sales-status', [ReportController::class, 'salesStatus'])->name('sales-status')->middleware('role.permission:reports,view');
     Route::get('/sales-status/drilldown', [ReportController::class, 'salesStatusDrilldown'])->name('sales-status.drilldown')->middleware('role.permission:reports,view');
+    Route::get('/disposition-report', [ReportController::class, 'dispositionReport'])->name('disposition-report')->middleware('role.permission:reports,view');
+    Route::get('/manager-submission-report', [ReportController::class, 'managerSubmissionReport'])->name('manager-submission-report')->middleware('role.permission:reports,view');
+    Route::get('/manager-submission-report/drilldown', [ReportController::class, 'managerSubmissionDrilldown'])->name('manager-submission-report.drilldown')->middleware('role.permission:reports,view');
 
     // ── Carrier Commission Sheet (standalone) ──────────
     Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {
@@ -917,6 +1008,7 @@ Route::group(['prefix' => 'ravens', 'as' => 'ravens.', 'middleware' => ['auth', 
     Route::post('/leads/save', [RavensDashboardController::class, 'saveLead'])->name('leads.save')->middleware('role.permission:ravens,edit');
     Route::post('/leads/submit-sale', [RavensDashboardController::class, 'submitSale'])->name('leads.submit-sale')->middleware('role.permission:ravens,edit');
     Route::post('/leads/dispose', [RavensDashboardController::class, 'disposeLead'])->name('leads.dispose')->middleware('role.permission:ravens,edit');
+    Route::post('/leads/call-dispose', [RavensDashboardController::class, 'callDispose'])->name('leads.call-dispose')->middleware('role.permission:ravens,edit');
     Route::post('/leads/restore', [RavensDashboardController::class, 'restoreLead'])->name('leads.restore')->middleware('role.permission:ravens,edit');
     Route::post('/leads/save-callback-note', [RavensDashboardController::class, 'saveCallbackNote'])->name('leads.save-callback-note');
     Route::post('/leads/record-dial', [RavensDashboardController::class, 'recordDial'])->name('leads.record-dial');

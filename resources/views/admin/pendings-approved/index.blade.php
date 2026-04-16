@@ -53,6 +53,9 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 .bd-mini.bd-green{background:rgba(52,195,143,.12);color:#1a8754;} .bd-mini.bd-warn{background:rgba(241,180,76,.12);color:#b87a14;}
 .bd-mini.bd-red{background:rgba(244,106,106,.12);color:#c84646;} .bd-mini.bd-blue{background:rgba(85,110,230,.12);color:#556ee6;}
 .bd-mini.bd-gray{background:rgba(108,117,125,.12);color:#6c757d;}
+/* QA tickers */
+.sl-qa-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.3px;line-height:1;vertical-align:middle;margin-left:4px;box-shadow:0 1px 4px rgba(16,185,129,.45);flex-shrink:0;}
+.sl-qa-badge-bad{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.3px;line-height:1;vertical-align:middle;margin-left:4px;box-shadow:0 1px 4px rgba(239,68,68,.45);flex-shrink:0;}
 
 .bd-ni{background:rgba(244,106,106,.12);color:#c84646;border:1px solid rgba(244,106,106,.25);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;}
 .bd-resolved{background:rgba(52,195,143,.12);color:#1a8754;border:1px solid rgba(52,195,143,.25);font-size:.6rem;padding:.2rem .5rem;border-radius:.3rem;font-weight:600;}
@@ -229,6 +232,11 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                 <a href="{{ route('issuance.show', $lead->id) }}" style="font-weight:600;font-size:.73rem;color:var(--bs-body-color);text-decoration:none;">
                                     {{ $lead->cn_name ?? '—' }}
                                 </a>
+                                @if(in_array($lead->qa_status ?? '', ['Good', 'Avg']))
+                                    <span class="sl-qa-badge" title="QA Cleared ({{ $lead->qa_status }})">QA</span>
+                                @elseif(($lead->qa_status ?? '') === 'Bad')
+                                    <span class="sl-qa-badge-bad" title="QA Bad">QA</span>
+                                @endif
                             </td>
                             <td>
                                 <div class="d-flex align-items-center gap-1">

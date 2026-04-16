@@ -1310,6 +1310,88 @@ class RavensDashboardController extends Controller
     }
 
     /**
+     * Record a call disposition (End Call or Save & Exit).
+     * Leads are NOT removed from the calling system.
+     */
+    public function callDispose(Request $request)
+    {
+        $endCallOptions   = \App\Models\BadLead::endCallDispositions();
+        $saveExitOptions  = \App\Models\BadLead::saveExitDispositions();
+        $allOptions       = array_merge($endCallOptions, $saveExitOptions);
+
+        try {
+            $request->validate([
+                'lead_id'     => 'required|exists:leads,id',
+                'disposition' => 'required|in:' . implode(',', $allOptions),
+                'trigger'     => 'required|in:end_call,save_exit',
+                'notes'       => 'nullable|string|max:1000',
+                // Optional form data (save_exit only)
+                'form_data'   => 'nullable|array',
+            ]);
+
+            $lead = Lead::findOrFail($request->input('lead_id'));
+
+            // If Save & Exit, persist form field updates first
+            if ($request->input('trigger') === 'save_exit' && $request->has('form_data')) {
+                $allowed = [
+                    'cn_name', 'phone_number', 'secondary_phone_number', 'state', 'zip_code',
+                    'date_of_birth', 'ssn', 'gender', 'address', 'emergency_contact',
+                    'driving_license', 'birth_place', 'height', 'weight', 'smoker',
+                    'medical_issue', 'medications', 'doctor_name', 'doctor_number',
+                    'doctor_address', 'policy_type', 'carrier_name', 'coverage_amount',
+                    'monthly_premium', 'initial_draft_date', 'future_draft_date',
+                    'bank_name', 'account_type', 'routing_number', 'account_number',
+                    'account_verified_by', 'bank_balance', 'card_number', 'cvv',
+                    'expiry_date', 'closer_name', 'policy_number', 'account_title', 'source',
+                ];
+                $formData = array_intersect_key((array) $request->input('form_data'), array_flip($allowed));
+                $formData = array_filter($formData, fn($v) => $v !== null && $v !== '');
+                if (!empty($formData)) {
+                    $lead->update($formData);
+                }
+            }
+
+            // Create disposition record (lead stays in calling system)
+            BadLead::create([
+                'lead_id'          => $lead->id,
+                'disposed_by'      => Auth::id(),
+                'disposition'      => $request->input('disposition'),
+                'notes'            => $request->input('notes'),
+                'lead_name'        => $lead->cn_name,
+                'lead_phone'       => $lead->phone_number,
+                'lead_ssn'         => $lead->ssn,
+                'trigger'          => $request->input('trigger'),
+                'keeps_in_calling' => true,
+            ]);
+
+            AuditLog::create([
+                'user_id'    => Auth::id(),
+                'action'     => 'call_disposed',
+                'model'      => 'Lead',
+                'model_id'   => $lead->id,
+                'changes'    => json_encode([
+                    'trigger'     => $request->input('trigger'),
+                    'disposition' => $request->input('disposition'),
+                    'notes'       => $request->input('notes'),
+                ]),
+                'ip_address' => $request->ip(),
+            ]);
+
+            return response()->json([
+                'success'     => true,
+                'disposition' => \App\Models\BadLead::getDispositionLabel($request->input('disposition')),
+                'message'     => 'Disposition recorded successfully',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error recording call disposition: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to record disposition: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * View all bad/disposed leads
      */
     public function badLeads(Request $request)
@@ -1334,7 +1416,9 @@ class RavensDashboardController extends Controller
             $endDate = \Carbon\Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
         }
 
+        // ── Legacy "Disposed Contacts" (removes_from_calling = false / null) ──
         $query = BadLead::with(['lead', 'disposedBy'])
+            ->where(function($q) { $q->whereNull('keeps_in_calling')->orWhere('keeps_in_calling', false); })
             ->whereBetween('created_at', [$startDate, $endDate]);
 
         if ($search) {
@@ -1351,24 +1435,91 @@ class RavensDashboardController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
 
-        // KPI stats for the filtered period
-        $allBadInRange = BadLead::whereBetween('created_at', [$startDate, $endDate]);
-        $totalBad = (clone $allBadInRange)->count();
-        $dispositionCounts = BadLead::whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('disposition, COUNT(*) as cnt')
-            ->groupBy('disposition')
-            ->pluck('cnt', 'disposition')
-            ->toArray();
+        // KPI stats for legacy bad leads
+        $legacyBase = BadLead::where(function($q) { $q->whereNull('keeps_in_calling')->orWhere('keeps_in_calling', false); })
+            ->whereBetween('created_at', [$startDate, $endDate]);
+        $totalBad = (clone $legacyBase)->count();
+        $legacyDispositions = (clone $legacyBase)->selectRaw('disposition, COUNT(*) as cnt')
+            ->groupBy('disposition')->pluck('cnt', 'disposition')->toArray();
 
         $badStats = [
-            'total' => $totalBad,
-            'no_answer' => $dispositionCounts['no_answer'] ?? 0,
-            'wrong_number' => $dispositionCounts['wrong_number'] ?? 0,
-            'wrong_details' => $dispositionCounts['wrong_details'] ?? 0,
-            'other' => $totalBad - ($dispositionCounts['no_answer'] ?? 0) - ($dispositionCounts['wrong_number'] ?? 0) - ($dispositionCounts['wrong_details'] ?? 0),
+            'total'        => $totalBad,
+            'no_answer'    => $legacyDispositions['no_answer'] ?? 0,
+            'wrong_number' => $legacyDispositions['wrong_number'] ?? 0,
+            'wrong_details'=> $legacyDispositions['wrong_details'] ?? 0,
+            'other'        => $totalBad - ($legacyDispositions['no_answer'] ?? 0)
+                                         - ($legacyDispositions['wrong_number'] ?? 0)
+                                         - ($legacyDispositions['wrong_details'] ?? 0),
         ];
 
-        return view('ravens.bad-leads', compact('badLeads', 'badStats', 'filter', 'search'));
+        // ── New "Disposed Calls" (keeps_in_calling = true) ──
+        $dcCloserFilter      = $request->input('dc_closer');
+        $dcDispositionFilter = $request->input('dc_disposition');
+        $dcTriggerFilter     = $request->input('dc_trigger');
+        $dcSearch            = $request->input('dc_search');
+
+        $dcQuery = BadLead::with(['lead', 'disposedBy'])
+            ->where('keeps_in_calling', true)
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($dcCloserFilter) {
+            $dcQuery->where('disposed_by', $dcCloserFilter);
+        }
+        if ($dcDispositionFilter) {
+            $dcQuery->where('disposition', $dcDispositionFilter);
+        }
+        if ($dcTriggerFilter) {
+            $dcQuery->where('trigger', $dcTriggerFilter);
+        }
+        if ($dcSearch) {
+            $dcQuery->where(function($q) use ($dcSearch) {
+                $q->where('lead_name', 'like', '%'.$dcSearch.'%')
+                  ->orWhere('lead_phone', 'like', '%'.$dcSearch.'%')
+                  ->orWhere('notes', 'like', '%'.$dcSearch.'%');
+            });
+        }
+
+        $dcPerPage = in_array((int) $request->input('dc_per_page'), [10, 20, 50, 100, 200, 500, 1000])
+            ? (int) $request->input('dc_per_page') : 50;
+
+        $disposedCalls = $dcQuery->orderBy('created_at', 'desc')
+            ->paginate($dcPerPage, ['*'], 'dc_page')
+            ->appends($request->query());
+
+        // KPI stats for disposed calls
+        $dcBase      = BadLead::where('keeps_in_calling', true)->whereBetween('created_at', [$startDate, $endDate]);
+        $dcDispoCounts = (clone $dcBase)->selectRaw('disposition, COUNT(*) as cnt')
+            ->groupBy('disposition')->pluck('cnt', 'disposition')->toArray();
+
+        $disposedCallStats = [
+            'total'            => (clone $dcBase)->count(),
+            'answering_machine'=> $dcDispoCounts['answering_machine'] ?? 0,
+            'busy'             => $dcDispoCounts['busy'] ?? 0,
+            'dead_air'         => $dcDispoCounts['dead_air'] ?? 0,
+            'disconnected'     => $dcDispoCounts['disconnected'] ?? 0,
+            'declined_sale'    => $dcDispoCounts['declined_sale'] ?? 0,
+            'dnc'              => $dcDispoCounts['dnc'] ?? 0,
+            'no_answer_ec'     => $dcDispoCounts['no_answer_ec'] ?? 0,
+            'not_interested'   => $dcDispoCounts['not_interested'] ?? 0,
+            'no_pitch'         => $dcDispoCounts['no_pitch'] ?? 0,
+            'business_number'  => $dcDispoCounts['business_number'] ?? 0,
+            'not_in_service'   => $dcDispoCounts['not_in_service'] ?? 0,
+            'callback_set'     => $dcDispoCounts['callback_set'] ?? 0,
+            'updated_data'     => $dcDispoCounts['updated_data'] ?? 0,
+        ];
+
+        // Closers list for filter dropdown — only include roles that actually exist
+        $wantedRoles = ['Ravens Closer', 'Peregrine Closer', 'Employee', 'Manager', 'Super Admin'];
+        $existingRoles = \Spatie\Permission\Models\Role::whereIn('name', $wantedRoles)->pluck('name')->toArray();
+        $closersList = $existingRoles
+            ? \App\Models\User::role($existingRoles)->orderBy('name')->get(['id', 'name'])
+            : collect();
+
+        return view('ravens.bad-leads', compact(
+            'badLeads', 'badStats', 'filter', 'search',
+            'disposedCalls', 'disposedCallStats', 'closersList',
+            'dcCloserFilter', 'dcDispositionFilter', 'dcTriggerFilter', 'dcSearch'
+        ));
     }
 
     /**

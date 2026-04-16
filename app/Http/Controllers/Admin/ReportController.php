@@ -1892,4 +1892,247 @@ class ReportController extends Controller
             'carrierName', 'assignedPartner'
         ));
     }
+
+    /**
+     * Dialer Report — breakdown of disposed calls per closer.
+     */
+    public function dispositionReport(Request $request)
+    {
+        $timezone = 'America/Los_Angeles';
+        $appTz    = config('app.timezone', 'America/Los_Angeles');
+
+        $filter      = $request->input('filter', 'today');
+        $customStart = $request->input('start_date');
+        $customEnd   = $request->input('end_date');
+
+        if ($filter === 'custom' && $customStart && $customEnd) {
+            try {
+                $startDate = Carbon::parse($customStart, $timezone)->startOfDay()->setTimezone($appTz);
+                $endDate   = Carbon::parse($customEnd, $timezone)->endOfDay()->setTimezone($appTz);
+            } catch (\Exception $e) {
+                $startDate = Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+                $endDate   = Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
+            }
+        } elseif ($filter === 'week') {
+            $startDate = Carbon::now($timezone)->startOfWeek()->startOfDay()->setTimezone($appTz);
+            $endDate   = Carbon::now($timezone)->endOfDay()->setTimezone($appTz);
+        } elseif ($filter === 'month') {
+            $startDate = Carbon::now($timezone)->startOfMonth()->startOfDay()->setTimezone($appTz);
+            $endDate   = Carbon::now($timezone)->endOfDay()->setTimezone($appTz);
+        } else {
+            $startDate = Carbon::today($timezone)->startOfDay()->setTimezone($appTz);
+            $endDate   = Carbon::today($timezone)->endOfDay()->setTimezone($appTz);
+        }
+
+        $closerFilter      = $request->input('closer');
+        $dispositionFilter = $request->input('disposition');
+        $triggerFilter     = $request->input('trigger');
+
+        // All disposition labels for reference
+        $allDispositions = [
+            'answering_machine', 'busy', 'dead_air', 'disconnected',
+            'declined_sale', 'dnc', 'no_answer_ec', 'not_interested', 'no_pitch',
+            'business_number', 'not_in_service',
+            'callback_set', 'updated_data',
+        ];
+
+        // Base query — disposed calls only (keeps_in_calling = true)
+        $base = BadLead::where('keeps_in_calling', true)
+            ->whereBetween('created_at', [$startDate, $endDate]);
+
+        if ($closerFilter) $base->where('disposed_by', $closerFilter);
+        if ($dispositionFilter) $base->where('disposition', $dispositionFilter);
+        if ($triggerFilter) $base->where('trigger', $triggerFilter);
+
+        // Overall KPIs
+        $totalCalls = (clone $base)->count();
+        $dispoCounts = (clone $base)->selectRaw('disposition, COUNT(*) as cnt')
+            ->groupBy('disposition')->pluck('cnt', 'disposition')->toArray();
+
+        // Per-closer breakdown
+        $perCloser = (clone $base)
+            ->selectRaw('disposed_by, disposition, `trigger`, COUNT(*) as cnt')
+            ->groupBy('disposed_by', 'disposition', DB::raw('`trigger`'))
+            ->with('disposedBy:id,name')
+            ->get()
+            ->groupBy('disposed_by');
+
+        // Build per-closer summary rows
+        $closerRows = $perCloser->map(function ($rows) use ($allDispositions) {
+            $user  = $rows->first()->disposedBy;
+            $name  = $user?->name ?? 'Unknown';
+            $total = $rows->sum('cnt');
+            $byDisp = $rows->groupBy('disposition')->map(fn ($g) => $g->sum('cnt'));
+            $endCallTotal  = $rows->where('trigger', 'end_call')->sum('cnt');
+            $saveExitTotal = $rows->where('trigger', 'save_exit')->sum('cnt');
+            return [
+                'id'            => $rows->first()->disposed_by,
+                'name'          => $name,
+                'total'         => $total,
+                'end_call'      => $endCallTotal,
+                'save_exit'     => $saveExitTotal,
+                'dispositions'  => $byDisp,
+            ];
+        })->sortByDesc('total')->values();
+
+        // Closers for filter dropdown
+        $wantedRoles   = ['Ravens Closer', 'Peregrine Closer', 'Employee', 'Manager', 'Super Admin'];
+        $existingRoles = \Spatie\Permission\Models\Role::whereIn('name', $wantedRoles)->pluck('name')->toArray();
+        $closersList   = $existingRoles
+            ? User::role($existingRoles)->orderBy('name')->get(['id', 'name'])
+            : collect();
+
+        return view('admin.reports.disposition-report', compact(
+            'filter', 'customStart', 'customEnd',
+            'totalCalls', 'dispoCounts', 'closerRows', 'allDispositions',
+            'closersList', 'closerFilter', 'dispositionFilter', 'triggerFilter',
+            'startDate', 'endDate'
+        ));
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+     * MANAGER SUBMISSION REPORT
+     * Shows per-manager counts of Pending Contract and Declined actions.
+     * Date range is based on the ACTION date (pending_contract_at / declined_at).
+     * ────────────────────────────────────────────────────────────── */
+    public function managerSubmissionReport(Request $request)
+    {
+        $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $carrierId   = $request->get('carrier_id');
+        $partnerName = $request->get('partner_name');
+        $policyType  = $request->get('policy_type');
+
+        // Leads where manager took action: approved to pending contract OR declined
+        // Date range applies to the ACTION date, not sale_date
+        $query = Lead::where(function ($q) use ($dateFrom, $dateTo) {
+            $q->where(function ($q2) use ($dateFrom, $dateTo) {
+                $q2->whereNotNull('pending_contract_at');
+                if ($dateFrom) $q2->whereDate('pending_contract_at', '>=', $dateFrom);
+                if ($dateTo)   $q2->whereDate('pending_contract_at', '<=', $dateTo);
+            })->orWhere(function ($q2) use ($dateFrom, $dateTo) {
+                $q2->whereNotNull('declined_at');
+                if ($dateFrom) $q2->whereDate('declined_at', '>=', $dateFrom);
+                if ($dateTo)   $q2->whereDate('declined_at', '<=', $dateTo);
+            });
+        })->whereNotNull('submission_by');
+
+        if ($carrierId)   $query->where('insurance_carrier_id', $carrierId);
+        if ($partnerName) $query->where('assigned_partner', $partnerName);
+        if ($policyType)  $query->where('policy_type', $policyType);
+
+        $leads = $query->select(
+            'id', 'submission_by', 'pending_contract_at', 'declined_at', 'sale_date'
+        )->get();
+
+        // Group by manager
+        $grouped = $leads->groupBy('submission_by');
+
+        // Fetch manager users
+        $managerIds = $grouped->keys()->filter()->toArray();
+        $managers   = User::withTrashed()->whereIn('id', $managerIds)->get()->keyBy('id');
+
+        $rows = $grouped->map(function ($group, $managerId) use ($managers) {
+            $pendingContract = $group->whereNotNull('pending_contract_at')->count();
+            $declined        = $group->whereNotNull('declined_at')->count();
+            $total           = $group->count();
+            $manager         = $managers->get($managerId);
+
+            return (object) [
+                'manager_id'       => $managerId,
+                'manager_name'     => $manager ? $manager->name . ($manager->trashed() ? ' (Terminated)' : '') : 'Unknown',
+                'pending_contract' => $pendingContract,
+                'declined'         => $declined,
+                'total'            => $total,
+            ];
+        })->sortByDesc('total')->values();
+
+        $grandPendingContract = $rows->sum('pending_contract');
+        $grandDeclined        = $rows->sum('declined');
+        $grandTotal           = $rows->sum('total');
+
+        // Filter dropdowns
+        $allCarriers = \App\Models\InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $allPartners = \App\Models\Lead::whereNotNull('assigned_partner')->where('assigned_partner', '!=', '')
+            ->distinct()->orderBy('assigned_partner')->pluck('assigned_partner');
+        $allPolicyTypes = ['Level', 'Graded', 'G.I', 'Modified'];
+
+        return view('admin.reports.manager-submission-report', compact(
+            'rows', 'grandPendingContract', 'grandDeclined', 'grandTotal',
+            'dateFrom', 'dateTo', 'carrierId', 'partnerName', 'policyType',
+            'allCarriers', 'allPartners', 'allPolicyTypes'
+        ));
+    }
+
+    /**
+     * Drilldown: individual leads actioned by a specific manager.
+     */
+    public function managerSubmissionDrilldown(Request $request)
+    {
+        $managerId   = $request->get('manager_id');
+        $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $actionFilter = $request->get('action'); // 'pending_contract' | 'declined' | null (both)
+        $carrierId   = $request->get('carrier_id');
+        $partnerName = $request->get('partner_name');
+        $policyType  = $request->get('policy_type');
+
+        $query = Lead::where(function ($q) use ($dateFrom, $dateTo, $actionFilter) {
+            if ($actionFilter === 'pending_contract') {
+                $q->whereNotNull('pending_contract_at');
+                if ($dateFrom) $q->whereDate('pending_contract_at', '>=', $dateFrom);
+                if ($dateTo)   $q->whereDate('pending_contract_at', '<=', $dateTo);
+            } elseif ($actionFilter === 'declined') {
+                $q->whereNotNull('declined_at');
+                if ($dateFrom) $q->whereDate('declined_at', '>=', $dateFrom);
+                if ($dateTo)   $q->whereDate('declined_at', '<=', $dateTo);
+            } else {
+                // Both — include if action date matches for either
+                $q->where(function ($q2) use ($dateFrom, $dateTo) {
+                    $q2->where(function ($q3) use ($dateFrom, $dateTo) {
+                        $q3->whereNotNull('pending_contract_at');
+                        if ($dateFrom) $q3->whereDate('pending_contract_at', '>=', $dateFrom);
+                        if ($dateTo)   $q3->whereDate('pending_contract_at', '<=', $dateTo);
+                    })->orWhere(function ($q3) use ($dateFrom, $dateTo) {
+                        $q3->whereNotNull('declined_at');
+                        if ($dateFrom) $q3->whereDate('declined_at', '>=', $dateFrom);
+                        if ($dateTo)   $q3->whereDate('declined_at', '<=', $dateTo);
+                    });
+                });
+            }
+        })->whereNotNull('submission_by');
+
+        if ($managerId)   $query->where('submission_by', $managerId);
+        if ($carrierId)   $query->where('insurance_carrier_id', $carrierId);
+        if ($partnerName) $query->where('assigned_partner', $partnerName);
+        if ($policyType)  $query->where('policy_type', $policyType);
+
+        $leads = $query->select(
+            'id', 'cn_name', 'carrier_name', 'insurance_carrier_id',
+            'assigned_partner', 'partner_id',
+            'policy_type', 'settlement_type', 'policy_number',
+            'monthly_premium', 'agent_commission', 'settlement_percentage',
+            'closer_name', 'sale_date',
+            'pending_contract_at', 'declined_at', 'issuance_status',
+            'submission_by', 'status'
+        )->orderByDesc('pending_contract_at')->get();
+
+        $managerName  = null;
+        if ($managerId) {
+            $mgr = User::withTrashed()->find($managerId);
+            $managerName = $mgr ? $mgr->name . ($mgr->trashed() ? ' (Terminated)' : '') : 'Unknown';
+        }
+
+        $totalLeads           = $leads->count();
+        $totalPendingContract = $leads->whereNotNull('pending_contract_at')->count();
+        $totalDeclined        = $leads->whereNotNull('declined_at')->count();
+        $totalPremium         = $leads->sum('monthly_premium');
+
+        return view('admin.reports.manager-submission-drilldown', compact(
+            'leads', 'managerName', 'managerId',
+            'totalLeads', 'totalPendingContract', 'totalDeclined', 'totalPremium',
+            'dateFrom', 'dateTo', 'actionFilter',
+            'carrierId', 'partnerName', 'policyType'
+        ));
+    }
 }
