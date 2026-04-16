@@ -44,7 +44,18 @@ class CarrierSheetController extends Controller
         $periodMonth = $request->input('month');
         $query = $rate->entries()->withoutTrashed()->orderBy('sr_number');
         if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
+            $parsed = \Carbon\Carbon::parse($periodMonth);
+            $query->where(function ($q) use ($parsed) {
+                $q->where(function ($q2) use ($parsed) {
+                    $q2->whereNotNull('period_month')
+                       ->whereYear('period_month', $parsed->year)
+                       ->whereMonth('period_month', $parsed->month);
+                })->orWhere(function ($q2) use ($parsed) {
+                    $q2->whereNull('period_month')
+                       ->whereYear('entry_date', $parsed->year)
+                       ->whereMonth('entry_date', $parsed->month);
+                });
+            });
         }
         $entries = $query->get();
 
@@ -515,7 +526,18 @@ class CarrierSheetController extends Controller
         $periodMonth = $request->input('month');
         $query = $rate->entries()->withoutTrashed()->orderBy('sr_number');
         if ($periodMonth) {
-            $query->where('period_month', $periodMonth);
+            $parsed = \Carbon\Carbon::parse($periodMonth);
+            $query->where(function ($q) use ($parsed) {
+                $q->where(function ($q2) use ($parsed) {
+                    $q2->whereNotNull('period_month')
+                       ->whereYear('period_month', $parsed->year)
+                       ->whereMonth('period_month', $parsed->month);
+                })->orWhere(function ($q2) use ($parsed) {
+                    $q2->whereNull('period_month')
+                       ->whereYear('entry_date', $parsed->year)
+                       ->whereMonth('entry_date', $parsed->month);
+                });
+            });
         }
         $entries = $query->get();
 

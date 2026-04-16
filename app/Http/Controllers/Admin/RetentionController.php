@@ -140,18 +140,18 @@ class RetentionController extends Controller
         // ----- Table queries -----
         if ($disposed) {
             // Show disposed leads
-            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
                 ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->whereIn('retention_disposition', $disposedStatuses);
-            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_paid_at')
                 ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
                 ->whereIn('retention_disposition', $disposedStatuses);
-            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
@@ -159,18 +159,18 @@ class RetentionController extends Controller
                 ->whereIn('retention_disposition', $disposedStatuses);
         } else {
             // Show active (non-disposed) leads
-            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')
                 ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
-            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_paid_at')
                 ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
                 ->whereNull('policy_died_at')
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
-            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights'])
+            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_issued_at')
                 ->whereNull('not_issued_resolved_at')
                 ->whereNotNull('pending_contract_at')

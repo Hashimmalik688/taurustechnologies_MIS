@@ -275,7 +275,19 @@ class CarrierSheetService
             return $query;
         }
         $parsed = \Carbon\Carbon::parse($periodMonth);
-        return $query->whereYear('period_month', $parsed->year)
-                     ->whereMonth('period_month', $parsed->month);
+        return $query->where(function ($q) use ($parsed) {
+            // Entries with explicit period_month matching this month
+            $q->where(function ($q2) use ($parsed) {
+                $q2->whereNotNull('period_month')
+                   ->whereYear('period_month', $parsed->year)
+                   ->whereMonth('period_month', $parsed->month);
+            })
+            // OR entries with no period_month but entry_date in this month
+            ->orWhere(function ($q2) use ($parsed) {
+                $q2->whereNull('period_month')
+                   ->whereYear('entry_date', $parsed->year)
+                   ->whereMonth('entry_date', $parsed->month);
+            });
+        });
     }
 }

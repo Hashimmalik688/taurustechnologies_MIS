@@ -187,10 +187,17 @@
 .cs-money-pos { color:#2E7D32; }
 .cs-money-neg { color:#C62828; }
 
-/* ── Copy button ───────────────────────────────────── */
-.cs-row-btn-copy { background:rgba(25,118,210,.08); color:#1976D2; }
-.cs-row-btn-copy:hover { background:#1976D2; color:#fff; }
-.cs-row-btn-copy.copied { background:#2E7D32 !important; color:#fff !important; }
+/* ── Copy feedback on cell click ───────────────── */
+.cs-dtable tbody tr[data-entry-id] td {
+    cursor: pointer;
+    transition: background .1s;
+}
+.cs-dtable tbody tr[data-entry-id] td:hover {
+    background: rgba(25,118,210,.09) !important;
+}
+.cs-dtable tbody tr[data-entry-id] td.cs-cell-copied {
+    background: rgba(46,125,50,.18) !important;
+}
 
 /* ── Daily summary ─────────────────────────────────── */
 .cs-daily { margin-top:1.2rem; }
@@ -323,7 +330,6 @@
                     <th>Paid</th>
                     <th>Balance</th>
                     <th>CB</th>
-                    <th style="width:28px;" title="Copy row"><i class="bx bx-copy" style="font-size:.7rem;"></i></th>
                     <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <th style="width:50px;"></th>
                     <?php endif; ?>
@@ -340,7 +346,6 @@
                         <?php echo e(number_format($openingCb->opening_balance, 2)); ?>
 
                     </td>
-                    <td></td>
                     <td></td>
                     <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <td>
@@ -365,7 +370,6 @@
                         <input type="number" step="0.01" id="pinnedBalInput" value="<?php echo e($openingCb->opening_balance); ?>" class="form-control form-control-sm" style="width:110px; font-size:.72rem; text-align:right;">
                     </td>
                     <td></td>
-                    <td></td>
                     <td>
                         <div style="display:flex; gap:.2rem;">
                             <button class="cs-row-btn cs-row-btn-edit" onclick="savePinnedBal()" title="Save"><i class="bx bx-check"></i></button>
@@ -388,7 +392,6 @@
                         <?php echo e($openingCb->amount > 0 ? number_format($openingCb->amount, 2) : ''); ?>
 
                     </td>
-                    <td></td>
                     <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <td>
                         <?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if BLOCK]><![endif]--><?php endif; ?><?php if($periodMonth): ?>
@@ -412,7 +415,6 @@
                     <td>
                         <input type="number" step="0.01" min="0" id="pinnedCbInput" value="<?php echo e($openingCb->amount); ?>" class="form-control form-control-sm" style="width:110px; font-size:.72rem; text-align:right;">
                     </td>
-                    <td></td>
                     <td>
                         <div style="display:flex; gap:.2rem;">
                             <button class="cs-row-btn cs-row-btn-edit" onclick="savePinnedCb()" title="Save"><i class="bx bx-check"></i></button>
@@ -467,28 +469,6 @@
                         <?php echo e($entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 2) : ''); ?>
 
                     </td>
-                    <td>
-                        <button class="cs-row-btn cs-row-btn-copy"
-                            title="Copy row to clipboard"
-                            onclick="copyRow(this,
-                                '<?php echo e($entry->sr_number); ?>',
-                                '<?php echo e($entry->entry_date?->format('Y-m-d')); ?>',
-                                '<?php echo e(addslashes($entry->policy_number)); ?>',
-                                '<?php echo e(addslashes($entry->name)); ?>',
-                                '<?php echo e(addslashes($entry->face_value)); ?>',
-                                '<?php echo e(number_format($entry->premium, 2)); ?>',
-                                '<?php echo e(addslashes($entry->policy_type)); ?>',
-                                '<?php echo e(ucfirst($entry->status)); ?>',
-                                '<?php echo e($entry->draft_date?->format('Y-m-d')); ?>',
-                                '<?php echo e($entry->payment_date?->format('Y-m-d')); ?>',
-                                '<?php echo e($entry->commission !== null ? number_format($entry->commission, 2) : ''); ?>',
-                                '<?php echo e($entry->paid_amount > 0 ? number_format($entry->paid_amount, 2) : ''); ?>',
-                                '<?php echo e(number_format($entry->balance, 2)); ?>',
-                                '<?php echo e($entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 2) : ''); ?>'
-                            )">
-                            <i class="bx bx-copy"></i>
-                        </button>
-                    </td>
                     <?php if(auth()->check() && auth()->user()->canEditModule('carrier-sheet')): ?>
                     <td>
                         <div class="cs-row-actions">
@@ -503,7 +483,7 @@
                     <?php endif; ?>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <tr><td colspan="16" style="text-align:center; padding:2rem; color:var(--cs-text-3);">No entries yet. Click "Add Entry" or import an Excel file.</td></tr>
+                <tr><td colspan="15" style="text-align:center; padding:2rem; color:var(--cs-text-3);">No entries yet. Click "Add Entry" or import an Excel file.</td></tr>
                 <?php endif; ?><?php if(\Livewire\Mechanisms\ExtendBlade\ExtendBlade::isRenderingLivewireComponent()): ?><!--[if ENDBLOCK]><![endif]--><?php endif; ?>
             </tbody>
         </table>
@@ -780,37 +760,32 @@
 
 <?php $__env->startSection('script'); ?>
 <script>
-// ── Copy row to clipboard ──────────────────────────────────────────────────
-window.copyRow = function(btn, sr, date, policy, name, fv, prm, type, status, draft, payment, commission, paid, balance, cb) {
-    const headers = ['SR#','Date','Policy #','Name','FV','Premium','Type','Status','Draft','Payment','Commission','Paid','Balance','CB'];
-    const values  = [sr, date, policy, name, fv, prm, type, status, draft, payment, commission, paid, balance, cb];
-    const tsv = headers.join('\t') + '\n' + values.join('\t');
-    navigator.clipboard.writeText(tsv).then(function() {
-        btn.classList.add('copied');
-        const icon = btn.querySelector('i');
-        icon.className = 'bx bx-check';
-        setTimeout(function() {
-            btn.classList.remove('copied');
-            icon.className = 'bx bx-copy';
-        }, 1500);
-    }).catch(function() {
-        // Fallback for older browsers
-        const ta = document.createElement('textarea');
-        ta.value = tsv;
-        ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        btn.classList.add('copied');
-        const icon = btn.querySelector('i');
-        icon.className = 'bx bx-check';
-        setTimeout(function() {
-            btn.classList.remove('copied');
-            icon.className = 'bx bx-copy';
-        }, 1500);
+// ── Click any data cell to copy its text ──────────────────────────────────
+(function () {
+    const table = document.getElementById('carrierTable');
+    if (!table) return;
+    table.addEventListener('click', function (e) {
+        const td = e.target.closest('td');
+        if (!td) return;
+        const row = td.closest('tr[data-entry-id]');
+        if (!row) return;
+        // Skip the actions column (contains buttons)
+        if (td.querySelector('button, input')) return;
+        const text = td.textContent.trim();
+        if (!text) return;
+        navigator.clipboard.writeText(text).catch(function () {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        });
+        td.classList.add('cs-cell-copied');
+        setTimeout(() => td.classList.remove('cs-cell-copied'), 700);
     });
-};
+}());
 
 (function() {
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;

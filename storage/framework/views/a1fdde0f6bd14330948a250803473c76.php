@@ -342,6 +342,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
+                                'assigned_partner'=>$lead->partner->name??null,
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         ?>
@@ -517,6 +518,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
+                                'assigned_partner'=>$lead->partner->name??null,
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         ?>
@@ -685,6 +687,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
+                                'assigned_partner'=>$lead->partner->name??null,
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         ?>
@@ -918,6 +921,10 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 <tr>
                                     <td><label for="dm-input-sale_date" style="font-size:.73rem;font-weight:600;">Sale Date <span class="fh-badge" id="fh-sale_date" style="display:none;"></span></label></td>
                                     <td><input class="ret-edit-input" id="dm-input-sale_date" name="sale_date" type="date"></td>
+                                </tr>
+                                <tr>
+                                    <td><label style="font-size:.73rem;font-weight:600;">Assigned Partner</label></td>
+                                    <td><span id="dm-partner-name" style="font-size:.78rem;font-weight:600;color:var(--bs-primary);">—</span></td>
                                 </tr>
                             </table>
                         </div>
@@ -1420,6 +1427,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
             setInput('dm-input-retention_notes', lead.retention_notes);
             setInput('dm-input-staff_notes',   lead.staff_notes);
             setInput('dm-input-comments',      lead.comments);
+            setTxt('dm-partner-name', lead.assigned_partner || '—');
 
             // Retention issue summary (read-only)
             setTxt('dm-issue_type',  lead.not_issued_disposition || lead.fdfp_type || '—');
