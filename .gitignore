@@ -14,6 +14,6 @@ yarn-error.log
 /.idea
 /.vscode
 storage/framework/sessions/*
-storage/framework/views/*
-storage/framework/cache/*
-storage/backups/*
+storage/framework/views/
+storage/framework/cache/
+storage/backups/
