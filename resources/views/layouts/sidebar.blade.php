@@ -186,7 +186,8 @@
                 auth()->user()->canViewModule('ravens-dashboard') ||
                 auth()->user()->canViewModule('ravens-calling') ||
                 auth()->user()->canViewModule('ravens-followups') ||
-                auth()->user()->canViewModule('ravens-validation')
+                auth()->user()->canViewModule('ravens-validation') ||
+                auth()->user()->canViewModule('ravens-bad-leads')
             );
         @endphp
         @if($canSeeRavens)
@@ -222,6 +223,13 @@
                     <a href="{{ route('ravens.validation.index') }}" class="dropdown-item {{ Request::is('ravens/validation*') ? 'active' : '' }}">
                         <i class="bx bx-check-shield"></i>
                         <span class="menu-text">Ravens Validation</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('ravens-bad-leads')
+                    <a href="{{ route('ravens.bad-leads') }}" class="dropdown-item {{ Request::is('ravens/bad-leads*') ? 'active' : '' }}">
+                        <i class="bx bx-x-circle"></i>
+                        <span class="menu-text">Bad Leads</span>
                     </a>
                 @endcanViewModule
             </div>
