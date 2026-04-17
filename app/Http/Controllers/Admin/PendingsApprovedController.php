@@ -267,7 +267,8 @@ class PendingsApprovedController extends Controller
             $lead->status = Statuses::LEAD_ACCEPTED;
         } elseif ($request->submission_status === 'declined') {
             // Mirror the status field so the closer's dashboard reflects the decline
-            $lead->status = Statuses::LEAD_DECLINED;
+            $lead->status      = Statuses::LEAD_DECLINED;
+            $lead->declined_at = now();
         }
 
         $lead->save();

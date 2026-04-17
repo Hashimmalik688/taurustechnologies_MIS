@@ -197,13 +197,20 @@
     const results  = document.getElementById('hubSearchResults');
     const spinner  = document.getElementById('hubSearchSpinner');
     const searchUrl = '{{ route('sales.hub.search') }}';
+
+    function showResults() {
+        results.classList.remove('d-none');
+    }
+    function hideResults() {
+        results.classList.add('d-none');
+    }
     let debounce;
 
     input.addEventListener('input', function () {
         clearTimeout(debounce);
         const q = this.value.trim();
         if (q.length < 2) {
-            results.classList.add('d-none');
+            hideResults();
             results.innerHTML = '';
             return;
         }
@@ -224,7 +231,7 @@
             .catch(err => {
                 spinner.classList.add('d-none');
                 results.innerHTML = '<div class="hub-search-empty"><i class="bx bx-error-circle" style="color:#e53e3e"></i> Search failed — try again</div>';
-                results.classList.remove('d-none');
+                showResults();
                 console.warn('[Hub Search]', err);
             });
         }, 320);
@@ -232,12 +239,19 @@
 
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.hub-search-wrap')) {
-            results.classList.add('d-none');
+            hideResults();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            hideResults();
+            input.blur();
         }
     });
 
     input.addEventListener('focus', function () {
-        if (results.innerHTML.trim() !== '') results.classList.remove('d-none');
+        if (results.innerHTML.trim() !== '') showResults();
     });
 
     function badgeClass(badge) {
@@ -255,7 +269,7 @@
     function renderResults(items) {
         if (!items.length) {
             results.innerHTML = '<div class="hub-search-empty"><i class="bx bx-search-alt"></i> No leads found</div>';
-            results.classList.remove('d-none');
+            showResults();
             return;
         }
         const html = items.map(lead => {
@@ -279,7 +293,7 @@
             </${tag}>`;
         }).join('');
         results.innerHTML = html;
-        results.classList.remove('d-none');
+        showResults();
     }
 })();
 </script>

@@ -45,15 +45,17 @@
 .dd-tab.active { background:linear-gradient(135deg,var(--dd-gold),#b8941f); color:#0f172a; border-color:transparent; }
 
 /* KPI strip */
-.dd-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:.45rem; margin-bottom:.7rem; }
-@media(max-width:860px) { .dd-kpis { grid-template-columns:repeat(2,1fr); } }
-@media(max-width:480px) { .dd-kpis { grid-template-columns:1fr; } }
+.dd-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:.45rem; margin-bottom:.7rem; }
+@media(max-width:1000px) { .dd-kpis { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:600px)  { .dd-kpis { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:380px)  { .dd-kpis { grid-template-columns:1fr; } }
 .dd-kpi { background:var(--dd-surface); border:1px solid var(--dd-border); border-radius:.55rem; padding:.55rem .75rem; position:relative; overflow:hidden; box-shadow:var(--dd-shadow); }
 .dd-kpi::before { content:''; position:absolute; inset:0 auto 0 0; width:3.5px; border-radius:2px 0 0 2px; }
 .dd-kpi-total::before    { background:linear-gradient(180deg,var(--dd-gold),#b8941f); }
 .dd-kpi-contract::before { background:linear-gradient(180deg,var(--dd-green),#16a34a); }
 .dd-kpi-declined::before { background:linear-gradient(180deg,var(--dd-red),#dc2626); }
 .dd-kpi-premium::before  { background:linear-gradient(180deg,var(--dd-indigo),#4338ca); }
+.dd-kpi-commission::before { background:linear-gradient(180deg,#f59e0b,#d97706); }
 .dd-kpi-icon { font-size:1.2rem; margin-bottom:.18rem; display:block; }
 .dd-kpi-lbl { font-size:.58rem; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--dd-text-4); margin-bottom:.15rem; }
 .dd-kpi-val { font-size:1.45rem; font-weight:900; color:var(--dd-text-1); line-height:1; }
@@ -165,6 +167,12 @@
         <div class="dd-kpi-val" style="color:var(--dd-indigo)">${{ number_format($totalPremium, 2) }}</div>
         <div class="dd-kpi-sub">Monthly premium</div>
     </div>
+    <div class="dd-kpi dd-kpi-commission">
+        <i class="bx bx-coin dd-kpi-icon" style="color:#d97706"></i>
+        <div class="dd-kpi-lbl">Total Commission</div>
+        <div class="dd-kpi-val" style="color:#d97706">${{ number_format($totalCommission, 2) }}</div>
+        <div class="dd-kpi-sub">Calculated commission</div>
+    </div>
 </div>
 
 {{-- Table --}}
@@ -253,12 +261,9 @@
 
                     {{-- Commission --}}
                     <td class="td-r">
-                        @php
-                            $commPct = $lead->settlement_percentage ?? $lead->agent_commission ?? null;
-                        @endphp
-                        @if($commPct)
-                            <span class="dd-chip dd-chip-indigo" style="font-size:.62rem">
-                                {{ number_format($commPct, 1) }}%
+                        @if($lead->eff_revenue > 0)
+                            <span class="dd-chip dd-chip-amber">
+                                <i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($lead->eff_revenue, 2) }}
                             </span>
                         @else
                             <span style="font-size:.65rem;color:var(--dd-text-4)">—</span>
@@ -324,7 +329,11 @@
                             <i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($totalPremium, 2) }}
                         </span>
                     </td>
-                    <td></td>
+                    <td class="td-r">
+                        <span class="dd-chip dd-chip-amber">
+                            <i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($totalCommission, 2) }}
+                        </span>
+                    </td>
                     <td colspan="4" style="font-size:.62rem;color:var(--dd-text-4)">
                         {{ $totalLeads }} lead{{ $totalLeads !== 1 ? 's' : '' }} &nbsp;·&nbsp;
                         <span style="color:#16a34a;font-weight:700">{{ $totalPendingContract }} contract</span>

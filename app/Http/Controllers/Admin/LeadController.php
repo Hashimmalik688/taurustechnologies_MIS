@@ -465,6 +465,7 @@ class LeadController extends Controller
                 'sale_at' => $validated['sale_date'],
                 'status' => $validated['status'] ?? Statuses::LEAD_ACCEPTED,
                 'source_type' => $sourceType,
+                'is_manual_sale' => true,
             ]);
 
             return redirect()->route('sales.index')
@@ -1128,7 +1129,8 @@ class LeadController extends Controller
         }
         // When manager declines, update main status so it moves to Failed Leads section
         elseif ($request->submission_status === 'declined') {
-            $lead->status = 'declined';
+            $lead->status      = 'declined';
+            $lead->declined_at = now();
         }
         
         $lead->save();

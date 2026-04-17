@@ -13,9 +13,8 @@
     border: 1px solid rgba(255,255,255,.08);
     border-radius: 0.6rem;
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     position: relative;
+    z-index: 20;
     overflow: visible;
 }
 .hub-header::before {
@@ -91,8 +90,6 @@
     border-radius: 0.55rem;
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: 0 1px 4px rgba(0,0,0,.05);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     text-decoration: none !important;
     color: inherit !important;
     cursor: pointer;
@@ -193,6 +190,7 @@
 
 .hub-search-wrap {
     position: relative;
+    z-index: 1056;
 }
 
 .hub-search-input-wrap {
@@ -246,13 +244,18 @@
     left: 0;
     right: 0;
     background: var(--bs-card-bg, #fff);
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 0.55rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(212, 175, 55, 0.1);
     z-index: 1060;
     max-height: 420px;
     overflow-y: auto;
     overflow-x: hidden;
+    animation: hub-sr-in 0.15s ease;
+}
+@keyframes hub-sr-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .hub-search-empty {

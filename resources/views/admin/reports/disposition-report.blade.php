@@ -187,6 +187,10 @@
             <div class="dr-kpi-val" style="color:#6366f1">{{ $totalCalls }}</div>
             <div class="dr-kpi-lbl">Total Calls</div>
         </div>
+        <div class="dr-kpi" title="Sales closed in this period" style="border-color:rgba(34,197,94,.28);flex:0 0 auto;min-width:80px;cursor:default">
+            <div class="dr-kpi-val" style="color:#16a34a">{{ $totalSales }}</div>
+            <div class="dr-kpi-lbl">Sales</div>
+        </div>
         <div class="dr-kpi" title="A — Answering Machine" style="border-color:rgba(99,102,241,.15);cursor:default">
             <div class="dr-kpi-val" style="color:#6366f1">{{ $dispoCounts['answering_machine'] ?? 0 }}</div>
             <div class="dr-kpi-lbl">A</div>
@@ -268,6 +272,7 @@
                         <tr>
                             <th style="text-align:left">Closer</th>
                             <th title="Total disposed calls">Total</th>
+                            <th title="Sales closed in this period" style="color:#16a34a">Sales</th>
                             <th title="Via End Call button"><span class="tr-badge tr-end">End Call</span></th>
                             <th title="Via Save &amp; Exit button"><span class="tr-badge tr-save">Save &amp; Exit</span></th>
                             <th title="A — Answering Machine"><span class="dh-pill dh-am">A</span></th>
@@ -293,6 +298,13 @@
                             <tr>
                                 <td>{{ $row['name'] }}</td>
                                 <td style="font-weight:800;color:#6366f1">{{ $row['total'] }}</td>
+                                <td>
+                                    @if(($row['sales'] ?? 0) > 0)
+                                        <span style="font-weight:800;color:#16a34a">{{ $row['sales'] }}</span>
+                                    @else
+                                        <span class="dr-zero">—</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($row['end_call'] > 0)
                                         <span class="tr-badge tr-end">{{ $row['end_call'] }}</span>
@@ -323,6 +335,7 @@
                         <tr>
                             <td style="font-weight:800">Totals</td>
                             <td style="color:#6366f1;font-weight:800">{{ $totalCalls }}</td>
+                            <td style="color:#16a34a;font-weight:800">{{ $totalSales }}</td>
                             <td>
                                 @php $ecTotal = $closerRows->sum('end_call') @endphp
                                 @if($ecTotal > 0)<span class="tr-badge tr-end">{{ $ecTotal }}</span>@else <span class="dr-zero">—</span> @endif

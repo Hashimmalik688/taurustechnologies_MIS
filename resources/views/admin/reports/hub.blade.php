@@ -18,28 +18,6 @@
         <div class="hub-section-label">Sales &amp; Performance</div>
         <div class="hub-grid">
             @canViewModule('reports')
-            <a href="{{ route('settings.reports.index') }}" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-file-find"></i></div>
-                <div class="hub-card-body">
-                    <div class="hub-card-title">Sales Reports</div>
-                    <p class="hub-card-desc">Filter, generate &amp; export sales, partner, chargeback and issuance reports</p>
-                </div>
-                <i class="bx bx-chevron-right hub-card-arrow"></i>
-            </a>
-            @endcanViewModule
-
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.per-closer') }}" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-phone-call"></i></div>
-                <div class="hub-card-body">
-                    <div class="hub-card-title">Per-Closer Performance</div>
-                    <p class="hub-card-desc">Dialed, connected, disposed &amp; sales ratios broken down by closer</p>
-                </div>
-                <i class="bx bx-chevron-right hub-card-arrow"></i>
-            </a>
-            @endcanViewModule
-
-            @canViewModule('reports')
             <a href="{{ route('settings.reports.submission-performance') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-award"></i></div>
                 <div class="hub-card-body">

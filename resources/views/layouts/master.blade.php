@@ -133,24 +133,27 @@
     <!-- Community Announcement Pop-up Styles -->
     <style>
         .ann-popup {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 10050;
-            width: 380px;
-            max-width: calc(100vw - 40px);
+            position: fixed !important;
+            top: 80px !important;
+            right: 20px !important;
+            z-index: 10050 !important;
+            width: 380px !important;
+            max-width: calc(100vw - 40px) !important;
             background: var(--bs-card-bg);
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
             transform: translateX(420px);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+            display: none;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease, visibility 0s linear 0.4s;
             pointer-events: none;
         }
         .ann-popup.visible {
+            display: block !important;
             transform: translateX(0);
             opacity: 1;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease, visibility 0s linear 0s;
             pointer-events: auto;
         }
         .ann-popup-progress {
@@ -942,7 +945,23 @@
     <script>
     // ===== COMMUNITY ANNOUNCEMENT NOTIFICATIONS (Polling) =====
     (function() {
+        // Persist lastPollTime across page navigations so we never re-show the
+        // same announcement when navigating between hub pages.
+        // Reset if older than 2 hours to avoid missing genuinely new content.
         let lastPollTime = null;
+        try {
+            const stored = localStorage.getItem('annLastPollTime');
+            if (stored) {
+                const storedAt = parseInt(localStorage.getItem('annLastPollTimeAt') || '0', 10);
+                if (storedAt && (Date.now() - storedAt) < 7200000) { // 2 hours
+                    lastPollTime = stored;
+                } else {
+                    localStorage.removeItem('annLastPollTime');
+                    localStorage.removeItem('annLastPollTimeAt');
+                }
+            }
+        } catch(e) {}
+
         let dismissTimer = null;
         let seenIds = JSON.parse(localStorage.getItem('seenAnnIds') || '[]');
         // seenVersions tracks id:updated_at so edits are detected
@@ -1019,7 +1038,13 @@
 
             if (withCountdown) {
                 document.getElementById('annProgress').style.width = '100%';
-                popup.classList.add('visible');
+                // Force critical positioning inline — cannot be overridden by any CSS
+                popup.style.cssText = 'position:fixed!important;top:80px!important;right:20px!important;width:380px!important;max-width:calc(100vw - 40px)!important;z-index:10050!important;display:block;background:var(--bs-card-bg);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);overflow:hidden;transform:translateX(420px);opacity:0;pointer-events:none';
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        popup.classList.add('visible');
+                    });
+                });
 
                 let remaining = 100;
                 const bar = document.getElementById('annProgress');
@@ -1037,7 +1062,14 @@
 
         function closePopup() {
             const popup = document.getElementById('annPopup');
-            if (popup) popup.classList.remove('visible');
+            if (popup) {
+                popup.classList.remove('visible');
+                setTimeout(function() {
+                    if (!popup.classList.contains('visible')) {
+                        popup.style.cssText = 'position:fixed!important;top:80px!important;right:20px!important;width:380px!important;max-width:calc(100vw - 40px)!important;z-index:10050!important;display:none';
+                    }
+                }, 450); // match transition duration
+            }
             clearInterval(dismissTimer);
         }
 
@@ -1093,7 +1125,13 @@
             .then(r => r.json())
             .then(data => {
                 if (!data.success) return;
-                if (data.server_time) lastPollTime = data.server_time;
+                if (data.server_time) {
+                    lastPollTime = data.server_time;
+                    try {
+                        localStorage.setItem('annLastPollTime', lastPollTime);
+                        localStorage.setItem('annLastPollTimeAt', Date.now().toString());
+                    } catch(e) {}
+                }
 
                 if (data.announcements && data.announcements.length > 0) {
                     for (let i = data.announcements.length - 1; i >= 0; i--) {
@@ -1111,6 +1149,15 @@
         window.reopenAnnPopup = reopenPopup;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Ensure annPopup & annBtn are direct <body> children so position:fixed
+            // works correctly — any ancestor with CSS transform breaks fixed positioning
+            ['annPopup', 'annBtn'].forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el && el.parentNode !== document.body) {
+                    document.body.appendChild(el);
+                }
+            });
+
             // If there's a stored announcement, show the floating button immediately
             if (lastAnnouncement) {
                 const btn = document.getElementById('annBtn');
@@ -1126,7 +1173,7 @@
     </script>
 
     <!-- Announcement Pop-up -->
-    <div id="annPopup" class="ann-popup">
+    <div id="annPopup" class="ann-popup" style="position:fixed!important;top:80px!important;right:20px!important;width:380px!important;max-width:calc(100vw - 40px)!important;z-index:10050!important;display:none">
         <div class="d-flex align-items-center u-gap-12" style="padding:14px 16px; border-bottom:1px solid var(--bs-surface-200)">
             <div id="annIcon" class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width:38px; height:38px">
                 <i class="bx bx-bullhorn" style="font-size:18px;"></i>

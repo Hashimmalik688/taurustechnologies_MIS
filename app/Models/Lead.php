@@ -122,6 +122,7 @@ class Lead extends Model
         // Sale tracking
         'sale_date',
         'sale_at',
+        'is_manual_sale',
         'resale_count',
         'resale_log',
 
@@ -254,6 +255,7 @@ class Lead extends Model
     protected $casts = [
         'sale_at' => 'datetime',
         'sale_date' => 'date',
+        'is_manual_sale' => 'boolean',
         'date_of_birth' => 'date',
         'beneficiary_dob' => 'date',
         'beneficiaries' => 'array',  // Cast JSON to array
