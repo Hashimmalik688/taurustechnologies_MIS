@@ -14,6 +14,10 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
 {
+    public int $createdCount = 0;
+    public int $updatedCount = 0;
+    public int $errorCount   = 0;
+
     public function collection(Collection $rows)
     {
         $importingUser = auth()->user();
@@ -182,13 +186,16 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         ], 'CSV import merged missing fields into existing lead');
                     }
                     
-                    // Add carrier details
-                    $existingLead->carriers()->create([
-                        'name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
-                        'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
-                        'premium_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
-                        'status' => 'pending',
-                    ]);
+                    // Add carrier details (only if carrier name is present)
+                    $carrierName = $this->getValueFromRow($lowercaseRow, ['carrier name']);
+                    if (!empty($carrierName)) {
+                        $existingLead->carriers()->create([
+                            'name'            => $carrierName,
+                            'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
+                            'premium_amount'  => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
+                            'status'          => 'pending',
+                        ]);
+                    }
 
                     $updatedCount++;
                     Log::info('Added carrier to existing lead', [
@@ -261,13 +268,16 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'status' => Statuses::LEAD_CLOSED, // Mark imported leads as closed so they appear in All Leads
                     ]);
 
-                    // Create carrier for new lead
-                    $lead->carriers()->create([
-                        'name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
-                        'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
-                        'premium_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
-                        'status' => 'pending',
-                    ]);
+                    // Create carrier for new lead (only if carrier name is present)
+                    $carrierName = $this->getValueFromRow($lowercaseRow, ['carrier name']);
+                    if (!empty($carrierName)) {
+                        $lead->carriers()->create([
+                            'name'            => $carrierName,
+                            'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount'])) ?? 0,
+                            'premium_amount'  => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
+                            'status'          => 'pending',
+                        ]);
+                    }
 
                     $createdCount++;
                     Log::info('Created new lead with carrier', [
@@ -289,14 +299,19 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                     'error_file' => $e->getFile(),
                     'row' => $row->toArray(),
                 ]);
+                $this->errorCount++;
                 // Continue processing other rows even if one fails
             }
         }
+
+        $this->createdCount = $createdCount;
+        $this->updatedCount = $updatedCount;
 
         $totalLeads = Lead::count();
         Log::info('Lead import completed', [
             'created' => $createdCount,
             'updated' => $updatedCount,
+            'errors'  => $this->errorCount,
             'total_leads_in_db' => $totalLeads
         ]);
     }

@@ -1039,25 +1039,38 @@ class LeadController extends Controller
             ], 'CSV lead import started');
 
             // Import the file using the LeadsImport class
-            Excel::import(new LeadsImport, $request->file('import_file'));
+            $importer = new LeadsImport;
+            Excel::import($importer, $request->file('import_file'));
 
-            $afterCount = Lead::count();
-            $imported = $afterCount - $beforeCount;
+            $afterCount  = Lead::count();
+            $created     = $importer->createdCount;
+            $updated     = $importer->updatedCount;
+            $errors      = $importer->errorCount;
 
             AuditLog::logAction('lead_import_completed', auth()->user(), null, null, [
                 'file_name'    => $file->getClientOriginalName(),
                 'leads_before' => $beforeCount,
                 'leads_after'  => $afterCount,
-                'new_leads'    => $imported,
-            ], "CSV import created {$imported} new leads");
+                'new_leads'    => $created,
+                'duplicates'   => $updated,
+                'errors'       => $errors,
+            ], "CSV import created {$created} new leads, merged {$updated} duplicates");
 
             \Log::info('=== WEB IMPORT COMPLETED ===', [
-                'before' => $beforeCount,
-                'after' => $afterCount,
-                'imported' => $imported,
+                'before'     => $beforeCount,
+                'after'      => $afterCount,
+                'created'    => $created,
+                'duplicates' => $updated,
+                'errors'     => $errors,
             ]);
 
-            return redirect()->route('leads.index')->with('success', "Successfully imported {$imported} leads! Total leads: {$afterCount}");
+            $message = "Import complete — {$created} new leads added, {$updated} duplicates merged";
+            if ($errors > 0) {
+                $message .= ", {$errors} rows skipped due to errors";
+            }
+            $message .= ". Total leads: {$afterCount}.";
+
+            return redirect()->route('leads.index')->with('success', $message);
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
             $errorMessage = "Import validation failed. Errors: ";

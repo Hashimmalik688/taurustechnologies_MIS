@@ -718,6 +718,7 @@ Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
             'paid_at', 'policy_died_at', 'followup_done_at',
             'pending_draft_at', 'pending_contract_at', 'submission_status',
             'issuance_status', 'not_paid_at', 'status',
+            'chargeback_marked_date', 'declined_at', 'decline_reason',
         ])
         ->orderByDesc('sale_at')
         ->limit(15)
@@ -729,6 +730,16 @@ Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
                 $badge  = 'danger';
                 $icon   = 'bx-x-circle';
                 $url    = null;
+            } elseif ($lead->chargeback_marked_date) {
+                $stage  = 'Chargeback';
+                $badge  = 'danger';
+                $icon   = 'bx-error-circle';
+                $url    = route('chargebacks.index') . '?search=' . urlencode($lead->cn_name ?? '');
+            } elseif ($lead->declined_at) {
+                $stage  = 'Declined';
+                $badge  = 'danger';
+                $icon   = 'bx-block';
+                $url    = route('sales.index') . '?search=' . urlencode($lead->cn_name ?? '');
             } elseif ($lead->paid_at) {
                 $stage  = 'Paid Sales';
                 $badge  = 'success';
