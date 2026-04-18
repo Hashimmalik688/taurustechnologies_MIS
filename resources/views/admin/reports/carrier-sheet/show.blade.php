@@ -914,6 +914,69 @@
         const filterType   = document.getElementById('filterType');
         const filterStatus = document.getElementById('filterStatus');
 
+        // Re-read opening balance/cb from the pinned rows (already on the page)
+        const openingCbAmt  = parseFloat("{{ $openingCb->amount ?? 0 }}") || 0;
+        const openingBalAmt = parseFloat("{{ $openingCb->opening_balance ?? 0 }}") || 0;
+
+        function recalcBadgesFromVisible() {
+            const visibleRows = [...document.querySelectorAll('#carrierTable tbody tr[data-entry-id]')]
+                .filter(r => r.style.display !== 'none');
+
+            let commission = 0, paidTotal = 0, cbTotal = 0;
+            let totalApps = 0, paidCnt = 0, approvedCnt = 0, cbCnt = 0, declinedCnt = 0;
+
+            visibleRows.forEach(function(row) {
+                const id = row.dataset.entryId;
+                const e  = entries[id];
+                if (!e) return;
+
+                const st = (e.status || '').toLowerCase();
+                totalApps++;
+
+                // Commission: same logic as server (non-CB gets it; paid-CB also gets it)
+                if (st !== 'chargeback') {
+                    commission += parseFloat(e.commission ?? 0);
+                } else if (parseFloat(e.paid_amount ?? 0) > 0) {
+                    commission += parseFloat(e.commission ?? 0);
+                }
+
+                // Paid total
+                if (st === 'paid' || st === 'chargeback') {
+                    paidTotal += parseFloat(e.paid_amount ?? 0);
+                }
+
+                // Chargeback total (entry-level)
+                cbTotal += parseFloat(e.chargeback_amount ?? 0);
+
+                // Counts
+                if (st === 'paid')       paidCnt++;
+                if (st === 'approved')   approvedCnt++;
+                if (st === 'chargeback') cbCnt++;
+                if (st === 'declined')   declinedCnt++;
+            });
+
+            // Include opening amounts only when no status/type/search filter is active
+            // so that "All" view stays consistent with server totals
+            const isFiltered = (searchInput && searchInput.value.trim()) ||
+                               (filterType   && filterType.value) ||
+                               (filterStatus && filterStatus.value);
+
+            const appliedCbTotal  = cbTotal + (isFiltered ? 0 : openingCbAmt);
+            const appliedBalance  = commission - paidTotal - appliedCbTotal + (isFiltered ? 0 : openingBalAmt);
+
+            updateBadges({
+                commission:       commission,
+                paid:             paidTotal,
+                balance:          appliedBalance,
+                chargeback_total: appliedCbTotal,
+                total_apps:       totalApps,
+                paid_count:       paidCnt,
+                approved_count:   approvedCnt,
+                chargeback_count: cbCnt,
+                declined_count:   declinedCnt,
+            });
+        }
+
         function applyFilters() {
             const needle = (searchInput ? searchInput.value.trim().toLowerCase() : '');
             const typeVal   = filterType   ? filterType.value.toLowerCase()   : '';
@@ -930,6 +993,7 @@
                 const matchStatus = !statusVal|| statusText.includes(statusVal);
                 row.style.display = (matchSearch && matchType && matchStatus) ? '' : 'none';
             });
+            recalcBadgesFromVisible();
         }
 
         if (searchInput) searchInput.addEventListener('input', applyFilters);

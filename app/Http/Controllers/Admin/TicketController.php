@@ -16,33 +16,23 @@ class TicketController extends Controller
      */
     public function index(Request $request)
     {
-        // Calculate KPI metrics - exclude closed tickets from priority counts
-        $kpis = [
-            'total_tickets' => PabsTicket::count(),
-            'open_tickets' => PabsTicket::where('status', Statuses::TICKET_OPEN)->count(),
-            'closed_tickets' => PabsTicket::where('status', Statuses::TICKET_CLOSED)->count(),
-            'high_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_HIGH)->count(),
-            'medium_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_MEDIUM)->count(),
-            'low_priority' => PabsTicket::whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_LOW)->count(),
-        ];
-        
         $query = PabsTicket::with('creator', 'assignee');
-        
+
         // Filter by section
         if ($request->filled('section_id')) {
             $query->where('section_id', $request->section_id);
         }
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Filter by priority
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
-        
+
         // Search by ticket code or subject
         if ($request->filled('search')) {
             $search = $request->search;
@@ -51,6 +41,17 @@ class TicketController extends Controller
                   ->orWhere('subject', 'like', "%{$search}%");
             });
         }
+
+        // Calculate KPI metrics based on the same filters (clone before paginating)
+        $kpiBase = clone $query;
+        $kpis = [
+            'total_tickets'   => (clone $kpiBase)->count(),
+            'open_tickets'    => (clone $kpiBase)->where('status', Statuses::TICKET_OPEN)->count(),
+            'closed_tickets'  => (clone $kpiBase)->where('status', Statuses::TICKET_CLOSED)->count(),
+            'high_priority'   => (clone $kpiBase)->whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_HIGH)->count(),
+            'medium_priority' => (clone $kpiBase)->whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_MEDIUM)->count(),
+            'low_priority'    => (clone $kpiBase)->whereNot('status', Statuses::TICKET_CLOSED)->where('priority', Statuses::PRIORITY_LOW)->count(),
+        ];
         
         $tickets = $query->orderBy('created_at', 'desc')->paginate(20);
         $sections = \App\Services\ProjectAuthorizationService::getSections();

@@ -119,7 +119,8 @@
 
 {{-- Action filter tabs --}}
 @php
-    $baseParams = array_filter(['manager_id' => $managerId, 'date_from' => $dateFrom, 'date_to' => $dateTo]);
+    $baseParams = array_filter(['manager_id' => $managerId, 'date_from' => $dateFrom, 'date_to' => $dateTo,
+        'carrier_id' => $carrierId ?? null, 'partner_name' => $partnerName ?? null, 'policy_type' => $policyType ?? null]);
 @endphp
 <div class="dd-tabs">
     <a href="{{ route('settings.reports.manager-submission-report.drilldown', $baseParams) }}"
@@ -135,6 +136,52 @@
         <i class="bx bx-x-circle"></i> Declined ({{ $totalDeclined }})
     </a>
 </div>
+
+{{-- Filters --}}
+<form method="GET" action="{{ route('settings.reports.manager-submission-report.drilldown') }}" style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:flex-end;background:var(--dd-surface);border:1px solid var(--dd-border);border-radius:.55rem;padding:.5rem .7rem;margin-bottom:.65rem;box-shadow:var(--dd-shadow)">
+    <input type="hidden" name="manager_id" value="{{ $managerId }}">
+    <input type="hidden" name="date_from" value="{{ $dateFrom }}">
+    <input type="hidden" name="date_to" value="{{ $dateTo }}">
+    @if($actionFilter)
+    <input type="hidden" name="action" value="{{ $actionFilter }}">
+    @endif
+    <div>
+        <label style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--dd-text-4);display:block;margin-bottom:.12rem">Carrier</label>
+        <select name="carrier_id" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--dd-border);background:var(--bs-input-bg,#f8fafc);color:var(--dd-text-1);outline:none;min-width:130px">
+            <option value="">All Carriers</option>
+            @foreach($allCarriers as $c)
+            <option value="{{ $c->id }}" {{ ($carrierId ?? '') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <label style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--dd-text-4);display:block;margin-bottom:.12rem">Partner</label>
+        <select name="partner_name" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--dd-border);background:var(--bs-input-bg,#f8fafc);color:var(--dd-text-1);outline:none;min-width:120px">
+            <option value="">All Partners</option>
+            @foreach($allPartners as $p)
+            <option value="{{ $p }}" {{ ($partnerName ?? '') === $p ? 'selected' : '' }}>{{ $p }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div>
+        <label style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--dd-text-4);display:block;margin-bottom:.12rem">Policy Type</label>
+        <select name="policy_type" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--dd-border);background:var(--bs-input-bg,#f8fafc);color:var(--dd-text-1);outline:none;min-width:110px">
+            <option value="">All Types</option>
+            @foreach($allPolicyTypes as $pt)
+            <option value="{{ $pt }}" {{ ($policyType ?? '') === $pt ? 'selected' : '' }}>{{ $pt }}</option>
+            @endforeach
+        </select>
+    </div>
+    <button type="submit" style="font-size:.7rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.22rem;background:linear-gradient(135deg,var(--dd-gold),#b8941f);color:#0f172a">
+        <i class="bx bx-filter-alt"></i> Filter
+    </button>
+    @if($carrierId || $partnerName || $policyType)
+    <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_filter(['manager_id' => $managerId, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => $actionFilter])) }}"
+       style="font-size:.7rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;border:1.5px solid var(--dd-border);background:transparent;color:var(--dd-text-3);text-decoration:none;display:inline-flex;align-items:center;gap:.22rem">
+        <i class="bx bx-x"></i> Clear
+    </a>
+    @endif
+</form>
 
 {{-- KPI Strip --}}
 <div class="dd-kpis">
@@ -220,13 +267,37 @@
                     $policyLabel = $lead->settlement_type ?: $lead->policy_type ?: '—';
                     $hasPendingContract = !is_null($lead->pending_contract_at);
                     $hasDeclined        = !is_null($lead->declined_at);
+                    // When both are set, the most recent timestamp wins as the current status
+                    if ($hasPendingContract && $hasDeclined) {
+                        $currentAction = \Carbon\Carbon::parse($lead->pending_contract_at)
+                            ->gt(\Carbon\Carbon::parse($lead->declined_at))
+                            ? 'pending_contract' : 'declined';
+                    } elseif ($hasPendingContract) {
+                        $currentAction = 'pending_contract';
+                    } elseif ($hasDeclined) {
+                        $currentAction = 'declined';
+                    } else {
+                        $currentAction = null;
+                    }
                 @endphp
                 <tr>
                     <td class="dd-idx">{{ $i + 1 }}</td>
 
                     {{-- Client --}}
                     <td>
-                        <div class="dd-name">{{ $lead->cn_name ?: '—' }}</div>
+                        <div style="display:flex;align-items:center;gap:.3rem">
+                            <div class="dd-name">{{ $lead->cn_name ?: '—' }}</div>
+                            @if($lead->cn_name)
+                            <button type="button"
+                                onclick="copyName(this, '{{ addslashes($lead->cn_name) }}')"
+                                title="Copy name"
+                                style="border:none;background:none;padding:.1rem .18rem;cursor:pointer;color:var(--dd-text-4);border-radius:3px;line-height:1;flex-shrink:0;font-size:.75rem"
+                                onmouseenter="this.style.color='var(--dd-gold)'"
+                                onmouseleave="this.style.color='var(--dd-text-4)'">
+                                <i class="bx bx-copy"></i>
+                            </button>
+                            @endif
+                        </div>
                         <div class="dd-sub">ID #{{ $lead->id }}</div>
                     </td>
 
@@ -245,7 +316,21 @@
 
                     {{-- Policy number --}}
                     <td style="font-size:.68rem;color:var(--dd-text-2)">
-                        {{ $lead->policy_number ?: '—' }}
+                        @if($lead->policy_number)
+                            <div style="display:flex;align-items:center;gap:.25rem">
+                                <span>{{ $lead->policy_number }}</span>
+                                <button type="button"
+                                    onclick="copyName(this, '{{ addslashes($lead->policy_number) }}')"
+                                    title="Copy policy number"
+                                    style="border:none;background:none;padding:.1rem .18rem;cursor:pointer;color:var(--dd-text-4);border-radius:3px;line-height:1;flex-shrink:0;font-size:.75rem"
+                                    onmouseenter="this.style.color='var(--dd-gold)'"
+                                    onmouseleave="this.style.color=''">
+                                    <i class="bx bx-copy"></i>
+                                </button>
+                            </div>
+                        @else
+                            —
+                        @endif
                     </td>
 
                     {{-- Monthly premium --}}
@@ -278,22 +363,14 @@
                         {{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—' }}
                     </td>
 
-                    {{-- Manager action --}}
+                    {{-- Manager action — show only the current (most recent) status --}}
                     <td>
-                        @if($hasPendingContract && $hasDeclined)
-                            {{-- Both set (edge case) --}}
-                            <span class="dd-chip dd-chip-green" title="Pending Contract: {{ \Carbon\Carbon::parse($lead->pending_contract_at)->format('M d, Y') }}">
-                                <i class="bx bx-check-circle"></i> Contract
-                            </span>
-                            <span class="dd-chip dd-chip-red" title="Declined: {{ \Carbon\Carbon::parse($lead->declined_at)->format('M d, Y') }}" style="margin-left:.2rem">
-                                <i class="bx bx-x-circle"></i> Declined
-                            </span>
-                        @elseif($hasPendingContract)
+                        @if($currentAction === 'pending_contract')
                             <span class="dd-chip dd-chip-green" title="{{ \Carbon\Carbon::parse($lead->pending_contract_at)->format('M d, Y g:i A') }}">
                                 <i class="bx bx-check-circle"></i> Pending Contract
                             </span>
                             <div class="dd-sub" style="margin-top:.22rem">{{ \Carbon\Carbon::parse($lead->pending_contract_at)->format('M d, Y') }}</div>
-                        @elseif($hasDeclined)
+                        @elseif($currentAction === 'declined')
                             <span class="dd-chip dd-chip-red" title="{{ \Carbon\Carbon::parse($lead->declined_at)->format('M d, Y g:i A') }}">
                                 <i class="bx bx-x-circle"></i> Declined
                             </span>
@@ -355,3 +432,19 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+function copyName(btn, name) {
+    navigator.clipboard.writeText(name).then(function() {
+        var icon = btn.querySelector('i');
+        icon.className = 'bx bx-check';
+        btn.style.color = '#16a34a';
+        setTimeout(function() {
+            icon.className = 'bx bx-copy';
+            btn.style.color = '';
+        }, 1500);
+    });
+}
+</script>
+@endpush

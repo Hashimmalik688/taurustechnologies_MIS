@@ -164,6 +164,13 @@ class PendingsApprovedController extends Controller
 
         $lead->pending_contract_at    = now();
         $lead->pending_contract_by_id = auth()->id();
+
+        // If the lead was previously declined, reset the status so it no longer
+        // shows as Declined on dashboards and the Sales Hub search.
+        if ($lead->status === Statuses::LEAD_DECLINED) {
+            $lead->status = Statuses::LEAD_ACCEPTED;
+        }
+
         $lead->save();
 
         return response()->json([

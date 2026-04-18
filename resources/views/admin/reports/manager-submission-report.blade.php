@@ -89,6 +89,17 @@
 </style>
 @endsection
 
+@push('scripts')
+<script>
+function setToday() {
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelector('input[name="date_from"]').value = today;
+    document.querySelector('input[name="date_to"]').value = today;
+    document.querySelector('.msr-filter').submit();
+}
+</script>
+@endpush
+
 @section('content')
 
 {{-- Header --}}
@@ -144,6 +155,9 @@
     </div>
     <button type="submit" class="msr-btn msr-btn-apply">
         <i class="bx bx-filter-alt"></i> Apply
+    </button>
+    <button type="button" class="msr-btn msr-btn-reset" onclick="setToday()" title="Set both dates to today">
+        <i class="bx bx-calendar-check"></i> Today
     </button>
     <a href="{{ route('settings.reports.manager-submission-report') }}" class="msr-btn msr-btn-reset">
         <i class="bx bx-x"></i> Reset

@@ -1368,9 +1368,17 @@ class ReportController extends Controller
         $managerIds = $grouped->keys()->filter()->toArray();
         $managers   = User::withTrashed()->whereIn('id', $managerIds)->get()->keyBy('id');
 
-        $rows = $grouped->map(function ($group, $managerId) use ($managers) {
-            $pendingContract = $group->whereNotNull('pending_contract_at')->count();
-            $declined        = $group->whereNotNull('declined_at')->count();
+        // Helper: resolve the current (most-recent) action for a lead
+        $currentAction = function ($lead) {
+            if ($lead->pending_contract_at && $lead->declined_at) {
+                return $lead->pending_contract_at > $lead->declined_at ? 'pending_contract' : 'declined';
+            }
+            return $lead->pending_contract_at ? 'pending_contract' : 'declined';
+        };
+
+        $rows = $grouped->map(function ($group, $managerId) use ($managers, $currentAction) {
+            $pendingContract = $group->filter(fn($l) => $currentAction($l) === 'pending_contract')->count();
+            $declined        = $group->filter(fn($l) => $currentAction($l) === 'declined')->count();
             $total           = $group->count();
             $manager         = $managers->get($managerId);
 
@@ -1415,13 +1423,25 @@ class ReportController extends Controller
 
         $query = Lead::where(function ($q) use ($dateFrom, $dateTo, $actionFilter) {
             if ($actionFilter === 'pending_contract') {
+                // Current action is pending_contract: has pending_contract_at in range,
+                // AND it is more recent than declined_at (or there is no declined_at)
                 $q->whereNotNull('pending_contract_at');
                 if ($dateFrom) $q->whereDate('pending_contract_at', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('pending_contract_at', '<=', $dateTo);
+                $q->where(function ($q2) {
+                    $q2->whereNull('declined_at')
+                       ->orWhereRaw('pending_contract_at > declined_at');
+                });
             } elseif ($actionFilter === 'declined') {
+                // Current action is declined: has declined_at in range,
+                // AND it is more recent than pending_contract_at (or there is no pending_contract_at)
                 $q->whereNotNull('declined_at');
                 if ($dateFrom) $q->whereDate('declined_at', '>=', $dateFrom);
                 if ($dateTo)   $q->whereDate('declined_at', '<=', $dateTo);
+                $q->where(function ($q2) {
+                    $q2->whereNull('pending_contract_at')
+                       ->orWhereRaw('declined_at > pending_contract_at');
+                });
             } else {
                 // Both — include if action date matches for either
                 $q->where(function ($q2) use ($dateFrom, $dateTo) {
@@ -1464,17 +1484,31 @@ class ReportController extends Controller
             $managerName = $mgr ? $mgr->name . ($mgr->trashed() ? ' (Terminated)' : '') : 'Unknown';
         }
 
+        // Current-action counts — each lead counted only once based on its most-recent action
+        $resolveAction = function ($lead) {
+            if ($lead->pending_contract_at && $lead->declined_at) {
+                return $lead->pending_contract_at > $lead->declined_at ? 'pending_contract' : 'declined';
+            }
+            return $lead->pending_contract_at ? 'pending_contract' : 'declined';
+        };
+
         $totalLeads           = $leads->count();
-        $totalPendingContract = $leads->whereNotNull('pending_contract_at')->count();
-        $totalDeclined        = $leads->whereNotNull('declined_at')->count();
+        $totalPendingContract = $leads->filter(fn($l) => $resolveAction($l) === 'pending_contract')->count();
+        $totalDeclined        = $leads->filter(fn($l) => $resolveAction($l) === 'declined')->count();
         $totalPremium         = $leads->sum('monthly_premium');
         $totalCommission      = $leads->sum('eff_revenue');
+
+        $allCarriers    = \App\Models\InsuranceCarrier::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $allPartners    = \App\Models\Lead::whereNotNull('assigned_partner')->where('assigned_partner', '!=', '')
+            ->distinct()->orderBy('assigned_partner')->pluck('assigned_partner');
+        $allPolicyTypes = ['Level', 'Graded', 'G.I', 'Modified'];
 
         return view('admin.reports.manager-submission-drilldown', compact(
             'leads', 'managerName', 'managerId',
             'totalLeads', 'totalPendingContract', 'totalDeclined', 'totalPremium', 'totalCommission',
             'dateFrom', 'dateTo', 'actionFilter',
-            'carrierId', 'partnerName', 'policyType'
+            'carrierId', 'partnerName', 'policyType',
+            'allCarriers', 'allPartners', 'allPolicyTypes'
         ));
     }
 }

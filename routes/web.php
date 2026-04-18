@@ -735,7 +735,7 @@ Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
                 $badge  = 'danger';
                 $icon   = 'bx-error-circle';
                 $url    = route('chargebacks.index') . '?search=' . urlencode($lead->cn_name ?? '');
-            } elseif ($lead->declined_at) {
+            } elseif ($lead->declined_at && (!$lead->pending_contract_at || $lead->declined_at > $lead->pending_contract_at)) {
                 $stage  = 'Declined';
                 $badge  = 'danger';
                 $icon   = 'bx-block';
