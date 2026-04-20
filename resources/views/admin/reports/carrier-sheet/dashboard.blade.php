@@ -58,7 +58,7 @@
     font-size:.58rem; font-weight:800; text-transform:uppercase;
     letter-spacing:.6px; color:var(--cs-text-3); display:block; margin-bottom:.12rem;
 }
-.cs-filter select, .cs-filter input[type=month] {
+.cs-filter select, .cs-filter input[type=month], .cs-filter input[type=search] {
     font-size:.73rem; padding:.28rem .45rem; border-radius:.4rem;
     border:1.5px solid var(--cs-border); background:var(--bs-input-bg, #f8fafc);
     color:var(--cs-text-1); outline:none; transition:border-color .15s;
@@ -192,6 +192,10 @@
                     </option>
                 @endforeach
             </select>
+        </div>
+        <div>
+            <label>Search</label>
+            <input type="search" id="dashboardCarrierSearch" placeholder="Search carrier..." autocomplete="off">
         </div>
         <div style="margin-left:auto; display:flex; gap:.4rem; align-items:flex-end;">
             @canEditModule('carrier-sheet')
@@ -333,11 +337,25 @@
 <script>
 (function(){
     const rows = @json($rows);
+    const searchInput = document.getElementById('dashboardCarrierSearch');
 
     const labels  = rows.map(r => r.carrier.carrier_label);
     const colors  = rows.map(r => r.carrier.title_color || '#1565C0');
     const paidAmt = rows.map(r => parseFloat(r.paid)    || 0);
     const balance = rows.map(r => parseFloat(r.balance) || 0);
+
+    function filterDashboardRows() {
+        const q = (searchInput?.value || '').trim().toLowerCase();
+        const tableRows = document.querySelectorAll('.cs-table tbody tr');
+        tableRows.forEach((tr) => {
+            const txt = tr.textContent.toLowerCase();
+            tr.style.display = !q || txt.includes(q) ? '' : 'none';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterDashboardRows);
+    }
 
     // ── Paid Amount chart ─────────────────────────────────────────────────
     new Chart(document.getElementById('chartPaid'), {

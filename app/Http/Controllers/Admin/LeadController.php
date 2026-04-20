@@ -11,6 +11,8 @@ use App\Models\Lead;
 use App\Events\LeadCreated;
 use App\Events\SaleCreated;
 use App\Services\CommissionCalculationService;
+use App\Services\LedgerService;
+use App\Traits\CommissionResolver;
 use App\Support\Roles;
 use App\Support\Statuses;
 use App\Support\Teams;
@@ -20,6 +22,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LeadController extends Controller
 {
+    use CommissionResolver;
+
     /**
      * Get status color configuration
      */
@@ -867,7 +871,52 @@ class LeadController extends Controller
         // Update the field
         $lead->$dbField = $value;
         $lead->save();
-        
+
+        // Sync the ledger journal entry when commission-affecting fields change
+        if (in_array($field, ['policy_type', 'premium', 'carrier']) && $lead->ledger_journal_entry_id) {
+            try {
+                $lead->load('partner', 'insuranceCarrier');
+                $commSvc     = app(CommissionCalculationService::class);
+                $ledger      = app(LedgerService::class);
+                $calc        = $this->calcLeadCommission($lead, $commSvc);
+                $commission  = $calc['commission'];
+                $ourSharePct = $calc['our_share_pct'];
+                $ourShare    = $calc['our_share'];
+
+                if ($ourShare > 0) {
+                    $je = \App\Models\LedgerJournalEntry::find($lead->ledger_journal_entry_id);
+                    if ($je) {
+                        $description = "Sale — {$lead->cn_name}"
+                            . ($lead->carrier_name ? " | {$lead->carrier_name}" : '')
+                            . ($lead->policy_number ? " | #{$lead->policy_number}" : '');
+
+                        $je->total_debit         = $ourShare;
+                        $je->gross_amount         = $commission;
+                        $je->our_share_percentage = $ourSharePct;
+                        $je->description          = $description;
+                        $je->save();
+
+                        // Update the two double-entry lines (debit AR / credit Sales)
+                        $lines = \App\Models\LedgerJournalEntryLine::where('journal_entry_id', $je->id)->get();
+                        foreach ($lines as $line) {
+                            if ($line->debit > 0) {
+                                $line->debit = $ourShare;
+                            } else {
+                                $line->credit = $ourShare;
+                            }
+                            $line->save();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Ledger sync failed after sales field update', [
+                    'lead_id' => $id,
+                    'field'   => $field,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
+        }
+
         // Log the update in audit log if available
         \Log::info("Sales field updated", [
             'lead_id' => $id,
