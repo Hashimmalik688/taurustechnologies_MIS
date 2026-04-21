@@ -65,7 +65,7 @@ class GoogleSheetsService
     private function buildPayload(\App\Models\Lead $lead): array
     {
         return [
-            'submission_date'     => now()->format('Y-m-d H:i:s'),
+            'submission_date'     => $lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s'),
             'closer_name'         => $lead->closer_name ?? '',
             'customer_name'       => $lead->cn_name ?? '',
             'phone_number'        => $lead->phone_number ?? '',

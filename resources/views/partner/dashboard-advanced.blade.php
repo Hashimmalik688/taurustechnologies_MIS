@@ -254,7 +254,7 @@
                 <div class="pd-hero-name">{{ $partner->name }}</div>
                 <div class="pd-hero-meta">
                     <span class="pd-chip pd-chip-glass">{{ $partner->code }}</span>
-                    <span class="pd-chip pd-chip-glass">{{ number_format($totalLeads) }} leads total</span>
+                    <span class="pd-chip pd-chip-glass">{{ number_format($totalContracts) }} sales</span>
                     <span class="pd-chip pd-chip-green"><span class="pd-pulse"></span> Live</span>
                     @if($chargebacks > 0)
                     <span class="pd-chip pd-chip-amber">CB: ${{ number_format($chargebacks,0) }} shared</span>
@@ -350,19 +350,19 @@
 ═══════════════════════════════════════════ --}}
 <div class="pd-stats pd-anim pd-d2">
     <div class="pd-stat">
-        <div class="pd-stat-icon si-violet"><i class="bx bx-file"></i></div>
+        <div class="pd-stat-icon si-violet"><i class="bx bx-trending-up"></i></div>
         <div>
-            <div class="pd-stat-val cval" data-target="{{ $monthlyLeads }}">{{ $monthlyLeads }}</div>
-            <div class="pd-stat-lbl">Leads this period</div>
-            <div class="pd-stat-sub">{{ number_format($totalLeads) }} all-time</div>
+            <div class="pd-stat-val cval" data-target="{{ $monthlyContracts }}">{{ $monthlyContracts }}</div>
+            <div class="pd-stat-lbl">Sales this period</div>
+            <div class="pd-stat-sub">{{ number_format($totalContracts) }} all-time</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-green"><i class="bx bx-check-shield"></i></div>
         <div>
-            <div class="pd-stat-val cval" data-target="{{ $totalSales }}">{{ $totalSales }}</div>
-            <div class="pd-stat-lbl">Sales this period</div>
-            <div class="pd-stat-sub">{{ $pendingLeads }} pending</div>
+            <div class="pd-stat-val cval" data-target="{{ $issuedContracts }}">{{ $issuedContracts }}</div>
+            <div class="pd-stat-lbl">Issued</div>
+            <div class="pd-stat-sub">{{ $notIssuedContracts }} not issued &middot; {{ $pendingContracts }} pending</div>
         </div>
     </div>
     <div class="pd-stat">
@@ -409,7 +409,7 @@
             <div class="pd-stat-icon si-green" style="flex-shrink:0;"><i class="bx bx-trending-up"></i></div>
             <div>
                 <div style="font-size:.88rem;font-weight:800;color:#111827;">Sales</div>
-                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $totalSales }} sales · {{ $monthlyLeads }} leads this period</div>
+                <div style="font-size:.72rem;color:#9ca3af;margin-top:.1rem;">{{ $issuedContracts }} issued &middot; {{ $pendingContracts }} pending this period</div>
             </div>
             <i class="bx bx-chevron-right ms-auto" style="color:#d1d5db;font-size:1.1rem;"></i>
         </a>

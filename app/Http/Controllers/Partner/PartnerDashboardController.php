@@ -58,22 +58,26 @@ class PartnerDashboardController extends Controller
         // ── Balance ─────────────────────────────────────────────────────
         $currentBalance = $this->ledgerRepository->getBalance($partner);
 
-        // ── Lead/Sale counts (carrier-scoped) ──────────────────────────
+        // ── Pending Contract counts (carrier-scoped) ───────────────────
         $allTimeQuery = Lead::where('partner_id', $partner->id)
             ->whereNotNull('partner_id')
-            ->where('status', '!=', 'unassigned')
+            ->whereNotNull('pending_contract_at')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId));
 
-        $totalLeads = (clone $allTimeQuery)->count();
+        $totalContracts = (clone $allTimeQuery)->count();
 
-        $periodQuery = (clone $allTimeQuery)->whereBetween('created_at', [$periodStart, $periodEnd]);
+        $periodQuery = (clone $allTimeQuery)->whereBetween('sale_date', [$periodStart, $periodEnd]);
 
-        $monthlyLeads = (clone $periodQuery)->count();
-        $totalSales   = (clone $periodQuery)
-            ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
-            ->count();
-        $pendingLeads = (clone $periodQuery)
-            ->whereIn('status', ['pending', 'Pending'])
+        $monthlyContracts   = (clone $periodQuery)->count();
+        $issuedContracts    = (clone $periodQuery)->where('issuance_status', 'Issued')->count();
+        $notIssuedContracts = (clone $periodQuery)->where('issuance_status', 'Not Issued')->count();
+        $pendingContracts   = (clone $periodQuery)->where(function ($q) {
+            $q->whereNull('issuance_status')
+              ->orWhere('issuance_status', 'Pending');
+        })->count();
+        $draftContracts     = (clone $periodQuery)
+            ->whereNotNull('pending_draft_at')
+            ->where('issuance_status', 'Issued')
             ->count();
 
         // ── Carriers list for filter pills ─────────────────────────────
@@ -83,10 +87,12 @@ class PartnerDashboardController extends Controller
             'partner',
             'activeCarriers',
             'carrierId',
-            'totalLeads',
-            'monthlyLeads',
-            'totalSales',
-            'pendingLeads',
+            'totalContracts',
+            'monthlyContracts',
+            'issuedContracts',
+            'notIssuedContracts',
+            'pendingContracts',
+            'draftContracts',
             'projectedRevenue',
             'earnedRevenue',
             'chargebacks',
@@ -160,21 +166,25 @@ class PartnerDashboardController extends Controller
         $activeCarriers = $this->revenueService->getActiveCarriers();
         $taurusPct = $partner->our_commission_percentage ?? 15.0;
 
-        // Base query (carrier + period filtered)
+        // Base query — pending contracts only (carrier + period filtered)
         $baseQuery = Lead::where('partner_id', $partner->id)
             ->whereNotNull('partner_id')
+            ->whereNotNull('pending_contract_at')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId))
-            ->when($statusFilter, fn ($q) => $q->where('status', $statusFilter))
+            ->when($statusFilter, fn ($q) => $q->where('issuance_status', $statusFilter))
             ->when($search, fn ($q) => $q->where('cn_name', 'like', '%' . $search . '%'))
-            ->where('status', '!=', 'unassigned')
-            ->whereBetween('created_at', [$periodStart, $periodEnd]);
+            ->whereBetween('sale_date', [$periodStart, $periodEnd]);
 
-        $monthlyLeads = (clone $baseQuery)->count();
-        $totalSales   = (clone $baseQuery)
-            ->whereIn('status', ['sale', 'approved', 'done', 'Accepted', 'Sale', 'Approved', 'Done'])
-            ->count();
-        $pendingLeads = (clone $baseQuery)
-            ->whereIn('status', ['pending', 'Pending'])
+        $monthlyContracts   = (clone $baseQuery)->count();
+        $issuedContracts    = (clone $baseQuery)->where('issuance_status', 'Issued')->count();
+        $notIssuedContracts = (clone $baseQuery)->where('issuance_status', 'Not Issued')->count();
+        $pendingContracts   = (clone $baseQuery)->where(function ($q) {
+            $q->whereNull('issuance_status')
+              ->orWhere('issuance_status', 'Pending');
+        })->count();
+        $draftContracts     = (clone $baseQuery)
+            ->whereNotNull('pending_draft_at')
+            ->where('issuance_status', 'Issued')
             ->count();
 
         // Revenue by carrier (filter by carrierId post-collection if specified)
@@ -188,16 +198,18 @@ class PartnerDashboardController extends Controller
         // Leads table
         $leads = (clone $baseQuery)
             ->with('insuranceCarrier')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('sale_date', 'desc')
             ->get();
 
         return view('partner.sales', compact(
             'partner',
             'activeCarriers',
             'carrierId',
-            'monthlyLeads',
-            'totalSales',
-            'pendingLeads',
+            'monthlyContracts',
+            'issuedContracts',
+            'notIssuedContracts',
+            'pendingContracts',
+            'draftContracts',
             'revenueByCarrier',
             'leads',
             'month',

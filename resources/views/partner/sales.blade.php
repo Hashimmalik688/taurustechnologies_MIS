@@ -33,6 +33,7 @@
 .si-violet{background:rgba(109,40,217,.1);color:#6d28d9;}
 .si-green{background:rgba(5,150,105,.1);color:#059669;}
 .si-amber{background:rgba(217,119,6,.1);color:#d97706;}
+.si-blue{background:rgba(2,132,199,.1);color:#0284c7;}
 .pd-stat-val{font-size:1.3rem;font-weight:900;letter-spacing:-.3px;line-height:1;color:#111827;}
 .pd-stat-lbl{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;margin-top:.1rem;}
 .pd-stat-sub{font-size:.7rem;color:#d1d5db;}
@@ -95,7 +96,7 @@
 
 <div class="ps-hdr">
     <h4><i class="bx bx-trending-up" style="color:#059669;margin-right:.35rem;"></i>Sales</h4>
-    <p>Your leads and sales performance for the selected period.</p>
+    <p>Your pending contracts and issuance status for the selected period.</p>
 </div>
 
 {{-- Period filter --}}
@@ -118,12 +119,9 @@
     <span class="pd-period-label" style="margin-left:.35rem;"><i class="bx bx-filter"></i> Status</span>
     <select name="status" class="pd-period-input" style="width:auto;">
         <option value="">All</option>
-        <option value="pending"   {{ request('status') === 'pending'   ? 'selected' : '' }}>Pending</option>
-        <option value="accepted"  {{ request('status') === 'accepted'  ? 'selected' : '' }}>Approved</option>
-        <option value="sale"      {{ request('status') === 'sale'      ? 'selected' : '' }}>Sale</option>
-        <option value="declined"  {{ request('status') === 'declined'  ? 'selected' : '' }}>Declined</option>
-        <option value="chargeback" {{ request('status') === 'chargeback' ? 'selected' : '' }}>Chargeback</option>
-        <option value="closed"    {{ request('status') === 'closed'    ? 'selected' : '' }}>Closed</option>
+        <option value="Issued"     {{ request('status') === 'Issued'     ? 'selected' : '' }}>Issued</option>
+        <option value="Not Issued" {{ request('status') === 'Not Issued' ? 'selected' : '' }}>Not Issued</option>
+        <option value="Pending"    {{ request('status') === 'Pending'    ? 'selected' : '' }}>Pending</option>
     </select>
 
     <input type="text" name="search" class="pd-period-input" style="width:160px;" placeholder="Search customer…" value="{{ request('search') }}">
@@ -138,28 +136,36 @@
 @include('partner.partials.carrier-filter')
 
 {{-- Stats strip --}}
-<div class="pd-stats">
+<div class="pd-stats" style="grid-template-columns:repeat(4,1fr);">
     <div class="pd-stat">
-        <div class="pd-stat-icon si-violet"><i class="bx bx-file"></i></div>
+        <div class="pd-stat-icon si-violet"><i class="bx bx-trending-up"></i></div>
         <div>
-            <div class="pd-stat-val">{{ $monthlyLeads }}</div>
-            <div class="pd-stat-lbl">Leads this period</div>
-            <div class="pd-stat-sub">{{ $pendingLeads }} pending</div>
+            <div class="pd-stat-val">{{ $monthlyContracts }}</div>
+            <div class="pd-stat-lbl">Total Sales</div>
+            <div class="pd-stat-sub">in selected period</div>
         </div>
     </div>
     <div class="pd-stat">
         <div class="pd-stat-icon si-green"><i class="bx bx-check-shield"></i></div>
         <div>
-            <div class="pd-stat-val">{{ $totalSales }}</div>
-            <div class="pd-stat-lbl">Sales this period</div>
-            <div class="pd-stat-sub">{{ $monthlyLeads > 0 ? number_format($totalSales / $monthlyLeads * 100, 1) : 0 }}% close rate</div>
+            <div class="pd-stat-val">{{ $issuedContracts }}</div>
+            <div class="pd-stat-lbl">Issued</div>
+            <div class="pd-stat-sub">{{ $monthlyContracts > 0 ? number_format($issuedContracts / $monthlyContracts * 100, 1) : 0 }}% issue rate</div>
         </div>
     </div>
     <div class="pd-stat">
-        <div class="pd-stat-icon si-amber"><i class="bx bx-wallet"></i></div>
+        <div class="pd-stat-icon si-amber"><i class="bx bx-x-circle"></i></div>
+        <div>
+            <div class="pd-stat-val">{{ $notIssuedContracts }}</div>
+            <div class="pd-stat-lbl">Not Issued</div>
+            <div class="pd-stat-sub">{{ $pendingContracts }} pending</div>
+        </div>
+    </div>
+    <div class="pd-stat">
+        <div class="pd-stat-icon si-blue"><i class="bx bx-wallet"></i></div>
         <div>
             <div class="pd-stat-val">${{ number_format($revenueByCarrier->sum('partner_share'), 0) }}</div>
-            <div class="pd-stat-lbl">Your earned share</div>
+            <div class="pd-stat-lbl">Your Earned Share</div>
             <div class="pd-stat-sub">After {{ $taurusPct }}% Taurus fee</div>
         </div>
     </div>
@@ -206,7 +212,7 @@
     <div class="col-12">
         <div class="pd-card">
             <div class="pd-head">
-                <h6><i class="bx bx-list-ul"></i> Leads &amp; Sales</h6>
+                <h6><i class="bx bx-list-ul"></i> Sales</h6>
                 <span class="pd-count">{{ $leads->count() }}</span>
             </div>
             <div style="overflow-x:auto;">
@@ -229,21 +235,16 @@
                     <tbody>
                         @foreach($leads as $lead)
                         @php
-                            $scCls = match(strtolower($lead->status ?? '')) {
-                                'sale','approved','accepted','done' => 'sc-ok',
-                                'pending' => 'sc-warn',
-                                'issued'  => 'sc-info',
-                                'declined','cancelled' => 'sc-danger',
-                                default => 'sc-def',
+                            $isStatus = $lead->issuance_status ?? null;
+                            $scCls = match($isStatus) {
+                                'Issued'     => 'sc-ok',
+                                'Not Issued' => 'sc-danger',
+                                'Pending', 'Incomplete', null => 'sc-warn',
+                                default      => 'sc-def',
                             };
-                            $statusLabel = match(strtolower($lead->status ?? '')) {
-                                'sale','approved','accepted','done' => 'Approved',
-                                'pending'   => 'Pending',
-                                'issued'    => 'Issued',
-                                'declined'  => 'Declined',
-                                'cancelled' => 'Cancelled',
-                                default => ucfirst($lead->status ?? '—'),
-                            };
+                            $statusLabel = $isStatus ?? 'Pending';
+                            // Show draft badge if applicable
+                            $isDraft = !empty($lead->pending_draft_at) && $isStatus === 'Issued';
                             $comm    = (float)($lead->agent_commission ?? 0);
                             $premium = (float)($lead->monthly_premium ?? 0);
                             $cPct    = (float)($lead->insuranceCarrier->base_commission_percentage ?? 0);
@@ -264,7 +265,10 @@
                             <td style="font-size:.8rem;color:#6b7280;">{{ $lead->insuranceCarrier->name ?? '—' }}</td>
                             @endif
                             <td><span class="pd-state-pill">{{ $lead->state ?? '—' }}</span></td>
-                            <td><span class="sc {{ $scCls }}">{{ $statusLabel }}</span></td>
+                            <td>
+                                <span class="sc {{ $scCls }}">{{ $statusLabel }}</span>
+                                @if($isDraft)<span class="sc sc-info" style="margin-left:.2rem;">Draft</span>@endif
+                            </td>
                             <td class="text-end">
                                 @if($hasComm)
                                 <span class="{{ $isEst ? '' : 'col-dr' }}" style="{{ $isEst ? 'color:#a78bfa;' : '' }}"
@@ -281,13 +285,13 @@
                                 </span>
                                 @else<span class="col-dim">—</span>@endif
                             </td>
-                            <td style="font-size:.75rem;color:#9ca3af;white-space:nowrap;">{{ $lead->created_at->format('M d, Y') }}</td>
+                            <td style="font-size:.75rem;color:#9ca3af;white-space:nowrap;">{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—' }}</td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
                 @else
-                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No leads for this period{{ $carrierId ? ' and carrier' : '' }}.</p></div>
+                <div class="pd-empty"><i class="bx bx-inbox"></i><p>No sales for this period{{ $carrierId ? ' and carrier' : '' }}.</p></div>
                 @endif
             </div>
         </div>
