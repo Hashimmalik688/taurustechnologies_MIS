@@ -389,6 +389,14 @@
             <div class="pd-stat-sub">Chargebacks this period</div>
         </div>
     </div>
+    <div class="pd-stat">
+        <div class="pd-stat-icon" style="background:rgba(8,145,178,.12);color:#0891b2;"><i class="bx bx-dollar-circle"></i></div>
+        <div>
+            <div class="pd-stat-val">${{ number_format($totalAP, 0) }}</div>
+            <div class="pd-stat-lbl">Annual Premium (AP)</div>
+            <div class="pd-stat-sub">Premium × 12 · filtered period</div>
+        </div>
+    </div>
 </div>
 
 

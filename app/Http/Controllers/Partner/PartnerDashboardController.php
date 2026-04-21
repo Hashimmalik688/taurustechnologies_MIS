@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Partner;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCarrierState;
 use App\Models\Lead;
+use App\Services\CommissionCalculationService;
 use App\Services\PartnerRevenueService;
 use App\Repositories\PartnerLedgerRepository;
 use Illuminate\Http\Request;
@@ -80,6 +81,9 @@ class PartnerDashboardController extends Controller
             ->where('issuance_status', 'Issued')
             ->count();
 
+        // ── Annual Premium (period-filtered, carrier-scoped) ───────────
+        $totalAP = (clone $periodQuery)->sum(DB::raw('monthly_premium * 12'));
+
         // ── Carriers list for filter pills ─────────────────────────────
         $activeCarriers = $this->revenueService->getActiveCarriers();
 
@@ -93,6 +97,7 @@ class PartnerDashboardController extends Controller
             'notIssuedContracts',
             'pendingContracts',
             'draftContracts',
+            'totalAP',
             'projectedRevenue',
             'earnedRevenue',
             'chargebacks',
@@ -187,6 +192,9 @@ class PartnerDashboardController extends Controller
             ->where('issuance_status', 'Issued')
             ->count();
 
+        // ── Annual Premium (respects all active filters) ────────────────
+        $totalAP = (clone $baseQuery)->sum(DB::raw('monthly_premium * 12'));
+
         // Revenue by carrier (filter by carrierId post-collection if specified)
         $revenueByCarrier = $this->revenueService->getEarnedRevenueByCarrier($periodStart, $periodEnd);
         if ($carrierId) {
@@ -195,11 +203,39 @@ class PartnerDashboardController extends Controller
                 ->values();
         }
 
-        // Leads table
+        // Leads table — recalculate commissions on-the-fly using current partner rates
         $leads = (clone $baseQuery)
             ->with('insuranceCarrier')
             ->orderBy('sale_date', 'desc')
             ->get();
+
+        $commSvc = new CommissionCalculationService();
+        foreach ($leads as $lead) {
+            $premiumVal    = (float) ($lead->monthly_premium ?? 0);
+            $lCarrierId    = $lead->insurance_carrier_id;
+            $lState        = $lead->state;
+            // Derive settlement type from settlement_type field, falling back to policy_type
+            $lSettlement   = CommissionCalculationService::normalizeSettlementType(
+                $lead->settlement_type ?? $lead->policy_type
+            );
+
+            if ($premiumVal > 0 && $lCarrierId && $lState) {
+                $result = $commSvc->calculateCommission(
+                    $partner->id,
+                    $lCarrierId,
+                    $lState,
+                    $lSettlement,
+                    $premiumVal
+                );
+                if ($result['success']) {
+                    // Override in memory only — no DB write
+                    $lead->agent_commission = $result['commission'];
+                    $lead->setAttribute('_commission_live', true);
+                    $lead->setAttribute('_commission_pct', $result['settlement_pct']);
+                    $lead->setAttribute('_settlement_type', $lSettlement);
+                }
+            }
+        }
 
         return view('partner.sales', compact(
             'partner',
@@ -210,6 +246,7 @@ class PartnerDashboardController extends Controller
             'notIssuedContracts',
             'pendingContracts',
             'draftContracts',
+            'totalAP',
             'revenueByCarrier',
             'leads',
             'month',

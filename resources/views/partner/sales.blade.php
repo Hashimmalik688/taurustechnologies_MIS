@@ -136,7 +136,7 @@
 @include('partner.partials.carrier-filter')
 
 {{-- Stats strip --}}
-<div class="pd-stats" style="grid-template-columns:repeat(4,1fr);">
+<div class="pd-stats" style="grid-template-columns:repeat(5,1fr);">
     <div class="pd-stat">
         <div class="pd-stat-icon si-violet"><i class="bx bx-trending-up"></i></div>
         <div>
@@ -167,6 +167,14 @@
             <div class="pd-stat-val">${{ number_format($revenueByCarrier->sum('partner_share'), 0) }}</div>
             <div class="pd-stat-lbl">Your Earned Share</div>
             <div class="pd-stat-sub">After {{ $taurusPct }}% Taurus fee</div>
+        </div>
+    </div>
+    <div class="pd-stat">
+        <div class="pd-stat-icon" style="background:rgba(8,145,178,.12);color:#0891b2;"><i class="bx bx-dollar-circle"></i></div>
+        <div>
+            <div class="pd-stat-val">${{ number_format($totalAP, 0) }}</div>
+            <div class="pd-stat-lbl">Annual Premium (AP)</div>
+            <div class="pd-stat-sub">Premium × 12 · filtered</div>
         </div>
     </div>
 </div>
@@ -217,6 +225,13 @@
             </div>
             <div style="overflow-x:auto;">
                 @if($leads->count() > 0)
+                @php
+                    $totalTableAP   = $leads->sum(fn($l) => (float)($l->monthly_premium ?? 0) * 12);
+                    $totalTableComm = $leads->sum(fn($l) => (float)($l->agent_commission ?? 0));
+                    $totalTableShare = $totalTableComm > 0 ? $totalTableComm - ($totalTableComm * $taurusPct / 100) : 0;
+                    // Column count: Customer + [Carrier] + State + PolicyType + AP + Status + Commission + Share + Date
+                    $colCount = $carrierId ? 8 : 9;
+                @endphp
                 <div style="padding:.35rem .85rem;font-size:.68rem;color:#9ca3af;background:#fafafa;border-bottom:1px solid rgba(0,0,0,.04);">
                     <span style="color:#a78bfa;font-weight:800;">~</span> = estimated (premium &times; 9 &times; carrier%) — finalised once policy is accepted
                 </div>
@@ -226,6 +241,8 @@
                             <th>Customer</th>
                             @if(!$carrierId)<th>Carrier</th>@endif
                             <th>State</th>
+                            <th>Policy Type</th>
+                            <th class="text-end">AP</th>
                             <th>Status</th>
                             <th class="text-end">Commission</th>
                             <th class="text-end">Your Share</th>
@@ -243,18 +260,32 @@
                                 default      => 'sc-def',
                             };
                             $statusLabel = $isStatus ?? 'Pending';
-                            // Show draft badge if applicable
                             $isDraft = !empty($lead->pending_draft_at) && $isStatus === 'Issued';
+
+                            // Policy type display
+                            $policyType    = $lead->policy_type ?? null;
+                            $settlementKey = $lead->getAttribute('_settlement_type') ?? null;
+                            $ptColors = [
+                                'level'    => ['bg'=>'#dbeafe','color'=>'#1d4ed8','label'=>'Level'],
+                                'graded'   => ['bg'=>'#fef9c3','color'=>'#854d0e','label'=>'Graded'],
+                                'gi'       => ['bg'=>'#dcfce7','color'=>'#15803d','label'=>'G.I'],
+                                'modified' => ['bg'=>'#fce7f3','color'=>'#9d174d','label'=>'Modified'],
+                            ];
+                            $ptStyle = $ptColors[$settlementKey] ?? ['bg'=>'#f3f4f6','color'=>'#6b7280','label'=>$policyType ?? '—'];
+
                             $comm    = (float)($lead->agent_commission ?? 0);
                             $premium = (float)($lead->monthly_premium ?? 0);
-                            $cPct    = (float)($lead->insuranceCarrier->base_commission_percentage ?? 0);
-                            $isEst = false;
-                            if ($comm <= 0 && $premium > 0 && $cPct > 0) {
-                                $comm  = $premium * 9 * ($cPct / 100);
+                            $commPct = (float)($lead->getAttribute('_commission_pct') ?? $lead->insuranceCarrier->base_commission_percentage ?? 0);
+                            $isLive  = (bool)($lead->getAttribute('_commission_live') ?? false);
+                            $isEst   = false;
+                            if ($comm <= 0 && $premium > 0 && $commPct > 0) {
+                                $comm  = $premium * 9 * ($commPct / 100);
                                 $isEst = true;
                             }
                             $hasComm = $comm > 0;
                             $share   = $hasComm ? $comm - ($comm * $taurusPct / 100) : null;
+
+                            $settlementLabel = $ptColors[$settlementKey]['label'] ?? ucfirst($settlementKey ?? 'Level');
                         @endphp
                         <tr>
                             <td>
@@ -266,13 +297,32 @@
                             @endif
                             <td><span class="pd-state-pill">{{ $lead->state ?? '—' }}</span></td>
                             <td>
+                                @if($policyType)
+                                <span style="display:inline-block;padding:.18rem .55rem;border-radius:99px;font-size:.7rem;font-weight:700;background:{{ $ptStyle['bg'] }};color:{{ $ptStyle['color'] }};"
+                                      title="{{ $settlementLabel }} — {{ $commPct }}% rate">
+                                    {{ $ptStyle['label'] }}
+                                </span>
+                                @else
+                                <span style="color:#9ca3af;font-size:.75rem;">—</span>
+                                @endif
+                            </td>
+                            <td class="text-end" style="white-space:nowrap;">
+                                @if($premium > 0)
+                                <span style="font-weight:700;color:#0891b2;" title="Annual Premium: ${{ number_format($premium, 2) }} × 12">
+                                    ${{ number_format($premium * 12, 2) }}
+                                </span>
+                                @else
+                                <span style="color:#d1d5db;">—</span>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="sc {{ $scCls }}">{{ $statusLabel }}</span>
                                 @if($isDraft)<span class="sc sc-info" style="margin-left:.2rem;">Draft</span>@endif
                             </td>
                             <td class="text-end">
                                 @if($hasComm)
                                 <span class="{{ $isEst ? '' : 'col-dr' }}" style="{{ $isEst ? 'color:#a78bfa;' : '' }}"
-                                      @if($isEst) title="Estimated: premium × 9 × {{ $cPct }}%" @endif>
+                                      @if($isEst) title="Estimated: premium × 9 × {{ $commPct }}%" @elseif($isLive) title="{{ $settlementLabel }} rate: {{ $commPct }}% — premium × 9 × {{ $commPct }}%" @endif>
                                     {{ $isEst ? '~' : '' }}${{ number_format($comm, 2) }}
                                 </span>
                                 @else<span class="col-dim">—</span>@endif
@@ -280,7 +330,7 @@
                             <td class="text-end">
                                 @if($share !== null)
                                 <span class="{{ $isEst ? '' : 'col-cr' }}" style="{{ $isEst ? 'color:#818cf8;' : '' }}"
-                                      @if($isEst) title="Est. partner share after {{ $taurusPct }}% fee" @endif>
+                                      @if($isEst) title="Est. partner share after {{ $taurusPct }}% fee" @elseif($isLive) title="Your share after {{ $taurusPct }}% Taurus fee" @endif>
                                     {{ $isEst ? '~' : '' }}${{ number_format($share, 2) }}
                                 </span>
                                 @else<span class="col-dim">—</span>@endif
@@ -289,6 +339,16 @@
                         </tr>
                         @endforeach
                     </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="{{ $carrierId ? 4 : 5 }}">Totals ({{ $leads->count() }} sales)</td>
+                            <td class="text-end" style="color:#0891b2;font-weight:800;">${{ number_format($totalTableAP, 2) }}</td>
+                            <td></td>
+                            <td class="text-end col-dr">${{ number_format($totalTableComm, 2) }}</td>
+                            <td class="text-end col-cr">${{ number_format($totalTableShare, 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
                 @else
                 <div class="pd-empty"><i class="bx bx-inbox"></i><p>No sales for this period{{ $carrierId ? ' and carrier' : '' }}.</p></div>

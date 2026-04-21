@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\InsuranceCarrier;
 use App\Models\AgentCarrierState;
 use App\Models\User;
+use App\Services\CommissionCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -127,6 +129,9 @@ class PartnerController extends Controller
             $this->syncCarrierStates($partner, $request);
         });
 
+        // Recalculate agent_commission on all this partner's leads using new rates
+        $this->recalculatePartnerLeadCommissions($partner->id);
+
         return redirect()
             ->route('admin.partners.edit', $partner->id)
             ->with('success', 'Partner updated successfully.');
@@ -207,6 +212,41 @@ class PartnerController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * Recalculate agent_commission for all pending/active leads of a partner.
+     * Called automatically after partner rates are updated.
+     */
+    protected function recalculatePartnerLeadCommissions(int $partnerId): void
+    {
+        $commSvc = new CommissionCalculationService();
+
+        Lead::where('partner_id', $partnerId)
+            ->whereNotNull('pending_contract_at')
+            ->where('monthly_premium', '>', 0)
+            ->whereNotNull('insurance_carrier_id')
+            ->whereNotNull('state')
+            ->chunk(100, function ($leads) use ($commSvc) {
+                foreach ($leads as $lead) {
+                    $settlement = CommissionCalculationService::normalizeSettlementType(
+                        $lead->settlement_type ?? $lead->policy_type
+                    );
+                    $result = $commSvc->calculateCommission(
+                        $lead->partner_id,
+                        $lead->insurance_carrier_id,
+                        $lead->state,
+                        $settlement,
+                        (float) $lead->monthly_premium
+                    );
+                    if ($result['success']) {
+                        $lead->timestamps = false; // don't bump updated_at
+                        $lead->agent_commission             = $result['commission'];
+                        $lead->commission_calculation_notes = '[auto-recalc] ' . $result['message'];
+                        $lead->save();
+                    }
+                }
+            });
     }
 
     /**

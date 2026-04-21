@@ -126,6 +126,26 @@ class CommissionCalculationService
             ->toArray();
     }
 
+    /**
+     * Normalize a raw policy_type string to one of the four settlement keys.
+     * Handles variant spellings from CSV imports and manual entry.
+     *
+     * @param  string|null $policyType  e.g. "G.I", "GI", "Graded", "level (pref)", "std"
+     * @return string  one of: level | graded | gi | modified
+     */
+    public static function normalizeSettlementType(?string $policyType): string
+    {
+        $key = strtolower(trim($policyType ?? ''));
+        $key = str_replace(['.', ' ', '_', '-'], '', $key); // normalize separators
+
+        return match(true) {
+            in_array($key, ['gi', 'guaranteedissue', 'guaranteedissue']) => 'gi',
+            in_array($key, ['graded', 'gradedbenefits'])                 => 'graded',
+            in_array($key, ['modified', 'modifiedbenefit'])              => 'modified',
+            default                                                       => 'level', // level, std, standard, level(pref), or unknown
+        };
+    }
+
     // Legacy methods for backwards compatibility (deprecated)
     
     /**
