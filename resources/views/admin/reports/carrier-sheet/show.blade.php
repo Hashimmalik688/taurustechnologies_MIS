@@ -182,19 +182,19 @@
     {{-- Summary badges (K1–T1) --}}
     <div class="cs-badges" id="summaryBadges">
         <div class="cs-badge cs-badge-commission">
-            <span class="cs-badge-val" id="badge-commission">{{ number_format($summary['commission'], 4) }}</span>
+            <span class="cs-badge-val" id="badge-commission">{{ number_format($summary['commission'], 2) }}</span>
             <span class="cs-badge-lbl">Commission</span>
         </div>
         <div class="cs-badge cs-badge-paid">
-            <span class="cs-badge-val" id="badge-paid">{{ number_format($summary['paid'], 4) }}</span>
+            <span class="cs-badge-val" id="badge-paid">{{ number_format($summary['paid'], 2) }}</span>
             <span class="cs-badge-lbl">Paid</span>
         </div>
         <div class="cs-badge cs-badge-balance">
-            <span class="cs-badge-val" id="badge-balance">{{ number_format($summary['balance'], 4) }}</span>
+            <span class="cs-badge-val" id="badge-balance">{{ number_format($summary['balance'], 2) }}</span>
             <span class="cs-badge-lbl">Balance</span>
         </div>
         <div class="cs-badge cs-badge-cb-total">
-            <span class="cs-badge-val" id="badge-cb-total">{{ number_format($summary['chargeback_total'], 4) }}</span>
+            <span class="cs-badge-val" id="badge-cb-total">{{ number_format($summary['chargeback_total'], 2) }}</span>
             <span class="cs-badge-lbl">Chargeback $</span>
         </div>
         <div style="width:1px; background:var(--cs-border); margin:0 .2rem;"></div>
@@ -235,7 +235,26 @@
         </div>
         <div>
             <label>Search</label>
-            <input type="search" id="carrierTableSearch" placeholder="Policy #, name, type, status..." autocomplete="off">
+            <input type="search" id="carrierTableSearch" placeholder="Policy #, name..." autocomplete="off">
+        </div>
+        <div>
+            <label>Policy Type</label>
+            <select id="filterPolicyType">
+                <option value="">All Types</option>
+                @foreach($rate->getPolicyTypes() as $pt)
+                <option value="{{ strtolower($pt) }}">{{ strtoupper(str_replace('_', ' ', $pt)) }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label>Status</label>
+            <select id="filterStatus">
+                <option value="">All Statuses</option>
+                <option value="approved">APPROVED</option>
+                <option value="paid">PAID</option>
+                <option value="chargeback">CHARGEBACK</option>
+                <option value="declined">DECLINED</option>
+            </select>
         </div>
         <div style="margin-left:auto; display:flex; gap:.4rem; align-items:flex-end;">
             @canEditModule('carrier-sheet')
@@ -258,7 +277,7 @@
                onchange="updateOpeningCb(this.value)">
         <span style="font-size:.6rem; color:#856404;">(Previous chargeback balance carried forward)</span>
         @else
-        <span class="fw-bold">{{ number_format($openingCb->amount, 4) }}</span>
+        <span class="fw-bold">{{ number_format($openingCb->amount, 2) }}</span>
         @endcanEditModule
     </div>
     @endif
@@ -289,13 +308,13 @@
             </thead>
             <tbody>
                 @forelse($entries as $entry)
-                <tr class="cs-row-{{ strtolower($entry->status) }}" data-entry-id="{{ $entry->id }}">
+                <tr class="cs-row-{{ strtolower($entry->status) }}" data-entry-id="{{ $entry->id }}" data-policy-type="{{ strtolower($entry->policy_type ?? '') }}" data-status="{{ strtolower($entry->status ?? '') }}" data-commission="{{ $entry->commission ?? 0 }}" data-paid="{{ $entry->paid_amount ?? 0 }}" data-cb="{{ $entry->chargeback_amount ?? 0 }}">
                     <td>{{ $entry->sr_number }}</td>
                     <td>{{ $entry->entry_date?->format('d-M-y') }}</td>
                     <td class="cs-left">{{ $entry->policy_number }}</td>
                     <td class="cs-left">{{ $entry->name }}</td>
                     <td>{{ $entry->face_value }}</td>
-                    <td class="cs-money">{{ number_format($entry->premium, 4) }}</td>
+                    <td class="cs-money">{{ number_format($entry->premium, 2) }}</td>
                     <td>
                         <span style="text-transform:uppercase; font-size:.6rem; font-weight:600;">{{ $entry->policy_type }}</span>
                     </td>
@@ -305,17 +324,17 @@
                     <td>{{ $entry->draft_date?->format('d M') }}</td>
                     <td>{{ $entry->payment_date?->format('d M') }}</td>
                     <td class="cs-money {{ $entry->commission ? 'cs-money-pos' : '' }}">
-                        {{ $entry->commission !== null ? number_format($entry->commission, 4) : '' }}
+                        {{ $entry->commission !== null ? number_format($entry->commission, 2) : '' }}
                         @if($entry->rate_override)
                         <span class="cs-override-indicator" title="Rate override: {{ $entry->rate_override }}">★</span>
                         @endif
                     </td>
-                    <td class="cs-money">{{ $entry->paid_amount > 0 ? number_format($entry->paid_amount, 4) : '' }}</td>
+                    <td class="cs-money">{{ $entry->paid_amount > 0 ? number_format($entry->paid_amount, 2) : '' }}</td>
                     <td class="cs-money {{ $entry->balance >= 0 ? 'cs-money-pos' : 'cs-money-neg' }}">
-                        {{ number_format($entry->balance, 4) }}
+                        {{ number_format($entry->balance, 2) }}
                     </td>
                     <td class="cs-money {{ $entry->chargeback_amount > 0 ? 'cs-money-neg' : '' }}">
-                        {{ $entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 4) : '' }}
+                        {{ $entry->chargeback_amount > 0 ? number_format($entry->chargeback_amount, 2) : '' }}
                     </td>
                     @canEditModule('carrier-sheet')
                     <td>
@@ -351,7 +370,7 @@
                     <tr>
                         <td>{{ $day['date'] ? \Carbon\Carbon::parse($day['date'])->format('d M Y') : '—' }}</td>
                         <td style="text-align:center;">{{ $day['apps'] }}</td>
-                        <td style="text-align:right;" class="cs-money cs-money-pos">{{ number_format($day['commission'], 4) }}</td>
+                        <td style="text-align:right;" class="cs-money cs-money-pos">{{ number_format($day['commission'], 2) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -383,9 +402,10 @@
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Policy #</label>
                             <input type="text" name="policy_number" class="form-control form-control-sm">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4" style="position:relative;">
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Name</label>
-                            <input type="text" name="name" class="form-control form-control-sm">
+                            <input type="text" name="name" id="add_name" class="form-control form-control-sm" autocomplete="off" placeholder="Type to search leads...">
+                            <div id="leadSuggestions" style="display:none; position:absolute; z-index:9999; width:100%; background:#fff; border:1px solid #ced4da; border-radius:4px; max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.15);top:100%; left:0;"></div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label" style="font-size:.68rem; font-weight:700;">Face Value</label>
@@ -551,11 +571,16 @@
 @section('script')
 <script>
 (function() {
-    const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+    const CSRF   = document.querySelector('meta[name="csrf-token"]').content;
     const RATE_ID = {{ $rate->id }};
-    const BASE = "{{ url('settings/reports/carrier-sheet') }}";
-    const PERIOD = "{{ $periodMonth ?? '' }}";
-    const TABLE_SEARCH = document.getElementById('carrierTableSearch');
+    const BASE    = "{{ url('settings/reports/carrier-sheet') }}";
+    const PERIOD  = "{{ $periodMonth ?? '' }}";
+    const TABLE_SEARCH      = document.getElementById('carrierTableSearch');
+    const FILTER_TYPE        = document.getElementById('filterPolicyType');
+    const FILTER_STATUS      = document.getElementById('filterStatus');
+
+    // Server-side summary snapshot — used to restore badges when filters are cleared
+    const SERVER_SUMMARY = @json($summary);
 
     // ── Entries data store (for edit modal population) ──
     const entries = @json($entries->keyBy('id'));
@@ -598,21 +623,130 @@
     }
 
     function fmtMoney(v) {
-        return Number(v).toLocaleString('en-US', {minimumFractionDigits:4, maximumFractionDigits:4});
+        return Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     }
 
     function filterTableRows() {
-        const q = (TABLE_SEARCH?.value || '').trim().toLowerCase();
-        const rows = document.querySelectorAll('#carrierTable tbody tr[data-entry-id]');
+        const q      = (TABLE_SEARCH?.value  || '').trim().toLowerCase();
+        const qType  = (FILTER_TYPE?.value   || '').toLowerCase();
+        const qStat  = (FILTER_STATUS?.value || '').toLowerCase();
+        const rows   = document.querySelectorAll('#carrierTable tbody tr[data-entry-id]');
+
+        const isFiltering = q || qType || qStat;
+
+        // Accumulators for live KPI
+        let commission = 0, paid = 0, cb = 0;
+        let totalApps = 0, paidCnt = 0, approvedCnt = 0, cbCnt = 0, declinedCnt = 0;
+
         rows.forEach((row) => {
-            const txt = row.textContent.toLowerCase();
-            row.style.display = !q || txt.includes(q) ? '' : 'none';
+            const txt      = row.textContent.toLowerCase();
+            const rowType  = (row.dataset.policyType || '').toLowerCase();
+            const rowStat  = (row.dataset.status      || '').toLowerCase();
+            const matchQ    = !q     || txt.includes(q);
+            const matchType = !qType || rowType === qType;
+            const matchStat = !qStat || rowStat === qStat;
+            const visible   = matchQ && matchType && matchStat;
+            row.style.display = visible ? '' : 'none';
+
+            if (visible) {
+                commission += parseFloat(row.dataset.commission || 0);
+                paid       += parseFloat(row.dataset.paid       || 0);
+                cb         += parseFloat(row.dataset.cb         || 0);
+                totalApps++;
+                if (rowStat === 'paid')       paidCnt++;
+                if (rowStat === 'approved')   approvedCnt++;
+                if (rowStat === 'chargeback') cbCnt++;
+                if (rowStat === 'declined')   declinedCnt++;
+            }
         });
+
+        // Only update badges when actively filtering, revert to server values otherwise
+        if (isFiltering) {
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            set('badge-commission', fmtMoney(commission));
+            set('badge-paid',       fmtMoney(paid));
+            set('badge-balance',    fmtMoney(commission - paid));
+            set('badge-cb-total',   fmtMoney(cb));
+            set('badge-total-apps', totalApps);
+            set('badge-paid-cnt',   paidCnt);
+            set('badge-approved',   approvedCnt);
+            set('badge-cb-cnt',     cbCnt);
+            set('badge-declined',   declinedCnt);
+        } else {
+            updateBadges(SERVER_SUMMARY);
+        }
     }
 
-    if (TABLE_SEARCH) {
-        TABLE_SEARCH.addEventListener('input', filterTableRows);
-    }
+    if (TABLE_SEARCH)   TABLE_SEARCH.addEventListener('input',  filterTableRows);
+    if (FILTER_TYPE)    FILTER_TYPE.addEventListener('change',  filterTableRows);
+    if (FILTER_STATUS)  FILTER_STATUS.addEventListener('change', filterTableRows);
+
+    // ── Lead Lookup Autocomplete ─────────────────────────
+    (function () {
+        const nameInput   = document.getElementById('add_name');
+        const suggestBox  = document.getElementById('leadSuggestions');
+        const LOOKUP_URL  = "{{ route('settings.reports.carrier-sheet.lead-lookup') }}";
+        let debounceTimer = null;
+
+        if (!nameInput) return;
+
+        function fillFromLead(lead) {
+            nameInput.value = lead.name || '';
+            const form = document.getElementById('addEntryForm');
+            if (!form) return;
+            const set = (n, v) => { const el = form.querySelector(`[name="${n}"]`); if (el && v != null) el.value = v; };
+            set('policy_number', lead.policy_number);
+            set('face_value',    lead.face_value);
+            set('premium',       lead.premium);
+            set('policy_type',   lead.policy_type ? lead.policy_type.toLowerCase() : null);
+            set('draft_date',    lead.draft_date);
+            set('payment_date',  lead.payment_date);
+            suggestBox.style.display = 'none';
+            suggestBox.innerHTML = '';
+        }
+
+        function renderSuggestions(leads) {
+            suggestBox.innerHTML = '';
+            if (!leads.length) {
+                suggestBox.style.display = 'none';
+                return;
+            }
+            leads.forEach(lead => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding:7px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:.82rem;';
+                div.innerHTML = `<strong>${lead.name}</strong>`
+                    + (lead.policy_number ? ` &nbsp;<span style="color:#6c757d">${lead.policy_number}</span>` : '')
+                    + (lead.premium       ? ` &nbsp;<span style="color:#0d6efd">$${lead.premium}</span>` : '');
+                div.addEventListener('mouseover', () => div.style.background = '#f8f9fa');
+                div.addEventListener('mouseout',  () => div.style.background = '');
+                div.addEventListener('mousedown', (e) => { e.preventDefault(); fillFromLead(lead); });
+                suggestBox.appendChild(div);
+            });
+            suggestBox.style.display = 'block';
+        }
+
+        nameInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const q = nameInput.value.trim();
+            if (q.length < 2) { suggestBox.style.display = 'none'; return; }
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const r = await fetch(`${LOOKUP_URL}?q=${encodeURIComponent(q)}`, { headers: { 'Accept': 'application/json' } });
+                    renderSuggestions(await r.json());
+                } catch (_) { suggestBox.style.display = 'none'; }
+            }, 280);
+        });
+
+        nameInput.addEventListener('blur', () => {
+            setTimeout(() => { suggestBox.style.display = 'none'; }, 200);
+        });
+
+        // Reset dropdown when modal opens
+        document.getElementById('addEntryModal')?.addEventListener('show.bs.modal', () => {
+            suggestBox.style.display = 'none';
+            suggestBox.innerHTML = '';
+        });
+    })();
 
     // ── Add Entry ───────────────────────────────────────
     window.submitAddEntry = async function() {
