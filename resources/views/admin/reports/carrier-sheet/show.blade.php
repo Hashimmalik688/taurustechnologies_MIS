@@ -114,8 +114,12 @@
     text-align:center; vertical-align:middle; color:var(--cs-text-1); white-space:nowrap;
 }
 .cs-dtable tbody tr:nth-child(even) { background:var(--cs-row-alt); }
-.cs-dtable tbody tr:hover { background:rgba(0,0,0,.04); cursor:pointer; }
-.cs-dtable tbody tr:active { background:rgba(0,0,0,.08); }
+.cs-dtable tbody tr:hover { background:rgba(0,0,0,.04); }
+
+/* Copyable cells */
+.cs-cell-copy { cursor:pointer; transition:all .15s; }
+.cs-cell-copy:hover { background:rgba(40,53,147,.08)!important; transform:scale(1.02); }
+.cs-cell-copy:active { background:rgba(40,53,147,.15)!important; }
 
 /* Status row colors */
 .cs-dtable tr.cs-row-approved   { background:#FFF8E1 !important; }
@@ -336,24 +340,19 @@
             </thead>
             <tbody>
                 @forelse($entries as $entry)
-                <tr class="cs-row-{{ strtolower($entry->status) }} cs-clickable-row" 
+                <tr class="cs-row-{{ strtolower($entry->status) }}" 
                     data-entry-id="{{ $entry->id }}" 
                     data-policy-type="{{ strtolower($entry->policy_type ?? '') }}" 
                     data-status="{{ strtolower($entry->status ?? '') }}" 
                     data-commission="{{ $entry->commission ?? 0 }}" 
                     data-paid="{{ $entry->paid_amount ?? 0 }}" 
-                    data-cb="{{ $entry->chargeback_amount ?? 0 }}"
-                    data-copy-policy="{{ $entry->policy_number }}"
-                    data-copy-name="{{ $entry->name }}"
-                    data-copy-premium="{{ number_format($entry->premium, 2) }}"
-                    data-copy-fv="{{ $entry->face_value }}"
-                    onclick="copyRowData(this, event)">
+                    data-cb="{{ $entry->chargeback_amount ?? 0 }}">
                     <td>{{ $entry->sr_number }}</td>
                     <td>{{ $entry->entry_date?->format('d-M-y') }}</td>
-                    <td class="cs-left">{{ $entry->policy_number }}</td>
-                    <td class="cs-left">{{ $entry->name }}</td>
-                    <td>{{ $entry->face_value }}</td>
-                    <td class="cs-money">{{ number_format($entry->premium, 2) }}</td>
+                    <td class="cs-left cs-cell-copy" onclick="copyCellData(this, '{{ $entry->policy_number }}')">{{ $entry->policy_number }}</td>
+                    <td class="cs-left cs-cell-copy" onclick="copyCellData(this, '{{ $entry->name }}')">{{ $entry->name }}</td>
+                    <td class="cs-cell-copy" onclick="copyCellData(this, '{{ $entry->face_value }}')">{{ $entry->face_value }}</td>
+                    <td class="cs-money cs-cell-copy" onclick="copyCellData(this, '{{ number_format($entry->premium, 2) }}')">{{ number_format($entry->premium, 2) }}</td>
                     <td>
                         @php $stage = $entry->getPipelineStage(); @endphp
                         <div style="display:flex; align-items:center; gap:.35rem; justify-content:center;">
