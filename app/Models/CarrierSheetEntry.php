@@ -198,49 +198,72 @@ class CarrierSheetEntry extends Model
             return [
                 'label' => '—',
                 'name'  => 'Unknown',
-                'color' => $this->getPipelineColor(),
+                'color' => '#6C757D', // Gray
             ];
         }
 
-        // Determine pipeline stage based on lead timestamps
-        if ($lead->paid_sale_at) {
-            $label = 'PS';
-            $name = 'Paid Sales';
-        } elseif ($lead->pending_draft_at) {
-            $label = 'PD';
-            $name = 'Pending Draft';
-        } elseif ($lead->assigned_followup_person) {
-            $label = 'FU';
-            $name = 'Followup';
-        } elseif ($lead->pending_contract_at) {
-            $label = 'PC';
-            $name = 'Pending Contract';
-        } elseif ($lead->pending_approval_at) {
-            $label = 'PA';
-            $name = 'Pending Approval';
-        } else {
-            $label = 'SR';
-            $name = 'Sales Record';
+        // Chargeback status takes precedence
+        if ($this->isChargeback()) {
+            return [
+                'label' => 'CB',
+                'name'  => 'Chargeback',
+                'color' => '#DC3545', // Red
+            ];
         }
 
-        return [
-            'label' => $label,
-            'name'  => $name,
-            'color' => $this->getPipelineColor(),
-        ];
-    }
+        // Paid Sales
+        if ($lead->paid_sale_at) {
+            return [
+                'label' => 'PAID',
+                'name'  => 'Paid Sales',
+                'color' => '#28A745', // Green
+            ];
+        }
 
-    /**
-     * Get color for pipeline badge based on current entry status.
-     */
-    public function getPipelineColor(): string
-    {
-        return match (strtolower($this->status)) {
-            'approved'   => '#FFC107', // Yellow
-            'paid'       => '#28A745', // Green
-            'chargeback' => '#DC3545', // Red
-            'declined'   => '#DC3545', // Red
-            default      => '#6C757D', // Gray
-        };
+        // Pending Draft
+        if ($lead->pending_draft_at) {
+            $color = $lead->not_paid_fdfp_type ? '#DC3545' : '#800020'; // Red (Not Paid) : Maroon (Pending)
+            return [
+                'label' => 'PD',
+                'name'  => 'Pending Draft',
+                'color' => $color,
+            ];
+        }
+
+        // Pending Contract
+        if ($lead->pending_contract_at) {
+            // Determine color based on status
+            if ($lead->not_issued_at && !$lead->not_issued_resolved_at) {
+                $color = '#FF69B4'; // Pink (Not Issued)
+            } elseif ($lead->assigned_followup_person) {
+                $color = '#FF8C00'; // Orange (Followup)
+            } elseif ($lead->issuance_status === 'Issued') {
+                $color = '#800080'; // Purple (Issued)
+            } else {
+                $color = '#FFC107'; // Yellow (Pending)
+            }
+            return [
+                'label' => 'PC',
+                'name'  => 'Pending Contract',
+                'color' => $color,
+            ];
+        }
+
+        // Pending Submission (Pending Approval)
+        if ($lead->pending_approval_at) {
+            $color = $this->isDeclined() ? '#DC3545' : '#007BFF'; // Red (Declined) : Blue (Pending)
+            return [
+                'label' => 'PS',
+                'name'  => 'Pending Submission',
+                'color' => $color,
+            ];
+        }
+
+        // Sales Record (default)
+        return [
+            'label' => 'SR',
+            'name'  => 'Sales Record',
+            'color' => '#6C757D', // Gray
+        ];
     }
 }

@@ -185,7 +185,54 @@
     transform:translateY(-1px);
     box-shadow:0 2px 5px rgba(0,0,0,.25);
 }
-
+/* ── Pipeline Legends ──────────────────────────────── */
+.cs-legends {
+    margin-top:1.5rem;
+    background:var(--cs-surface);
+    border:1px solid var(--cs-border);
+    border-radius:.55rem;
+    padding:.9rem 1rem;
+    box-shadow:var(--cs-shadow);
+}
+.cs-legends-title {
+    font-size:.75rem;
+    font-weight:800;
+    color:var(--cs-text-1);
+    margin-bottom:.65rem;
+    display:flex;
+    align-items:center;
+    gap:.35rem;
+}
+.cs-legends-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+    gap:.55rem;
+}
+.cs-legend-item {
+    display:flex;
+    align-items:center;
+    gap:.4rem;
+    font-size:.68rem;
+}
+.cs-legend-badge {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:40px;
+    height:20px;
+    padding:.12rem .4rem;
+    border-radius:.25rem;
+    font-size:.6rem;
+    font-weight:800;
+    color:#fff;
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    box-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+.cs-legend-desc {
+    color:var(--cs-text-3);
+    font-weight:600;
+}
 /* ── Copy toast notification ───────────────────────── */
 .cs-copy-toast {
     position:fixed; bottom:20px; right:20px; z-index:9999;
@@ -424,6 +471,60 @@
         </div>
     </div>
     @endif
+
+    {{-- Pipeline Stage Legends --}}
+    <div class="cs-legends">
+        <div class="cs-legends-title">
+            <i class="bx bx-info-circle"></i>
+            Pipeline Stage Legend
+        </div>
+        <div class="cs-legends-grid">
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#6C757D">SR</span>
+                <span class="cs-legend-desc">Sales Record</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#007BFF">PS</span>
+                <span class="cs-legend-desc">Pending Submission</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#DC3545">PS</span>
+                <span class="cs-legend-desc">Pending Sub. (Declined)</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#FFC107;color:#000">PC</span>
+                <span class="cs-legend-desc">Pending Contract</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#800080">PC</span>
+                <span class="cs-legend-desc">Pend. Cont. (Issued)</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#FF8C00">PC</span>
+                <span class="cs-legend-desc">Pend. Cont. (Followup)</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#FF69B4">PC</span>
+                <span class="cs-legend-desc">Pend. Cont. (Not Issued)</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#800020">PD</span>
+                <span class="cs-legend-desc">Pending Draft</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#DC3545">PD</span>
+                <span class="cs-legend-desc">Pend. Draft (Not Paid)</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#28A745">PAID</span>
+                <span class="cs-legend-desc">Paid Sales</span>
+            </div>
+            <div class="cs-legend-item">
+                <span class="cs-legend-badge" style="background:#DC3545">CB</span>
+                <span class="cs-legend-desc">Chargeback</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{-- ═══════════════════════════════════════════════════
