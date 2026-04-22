@@ -1277,6 +1277,11 @@ class LeadController extends Controller
             $query->where('insurance_carrier_id', $request->carrier);
         }
 
+        // Filter by partner
+        if ($request->filled('partner')) {
+            $query->where('partner_id', $request->partner);
+        }
+
         // Filter by issuance status
         if ($request->filled('issuance_status')) {
             if ($request->issuance_status === 'pending') {

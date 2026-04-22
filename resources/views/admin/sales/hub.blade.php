@@ -266,6 +266,47 @@
         return map[badge] || 'bg-secondary';
     }
 
+    const stageColorMap = {
+        'Sale':             'sr-trail-sale',
+        'Pending Sub.':     'sr-trail-sub',
+        'Pending Contract': 'sr-trail-contract',
+        'Followup Done':    'sr-trail-followup',
+        'Pending Draft':    'sr-trail-draft',
+        'Not Paid':         'sr-trail-notpaid',
+        'Paid':             'sr-trail-paid',
+        'Declined':         'sr-trail-danger',
+        'Chargeback':       'sr-trail-danger',
+        'Policy Died':      'sr-trail-danger',
+    };
+
+    function renderStageTrail(lead) {
+        if (!lead.stage_history || lead.stage_history.length <= 1) return '';
+        const pills = lead.stage_history.map((s, i) => {
+            const cls    = stageColorMap[s] || 'sr-trail-default';
+            const isLast = i === lead.stage_history.length - 1;
+            const arrow  = !isLast ? '<i class="bx bx-chevron-right sr-trail-arrow"></i>' : '';
+            return `<span class="sr-trail-pill ${cls}">${s}</span>${arrow}`;
+        }).join('');
+        return `<div class="sr-stage-trail">${pills}</div>`;
+    }
+
+    function renderSubStatuses(lead) {
+        if (!lead.sub_statuses || !lead.sub_statuses.length) return '';
+        const typeMap = {
+            success: 'sr-sub-success',
+            danger:  'sr-sub-danger',
+            warning: 'sr-sub-warning',
+            info:    'sr-sub-info',
+            primary: 'sr-sub-primary',
+            muted:   'sr-sub-muted',
+        };
+        const chips = lead.sub_statuses.map(c => {
+            const cls = typeMap[c.type] || 'sr-sub-muted';
+            return `<span class="sr-sub-chip ${cls}"><span class="sr-sub-dot"></span>${c.label}</span>`;
+        }).join('');
+        return `<div class="sr-sub-row">${chips}</div>`;
+    }
+
     function renderResults(items) {
         if (!items.length) {
             results.innerHTML = '<div class="hub-search-empty"><i class="bx bx-search-alt"></i> No leads found</div>';
@@ -285,6 +326,8 @@
                         ${lead.sale_date    ? `<span><i class="bx bx-calendar"></i> ${lead.sale_date}</span>` : ''}
                         ${lead.closer_name  ? `<span><i class="bx bx-user"></i> ${lead.closer_name}</span>` : ''}
                     </div>
+                    ${renderStageTrail(lead)}
+                    ${renderSubStatuses(lead)}
                 </div>
                 <div class="hub-sr-stage">
                     <span class="badge ${badgeClass(lead.badge)}">${lead.stage}</span>

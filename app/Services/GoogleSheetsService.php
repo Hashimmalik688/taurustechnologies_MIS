@@ -27,8 +27,8 @@ class GoogleSheetsService
     public function __construct()
     {
         $this->http = new Client([
-            'timeout'         => 10,
-            'connect_timeout' => 5,
+            'timeout'         => 300, // Apps Script can take up to ~240s under load
+            'connect_timeout' => 15,
             'allow_redirects' => true,
         ]);
     }

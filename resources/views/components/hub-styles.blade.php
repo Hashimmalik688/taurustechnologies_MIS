@@ -362,3 +362,102 @@
     .hub-sr-item { flex-wrap: wrap; }
     .hub-sr-stage { width: 100%; justify-content: flex-end; }
 }
+
+/* ── Stage Trail (pipeline history) ── */
+.sr-stage-trail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    margin-top: 5px;
+}
+
+.sr-trail-pill {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    white-space: nowrap;
+    line-height: 1.5;
+}
+
+.sr-trail-arrow {
+    font-size: 11px;
+    color: var(--bs-surface-400, #9ca3af);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.sr-trail-sale     { background: rgba(59,130,246,0.12);  color: #3b82f6; }
+.sr-trail-sub      { background: rgba(107,114,128,0.12); color: #6b7280; }
+.sr-trail-contract { background: rgba(234,179,8,0.15);   color: #b45309; }
+.sr-trail-followup { background: rgba(14,165,233,0.12);  color: #0284c7; }
+.sr-trail-draft    { background: rgba(99,102,241,0.12);  color: #6366f1; }
+.sr-trail-notpaid  { background: rgba(245,158,11,0.15);  color: #d97706; }
+.sr-trail-paid     { background: rgba(34,197,94,0.12);   color: #16a34a; }
+.sr-trail-danger   { background: rgba(239,68,68,0.12);   color: #dc2626; }
+.sr-trail-default  { background: rgba(107,114,128,0.1);  color: #6b7280; }
+
+[data-bs-theme="dark"] .sr-trail-sale     { background: rgba(59,130,246,0.2);  color: #93c5fd; }
+[data-bs-theme="dark"] .sr-trail-sub      { background: rgba(156,163,175,0.15); color: #d1d5db; }
+[data-bs-theme="dark"] .sr-trail-contract { background: rgba(234,179,8,0.2);   color: #fcd34d; }
+[data-bs-theme="dark"] .sr-trail-followup { background: rgba(14,165,233,0.2);  color: #7dd3fc; }
+[data-bs-theme="dark"] .sr-trail-draft    { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
+[data-bs-theme="dark"] .sr-trail-notpaid  { background: rgba(245,158,11,0.2);  color: #fbbf24; }
+[data-bs-theme="dark"] .sr-trail-paid     { background: rgba(34,197,94,0.2);   color: #86efac; }
+[data-bs-theme="dark"] .sr-trail-danger   { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+
+/* ── Sub-status chips (contextual KPI indicators) ── */
+.sr-sub-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.sr-sub-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 2px 7px 2px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+}
+
+.sr-sub-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sr-sub-success { background: rgba(34,197,94,0.08);   color: #16a34a; border-color: rgba(34,197,94,0.25); }
+.sr-sub-success .sr-sub-dot { background: #16a34a; }
+
+.sr-sub-danger  { background: rgba(239,68,68,0.08);   color: #dc2626; border-color: rgba(239,68,68,0.25); }
+.sr-sub-danger  .sr-sub-dot { background: #dc2626; }
+
+.sr-sub-warning { background: rgba(245,158,11,0.08);  color: #b45309; border-color: rgba(245,158,11,0.25); }
+.sr-sub-warning .sr-sub-dot { background: #d97706; }
+
+.sr-sub-info    { background: rgba(14,165,233,0.08);  color: #0284c7; border-color: rgba(14,165,233,0.25); }
+.sr-sub-info    .sr-sub-dot { background: #0284c7; }
+
+.sr-sub-primary { background: rgba(99,102,241,0.08);  color: #4f46e5; border-color: rgba(99,102,241,0.25); }
+.sr-sub-primary .sr-sub-dot { background: #6366f1; }
+
+.sr-sub-muted   { background: rgba(107,114,128,0.08); color: #6b7280; border-color: rgba(107,114,128,0.2); }
+.sr-sub-muted   .sr-sub-dot { background: #9ca3af; }
+
+[data-bs-theme="dark"] .sr-sub-success { background: rgba(34,197,94,0.15);   color: #86efac; border-color: rgba(34,197,94,0.3); }
+[data-bs-theme="dark"] .sr-sub-danger  { background: rgba(239,68,68,0.15);   color: #fca5a5; border-color: rgba(239,68,68,0.3); }
+[data-bs-theme="dark"] .sr-sub-warning { background: rgba(245,158,11,0.15);  color: #fcd34d; border-color: rgba(245,158,11,0.3); }
+[data-bs-theme="dark"] .sr-sub-info    { background: rgba(14,165,233,0.15);  color: #7dd3fc; border-color: rgba(14,165,233,0.3); }
+[data-bs-theme="dark"] .sr-sub-primary { background: rgba(99,102,241,0.15);  color: #a5b4fc; border-color: rgba(99,102,241,0.3); }
+[data-bs-theme="dark"] .sr-sub-muted   { background: rgba(156,163,175,0.1);  color: #d1d5db; border-color: rgba(156,163,175,0.2); }

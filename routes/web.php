@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\RavensDashboardController;
 use App\Http\Controllers\Admin\RetentionDashboardController;
 use App\Http\Controllers\Admin\DupeCheckerController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\CloserReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamDashboardController;
 use App\Http\Controllers\AgentDashboardController;
@@ -244,7 +245,7 @@ Route::group(['prefix' => 'leads', 'as' => 'leads.', 'middleware' => ['auth', Ro
     Route::post('/{id}/status', [LeadController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/{id}/update-comment', [LeadController::class, 'updateComment'])->name('updateComment');
     Route::post('/{id}/unassign-partner', [LeadController::class, 'unassignPartner'])->name('unassignPartner');
-    Route::post('/{id}/send-to-previous-stage', [LeadController::class, 'sendToPreviousStage'])->name('sendToPreviousStage')->middleware('role.permission:leads,edit');
+    Route::post('/{id}/send-to-previous-stage', [LeadController::class, 'sendToPreviousStage'])->name('sendToPreviousStage')->middleware('role.permission:issuance,edit');
 });
 
 // Sales Management — access controlled by role.permission:sales,level
@@ -719,6 +720,11 @@ Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
             'pending_draft_at', 'pending_contract_at', 'submission_status',
             'issuance_status', 'not_paid_at', 'status',
             'chargeback_marked_date', 'declined_at', 'decline_reason',
+            'submission_at',
+            // sub-status fields
+            'qa_status', 'bank_verification_status',
+            'not_issued_disposition', 'not_paid_fdfp_type',
+            'retention_disposition',
         ])
         ->orderByDesc('sale_at')
         ->limit(15)
@@ -778,18 +784,121 @@ Route::get('/sales/hub/search', function (\Illuminate\Http\Request $request) {
                 $url    = route('sales.index') . '?search=' . urlencode($lead->cn_name ?? '');
             }
 
+            // Build chronological stage history from timestamps
+            $stageTimestamps = [
+                'Sale'             => $lead->sale_at,
+                'Pending Sub.'     => $lead->submission_at,
+                'Pending Contract' => $lead->pending_contract_at,
+                'Followup Done'    => $lead->followup_done_at,
+                'Pending Draft'    => $lead->pending_draft_at,
+                // "Not Paid" is stamped automatically by the chargeback action —
+                // suppress it from the trail when a chargeback exists to avoid the
+                // misleading "Chargeback → Not Paid" sequence.
+                'Not Paid'         => $lead->chargeback_marked_date ? null : $lead->not_paid_at,
+                'Paid'             => $lead->paid_at,
+                'Declined'         => $lead->declined_at,
+                'Chargeback'       => $lead->chargeback_marked_date ? \Carbon\Carbon::parse($lead->chargeback_marked_date) : null,
+                'Policy Died'      => $lead->policy_died_at,
+            ];
+            $stageHistory = collect($stageTimestamps)
+                ->filter(fn($ts) => !is_null($ts))
+                ->map(fn($ts) => \Carbon\Carbon::parse($ts))
+                ->sortBy(fn($ts) => $ts->timestamp)
+                ->keys()
+                ->values()
+                ->toArray();
+
             return [
-                'id'           => $lead->id,
-                'cn_name'      => $lead->cn_name,
-                'phone_number' => $lead->phone_number,
-                'policy_number'=> $lead->policy_number,
-                'carrier_name' => $lead->carrier_name,
-                'sale_date'    => $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M j, Y') : null,
-                'closer_name'  => $lead->closer_name,
-                'stage'        => $stage,
-                'badge'        => $badge,
-                'icon'         => $icon,
-                'url'          => $url,
+                'id'            => $lead->id,
+                'cn_name'       => $lead->cn_name,
+                'phone_number'  => $lead->phone_number,
+                'policy_number' => $lead->policy_number,
+                'carrier_name'  => $lead->carrier_name,
+                'sale_date'     => $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M j, Y') : null,
+                'closer_name'   => $lead->closer_name,
+                'stage'         => $stage,
+                'badge'         => $badge,
+                'icon'          => $icon,
+                'url'           => $url,
+                'stage_history' => $stageHistory,
+                'sub_statuses'  => (function () use ($lead, $stage) {
+                    $chips = [];
+
+                    // ── Issuance status (Pending Contract stage) ──
+                    if ($lead->pending_contract_at && !$lead->followup_done_at) {
+                        if ($lead->not_issued_disposition) {
+                            $niLabels = \App\Support\Statuses::NOT_ISSUED_DISPOSITIONS;
+                            $chips[] = ['label' => 'Not Issued: ' . ($niLabels[$lead->not_issued_disposition] ?? $lead->not_issued_disposition), 'type' => 'danger'];
+                        } elseif ($lead->issuance_status === \App\Support\Statuses::ISSUANCE_ISSUED) {
+                            $chips[] = ['label' => 'Issued', 'type' => 'success'];
+                        } elseif ($lead->issuance_status) {
+                            $chips[] = ['label' => 'Issuance: ' . $lead->issuance_status, 'type' => 'warning'];
+                        }
+                    }
+
+                    // ── Submission status (Pending Submission stage) ──
+                    if (!$lead->pending_contract_at && $lead->submission_status && $lead->submission_status !== \App\Support\Statuses::SUB_PENDING) {
+                        $subMap = [
+                            \App\Support\Statuses::SUB_APPROVED     => ['Approved',      'success'],
+                            \App\Support\Statuses::SUB_DECLINED      => ['Sub. Declined', 'danger'],
+                            \App\Support\Statuses::SUB_UNDERWRITING  => ['Underwriting',  'warning'],
+                            \App\Support\Statuses::SUB_CHARGEBACK    => ['Chargeback',    'danger'],
+                        ];
+                        if (isset($subMap[$lead->submission_status])) {
+                            $chips[] = ['label' => $subMap[$lead->submission_status][0], 'type' => $subMap[$lead->submission_status][1]];
+                        }
+                    }
+
+                    // ── FDFP type (Not Paid / Pending Draft) ──
+                    if ($lead->not_paid_at && $lead->not_paid_fdfp_type) {
+                        $fdfpLabels = \App\Support\Statuses::FDFP_TYPES;
+                        $chips[] = ['label' => $fdfpLabels[$lead->not_paid_fdfp_type] ?? $lead->not_paid_fdfp_type, 'type' => 'warning'];
+                    }
+
+                    // ── Retention disposition (Chargeback / Not Paid) ──
+                    if (($lead->chargeback_marked_date || $lead->not_paid_at) && $lead->retention_disposition) {
+                        $retMap = [
+                            'retained'           => ['Retained',          'success'],
+                            'rewrite'            => ['Rewrite',           'info'],
+                            'recalled_to_closer' => ['Recalled to Closer','info'],
+                            'cancelled'          => ['Cancelled',         'muted'],
+                            'in_progress'        => ['In Progress',       'primary'],
+                            'unable_to_connect'  => ['UTC',               'warning'],
+                            'not_answering'      => ['Not Answering',     'warning'],
+                            'pending'            => ['Ret. Pending',      'muted'],
+                        ];
+                        if (isset($retMap[$lead->retention_disposition])) {
+                            $chips[] = ['label' => $retMap[$lead->retention_disposition][0], 'type' => $retMap[$lead->retention_disposition][1]];
+                        }
+                    }
+
+                    // ── Bank verification ──
+                    if ($lead->bank_verification_status) {
+                        $bvMap = [
+                            \App\Support\Statuses::BANK_GOOD    => ['Bank: Good',    'success'],
+                            \App\Support\Statuses::BANK_AVERAGE => ['Bank: Average', 'warning'],
+                            \App\Support\Statuses::BANK_BAD     => ['Bank: Bad',     'danger'],
+                        ];
+                        if (isset($bvMap[$lead->bank_verification_status])) {
+                            $chips[] = ['label' => $bvMap[$lead->bank_verification_status][0], 'type' => $bvMap[$lead->bank_verification_status][1]];
+                        }
+                    }
+
+                    // ── QA status ──
+                    if ($lead->qa_status && $lead->qa_status !== \App\Support\Statuses::QA_PENDING) {
+                        $qaMap = [
+                            \App\Support\Statuses::QA_GOOD      => ['QA: Good',      'success'],
+                            \App\Support\Statuses::QA_AVG       => ['QA: Avg',       'warning'],
+                            \App\Support\Statuses::QA_BAD       => ['QA: Bad',       'danger'],
+                            \App\Support\Statuses::QA_IN_REVIEW => ['QA: In Review', 'info'],
+                        ];
+                        if (isset($qaMap[$lead->qa_status])) {
+                            $chips[] = ['label' => $qaMap[$lead->qa_status][0], 'type' => $qaMap[$lead->qa_status][1]];
+                        }
+                    }
+
+                    return $chips;
+                })(),
             ];
         });
 
@@ -849,6 +958,8 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/disposition-report', [ReportController::class, 'dispositionReport'])->name('disposition-report')->middleware('role.permission:reports,view');
     Route::get('/manager-submission-report', [ReportController::class, 'managerSubmissionReport'])->name('manager-submission-report')->middleware('role.permission:reports,view');
     Route::get('/manager-submission-report/drilldown', [ReportController::class, 'managerSubmissionDrilldown'])->name('manager-submission-report.drilldown')->middleware('role.permission:reports,view');
+    Route::get('/closer-report', [CloserReportController::class, 'index'])->name('closer-report')->middleware('role.permission:reports,view');
+    Route::get('/closer-report/drilldown', [CloserReportController::class, 'drilldown'])->name('closer-report.drilldown')->middleware('role.permission:reports,view');
 
     // ── Carrier Commission Sheet (standalone) ──────────
     Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {

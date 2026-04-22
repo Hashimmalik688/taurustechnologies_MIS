@@ -23,11 +23,17 @@ class SyncSaleToGoogleSheets implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /** Retry up to 3 times before giving up. */
-    public int $tries = 3;
+    /** Retry up to 5 times before giving up. */
+    public int $tries = 5;
 
-    /** Wait 30 seconds between retries. */
-    public int $backoff = 30;
+    /** Queue worker timeout — must exceed the HTTP timeout in GoogleSheetsService. */
+    public int $timeout = 360;
+
+    /** Exponential backoff: 60s, 120s, 240s, 480s between retries. */
+    public function backoff(): array
+    {
+        return [60, 120, 240, 480];
+    }
 
     public function __construct(public Lead $lead)
     {

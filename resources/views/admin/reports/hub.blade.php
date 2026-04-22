@@ -63,6 +63,15 @@
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
 
+            <a href="{{ route('settings.reports.closer-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-user-check"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Closer Performance Report</div>
+                    <p class="hub-card-desc">Per-closer sales metrics — total sales, approved, declined, paid &amp; chargeback counts with detailed drilldown</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+
             <a href="{{ route('settings.reports.manager-submission-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-user-check"></i></div>
                 <div class="hub-card-body">
