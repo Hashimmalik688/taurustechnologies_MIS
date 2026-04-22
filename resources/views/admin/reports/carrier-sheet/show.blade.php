@@ -349,10 +349,10 @@
                     data-cb="{{ $entry->chargeback_amount ?? 0 }}">
                     <td>{{ $entry->sr_number }}</td>
                     <td>{{ $entry->entry_date?->format('d-M-y') }}</td>
-                    <td class="cs-left cs-cell-copy" onclick="copyCellData(this, '{{ $entry->policy_number }}')">{{ $entry->policy_number }}</td>
-                    <td class="cs-left cs-cell-copy" onclick="copyCellData(this, '{{ $entry->name }}')">{{ $entry->name }}</td>
-                    <td class="cs-cell-copy" onclick="copyCellData(this, '{{ $entry->face_value }}')">{{ $entry->face_value }}</td>
-                    <td class="cs-money cs-cell-copy" onclick="copyCellData(this, '{{ number_format($entry->premium, 2) }}')">{{ number_format($entry->premium, 2) }}</td>
+                    <td class="cs-left cs-cell-copy" data-copy-value="{{ $entry->policy_number }}">{{ $entry->policy_number }}</td>
+                    <td class="cs-left cs-cell-copy" data-copy-value="{{ $entry->name }}">{{ $entry->name }}</td>
+                    <td class="cs-cell-copy" data-copy-value="{{ $entry->face_value }}">{{ $entry->face_value }}</td>
+                    <td class="cs-money cs-cell-copy" data-copy-value="{{ number_format($entry->premium, 2) }}">{{ number_format($entry->premium, 2) }}</td>
                     <td>
                         @php $stage = $entry->getPipelineStage(); @endphp
                         <div style="display:flex; align-items:center; gap:.35rem; justify-content:center;">
@@ -886,41 +886,44 @@
         }
     };
 
-    // ── Copy Row Data ───────────────────────────────────
-    window.copyRowData = function(row, event) {
-        // Don't trigger if clicking on action buttons
-        if (event.target.closest('.cs-row-actions') || event.target.closest('button')) {
-            return;
-        }
+    // ── Copy Single Cell Data ──────────────────────────
+    // Attach event listeners to all copyable cells
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.cs-cell-copy').forEach(cell => {
+            cell.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const value = this.dataset.copyValue;
+                if (!value || value === 'null' || value === 'undefined' || value === '') {
+                    return;
+                }
 
-        const policy = row.dataset.copyPolicy || '';
-        const name = row.dataset.copyName || '';
-        const fv = row.dataset.copyFv || '';
-        const premium = row.dataset.copyPremium || '';
-        const status = row.dataset.status || '';
-        
-        // Format copy text
-        const copyText = `Policy: ${policy}\nName: ${name}\nFace Value: ${fv}\nPremium: ${premium}\nStatus: ${status.toUpperCase()}`;
-        
-        // Copy to clipboard
-        navigator.clipboard.writeText(copyText)
-            .then(() => {
-                showCopyToast('Row copied to clipboard!');
-            })
-            .catch(err => {
-                console.error('Copy failed:', err);
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = copyText;
-                textarea.style.position = 'fixed';
-                textarea.style.opacity = '0';
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showCopyToast('Row copied to clipboard!');
+                // Copy to clipboard
+                navigator.clipboard.writeText(value)
+                    .then(() => {
+                        showCopyToast(`Copied: ${value}`);
+                        // Visual feedback on the cell
+                        const originalBg = this.style.background;
+                        this.style.background = 'rgba(40,53,147,.25)';
+                        setTimeout(() => {
+                            this.style.background = originalBg;
+                        }, 200);
+                    })
+                    .catch(err => {
+                        console.error('Copy failed:', err);
+                        // Fallback for older browsers
+                        const textarea = document.createElement('textarea');
+                        textarea.value = value;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        showCopyToast(`Copied: ${value}`);
+                    });
             });
-    };
+        });
+    });
 
     function showCopyToast(message) {
         const toast = document.createElement('div');
