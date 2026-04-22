@@ -515,6 +515,9 @@
         </div>
     @endif
 
+    <!-- Sales Flow Navigation -->
+    <x-sales-flow-navigation currentStage="sales" />
+
     <!-- KPI Tab Cards -->
     @php
         $tabBaseQuery = request()->except('status', 'page');

@@ -126,6 +126,9 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 @section('content')
 <div class="container-fluid" style="max-width:1600px">
 
+    <!-- Sales Flow Navigation -->
+    <x-sales-flow-navigation currentStage="submissions" />
+
     {{-- Page Header --}}
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
@@ -304,6 +307,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                         data-partner="{{ $lead->assigned_partner ?? '' }}"
                                         data-appid="{{ $lead->app_id ?? '' }}"
                                         data-decision="{{ $lead->submission_status ?? '' }}"
+                                        data-carrier-id="{{ $lead->insurance_carrier_id ?? '' }}"
                                         style="font-size:.63rem;">
                                         <i class="bx bx-pencil"></i> Manage
                                     </button>
@@ -501,6 +505,9 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
 
 @section('script')
 <script>
+// Partner-carrier mapping for frontend validation
+const partnerCarriers = @json($partnerCarriers ?? []);
+
 (function() {
     let currentLeadId = null;
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -512,11 +519,49 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
     document.querySelectorAll('.btn-open-actions-modal').forEach(btn => {
         btn.addEventListener('click', function() {
             currentLeadId = this.dataset.id;
+            const leadCarrierId = this.dataset.carrierId ? parseInt(this.dataset.carrierId) : null;
+            
             document.getElementById('actions-lead-name').textContent = this.dataset.name;
             document.getElementById('actions-decision').value = this.dataset.decision || '';
             document.getElementById('actions-app-id').value = this.dataset.appid;
             document.getElementById('actions-policy-number').value = this.dataset.policy;
-            document.getElementById('actions-partner').value = this.dataset.partner;
+            
+            // Filter and populate partner dropdown based on carrier availability
+            const partnerSelect = document.getElementById('actions-partner');
+            const currentPartner = this.dataset.partner;
+            
+            // Clear existing options except the first default option
+            partnerSelect.innerHTML = '<option value="">— Select Partner —</option>';
+            
+            // Get all partner options from the page (stored in data attributes)
+            const allPartners = @json($partners->map(fn($p) => ['id' => $p->id, 'name' => $p->name, 'code' => $p->code])->values());
+            
+            // Filter partners: only show those who have access to this carrier
+            allPartners.forEach(partner => {
+                const partnerHasCarrier = !leadCarrierId || 
+                    (partnerCarriers[partner.id] && partnerCarriers[partner.id].includes(leadCarrierId));
+                
+                if (partnerHasCarrier) {
+                    const option = document.createElement('option');
+                    option.value = partner.name;
+                    option.dataset.partnerId = partner.id;
+                    option.textContent = partner.name + (partner.code ? ' (' + partner.code + ')' : '');
+                    if (partner.name === currentPartner) {
+                        option.selected = true;
+                    }
+                    partnerSelect.appendChild(option);
+                }
+            });
+            
+            // Show warning if no partners available for this carrier
+            if (leadCarrierId && partnerSelect.options.length === 1) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '⚠️ No partners available for this carrier';
+                option.disabled = true;
+                option.style.color = '#dc3545';
+                partnerSelect.appendChild(option);
+            }
 
             // Show/hide conditional fields based on current decision
             const decision = this.dataset.decision || '';

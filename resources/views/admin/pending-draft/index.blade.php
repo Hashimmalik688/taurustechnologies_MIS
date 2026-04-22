@@ -217,6 +217,9 @@
 @section('content')
 <div class="container-fluid px-3 py-3" style="max-width:1600px">
 
+    <!-- Sales Flow Navigation -->
+    <x-sales-flow-navigation currentStage="draft" />
+
     {{-- Header --}}
     <div class="d-flex align-items-center justify-content-between mb-3">
         <div>

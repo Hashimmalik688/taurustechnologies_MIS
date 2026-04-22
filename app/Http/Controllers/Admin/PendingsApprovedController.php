@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AgentCarrierState;
 use App\Models\AuditLog;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
@@ -135,13 +136,22 @@ class PendingsApprovedController extends Controller
             ->get(['id', 'name']);
         
         // Active partners for modal dropdown
-        $partners = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $partners = Partner::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']);
+        
+        // Build partner-carrier mapping for frontend validation
+        $partnerCarriers = AgentCarrierState::whereNotNull('partner_id')
+            ->select('partner_id', 'insurance_carrier_id')
+            ->distinct()
+            ->get()
+            ->groupBy('partner_id')
+            ->map(fn($states) => $states->pluck('insurance_carrier_id')->toArray())
+            ->toArray();
 
         return view('admin.pendings-approved.index', compact(
             'leads', 'carriers', 'search', 'carrier',
             'dateFrom', 'dateTo', 'status',
             'pendingCount', 'approvedCount', 'declinedCount', 'underwritingCount',
-            'partners'
+            'partners', 'partnerCarriers'
         ));
     }
 
@@ -261,7 +271,32 @@ class PendingsApprovedController extends Controller
         if ($request->submission_status === 'approved') {
             if ($request->filled('policy_number'))    $lead->policy_number    = $request->policy_number;
             if ($request->filled('assigned_partner')) $lead->assigned_partner = $request->assigned_partner;
+            
+            // Validate partner has access to this carrier
             if ($request->partner_id) {
+                $carrierId = $lead->insurance_carrier_id;
+                
+                // Check if carrier is assigned - only validate if carrier is set
+                if ($carrierId) {
+                    $partnerHasCarrier = AgentCarrierState::where('partner_id', $request->partner_id)
+                        ->where('insurance_carrier_id', $carrierId)
+                        ->exists();
+                    
+                    if (!$partnerHasCarrier) {
+                        $partner = Partner::find($request->partner_id);
+                        $carrier = InsuranceCarrier::find($carrierId);
+                        
+                        return response()->json([
+                            'success' => false,
+                            'message' => sprintf(
+                                'Partner "%s" does not have access to carrier "%s". Please assign this carrier to the partner first or select a different partner.',
+                                $partner->name ?? 'Unknown',
+                                $carrier->name ?? 'Unknown'
+                            ),
+                        ], 422);
+                    }
+                }
+                
                 $lead->partner_id     = $request->partner_id;
                 $lead->partner_set_at = now();
             }

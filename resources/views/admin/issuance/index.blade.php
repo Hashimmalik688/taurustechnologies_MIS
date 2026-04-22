@@ -314,6 +314,9 @@
 @endsection
 
 @section('content')
+    <!-- Sales Flow Navigation -->
+    <x-sales-flow-navigation currentStage="contracts" />
+
     {{-- Page Header --}}
     <div class="container-fluid px-0 pb-2" style="max-width:1600px;">
         <h1 class="sl-page-title"><i class="bx bx-file-find"></i> Pending Contracts</h1>
