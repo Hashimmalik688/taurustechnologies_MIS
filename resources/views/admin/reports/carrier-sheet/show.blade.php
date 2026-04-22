@@ -114,7 +114,8 @@
     text-align:center; vertical-align:middle; color:var(--cs-text-1); white-space:nowrap;
 }
 .cs-dtable tbody tr:nth-child(even) { background:var(--cs-row-alt); }
-.cs-dtable tbody tr:hover { background:rgba(0,0,0,.04); }
+.cs-dtable tbody tr:hover { background:rgba(0,0,0,.04); cursor:pointer; }
+.cs-dtable tbody tr:active { background:rgba(0,0,0,.08); }
 
 /* Status row colors */
 .cs-dtable tr.cs-row-approved   { background:#FFF8E1 !important; }
@@ -166,6 +167,33 @@
 .cs-daily-table { width:100%; max-width:400px; font-size:.68rem; border-collapse:collapse; }
 .cs-daily-table th { background:var(--cs-title); color:#fff; padding:.3rem .5rem; font-size:.58rem; text-transform:uppercase; }
 .cs-daily-table td { padding:.25rem .5rem; border-bottom:1px solid var(--cs-border); }
+
+/* ── Pipeline stage badge ──────────────────────────── */
+.cs-pipeline-badge {
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width:24px; height:18px; padding:.1rem .35rem;
+    border-radius:.25rem; font-size:.55rem; font-weight:800;
+    text-transform:uppercase; letter-spacing:.3px;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+    cursor:help; transition:all .15s;
+}
+.cs-pipeline-badge:hover {
+    transform:translateY(-1px);
+    box-shadow:0 2px 5px rgba(0,0,0,.25);
+}
+
+/* ── Copy toast notification ───────────────────────── */
+.cs-copy-toast {
+    position:fixed; bottom:20px; right:20px; z-index:9999;
+    background:#28A745; color:#fff; padding:.7rem 1.2rem;
+    border-radius:.4rem; font-size:.75rem; font-weight:700;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
+    animation: csToastSlide 0.3s ease-out;
+}
+@keyframes csToastSlide {
+    from { transform:translateY(100%); opacity:0; }
+    to { transform:translateY(0); opacity:1; }
+}
 </style>
 @endsection
 
@@ -308,7 +336,18 @@
             </thead>
             <tbody>
                 @forelse($entries as $entry)
-                <tr class="cs-row-{{ strtolower($entry->status) }}" data-entry-id="{{ $entry->id }}" data-policy-type="{{ strtolower($entry->policy_type ?? '') }}" data-status="{{ strtolower($entry->status ?? '') }}" data-commission="{{ $entry->commission ?? 0 }}" data-paid="{{ $entry->paid_amount ?? 0 }}" data-cb="{{ $entry->chargeback_amount ?? 0 }}">
+                <tr class="cs-row-{{ strtolower($entry->status) }} cs-clickable-row" 
+                    data-entry-id="{{ $entry->id }}" 
+                    data-policy-type="{{ strtolower($entry->policy_type ?? '') }}" 
+                    data-status="{{ strtolower($entry->status ?? '') }}" 
+                    data-commission="{{ $entry->commission ?? 0 }}" 
+                    data-paid="{{ $entry->paid_amount ?? 0 }}" 
+                    data-cb="{{ $entry->chargeback_amount ?? 0 }}"
+                    data-copy-policy="{{ $entry->policy_number }}"
+                    data-copy-name="{{ $entry->name }}"
+                    data-copy-premium="{{ number_format($entry->premium, 2) }}"
+                    data-copy-fv="{{ $entry->face_value }}"
+                    onclick="copyRowData(this, event)">
                     <td>{{ $entry->sr_number }}</td>
                     <td>{{ $entry->entry_date?->format('d-M-y') }}</td>
                     <td class="cs-left">{{ $entry->policy_number }}</td>
@@ -316,7 +355,15 @@
                     <td>{{ $entry->face_value }}</td>
                     <td class="cs-money">{{ number_format($entry->premium, 2) }}</td>
                     <td>
-                        <span style="text-transform:uppercase; font-size:.6rem; font-weight:600;">{{ $entry->policy_type }}</span>
+                        @php $stage = $entry->getPipelineStage(); @endphp
+                        <div style="display:flex; align-items:center; gap:.35rem; justify-content:center;">
+                            <span class="cs-pipeline-badge" 
+                                  style="background-color:{{ $stage['color'] }}; color:#fff;" 
+                                  title="{{ $stage['name'] }}">
+                                {{ $stage['label'] }}
+                            </span>
+                            <span style="text-transform:uppercase; font-size:.6rem; font-weight:600;">{{ $entry->policy_type }}</span>
+                        </div>
                     </td>
                     <td>
                         <span class="cs-status cs-status-{{ strtolower($entry->status) }}">{{ ucfirst($entry->status) }}</span>
@@ -839,6 +886,56 @@
             alert('Error: ' + e.message);
         }
     };
+
+    // ── Copy Row Data ───────────────────────────────────
+    window.copyRowData = function(row, event) {
+        // Don't trigger if clicking on action buttons
+        if (event.target.closest('.cs-row-actions') || event.target.closest('button')) {
+            return;
+        }
+
+        const policy = row.dataset.copyPolicy || '';
+        const name = row.dataset.copyName || '';
+        const fv = row.dataset.copyFv || '';
+        const premium = row.dataset.copyPremium || '';
+        const status = row.dataset.status || '';
+        
+        // Format copy text
+        const copyText = `Policy: ${policy}\nName: ${name}\nFace Value: ${fv}\nPremium: ${premium}\nStatus: ${status.toUpperCase()}`;
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(copyText)
+            .then(() => {
+                showCopyToast('Row copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Copy failed:', err);
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = copyText;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showCopyToast('Row copied to clipboard!');
+            });
+    };
+
+    function showCopyToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'cs-copy-toast';
+        toast.innerHTML = `<i class="bx bx-check-circle" style="margin-right:.3rem;"></i>${message}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(100%)';
+            toast.style.transition = 'all 0.3s ease-in';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
 })();
 </script>
 @endsection

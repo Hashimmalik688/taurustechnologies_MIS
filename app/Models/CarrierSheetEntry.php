@@ -46,6 +46,12 @@ class CarrierSheetEntry extends Model
         'sr_number'         => 'integer',
     ];
 
+    /**
+     * Cache the lead lookup to avoid multiple queries per entry.
+     */
+    protected $leadCache = null;
+    protected $leadCacheLoaded = false;
+
     /* ── Relationships ─────────────────────────────────── */
 
     public function carrierRate(): BelongsTo
@@ -56,6 +62,57 @@ class CarrierSheetEntry extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the associated lead by policy number (primary) or name (fallback).
+     * Implements intelligent matching with caching to avoid repeated queries.
+     * 
+     * Matching priority:
+     * 1. Exact policy_number match
+     * 2. Exact cn_name match
+     * 3. Case-insensitive partial name match
+     */
+    public function lead()
+    {
+        // Return cached result if already loaded
+        if ($this->leadCacheLoaded) {
+            return $this->leadCache;
+        }
+
+        $lead = null;
+
+        // Try matching by policy number first (most reliable)
+        if (!empty($this->policy_number)) {
+            $lead = Lead::where('policy_number', $this->policy_number)->first();
+            if ($lead) {
+                $this->leadCache = $lead;
+                $this->leadCacheLoaded = true;
+                return $lead;
+            }
+        }
+
+        // Fallback: match by name if policy number didn't work
+        if (!empty($this->name)) {
+            // Try exact match first
+            $lead = Lead::where('cn_name', $this->name)->first();
+            if ($lead) {
+                $this->leadCache = $lead;
+                $this->leadCacheLoaded = true;
+                return $lead;
+            }
+
+            // Try case-insensitive partial match as last resort
+            $lead = Lead::whereRaw('LOWER(cn_name) LIKE ?', ['%' . strtolower($this->name) . '%'])
+                ->orderByRaw('LENGTH(cn_name) ASC') // Prefer shorter matches (more precise)
+                ->first();
+        }
+
+        // Cache the result (even if null) to avoid repeated queries
+        $this->leadCache = $lead;
+        $this->leadCacheLoaded = true;
+
+        return $lead;
     }
 
     /* ── Status constants ──────────────────────────────── */
@@ -126,6 +183,64 @@ class CarrierSheetEntry extends Model
             'chargeback' => 'bg-danger',
             'declined'   => 'bg-orange',
             default      => 'bg-secondary',
+        };
+    }
+
+    /**
+     * Get sales pipeline stage abbreviation and info.
+     * Returns ['label' => 'PC', 'name' => 'Pending Contract', 'color' => '#color']
+     */
+    public function getPipelineStage(): array
+    {
+        $lead = $this->lead();
+
+        if (!$lead) {
+            return [
+                'label' => '—',
+                'name'  => 'Unknown',
+                'color' => $this->getPipelineColor(),
+            ];
+        }
+
+        // Determine pipeline stage based on lead timestamps
+        if ($lead->paid_sale_at) {
+            $label = 'PS';
+            $name = 'Paid Sales';
+        } elseif ($lead->pending_draft_at) {
+            $label = 'PD';
+            $name = 'Pending Draft';
+        } elseif ($lead->assigned_followup_person) {
+            $label = 'FU';
+            $name = 'Followup';
+        } elseif ($lead->pending_contract_at) {
+            $label = 'PC';
+            $name = 'Pending Contract';
+        } elseif ($lead->pending_approval_at) {
+            $label = 'PA';
+            $name = 'Pending Approval';
+        } else {
+            $label = 'SR';
+            $name = 'Sales Record';
+        }
+
+        return [
+            'label' => $label,
+            'name'  => $name,
+            'color' => $this->getPipelineColor(),
+        ];
+    }
+
+    /**
+     * Get color for pipeline badge based on current entry status.
+     */
+    public function getPipelineColor(): string
+    {
+        return match (strtolower($this->status)) {
+            'approved'   => '#FFC107', // Yellow
+            'paid'       => '#28A745', // Green
+            'chargeback' => '#DC3545', // Red
+            'declined'   => '#DC3545', // Red
+            default      => '#6C757D', // Gray
         };
     }
 }
