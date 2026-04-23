@@ -184,6 +184,11 @@ class CarrierSheetController extends Controller
         $validated['paid_amount'] = round(($validated['paid_amount'] ?? 0) / 2, 2);
         $validated['chargeback_amount'] = $validated['chargeback_amount'] ?? 0;
 
+        // Auto-derive period_month from entry_date if not provided
+        if (empty($validated['period_month']) && !empty($validated['entry_date'])) {
+            $validated['period_month'] = \Carbon\Carbon::parse($validated['entry_date'])->startOfMonth()->toDateString();
+        }
+
         $entry = new CarrierSheetEntry($validated);
         $this->service->recalculateEntry($entry);
         $entry->save();

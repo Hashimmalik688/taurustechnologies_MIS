@@ -620,20 +620,14 @@
         set('quickEntryDraftDate', lead.draft_date);
         set('quickEntryPaymentDate', lead.payment_date);
         
-        // Auto-select carrier sheet if suggested
-        if (lead.suggested_sheet) {
+        // Auto-select carrier sheet ONLY if none is currently selected
+        if (lead.suggested_sheet && !carrierSheetSelect.value) {
             carrierSheetSelect.value = lead.suggested_sheet;
-            carrierSheetSelect.classList.add('border-success');
-            setTimeout(() => {
-                carrierSheetSelect.classList.remove('border-success');
-            }, 2000);
-            
-            // Show success message
-            successAlert.textContent = '✓ Lead info loaded! Carrier sheet auto-matched based on partner code.';
-            successAlert.style.display = 'block';
-            setTimeout(() => {
-                successAlert.style.display = 'none';
-            }, 3000);
+            // Update modal title
+            const label = carrierSheetSelect.options[carrierSheetSelect.selectedIndex]?.text;
+            if (label) {
+                quickEntryModal.querySelector('.modal-title').innerHTML = `<i class="bx bx-plus me-1"></i> Add Entry — ${label}`;
+            }
         }
         
         suggestBox.style.display = 'none';
