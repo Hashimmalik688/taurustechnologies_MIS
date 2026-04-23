@@ -135,6 +135,14 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, $id)
     {
+        \Log::info("=== USER UPDATE STARTED ===", [
+            'user_id' => $id,
+            'request_all' => $request->all(),
+            'request_roles' => $request->roles,
+            'has_roles' => $request->has('roles'),
+            'ip' => $request->ip()
+        ]);
+
         $user = User::findOrFail($id);
 
         // Store old values for audit log
@@ -200,7 +208,9 @@ class UserController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->route('users.index')->with('error', 'User updated but roles failed to update: ' . $e->getMessage());
+            return request()->expectsJson()
+                ? response()->json(['success' => false, 'message' => 'User updated but roles failed: ' . $e->getMessage()], 500)
+                : redirect()->route('users.index')->with('error', 'User updated but roles failed to update: ' . $e->getMessage());
         }
 
         // Sync with EMS - update employee record
@@ -247,7 +257,9 @@ class UserController extends Controller
             ]
         );
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return request()->expectsJson()
+            ? response()->json(['success' => true, 'message' => 'User updated successfully.'])
+            : redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
 
     public function destroy($id)

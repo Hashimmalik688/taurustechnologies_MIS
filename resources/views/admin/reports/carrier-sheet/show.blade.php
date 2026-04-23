@@ -863,7 +863,9 @@
                 div.style.cssText = 'padding:7px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:.82rem;';
                 div.innerHTML = `<strong>${lead.name}</strong>`
                     + (lead.policy_number ? ` &nbsp;<span style="color:#6c757d">${lead.policy_number}</span>` : '')
-                    + (lead.premium       ? ` &nbsp;<span style="color:#0d6efd">$${lead.premium}</span>` : '');
+                    + (lead.premium       ? ` &nbsp;<span style="color:#0d6efd">$${lead.premium}</span>` : '')
+                    + (lead.face_value    ? ` &nbsp;<span style="background:#e9ecef;border-radius:3px;padding:1px 5px;font-size:.72rem;color:#495057">${lead.face_value}</span>` : '')
+                    + (lead.carrier_name  ? ` &nbsp;<span style="color:#6c757d;font-size:.72rem">${lead.carrier_name}</span>` : '');
                 div.addEventListener('mouseover', () => div.style.background = '#f8f9fa');
                 div.addEventListener('mouseout',  () => div.style.background = '');
                 div.addEventListener('mousedown', (e) => { e.preventDefault(); fillFromLead(lead); });

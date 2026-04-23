@@ -50,8 +50,14 @@
 
         .role-grid { display:grid;grid-template-columns:1fr 1fr;gap:.15rem .75rem }
         .role-check { display:flex;align-items:center;gap:.35rem;padding:.2rem 0;font-size:.78rem }
-        .role-check input[type="checkbox"] { width:15px;height:15px;border-radius:4px;accent-color:#d4af37;cursor:pointer }
-        .role-check label { cursor:pointer;font-weight:500;color:var(--bs-body-color) }
+        .role-check input[type="checkbox"] { 
+            width:16px;height:16px;border-radius:4px;accent-color:#d4af37;cursor:pointer;
+            flex-shrink:0;margin:0;
+        }
+        .role-check input[type="checkbox"]:hover { 
+            outline:2px solid rgba(212,175,55,.2);outline-offset:1px;
+        }
+        .role-check label { cursor:pointer;font-weight:500;color:var(--bs-body-color);user-select:none }
         .role-section-lbl { font-size:.65rem;font-weight:700;color:#556ee6;text-transform:uppercase;letter-spacing:.3px;margin-top:.35rem;margin-bottom:.15rem;grid-column:1/-1 }
 
         .del-warn { text-align:center;padding:1.25rem;font-size:.82rem;color:var(--bs-body-color) }
@@ -194,10 +200,11 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.6rem"></button>
                     </div>
-                    <form action="{{ route('users.update', $user->id) }}" method="POST">
+                    <form class="edit-user-form" data-user-id="{{ $user->id }}" data-update-url="{{ route('users.update', $user->id) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="modal-body" style="max-height:70vh;overflow-y:auto;padding:1rem 1.25rem">
+                            <div class="ajax-form-msg" style="display:none;margin-bottom:.75rem"></div>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
                                 <div>
                                     <label class="f-label">Name</label>
@@ -332,7 +339,7 @@
                         </div>
                         <div class="modal-footer" style="border-top:1px solid rgba(0,0,0,.05);padding:.65rem 1.25rem">
                             <button type="button" class="act-btn a-danger" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="pipe-pill-apply" style="font-size:.72rem;padding:.32rem .75rem">
+                            <button type="button" class="pipe-pill-apply btn-save-user" data-user-id="{{ $user->id }}" style="font-size:.72rem;padding:.32rem .75rem">
                                 <i class="bx bx-save" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Update User
                             </button>
                         </div>
@@ -415,6 +422,83 @@
                         el.style.borderColor = '#f46a6a';
                         setTimeout(() => { el.style.borderColor = ''; }, 1200);
                     });
+                });
+            });
+
+            // AJAX form submission for all user edit forms
+            document.querySelectorAll('.btn-save-user').forEach(saveBtn => {
+                saveBtn.addEventListener('click', function() {
+                    const userId = this.dataset.userId;
+                    const form = document.querySelector('.edit-user-form[data-user-id="' + userId + '"]');
+                    const msgBox = form.querySelector('.ajax-form-msg');
+                    const url = form.dataset.updateUrl;
+                    const formData = new FormData(form);
+                    const clickedBtn = this;
+
+                    clickedBtn.disabled = true;
+                    clickedBtn.textContent = 'Saving...';
+                    msgBox.style.display = 'none';
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json().then(data => ({ status: response.status, data })))
+                    .then(({ status, data }) => {
+                        if (status === 200) {
+                            msgBox.style.display = 'block';
+                            msgBox.className = 'ajax-form-msg alert alert-success';
+                            msgBox.style.fontSize = '.75rem';
+                            msgBox.style.padding = '.4rem .65rem';
+                            msgBox.textContent = '✓ ' + (data.message || 'User updated successfully!');
+                            clickedBtn.disabled = false;
+                            clickedBtn.innerHTML = '<i class="bx bx-save" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Update User';
+                            setTimeout(() => { window.location.reload(); }, 1200);
+                        } else if (status === 422) {
+                            const errors = Object.values(data.errors || {}).flat().join(' | ');
+                            msgBox.style.display = 'block';
+                            msgBox.className = 'ajax-form-msg alert alert-danger';
+                            msgBox.style.fontSize = '.75rem';
+                            msgBox.style.padding = '.4rem .65rem';
+                            msgBox.textContent = 'Validation: ' + errors;
+                            clickedBtn.disabled = false;
+                            clickedBtn.innerHTML = '<i class="bx bx-save" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Update User';
+                        } else {
+                            msgBox.style.display = 'block';
+                            msgBox.className = 'ajax-form-msg alert alert-danger';
+                            msgBox.style.fontSize = '.75rem';
+                            msgBox.style.padding = '.4rem .65rem';
+                            msgBox.textContent = 'Error ' + status + ': ' + (data.message || 'Unknown error');
+                            clickedBtn.disabled = false;
+                            clickedBtn.innerHTML = '<i class="bx bx-save" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Update User';
+                        }
+                    })
+                    .catch(err => {
+                        msgBox.style.display = 'block';
+                        msgBox.className = 'ajax-form-msg alert alert-danger';
+                        msgBox.style.fontSize = '.75rem';
+                        msgBox.style.padding = '.4rem .65rem';
+                        msgBox.textContent = 'Network error: ' + err.message;
+                        clickedBtn.disabled = false;
+                        clickedBtn.innerHTML = '<i class="bx bx-save" style="font-size:.8rem;vertical-align:middle;margin-right:.15rem"></i> Update User';
+                    });
+                });
+            });
+
+            // Checkbox label click - let default behavior work naturally
+
+            // Add visual feedback on checkbox change
+            document.querySelectorAll('.role-check input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    console.log(this.id + ' changed to: ' + this.checked);
+                    this.parentElement.style.backgroundColor = this.checked ? 'rgba(212,175,55,.08)' : '';
+                    setTimeout(() => {
+                        this.parentElement.style.backgroundColor = '';
+                    }, 300);
                 });
             });
         });

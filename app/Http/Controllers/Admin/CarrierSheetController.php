@@ -446,15 +446,19 @@ class CarrierSheetController extends Controller
             return response()->json([]);
         }
 
+        // Filter for leads that have reached "Pending Contract" stage and beyond
+        // (includes Issued, Not Issued, Ready for Draft, Sent to Draft, Paid, etc.)
         $leads = \App\Models\Lead::query()
+            ->whereNotNull('pending_contract_at') // Reached Pending Contract stage
+            ->whereNull('policy_died_at') // Not cancelled/died
             ->where(function ($query) use ($q) {
                 $query->where('cn_name', 'like', "%{$q}%")
                       ->orWhere('policy_number', 'like', "%{$q}%");
             })
             ->whereNotNull('cn_name')
-            ->with(['partner:id,name,partner_code']) // Eager load partner
-            ->select(['id', 'cn_name', 'policy_number', 'coverage_amount', 'monthly_premium', 'policy_type', 'initial_draft_date', 'future_draft_date', 'partner_id', 'carrier_name', 'sale_at'])
-            ->orderByDesc('sale_at')
+            ->with(['partner:id,name,code']) // Eager load partner
+            ->select(['id', 'cn_name', 'policy_number', 'coverage_amount', 'monthly_premium', 'policy_type', 'initial_draft_date', 'future_draft_date', 'partner_id', 'carrier_name', 'pending_contract_at', 'issuance_status'])
+            ->orderByDesc('pending_contract_at')
             ->limit(12)
             ->get()
             ->map(function ($lead) {
@@ -476,8 +480,9 @@ class CarrierSheetController extends Controller
                     'policy_type'     => $lead->policy_type,
                     'draft_date'      => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
                     'payment_date'    => $lead->future_draft_date  ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d')  : null,
-                    'partner_code'    => $lead->partner?->partner_code,
+                    'partner_code'    => $lead->partner?->code,
                     'carrier_name'    => $lead->carrier_name,
+                    'issuance_status' => $lead->issuance_status,
                     'suggested_sheet' => $suggestedSheet,
                 ];
             });
@@ -491,7 +496,7 @@ class CarrierSheetController extends Controller
      */
     private function matchLeadToCarrierSheet($lead): ?int
     {
-        $partnerCode = $lead->partner?->partner_code;
+        $partnerCode = $lead->partner?->code;
         $carrierName = strtolower($lead->carrier_name ?? '');
         
         // Build matching logic: carrier abbreviation + partner code

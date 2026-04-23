@@ -305,17 +305,17 @@
 @canEditModule('carrier-sheet')
 <div class="modal fade" id="quickEntryModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
-        <form class="modal-content" id="quickEntryForm" method="POST">
+        <form class="modal-content" id="quickEntryForm">
             @csrf
-            <div class="modal-header">
-                <h6 class="modal-title fw-bold"><i class="bx bx-plus-circle me-1"></i> Quick Add Entry</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header" style="background:var(--cs-title); color:#fff;">
+                <h6 class="modal-title fw-bold"><i class="bx bx-plus me-1"></i> Add Entry</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="row g-3">
-                    {{-- Carrier Sheet Selection --}}
+                {{-- Row 1: Carrier Sheet + Date --}}
+                <div class="row g-2">
                     <div class="col-md-6">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Carrier Sheet *</label>
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Carrier Sheet *</label>
                         <select name="carrier_sheet_rate_id" id="quickEntryCarrierSheet" class="form-select form-select-sm" required>
                             <option value="">— Select Carrier Sheet —</option>
                             @foreach($carriers as $carrier)
@@ -323,93 +323,80 @@
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Lead Search --}}
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Search Lead (Optional)</label>
-                        <div class="position-relative">
-                            <input type="text" 
-                                   id="quickEntryLeadSearch" 
-                                   class="form-control form-control-sm" 
-                                   placeholder="Type name or policy number..."
-                                   autocomplete="off">
-                            <div id="quickEntrySearchResults" class="position-absolute w-100 bg-white border rounded shadow-sm" style="max-height:250px; overflow-y:auto; z-index:1050; display:none;"></div>
-                        </div>
-                        <small class="text-muted d-block mt-1" style="font-size:.65rem;">
-                            <i class="bx bx-info-circle"></i> Search will auto-populate fields and suggest matching carrier sheet
-                        </small>
-                    </div>
-
-                    {{-- Entry Date --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Entry Date *</label>
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Date *</label>
                         <input type="date" name="entry_date" id="quickEntryDate" class="form-control form-control-sm" required>
                     </div>
-
-                    {{-- Policy Number --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Policy Number *</label>
-                        <input type="text" name="policy_number" id="quickEntryPolicyNumber" class="form-control form-control-sm" required>
+                </div>
+                {{-- Row 2: Policy # + Name + Face Value --}}
+                <div class="row g-2 mt-1">
+                    <div class="col-md-3">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Policy #</label>
+                        <input type="text" name="policy_number" id="quickEntryPolicyNumber" class="form-control form-control-sm">
                     </div>
-
-                    {{-- Name --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Name *</label>
-                        <input type="text" name="name" id="quickEntryName" class="form-control form-control-sm" required>
+                    <div class="col-md-4" style="position:relative;">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Name *</label>
+                        <input type="text" name="name" id="quickEntryName" class="form-control form-control-sm" autocomplete="off" placeholder="Type to search leads..." required>
+                        <div id="quickEntryLeadSuggestions" style="display:none; position:absolute; z-index:9999; width:100%; background:#fff; border:1px solid #ced4da; border-radius:4px; max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.15); top:100%; left:0;"></div>
                     </div>
-
-                    {{-- Face Value --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Face Value</label>
-                        <input type="number" step="0.01" name="face_value" id="quickEntryFaceValue" class="form-control form-control-sm">
-                    </div>
-
-                    {{-- Premium --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Premium</label>
-                        <input type="number" step="0.01" name="premium" id="quickEntryPremium" class="form-control form-control-sm">
-                    </div>
-
-                    {{-- Policy Type --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Policy Type</label>
-                        <select name="policy_type" id="quickEntryPolicyType" class="form-select form-select-sm">
-                            <option value="">— Select —</option>
-                            <option value="IUL">IUL</option>
-                            <option value="Term">Term</option>
-                            <option value="Whole Life">Whole Life</option>
-                            <option value="Final Expense">Final Expense</option>
-                        </select>
-                    </div>
-
-                    {{-- Status --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Status *</label>
-                        <select name="status" id="quickEntryStatus" class="form-select form-select-sm" required>
-                            <option value="Paid">Paid</option>
-                            <option value="Approved">Approved</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Chargeback">Chargeback</option>
-                            <option value="Declined">Declined</option>
-                        </select>
-                    </div>
-
-                    {{-- Draft Date --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Draft Date</label>
-                        <input type="date" name="draft_date" id="quickEntryDraftDate" class="form-control form-control-sm">
-                    </div>
-
-                    {{-- Payment Date --}}
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold" style="font-size:.72rem;">Payment Date</label>
-                        <input type="date" name="payment_date" id="quickEntryPaymentDate" class="form-control form-control-sm">
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Face Value</label>
+                        <input type="text" name="face_value" id="quickEntryFaceValue" class="form-control form-control-sm" placeholder="e.g. 5K">
                     </div>
                 </div>
-
-                <div class="alert alert-info py-2 px-3 mt-3" style="font-size:.68rem;">
-                    <i class="bx bx-info-circle me-1"></i>
-                    Commission and balance will be calculated automatically based on carrier rates.
+                {{-- Row 3: Premium + Policy Type + Status + Draft Date + Payment Date + Paid Amt --}}
+                <div class="row g-2 mt-1">
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Premium *</label>
+                        <input type="number" step="0.01" name="premium" id="quickEntryPremium" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Policy Type</label>
+                        <select name="policy_type" id="quickEntryPolicyType" class="form-select form-select-sm">
+                            <option value="">—</option>
+                            <option value="iul">IUL</option>
+                            <option value="term">Term</option>
+                            <option value="whole life">Whole Life</option>
+                            <option value="final expense">Final Expense</option>
+                            <option value="graded">Graded</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Status *</label>
+                        <select name="status" id="quickEntryStatus" class="form-select form-select-sm" required>
+                            <option value="approved">APPROVED</option>
+                            <option value="paid">PAID</option>
+                            <option value="chargeback">CHARGEBACK</option>
+                            <option value="declined">DECLINED</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Draft Date</label>
+                        <input type="date" name="draft_date" id="quickEntryDraftDate" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Payment Date</label>
+                        <input type="date" name="payment_date" id="quickEntryPaymentDate" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Paid Amt</label>
+                        <input type="number" step="0.01" name="paid_amount" class="form-control form-control-sm" value="0">
+                    </div>
+                </div>
+                {{-- Row 4: Chargeback + Rate Override + Notes --}}
+                <div class="row g-2 mt-1">
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Chargeback $</label>
+                        <input type="number" step="0.01" name="chargeback_amount" class="form-control form-control-sm" value="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Rate Override</label>
+                        <input type="number" step="0.0001" name="rate_override" class="form-control form-control-sm" placeholder="optional">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label" style="font-size:.68rem; font-weight:700;">Notes</label>
+                        <input type="text" name="notes" class="form-control form-control-sm">
+                    </div>
                 </div>
 
                 <div id="quickEntryError" class="alert alert-danger py-2 px-3 mt-2" style="font-size:.68rem; display:none;"></div>
@@ -417,7 +404,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-sm btn-primary"><i class="bx bx-check me-1"></i> Add Entry</button>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bx bx-check me-1"></i> Add Entry</button>
             </div>
         </form>
     </div>
@@ -575,20 +562,22 @@
     
     const quickEntryModal = document.getElementById('quickEntryModal');
     const quickEntryForm = document.getElementById('quickEntryForm');
-    const leadSearchInput = document.getElementById('quickEntryLeadSearch');
-    const searchResults = document.getElementById('quickEntrySearchResults');
+    const nameInput = document.getElementById('quickEntryName');
+    const suggestBox = document.getElementById('quickEntryLeadSuggestions');
     const carrierSheetSelect = document.getElementById('quickEntryCarrierSheet');
     const errorAlert = document.getElementById('quickEntryError');
     const successAlert = document.getElementById('quickEntrySuccess');
+    const LOOKUP_URL = "{{ route('settings.reports.carrier-sheet.lead-lookup') }}";
 
-    let searchTimeout;
+    let debounceTimer = null;
     let selectedLeadId = null;
 
     // Reset form when modal opens
     if (quickEntryModal) {
         quickEntryModal.addEventListener('show.bs.modal', function() {
             quickEntryForm.reset();
-            searchResults.style.display = 'none';
+            suggestBox.style.display = 'none';
+            suggestBox.innerHTML = '';
             errorAlert.style.display = 'none';
             successAlert.style.display = 'none';
             selectedLeadId = null;
@@ -596,108 +585,111 @@
             // Set today's date as default
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('quickEntryDate').value = today;
+            // Reset modal title
+            quickEntryModal.querySelector('.modal-title').innerHTML = '<i class="bx bx-plus me-1"></i> Add Entry';
         });
     }
 
-    // Lead search with debounce
-    if (leadSearchInput) {
-        leadSearchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const query = this.value.trim();
-
-            if (query.length < 2) {
-                searchResults.style.display = 'none';
-                return;
-            }
-
-            searchTimeout = setTimeout(() => {
-                fetch(`/settings/reports/carrier-sheet/lead-lookup?q=${encodeURIComponent(query)}`)
-                    .then(res => res.json())
-                    .then(leads => {
-                        if (leads.length === 0) {
-                            searchResults.innerHTML = '<div class="p-2 text-muted" style="font-size:.7rem;">No leads found</div>';
-                            searchResults.style.display = 'block';
-                            return;
-                        }
-
-                        searchResults.innerHTML = leads.map(lead => `
-                            <div class="lead-result-item p-2 border-bottom" 
-                                 style="cursor:pointer; font-size:.72rem;" 
-                                 data-lead='${JSON.stringify(lead)}'>
-                                <div class="fw-bold">${lead.name}</div>
-                                <div class="text-muted small">
-                                    Policy: ${lead.policy_number || 'N/A'} | 
-                                    Premium: $${lead.premium || '0'} | 
-                                    Carrier: ${lead.carrier_name || 'N/A'}
-                                    ${lead.suggested_sheet ? '<span class="badge bg-success ms-1">Auto-match available</span>' : ''}
-                                </div>
-                            </div>
-                        `).join('');
-                        
-                        searchResults.style.display = 'block';
-
-                        // Attach click handlers
-                        searchResults.querySelectorAll('.lead-result-item').forEach(item => {
-                            item.addEventListener('click', function() {
-                                const lead = JSON.parse(this.dataset.lead);
-                                populateFormFromLead(lead);
-                                searchResults.style.display = 'none';
-                            });
-                        });
-                    })
-                    .catch(err => {
-                        console.error('Lead search error:', err);
-                        searchResults.innerHTML = '<div class="p-2 text-danger" style="font-size:.7rem;">Error searching leads</div>';
-                        searchResults.style.display = 'block';
-                    });
-            }, 300);
-        });
-
-        // Hide results when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!leadSearchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                searchResults.style.display = 'none';
+    // Update modal title when carrier sheet is selected
+    if (carrierSheetSelect) {
+        carrierSheetSelect.addEventListener('change', function() {
+            const label = this.options[this.selectedIndex]?.text;
+            const title = quickEntryModal.querySelector('.modal-title');
+            if (title) {
+                title.innerHTML = label && this.value
+                    ? `<i class="bx bx-plus me-1"></i> Add Entry — ${label}`
+                    : '<i class="bx bx-plus me-1"></i> Add Entry';
             }
         });
     }
 
-    // Populate form fields from selected lead
-    function populateFormFromLead(lead) {
+    // Function to fill form fields from selected lead
+    function fillFromLead(lead) {
         selectedLeadId = lead.id;
-        leadSearchInput.value = `${lead.name} - ${lead.policy_number}`;
-
-        // Auto-populate fields
-        document.getElementById('quickEntryPolicyNumber').value = lead.policy_number || '';
-        document.getElementById('quickEntryName').value = lead.name;
-        document.getElementById('quickEntryFaceValue').value = lead.face_value || '';
-        document.getElementById('quickEntryPremium').value = lead.premium || '';
-        document.getElementById('quickEntryPolicyType').value = lead.policy_type || '';
-
-        // Set dates if available
-        if (lead.draft_date) {
-            document.getElementById('quickEntryDraftDate').value = lead.draft_date;
-        }
-        if (lead.payment_date) {
-            document.getElementById('quickEntryPaymentDate').value = lead.payment_date;
-        }
-
+        nameInput.value = lead.name || '';
+        
+        const set = (id, v) => { 
+            const el = document.getElementById(id); 
+            if (el && v != null) el.value = v; 
+        };
+        
+        set('quickEntryPolicyNumber', lead.policy_number);
+        set('quickEntryFaceValue', lead.face_value);
+        set('quickEntryPremium', lead.premium);
+        set('quickEntryPolicyType', lead.policy_type ? lead.policy_type.toLowerCase() : null);
+        set('quickEntryDraftDate', lead.draft_date);
+        set('quickEntryPaymentDate', lead.payment_date);
+        
         // Auto-select carrier sheet if suggested
         if (lead.suggested_sheet) {
             carrierSheetSelect.value = lead.suggested_sheet;
-            
-            // Visual feedback
             carrierSheetSelect.classList.add('border-success');
             setTimeout(() => {
                 carrierSheetSelect.classList.remove('border-success');
             }, 2000);
+            
+            // Show success message
+            successAlert.textContent = '✓ Lead info loaded! Carrier sheet auto-matched based on partner code.';
+            successAlert.style.display = 'block';
+            setTimeout(() => {
+                successAlert.style.display = 'none';
+            }, 3000);
         }
+        
+        suggestBox.style.display = 'none';
+        suggestBox.innerHTML = '';
+    }
 
-        // Show success message
-        successAlert.textContent = `✓ Lead info loaded! ${lead.suggested_sheet ? 'Carrier sheet auto-matched based on partner code.' : ''}`;
-        successAlert.style.display = 'block';
-        setTimeout(() => {
-            successAlert.style.display = 'none';
-        }, 4000);
+    // Render suggestion list
+    function renderSuggestions(leads) {
+        suggestBox.innerHTML = '';
+        if (!leads.length) {
+            suggestBox.style.display = 'none';
+            return;
+        }
+        leads.forEach(lead => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding:7px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:.82rem;';
+            div.innerHTML = `<strong>${lead.name}</strong>`
+                + (lead.policy_number ? ` &nbsp;<span style="color:#6c757d">${lead.policy_number}</span>` : '')
+                + (lead.premium       ? ` &nbsp;<span style="color:#0d6efd">$${lead.premium}</span>` : '')
+                + (lead.face_value    ? ` &nbsp;<span style="background:#e9ecef;border-radius:3px;padding:1px 5px;font-size:.72rem;color:#495057">${lead.face_value}</span>` : '')
+                + (lead.carrier_name  ? ` &nbsp;<span style="color:#6c757d;font-size:.72rem">${lead.carrier_name}</span>` : '')
+                + (lead.suggested_sheet ? ` &nbsp;<span style="background:#d1e7dd;border-radius:3px;padding:1px 5px;font-size:.68rem;color:#0a3622">matched</span>` : '');
+            div.addEventListener('mouseover', () => div.style.background = '#f8f9fa');
+            div.addEventListener('mouseout', () => div.style.background = '');
+            div.addEventListener('mousedown', (e) => { e.preventDefault(); fillFromLead(lead); });
+            suggestBox.appendChild(div);
+        });
+        suggestBox.style.display = 'block';
+    }
+
+    // Name input autocomplete
+    if (nameInput) {
+        nameInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const q = nameInput.value.trim();
+            if (q.length < 2) { 
+                suggestBox.style.display = 'none'; 
+                return; 
+            }
+            
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`${LOOKUP_URL}?q=${encodeURIComponent(q)}`, { 
+                        headers: { 'Accept': 'application/json' } 
+                    });
+                    renderSuggestions(await res.json());
+                } catch (err) {
+                    console.error('Lead lookup error:', err);
+                    suggestBox.style.display = 'none';
+                }
+            }, 280);
+        });
+
+        nameInput.addEventListener('blur', () => {
+            setTimeout(() => { suggestBox.style.display = 'none'; }, 200);
+        });
     }
 
     // Form submission
