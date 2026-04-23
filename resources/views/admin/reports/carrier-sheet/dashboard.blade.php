@@ -199,6 +199,9 @@
         </div>
         <div style="margin-left:auto; display:flex; gap:.4rem; align-items:flex-end;">
             @canEditModule('carrier-sheet')
+            <button type="button" class="cs-btn cs-btn-primary" data-bs-toggle="modal" data-bs-target="#quickEntryModal">
+                <i class="bx bx-plus-circle"></i> Add Entry
+            </button>
             <button type="button" class="cs-btn cs-btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
                 <i class="bx bx-import"></i> Import .xlsx
             </button>
@@ -297,6 +300,129 @@
         </div>
     </div>
 </div>
+
+{{-- Quick Entry Modal --}}
+@canEditModule('carrier-sheet')
+<div class="modal fade" id="quickEntryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form class="modal-content" id="quickEntryForm" method="POST">
+            @csrf
+            <div class="modal-header">
+                <h6 class="modal-title fw-bold"><i class="bx bx-plus-circle me-1"></i> Quick Add Entry</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    {{-- Carrier Sheet Selection --}}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Carrier Sheet *</label>
+                        <select name="carrier_sheet_rate_id" id="quickEntryCarrierSheet" class="form-select form-select-sm" required>
+                            <option value="">— Select Carrier Sheet —</option>
+                            @foreach($carriers as $carrier)
+                                <option value="{{ $carrier->id }}">{{ $carrier->carrier_label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Lead Search --}}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Search Lead (Optional)</label>
+                        <div class="position-relative">
+                            <input type="text" 
+                                   id="quickEntryLeadSearch" 
+                                   class="form-control form-control-sm" 
+                                   placeholder="Type name or policy number..."
+                                   autocomplete="off">
+                            <div id="quickEntrySearchResults" class="position-absolute w-100 bg-white border rounded shadow-sm" style="max-height:250px; overflow-y:auto; z-index:1050; display:none;"></div>
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size:.65rem;">
+                            <i class="bx bx-info-circle"></i> Search will auto-populate fields and suggest matching carrier sheet
+                        </small>
+                    </div>
+
+                    {{-- Entry Date --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Entry Date *</label>
+                        <input type="date" name="entry_date" id="quickEntryDate" class="form-control form-control-sm" required>
+                    </div>
+
+                    {{-- Policy Number --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Policy Number *</label>
+                        <input type="text" name="policy_number" id="quickEntryPolicyNumber" class="form-control form-control-sm" required>
+                    </div>
+
+                    {{-- Name --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Name *</label>
+                        <input type="text" name="name" id="quickEntryName" class="form-control form-control-sm" required>
+                    </div>
+
+                    {{-- Face Value --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Face Value</label>
+                        <input type="number" step="0.01" name="face_value" id="quickEntryFaceValue" class="form-control form-control-sm">
+                    </div>
+
+                    {{-- Premium --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Premium</label>
+                        <input type="number" step="0.01" name="premium" id="quickEntryPremium" class="form-control form-control-sm">
+                    </div>
+
+                    {{-- Policy Type --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Policy Type</label>
+                        <select name="policy_type" id="quickEntryPolicyType" class="form-select form-select-sm">
+                            <option value="">— Select —</option>
+                            <option value="IUL">IUL</option>
+                            <option value="Term">Term</option>
+                            <option value="Whole Life">Whole Life</option>
+                            <option value="Final Expense">Final Expense</option>
+                        </select>
+                    </div>
+
+                    {{-- Status --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Status *</label>
+                        <select name="status" id="quickEntryStatus" class="form-select form-select-sm" required>
+                            <option value="Paid">Paid</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Chargeback">Chargeback</option>
+                            <option value="Declined">Declined</option>
+                        </select>
+                    </div>
+
+                    {{-- Draft Date --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Draft Date</label>
+                        <input type="date" name="draft_date" id="quickEntryDraftDate" class="form-control form-control-sm">
+                    </div>
+
+                    {{-- Payment Date --}}
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold" style="font-size:.72rem;">Payment Date</label>
+                        <input type="date" name="payment_date" id="quickEntryPaymentDate" class="form-control form-control-sm">
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 px-3 mt-3" style="font-size:.68rem;">
+                    <i class="bx bx-info-circle me-1"></i>
+                    Commission and balance will be calculated automatically based on carrier rates.
+                </div>
+
+                <div id="quickEntryError" class="alert alert-danger py-2 px-3 mt-2" style="font-size:.68rem; display:none;"></div>
+                <div id="quickEntrySuccess" class="alert alert-success py-2 px-3 mt-2" style="font-size:.68rem; display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-sm btn-primary"><i class="bx bx-check me-1"></i> Add Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endcanEditModule
 
 {{-- Import Modal --}}
 @canEditModule('carrier-sheet')
@@ -442,6 +568,195 @@
             }
         }
     });
+
+    // ══════════════════════════════════════════════════════════════════════
+    // QUICK ENTRY MODAL FUNCTIONALITY
+    // ══════════════════════════════════════════════════════════════════════
+    
+    const quickEntryModal = document.getElementById('quickEntryModal');
+    const quickEntryForm = document.getElementById('quickEntryForm');
+    const leadSearchInput = document.getElementById('quickEntryLeadSearch');
+    const searchResults = document.getElementById('quickEntrySearchResults');
+    const carrierSheetSelect = document.getElementById('quickEntryCarrierSheet');
+    const errorAlert = document.getElementById('quickEntryError');
+    const successAlert = document.getElementById('quickEntrySuccess');
+
+    let searchTimeout;
+    let selectedLeadId = null;
+
+    // Reset form when modal opens
+    if (quickEntryModal) {
+        quickEntryModal.addEventListener('show.bs.modal', function() {
+            quickEntryForm.reset();
+            searchResults.style.display = 'none';
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+            selectedLeadId = null;
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('quickEntryDate').value = today;
+        });
+    }
+
+    // Lead search with debounce
+    if (leadSearchInput) {
+        leadSearchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/settings/reports/carrier-sheet/lead-lookup?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(leads => {
+                        if (leads.length === 0) {
+                            searchResults.innerHTML = '<div class="p-2 text-muted" style="font-size:.7rem;">No leads found</div>';
+                            searchResults.style.display = 'block';
+                            return;
+                        }
+
+                        searchResults.innerHTML = leads.map(lead => `
+                            <div class="lead-result-item p-2 border-bottom" 
+                                 style="cursor:pointer; font-size:.72rem;" 
+                                 data-lead='${JSON.stringify(lead)}'>
+                                <div class="fw-bold">${lead.name}</div>
+                                <div class="text-muted small">
+                                    Policy: ${lead.policy_number || 'N/A'} | 
+                                    Premium: $${lead.premium || '0'} | 
+                                    Carrier: ${lead.carrier_name || 'N/A'}
+                                    ${lead.suggested_sheet ? '<span class="badge bg-success ms-1">Auto-match available</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                        
+                        searchResults.style.display = 'block';
+
+                        // Attach click handlers
+                        searchResults.querySelectorAll('.lead-result-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                const lead = JSON.parse(this.dataset.lead);
+                                populateFormFromLead(lead);
+                                searchResults.style.display = 'none';
+                            });
+                        });
+                    })
+                    .catch(err => {
+                        console.error('Lead search error:', err);
+                        searchResults.innerHTML = '<div class="p-2 text-danger" style="font-size:.7rem;">Error searching leads</div>';
+                        searchResults.style.display = 'block';
+                    });
+            }, 300);
+        });
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!leadSearchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    }
+
+    // Populate form fields from selected lead
+    function populateFormFromLead(lead) {
+        selectedLeadId = lead.id;
+        leadSearchInput.value = `${lead.name} - ${lead.policy_number}`;
+
+        // Auto-populate fields
+        document.getElementById('quickEntryPolicyNumber').value = lead.policy_number || '';
+        document.getElementById('quickEntryName').value = lead.name;
+        document.getElementById('quickEntryFaceValue').value = lead.face_value || '';
+        document.getElementById('quickEntryPremium').value = lead.premium || '';
+        document.getElementById('quickEntryPolicyType').value = lead.policy_type || '';
+
+        // Set dates if available
+        if (lead.draft_date) {
+            document.getElementById('quickEntryDraftDate').value = lead.draft_date;
+        }
+        if (lead.payment_date) {
+            document.getElementById('quickEntryPaymentDate').value = lead.payment_date;
+        }
+
+        // Auto-select carrier sheet if suggested
+        if (lead.suggested_sheet) {
+            carrierSheetSelect.value = lead.suggested_sheet;
+            
+            // Visual feedback
+            carrierSheetSelect.classList.add('border-success');
+            setTimeout(() => {
+                carrierSheetSelect.classList.remove('border-success');
+            }, 2000);
+        }
+
+        // Show success message
+        successAlert.textContent = `✓ Lead info loaded! ${lead.suggested_sheet ? 'Carrier sheet auto-matched based on partner code.' : ''}`;
+        successAlert.style.display = 'block';
+        setTimeout(() => {
+            successAlert.style.display = 'none';
+        }, 4000);
+    }
+
+    // Form submission
+    if (quickEntryForm) {
+        quickEntryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const carrierSheetId = carrierSheetSelect.value;
+            if (!carrierSheetId) {
+                errorAlert.textContent = 'Please select a carrier sheet';
+                errorAlert.style.display = 'block';
+                return;
+            }
+
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Saving...';
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+
+            // Add lead_id if one was selected
+            if (selectedLeadId) {
+                formData.append('lead_id', selectedLeadId);
+            }
+
+            fetch(`/settings/reports/carrier-sheet/${carrierSheetId}/entries`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    successAlert.textContent = '✓ Entry added successfully!';
+                    successAlert.style.display = 'block';
+                    
+                    // Close modal and reload page after 1 second
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error(data.message || 'Failed to add entry');
+                }
+            })
+            .catch(err => {
+                console.error('Form submission error:', err);
+                errorAlert.textContent = err.message || 'An error occurred while saving the entry';
+                errorAlert.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            });
+        });
+    }
 })();
 </script>
 @endpush

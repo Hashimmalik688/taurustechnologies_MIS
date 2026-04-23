@@ -25,6 +25,9 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->timestamps();
+
+            // ── Performance indexes ────────────────────────────────
+            $table->index('is_active');  // filter active carriers
         });
 
         // ── Per-policy entries (rows 4–200 on each carrier sheet) ─
@@ -54,8 +57,15 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
+            // ── Performance indexes ────────────────────────────────
             $table->index(['carrier_sheet_rate_id', 'period_month']);
             $table->index(['carrier_sheet_rate_id', 'status']);
+            $table->index('policy_number');                                    // lead lookup
+            $table->index('name');                                             // lead lookup
+            $table->index('entry_date');                                       // date filtering
+            $table->index('deleted_at');                                       // soft delete queries
+            $table->index(['carrier_sheet_rate_id', 'entry_date']);          // sheet + date queries
+            $table->index(['carrier_sheet_rate_id', 'status', 'period_month']); // summary calculations
         });
 
         // ── Opening chargebacks (Row 3 per carrier per month) ─────
@@ -68,7 +78,9 @@ return new class extends Migration
             $table->decimal('amount', 12, 2)->default(0);
             $table->timestamps();
 
+            // ── Performance indexes ────────────────────────────────
             $table->unique(['carrier_sheet_rate_id', 'period_month'], 'cs_opening_cb_rate_month_unique');
+            $table->index('period_month');  // period filtering
         });
     }
 

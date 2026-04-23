@@ -126,12 +126,15 @@
             </div>
             <div>
                 <label>From</label>
-                <input type="date" name="date_from" class="form-control" value="{{ $dateFrom }}" style="width:135px;">
+                <input type="date" name="date_from" id="date_from" class="form-control" value="{{ $dateFrom }}" style="width:135px;">
             </div>
             <div>
                 <label>To</label>
-                <input type="date" name="date_to" class="form-control" value="{{ $dateTo }}" style="width:135px;">
+                <input type="date" name="date_to" id="date_to" class="form-control" value="{{ $dateTo }}" style="width:135px;">
             </div>
+            <button type="button" id="btn-today" class="a-btn" style="background:rgba(85,110,230,.15);color:#556ee6;border-color:rgba(85,110,230,.25);height:2rem;" title="Set dates to today">
+                <i class="bx bx-calendar-check"></i> Today
+            </button>
             <button type="submit" class="a-btn" style="background:rgba(52,195,143,.2);color:#1a8754;border-color:rgba(52,195,143,.3);height:2rem;">
                 <i class="bx bx-search-alt-2"></i> Filter
             </button>
@@ -278,6 +281,18 @@
 <script>
 (function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+    // ── Today Button ──
+    const btnToday = document.getElementById('btn-today');
+    if (btnToday) {
+        btnToday.addEventListener('click', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date_from').value = today;
+            document.getElementById('date_to').value = today;
+            // Auto-submit the form after setting dates
+            this.closest('form').submit();
+        });
+    }
 
     // ── Post single sale to Ledger ──
     document.querySelectorAll('.btn-post-ledger').forEach(btn => {

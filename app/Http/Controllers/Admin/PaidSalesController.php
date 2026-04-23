@@ -56,15 +56,12 @@ class PaidSalesController extends Controller
             $query->where('partner_id', $partnerId);
         }
 
-        // Skip date filters when a search term is active so searching by
-        // policy number (or name) returns results regardless of date range.
-        if (!$search) {
-            if ($dateFrom) {
-                $query->whereDate('sale_date', '>=', $dateFrom);
-            }
-            if ($dateTo) {
-                $query->whereDate('sale_date', '<=', $dateTo);
-            }
+        // Apply date filters (always apply them to respect user selection)
+        if ($dateFrom) {
+            $query->whereDate('paid_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate('paid_at', '<=', $dateTo);
         }
 
         // Stats — KPI totals must reflect ALL filtered leads, not just the current page.

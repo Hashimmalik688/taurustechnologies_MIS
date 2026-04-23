@@ -52,6 +52,12 @@ class CarrierSheetEntry extends Model
     protected $leadCache = null;
     protected $leadCacheLoaded = false;
 
+    /**
+     * Static cache for batch lead lookups to avoid repeated queries
+     * across multiple entries in the same request.
+     */
+    protected static $batchLeadCache = [];
+
     /* ── Relationships ─────────────────────────────────── */
 
     public function carrierRate(): BelongsTo
@@ -72,11 +78,26 @@ class CarrierSheetEntry extends Model
      * 1. Exact policy_number match (skips placeholder values like NA, N/A, TBD)
      * 2. Exact cn_name match
      * 3. Case-insensitive partial name match
+     * 
+     * Performance: Uses both instance cache and static batch cache to minimize queries.
      */
     public function lead()
     {
+        // Check if already set as cached_lead attribute (from controller preload)
+        if (isset($this->cached_lead)) {
+            return $this->cached_lead;
+        }
+        
         // Return cached result if already loaded
         if ($this->leadCacheLoaded) {
+            return $this->leadCache;
+        }
+
+        // Check static batch cache first
+        $cacheKey = $this->generateLeadCacheKey();
+        if (isset(self::$batchLeadCache[$cacheKey])) {
+            $this->leadCache = self::$batchLeadCache[$cacheKey];
+            $this->leadCacheLoaded = true;
             return $this->leadCache;
         }
 
@@ -138,8 +159,88 @@ class CarrierSheetEntry extends Model
         // Cache the result (even if null) to avoid repeated queries
         $this->leadCache = $lead;
         $this->leadCacheLoaded = true;
+        self::$batchLeadCache[$cacheKey] = $lead;
 
         return $lead;
+    }
+
+    /**
+     * Generate a unique cache key for lead lookup.
+     */
+    private function generateLeadCacheKey(): string
+    {
+        return md5(($this->policy_number ?? '') . '|' . ($this->name ?? ''));
+    }
+
+    /**
+     * Batch preload leads for a collection of entries to avoid N+1 queries.
+     * Call this before iterating over entries that need lead data.
+     * 
+     * @param \Illuminate\Support\Collection $entries
+     * @return void
+     */
+    public static function preloadLeads($entries): void
+    {
+        if ($entries->isEmpty()) {
+            return;
+        }
+
+        // Collect unique policy numbers and names
+        $policyNumbers = $entries
+            ->pluck('policy_number')
+            ->filter(fn($pn) => !empty($pn) && !static::isPlaceholderPolicyNumberStatic($pn))
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $names = $entries
+            ->pluck('name')
+            ->filter(fn($n) => !empty($n))
+            ->unique()
+            ->values()
+            ->toArray();
+
+        // Batch load all potential leads in 2 queries
+        $leadsByPolicyNumber = [];
+        $leadsByName = [];
+
+        if (!empty($policyNumbers)) {
+            $leadsByPolicyNumber = Lead::whereIn('policy_number', $policyNumbers)
+                ->get()
+                ->keyBy('policy_number');
+        }
+
+        if (!empty($names)) {
+            $leadsByName = Lead::whereIn('cn_name', $names)
+                ->get()
+                ->keyBy('cn_name');
+        }
+
+        // Populate cache for each entry
+        foreach ($entries as $entry) {
+            $cacheKey = $entry->generateLeadCacheKey();
+            $lead = null;
+
+            // Try policy number first
+            if (!empty($entry->policy_number) && !static::isPlaceholderPolicyNumberStatic($entry->policy_number)) {
+                $lead = $leadsByPolicyNumber[$entry->policy_number] ?? null;
+            }
+
+            // Fallback to name
+            if (!$lead && !empty($entry->name)) {
+                $lead = $leadsByName[$entry->name] ?? null;
+            }
+
+            self::$batchLeadCache[$cacheKey] = $lead;
+        }
+    }
+
+    /**
+     * Clear the batch lead cache (useful for testing or memory management).
+     */
+    public static function clearBatchLeadCache(): void
+    {
+        self::$batchLeadCache = [];
     }
 
     /* ── Status constants ──────────────────────────────── */
@@ -158,17 +259,48 @@ class CarrierSheetEntry extends Model
 
     /* ── Scopes ────────────────────────────────────────── */
 
+    /**
+     * Eager load common relationships to prevent N+1 queries.
+     */
+    public function scopeWithStandardRelations($query)
+    {
+        return $query->with(['carrierRate', 'creator']);
+    }
+
+    /**
+     * Optimized period filtering that uses indexes efficiently.
+     */
     public function scopeForPeriod($query, ?string $month)
     {
-        if ($month) {
-            return $query->where('period_month', $month);
+        if (!$month) {
+            return $query;
         }
-        return $query;
+        
+        $parsed = \Carbon\Carbon::parse($month);
+        return $query->where(function ($q) use ($parsed) {
+            $q->where(function ($q2) use ($parsed) {
+                $q2->whereNotNull('period_month')
+                   ->whereYear('period_month', $parsed->year)
+                   ->whereMonth('period_month', $parsed->month);
+            })->orWhere(function ($q2) use ($parsed) {
+                $q2->whereNull('period_month')
+                   ->whereYear('entry_date', $parsed->year)
+                   ->whereMonth('entry_date', $parsed->month);
+            });
+        });
     }
 
     public function scopeByStatus($query, string $status)
     {
         return $query->where('status', $status);
+    }
+
+    /**
+     * Scope for active (non-deleted) entries - explicitly uses index.
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
     }
 
     /* ── Helpers ───────────────────────────────────────── */
@@ -178,6 +310,14 @@ class CarrierSheetEntry extends Model
      * Placeholder values should be skipped during lead matching to avoid false positives.
      */
     private function isPlaceholderPolicyNumber(?string $policyNumber): bool
+    {
+        return static::isPlaceholderPolicyNumberStatic($policyNumber);
+    }
+
+    /**
+     * Static version for use in static methods.
+     */
+    private static function isPlaceholderPolicyNumberStatic(?string $policyNumber): bool
     {
         if (empty($policyNumber)) {
             return true;
@@ -281,10 +421,12 @@ class CarrierSheetEntry extends Model
     /**
      * Get sales pipeline stage abbreviation and info.
      * Returns ['label' => 'PC', 'name' => 'Pending Contract', 'color' => '#color']
+     * Optimized to use cached_lead if available to avoid N+1 queries.
      */
     public function getPipelineStage(): array
     {
-        $lead = $this->lead();
+        // Use cached_lead if available (set by controller), otherwise lookup
+        $lead = $this->cached_lead ?? $this->lead();
 
         if (!$lead) {
             return [
@@ -304,7 +446,7 @@ class CarrierSheetEntry extends Model
         }
 
         // Paid Sales
-        if ($lead->paid_sale_at) {
+        if ($lead->paid_at) {
             return [
                 'label' => 'PAID',
                 'name'  => 'Paid Sales',

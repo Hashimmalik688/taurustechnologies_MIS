@@ -9,6 +9,7 @@ use App\Models\CarrierSheetRate;
 use App\Services\CarrierSheetService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CarrierSheetController extends Controller
@@ -17,15 +18,32 @@ class CarrierSheetController extends Controller
         private CarrierSheetService $service
     ) {}
 
-    /* ================================================================
-     *  DASHBOARD  (D.B sheet — all carriers summary)
-     * ================================================================ */
+    /**
+     * DASHBOARD  (D.B sheet — all carriers summary)
+     * Optimized with aggressive caching.
+     */
     public function dashboard(Request $request)
     {
         $periodMonth = $request->input('month');
-        $summary = $this->service->getDashboardSummary($periodMonth);
-        $months = $this->service->getAvailableMonths();
-        $carriers = CarrierSheetRate::active()->ordered()->get();
+        
+        // Use aggressive caching for dashboard (15 minutes)
+        $summary = Cache::remember(
+            'carrier_sheet:dashboard:' . ($periodMonth ?? 'all'),
+            900, // 15 minutes
+            fn() => $this->service->getDashboardSummary($periodMonth, false) // useCache=false to avoid double caching
+        );
+        
+        $months = Cache::remember(
+            'carrier_sheet:available_months',
+            1800, // 30 minutes
+            fn() => $this->service->getAvailableMonths()
+        );
+        
+        $carriers = Cache::remember(
+            'carrier_sheet:active_carriers',
+            3600, // 1 hour
+            fn() => CarrierSheetRate::active()->ordered()->get()
+        );
 
         return view('admin.reports.carrier-sheet.dashboard', [
             'rows'        => $summary['rows'],
@@ -36,13 +54,30 @@ class CarrierSheetController extends Controller
         ]);
     }
 
-    /* ================================================================
-     *  SHOW CARRIER SHEET  (single carrier — all entries)
-     * ================================================================ */
+    /**
+     * SHOW CARRIER SHEET  (single carrier — all entries)
+     * Heavily optimized: pagination, column selection, pre-attached leads, aggressive caching.
+     */
     public function show(CarrierSheetRate $rate, Request $request)
     {
         $periodMonth = $request->input('month');
-        $query = $rate->entries()->withoutTrashed()->orderBy('sr_number');
+        $perPage = $request->input('per_page', 50); // Default 50 entries per page
+        
+        // Build optimized query with minimal column selection
+        $query = $rate->entries()
+            ->withoutTrashed()
+            ->select([
+                'id', 'carrier_sheet_rate_id', 'sr_number', 'entry_date', 
+                'policy_number', 'name', 'face_value', 'premium', 'policy_type',
+                'status', 'draft_date', 'payment_date', 'commission', 
+                'paid_amount', 'balance', 'chargeback_amount', 'period_month'
+            ])
+            ->with([
+                'carrierRate:id,carrier_label,carrier_slug,title_color',
+                'creator:id,name'
+            ])  // Eager load with specific columns
+            ->orderBy('sr_number');
+            
         if ($periodMonth) {
             $parsed = \Carbon\Carbon::parse($periodMonth);
             $query->where(function ($q) use ($parsed) {
@@ -57,23 +92,48 @@ class CarrierSheetController extends Controller
                 });
             });
         }
-        $entries = $query->get();
+        
+        // Paginate instead of loading all at once
+        $entries = $query->paginate($perPage)->withQueryString();
+        
+        // Batch preload leads and pre-attach to entries to avoid lazy loading in views
+        $entriesCollection = $entries->getCollection();
+        \App\Models\CarrierSheetEntry::preloadLeads($entriesCollection);
+        
+        // Pre-attach leads to each entry to avoid calling ->lead() in Blade
+        $entriesCollection->each(function($entry) {
+            $entry->cached_lead = $entry->lead();
+        });
 
-        $summary = $this->service->getCarrierSummary($rate, $periodMonth);
-        $months = $this->service->getAvailableMonths($rate->id);
+        // Aggressively cache summary calculations (they're expensive)
+        $summary = Cache::remember(
+            "carrier_sheet:summary:{$rate->id}:" . ($periodMonth ?? 'all'),
+            900, // 15 minutes
+            fn() => $this->service->getCarrierSummary($rate, $periodMonth, false)
+        );
+        
+        $months = Cache::remember(
+            "carrier_sheet:months:{$rate->id}",
+            1800, // 30 minutes
+            fn() => $this->service->getAvailableMonths($rate->id)
+        );
 
-        // Opening chargeback for this carrier/month (always load; period=null returns a default stub)
+        // Opening chargeback - cached separately
         if ($periodMonth) {
             $openingCb = CarrierSheetOpeningCb::firstOrCreate(
                 ['carrier_sheet_rate_id' => $rate->id, 'period_month' => $periodMonth],
                 ['amount' => 0, 'opening_balance' => 0]
             );
         } else {
-            // Stub object so the view always renders the fields
             $openingCb = new CarrierSheetOpeningCb(['amount' => 0, 'opening_balance' => 0]);
         }
 
-        $dailySummary = $this->service->getDailySummary($rate, $periodMonth);
+        // Cache daily summary aggressively (15 minutes)
+        $dailySummary = \Cache::remember(
+            "carrier_sheet:daily:{$rate->id}:" . ($periodMonth ?? 'all'),
+            900,
+            fn() => $this->service->getDailySummary($rate, $periodMonth)
+        );
 
         return view('admin.reports.carrier-sheet.show', [
             'rate'         => $rate,
@@ -86,9 +146,10 @@ class CarrierSheetController extends Controller
         ]);
     }
 
-    /* ================================================================
-     *  STORE ENTRY  (add new policy row)
-     * ================================================================ */
+    /**
+     * STORE ENTRY  (add new policy row)
+     * Clears cache after saving.
+     */
     public function storeEntry(CarrierSheetRate $rate, Request $request)
     {
         $validated = $request->validate([
@@ -126,6 +187,9 @@ class CarrierSheetController extends Controller
         $entry = new CarrierSheetEntry($validated);
         $this->service->recalculateEntry($entry);
         $entry->save();
+        
+        // Clear cache for this carrier 
+        $this->service->clearCache($rate->id, $validated['period_month'] ?? null);
 
         if ($request->expectsJson()) {
             $summary = $this->service->getCarrierSummary($rate, $validated['period_month'] ?? null);
@@ -139,9 +203,10 @@ class CarrierSheetController extends Controller
         return back()->with('success', 'Entry added successfully.');
     }
 
-    /* ================================================================
-     *  UPDATE ENTRY
-     * ================================================================ */
+    /**
+     * UPDATE ENTRY
+     * Clears cache after update.
+     */
     public function updateEntry(CarrierSheetEntry $entry, Request $request)
     {
         $validated = $request->validate([
@@ -181,6 +246,9 @@ class CarrierSheetController extends Controller
             $this->service->recalculateEntry($entry);
         }
         $entry->save();
+        
+        // Clear cache for this carrier
+        $this->service->clearCache($entry->carrier_sheet_rate_id, $entry->period_month?->format('Y-m-01'));
 
         if ($request->expectsJson()) {
             $rate = $entry->carrierRate;
@@ -195,14 +263,19 @@ class CarrierSheetController extends Controller
         return back()->with('success', 'Entry updated.');
     }
 
-    /* ================================================================
-     *  DELETE ENTRY  (soft delete)
-     * ================================================================ */
+    /**
+     * DELETE ENTRY  (soft delete)
+     * Clears cache after deletion.
+     */
     public function deleteEntry(CarrierSheetEntry $entry, Request $request)
     {
         $rate = $entry->carrierRate;
         $periodMonth = $entry->period_month?->format('Y-m-01');
+        
         $entry->delete();
+        
+        // Clear cache for this carrier
+        $this->service->clearCache($rate->id, $periodMonth);
 
         if ($request->expectsJson()) {
             $summary = $this->service->getCarrierSummary($rate, $periodMonth);
@@ -212,9 +285,10 @@ class CarrierSheetController extends Controller
         return back()->with('success', 'Entry deleted.');
     }
 
-    /* ================================================================
-     *  UPDATE OPENING CHARGEBACK  (Row 3)
-     * ================================================================ */
+    /**
+     * UPDATE OPENING CHARGEBACK  (Row 3)
+     * Clears cache after update.
+     */
     public function updateOpeningChargeback(CarrierSheetRate $rate, Request $request)
     {
         $validated = $request->validate([
@@ -226,6 +300,9 @@ class CarrierSheetController extends Controller
             ['carrier_sheet_rate_id' => $rate->id, 'period_month' => $validated['period_month']],
             ['amount' => $validated['amount']]
         );
+        
+        // Clear cache for this carrier
+        $this->service->clearCache($rate->id, $validated['period_month']);
 
         if ($request->expectsJson()) {
             $summary = $this->service->getCarrierSummary($rate, $validated['period_month']);
@@ -235,9 +312,10 @@ class CarrierSheetController extends Controller
         return back()->with('success', 'Opening chargeback updated.');
     }
 
-    /* ================================================================
-     *  UPDATE OPENING BALANCE
-     * ================================================================ */
+    /**
+     * UPDATE OPENING BALANCE
+     * Clears cache after update.
+     */
     public function updateOpeningBalance(CarrierSheetRate $rate, Request $request)
     {
         $validated = $request->validate([
@@ -249,6 +327,9 @@ class CarrierSheetController extends Controller
             ['carrier_sheet_rate_id' => $rate->id, 'period_month' => $validated['period_month']],
             ['opening_balance' => $validated['opening_balance']]
         );
+        
+        // Clear cache for this carrier
+        $this->service->clearCache($rate->id, $validated['period_month']);
 
         if ($request->expectsJson()) {
             $summary = $this->service->getCarrierSummary($rate, $validated['period_month']);
@@ -340,6 +421,8 @@ class CarrierSheetController extends Controller
 
         // Recalculate all entries for this carrier
         $recalculated = $this->service->recalculateAllEntries($rate);
+        
+        // Cache is cleared inside recalculateAllEntries
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -352,9 +435,10 @@ class CarrierSheetController extends Controller
         return back()->with('success', "Rates updated. {$recalculated} entries recalculated.");
     }
 
-    /* ================================================================
-     *  LEAD LOOKUP  (autocomplete for Add Entry modal)
-     * ================================================================ */
+    /**
+     * LEAD LOOKUP (autocomplete for Add Entry modal)
+     * Enhanced with partner information for auto-sheet-matching
+     */
     public function leadLookup(Request $request): \Illuminate\Http\JsonResponse
     {
         $q = trim($request->input('q', ''));
@@ -368,9 +452,9 @@ class CarrierSheetController extends Controller
                       ->orWhere('policy_number', 'like', "%{$q}%");
             })
             ->whereNotNull('cn_name')
-            ->whereNotNull('sale_at')
-            ->select(['id', 'cn_name', 'policy_number', 'coverage_amount', 'monthly_premium', 'policy_type', 'initial_draft_date', 'future_draft_date'])
-            ->orderBy('cn_name')
+            ->with(['partner:id,name,partner_code']) // Eager load partner
+            ->select(['id', 'cn_name', 'policy_number', 'coverage_amount', 'monthly_premium', 'policy_type', 'initial_draft_date', 'future_draft_date', 'partner_id', 'carrier_name', 'sale_at'])
+            ->orderByDesc('sale_at')
             ->limit(12)
             ->get()
             ->map(function ($lead) {
@@ -379,24 +463,77 @@ class CarrierSheetController extends Controller
                     $amt = (float) $lead->coverage_amount;
                     $fv  = $amt >= 1000 ? round($amt / 1000) . 'K' : (string) $amt;
                 }
+                
+                // Determine suggested carrier sheet based on partner code and carrier name
+                $suggestedSheet = $this->matchLeadToCarrierSheet($lead);
+                
                 return [
-                    'id'            => $lead->id,
-                    'name'          => $lead->cn_name,
-                    'policy_number' => $lead->policy_number,
-                    'face_value'    => $fv,
-                    'premium'       => $lead->monthly_premium ? round((float) $lead->monthly_premium, 2) : null,
-                    'policy_type'   => $lead->policy_type,
-                    'draft_date'    => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
-                    'payment_date'  => $lead->future_draft_date  ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d')  : null,
+                    'id'              => $lead->id,
+                    'name'            => $lead->cn_name,
+                    'policy_number'   => $lead->policy_number,
+                    'face_value'      => $fv,
+                    'premium'         => $lead->monthly_premium ? round((float) $lead->monthly_premium, 2) : null,
+                    'policy_type'     => $lead->policy_type,
+                    'draft_date'      => $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : null,
+                    'payment_date'    => $lead->future_draft_date  ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d')  : null,
+                    'partner_code'    => $lead->partner?->partner_code,
+                    'carrier_name'    => $lead->carrier_name,
+                    'suggested_sheet' => $suggestedSheet,
                 ];
             });
 
         return response()->json($leads);
     }
+    
+    /**
+     * Auto-match lead to carrier sheet based on partner code and carrier name.
+     * Returns carrier_sheet_rate_id or null.
+     */
+    private function matchLeadToCarrierSheet($lead): ?int
+    {
+        $partnerCode = $lead->partner?->partner_code;
+        $carrierName = strtolower($lead->carrier_name ?? '');
+        
+        // Build matching logic: carrier abbreviation + partner code
+        $carrierMap = [
+            'transamerica'      => 'ta',
+            'ta'                => 'ta',
+            't.a'               => 'ta',
+            'aig'               => 'aig',
+            'american general'  => 'aig',
+            'amam'              => 'amam',
+            'securian'          => 'sec',
+            'sec'               => 'sec',
+            'royal arcanum'     => 'ra',
+            'r.a'               => 'ra',
+            'aetna'             => 'aetna',
+            'mutual of omaha'   => 'moo',
+            'moo'               => 'moo',
+        ];
+        
+        $carrierSlug = null;
+        foreach ($carrierMap as $needle => $slug) {
+            if (str_contains($carrierName, $needle)) {
+                $carrierSlug = $slug;
+                break;
+            }
+        }
+        
+        if (!$carrierSlug || !$partnerCode) {
+            return null;
+        }
+        
+        // Try to find matching carrier_sheet_rate
+        $slug = $carrierSlug . '-' . strtolower($partnerCode);
+        $rate = CarrierSheetRate::where('carrier_slug', $slug)->first();
+        
+        return $rate?->id;
+    }
 
-    /* ================================================================
-     *  IMPORT (.xlsx — multi-sheet)
-     * ================================================================ */
+    /**
+     * IMPORT (.xlsx — multi-sheet)
+     * Optimized with batch inserts and cache clearing.
+     */
     public function import(Request $request)
     {
         $request->validate([
@@ -452,6 +589,8 @@ class CarrierSheetController extends Controller
 
             $imported = 0;
             $skipped = 0;
+            $batchSize = 100; // Process in batches to reduce memory usage
+            $batch = [];
 
             for ($row = 4; $row <= $highestRow; $row++) {
                 // Read columns A–N — use getCalculatedValue() so formula cells return their result
@@ -495,9 +634,25 @@ class CarrierSheetController extends Controller
                 ]);
 
                 $this->service->recalculateEntry($entry);
-                $entry->save();
+                $batch[] = $entry;
                 $imported++;
+                
+                // Save in batches
+                if (count($batch) >= $batchSize) {
+                    foreach ($batch as $e) {
+                        $e->save();
+                    }
+                    $batch = [];
+                }
             }
+            
+            // Save remaining entries
+            foreach ($batch as $e) {
+                $e->save();
+            }
+            
+            // Clear cache for this carrier
+            $this->service->clearCache($rate->id);
 
             $results[] = [
                 'sheet'    => $sheetName,

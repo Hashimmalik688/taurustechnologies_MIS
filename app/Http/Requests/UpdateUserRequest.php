@@ -26,13 +26,17 @@ class UpdateUserRequest extends FormRequest
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'phone' => ['nullable', 'string', 'max:20'],
             'zoom_number' => ['nullable', 'string', 'max:50'],
+            'zoom_user_id' => ['nullable', 'string', 'max:100'],
+            'zoom_extension' => ['nullable', 'string', 'max:20'],
+            'status' => ['nullable', 'in:active,inactive,suspended'],
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['in:Super Admin,Manager,Employee,HR,Peregrine Validator,Verifier,Peregrine Closer,Ravens Closer,Retention Officer,QA,Co-ordinator'],
+            'roles.*' => ['in:Super Admin,Manager,Employee,HR,Peregrine Validator,Verifier,Peregrine Closer,Ravens Closer,Retention Officer,QA,Co-ordinator,CEO'],
             'dob' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', 'in:Male,Female,Other'],
             'join_date' => ['nullable', 'date'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:500'],
+            'plain_password' => ['nullable', 'string', 'max:255'],
         ];
     }
 

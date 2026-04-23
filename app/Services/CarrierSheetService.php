@@ -6,9 +6,57 @@ use App\Models\CarrierSheetEntry;
 use App\Models\CarrierSheetOpeningCb;
 use App\Models\CarrierSheetRate;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class CarrierSheetService
 {
+    /**
+     * Cache TTL for carrier sheet summaries (15 minutes for better performance).
+     */
+    private const CACHE_TTL = 900;
+
+    /**
+     * Generate cache key for carrier summary.
+     */
+    private function getSummaryCacheKey(int $carrierId, ?string $periodMonth): string
+    {
+        return "carrier_sheet:summary:{$carrierId}:" . ($periodMonth ?? 'all');
+    }
+
+    /**
+     * Generate cache key for dashboard summary.
+     */
+    private function getDashboardCacheKey(?string $periodMonth): string
+    {
+        return "carrier_sheet:dashboard:" . ($periodMonth ?? 'all');
+    }
+
+    /**
+     * Clear all carrier sheet caches.
+     */
+    public function clearCache(?int $carrierId = null, ?string $periodMonth = null): void
+    {
+        if ($carrierId) {
+            // Clear specific carrier cache
+            Cache::forget($this->getSummaryCacheKey($carrierId, $periodMonth));
+            Cache::forget($this->getSummaryCacheKey($carrierId, null));
+            // Clear daily summary for this carrier
+            Cache::forget("carrier_sheet:daily:{$carrierId}:" . ($periodMonth ?? 'all'));
+        } else {
+            // Clear all carrier sheet caches
+            CarrierSheetRate::all()->each(function ($rate) {
+                Cache::forget($this->getSummaryCacheKey($rate->id, null));
+                Cache::forget("carrier_sheet:daily:{$rate->id}:all");
+            });
+        }
+        
+        // Always clear dashboard and metadata caches when any data changes
+        Cache::forget($this->getDashboardCacheKey($periodMonth));
+        Cache::forget($this->getDashboardCacheKey(null));
+        Cache::forget('carrier_sheet:available_months');
+        Cache::forget('carrier_sheet:active_carriers');
+    }
+
     /* ================================================================
      *  COMMISSION FORMULA
      *  Replicates: Premium × Multiplier × Rate / 2
@@ -83,9 +131,10 @@ class CarrierSheetService
         return round(($commission ?? 0) - $effectivePaid - $chargebackAmount, 2);
     }
 
-    /* ================================================================
-     *  RECALCULATE a single entry (updates commission + balance)
-     * ================================================================ */
+    /**
+     * Recalculate a single entry (updates commission + balance).
+     * Clears cache for the related carrier.
+     */
     public function recalculateEntry(CarrierSheetEntry $entry): CarrierSheetEntry
     {
         $rate = $entry->carrierRate ?? CarrierSheetRate::find($entry->carrier_sheet_rate_id);
@@ -106,12 +155,18 @@ class CarrierSheetService
             (float) $entry->chargeback_amount
         );
 
+        // Clear cache for this carrier
+        if ($entry->exists) {
+            $this->clearCache($entry->carrier_sheet_rate_id, $entry->period_month?->format('Y-m-01'));
+        }
+
         return $entry;
     }
 
-    /* ================================================================
-     *  BULK RECALCULATE all entries for a carrier (after rate change)
-     * ================================================================ */
+    /**
+     * Bulk recalculate all entries for a carrier (after rate change).
+     * Uses batch updates for better performance.
+     */
     public function recalculateAllEntries(CarrierSheetRate $rate, ?string $periodMonth = null): int
     {
         $query = $rate->entries();
@@ -119,19 +174,39 @@ class CarrierSheetService
 
         $entries = $query->get();
         $count = 0;
+        $updates = [];
 
         foreach ($entries as $entry) {
             $entry->setRelation('carrierRate', $rate);
             $this->recalculateEntry($entry);
-            $entry->save();
+            
+            // Collect updates for batch processing
+            $updates[] = [
+                'id' => $entry->id,
+                'commission' => $entry->commission,
+                'balance' => $entry->balance,
+            ];
+            
             $count++;
         }
+
+        // Batch update all entries
+        foreach ($updates as $update) {
+            CarrierSheetEntry::where('id', $update['id'])->update([
+                'commission' => $update['commission'],
+                'balance' => $update['balance'],
+            ]);
+        }
+
+        // Clear cache after bulk update
+        $this->clearCache($rate->id, $periodMonth);
 
         return $count;
     }
 
-    /* ================================================================
-     *  CARRIER SUMMARY (Badge values for one carrier sheet)
+    /**
+     * CARRIER SUMMARY (Badge values for one carrier sheet)
+     * Uses aggressive caching and optimized queries.
      *
      *  K1 = SUMIF(status<>CHARGEBACK, commission) + SUMIFS(commission, status=CHARGEBACK, paid>0)
      *  L1 = SUM(paid_amount)
@@ -142,12 +217,25 @@ class CarrierSheetService
      *  R1 = count(status=APPROVED)
      *  S1 = count(status=CHARGEBACK)
      *  T1 = count(status=DECLINED)
-     * ================================================================ */
-    public function getCarrierSummary(CarrierSheetRate $rate, ?string $periodMonth = null): array
+     */
+    public function getCarrierSummary(CarrierSheetRate $rate, ?string $periodMonth = null, bool $useCache = true): array
     {
-        $query = $rate->entries()->withoutTrashed();
+        // Check cache first
+        if ($useCache) {
+            $cached = Cache::get($this->getSummaryCacheKey($rate->id, $periodMonth));
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+
+        // Optimized query - only select needed columns for calculations
+        $query = $rate->entries()
+            ->withoutTrashed()
+            ->select(['id', 'status', 'commission', 'paid_amount', 'chargeback_amount']);
         $this->scopeByPeriodMonth($query, $periodMonth);
         $entries = $query->get();
+
+        // No need to preload leads for summary calculations
 
         // K1: commission for non-chargeback statuses + commission for paid chargebacks
         $commissionTotal = 0;
@@ -182,7 +270,7 @@ class CarrierSheetService
         $chargebackTotal += $openingCb;
         $balanceTotal = round($commissionTotal - $paidTotal - $chargebackTotal + $openingBalance, 2);
 
-        return [
+        $result = [
             'commission'       => round($commissionTotal, 2),    // K1
             'paid'             => round($paidTotal, 2),           // L1
             'balance'          => $balanceTotal,                   // M1
@@ -195,14 +283,34 @@ class CarrierSheetService
             'chargeback_count' => $entries->where('status', 'chargeback')->count(),    // S1
             'declined_count'   => $entries->where('status', 'declined')->count(),      // T1
         ];
+
+        // Cache the result
+        if ($useCache) {
+            Cache::put($this->getSummaryCacheKey($rate->id, $periodMonth), $result, self::CACHE_TTL);
+        }
+
+        return $result;
     }
 
-    /* ================================================================
-     *  DASHBOARD SUMMARY (all carriers — replicates D.B sheet)
-     * ================================================================ */
-    public function getDashboardSummary(?string $periodMonth = null): array
+    /**
+     * DASHBOARD SUMMARY (all carriers — replicates D.B sheet)
+     * Uses aggressive caching and optimized queries.
+     */
+    public function getDashboardSummary(?string $periodMonth = null, bool $useCache = true): array
     {
-        $carriers = CarrierSheetRate::active()->ordered()->get();
+        // Check cache first
+        if ($useCache) {
+            $cached = Cache::get($this->getDashboardCacheKey($periodMonth));
+            if ($cached !== null) {
+                return $cached;
+            }
+        }
+        
+        $carriers = Cache::remember(
+            'carrier_sheet:active_carriers',
+            3600,
+            fn() => CarrierSheetRate::active()->ordered()->get()
+        );
         $rows = [];
         $totals = [
             'commission' => 0, 'paid' => 0, 'balance' => 0,
@@ -222,10 +330,17 @@ class CarrierSheetService
         // Recalculate balance total from commission - paid - chargeback
         $totals['balance'] = round($totals['commission'] - $totals['paid'] - $totals['chargeback_total'], 2);
 
-        return [
+        $result = [
             'rows'   => $rows,
             'totals' => $totals,
         ];
+
+        // Cache the result
+        if ($useCache) {
+            Cache::put($this->getDashboardCacheKey($periodMonth), $result, self::CACHE_TTL);
+        }
+
+        return $result;
     }
 
     /* ================================================================

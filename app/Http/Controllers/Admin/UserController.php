@@ -173,20 +173,34 @@ class UserController extends Controller
 
         // Update user roles in Spatie - detach all first then attach new ones
         try {
+            \Log::info("Updating roles for user {$user->id}", [
+                'old_roles' => $oldRoles,
+                'new_roles' => $newRoles,
+                'request_data' => $request->only(['name', 'email', 'roles'])
+            ]);
+            
             // Detach all existing roles first
             $user->roles()->detach();
             
-            // Attach new roles by name
-            if (!empty($newRoles)) {
-                $user->syncRoles($newRoles);
-            }
+            // Attach new roles by name (syncRoles will handle empty array by removing all roles)
+            $user->syncRoles($newRoles);
+            
+            // Clear permission cache for this user
+            $permissionService = app(\App\Services\PermissionService::class);
+            $permissionService->clearUserPermissionCache($user->id);
+            
+            \Log::info("Roles updated successfully for user {$user->id}", [
+                'final_roles' => $user->fresh()->roles->pluck('name')->toArray()
+            ]);
         } catch (\Exception $e) {
             \Log::error("Error updating roles for user", [
                 'user_id' => $user->id,
-                'roles' => $newRoles,
-                'error' => $e->getMessage()
+                'old_roles' => $oldRoles,
+                'new_roles' => $newRoles,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            // Continue without roles rather than failing the entire operation
+            return redirect()->route('users.index')->with('error', 'User updated but roles failed to update: ' . $e->getMessage());
         }
 
         // Sync with EMS - update employee record
