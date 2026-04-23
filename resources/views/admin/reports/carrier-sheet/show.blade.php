@@ -448,6 +448,11 @@
             </tbody>
         </table>
     </div>
+    @if($entries->hasPages())
+    <div class="d-flex justify-content-center mt-2" style="font-size:.75rem;">
+        {{ $entries->links() }}
+    </div>
+    @endif
 
     {{-- Daily Summary --}}
     @if($dailySummary->isNotEmpty())

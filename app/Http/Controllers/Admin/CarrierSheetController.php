@@ -61,7 +61,7 @@ class CarrierSheetController extends Controller
     public function show(CarrierSheetRate $rate, Request $request)
     {
         $periodMonth = $request->input('month');
-        $perPage = $request->input('per_page', 50); // Default 50 entries per page
+        $perPage = $request->input('per_page', 500); // Default 500 — avoids hidden entries on page 2
         
         // Build optimized query with minimal column selection
         $query = $rate->entries()
