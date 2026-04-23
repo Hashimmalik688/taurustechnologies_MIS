@@ -38,185 +38,106 @@
 @endphp
 
 <style>
-    /* Sales Flow Navigation Styles - Compact */
-    .sales-flow-nav {
-        background: rgba(212,175,55,.04);
-        border: 1px solid rgba(212,175,55,.12);
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        margin-bottom: 1rem;
-    }
-    
-    .sales-flow-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.35rem;
-        max-width: 100%;
-        overflow-x: auto;
-    }
-    
-    .sales-flow-stage {
+    .sales-flow-strip {
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        text-decoration: none;
-        color: inherit;
-        transition: all 0.15s ease;
-        padding: 0.3rem 0.65rem;
-        border-radius: 6px;
-        background: transparent;
+        padding: 0.5rem 0;
+        margin-bottom: 0.75rem;
+        font-size: 0.68rem;
     }
     
-    .sales-flow-stage-circle {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        display: flex;
+    .sales-flow-item {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        transition: all 0.15s ease;
-        background: #f1f5f9;
-        border: 1.5px solid #e2e8f0;
-        color: #94a3b8;
-        flex-shrink: 0;
-    }
-    
-    .sales-flow-stage-name {
-        font-size: 0.7rem;
+        padding: 0.3rem 0.55rem;
+        border-radius: 4px;
+        text-decoration: none;
         font-weight: 500;
+        transition: all 0.15s;
+        background: rgba(0,0,0,.02);
+        border: 1px solid rgba(0,0,0,.06);
         color: #64748b;
-        transition: all 0.15s ease;
-        white-space: nowrap;
+        cursor: pointer;
     }
     
-    /* Current/Active Stage */
-    .sales-flow-stage.active .sales-flow-stage-circle {
-        background: linear-gradient(135deg, #d4af37 0%, #e8c84a 100%);
+    .sales-flow-item:hover {
+        background: rgba(0,0,0,.04);
+        border-color: rgba(212,175,55,.3);
+        color: #1e293b;
+    }
+    
+    .sales-flow-item.active {
+        background: #d4af37;
+        color: #1e293b;
         border-color: #d4af37;
-        color: #1e293b;
-        box-shadow: 0 2px 6px rgba(212,175,55,.25);
-    }
-    
-    .sales-flow-stage.active .sales-flow-stage-name {
-        color: #1e293b;
         font-weight: 600;
     }
     
-    .sales-flow-stage.active {
-        background: rgba(212,175,55,.08);
-    }
-    
-    /* Completed Stages (before current) */
-    .sales-flow-stage.completed .sales-flow-stage-circle {
+    .sales-flow-item.completed {
         background: #10b981;
-        border-color: #10b981;
         color: #fff;
+        border-color: #10b981;
     }
     
-    .sales-flow-stage.completed .sales-flow-stage-name {
-        color: #059669;
+    .sales-flow-item.future {
+        background: transparent;
+        color: #94a3b8;
+        border-color: rgba(0,0,0,.04);
     }
     
-    /* Hover effects for clickable stages */
-    .sales-flow-stage:not(.future):hover {
-        background: rgba(212,175,55,.06);
-    }
-    
-    .sales-flow-stage:not(.future):hover .sales-flow-stage-circle {
-        transform: scale(1.1);
-    }
-    
-    /* Future stages (after current) */
-    .sales-flow-stage.future {
-        cursor: not-allowed;
-        opacity: 0.5;
-    }
-    
-    .sales-flow-stage.future .sales-flow-stage-circle {
-        background: #f8fafc;
-        border-color: #e2e8f0;
+    .sales-flow-sep {
         color: #cbd5e1;
-    }
-    
-    /* Connector arrow */
-    .sales-flow-connector {
-        color: #cbd5e1;
-        font-size: 0.85rem;
-        flex-shrink: 0;
-    }
-    
-    .sales-flow-connector.completed {
-        color: #10b981;
-    }
-    
-    .sales-flow-connector.active {
-        color: #d4af37;
+        font-size: 0.7rem;
+        user-select: none;
     }
     
     @media (max-width: 768px) {
-        .sales-flow-container {
+        .sales-flow-strip {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            justify-content: flex-start;
-            padding-bottom: 0.25rem;
         }
         
-        .sales-flow-nav {
-            padding: 0.5rem 0.75rem;
-        }
-        
-        .sales-flow-stage-name {
+        .sales-flow-item {
             font-size: 0.65rem;
+            padding: 0.25rem 0.45rem;
+            white-space: nowrap;
         }
-        
-        .sales-flow-stage-circle {
-            width: 24px;
-            height: 24px;
-            font-size: 0.75rem;
-        }
+    }
+    
+    [data-bs-theme=dark] .sales-flow-item,
+    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .sales-flow-item {
+        background: rgba(30,41,59,0.4);
+        border-color: rgba(255,255,255,.08);
     }
 </style>
 
-<div class="sales-flow-nav">
-    <div class="sales-flow-container">
-        @foreach($stages as $index => $stage)
-            @php
-                $isActive = $stage['key'] === $currentStage;
-                $isCompleted = $index < $currentIndex;
-                $isFuture = $index > $currentIndex;
-                $routeExists = Route::has($stage['route']);
-                
-                $stageClass = 'sales-flow-stage';
-                if ($isActive) {
-                    $stageClass .= ' active';
-                } elseif ($isCompleted) {
-                    $stageClass .= ' completed';
-                } elseif ($isFuture) {
-                    $stageClass .= ' future';
-                }
-            @endphp
+<div class="sales-flow-strip">
+    @foreach($stages as $index => $stage)
+        @php
+            $isActive = $stage['key'] === $currentStage;
+            $isCompleted = $index < $currentIndex;
+            $isFuture = $index > $currentIndex;
+            $routeExists = Route::has($stage['route']);
             
-            @if($index > 0)
-                <i class="mdi mdi-chevron-right sales-flow-connector {{ $isCompleted ? 'completed' : ($isActive ? 'active' : '') }}"></i>
-            @endif
-            
-            @if($routeExists && !$isFuture)
-                <a href="{{ route($stage['route']) }}" class="{{ $stageClass }}">
-                    <div class="sales-flow-stage-circle">
-                        <i class="mdi {{ $stage['icon'] }}"></i>
-                    </div>
-                    <div class="sales-flow-stage-name">{{ $stage['name'] }}</div>
-                </a>
-            @else
-                <div class="{{ $stageClass }}">
-                    <div class="sales-flow-stage-circle">
-                        <i class="mdi {{ $stage['icon'] }}"></i>
-                    </div>
-                    <div class="sales-flow-stage-name">{{ $stage['name'] }}</div>
-                </div>
-            @endif
-        @endforeach
-    </div>
+            $itemClass = 'sales-flow-item';
+            if ($isActive) $itemClass .= ' active';
+            elseif ($isCompleted) $itemClass .= ' completed';
+            elseif ($isFuture) $itemClass .= ' future';
+        @endphp
+        
+        @if($index > 0)
+            <span class="sales-flow-sep">›</span>
+        @endif
+        
+        @if($routeExists)
+            <a href="{{ route($stage['route']) }}" class="{{ $itemClass }}" title="{{ $stage['name'] }}">
+                {{ $stage['short'] }}
+            </a>
+        @else
+            <span class="{{ $itemClass }}" title="{{ $stage['name'] }}">
+                {{ $stage['short'] }}
+            </span>
+        @endif
+    @endforeach
 </div>

@@ -69,7 +69,7 @@ class CarrierSheetEntry extends Model
      * Implements intelligent matching with caching to avoid repeated queries.
      * 
      * Matching priority:
-     * 1. Exact policy_number match
+     * 1. Exact policy_number match (skips placeholder values like NA, N/A, TBD)
      * 2. Exact cn_name match
      * 3. Case-insensitive partial name match
      */
@@ -83,7 +83,8 @@ class CarrierSheetEntry extends Model
         $lead = null;
 
         // Try matching by policy number first (most reliable)
-        if (!empty($this->policy_number)) {
+        // Skip placeholder values like NA, N.A, N/A, TBD, etc.
+        if (!empty($this->policy_number) && !$this->isPlaceholderPolicyNumber($this->policy_number)) {
             $lead = Lead::where('policy_number', $this->policy_number)->first();
             if ($lead) {
                 $this->leadCache = $lead;
@@ -94,8 +95,34 @@ class CarrierSheetEntry extends Model
 
         // Fallback: match by name if policy number didn't work
         if (!empty($this->name)) {
+            // Get carrier name for this entry to help with matching
+            $carrierName = $this->carrierRate?->carrier_label;
+            
             // Try exact match first
-            $lead = Lead::where('cn_name', $this->name)->first();
+            $query = Lead::where('cn_name', $this->name);
+            
+            // If carrier is known, prefer matching by carrier too (handles duplicate names)
+            if ($carrierName) {
+                // Try to extract carrier name from label (e.g., "MOO (J-1)" -> "Mutual of Omaha")
+                $leadWithCarrier = (clone $query)->whereHas('insuranceCarrier', function($q) use ($carrierName) {
+                    $q->where('name', 'LIKE', '%' . $this->extractCarrierKeyword($carrierName) . '%');
+                })->first();
+                
+                // Also check carrier_name field directly (legacy compatibility)
+                if (!$leadWithCarrier) {
+                    $leadWithCarrier = (clone $query)->where('carrier_name', 'LIKE', '%' . $this->extractCarrierKeyword($carrierName) . '%')->first();
+                }
+                
+                if ($leadWithCarrier) {
+                    $lead = $leadWithCarrier;
+                }
+            }
+            
+            // If no carrier-specific match, use any exact name match
+            if (!$lead) {
+                $lead = $query->first();
+            }
+            
             if ($lead) {
                 $this->leadCache = $lead;
                 $this->leadCacheLoaded = true;
@@ -145,6 +172,71 @@ class CarrierSheetEntry extends Model
     }
 
     /* ── Helpers ───────────────────────────────────────── */
+
+    /**
+     * Check if a policy number is a placeholder value (not a real policy number).
+     * Placeholder values should be skipped during lead matching to avoid false positives.
+     */
+    private function isPlaceholderPolicyNumber(?string $policyNumber): bool
+    {
+        if (empty($policyNumber)) {
+            return true;
+        }
+
+        $normalized = strtoupper(trim($policyNumber));
+        
+        // Common placeholder patterns
+        $placeholders = [
+            'NA',
+            'N.A',
+            'N.A.',
+            'N/A',
+            'TBD',
+            'PENDING',
+            'NONE',
+            'NULL',
+            '--',
+            '---',
+            'N\\A', // Escaped slash
+        ];
+
+        return in_array($normalized, $placeholders);
+    }
+
+    /**
+     * Extract carrier keyword from carrier label for matching.
+     * E.g., "MOO (J-1)" -> "Mutual of Omaha", "AIG E-1" -> "AIG"
+     */
+    private function extractCarrierKeyword(?string $carrierLabel): string
+    {
+        if (empty($carrierLabel)) {
+            return '';
+        }
+
+        // Remove partner codes and extra info in parentheses
+        $keyword = preg_replace('/\s*\([^)]*\)/', '', $carrierLabel);
+        $keyword = trim($keyword);
+        
+        // Get first word/acronym
+        $parts = explode(' ', $keyword);
+        $acronym = $parts[0] ?? '';
+        
+        // Map common carrier acronyms to full names for better matching
+        $acronymMap = [
+            'MOO' => 'Mutual of Omaha',
+            'MoO' => 'Mutual of Omaha',
+            'AIG' => 'AIG',
+            'TA' => 'Transamerica',
+            'SEC' => 'Securian',
+            'AMAM' => 'AMAM',
+            'RA' => 'Royal Arcanum',
+            'R.A' => 'Royal Arcanum',
+            'AETNA' => 'Aetna',
+            'GTL' => 'GTL',
+        ];
+        
+        return $acronymMap[strtoupper($acronym)] ?? $acronym;
+    }
 
     public function isDeclined(): bool
     {

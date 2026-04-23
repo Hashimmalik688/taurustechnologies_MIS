@@ -17,23 +17,12 @@
 
         <div class="hub-section-label">Accounting</div>
         <div class="hub-grid">
-            @canViewModule('chart-of-accounts')
-            <a href="{{ route('chart-of-accounts.index') }}" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-list-ul"></i></div>
-                <div class="hub-card-body">
-                    <div class="hub-card-title">Chart of Accounts</div>
-                    <p class="hub-card-desc">Manage account categories, codes &amp; organizational structure</p>
-                </div>
-                <i class="bx bx-chevron-right hub-card-arrow"></i>
-            </a>
-            @endcanViewModule
-
-            @canViewModule('general-ledger')
-            <a href="{{ route('ledger.index') }}" class="hub-card">
+            @canViewModule('accounting')
+            <a href="{{ route('admin.accounting.dashboard') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-book-open"></i></div>
                 <div class="hub-card-body">
-                    <div class="hub-card-title">General Ledger</div>
-                    <p class="hub-card-desc">Financial transactions, journal entries &amp; account balances</p>
+                    <div class="hub-card-title">Accounting</div>
+                    <p class="hub-card-desc">Sales ledger, partner ledger & commission tracking</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>

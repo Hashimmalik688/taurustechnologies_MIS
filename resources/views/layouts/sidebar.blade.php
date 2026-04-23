@@ -313,23 +313,16 @@
                 auth()->user()->canViewModule('general-ledger') ||
                 auth()->user()->canViewModule('petty-cash') ||
                 auth()->user()->canViewModule('payroll') ||
-                auth()->user()->canViewModule('pabs-tickets')
+                auth()->user()->canViewModule('pabs-tickets') ||
+                auth()->user()->canViewModule('accounting')
             );
         @endphp
         @if($canSeeFinance)
-            <a href="{{ route('finance.hub') }}" class="menu-item {{ Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') ? 'active' : '' }}">
+            <a href="{{ route('finance.hub') }}" class="menu-item {{ Request::is('finance/hub') || Request::is('chart-of-accounts*') || Request::is('ledger*') || Request::is('petty-cash*') || Request::is('payroll*') || Request::is('pabs/tickets*') || Request::is('admin/accounting*') ? 'active' : '' }}">
                 <i class="bx bx-dollar-circle"></i>
                 <span class="menu-text">Finance & Accounts</span>
             </a>
         @endif
-
-        {{-- ACCOUNTING LEDGER (Double-Entry) --}}
-        @canViewModule('accounting')
-        <a href="{{ route('admin.accounting.dashboard') }}" class="menu-item {{ Request::is('admin/accounting*') ? 'active' : '' }}">
-            <i class="bx bx-book-open"></i>
-            <span class="menu-text">Accounting</span>
-        </a>
-        @endcanViewModule
 
         {{-- REPORTS --}}
         @canViewModule('reports')
