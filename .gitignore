@@ -17,3 +17,6 @@ storage/framework/sessions/*
 storage/framework/views/
 storage/framework/cache/
 storage/backups/
+
+# AI assistant skills (not application code)
+.claude/

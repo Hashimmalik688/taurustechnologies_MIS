@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\Lead;
 use App\Events\LeadCreated;
 use App\Events\SaleCreated;
+use App\Services\CarrierSheetLeadSyncService;
 use App\Services\CommissionCalculationService;
 use App\Services\LedgerService;
 use App\Traits\CommissionResolver;
@@ -715,6 +716,7 @@ class LeadController extends Controller
         $before = $lead->only($identityFields);
 
         $validated = $request->validated();
+        $statusWas = (string) ($lead->status ?? '');
 
         // Auto-populate sale_date from sale_at if sale_at is set but sale_date is not
         if (!empty($validated['sale_at']) && empty($validated['sale_date'])) {
@@ -957,6 +959,7 @@ class LeadController extends Controller
         ]);
 
         $lead = Lead::findOrFail($id);
+        $statusWas = (string) ($lead->status ?? '');
         $lead->status = $request->status;
         
         // If status is changed to unassigned, clear the partner assignment

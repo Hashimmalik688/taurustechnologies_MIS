@@ -735,7 +735,7 @@
     const SERVER_SUMMARY = @json($summary);
 
     // ── Entries data store (for edit modal population) ──
-    const entries = @json($entries->keyBy('id'));
+    const entries = @json($entries->getCollection()->keyBy('id'));
 
     // ── Helper: AJAX request ────────────────────────────
     async function ajax(url, method, data = null) {
@@ -817,7 +817,7 @@
             const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
             set('badge-commission', fmtMoney(commission));
             set('badge-paid',       fmtMoney(paid));
-            set('badge-balance',    fmtMoney(commission - paid));
+            set('badge-balance',    fmtMoney(commission - paid - cb));
             set('badge-cb-total',   fmtMoney(cb));
             set('badge-total-apps', totalApps);
             set('badge-paid-cnt',   paidCnt);
@@ -995,9 +995,8 @@
     };
 
     // ── Copy Single Cell Data ──────────────────────────
-    // Attach event listeners to all copyable cells
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.cs-cell-copy').forEach(cell => {
+    // Attach event listeners to all copyable cells (DOM already ready at this point)
+    document.querySelectorAll('.cs-cell-copy').forEach(cell => {
             cell.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const value = this.dataset.copyValue;
@@ -1031,7 +1030,6 @@
                     });
             });
         });
-    });
 
     function showCopyToast(message) {
         const toast = document.createElement('div');
