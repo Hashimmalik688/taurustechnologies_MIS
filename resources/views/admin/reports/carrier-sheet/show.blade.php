@@ -907,9 +907,9 @@
         const form = document.getElementById('addEntryForm');
         const fd = new FormData(form);
         const data = Object.fromEntries(fd.entries());
-        // Convert empty strings to null for optional fields
-        for (const k of ['rate_override']) {
-            if (data[k] === '') data[k] = null;
+        // Convert empty strings to null for all decimal/numeric fields
+        for (const k of ['rate_override', 'premium', 'paid_amount', 'chargeback_amount']) {
+            if (data[k] === '' || data[k] === undefined) data[k] = null;
         }
 
         try {
@@ -944,14 +944,25 @@
         new bootstrap.Modal(document.getElementById('editEntryModal')).show();
     };
 
+    // ── Auto-fill chargeback from paid_amount when status → chargeback ──
+    document.getElementById('edit_status')?.addEventListener('change', function() {
+        if (this.value === 'chargeback') {
+            const paid = parseFloat(document.getElementById('edit_paid_amount').value) || 0;
+            if (paid > 0) {
+                document.getElementById('edit_chargeback_amount').value = paid.toFixed(2);
+            }
+        }
+    });
+
     window.submitEditEntry = async function() {
         const form = document.getElementById('editEntryForm');
         const fd = new FormData(form);
         const data = Object.fromEntries(fd.entries());
         const id = data.entry_id;
         delete data.entry_id;
-        for (const k of ['rate_override']) {
-            if (data[k] === '') data[k] = null;
+        // Convert empty strings to null for all decimal/numeric fields
+        for (const k of ['rate_override', 'premium', 'paid_amount', 'chargeback_amount']) {
+            if (data[k] === '' || data[k] === undefined) data[k] = null;
         }
 
         try {
