@@ -40,6 +40,8 @@ class VerifierController extends Controller
 
         $validated = $request->validate([
             'date' => ['required', 'date'],
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
             'cn_name' => ['required', 'string', 'max:255'],
             'phone_number' => ['required', 'string', 'max:30'],
             'verifier_name' => ['required', 'string', 'max:255'],
@@ -51,6 +53,12 @@ class VerifierController extends Controller
             'address' => ['required', 'string', 'max:500'],
             'state' => ['required', 'string', 'max:50'],
             'zip_code' => ['required', 'string', 'max:10'],
+            'medications' => ['required', 'string', 'max:1000'],
+            'doctor_name' => ['required', 'string', 'max:255'],
+            'doctor_address' => ['required', 'string', 'max:500'],
+            'bank_name' => ['required', 'string', 'max:255'],
+            'bank_address' => ['required', 'string', 'max:500'],
+            'beneficiary' => ['required', 'string', 'max:255'],
         ]);
 
         $closer = User::findOrFail($validated['closer_id']);
@@ -58,6 +66,8 @@ class VerifierController extends Controller
         // Create a minimal Lead record with allowed fields
         Lead::create([
             'date' => $validated['date'],
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
             'cn_name' => $validated['cn_name'],
             'phone_number' => $validated['phone_number'],
             'account_verified_by' => $validated['verifier_name'],
@@ -70,6 +80,12 @@ class VerifierController extends Controller
             'address' => $validated['address'],
             'state' => $validated['state'],
             'zip_code' => $validated['zip_code'],
+            'medications' => $validated['medications'],
+            'doctor_name' => $validated['doctor_name'],
+            'doctor_address' => $validated['doctor_address'],
+            'bank_name' => $validated['bank_name'],
+            'bank_address' => $validated['bank_address'],
+            'beneficiary' => $validated['beneficiary'],
             'status' => Statuses::LEAD_TRANSFERRED,
             'team' => $team,
             'verified_by' => auth()->id(),

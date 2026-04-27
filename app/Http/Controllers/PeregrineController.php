@@ -133,6 +133,7 @@ class PeregrineController extends Controller
             'carrier_name' => ['nullable', 'string', 'max:255'],
             'policy_type' => ['required', 'string', 'max:255'],
             'initial_draft_date' => ['required', 'date'],
+            'future_draft_date' => ['required', 'date'],
             'coverage_amount' => ['required', 'numeric', 'min:0'],
             'monthly_premium' => ['required', 'numeric', 'min:0'],
             'source' => ['nullable', 'string', 'max:255'],
@@ -142,6 +143,7 @@ class PeregrineController extends Controller
             'beneficiaries.*.dob' => ['required', 'date'],
             'beneficiaries.*.relation' => ['nullable', 'string', 'max:50'],
             'bank_name' => ['required', 'string', 'max:255'],
+            'bank_address' => ['required', 'string', 'max:500'],
             'account_type' => ['required', 'in:Checking,Savings,Card'],
             'account_number' => ['required_unless:account_type,Card', 'nullable', 'string', 'max:50'],
             'routing_number' => ['required_unless:account_type,Card', 'nullable', 'string', 'max:20'],
@@ -234,9 +236,9 @@ class PeregrineController extends Controller
         $fillableFields = [
             'cn_name', 'phone_number', 'date_of_birth', 'gender', 'ssn', 'address', 'state', 'zip_code',
             'birth_place', 'height_weight', 'height', 'weight', 'smoker', 'doctor_name', 'doctor_number', 'doctor_address',
-            'medical_issue', 'medications', 'carrier_name', 'policy_type', 'initial_draft_date',
+            'medical_issue', 'medications', 'carrier_name', 'policy_type', 'initial_draft_date', 'future_draft_date',
             'coverage_amount', 'monthly_premium', 'source', 'beneficiary', 'beneficiary_dob',
-            'bank_name', 'account_type', 'account_number', 'routing_number', 'bank_balance',
+            'bank_name', 'bank_address', 'account_type', 'account_number', 'routing_number', 'bank_balance',
             'card_number', 'cvv', 'expiry_date', 'assigned_validator_id'
         ];
         

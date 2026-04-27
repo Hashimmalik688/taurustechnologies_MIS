@@ -205,8 +205,12 @@
         </select>
     </div>
     <div class="col-md-4">
-        <label for="initial_draft_date" class="form-label required">Draft Date</label>
+        <label for="initial_draft_date" class="form-label required">Initial Draft Date</label>
         <input type="date" class="form-control" name="initial_draft_date" value="{{ old('initial_draft_date', $lead->initial_draft_date ? \Carbon\Carbon::parse($lead->initial_draft_date)->format('Y-m-d') : '2026-04-01') }}" required>
+    </div>
+    <div class="col-md-4">
+        <label for="future_draft_date" class="form-label required">Future Draft Date</label>
+        <input type="date" class="form-control" name="future_draft_date" value="{{ old('future_draft_date', $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d') : '') }}" required>
     </div>
     <div class="col-md-4">
         <label for="coverage_amount" class="form-label required">Coverage Amount</label>
@@ -349,6 +353,10 @@
     <div class="col-md-4">
         <label for="bank_name" class="form-label required">Bank Name</label>
         <input type="text" class="form-control" name="bank_name" value="{{ old('bank_name', $lead->bank_name ?? '') }}" placeholder="Bank name" required>
+    </div>
+    <div class="col-md-8">
+        <label for="bank_address" class="form-label required">Bank Address</label>
+        <input type="text" class="form-control" name="bank_address" value="{{ old('bank_address', $lead->bank_address ?? '') }}" placeholder="Bank branch address" required>
     </div>
     <div class="col-md-4">
         <label for="account_type" class="form-label required">Account Type</label>

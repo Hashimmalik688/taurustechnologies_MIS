@@ -235,6 +235,12 @@
                                 @error('initial_draft_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4">
+                                <label for="future_draft_date" class="form-label required">Future Draft Date</label>
+                                <input type="date" class="form-control @error('future_draft_date') is-invalid @enderror"
+                                    id="future_draft_date" name="future_draft_date" value="{{ old('future_draft_date', $lead->future_draft_date ? \Carbon\Carbon::parse($lead->future_draft_date)->format('Y-m-d') : '') }}" required>
+                                @error('future_draft_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="col-md-4">
                                 <label for="coverage_amount" class="form-label required">Coverage Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
@@ -332,6 +338,13 @@
                                     id="bank_name" name="bank_name" value="{{ old('bank_name', $lead->bank_name) }}"
                                     placeholder="Bank name" required>
                                 @error('bank_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="col-md-8">
+                                <label for="bank_address" class="form-label required">Bank Address</label>
+                                <input type="text" class="form-control @error('bank_address') is-invalid @enderror"
+                                    id="bank_address" name="bank_address" value="{{ old('bank_address', $lead->bank_address) }}"
+                                    placeholder="Bank branch address" required>
+                                @error('bank_address')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-3">
                                 <label for="account_type" class="form-label required">Account Type</label>
@@ -619,6 +632,53 @@
                 });
             });
         });
+
+        // ── localStorage Auto-Save ────────────────────────────────────
+        (function() {
+            const DRAFT_KEY = 'pgcloser_draft_{{ $lead->id }}';
+            const mainForm  = document.querySelector('form[action*="update"]');
+            if (!mainForm) return;
+
+            // Collect all saveable field values into a plain object
+            function collectFormData() {
+                const data = {};
+                mainForm.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([readonly]), select, textarea').forEach(function(el) {
+                    if (!el.name) return;
+                    if (el.type === 'checkbox') { data[el.name] = el.checked ? '1' : '0'; return; }
+                    if (el.type === 'radio')    { if (el.checked) data[el.name] = el.value; return; }
+                    data[el.name] = el.value;
+                });
+                return data;
+            }
+
+            // Restore saved values into form (skips fields already populated by server)
+            function restoreDraft(saved) {
+                Object.entries(saved).forEach(function([name, value]) {
+                    // Only restore into elements that currently have no value (empty)
+                    mainForm.querySelectorAll('[name="' + CSS.escape(name) + '"]').forEach(function(el) {
+                        if (el.type === 'checkbox') { el.checked = value === '1'; return; }
+                        if (el.type === 'radio')    { el.checked = (el.value === value); return; }
+                        if (!el.value) el.value = value;
+                    });
+                });
+            }
+
+            // Save to localStorage on any change, debounced 800ms
+            let saveTimer;
+            mainForm.addEventListener('input',  function() { clearTimeout(saveTimer); saveTimer = setTimeout(function() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collectFormData())); } catch(e) {} }, 800); });
+            mainForm.addEventListener('change', function() { clearTimeout(saveTimer); saveTimer = setTimeout(function() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(collectFormData())); } catch(e) {} }, 800); });
+
+            // Restore draft on page load
+            try {
+                const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+                if (saved) restoreDraft(saved);
+            } catch(e) {}
+
+            // Clear draft on successful form submit
+            mainForm.addEventListener('submit', function() {
+                try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+            });
+        })();
 
         // Copy form data to pending form before submit
         document.getElementById('pendingForm').addEventListener('submit', function(e) {
