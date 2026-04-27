@@ -1080,6 +1080,7 @@ Route::group(['prefix' => 'chargebacks', 'as' => 'chargebacks.', 'middleware' =>
     Route::get('/', [ChargebackController::class, 'index'])->name('index')->middleware('role.permission:chargebacks,view');
     Route::get('/show/{id}', [ChargebackController::class, 'show'])->name('show')->middleware('role.permission:chargebacks,view');
     Route::post('/{id}/send-to-retention', [ChargebackController::class, 'sendToRetention'])->name('sendToRetention')->middleware('role.permission:chargebacks,view');
+    Route::post('/{id}/post-sales-return', [ChargebackController::class, 'postSalesReturn'])->name('postSalesReturn')->middleware('role.permission:accounting,edit');
 });
 
 // Retention — access controlled by role.permission:retention,level

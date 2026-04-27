@@ -169,6 +169,16 @@
     }
     .sl-act-send-retention:hover { background: rgba(14,165,233,.22); }
     .sl-act-send-retention:disabled { opacity: .5; cursor: not-allowed; }
+    .sl-act-post-ledger {
+        display: inline-flex; align-items: center; gap: .25rem;
+        font-size: .63rem; font-weight: 600; cursor: pointer;
+        padding: .28rem .55rem; border-radius: .35rem;
+        background: rgba(245,158,11,.12); color: #b45309;
+        border: 1px solid rgba(245,158,11,.35);
+        transition: all .15s; white-space: nowrap;
+    }
+    .sl-act-post-ledger:hover { background: rgba(245,158,11,.22); }
+    .sl-act-post-ledger:disabled { opacity: .5; cursor: not-allowed; }
 
     /* Badges */
     .sl-tbl .badge { font-size: .68rem; font-weight: 600; padding: .25rem .55rem; border-radius: 22px; }
@@ -292,6 +302,15 @@
                 <div class="kpi-value text-warning">${{ number_format($total_amount, 2) }}</div>
             </div>
         </div>
+        <div class="sl-kpi-pill">
+            <div class="kpi-icon" style="background:rgba(245,158,11,.12);color:#b45309;">
+                <i class="bx bx-book-open"></i>
+            </div>
+            <div>
+                <div class="kpi-label">Ledger Pending</div>
+                <div class="kpi-value" style="color:{{ $kpi_ledger_pending > 0 ? '#b45309' : '#059669' }};">{{ $kpi_ledger_pending }}</div>
+            </div>
+        </div>
     </div>
 
     <!-- Chargebacks Card -->
@@ -341,6 +360,7 @@
                         <th style="min-width:180px">Manager Reason</th>
                         <th style="min-width:145px">Marked as CB</th>
                         <th style="min-width:145px">Sent to Retention</th>
+                        <th style="min-width:145px">Ledger</th>
                         <th style="min-width:90px">Actions</th>
                     </tr>
                 </thead>
@@ -413,6 +433,33 @@
                                 @endif
                             </td>
 
+                            {{-- ── Ledger Status column ── --}}
+                            <td style="font-size:.72rem;line-height:1.6;">
+                                @if($lead->ledger_sales_return_status === 'posted' || $lead->ledger_sales_return_entry_id)
+                                    <div style="color:#059669;font-weight:600;">
+                                        <i class="bx bx-check-circle"></i> Posted
+                                    </div>
+                                    @if($lead->ledger_sales_return_posted_at)
+                                        <div style="color:#64748b;">{{ $lead->ledger_sales_return_posted_at->format('M d, Y') }}</div>
+                                        <div style="color:#64748b;">by {{ $lead->ledgerSalesReturnPostedBy->name ?? 'System' }}</div>
+                                    @endif
+                                @else
+                                    <span style="display:inline-block;font-size:.62rem;font-weight:700;padding:.2rem .45rem;border-radius:22px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.3);margin-bottom:.35rem;">
+                                        <i class="bx bx-time-five"></i> Pending
+                                    </span>
+                                    @can('accounting.edit')
+                                    <div>
+                                        <button class="sl-act-post-ledger"
+                                            data-id="{{ $lead->id }}"
+                                            data-name="{{ $lead->cn_name }}"
+                                            title="Confirm and post Sales Return to accounting ledger">
+                                            <i class="bx bx-book-open"></i> Post Sales Return
+                                        </button>
+                                    </div>
+                                    @endcan
+                                @endif
+                            </td>
+
                             {{-- ── Actions column ── --}}
                             <td>
                                 <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
@@ -437,7 +484,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center py-4">
+                            <td colspan="13" class="text-center py-4">
                                 <i class="bx bx-info-circle" style="font-size:2rem;color:#94a3b8"></i>
                                 <p class="mb-0 text-muted" style="font-size:.82rem">No chargebacks found for the selected period</p>
                             </td>
@@ -449,7 +496,7 @@
                         <tr>
                             <td colspan="6" class="text-end">Total:</td>
                             <td><span class="badge bg-danger">${{ number_format($total_amount, 2) }}</span></td>
-                            <td colspan="5"></td>
+                            <td colspan="6"></td>
                         </tr>
                     </tfoot>
                 @endif
@@ -685,6 +732,59 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             btn.innerHTML = '<i class="bx bx-transfer-alt me-1"></i> Send to Retention';
             alert('Network error. Please try again.');
+        });
+    });
+
+    // ── Post Sales Return to Ledger ──
+    document.querySelectorAll('.sl-act-post-ledger').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id   = this.dataset.id;
+            const name = this.dataset.name;
+            if (!confirm('Post Sales Return for "' + name + '" to the accounting ledger?\n\nThis will create a Sales Return (debit) entry against the partner ledger.\nThis action cannot be undone.\n\nContinue?')) return;
+
+            this.disabled = true;
+            this.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Posting…';
+            const cell = this.closest('td');
+
+            fetch('/chargebacks/' + id + '/post-sales-return', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    cell.innerHTML =
+                        '<div style="color:#059669;font-weight:600;font-size:.72rem;">' +
+                            '<i class="bx bx-check-circle"></i> Posted' +
+                        '</div>' +
+                        '<div style="color:#64748b;font-size:.72rem;">' + data.posted_at + '</div>' +
+                        '<div style="color:#64748b;font-size:.72rem;">by ' + data.posted_by + '</div>';
+                    // Decrement the "Ledger Pending" KPI pill value
+                    const kpiPills = document.querySelectorAll('.sl-kpi-pill .kpi-value');
+                    kpiPills.forEach(el => {
+                        if (el.closest('.sl-kpi-pill').querySelector('.kpi-label')?.textContent.trim() === 'Ledger Pending') {
+                            const cur = parseInt(el.textContent, 10);
+                            if (!isNaN(cur) && cur > 0) {
+                                el.textContent = cur - 1;
+                                if (cur - 1 === 0) el.style.color = '#059669';
+                            }
+                        }
+                    });
+                    alert('✓ ' + (data.message || 'Sales Return posted to ledger.'));
+                } else {
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bx bx-book-open"></i> Post Sales Return';
+                    alert('Error: ' + (data.message || 'Could not post to ledger.'));
+                }
+            })
+            .catch(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="bx bx-book-open"></i> Post Sales Return';
+                alert('Network error. Please try again.');
+            });
         });
     });
 

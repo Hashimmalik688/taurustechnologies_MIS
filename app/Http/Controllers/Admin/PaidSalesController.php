@@ -131,52 +131,14 @@ class PaidSalesController extends Controller
             ], 422);
         }
 
-        $lead->status                = \App\Support\Statuses::LEAD_CHARGEBACK;
-        $lead->retention_status      = \App\Support\Statuses::RETENTION_PENDING;
-        $lead->chargeback_marked_by_id = \Illuminate\Support\Facades\Auth::id();
+        $lead->status                       = \App\Support\Statuses::LEAD_CHARGEBACK;
+        $lead->retention_status             = \App\Support\Statuses::RETENTION_PENDING;
+        $lead->chargeback_marked_by_id      = \Illuminate\Support\Facades\Auth::id();
+        $lead->ledger_sales_return_status   = 'pending'; // Sales return NOT auto-posted; must be confirmed manually
         // chargeback_marked_date is auto-set by the model boot observer
         $lead->save();
 
-        // Auto-post a Sales Return entry to the accounting ledger
-        // (the guard above already ensures ledger_journal_entry_id is set)
-        if (!$lead->ledger_sales_return_entry_id && $lead->partner_id) {
-            try {
-                $ledger  = app(LedgerService::class);
-                $calc    = $this->calcLeadCommission($lead, app(CommissionCalculationService::class));
-                $commission  = $calc['commission'];
-                $ourSharePct = $calc['our_share_pct'];
-                $ourShare    = $calc['our_share'];
-
-                if ($ourShare > 0) {
-                    $description = "Sales Return (Chargeback) — {$lead->cn_name}" .
-                        ($lead->carrier_name ? " | {$lead->carrier_name}" : '') .
-                        ($lead->policy_number ? " | #{$lead->policy_number}" : '');
-
-                    $returnEntry = $ledger->createSalesReturnEntry(
-                        partnerId:       $lead->partner_id,
-                        amount:          $ourShare,
-                        date:            now()->toDateString(),
-                        description:     $description,
-                        reference:       $lead->policy_number,
-                        carrierId:       $lead->insurance_carrier_id,
-                        insuredName:     $lead->cn_name,
-                        grossAmount:     $commission,
-                        sharePercentage: $ourSharePct,
-                        leadId:          $lead->id
-                    );
-
-                    $lead->ledger_sales_return_entry_id = $returnEntry->id;
-                    $lead->saveQuietly();
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('PaidSales markChargeback: could not post sales return to ledger', [
-                    'lead_id' => $id,
-                    'error'   => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return response()->json(['success' => true, 'message' => 'Lead marked as Chargeback.']);
+        return response()->json(['success' => true, 'message' => 'Lead marked as Chargeback. Sales return ledger entry is pending — confirm it from the Chargebacks page when ready.']);
     }
 
     /**

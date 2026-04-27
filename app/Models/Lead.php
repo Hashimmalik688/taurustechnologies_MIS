@@ -228,6 +228,9 @@ class Lead extends Model
         // Accounting Ledger links
         'ledger_journal_entry_id',
         'ledger_sales_return_entry_id',
+        'ledger_sales_return_status',
+        'ledger_sales_return_posted_at',
+        'ledger_sales_return_posted_by_id',
         'ledger_chargeback_paid_entry_id',
 
         // Policy Died
@@ -309,8 +312,9 @@ class Lead extends Model
         'not_paid_at'              => 'datetime',
         'paid_at'                  => 'datetime',
         'policy_died_at'           => 'datetime',
-        'chargeback_paid_at'          => 'datetime',
-        'cb_sent_to_retention_at'    => 'datetime',
+        'chargeback_paid_at'              => 'datetime',
+        'cb_sent_to_retention_at'        => 'datetime',
+        'ledger_sales_return_posted_at'  => 'datetime',
     ];
 
     /**
@@ -630,6 +634,12 @@ class Lead extends Model
     public function ledgerSalesReturnEntry()
     {
         return $this->belongsTo(\App\Models\LedgerJournalEntry::class, 'ledger_sales_return_entry_id');
+    }
+
+    /** User who manually confirmed the sales return to the ledger */
+    public function ledgerSalesReturnPostedBy()
+    {
+        return $this->belongsTo(User::class, 'ledger_sales_return_posted_by_id');
     }
 
     /** The chargeback recovery journal entry posted when a chargebacked lead is marked paid */

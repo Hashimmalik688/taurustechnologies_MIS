@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\LedgerEntry;
+use App\Services\CommissionCalculationService;
+use App\Services\LedgerService;
 use App\Support\Statuses;
+use App\Traits\CommissionResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ChargebackController extends Controller
 {
+    use CommissionResolver;
     /**
      * Display chargebacks page
      */
@@ -64,7 +69,7 @@ class ChargebackController extends Controller
 
         // Get chargebacks from leads table
         $query = Lead::where('status', 'chargeback')
-            ->with(['insuranceCarrier', 'managedBy', 'chargebackMarkedBy', 'chargebackPaidBy', 'cbSentToRetentionBy']);
+            ->with(['insuranceCarrier', 'managedBy', 'chargebackMarkedBy', 'chargebackPaidBy', 'cbSentToRetentionBy', 'ledgerSalesReturnPostedBy']);
         $applyFilters($query);
 
         $chargebacks = $query->latest('sale_date')->paginate(50);
@@ -78,9 +83,10 @@ class ChargebackController extends Controller
         $total_amount = $totalQuery->sum('monthly_premium');
 
         // Global KPI counts (all-time, no date filter)
-        $kpi_total_all        = Lead::where('status', 'chargeback')->count();
-        $kpi_current          = Lead::where('status', 'chargeback')->whereNull('cb_sent_to_retention_at')->count();
+        $kpi_total_all         = Lead::where('status', 'chargeback')->count();
+        $kpi_current           = Lead::where('status', 'chargeback')->whereNull('cb_sent_to_retention_at')->count();
         $kpi_sent_to_retention = Lead::where('status', 'chargeback')->whereNotNull('cb_sent_to_retention_at')->count();
+        $kpi_ledger_pending    = Lead::where('status', 'chargeback')->where('ledger_sales_return_status', 'pending')->count();
 
         $fdfpTypes     = Statuses::FDFP_TYPES;
         $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
@@ -98,6 +104,7 @@ class ChargebackController extends Controller
             'kpi_total_all',
             'kpi_current',
             'kpi_sent_to_retention',
+            'kpi_ledger_pending',
             'fdfpTypes',
             'niDispositions'
         ));
@@ -161,5 +168,79 @@ class ChargebackController extends Controller
             'sent_time'=> now()->format('H:i'),
             'sent_by'  => Auth::user()->name,
         ]);
+    }
+
+    /**
+     * Manually confirm and post the Sales Return ledger entry for a chargeback.
+     *
+     * Previously this was auto-posted when marking a sale as chargeback.
+     * Now it is deferred to allow for insurance companies that take 60+ days
+     * to claw back funds. The entry is only posted when explicitly confirmed here.
+     */
+    public function postSalesReturn(int $id)
+    {
+        $lead = Lead::with('partner', 'insuranceCarrier')->findOrFail($id);
+
+        if ($lead->status !== Statuses::LEAD_CHARGEBACK) {
+            return response()->json(['success' => false, 'message' => 'Lead is not in Chargeback status.'], 422);
+        }
+
+        if ($lead->ledger_sales_return_entry_id || $lead->ledger_sales_return_status === 'posted') {
+            return response()->json(['success' => false, 'message' => 'Sales Return has already been posted to the ledger.'], 422);
+        }
+
+        if (!$lead->partner_id) {
+            return response()->json(['success' => false, 'message' => 'Lead has no partner assigned — cannot post sales return.'], 422);
+        }
+
+        try {
+            $ledger  = app(LedgerService::class);
+            $calc    = $this->calcLeadCommission($lead, app(CommissionCalculationService::class));
+            $commission  = $calc['commission'];
+            $ourSharePct = $calc['our_share_pct'];
+            $ourShare    = $calc['our_share'];
+
+            if ($ourShare <= 0) {
+                return response()->json(['success' => false, 'message' => 'Calculated share is $0 — review commission settings before posting.'], 422);
+            }
+
+            $description = "Sales Return (Chargeback) — {$lead->cn_name}" .
+                ($lead->carrier_name ? " | {$lead->carrier_name}" : '') .
+                ($lead->policy_number ? " | #{$lead->policy_number}" : '');
+
+            $returnEntry = $ledger->createSalesReturnEntry(
+                partnerId:       $lead->partner_id,
+                amount:          $ourShare,
+                date:            now()->toDateString(),
+                description:     $description,
+                reference:       $lead->policy_number,
+                carrierId:       $lead->insurance_carrier_id,
+                insuredName:     $lead->cn_name,
+                grossAmount:     $commission,
+                sharePercentage: $ourSharePct,
+                leadId:          $lead->id
+            );
+
+            $lead->ledger_sales_return_entry_id     = $returnEntry->id;
+            $lead->ledger_sales_return_status       = 'posted';
+            $lead->ledger_sales_return_posted_at    = now();
+            $lead->ledger_sales_return_posted_by_id = Auth::id();
+            $lead->saveQuietly();
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'Sales Return posted to ledger: ' . $returnEntry->entry_number,
+                'entry_number' => $returnEntry->entry_number,
+                'posted_at'    => now()->format('M d, Y H:i'),
+                'posted_by'    => Auth::user()->name,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('ChargebackController postSalesReturn error', [
+                'lead_id' => $id,
+                'error'   => $e->getMessage(),
+            ]);
+
+            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 }

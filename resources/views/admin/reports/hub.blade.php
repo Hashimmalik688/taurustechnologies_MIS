@@ -17,7 +17,7 @@
 
         <div class="hub-section-label">Sales &amp; Performance</div>
         <div class="hub-grid">
-            @canViewModule('reports')
+            @canViewModule('report-submission-performance')
             <a href="{{ route('settings.reports.submission-performance') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-award"></i></div>
                 <div class="hub-card-body">
@@ -28,7 +28,7 @@
             </a>
             @endcanViewModule
 
-            @canViewModule('reports')
+            @canViewModule('report-policy-type')
             <a href="{{ route('settings.reports.policy-type-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-category"></i></div>
                 <div class="hub-card-body">
@@ -39,7 +39,7 @@
             </a>
             @endcanViewModule
 
-            @canViewModule('reports')
+            @canViewModule('report-sales-status')
             <a href="{{ route('settings.reports.sales-status') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-table"></i></div>
                 <div class="hub-card-body">
@@ -53,7 +53,7 @@
 
         <div class="hub-section-label">Call Tracking</div>
         <div class="hub-grid">
-            @canViewModule('ravens-bad-leads')
+            @canViewModule('report-disposition')
             <a href="{{ route('settings.reports.disposition-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-phone-call"></i></div>
                 <div class="hub-card-body">
@@ -62,7 +62,9 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
+            @endcanViewModule
 
+            @canViewModule('report-closer')
             <a href="{{ route('settings.reports.closer-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-user-check"></i></div>
                 <div class="hub-card-body">
@@ -71,7 +73,9 @@
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
+            @endcanViewModule
 
+            @canViewModule('report-manager-submission')
             <a href="{{ route('settings.reports.manager-submission-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-user-check"></i></div>
                 <div class="hub-card-body">
@@ -82,7 +86,7 @@
             </a>
             @endcanViewModule
 
-            @canViewModule('reports')
+            @canViewModule('report-peregrine-team')
             <a href="{{ route('settings.reports.peregrine-team-report') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
                 <div class="hub-card-body">
@@ -93,18 +97,7 @@
             </a>
             @endcanViewModule
 
-            @canViewModule('reports')
-            <a href="{{ route('settings.reports.peregrine-team-report') }}" class="hub-card">
-                <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
-                <div class="hub-card-body">
-                    <div class="hub-card-title">Peregrine Team Report</div>
-                    <p class="hub-card-desc">PJC submissions, Closer pipeline &amp; Validator outcomes — full Peregrine team performance in one view</p>
-                </div>
-                <i class="bx bx-chevron-right hub-card-arrow"></i>
-            </a>
-            @endcanViewModule
-
-            @canViewModule('reports')
+            @canViewModule('report-zoom-logs')
             <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>
                 <div class="hub-card-body">

@@ -329,6 +329,7 @@
                         <th>Policy #</th>
                         <th>Partner</th>
                         <th class="text-center">Premium</th>
+                        <th class="text-center">Commission</th>
                         <th>Followup Done</th>
                         <th>Sent to Draft</th>
                         @if($tab === 'not_paid')
@@ -369,6 +370,13 @@
                             </td>
                             <td class="text-center">
                                 <span class="bd-mini bd-gold">${{ number_format($lead->monthly_premium ?? 0, 2) }}</span>
+                            </td>
+                            <td class="text-center">
+                                @if(($lead->calculated_commission ?? 0) > 0)
+                                    <span style="color:#722ed1;font-weight:600;font-size:.78rem;">${{ number_format($lead->calculated_commission, 2) }}</span>
+                                @else
+                                    <span style="color:var(--bs-surface-400);">—</span>
+                                @endif
                             </td>
                             <td>
                                 @if($lead->followup_done_at)
@@ -437,7 +445,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $tab === 'not_paid' ? 12 : 11 }}">
+                            <td colspan="{{ $tab === 'not_paid' ? 13 : 12 }}">
                                 <div class="pd-empty">
                                     <i class="bx bx-inbox"></i>
                                     <p>No leads in this queue for the selected period.</p>

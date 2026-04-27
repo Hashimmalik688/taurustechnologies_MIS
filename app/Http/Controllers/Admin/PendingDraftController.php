@@ -100,6 +100,13 @@ class PendingDraftController extends Controller
         $fdfpTypes  = Statuses::FDFP_TYPES;
         $niDispositions = Statuses::NOT_ISSUED_DISPOSITIONS;
 
+        // Annotate each paginated row with its calculated commission
+        $commissionService = app(CommissionCalculationService::class);
+        foreach ($leads as $lead) {
+            $c = $this->calcLeadCommission($lead, $commissionService);
+            $lead->calculated_commission = $c['commission'];
+        }
+
         return view('admin.pending-draft.index', compact(
             'leads', 'carriers', 'partners', 'search', 'carrier', 'partner',
             'dateFrom', 'dateTo', 'tab',

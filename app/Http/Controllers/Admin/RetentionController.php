@@ -40,6 +40,7 @@ class RetentionController extends Controller
                       ->orWhere('carrier_name','like', "%{$search}%")
                       ->orWhere('closer_name', 'like', "%{$search}%");
                 });
+                return $query; // skip date filters when searching — look across all time
             }
             if ($date_from) $query->whereDate('sale_date', '>=', $date_from);
             if ($date_to)   $query->whereDate('sale_date', '<=', $date_to);
@@ -63,6 +64,7 @@ class RetentionController extends Controller
                       ->orWhere('carrier_name','like', "%{$search}%")
                       ->orWhere('closer_name', 'like', "%{$search}%");
                 });
+                return $query; // skip date filters when searching — look across all time
             }
             if ($date_from) $query->whereDate('not_paid_at', '>=', $date_from);
             if ($date_to)   $query->whereDate('not_paid_at', '<=', $date_to);
@@ -138,7 +140,23 @@ class RetentionController extends Controller
         )->count();
 
         // ----- Table queries -----
-        if ($disposed) {
+        if ($search) {
+            // Search mode: bypass disposed/disp_filter restrictions — search across ALL leads in all tabs
+            $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', '!=', Statuses::NI_CANCELLED_BY_CUSTOMER);
+            $np_query = Lead::with(['insuranceCarrier', 'notPaidBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
+                ->whereNotNull('not_paid_at')
+                ->where(fn($q) => $q->whereNull('paid_at')->orWhereNotNull('cb_sent_to_retention_at'))
+                ->whereNull('policy_died_at');
+            $cancelled_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
+                ->whereNotNull('not_issued_at')
+                ->whereNull('not_issued_resolved_at')
+                ->whereNotNull('pending_contract_at')
+                ->where('not_issued_disposition', Statuses::NI_CANCELLED_BY_CUSTOMER);
+        } elseif ($disposed) {
             // Show disposed leads
             $ni_query = Lead::with(['insuranceCarrier', 'notIssuedBy', 'retActionUpdatedBy', 'recallRequestedBy', 'fieldHighlights', 'partner'])
                 ->whereNotNull('not_issued_at')
@@ -177,8 +195,8 @@ class RetentionController extends Controller
                 ->where('not_issued_disposition', Statuses::NI_CANCELLED_BY_CUSTOMER)
                 ->where(fn($q) => $q->whereNull('retention_disposition')->orWhereNotIn('retention_disposition', $disposedStatuses));
         }
-        // Further narrow by specific disposition if a KPI pill was clicked
-        if ($disp_filter) {
+        // Further narrow by specific disposition if a KPI pill was clicked (skip in search mode)
+        if (!$search && $disp_filter) {
             if ($disp_filter === 'pending') {
                 $ni_query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
                 $np_query->where(fn($q) => $q->whereNull('retention_disposition')->orWhere('retention_disposition', 'pending'));
@@ -198,10 +216,13 @@ class RetentionController extends Controller
         $not_paid_leads   = $np_query->latest('not_paid_at')->paginate(50, ['*'], 'not_paid_page');
         $cancelled_leads  = $cancelled_query->latest('not_issued_at')->paginate(50, ['*'], 'cancelled_page');
 
-        // Auto-activate the first tab that has results when a KPI filter is applied
-        if ($disp_filter && $not_issued_leads->isEmpty() && !$not_paid_leads->isEmpty()) {
+        // Auto-activate the first tab that has results when a KPI filter OR search is applied
+        $hasAnyFilter = $disp_filter || $search || $month || $year || $date_from || $date_to;
+        if ($hasAnyFilter && $not_issued_leads->isEmpty() && $cancelled_leads->isEmpty() && !$not_paid_leads->isEmpty()) {
             $activeTab = 'not-paid';
-        } elseif ($disp_filter && $not_issued_leads->isEmpty() && $not_paid_leads->isEmpty() && !$cancelled_leads->isEmpty()) {
+        } elseif ($hasAnyFilter && $not_issued_leads->isEmpty() && $not_paid_leads->isEmpty() && !$cancelled_leads->isEmpty()) {
+            $activeTab = 'cancelled';
+        } elseif ($hasAnyFilter && $not_issued_leads->isEmpty() && !$cancelled_leads->isEmpty()) {
             $activeTab = 'cancelled';
         } else {
             $activeTab = 'not-issued';

@@ -37,6 +37,7 @@ class ReportController extends Controller
      */
     public function zoomLogs(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-zoom-logs'), 403, 'Access denied.');
         // All call times are displayed in Pacific Time (America/Los_Angeles)
         $displayTz = 'America/Los_Angeles';
 
@@ -749,6 +750,7 @@ class ReportController extends Controller
 
     public function submissionPerformance(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-submission-performance'), 403, 'Access denied.');
         // Default to current month
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
@@ -806,6 +808,7 @@ class ReportController extends Controller
      */
     public function submissionPerformanceDrilldown(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-submission-performance'), 403, 'Access denied.');
         $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $carrierName    = $request->get('carrier_name');
@@ -862,6 +865,7 @@ class ReportController extends Controller
      * ────────────────────────────────────────────────────────────── */
     public function salesStatus(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-sales-status'), 403, 'Access denied.');
         $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $dateField = $request->get('date_field', 'sale_date'); // 'sale_date' | 'paid_at'
@@ -944,6 +948,7 @@ class ReportController extends Controller
      */
     public function salesStatusDrilldown(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-sales-status'), 403, 'Access denied.');
         $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $dateField   = $request->get('date_field', 'sale_date');
@@ -1029,6 +1034,7 @@ class ReportController extends Controller
      * ────────────────────────────────────────────────────────────── */
     public function policyTypeReport(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-policy-type'), 403, 'Access denied.');
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
 
@@ -1144,6 +1150,7 @@ class ReportController extends Controller
      */
     public function policyTypeReportDrilldown(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-policy-type'), 403, 'Access denied.');
         $dateFrom        = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo          = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $policyType      = $request->get('policy_type', 'Unknown');
@@ -1211,6 +1218,7 @@ class ReportController extends Controller
      */
     public function dispositionReport(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-disposition'), 403, 'Access denied.');
         $timezone = 'America/Los_Angeles';
         $appTz    = config('app.timezone', 'America/Los_Angeles');
 
@@ -1333,10 +1341,8 @@ class ReportController extends Controller
      * ────────────────────────────────────────────────────────────── */
     public function managerSubmissionReport(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-manager-submission'), 403, 'Access denied.');
         $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
-        $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
-        $carrierId   = $request->get('carrier_id');
-        $partnerName = $request->get('partner_name');
         $policyType  = $request->get('policy_type');
 
         // Leads where manager took action: approved to pending contract OR declined
@@ -1413,6 +1419,7 @@ class ReportController extends Controller
      */
     public function managerSubmissionDrilldown(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-manager-submission'), 403, 'Access denied.');
         $managerId   = $request->get('manager_id');
         $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
@@ -1519,6 +1526,7 @@ class ReportController extends Controller
      * ────────────────────────────────────────────────────────────── */
     public function peregrineTeamReport(Request $request)
     {
+        abort_unless(auth()->user()->canViewModule('report-peregrine-team'), 403, 'Access denied.');
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->toDateString());
 
