@@ -142,3 +142,34 @@ php artisan config:cache
 - **Reverb WebSocket:** Check port 8080 isn't blocked, verify `.env` REVERB_* vars
 - **Import failures:** Check `storage/logs/laravel.log` for row-level errors in LeadsImport
 - **Permission denied:** User missing role assignment - check `spatie/laravel-permission` tables
+
+## Knowledge Graph (RAG)
+
+A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,702 nodes, 27,187 edges, 803 communities from AST extraction of all 1,281 PHP/JS/TS files).
+
+**Always follow this order when answering codebase questions:**
+
+1. **Read `graphify-out/GRAPH_REPORT.md` first** — it contains god nodes (highest-degree concepts), community clusters, and surprising cross-file connections. Use it to orient before searching files.
+
+2. **Query the graph for specific questions** instead of grepping raw files:
+   ```
+   graphify query "what connects LeadController to the salary system?" --graph graphify-out/graph.json
+   graphify path "LeadsImport" "Lead" --graph graphify-out/graph.json
+   graphify explain "AttendanceService" --graph graphify-out/graph.json
+   ```
+
+3. **Use the MCP server for programmatic graph access** (structured queries):
+   ```
+   python3 -m graphify.serve graphify-out/graph.json
+   ```
+   Exposes: `query_graph`, `get_node`, `get_neighbors`, `shortest_path`
+
+4. **Only fall back to reading raw files** when the graph query doesn't have enough detail.
+
+**Obsidian vault** (visual exploration): `/root/obsidian-vaults/taurus-crm/` — open in Obsidian desktop for linked node graph. Start from `index.md`.
+
+**Update the graph** after significant code changes:
+```bash
+cd /var/www/taurus-crm && python3 /root/graphify_step3a.py && python3 /root/graphify_merge.py && python3 /root/graphify_step4.py && python3 /root/graphify_step5_obsidian.py
+```
+Or in Copilot Chat: `/graphify /var/www/taurus-crm --update`

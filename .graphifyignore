@@ -1,0 +1,33 @@
+# graphify — skip generated, binary, and vendor content
+vendor/
+node_modules/
+storage/
+public/build/
+public/hot
+bootstrap/cache/
+.git/
+
+# graphify's own output (don't self-index)
+graphify-out/
+AGENTS.md
+CLAUDE.md
+
+# compiled / lock files
+composer.lock
+package-lock.json
+*.min.js
+*.min.css
+*.map
+
+# large data / logs
+*.log
+*.sql
+*.csv
+*.xlsx
+*.pdf
+
+# local scripts not part of the codebase
+clear_cs.php
+sync_missing_sales.php
+scripts/
+worked/
