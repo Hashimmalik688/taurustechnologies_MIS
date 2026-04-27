@@ -84,18 +84,18 @@
 
         <div class="row">
             <div class="col-12">
-                <!-- Verifier Information (Read-Only) -->
+                <!-- PJC Information (Read-Only) -->
                 <div class="card lead-form-card">
                     <div class="card-header">
                         <h5 class="card-title">
                             <i class="bx bx-check-circle section-icon"></i>
-                            Verified Information (Read-Only)
+                            PJC Information (Read-Only)
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <strong>Note:</strong> The following information was collected by the verifier and cannot be changed.
+                            <strong>Note:</strong> The following information was collected by the PJC (Peregrines Junior Closer) and cannot be changed.
                         </div>
                         <div class="row g-3">
                             <div class="col-md-3">

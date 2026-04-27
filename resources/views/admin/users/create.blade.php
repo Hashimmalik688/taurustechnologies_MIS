@@ -186,7 +186,7 @@
                                             </div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="role-verifier">
-                                                <label class="form-check-label" for="role-verifier">Verifier</label>
+                                                <label class="form-check-label" for="role-verifier">{{ Roles::VERIFIER }}</label>
                                             </div>
                                         </div>
                                         <div class="col-md-3">

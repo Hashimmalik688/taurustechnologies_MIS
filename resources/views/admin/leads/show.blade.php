@@ -1136,7 +1136,7 @@
                             <span class="ld-fv">{{ \Carbon\Carbon::parse($insurance->verified_at)->format('M d, Y h:i A') }}</span>
                         </div>
                         <div class="ld-f">
-                            <span class="ld-fl">Verified By</span>
+                            <span class="ld-fl">Verified By (PJC)</span>
                             <span class="ld-fv {{ $insurance->verifier ? '' : 'empty' }}">{{ $insurance->verifier->name ?? 'N/A' }}</span>
                         </div>
                     </div>

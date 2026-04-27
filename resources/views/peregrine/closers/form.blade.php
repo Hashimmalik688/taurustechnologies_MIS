@@ -27,10 +27,10 @@
     }
 </style>
 
-<!-- Verifier Information (Read-Only) -->
+<!-- PJC Information (Read-Only) -->
 <div class="alert alert-info">
     <i class="fas fa-info-circle me-2"></i>
-    <strong>Verified Information:</strong> The following was collected by the verifier
+    <strong>PJC Information:</strong> The following was collected by the Peregrines Junior Closer
 </div>
 
 <div class="row g-3 mb-4">

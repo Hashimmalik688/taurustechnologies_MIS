@@ -152,14 +152,14 @@
                 @canViewModule('peregrine-dashboard')
                     <a href="{{ route('verifier.dashboard') }}" class="dropdown-item {{ Request::is('verifier/dashboard') ? 'active' : '' }}">
                         <i class="bx bx-shield-alt"></i>
-                        <span class="menu-text">Peregrine Dashboard</span>
+                        <span class="menu-text">PJC Dashboard</span>
                     </a>
                 @endcanViewModule
 
                 @canViewModule('peregrine-verifier')
                     <a href="{{ route('verifier.create.team', 'peregrine') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
                         <i class="bx bx-edit-alt"></i>
-                        <span class="menu-text">Verifier Form</span>
+                        <span class="menu-text">PJC Form</span>
                     </a>
                 @endcanViewModule
 
@@ -173,7 +173,7 @@
                 @canViewModule('peregrine-validation')
                     <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
                         <i class="bx bx-check-shield"></i>
-                        <span class="menu-text">Validation Dashboard</span>
+                        <span class="menu-text">Peregrines Validator</span>
                     </a>
                 @endcanViewModule
             </div>

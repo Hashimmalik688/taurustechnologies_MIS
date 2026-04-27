@@ -163,12 +163,12 @@ Future Draft Date: {{ $lead->future_draft_date ? \Carbon\Carbon::parse($lead->fu
 Lead Source: {{ $lead->source ?? '_________________' }}
 Team: {{ ucfirst($lead->team ?? '_________________') }}
 Closer Name: {{ $lead->closer_name ?? '_________________' }}
-Verified By: {{ $lead->account_verified_by ?? '_________________' }}
+Verified By (PJC): {{ $lead->account_verified_by ?? '_________________' }}
 @if($lead->verifier)
-Verifier: {{ $lead->verifier->name ?? '_________________' }}
+PJC: {{ $lead->verifier->name ?? '_________________' }}
 @endif
 @if($lead->validator)
-Validator: {{ $lead->validator->name ?? '_________________' }}
+Peregrines Validator: {{ $lead->validator->name ?? '_________________' }}
 @endif
 Sale Date: {{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '_________________' }}
 

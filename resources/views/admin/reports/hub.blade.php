@@ -83,6 +83,28 @@
             @endcanViewModule
 
             @canViewModule('reports')
+            <a href="{{ route('settings.reports.peregrine-team-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Peregrine Team Report</div>
+                    <p class="hub-card-desc">PJC submissions, Closer pipeline &amp; Validator outcomes — full Peregrine team performance in one view</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
+            @canViewModule('reports')
+            <a href="{{ route('settings.reports.peregrine-team-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Peregrine Team Report</div>
+                    <p class="hub-card-desc">PJC submissions, Closer pipeline &amp; Validator outcomes — full Peregrine team performance in one view</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
+            @canViewModule('reports')
             <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>
                 <div class="hub-card-body">

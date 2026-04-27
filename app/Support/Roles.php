@@ -26,7 +26,8 @@ class Roles
     public const EMPLOYEE = 'Employee';
     public const HR = 'HR';
     public const QA = 'QA';
-    public const VERIFIER = 'Verifier';
+    public const VERIFIER = 'Peregrines Junior Closer'; // formerly 'Verifier'
+    public const PJC = self::VERIFIER; // alias — Peregrines Junior Closer
 
     // ── Sales / Pipeline Roles ─────────────────────────────────────────
 

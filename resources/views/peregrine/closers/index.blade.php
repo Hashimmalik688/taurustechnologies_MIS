@@ -106,7 +106,7 @@
                         <th>Customer Name</th>
                         <th>Phone</th>
                         <th>Date</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Action</th>
                     </tr>
@@ -264,7 +264,7 @@
                     <tr>
                         <th>Customer Name</th>
                         <th>Phone</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th class="text-center">Status</th>
                         <th>Submitted</th>
                     </tr>
@@ -308,7 +308,7 @@
                     <tr>
                         <th>Customer Name</th>
                         <th>Phone</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th class="text-center">Reason</th>
                         <th>Failed At</th>
                     </tr>

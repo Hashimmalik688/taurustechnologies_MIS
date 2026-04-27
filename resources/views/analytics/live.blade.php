@@ -159,23 +159,23 @@
     ═══════════════════════════════════════════ --}}
     <div class="team-section">
         <div class="team-hdr t-per">
-            <i class="bx bx-check-shield"></i> Verifier Dashboard
-            <span style="margin-left:auto;font-size:.6rem;opacity:.7;">Verifier → Closer → Validator → Manager → QA</span>
+            <i class="bx bx-check-shield"></i> PJC Dashboard
+            <span style="margin-left:auto;font-size:.6rem;opacity:.7;">PJC → Closer → Peregrines Validator → Manager → QA</span>
         </div>
 
-        {{-- Peregrine: Verifier Pipeline & Closer side-by-side --}}
+        {{-- Peregrine: PJC Pipeline & Closer side-by-side --}}
         <div class="grid-2">
-            {{-- Verifier Pipeline (Peregrine only) --}}
+            {{-- PJC Pipeline (Peregrine only) --}}
             <div class="ex-card sec-card">
                 <div class="sec-hdr">
-                    <h6><i class="bx bx-check-shield" style="color:#50a5f1;"></i> Verifier Pipeline</h6>
+                    <h6><i class="bx bx-check-shield" style="color:#50a5f1;"></i> PJC Pipeline</h6>
                     <span style="font-size:.6rem;color:var(--bs-surface-400);" id="per-verifier-count">{{ $verifierPipeline->count() }} active</span>
                 </div>
                 <div class="scroll-tbl">
                     <table class="ex-tbl">
                         <thead>
                             <tr>
-                                <th>Verifier</th>
+                                <th>PJC</th>
                                 <th class="text-center">Total</th>
                                 <th class="text-center">Disposed</th>
                                 <th class="text-center">Pending</th>
@@ -194,7 +194,7 @@
                                     <td class="text-center"><span class="v-badge v-red">{{ $v['declined'] }}</span></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-info-circle"></i> No verifier activity</td></tr>
+                                <tr><td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-info-circle"></i> No PJC activity</td></tr>
                             @endforelse
                         </tbody>
                         @if($verifierPipeline->count() > 0)
@@ -265,10 +265,10 @@
             </div>
         </div>
 
-        {{-- Verifier Submissions Log --}}
+        {{-- PJC Submissions Log --}}
         <div class="ex-card sec-card" style="margin-top:.5rem;">
             <div class="sec-hdr">
-                <h6><i class="bx bx-list-ul" style="color:#50a5f1;"></i> Verifier Submissions Log</h6>
+                <h6><i class="bx bx-list-ul" style="color:#50a5f1;"></i> PJC Submissions Log</h6>
                 <span style="font-size:.6rem;color:var(--bs-surface-400);" id="per-submissions-count">{{ $verifierSubmissions->count() }} submissions</span>
             </div>
             <div class="scroll-tbl" style="max-height:320px;">
@@ -279,7 +279,7 @@
                             <th>Date / Time</th>
                             <th>Lead Name</th>
                             <th>Phone</th>
-                            <th>Verifier</th>
+                            <th>PJC</th>
                             <th>Closer</th>
                             <th class="text-center">Status</th>
                         </tr>
@@ -754,7 +754,7 @@ function renderPeregrineCloserTotals(d) {
     return '<tr><td><strong>Total</strong></td><td class="text-center">' + badge('v-blue',sum(d,'total_assigned')) + '</td><td class="text-center">' + badge('v-gray',sum(d,'disposed')) + '</td><td class="text-center">' + badge('v-warn',sum(d,'callbacks')) + '</td><td class="text-center">' + badge('v-teal',sum(d,'sent_to_validator')) + '</td><td class="text-center">' + badge('v-green',sum(d,'sales')) + '</td><td class="text-center">' + badge('v-red',sum(d,'declined')) + '</td></tr>';
 }
 
-// Verifier Submissions Log
+// PJC Submissions Log
 function getSubmissionStatusClass(s) {
     if (s.indexOf('Sale') >= 0) return 'v-green';
     if (s.indexOf('Declined') >= 0) return 'v-red';

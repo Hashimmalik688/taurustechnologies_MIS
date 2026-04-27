@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    Validator Dashboard
+    Peregrines Validator
 @endsection
 
 @section('css')
@@ -106,7 +106,7 @@
                     <tr>
                         <th>Customer Name</th>
                         <th>Phone</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th>Closer</th>
                         <th class="text-center">Partner</th>
                         <th class="text-end">Coverage</th>
@@ -233,7 +233,7 @@
                         <th>Customer Name</th>
                         <th>Closer</th>
                         <th class="text-center">Partner</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th class="text-end">Coverage</th>
                         <th>Submitted</th>
                         <th class="text-center">Action</th>
@@ -289,7 +289,7 @@
                         <th>Customer Name</th>
                         <th>Closer</th>
                         <th class="text-center">Partner</th>
-                        <th>Verifier</th>
+                        <th>PJC</th>
                         <th class="text-center">Status</th>
                         <th>Validated By</th>
                     </tr>

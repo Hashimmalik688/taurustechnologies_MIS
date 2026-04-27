@@ -271,7 +271,7 @@
                                     </div>
                                     <div class="role-check">
                                         <input type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="mr-vr-{{ $user->id }}" {{ in_array(Roles::VERIFIER, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-vr-{{ $user->id }}">Verifier</label>
+                                        <label for="mr-vr-{{ $user->id }}">PJC</label>
                                     </div>
                                     <div class="role-section-lbl">Other Roles</div>
                                     <div class="role-check">

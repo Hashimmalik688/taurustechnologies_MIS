@@ -1,12 +1,12 @@
 @extends('layouts.master')
 
 @section('title')
-    Edit Lead - Validator
+    Edit Lead - Peregrines Validator
 @endsection
 
 @section('content')
     @component('components.breadcrumb')
-        @slot('li_1') Validator @endslot
+        @slot('li_1') Peregrines Validator @endslot
         @slot('title') Edit Lead @endslot
     @endcomponent
 

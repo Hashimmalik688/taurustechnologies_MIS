@@ -222,9 +222,9 @@
                         </select>
                     </div>
                     <div>
-                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">Verifier</label>
+                        <label class="pipe-pill-lbl" style="margin-bottom:.2rem;display:block">PJC</label>
                         <select name="verifier_id" id="verifierFilter" class="sl-pill-select">
-                            <option value="">All Verifiers</option>
+                            <option value="">All PJCs</option>
                             @foreach($verifiers as $id => $name)
                                 <option value="{{ $id }}">{{ $name }}</option>
                             @endforeach

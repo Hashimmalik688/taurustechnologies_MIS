@@ -1,12 +1,12 @@
 @extends('layouts.master')
 
 @section('title')
-    Verifier Submission
+    PJC Submission
 @endsection
 
 @section('css')
 <style>
-    /* ── Verifier Submission Form — sl-* Design System ── */
+    /* ── PJC Submission Form — sl-* Design System ── */
 
     /* Top bar */
     .sl-topbar {
@@ -192,7 +192,7 @@
     {{-- Top bar --}}
     <div class="sl-topbar">
         <div class="sl-topbar-left">
-            <h2 class="sl-page-title"><i class="bx bx-clipboard"></i> {{ ucfirst($team ?? 'peregrine') }} — New Submission</h2>
+            <h2 class="sl-page-title"><i class="bx bx-clipboard"></i> Peregrine — PJC New Submission</h2>
         </div>
         <div class="sl-topbar-right">
             <a href="{{ route('verifier.dashboard') }}" class="sl-btn-dash">
@@ -211,7 +211,7 @@
 
     <div class="sl-card">
         <div class="sl-card-header">
-            <h4><i class="bx bx-edit-alt"></i> Verification Form</h4>
+            <h4><i class="bx bx-edit-alt"></i> PJC Submission Form</h4>
         </div>
         <div class="sl-card-body">
             <form method="POST" action="{{ isset($team) ? route('verifier.store.team', ['team' => $team]) : route('verifier.store') }}">
@@ -225,7 +225,7 @@
                         @error('date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-4 sl-form-group">
-                        <label class="sl-form-label">Verifier Name <span class="req">*</span></label>
+                        <label class="sl-form-label">PJC Name <span class="req">*</span></label>
                         <input type="text" class="sl-form-input" value="{{ auth()->user()->name }}" readonly tabindex="-1">
                         <input type="hidden" name="verifier_name" value="{{ auth()->user()->name }}">
                     </div>

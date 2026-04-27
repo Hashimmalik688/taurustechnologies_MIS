@@ -1511,4 +1511,109 @@ class ReportController extends Controller
             'allCarriers', 'allPartners', 'allPolicyTypes'
         ));
     }
+
+    /* ─────────────────────────────────────────────────────────────
+     * PEREGRINE TEAM REPORT
+     * Shows PJC, Closer, and Validator performance for the Peregrine team.
+     * Three sections: PJC submissions, Closer pipeline, Validator outcomes.
+     * ────────────────────────────────────────────────────────────── */
+    public function peregrineTeamReport(Request $request)
+    {
+        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo   = $request->get('date_to',   now()->toDateString());
+
+        $baseQuery = fn() => Lead::where('team', Teams::PEREGRINE)
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo);
+
+        // ── PJC Performance ───────────────────────────────────────
+        // Group by the PJC user (verified_by) who submitted the lead
+        $pjcLeads = ($baseQuery)()
+            ->whereNotNull('verified_by')
+            ->with('verifier:id,name')
+            ->select('id', 'verified_by', 'account_verified_by', 'status', 'sale_at', 'created_at')
+            ->get();
+
+        $pjcRows = $pjcLeads->groupBy('verified_by')->map(function ($leads, $pjcId) {
+            $verifier = $leads->first()->verifier;
+            return (object) [
+                'pjc_id'        => $pjcId,
+                'pjc_name'      => $verifier?->name ?? $leads->first()->account_verified_by ?? 'Unknown',
+                'total'         => $leads->count(),
+                'with_closer'   => $leads->whereIn('status', [Statuses::LEAD_TRANSFERRED, Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_DECLINED, Statuses::LEAD_RETURNED, Statuses::LEAD_FORWARDED])->count(),
+                'with_validator'=> $leads->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_FORWARDED])->count(),
+                'sales'         => $leads->whereNotNull('sale_at')->count(),
+                'declined'      => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
+                'pending'       => $leads->where('status', Statuses::LEAD_PENDING)->count(),
+            ];
+        })->sortByDesc('total')->values();
+
+        // ── Closer Performance ────────────────────────────────────
+        $closerLeads = Lead::where('team', Teams::PEREGRINE)
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo)
+            ->whereNotNull('managed_by')
+            ->with('assignedCloser:id,name')
+            ->select('id', 'managed_by', 'closer_name', 'status', 'sale_at', 'closed_at', 'created_at')
+            ->get();
+
+        $closerRows = $closerLeads->groupBy('managed_by')->map(function ($leads, $closerId) {
+            $total   = $leads->count();
+            $sales   = $leads->whereNotNull('sale_at')->count();
+            $sentToValidator = $leads->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_FORWARDED])->count();
+            $convRate = $total > 0 ? round(($sales / $total) * 100, 1) : 0;
+            $closer  = $leads->first()->assignedCloser;
+            return (object) [
+                'closer_id'        => $closerId,
+                'closer_name'      => $closer?->name ?? $leads->first()->closer_name ?? 'Unknown',
+                'total_received'   => $total,
+                'sent_to_validator'=> $sentToValidator,
+                'sales'            => $sales,
+                'returned'         => $leads->where('status', Statuses::LEAD_RETURNED)->count(),
+                'declined'         => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
+                'conversion_rate'  => $convRate,
+            ];
+        })->sortByDesc('total_received')->values();
+
+        // ── Validator Performance ─────────────────────────────────
+        $validatorLeads = Lead::where('team', Teams::PEREGRINE)
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo)
+            ->whereNotNull('assigned_validator_id')
+            ->with('assignedValidator:id,name')
+            ->select('id', 'assigned_validator_id', 'status', 'sale_at', 'validated_at', 'created_at')
+            ->get();
+
+        $validatorRows = $validatorLeads->groupBy('assigned_validator_id')->map(function ($leads, $valId) {
+            $sales = $leads->whereNotNull('sale_at')->count();
+            $total = $leads->count();
+            $validator = $leads->first()->assignedValidator;
+            return (object) [
+                'validator_id'     => $valId,
+                'validator_name'   => $validator?->name ?? 'Unknown',
+                'total_received'   => $total,
+                'marked_sale'      => $sales,
+                'returned_closer'  => $leads->where('status', Statuses::LEAD_RETURNED)->count(),
+                'declined'         => $leads->where('status', Statuses::LEAD_DECLINED)->count(),
+                'pending_ho'       => $leads->where('status', Statuses::LEAD_PENDING)->count(),
+                'conversion_rate'  => $total > 0 ? round(($sales / $total) * 100, 1) : 0,
+            ];
+        })->sortByDesc('total_received')->values();
+
+        // ── Totals ────────────────────────────────────────────────
+        $teamTotals = [
+            'total_leads'    => ($baseQuery)()->count(),
+            'total_sales'    => ($baseQuery)()->whereNotNull('sale_at')->count(),
+            'total_declined' => ($baseQuery)()->where('status', Statuses::LEAD_DECLINED)->count(),
+            'total_pending'  => ($baseQuery)()->where('status', Statuses::LEAD_PENDING)->count(),
+        ];
+        $teamTotals['conversion_rate'] = $teamTotals['total_leads'] > 0
+            ? round(($teamTotals['total_sales'] / $teamTotals['total_leads']) * 100, 1)
+            : 0;
+
+        return view('admin.reports.peregrine-team-report', compact(
+            'pjcRows', 'closerRows', 'validatorRows', 'teamTotals',
+            'dateFrom', 'dateTo'
+        ));
+    }
 }
