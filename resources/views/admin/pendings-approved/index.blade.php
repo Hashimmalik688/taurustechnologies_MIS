@@ -135,7 +135,13 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
             <h1 class="sl-page-title"><i class="bx bx-check-circle"></i> Pending Submission</h1>
             <p class="sl-page-subtitle mt-1">Assign details and send validated leads to Pending Contracts</p>
         </div>
-        <div class="d-flex gap-1 align-items-center">
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ route('submissions.export', array_filter(['status' => $status, 'search' => $search, 'carrier' => $carrier, 'date_from' => $dateFrom, 'date_to' => $dateTo])) }}"
+               target="_blank"
+               class="a-btn"
+               style="background:rgba(212,175,55,.1);color:#b89730;border:1px solid rgba(212,175,55,.3);font-size:.7rem;">
+                <i class="bx bx-printer"></i> Export Report
+            </a>
             <a href="{{ route('issuance.index') }}" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.08);font-size:.7rem;">
                 <i class="bx bx-right-arrow-alt"></i> Pending Contracts
             </a>

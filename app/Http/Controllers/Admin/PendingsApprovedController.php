@@ -380,45 +380,79 @@ class PendingsApprovedController extends Controller
     }
 
     /**
-     * Recall / Send Back a declined lead to the closer for re-dial.
-     * Sets recall fields so the closer sees it on their Ravens dashboard.
+     * Export current filtered view as a plain printable corporate report.
+     * Opens in a new tab — all filters honoured, no pagination.
      */
-    public function recallToCloser(Request $request, int $id)
+    public function export(Request $request)
     {
-        $request->validate([
-            'recall_note' => 'required|string|max:1000',
-        ]);
+        $search   = $request->get('search');
+        $carrier  = $request->get('carrier');
+        $dateFrom = $request->get('date_from');
+        $dateTo   = $request->get('date_to');
+        $status   = $request->get('status', 'pending');
 
-        $lead = Lead::findOrFail($id);
-
-        if ($lead->recall_requested_at) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This lead has already been recalled.',
-            ], 422);
+        if (!$dateFrom && !$dateTo) {
+            $dateFrom = now()->startOfMonth()->toDateString();
+            $dateTo   = now()->endOfMonth()->toDateString();
         }
 
-        $lead->recall_requested_at = now();
-        $lead->recall_requested_by = Auth::id();
-        $lead->recall_note         = $request->recall_note;
-        $lead->save();
+        $query = Lead::with(['insuranceCarrier', 'submissionReviewer'])
+            ->where('ravens_validation_status', 'valid')
+            ->where('team', '!=', 'peregrine')
+            ->whereNotNull('closer_name')
+            ->where('cn_name', '!=', '')
+            ->whereNotNull('cn_name')
+            ->where(function ($q) {
+                $q->whereNotNull('sale_at')->orWhereNotNull('sale_date');
+            })
+            ->where(function ($q) {
+                $q->where(function ($s) { $s->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            });
 
-        AuditLog::create([
-            'user_id'    => Auth::id(),
-            'action'     => 'Submissions — Recall to Closer',
-            'model'      => 'Lead',
-            'model_id'   => $lead->id,
-            'old_values' => json_encode(['recall_requested_at' => null]),
-            'new_values' => json_encode([
-                'recall_requested_at' => now()->toISOString(),
-                'recall_note'         => $request->recall_note,
-            ]),
-            'ip_address' => $request->ip(),
-        ]);
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('cn_name',      'like', "%{$search}%")
+                  ->orWhere('phone_number', 'like', "%{$search}%")
+                  ->orWhere('carrier_name', 'like', "%{$search}%")
+                  ->orWhere('closer_name',  'like', "%{$search}%");
+            });
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => "Lead \"{$lead->cn_name}\" recalled to closer.",
-        ]);
+        if ($carrier) $query->where('insurance_carrier_id', $carrier);
+        if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
+        if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+
+        if ($status === 'pending') {
+            $query->whereNull('pending_contract_at')
+                  ->where(function ($q) { $q->whereNull('submission_status')->orWhere('submission_status', 'pending'); });
+        } elseif ($status === 'approved') {
+            $query->where('submission_status', 'approved');
+        } elseif ($status === 'declined') {
+            $query->whereNull('pending_contract_at')->where('submission_status', 'declined');
+        } elseif ($status === 'underwriting') {
+            $query->whereNull('pending_contract_at')->where('submission_status', 'underwriting');
+        }
+
+        $leads = $query->orderBy('sale_date', 'desc')->get();
+
+        $stateCounts = $leads
+            ->groupBy(fn ($l) => strtoupper(trim($l->state ?: '')) ?: 'Unknown')
+            ->map->count()
+            ->sortDesc();
+
+        $statusLabel = match($status) {
+            'approved'     => 'Approved',
+            'declined'     => 'Declined',
+            'underwriting' => 'Underwriting',
+            default        => 'Pending Approval',
+        };
+        $exportedAt = now()->format('F j, Y  g:i A');
+
+        return view('admin.pendings-approved.export', compact(
+            'leads', 'stateCounts', 'status', 'statusLabel',
+            'dateFrom', 'dateTo', 'search', 'exportedAt'
+        ));
     }
 }

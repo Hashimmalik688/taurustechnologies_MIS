@@ -289,6 +289,7 @@ Route::group(['prefix' => 'pending-contracts', 'as' => 'issuance.', 'middleware'
 // Pendings Approved — Stage 2 pipeline
 Route::group(['prefix' => 'submissions', 'as' => 'submissions.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PendingsApprovedController::class, 'index'])->name('index')->middleware('role.permission:pendings-approved,view');
+    Route::get('/export', [PendingsApprovedController::class, 'export'])->name('export')->middleware('role.permission:pendings-approved,view');
     Route::post('/{id}/send-to-contract', [PendingsApprovedController::class, 'sendToContract'])->name('sendToContract')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/mark-not-issued', [PendingsApprovedController::class, 'markNotIssued'])->name('markNotIssued')->middleware('role.permission:pendings-approved,edit');
     Route::post('/{id}/resolve-not-issued', [PendingsApprovedController::class, 'resolveNotIssued'])->name('resolveNotIssued')->middleware('role.permission:pendings-approved,edit');
@@ -301,6 +302,7 @@ Route::group(['prefix' => 'submissions', 'as' => 'submissions.', 'middleware' =>
 // Pending Draft — Stage 6 pipeline
 Route::group(['prefix' => 'pending-draft', 'as' => 'pending-draft.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [PendingDraftController::class, 'index'])->name('index')->middleware('role.permission:pending-draft,view');
+    Route::get('/export', [PendingDraftController::class, 'export'])->name('export')->middleware('role.permission:pending-draft,view');
     Route::post('/{id}/mark-not-paid', [PendingDraftController::class, 'markNotPaid'])->name('markNotPaid')->middleware('role.permission:pending-draft,edit');
     Route::post('/{id}/mark-paid', [PendingDraftController::class, 'markPaid'])->name('markPaid')->middleware('role.permission:pending-draft,full');
     Route::post('/{id}/mark-policy-died', [PendingDraftController::class, 'markPolicyDied'])->name('markPolicyDied')->middleware('role.permission:pending-draft,full');

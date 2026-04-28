@@ -226,9 +226,17 @@
             <h1 class="sl-page-title"><i class="bx bx-time-five"></i> Pending Draft</h1>
             <p class="sl-page-subtitle mt-1">Stage 6 — Awaiting first premium draft confirmation</p>
         </div>
-        <a href="{{ route('paid-sales.index') }}" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.1);">
-            <i class="bx bx-badge-check"></i> View Paid Sales
-        </a>
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ route('pending-draft.export', array_filter(['tab' => $tab, 'search' => $search, 'carrier' => $carrier, 'partner' => $partner, 'date_from' => $dateFrom, 'date_to' => $dateTo])) }}"
+               target="_blank"
+               class="a-btn"
+               style="background:rgba(212,175,55,.1);color:#b89730;border:1px solid rgba(212,175,55,.3);">
+                <i class="bx bx-printer"></i> Export Report
+            </a>
+            <a href="{{ route('paid-sales.index') }}" class="a-btn" style="background:var(--bs-card-bg);border:1px solid rgba(0,0,0,.1);">
+                <i class="bx bx-badge-check"></i> View Paid Sales
+            </a>
+        </div>
     </div>
 
     {{-- KPIs --}}
