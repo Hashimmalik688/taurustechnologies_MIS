@@ -1343,6 +1343,9 @@ class ReportController extends Controller
     {
         abort_unless(auth()->user()->canViewModule('report-manager-submission'), 403, 'Access denied.');
         $dateFrom    = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo      = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $carrierId   = $request->get('carrier_id');
+        $partnerName = $request->get('partner_name');
         $policyType  = $request->get('policy_type');
 
         // Leads where manager took action: approved to pending contract OR declined
