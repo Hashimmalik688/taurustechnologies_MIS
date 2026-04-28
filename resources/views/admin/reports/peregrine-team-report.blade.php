@@ -323,12 +323,64 @@
             </table>
         </div>
     </div>
+
+    {{-- ── Section 4: Sales Detail ─────────────────────────────── --}}
+    <div class="ex-card sec-card" style="margin-bottom:.65rem">
+        <div class="sec-hdr">
+            <h6>
+                <span class="sec-pill sec-pill-sale"><i class="bx bx-dollar-circle"></i> Sales</span>
+                <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">{{ $salesLeads->count() }} sale(s) · {{ $dateFrom }} → {{ $dateTo }}</span>
+            </h6>
+        </div>
+        <div class="scroll-tbl">
+            <table class="rp-table" id="salesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer Name</th>
+                        <th>Policy Type</th>
+                        <th class="rp-th-num">Coverage</th>
+                        <th class="rp-th-num">Premium/mo</th>
+                        <th>Closed By</th>
+                        <th>Validator</th>
+                        <th class="rp-th-num">Sale Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($salesLeads as $i => $lead)
+                        <tr>
+                            <td style="font-size:.72rem;color:var(--bs-surface-400)">{{ $i + 1 }}</td>
+                            <td class="rp-td-name">{{ $lead->cn_name ?? '—' }}</td>
+                            <td style="font-size:.75rem">{{ $lead->policy_type ?? '—' }}</td>
+                            <td class="rp-td-num">${{ number_format($lead->coverage_amount ?? 0) }}</td>
+                            <td class="rp-td-num">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
+                            <td style="font-size:.75rem">{{ $lead->assignedCloser?->name ?? $lead->closer_name ?? '—' }}</td>
+                            <td style="font-size:.75rem">{{ $lead->assignedValidator?->name ?? '—' }}</td>
+                            <td class="rp-td-num" style="white-space:nowrap;font-size:.75rem">{{ $lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : '—' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem"><i class="bx bx-info-circle"></i> No sales in this period</td></tr>
+                    @endforelse
+                </tbody>
+                @if($salesLeads->count() > 0)
+                <tfoot>
+                    <tr class="rp-total-row">
+                        <td colspan="3" style="font-size:.72rem;font-weight:600">Totals</td>
+                        <td class="rp-td-num">${{ number_format($salesLeads->sum('coverage_amount')) }}</td>
+                        <td class="rp-td-num">${{ number_format($salesLeads->sum('monthly_premium'), 2) }}</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+        </div>
+    </div>
 @endsection
 
 @section('script')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    ['pjcTable', 'closerTable', 'validatorTable'].forEach(function (tableId) {
+    ['pjcTable', 'closerTable', 'validatorTable', 'salesTable'].forEach(function (tableId) {
         const table = document.getElementById(tableId);
         if (!table) return;
         const headers = table.querySelectorAll('thead th');

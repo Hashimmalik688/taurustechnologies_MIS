@@ -363,6 +363,7 @@ Route::group([
     'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
     Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index')->middleware('role.permission:leads-peregrine,view');
+    Route::post('/manual-store', [PeregrineController::class, 'manualStore'])->name('manual-store')->middleware('role.permission:leads-peregrine,edit');
     Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
     Route::put('/{lead}/update', [PeregrineController::class, 'closerUpdate'])->name('update')->middleware('role.permission:leads-peregrine,edit');
     Route::put('/{lead}/mark-failed', [PeregrineController::class, 'closerMarkFailed'])->name('mark-failed')->middleware('role.permission:leads-peregrine,edit');

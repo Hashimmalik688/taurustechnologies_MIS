@@ -1622,9 +1622,20 @@ class ReportController extends Controller
             ? round(($teamTotals['total_sales'] / $teamTotals['total_leads']) * 100, 1)
             : 0;
 
+        // ── Individual Sales Records ──────────────────────────────
+        $salesLeads = Lead::where('team', Teams::PEREGRINE)
+            ->whereDate('created_at', '>=', $dateFrom)
+            ->whereDate('created_at', '<=', $dateTo)
+            ->whereNotNull('sale_at')
+            ->with(['assignedCloser:id,name', 'assignedValidator:id,name'])
+            ->select('id', 'cn_name', 'closer_name', 'managed_by', 'assigned_validator_id',
+                     'sale_at', 'closed_at', 'monthly_premium', 'coverage_amount', 'policy_type')
+            ->orderByDesc('sale_at')
+            ->get();
+
         return view('admin.reports.peregrine-team-report', compact(
             'pjcRows', 'closerRows', 'validatorRows', 'teamTotals',
-            'dateFrom', 'dateTo'
+            'salesLeads', 'dateFrom', 'dateTo'
         ));
     }
 }

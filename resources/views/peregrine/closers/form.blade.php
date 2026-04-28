@@ -28,15 +28,22 @@
 </style>
 
 <!-- PJC Information (Read-Only) -->
+@if(isset($isManualEntry) && $isManualEntry)
+<div class="alert alert-warning">
+    <i class="bx bx-edit me-2"></i>
+    <strong>Manual Entry Mode:</strong> No PJC involved. Fill in all customer details below. This lead will go directly to the selected validator.
+</div>
+@else
 <div class="alert alert-info">
     <i class="fas fa-info-circle me-2"></i>
     <strong>PJC Information:</strong> The following was collected by the Peregrines Junior Closer
 </div>
+@endif
 
 <div class="row g-3 mb-4">
     <div class="col-md-2">
         <label class="form-label">Date</label>
-        <div class="readonly-value">{{ $lead->date ?? 'N/A' }}</div>
+        <div class="readonly-value">{{ $lead->date ? \Carbon\Carbon::parse($lead->date)->format('M d, Y') : (isset($isManualEntry) && $isManualEntry ? now()->format('M d, Y') : 'N/A') }}</div>
     </div>
     <div class="col-md-3">
         <label class="form-label required">Customer Name</label>
@@ -56,7 +63,7 @@
     </div>
     <div class="col-md-1">
         <label class="form-label">Closer</label>
-        <div class="readonly-value">{{ $lead->closer_name ?? 'N/A' }}</div>
+        <div class="readonly-value">{{ $lead->closer_name ?? ((isset($isManualEntry) && $isManualEntry) ? Auth::user()->name : 'N/A') }}</div>
     </div>
 </div>
 

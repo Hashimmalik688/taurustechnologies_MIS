@@ -65,7 +65,7 @@
     @endif
 
     {{-- KPI Cards --}}
-    <div class="kpi-row">
+    <div class="kpi-row" style="align-items:center;">
         <div class="kpi-card k-blue ex-card">
             <i class="bx bx-transfer-alt k-icon"></i>
             <div class="k-val">{{ $todayStats['total_assigned'] ?? 0 }}</div>
@@ -90,6 +90,11 @@
             <i class="bx bx-x-circle k-icon"></i>
             <div class="k-val">{{ $todayStats['declined'] ?? 0 }}</div>
             <div class="k-lbl">Declined</div>
+        </div>
+        <div style="margin-left:auto;flex-shrink:0;">
+            <button type="button" class="act-btn a-primary" data-bs-toggle="modal" data-bs-target="#manualLeadModal" style="padding:.3rem .75rem;font-size:.75rem;">
+                <i class="bx bx-plus-circle"></i> Manual Lead Entry
+            </button>
         </div>
     </div>
 
@@ -337,6 +342,49 @@
             </table>
         </div>
     </div>
+
+{{-- Manual Lead Entry Modal --}}
+<div class="modal fade" id="manualLeadModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header modal-header-custom">
+                <h5 class="modal-title"><i class="bx bx-edit-alt me-2"></i> Manual Lead Entry &mdash; No PJC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="max-height:calc(100vh - 250px);overflow-y:auto;">
+                @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="bx bx-error-circle me-2"></i>
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                @endif
+                <form method="POST" action="{{ route('peregrine.closers.manual-store') }}" id="manualLeadForm">
+                    @csrf
+                    @include('peregrine.closers.form', ['lead' => new App\Models\Lead(), 'isManualEntry' => true])
+                </form>
+            </div>
+            <div class="modal-footer" style="gap:.3rem;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="manualLeadForm" class="act-btn a-success" style="padding:.35rem .7rem;">
+                    <i class="bx bx-send"></i> Submit to Validator
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@if(session('openManualModal'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        new bootstrap.Modal(document.getElementById('manualLeadModal')).show();
+    });
+</script>
+@endif
 @endsection
 
 @section('script')

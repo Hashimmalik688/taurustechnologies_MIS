@@ -269,6 +269,132 @@ class PeregrineController extends Controller
     }
 
     /**
+     * Store a manually-created lead, bypassing PJC and going straight to validator.
+     * Creates the lead as status=closed so it immediately appears in the validator queue.
+     */
+    public function manualStore(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'cn_name'               => ['required', 'string', 'max:255'],
+            'phone_number'          => ['required', 'string', 'max:30'],
+            'date_of_birth'         => ['required', 'date'],
+            'gender'                => ['required', 'in:Male,Female,Other'],
+            'ssn'                   => ['required', 'string', 'max:20'],
+            'address'               => ['required', 'string'],
+            'state'                 => ['required', 'string', 'max:50'],
+            'zip_code'              => ['required', 'string', 'max:10'],
+            'birth_place'           => ['nullable', 'string', 'max:255'],
+            'height'                => ['nullable', 'string', 'max:50'],
+            'weight'                => ['nullable', 'string', 'max:50'],
+            'smoker'                => ['nullable', 'boolean'],
+            'doctor_name'           => ['required', 'string', 'max:255'],
+            'doctor_number'         => ['required', 'string', 'max:50'],
+            'doctor_address'        => ['required', 'string', 'max:500'],
+            'medical_issue'         => ['required', 'string'],
+            'medications'           => ['required', 'string', 'max:1000'],
+            'carrier_name'          => ['nullable', 'string', 'max:255'],
+            'policy_type'           => ['required', 'string', 'max:255'],
+            'initial_draft_date'    => ['required', 'date'],
+            'future_draft_date'     => ['required', 'date'],
+            'coverage_amount'       => ['required', 'numeric', 'min:0'],
+            'monthly_premium'       => ['required', 'numeric', 'min:0'],
+            'source'                => ['nullable', 'string', 'max:255'],
+            'assigned_partner'      => ['nullable', 'string', 'max:255'],
+            'beneficiaries'         => ['required', 'array', 'min:1'],
+            'beneficiaries.*.name'  => ['required', 'string', 'max:255'],
+            'beneficiaries.*.dob'   => ['required', 'date'],
+            'beneficiaries.*.relation' => ['nullable', 'string', 'max:50'],
+            'bank_name'             => ['required', 'string', 'max:255'],
+            'bank_address'          => ['required', 'string', 'max:500'],
+            'account_type'          => ['required', 'in:Checking,Savings,Card'],
+            'account_number'        => ['required_unless:account_type,Card', 'nullable', 'string', 'max:50'],
+            'routing_number'        => ['required_unless:account_type,Card', 'nullable', 'string', 'max:20'],
+            'bank_balance'          => ['nullable', 'numeric', 'min:0'],
+            'card_number'           => ['nullable', 'string', 'max:19'],
+            'cvv'                   => ['nullable', 'string', 'max:4'],
+            'expiry_date'           => ['nullable', 'string', 'max:50'],
+            'assigned_validator_id' => ['required', 'exists:users,id'],
+            'followup_required'     => ['required', 'boolean'],
+            'followup_scheduled_at' => ['required_if:followup_required,1', 'nullable', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('peregrine.closers.index')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('openManualModal', true);
+        }
+
+        $validated = $validator->validated();
+
+        // Same business rule as closerUpdate: must confirm follow-up
+        if ($validated['followup_required'] == 0) {
+            return redirect()->route('peregrine.closers.index')
+                ->withErrors(['followup_required' => 'You must select "Yes" for Follow Up to submit this lead to the validator.'])
+                ->withInput()
+                ->with('openManualModal', true);
+        }
+
+        $firstBeneficiary = $validated['beneficiaries'][0] ?? null;
+
+        Lead::create([
+            'date'                  => now()->format('Y-m-d'),
+            'cn_name'               => $validated['cn_name'],
+            'phone_number'          => $validated['phone_number'],
+            'date_of_birth'         => $validated['date_of_birth'],
+            'gender'                => $validated['gender'],
+            'ssn'                   => $validated['ssn'],
+            'address'               => $validated['address'],
+            'state'                 => $validated['state'],
+            'zip_code'              => $validated['zip_code'],
+            'birth_place'           => $validated['birth_place'] ?? null,
+            'height'                => $validated['height'] ?? null,
+            'weight'                => $validated['weight'] ?? null,
+            'smoker'                => isset($validated['smoker']) ? ($validated['smoker'] ? 'yes' : 'no') : null,
+            'medical_issue'         => $validated['medical_issue'] ?? null,
+            'medications'           => $validated['medications'] ?? null,
+            'doctor_name'           => $validated['doctor_name'] ?? null,
+            'doctor_number'         => $validated['doctor_number'] ?? null,
+            'doctor_address'        => $validated['doctor_address'] ?? null,
+            'carrier_name'          => $validated['carrier_name'] ?? null,
+            'policy_type'           => $validated['policy_type'],
+            'initial_draft_date'    => $validated['initial_draft_date'],
+            'future_draft_date'     => $validated['future_draft_date'],
+            'coverage_amount'       => $validated['coverage_amount'],
+            'monthly_premium'       => $validated['monthly_premium'],
+            'source'                => $validated['source'] ?? null,
+            'assigned_partner'      => $validated['assigned_partner'] ?? null,
+            'bank_name'             => $validated['bank_name'],
+            'bank_address'          => $validated['bank_address'],
+            'account_type'          => $validated['account_type'],
+            'account_number'        => $validated['account_number'] ?? null,
+            'acc_number'            => $validated['account_number'] ?? null,
+            'routing_number'        => $validated['routing_number'] ?? null,
+            'bank_balance'          => $validated['bank_balance'] ?? null,
+            'card_number'           => $validated['card_number'] ?? null,
+            'cvv'                   => $validated['cvv'] ?? null,
+            'expiry_date'           => $validated['expiry_date'] ?? null,
+            'assigned_validator_id' => $validated['assigned_validator_id'],
+            'followup_required'     => $validated['followup_required'],
+            'followup_scheduled_at' => $validated['followup_scheduled_at'] ?? null,
+            'beneficiaries'         => $validated['beneficiaries'],
+            'beneficiary'           => $firstBeneficiary['name'] ?? null,
+            'beneficiary_dob'       => $firstBeneficiary['dob'] ?? null,
+            // Pipeline identifiers
+            'team'                  => Teams::PEREGRINE,
+            'status'                => Statuses::LEAD_CLOSED,
+            'managed_by'            => Auth::id(),
+            'closer_id'             => Auth::id(),
+            'closer_name'           => Auth::user()->name,
+            'source_type'           => Teams::PEREGRINE,
+            'closed_at'             => now(),
+        ]);
+
+        return redirect()->route('peregrine.closers.index')
+            ->with('success', 'Lead created and sent to validator successfully.');
+    }
+
+    /**
      * Get daily stats for closer
      */
     private function getDailyStats($closerId, $startDate, $endDate)
