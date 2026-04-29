@@ -1,7 +1,7 @@
 # Graph Report - taurus-crm  (2026-04-29)
 
 ## Corpus Check
-- 1288 files · ~1,922,618 words
+- 1288 files · ~1,922,673 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
