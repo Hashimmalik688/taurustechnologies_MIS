@@ -420,42 +420,41 @@
 <h6 class="form-section-title"><i class="bx bx-calendar-event me-2"></i>Follow Up Schedule</h6>
 <div class="row g-3 mb-4">
     <div class="col-md-12">
-        <label for="followup_required" class="form-label required">Follow Up Required</label>
-        <select class="form-select" name="followup_required" id="followup_required" required>
+        <label class="form-label required">Follow Up Required</label>
+        <select class="form-select followup-required-select" name="followup_required" required>
             <option value="">Select option...</option>
             <option value="1" {{ old('followup_required', $lead->followup_required ?? '') == '1' ? 'selected' : '' }}>Yes</option>
             <option value="0" {{ old('followup_required', $lead->followup_required ?? '') === '0' || old('followup_required', $lead->followup_required ?? '') === 0 ? 'selected' : '' }}>No</option>
         </select>
     </div>
- <div class="col-md-12 d-none" id="followup_schedule_fields" >
-        <label for="followup_scheduled_at" class="form-label required">Follow Up Date & Time</label>
-        <input type="datetime-local" class="form-control" name="followup_scheduled_at" id="followup_scheduled_at" value="{{ old('followup_scheduled_at', $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '') }}">
+    <div class="col-md-12 followup-schedule-fields d-none">
+        <label class="form-label required">Follow Up Date & Time</label>
+        <input type="datetime-local" class="form-control followup-scheduled-at" name="followup_scheduled_at" value="{{ old('followup_scheduled_at', $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '') }}">
         <small class="text-muted">When should the follow-up call be scheduled?</small>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const followupRequired = document.getElementById('followup_required');
-    const followupScheduleFields = document.getElementById('followup_schedule_fields');
-    const followupScheduledAt = document.getElementById('followup_scheduled_at');
-    
+(function() {
+    // Scope to the last rendered select on the page (this include's instance)
+    var selects = document.querySelectorAll('.followup-required-select');
+    var sel = selects[selects.length - 1];
+    var wrapper = sel.closest('.row').querySelector('.followup-schedule-fields');
+    var input = wrapper.querySelector('.followup-scheduled-at');
+
     function toggleFollowupFields() {
-        if (followupRequired.value === '1') {
-            followupScheduleFields.style.display = 'block';
-            followupScheduledAt.setAttribute('required', 'required');
+        if (sel.value === '1') {
+            wrapper.classList.remove('d-none');
+            input.setAttribute('required', 'required');
         } else {
-            followupScheduleFields.style.display = 'none';
-            followupScheduledAt.removeAttribute('required');
+            wrapper.classList.add('d-none');
+            input.removeAttribute('required');
         }
     }
-    
-    // Initialize on page load
+
     toggleFollowupFields();
-    
-    // Listen for changes
-    followupRequired.addEventListener('change', toggleFollowupFields);
-});
+    sel.addEventListener('change', toggleFollowupFields);
+})();
 </script>
 
 <h6 class="form-section-title"><i class="bx bx-user-check me-2"></i>Assign Validator</h6>

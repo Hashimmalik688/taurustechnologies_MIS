@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Roles;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
@@ -26,7 +27,7 @@ class StoreUserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'zoom_number' => ['nullable', 'string', 'max:50'],
             'roles' => ['nullable', 'array'],
-            'roles.*' => ['in:Super Admin,Manager,Employee,HR,Peregrine Validator,Verifier,Peregrine Closer,Ravens Closer,Retention Officer,QA,Co-ordinator'],
+            'roles.*' => ['in:' . implode(',', Roles::ALL)],
             'dob' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', 'in:Male,Female,Other'],
             'join_date' => ['nullable', 'date'],

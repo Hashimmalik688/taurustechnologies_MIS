@@ -180,6 +180,11 @@
                                         <div class="col-md-3">
                                             <label class="form-label text-primary">Peregrine Team</label>
                                             <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_MANAGER }}" id="role-peregrine-manager"
+                                                    {{ in_array(Roles::PEREGRINE_MANAGER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-peregrine-manager">{{ Roles::PEREGRINE_MANAGER }}</label>
+                                            </div>
+                                            <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="role-peregrine-closer"
                                                     {{ in_array(Roles::PEREGRINE_CLOSER, old('roles', $currentRoles)) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="role-peregrine-closer">{{ Roles::PEREGRINE_CLOSER }}</label>

@@ -424,39 +424,39 @@ class PeregrineController extends Controller
         
         switch ($filter) {
             case 'today':
-                $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                $end = Carbon::today($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                $start = Carbon::today($timezone)->setTime(7, 0, 0);
+                $end = Carbon::today($timezone)->setTime(23, 59, 59);
                 return [$start, $end];
             
             case 'yesterday':
-                $start = Carbon::yesterday($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                $end = Carbon::yesterday($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                $start = Carbon::yesterday($timezone)->setTime(7, 0, 0);
+                $end = Carbon::yesterday($timezone)->setTime(23, 59, 59);
                 return [$start, $end];
             
             case 'week':
-                $start = Carbon::now($timezone)->startOfWeek()->setTime(7, 0, 0)->setTimezone('UTC');
-                $end = Carbon::today($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                $start = Carbon::now($timezone)->startOfWeek()->setTime(7, 0, 0);
+                $end = Carbon::today($timezone)->setTime(23, 59, 59);
                 return [$start, $end];
             
             case 'custom':
                 if ($customStart && $customEnd) {
                     try {
-                        $start = Carbon::parse($customStart, $timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                        $end = Carbon::parse($customEnd, $timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                        $start = Carbon::parse($customStart, $timezone)->setTime(7, 0, 0);
+                        $end = Carbon::parse($customEnd, $timezone)->setTime(23, 59, 59);
                         return [$start, $end];
                     } catch (\Exception $e) {
-                        $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                        $end = Carbon::today($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                        $start = Carbon::today($timezone)->setTime(7, 0, 0);
+                        $end = Carbon::today($timezone)->setTime(23, 59, 59);
                         return [$start, $end];
                     }
                 }
-                $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                $end = Carbon::today($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                $start = Carbon::today($timezone)->setTime(7, 0, 0);
+                $end = Carbon::today($timezone)->setTime(23, 59, 59);
                 return [$start, $end];
             
             default:
-                $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
-                $end = Carbon::today($timezone)->setTime(23, 59, 59)->setTimezone('UTC');
+                $start = Carbon::today($timezone)->setTime(7, 0, 0);
+                $end = Carbon::today($timezone)->setTime(23, 59, 59);
                 return [$start, $end];
         }
     }

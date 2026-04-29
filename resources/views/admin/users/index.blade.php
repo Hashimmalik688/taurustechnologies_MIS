@@ -262,6 +262,10 @@
                                     </div>
                                     <div class="role-section-lbl">Peregrine Team</div>
                                     <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_MANAGER }}" id="mr-pm-{{ $user->id }}" {{ in_array(Roles::PEREGRINE_MANAGER, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-pm-{{ $user->id }}">Peregrine Manager</label>
+                                    </div>
+                                    <div class="role-check">
                                         <input type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="mr-pc-{{ $user->id }}" {{ in_array(Roles::PEREGRINE_CLOSER, $currentRoles) ? 'checked' : '' }}>
                                         <label for="mr-pc-{{ $user->id }}">Peregrine Closer</label>
                                     </div>

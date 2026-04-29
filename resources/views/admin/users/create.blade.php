@@ -177,6 +177,10 @@
                                         <div class="col-md-3">
                                             <label class="form-label text-primary">Peregrine Team</label>
                                             <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_MANAGER }}" id="role-peregrine-manager">
+                                                <label class="form-check-label" for="role-peregrine-manager">Peregrine Manager</label>
+                                            </div>
+                                            <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::PEREGRINE_CLOSER }}" id="role-peregrine-closer">
                                                 <label class="form-check-label" for="role-peregrine-closer">Peregrine Closer</label>
                                             </div>

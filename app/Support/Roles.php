@@ -31,6 +31,7 @@ class Roles
 
     // ── Sales / Pipeline Roles ─────────────────────────────────────────
 
+    public const PEREGRINE_MANAGER = 'Peregrine Manager';
     public const PEREGRINE_CLOSER = 'Peregrine Closer';
     public const PEREGRINE_VALIDATOR = 'Peregrine Validator';
     public const RAVENS_CLOSER = 'Ravens Closer';
@@ -47,6 +48,7 @@ class Roles
         self::HR,
         self::QA,
         self::VERIFIER,
+        self::PEREGRINE_MANAGER,
         self::PEREGRINE_CLOSER,
         self::PEREGRINE_VALIDATOR,
         self::RAVENS_CLOSER,

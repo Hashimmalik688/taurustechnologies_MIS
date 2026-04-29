@@ -87,7 +87,7 @@ Route::get('/logout', function() {
 
 // Authenticated routes - Dashboard with role-based redirects
 // Prevent partners from accessing user/employee areas
-Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR)]], function () {
+Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::PEREGRINE_MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR)]], function () {
     // Smart router - redirects each user to their appropriate landing page
     Route::get('/', [DashboardController::class, 'root'])->name('root');
     
@@ -362,12 +362,12 @@ Route::group([
     'as' => 'peregrine.closers.',
     'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
-    Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index')->middleware('role.permission:leads-peregrine,view');
-    Route::post('/manual-store', [PeregrineController::class, 'manualStore'])->name('manual-store')->middleware('role.permission:leads-peregrine,edit');
-    Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/update', [PeregrineController::class, 'closerUpdate'])->name('update')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-failed', [PeregrineController::class, 'closerMarkFailed'])->name('mark-failed')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-pending', [PeregrineController::class, 'closerMarkPending'])->name('mark-pending')->middleware('role.permission:leads-peregrine,edit');
+    Route::get('/', [PeregrineController::class, 'closersIndex'])->name('index')->middleware('role.permission:peregrine-closers,view');
+    Route::post('/manual-store', [PeregrineController::class, 'manualStore'])->name('manual-store')->middleware('role.permission:peregrine-closers,edit');
+    Route::get('/{lead}/edit', [PeregrineController::class, 'closerEdit'])->name('edit')->middleware('role.permission:peregrine-closers,edit');
+    Route::put('/{lead}/update', [PeregrineController::class, 'closerUpdate'])->name('update')->middleware('role.permission:peregrine-closers,edit');
+    Route::put('/{lead}/mark-failed', [PeregrineController::class, 'closerMarkFailed'])->name('mark-failed')->middleware('role.permission:peregrine-closers,edit');
+    Route::put('/{lead}/mark-pending', [PeregrineController::class, 'closerMarkPending'])->name('mark-pending')->middleware('role.permission:peregrine-closers,edit');
 });
 
 // Peregrine Validator — access controlled by role.permission:peregrine-validation,level
@@ -376,15 +376,15 @@ Route::group([
     'as' => 'validator.',
     'middleware' => ['auth', Roles::middleware(...Roles::ALL)]
 ], function () {
-    Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index')->middleware('role.permission:leads-peregrine,view');
-    Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/update', [\App\Http\Controllers\ValidatorController::class, 'update'])->name('update')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-sale', [\App\Http\Controllers\ValidatorController::class, 'markAsSale'])->name('mark-sale')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-forwarded', [\App\Http\Controllers\ValidatorController::class, 'markAsForwarded'])->name('mark-forwarded')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-failed', [\App\Http\Controllers\ValidatorController::class, 'markAsFailed'])->name('mark-failed')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-simple-declined', [\App\Http\Controllers\ValidatorController::class, 'markAsSimpleDeclined'])->name('mark-simple-declined')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/mark-home-office-sale', [\App\Http\Controllers\ValidatorController::class, 'markHomeOfficeSale'])->name('mark-home-office-sale')->middleware('role.permission:leads-peregrine,edit');
-    Route::put('/{lead}/return-to-closer', [\App\Http\Controllers\ValidatorController::class, 'returnToCloser'])->name('return-to-closer')->middleware('role.permission:leads-peregrine,edit');
+    Route::get('/', [\App\Http\Controllers\ValidatorController::class, 'index'])->name('index')->middleware('role.permission:peregrine-validation,view');
+    Route::get('/{lead}/edit', [\App\Http\Controllers\ValidatorController::class, 'edit'])->name('edit')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/update', [\App\Http\Controllers\ValidatorController::class, 'update'])->name('update')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/mark-sale', [\App\Http\Controllers\ValidatorController::class, 'markAsSale'])->name('mark-sale')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/mark-forwarded', [\App\Http\Controllers\ValidatorController::class, 'markAsForwarded'])->name('mark-forwarded')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/mark-failed', [\App\Http\Controllers\ValidatorController::class, 'markAsFailed'])->name('mark-failed')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/mark-simple-declined', [\App\Http\Controllers\ValidatorController::class, 'markAsSimpleDeclined'])->name('mark-simple-declined')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/mark-home-office-sale', [\App\Http\Controllers\ValidatorController::class, 'markHomeOfficeSale'])->name('mark-home-office-sale')->middleware('role.permission:peregrine-validation,edit');
+    Route::put('/{lead}/return-to-closer', [\App\Http\Controllers\ValidatorController::class, 'returnToCloser'])->name('return-to-closer')->middleware('role.permission:peregrine-validation,edit');
 });
 
 // Call Logs - Temporarily Disabled

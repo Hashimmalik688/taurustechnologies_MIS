@@ -70,6 +70,7 @@ class DashboardController extends Controller
             Roles::VERIFIER            => 'verifier.dashboard',
             Roles::PEREGRINE_CLOSER    => 'peregrine.closers.index',
             Roles::PEREGRINE_VALIDATOR => 'validator.index',
+            Roles::PEREGRINE_MANAGER   => 'dashboard',
             Roles::EMPLOYEE            => 'attendance.dashboard',
             Roles::RAVENS_CLOSER       => 'ravens.dashboard',
             Roles::QA                  => 'qa.review',
@@ -583,35 +584,35 @@ class DashboardController extends Controller
      */
     public function freeloaders()
     {
-        $allRavensClosers = User::role(Roles::RAVENS_CLOSER)
+        $allClosersUsers = User::role([Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER])
             ->where('status', '!=', Statuses::USER_INACTIVE)
             ->get(['id', 'name', 'email']);
 
         $salesCountByName = Lead::whereNotNull('closer_name')
             ->whereNotNull('sale_date')
             ->whereDate('sale_date', today())
-            ->whereIn('closer_name', $allRavensClosers->pluck('name'))
+            ->whereIn('closer_name', $allClosersUsers->pluck('name'))
             ->selectRaw('closer_name, COUNT(*) as sale_count')
             ->groupBy('closer_name')
             ->pluck('sale_count', 'closer_name');
 
         $closersWithSaleToday = $salesCountByName->keys();
 
-        // Fetch passport photos for Ravens Closers (matched by email → employees table)
+        // Fetch passport photos (matched by email → employees table)
         // Only include photo when show_strip_photo = true
-        $empRows = Employee::whereIn('email', $allRavensClosers->pluck('email'))
+        $empRows = Employee::whereIn('email', $allClosersUsers->pluck('email'))
             ->get(['email', 'passport_image', 'show_strip_photo']);
         $photosByEmail = $empRows->mapWithKeys(fn($e) => [
             $e->email => ($e->show_strip_photo && $e->passport_image) ? $e->passport_image : null,
         ]);
 
-        $freeloaderNames = $allRavensClosers
+        $freeloaderNames = $allClosersUsers
             ->filter(fn($u) => !$closersWithSaleToday->contains($u->name))
             ->pluck('name')
             ->values();
 
         // Return all closers: no-sale first, then sold — each with hasSale flag + saleCount
-        $allClosers = $allRavensClosers
+        $allClosers = $allClosersUsers
             ->sortBy(fn($u) => $closersWithSaleToday->contains($u->name) ? 1 : 0) // no-sale first
             ->map(fn($u) => [
                 'name'      => $u->name,
@@ -628,7 +629,7 @@ class DashboardController extends Controller
             'allClosers'  => $allClosers,
             'chillParty'  => $allClosers->filter(fn($c) => !$c['hasSale'])->values(), // compat
             'count'       => $freeloaderNames->count(),
-            'total'       => $allRavensClosers->count(),
+            'total'       => $allClosersUsers->count(),
         ]);
     }
 }
