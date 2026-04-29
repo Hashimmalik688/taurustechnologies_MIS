@@ -168,9 +168,10 @@
 /* ── Daily summary ─────────────────────────────────── */
 .cs-daily { margin-top:1.2rem; }
 .cs-daily h6 { font-size:.72rem; font-weight:800; color:var(--cs-text-1); margin-bottom:.5rem; }
-.cs-daily-table { width:100%; max-width:400px; font-size:.68rem; border-collapse:collapse; }
-.cs-daily-table th { background:var(--cs-title); color:#fff; padding:.3rem .5rem; font-size:.58rem; text-transform:uppercase; }
+.cs-daily-table { width:100%; font-size:.68rem; border-collapse:collapse; }
+.cs-daily-table th { background:var(--cs-title); color:#fff; padding:.3rem .5rem; font-size:.58rem; text-transform:uppercase; position:sticky; top:0; z-index:2; }
 .cs-daily-table td { padding:.25rem .5rem; border-bottom:1px solid var(--cs-border); }
+.cs-daily-scroll { max-height:420px; overflow-y:auto; border-radius:.4rem; }
 
 /* ── Pipeline stage badge ──────────────────────────── */
 .cs-pipeline-badge {
@@ -457,22 +458,34 @@
     {{-- Daily Summary --}}
     @if($dailySummary->isNotEmpty())
     <div class="cs-daily">
-        <h6><i class="bx bx-calendar me-1"></i> Daily Summary</h6>
+        <h6>
+            <i class="bx bx-calendar me-1"></i> Daily Summary
+            <span style="font-weight:500;color:var(--bs-surface-400);margin-left:.35rem;">{{ $dailySummary->count() }} day{{ $dailySummary->count() !== 1 ? 's' : '' }}</span>
+        </h6>
         <div class="cs-card" style="max-width:420px;">
-            <table class="cs-daily-table">
-                <thead>
-                    <tr><th>Date</th><th>Apps</th><th>Commission</th></tr>
-                </thead>
-                <tbody>
-                    @foreach($dailySummary as $day)
-                    <tr>
-                        <td>{{ $day['date'] ? \Carbon\Carbon::parse($day['date'])->format('d M Y') : '—' }}</td>
-                        <td style="text-align:center;">{{ $day['apps'] }}</td>
-                        <td style="text-align:right;" class="cs-money cs-money-pos">{{ number_format($day['commission'], 2) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="cs-daily-scroll">
+                <table class="cs-daily-table">
+                    <thead>
+                        <tr><th>Date</th><th>Apps</th><th>Commission</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($dailySummary as $day)
+                        <tr>
+                            <td>{{ $day['date'] ? \Carbon\Carbon::parse($day['date'])->format('d M Y') : '—' }}</td>
+                            <td style="text-align:center;">{{ $day['apps'] }}</td>
+                            <td style="text-align:right;" class="cs-money cs-money-pos">{{ number_format($day['commission'], 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot style="position:sticky;bottom:0;background:var(--cs-surface);">
+                        <tr style="font-weight:700;border-top:2px solid var(--cs-border);">
+                            <td style="font-size:.62rem;text-transform:uppercase;letter-spacing:.3px;">Total</td>
+                            <td style="text-align:center;">{{ $dailySummary->sum('apps') }}</td>
+                            <td style="text-align:right;" class="cs-money cs-money-pos">{{ number_format($dailySummary->sum('commission'), 2) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
     @endif

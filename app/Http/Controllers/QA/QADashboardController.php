@@ -41,8 +41,10 @@ class QADashboardController extends Controller
         // Determine back URL based on the user's role
         if ($user->hasRole('Ravens Closer')) {
             $backUrl = route('ravens.dashboard');
+        } elseif ($user->hasRole('Peregrine Closer')) {
+            $backUrl = route('peregrine.closers.index');
         } else {
-            $backUrl = url()->previous(route('home'));
+            $backUrl = url()->previous(route('qa.scoring'));
         }
 
         return view('qa.dashboard', [
