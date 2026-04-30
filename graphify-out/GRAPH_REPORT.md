@@ -1,12 +1,12 @@
 # Graph Report - taurus-crm  (2026-04-30)
 
 ## Corpus Check
-- 1288 files · ~1,922,999 words
+- 1288 files · ~1,923,027 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
 - 9722 nodes · 27248 edges · 106 communities detected
-- Extraction: 69% EXTRACTED · 31% INFERRED · 0% AMBIGUOUS · INFERRED: 8534 edges (avg confidence: 0.8)
+- Extraction: 69% EXTRACTED · 31% INFERRED · 0% AMBIGUOUS · INFERRED: 8535 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
