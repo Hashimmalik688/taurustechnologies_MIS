@@ -313,6 +313,27 @@
     background: rgba(212,175,55,.1);
     color: var(--gold, #d4af37);
 }
+.th-action--labeled {
+    width: auto;
+    min-width: 36px;
+    height: auto;
+    border-radius: 10px;
+    flex-direction: column;
+    gap: 1px;
+    padding: 5px 8px;
+}
+.th-action--labeled i {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.th-action--labeled .th-action-label {
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    line-height: 1;
+    opacity: .75;
+}
 .th-action-badge {
     position: absolute;
     top: 4px;

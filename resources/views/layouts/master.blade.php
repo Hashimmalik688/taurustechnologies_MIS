@@ -262,8 +262,9 @@
                 </button>
 
                 {{-- Chat --}}
-                <a href="{{ route('chat.index') }}" class="th-action" title="Team Chat">
+                <a href="{{ route('chat.index') }}" class="th-action th-action--labeled" title="Team Chat">
                     <i class="bx bx-chat"></i>
+                    <span class="th-action-label">Chat</span>
                     <span class="th-action-badge th-badge-green chat-badge d-none">0</span>
                 </a>
 

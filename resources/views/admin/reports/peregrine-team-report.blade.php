@@ -343,6 +343,7 @@
                         <th class="rp-th-num">Premium/mo</th>
                         <th>Closed By</th>
                         <th>Validator</th>
+                        <th>Status</th>
                         <th class="rp-th-num">Sale Date</th>
                     </tr>
                 </thead>
@@ -356,10 +357,11 @@
                             <td class="rp-td-num">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
                             <td style="font-size:.75rem">{{ $lead->assignedCloser?->name ?? $lead->closer_name ?? '—' }}</td>
                             <td style="font-size:.75rem">{{ $lead->assignedValidator?->name ?? '—' }}</td>
+                            <td>@php $statusBadge = match($lead->status ?? '') { 'sale' => 'rp-badge-sale', 'declined' => 'rp-badge-declined', 'chargeback' => 'rp-badge-declined', 'pending' => 'rp-badge-pending', 'returned' => 'rp-badge-returned', default => 'rp-badge-default' }; @endphp<span class="rp-badge {{ $statusBadge }}">{{ $lead->status ?? '—' }}</span></td>
                             <td class="rp-td-num" style="white-space:nowrap;font-size:.75rem">{{ $lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('M d, Y') : '—' }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem"><i class="bx bx-info-circle"></i> No sales in this period</td></tr>
+                        <tr><td colspan="9" style="text-align:center;padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem"><i class="bx bx-info-circle"></i> No sales in this period</td></tr>
                     @endforelse
                 </tbody>
                 @if($salesLeads->count() > 0)
@@ -368,7 +370,7 @@
                         <td colspan="3" style="font-size:.72rem;font-weight:600">Totals</td>
                         <td class="rp-td-num">${{ number_format($salesLeads->sum('coverage_amount')) }}</td>
                         <td class="rp-td-num">${{ number_format($salesLeads->sum('monthly_premium'), 2) }}</td>
-                        <td colspan="3"></td>
+                        <td colspan="4"></td>
                     </tr>
                 </tfoot>
                 @endif

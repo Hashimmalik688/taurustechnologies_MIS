@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AgentCarrierState;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
@@ -71,6 +72,8 @@ class PeregrineController extends Controller
         // Daily stats within the selected date range
         $todayStats = $this->getDailyStats($userId, $startDate, $endDate);
 
+        $carrierPartnerData = $this->buildCarrierPartnerData();
+
         return view('peregrine.closers.index', compact(
             'pendingLeads', 
             'completedLeads', 
@@ -80,7 +83,8 @@ class PeregrineController extends Controller
             'filter', 
             'startDate', 
             'endDate',
-            'filteredTotal'
+            'filteredTotal',
+            'carrierPartnerData'
         ));
     }
 
@@ -98,7 +102,9 @@ class PeregrineController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('peregrine.closers.edit', compact('lead', 'validators'));
+        $carrierPartnerData = $this->buildCarrierPartnerData();
+
+        return view('peregrine.closers.edit', compact('lead', 'validators', 'carrierPartnerData'));
     }
 
     /**
@@ -131,14 +137,8 @@ class PeregrineController extends Controller
             'medical_issue' => ['nullable', 'string'],
             'medications' => ['nullable', 'string'],
             'carrier_name' => ['nullable', 'string', 'max:255'],
+            'insurance_carrier_id' => ['nullable', 'exists:insurance_carriers,id'],
             'policy_type' => ['required', 'string', 'max:255'],
-            'initial_draft_date' => ['required', 'date'],
-            'future_draft_date' => ['required', 'date'],
-            'coverage_amount' => ['required', 'numeric', 'min:0'],
-            'monthly_premium' => ['required', 'numeric', 'min:0'],
-            'source' => ['nullable', 'string', 'max:255'],
-            // Multiple beneficiaries support
-            'beneficiaries' => ['required', 'array', 'min:1'],
             'beneficiaries.*.name' => ['required', 'string', 'max:255'],
             'beneficiaries.*.dob' => ['required', 'date'],
             'beneficiaries.*.relation' => ['nullable', 'string', 'max:50'],
@@ -152,6 +152,7 @@ class PeregrineController extends Controller
             'cvv' => ['nullable', 'required_if:account_type,Card', 'string', 'max:4'],
             'expiry_date' => ['nullable', 'required_if:account_type,Card', 'string', 'max:50'],
             'assigned_partner' => ['required', 'string', 'max:255'],
+            'partner_id' => ['nullable', 'exists:partners,id'],
             'assigned_validator_id' => ['required', 'exists:users,id'],
             // Follow up schedule fields
             'followup_required' => ['required', 'boolean'],
@@ -236,10 +237,10 @@ class PeregrineController extends Controller
         $fillableFields = [
             'cn_name', 'phone_number', 'date_of_birth', 'gender', 'ssn', 'address', 'state', 'zip_code',
             'birth_place', 'height_weight', 'height', 'weight', 'smoker', 'doctor_name', 'doctor_number', 'doctor_address',
-            'medical_issue', 'medications', 'carrier_name', 'policy_type', 'initial_draft_date', 'future_draft_date',
+            'medical_issue', 'medications', 'carrier_name', 'insurance_carrier_id', 'policy_type', 'initial_draft_date', 'future_draft_date',
             'coverage_amount', 'monthly_premium', 'source', 'beneficiary', 'beneficiary_dob',
             'bank_name', 'bank_address', 'account_type', 'account_number', 'routing_number', 'bank_balance',
-            'card_number', 'cvv', 'expiry_date', 'assigned_validator_id'
+            'card_number', 'cvv', 'expiry_date', 'assigned_validator_id', 'assigned_partner', 'partner_id'
         ];
         
         $data = [];
@@ -293,6 +294,7 @@ class PeregrineController extends Controller
             'medical_issue'         => ['required', 'string'],
             'medications'           => ['required', 'string', 'max:1000'],
             'carrier_name'          => ['nullable', 'string', 'max:255'],
+            'insurance_carrier_id'  => ['nullable', 'exists:insurance_carriers,id'],
             'policy_type'           => ['required', 'string', 'max:255'],
             'initial_draft_date'    => ['required', 'date'],
             'future_draft_date'     => ['required', 'date'],
@@ -300,6 +302,7 @@ class PeregrineController extends Controller
             'monthly_premium'       => ['required', 'numeric', 'min:0'],
             'source'                => ['nullable', 'string', 'max:255'],
             'assigned_partner'      => ['nullable', 'string', 'max:255'],
+            'partner_id'            => ['nullable', 'exists:partners,id'],
             'beneficiaries'         => ['required', 'array', 'min:1'],
             'beneficiaries.*.name'  => ['required', 'string', 'max:255'],
             'beneficiaries.*.dob'   => ['required', 'date'],
@@ -357,6 +360,7 @@ class PeregrineController extends Controller
             'doctor_number'         => $validated['doctor_number'] ?? null,
             'doctor_address'        => $validated['doctor_address'] ?? null,
             'carrier_name'          => $validated['carrier_name'] ?? null,
+            'insurance_carrier_id'  => $validated['insurance_carrier_id'] ?? null,
             'policy_type'           => $validated['policy_type'],
             'initial_draft_date'    => $validated['initial_draft_date'],
             'future_draft_date'     => $validated['future_draft_date'],
@@ -364,6 +368,7 @@ class PeregrineController extends Controller
             'monthly_premium'       => $validated['monthly_premium'],
             'source'                => $validated['source'] ?? null,
             'assigned_partner'      => $validated['assigned_partner'] ?? null,
+            'partner_id'            => $validated['partner_id'] ?? null,
             'bank_name'             => $validated['bank_name'],
             'bank_address'          => $validated['bank_address'],
             'account_type'          => $validated['account_type'],
@@ -392,6 +397,32 @@ class PeregrineController extends Controller
 
         return redirect()->route('peregrine.closers.index')
             ->with('success', 'Lead created and sent to validator successfully.');
+    }
+
+    /**
+     * Build the carrier → partner → states data array (same structure as Ravens dashboard).
+     */
+    private function buildCarrierPartnerData(): array
+    {
+        return AgentCarrierState::with(['insuranceCarrier', 'partner'])
+            ->whereHas('insuranceCarrier', fn($q) => $q->where('is_active', true))
+            ->whereHas('partner',          fn($q) => $q->where('is_active', true))
+            ->get()
+            ->groupBy(fn($item) => $item->insurance_carrier_id . '_' . $item->partner_id)
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'carrier_id'   => $first->insurance_carrier_id,
+                    'carrier_name' => $first->insuranceCarrier->name,
+                    'partner_id'   => $first->partner_id,
+                    'partner_name' => $first->partner->name,
+                    'partner_code' => $first->partner->code,
+                    'display_name' => $first->insuranceCarrier->name . ' (' . $first->partner->code . ')',
+                    'states'       => $group->pluck('state')->unique()->values()->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
     }
 
     /**

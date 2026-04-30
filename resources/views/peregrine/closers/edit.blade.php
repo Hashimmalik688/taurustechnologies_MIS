@@ -217,9 +217,26 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label for="carrier_name" class="form-label">Carrier Name</label>
-                                <input type="text" class="form-control" id="carrier_name" name="carrier_name"
-                                    value="{{ old('carrier_name', $lead->carrier_name) }}" placeholder="Insurance company">
+                                <label class="form-label">Carrier &amp; Partner <span class="text-danger">*</span></label>
+                                <select class="form-select" id="edit_carrier" required
+                                        data-carrier-partner-info='@json($carrierPartnerData ?? [])'>
+                                    <option value="">Select Carrier / Partner</option>
+                                    @foreach($carrierPartnerData ?? [] as $cp)
+                                        <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}"
+                                                data-carrier-name="{{ $cp['carrier_name'] }}"
+                                                data-carrier-id="{{ $cp['carrier_id'] }}"
+                                                data-partner-id="{{ $cp['partner_id'] }}"
+                                                data-partner-name="{{ $cp['partner_name'] }}"
+                                                data-states='@json($cp['states'])'
+                                                {{ (old('insurance_carrier_id', $lead->insurance_carrier_id) == $cp['carrier_id'] && old('partner_id', $lead->partner_id) == $cp['partner_id']) ? 'selected' : '' }}>
+                                            {{ $cp['display_name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" name="carrier_name"         id="edit_carrier_name" value="{{ old('carrier_name', $lead->carrier_name) }}">
+                                <input type="hidden" name="insurance_carrier_id" id="edit_carrier_id"   value="{{ old('insurance_carrier_id', $lead->insurance_carrier_id) }}">
+                                <input type="hidden" name="assigned_partner"     id="edit_partner_name" value="{{ old('assigned_partner', $lead->assigned_partner) }}">
+                                <input type="hidden" name="partner_id"           id="edit_partner_id"   value="{{ old('partner_id', $lead->partner_id) }}">
                             </div>
                             <div class="col-md-4">
                                 <label for="policy_type" class="form-label required">Policy Type</label>
@@ -425,12 +442,11 @@
                         </h6>
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <label for="assigned_partner" class="form-label required">Assigned Partner</label>
-                                <input type="text" class="form-control @error('assigned_partner') is-invalid @enderror"
-                                    id="assigned_partner" name="assigned_partner" 
-                                    value="{{ old('assigned_partner', $lead->assigned_partner) }}"
-                                    placeholder="Enter partner name" required>
-                                @error('assigned_partner')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <label class="form-label">Assigned Partner</label>
+                                <input type="text" class="form-control" id="edit_partner_display"
+                                       placeholder="Auto-filled from carrier selection" readonly
+                                       value="{{ old('assigned_partner', $lead->assigned_partner) }}">
+                                <small class="text-muted">Select a Carrier above — partner fills automatically.</small>
                             </div>
                         </div>
 
@@ -720,5 +736,34 @@
                 }
             });
         });
+    </script>
+
+    <script>
+    (function() {
+        const sel  = document.getElementById('edit_carrier');
+        if (!sel) return;
+
+        function syncCarrierPartner() {
+            const opt         = sel.options[sel.selectedIndex];
+            const carrierName = opt ? (opt.dataset.carrierName  || '') : '';
+            const carrierId   = opt ? (opt.dataset.carrierId    || '') : '';
+            const partnerName = opt ? (opt.dataset.partnerName  || '') : '';
+            const partnerId   = opt ? (opt.dataset.partnerId    || '') : '';
+
+            document.getElementById('edit_carrier_name').value    = carrierName;
+            document.getElementById('edit_carrier_id').value      = carrierId;
+            document.getElementById('edit_partner_name').value    = partnerName;
+            document.getElementById('edit_partner_id').value      = partnerId;
+            document.getElementById('edit_partner_display').value = partnerName;
+        }
+
+        sel.addEventListener('change', syncCarrierPartner);
+
+        // On page load: display existing partner name from hidden field
+        const existingPartner = document.getElementById('edit_partner_name').value;
+        if (existingPartner) {
+            document.getElementById('edit_partner_display').value = existingPartner;
+        }
+    })();
     </script>
 @endsection

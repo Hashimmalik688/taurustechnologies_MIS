@@ -758,8 +758,10 @@ class ReportController extends Controller
         $query = Lead::whereNotNull('pending_contract_at')
             ->whereNotNull('closer_name');
 
-        if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
-        if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+        // Filter by pending_contract_at (submission date) not sale_date,
+        // so the report accurately shows what was submitted in the selected period.
+        if ($dateFrom) $query->whereDate('pending_contract_at', '>=', $dateFrom);
+        if ($dateTo)   $query->whereDate('pending_contract_at', '<=', $dateTo);
 
         // Load all leads and calculate revenue from cluster rates (premium × 9 × commission%)
         $leads = $query->select(
@@ -817,8 +819,9 @@ class ReportController extends Controller
         $query = Lead::whereNotNull('pending_contract_at')
             ->whereNotNull('closer_name');
 
-        if ($dateFrom)        $query->whereDate('sale_date', '>=', $dateFrom);
-        if ($dateTo)          $query->whereDate('sale_date', '<=', $dateTo);
+        // Filter by pending_contract_at (submission date) — consistent with the main report.
+        if ($dateFrom)        $query->whereDate('pending_contract_at', '>=', $dateFrom);
+        if ($dateTo)          $query->whereDate('pending_contract_at', '<=', $dateTo);
         if ($carrierName)     $query->where('carrier_name', $carrierName);
         if ($assignedPartner !== null) $query->where('assigned_partner', $assignedPartner ?: null);
 
@@ -831,7 +834,7 @@ class ReportController extends Controller
                 'policy_number',
                 'commission_calculation_notes', 'commission_calculated_at'
             )
-            ->orderByDesc('sale_date')
+            ->orderByDesc('pending_contract_at')
             ->get();
 
         // Attach calculated revenue to each lead for display
@@ -1629,7 +1632,7 @@ class ReportController extends Controller
             ->whereNotNull('sale_at')
             ->with(['assignedCloser:id,name', 'assignedValidator:id,name'])
             ->select('id', 'cn_name', 'closer_name', 'managed_by', 'assigned_validator_id',
-                     'sale_at', 'closed_at', 'monthly_premium', 'coverage_amount', 'policy_type')
+                     'sale_at', 'closed_at', 'monthly_premium', 'coverage_amount', 'policy_type', 'status')
             ->orderByDesc('sale_at')
             ->get();
 

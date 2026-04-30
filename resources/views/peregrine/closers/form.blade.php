@@ -197,9 +197,29 @@
 
 <h6 class="form-section-title"><i class="bx bx-shield me-2"></i>Insurance Information</h6>
 <div class="row g-3 mb-3">
+    @php $cpfx = 'cpf_' . ($lead->id ?? 'new'); @endphp
     <div class="col-md-4">
-        <label for="carrier_name" class="form-label">Carrier Name</label>
-        <input type="text" class="form-control" name="carrier_name" value="{{ old('carrier_name', $lead->carrier_name ?? '') }}" placeholder="Insurance company">
+        <label class="form-label">Carrier &amp; Partner <span class="text-danger">*</span></label>
+        <select class="form-select" id="{{ $cpfx }}_carrier" required
+                data-carrier-partner-info='@json($carrierPartnerData ?? [])'>
+            <option value="">Select Carrier / Partner</option>
+            @foreach($carrierPartnerData ?? [] as $cp)
+                <option value="{{ $cp['carrier_id'] }}_{{ $cp['partner_id'] }}"
+                        data-carrier-name="{{ $cp['carrier_name'] }}"
+                        data-carrier-id="{{ $cp['carrier_id'] }}"
+                        data-partner-id="{{ $cp['partner_id'] }}"
+                        data-partner-name="{{ $cp['partner_name'] }}"
+                        data-states='@json($cp['states'])'
+                        {{ (old('insurance_carrier_id', $lead->insurance_carrier_id ?? '') == $cp['carrier_id'] && old('partner_id', $lead->partner_id ?? '') == $cp['partner_id']) ? 'selected' : '' }}>
+                    {{ $cp['display_name'] }}
+                </option>
+            @endforeach
+        </select>
+        {{-- Hidden fields submitted with the form --}}
+        <input type="hidden" name="carrier_name"          id="{{ $cpfx }}_carrier_name"  value="{{ old('carrier_name', $lead->carrier_name ?? '') }}">
+        <input type="hidden" name="insurance_carrier_id"  id="{{ $cpfx }}_carrier_id"    value="{{ old('insurance_carrier_id', $lead->insurance_carrier_id ?? '') }}">
+        <input type="hidden" name="assigned_partner"      id="{{ $cpfx }}_partner_name"  value="{{ old('assigned_partner', $lead->assigned_partner ?? '') }}">
+        <input type="hidden" name="partner_id"            id="{{ $cpfx }}_partner_id"    value="{{ old('partner_id', $lead->partner_id ?? '') }}">
     </div>
     <div class="col-md-4">
         <label for="policy_type" class="form-label required">Policy Type</label>
@@ -410,8 +430,11 @@
 <h6 class="form-section-title"><i class="bx bx-briefcase me-2"></i>Partner Information</h6>
 <div class="row g-3 mb-4">
     <div class="col-md-12">
-        <label for="assigned_partner" class="form-label">Assigned Partner</label>
-        <input type="text" class="form-control" name="assigned_partner" id="assigned_partner" value="{{ old('assigned_partner', $lead->assigned_partner ?? '') }}" placeholder="Enter partner name">
+        <label class="form-label">Assigned Partner</label>
+        <input type="text" class="form-control" id="{{ $cpfx }}_partner_display"
+               placeholder="Auto-filled from carrier selection" readonly
+               value="{{ old('assigned_partner', $lead->assigned_partner ?? '') }}">
+        <small class="text-muted">Select a Carrier above — partner fills automatically.</small>
     </div>
 </div>
 
@@ -495,4 +518,36 @@
     @endif
 </div>
 @endif
+
+<script>
+(function() {
+    const pfx  = '{{ $cpfx }}';
+    const sel  = document.getElementById(pfx + '_carrier');
+    if (!sel) return;
+
+    function syncCarrierPartner() {
+        const opt         = sel.options[sel.selectedIndex];
+        const carrierName = opt ? (opt.dataset.carrierName  || '') : '';
+        const carrierId   = opt ? (opt.dataset.carrierId    || '') : '';
+        const partnerName = opt ? (opt.dataset.partnerName  || '') : '';
+        const partnerId   = opt ? (opt.dataset.partnerId    || '') : '';
+
+        document.getElementById(pfx + '_carrier_name').value  = carrierName;
+        document.getElementById(pfx + '_carrier_id').value    = carrierId;
+        document.getElementById(pfx + '_partner_name').value  = partnerName;
+        document.getElementById(pfx + '_partner_id').value    = partnerId;
+        document.getElementById(pfx + '_partner_display').value = partnerName;
+    }
+
+    sel.addEventListener('change', syncCarrierPartner);
+
+    // On page load: if hidden fields already have values (old()/edit), ensure display input shows partner name
+    document.addEventListener('DOMContentLoaded', function () {
+        const existingPartner = document.getElementById(pfx + '_partner_name').value;
+        if (existingPartner) {
+            document.getElementById(pfx + '_partner_display').value = existingPartner;
+        }
+    });
+})();
+</script>
 
