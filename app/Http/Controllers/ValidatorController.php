@@ -127,11 +127,12 @@ class ValidatorController extends Controller
         }
 
         $lead->update([
-            'status' => Statuses::LEAD_SALE,
-            'validated_by' => Auth::id(),
-            'validated_at' => now(),
-            'sale_at' => now(),
-            'sale_date' => now()->format('Y-m-d'),
+            'status'                   => Statuses::LEAD_SALE,
+            'validated_by'             => Auth::id(),
+            'validated_at'             => now(),
+            'ravens_validation_status' => 'valid',
+            'sale_at'                  => now(),
+            'sale_date'                => now()->format('Y-m-d'),
         ]);
 
         return redirect()->route('validator.index')
@@ -271,11 +272,12 @@ class ValidatorController extends Controller
         }
 
         // Update lead and mark as sale
-        $validated['status'] = Statuses::LEAD_SALE;
-        $validated['validated_by'] = Auth::id();
-        $validated['validated_at'] = now();
-        $validated['sale_at'] = now();
-        $validated['sale_date'] = now()->format('Y-m-d');
+        $validated['status']                   = Statuses::LEAD_SALE;
+        $validated['validated_by']             = Auth::id();
+        $validated['validated_at']             = now();
+        $validated['ravens_validation_status'] = 'valid';
+        $validated['sale_at']                  = now();
+        $validated['sale_date']                = now()->format('Y-m-d');
         
         $lead->update($validated);
 
@@ -350,11 +352,12 @@ class ValidatorController extends Controller
         }
 
         $lead->update([
-            'status' => Statuses::LEAD_SALE,
-            'validated_by' => Auth::id(),
-            'validated_at' => now(),
-            'sale_at' => now(),
-            'sale_date' => now()->format('Y-m-d'),
+            'status'                   => Statuses::LEAD_SALE,
+            'validated_by'             => Auth::id(),
+            'validated_at'             => now(),
+            'ravens_validation_status' => 'valid',
+            'sale_at'                  => now(),
+            'sale_date'                => now()->format('Y-m-d'),
         ]);
 
         return redirect()->route('validator.index')

@@ -70,7 +70,7 @@ class DashboardController extends Controller
             Roles::VERIFIER            => 'verifier.dashboard',
             Roles::PEREGRINE_CLOSER    => 'peregrine.closers.index',
             Roles::PEREGRINE_VALIDATOR => 'validator.index',
-            Roles::PEREGRINE_MANAGER   => 'dashboard',
+            Roles::PEREGRINE_MANAGER   => 'settings.reports.hub',
             Roles::EMPLOYEE            => 'attendance.dashboard',
             Roles::RAVENS_CLOSER       => 'ravens.dashboard',
             Roles::QA                  => 'qa.review',

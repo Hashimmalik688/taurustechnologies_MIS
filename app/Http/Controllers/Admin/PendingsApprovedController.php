@@ -50,8 +50,12 @@ class PendingsApprovedController extends Controller
         // For other statuses: show sales still awaiting decision (not in Pending Contracts)
         
         $baseConditions = function($query) {
-            $query->where('ravens_validation_status', 'valid')
-                  ->where('team', '!=', 'peregrine')
+            $query->where(function($q) {
+                      // Unified: all teams use ravens_validation_status going forward
+                      // OR validated_at as a fallback for legacy Peregrine leads
+                      $q->where('ravens_validation_status', 'valid')
+                        ->orWhereNotNull('validated_at');
+                  })
                   ->whereNotNull('closer_name')
                   ->where('cn_name', '!=', '')
                   ->whereNotNull('cn_name')
@@ -397,8 +401,12 @@ class PendingsApprovedController extends Controller
         }
 
         $query = Lead::with(['insuranceCarrier', 'submissionReviewer'])
-            ->where('ravens_validation_status', 'valid')
-            ->where('team', '!=', 'peregrine')
+            ->where(function($q) {
+                // Unified: all teams use ravens_validation_status going forward
+                // OR validated_at as a fallback for legacy Peregrine leads
+                $q->where('ravens_validation_status', 'valid')
+                  ->orWhereNotNull('validated_at');
+            })
             ->whereNotNull('closer_name')
             ->where('cn_name', '!=', '')
             ->whereNotNull('cn_name')

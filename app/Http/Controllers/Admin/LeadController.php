@@ -936,20 +936,13 @@ class LeadController extends Controller
     public function destroy($id)
     {
         $lead = Lead::findOrFail($id);
+        $lead->delete();
 
-        // Remove sale data only — do NOT delete the lead record.
-        $lead->update([
-            'sale_at'         => null,
-            'sale_date'       => null,
-            'closer_name'     => null,
-            'closer_user_id'  => null,
-            'carrier_name'    => null,
-            'monthly_premium' => null,
-            'policy_number'   => null,
-            'status'          => 'unassigned',
-        ]);
+        // Redirect back to wherever the user came from (peregrine leads, index, etc.)
+        $previous = url()->previous();
+        $fallback = route('leads.peregrine');
 
-        return redirect()->route('sales.index')->with('success', 'Sale removed successfully. Lead record preserved.');
+        return redirect($previous ?: $fallback)->with('success', 'Lead deleted successfully.');
     }
 
     public function updateStatus(Request $request, $id)
