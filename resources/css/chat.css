@@ -1636,9 +1636,13 @@
     z-index: 10;
 }
 .message-item:hover .message-actions { opacity: 1; pointer-events: auto; }
-.message-content { position: relative; }
-.message-item.message-sender .message-actions { right: auto; left: auto; position: absolute; right: 100%; top: 4px; margin-right: 4px; }
-.message-item.message-receiver .message-actions { right: auto; left: 100%; top: 4px; margin-left: 4px; }
+
+/* Bubble wrap: shrinks to fit content width, provides position context for actions */
+.message-bubble-wrap { position: relative; display: inline-block; max-width: 100%; }
+
+/* Actions float outside the bubble, to the left for sender, right for receiver */
+.message-item.message-sender .message-actions { right: 100%; left: auto; top: 4px; margin-right: 6px; }
+.message-item.message-receiver .message-actions { left: 100%; right: auto; top: 4px; margin-left: 6px; }
 
 /* Style all buttons inside message-actions (including those without .message-action-btn) */
 .message-actions button {

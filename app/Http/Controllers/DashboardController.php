@@ -17,16 +17,6 @@ use Illuminate\Support\Facades\Cache;
 class DashboardController extends Controller
 {
     /**
-     * Boss dashboard endpoint
-     */
-    private $bossEndpoint = 'https://backend.taurustechnologies.co/webhook/dashboard-metrics';
-
-    /**
-     * Cache duration in seconds (5 minutes)
-     */
-    private $cacheDuration = 300;
-
-    /**
      * Create a new controller instance.
      */
     public function __construct()
@@ -117,211 +107,208 @@ class DashboardController extends Controller
      * Executive Dashboard (Company Overview) with live data.
      * Accessible at /dashboard with role.permission:dashboard,view middleware.
      */
-    public function executiveDashboard()
+    public function executiveDashboard(Request $request)
     {
-        // Fetch data from boss's dashboard with caching (for attendance only)
-        $bossData = $this->fetchBossDashboardData();
+        $today = today(); // PT (app timezone = America/Los_Angeles)
 
-        // Extract data from local database using proper fields
-        $users_count = Cache::remember('dashboard_users_count', 300, function () {
-            return User::count();
-        });
-        
-        // Get current month start and today
-        $monthStart = now()->startOfMonth();
-        $today = today();
-        
-        // Sales counts using sale_date field (from sales management page)
-        $total_sales_today = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->whereDate('sale_date', $today)
-            ->count();
-            
-        // Month-to-date sales (all submitted)
-        $total_monthly_sales = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->count();
-        
-        // Calculate revenue from issued and verified sales (Revenue Analytics logic)
-        // Use agent_revenue (calculated commission) with fallback to monthly_premium
-        $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('submission_status', Statuses::SUB_APPROVED)
-            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
-            ->get();
-            
-        $total_revenue = $issued_sales->sum(function($lead) {
-            return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
-        });
-        
-        // Sales status counts by submission_status (MTD) using sale_date
-        $done_count = $total_monthly_sales; // Total submitted MTD
-        $approved_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->where('submission_status', Statuses::SUB_APPROVED)
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->count();
-            
-        $underwriting_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->where('submission_status', Statuses::SUB_UNDERWRITING)
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->count();
-            
-        $declined_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->where('submission_status', Statuses::SUB_DECLINED)
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->count();
+        // ── Period: accept ?period=YYYY-MM or default to current 3rd→3rd ──
+        $periodParam = $request->get('period'); // e.g. "2026-04"
+        if ($periodParam && preg_match('/^\d{4}-\d{2}$/', $periodParam)) {
+            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->startOfMonth();
+        } else {
+            $anchor = $today->copy();
+        }
+        if ($anchor->day >= 3) {
+            $rev_period_start = $anchor->copy()->setDay(3)->startOfDay();
+            $rev_period_end   = $anchor->copy()->addMonthNoOverflow()->setDay(3)->endOfDay();
+        } else {
+            $rev_period_start = $anchor->copy()->subMonthNoOverflow()->setDay(3)->startOfDay();
+            $rev_period_end   = $anchor->copy()->setDay(3)->endOfDay();
+        }
+        $revenue_period_label = $rev_period_start->format('M j') . ' → ' . $rev_period_end->format('M j');
+        // For the selector: which month is the "anchor" (the start month of the period)
+        $selected_period = $rev_period_start->format('Y-m');
 
-        // Attendance - Use local database instead of external API
-        $usaToday = now()->toDateString();
-        $trackableRoles = [Roles::EMPLOYEE, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RAVENS_CLOSER];
+        // ── All MTD leads in the 3rd→3rd period ──────────────────
+        $revenue_leads = Lead::whereNotNull('pending_contract_at')
+            ->whereDate('pending_contract_at', '>=', $rev_period_start)
+            ->whereDate('pending_contract_at', '<=', $rev_period_end)
+            ->get(['id', 'monthly_premium', 'carrier_name', 'assigned_partner',
+                   'closer_name', 'submission_status', 'pending_contract_at']);
+
+        $mtd_sales      = $revenue_leads->count();
+        $total_revenue  = $revenue_leads->sum('monthly_premium');   // Total Premium (raw sum)
+        $mtd_approved   = $revenue_leads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $mtd_declined   = $revenue_leads->where('submission_status', Statuses::SUB_DECLINED)->count();
+
+        // ── Today leads (filter from MTD set) ────────────────────
+        $today_leads    = $revenue_leads->filter(fn($l) =>
+            $l->pending_contract_at && \Carbon\Carbon::parse($l->pending_contract_at)->isSameDay($today)
+        );
+        $today_sales    = $today_leads->count();
+        $today_revenue  = $today_leads->sum('monthly_premium');
+        $today_approved = $today_leads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $today_declined = $today_leads->where('submission_status', Statuses::SUB_DECLINED)->count();
+
+        // Aliases for pipeline / backward compat
+        $done_count     = $mtd_sales;
+        $approved_count = $mtd_approved;
+        $declined_count = $mtd_declined;
+
+        // Revenue by carrier (top 5 for summary panel)
+        $revenue_by_carrier = $revenue_leads
+            ->groupBy('carrier_name')
+            ->map(fn($g) => [
+                'carrier'  => $g->first()->carrier_name ?? 'Unknown',
+                'count'    => $g->count(),
+                'premium'  => $g->sum('monthly_premium'),
+            ])
+            ->sortByDesc('premium')
+            ->values()
+            ->take(5)
+            ->toArray();
+
+        $revenue_total_submissions = $revenue_leads->count();
+
+        // ── Attendance ────────────────────────────────────────────
         $todayAttendances = \App\Models\Attendance::with('user')
-            ->whereDate('date', $usaToday)
+            ->whereDate('date', $today->toDateString())
             ->get();
-        
-        $attendance = $todayAttendances->map(function($att) {
-            return [
-                'name' => $att->user->name,
-                'status' => $att->status,
-            ];
-        })->toArray();
-        
-        $present_count = $todayAttendances->whereIn('status', [Statuses::ATTENDANCE_PRESENT, Statuses::ATTENDANCE_LATE])->count();
-        $absent_count = $todayAttendances->where('status', Statuses::ATTENDANCE_ABSENT)->count();
 
-        // Sales per closer - Calculate from local database using submission_status and sale_date
-        $closers = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_date')
-            ->whereMonth('sale_date', now()->month)
-            ->whereYear('sale_date', now()->year)
-            ->get()
-            ->groupBy('closer_name');
-            
+        $attendance = $todayAttendances->map(fn($att) => [
+            'name'   => optional($att->user)->name ?? '—',
+            'status' => $att->status,
+        ])->toArray();
+
+        $present_count          = $todayAttendances->whereIn('status', [Statuses::ATTENDANCE_PRESENT, Statuses::ATTENDANCE_LATE])->count();
+        $absent_count           = $todayAttendances->where('status', Statuses::ATTENDANCE_ABSENT)->count();
+        $total_attendance_count = $todayAttendances->count();
+
+        // ── Sales per closer (uses revenue_leads = 3rd→3rd period) ──
+        $closerGroups = $revenue_leads->filter(fn($l) => !empty($l->closer_name))->groupBy('closer_name');
+
         $sales_per_closer = [];
-        foreach ($closers as $closerName => $sales) {
-            $todaySales = $sales->filter(function($sale) use ($today) {
-                return $sale->sale_date && $sale->sale_date->isSameDay($today);
-            })->count();
-            
-            // Get user to determine team
+        foreach ($closerGroups as $closerName => $sales) {
+            $todaySales = $sales->filter(fn($s) =>
+                $s->pending_contract_at && \Carbon\Carbon::parse($s->pending_contract_at)->isSameDay($today)
+            )->count();
             $user = User::where('name', $closerName)->first();
-            $team = Teams::RAVENS; // default
-            if ($user) {
-                if ($user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-                    $team = Teams::PEREGRINE;
-                }
-            }
-            
+            $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
+                ? Teams::PEREGRINE
+                : Teams::RAVENS;
+
             $sales_per_closer[] = [
-                'closer' => $closerName,
-                'today' => $todaySales,
-                'mtd' => $sales->count(),
+                'closer'      => $closerName,
+                'today'       => $todaySales,
+                'mtd'         => $sales->count(),
                 'approvedMTD' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
                 'declinedMTD' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
-                'uwMTD' => $sales->where('submission_status', Statuses::SUB_UNDERWRITING)->count(),
-                'team' => $team
+                'uwMTD'       => 0,
+                'team'        => $team,
             ];
         }
-        
-        // Sort by MTD sales descending
-        usort($sales_per_closer, function($a, $b) {
-            return $b['mtd'] - $a['mtd'];
-        });
-        
-        // Get team counts from users with roles
+        usort($sales_per_closer, fn($a, $b) => $b['mtd'] - $a['mtd']);
+
+        // ── Team counts ───────────────────────────────────────────
         $peregrine_count = User::role([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])
-            ->where('status', '!=', Statuses::USER_INACTIVE)
-            ->count();
+            ->where('status', '!=', Statuses::USER_INACTIVE)->count();
         $ravens_count = User::role(Roles::RAVENS_CLOSER)
-            ->where('status', '!=', Statuses::USER_INACTIVE)
-            ->count();
+            ->where('status', '!=', Statuses::USER_INACTIVE)->count();
 
-        // Chargebacks - Calculate from local database
-        $thisMonthStart = now()->startOfMonth();
-        $lastMonthStart = now()->subMonth()->startOfMonth();
-        $lastMonthEnd = now()->subMonth()->endOfMonth();
-        
-        $cb_this_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where('updated_at', '>=', $thisMonthStart)
-            ->count();
-        $cb_this_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where('updated_at', '>=', $thisMonthStart)
-            ->sum('monthly_premium') ?? 0;
-        
-        $cb_last_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
-            ->count();
-        $cb_last_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
-            ->sum('monthly_premium') ?? 0;
-
-        // Retention — matches RetentionController logic
-        $retention_cb = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
-        $retention_retained = Lead::where('retention_status', Statuses::RETENTION_RETAINED)->count();
-        $retention_pending = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where(function($q) {
-                $q->whereNull('retention_status')
-                  ->orWhere('retention_status', Statuses::RETENTION_PENDING);
+        // ── Manager Submission Breakdown — today PT ───────────────
+        $managerTodayLeads = Lead::where(function ($q) use ($today) {
+                $q->whereDate('pending_contract_at', $today)
+                  ->orWhereDate('declined_at', $today);
             })
+            ->whereNotNull('submission_by')
+            ->select('id', 'submission_by', 'pending_contract_at', 'declined_at', 'monthly_premium')
+            ->get();
+
+        $currentAction = function ($lead) {
+            if ($lead->pending_contract_at && $lead->declined_at) {
+                return $lead->pending_contract_at > $lead->declined_at ? 'pending_contract' : 'declined';
+            }
+            return $lead->pending_contract_at ? 'pending_contract' : 'declined';
+        };
+
+        $managerGroups = $managerTodayLeads->groupBy('submission_by');
+        $managerIds    = $managerGroups->keys()->filter()->toArray();
+        $managerUsers  = User::withTrashed()->whereIn('id', $managerIds)->get()->keyBy('id');
+
+        $manager_breakdown = $managerGroups->map(function ($group, $managerId) use ($managerUsers, $currentAction) {
+            $pending  = $group->filter(fn($l) => $currentAction($l) === 'pending_contract');
+            $declined = $group->filter(fn($l) => $currentAction($l) === 'declined');
+            $manager  = $managerUsers->get($managerId);
+
+            return [
+                'manager_name'     => $manager ? $manager->name : 'Unknown',
+                'pending_contract' => $pending->count(),
+                'declined'         => $declined->count(),
+                'total'            => $group->count(),
+                'total_premium'    => (float) $pending->sum('monthly_premium'),
+                'decline_rate'     => $group->count() > 0 ? round($declined->count() / $group->count() * 100) : 0,
+            ];
+        })->sortByDesc('total')->values()->toArray();
+
+        $mgr_total_pending  = collect($manager_breakdown)->sum('pending_contract');
+        $mgr_total_declined = collect($manager_breakdown)->sum('declined');
+        $mgr_total_premium  = collect($manager_breakdown)->sum('total_premium');
+
+        // ── Chargebacks ───────────────────────────────────────────
+        $thisMonthStart = now()->startOfMonth();
+        $lastMonthStart = now()->subMonthNoOverflow()->startOfMonth();
+        $lastMonthEnd   = now()->subMonthNoOverflow()->endOfMonth();
+
+        $cb_this_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where('updated_at', '>=', $thisMonthStart)->count();
+        $cb_this_amt   = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where('updated_at', '>=', $thisMonthStart)->sum('monthly_premium') ?? 0;
+
+        $cb_last_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])->count();
+        $cb_last_amt   = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])->sum('monthly_premium') ?? 0;
+
+        // ── Retention ─────────────────────────────────────────────
+        $retention_cb       = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
+        $retention_retained = Lead::where('retention_status', Statuses::RETENTION_RETAINED)->count();
+        $retention_pending  = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where(fn($q) => $q->whereNull('retention_status')
+                ->orWhere('retention_status', Statuses::RETENTION_PENDING))
             ->count();
-
-        // Financial overview
-        $financial = $bossData['financialOverview'] ?? [];
-        $financial_received = $financial['amountReceived'] ?? 0;
-        $financial_pending = $financial['totalPending'] ?? 0;
-        $financial_balance = $financial['amountReceived'] ?? 0;
-
-        // Agent revenue
-        $agent_revenue = $bossData['totalAgentRevenue']['combined'] ?? 0;
-        $avg_agent_revenue = $bossData['totalAgentRevenue']['avgPerAgent'] ?? 0;
-
-        // Per agent breakdown
-        $per_agent = $bossData['perAgent'] ?? [];
-
-        // Pending leads from local database with caching
-        $pending_leads_count = Cache::remember('dashboard_pending_leads_count', 60, function () {
-            return Lead::where('status', Statuses::LEAD_PENDING)->count();
-        });
-        $pending_leads = Cache::remember('dashboard_pending_leads', 60, function () {
-            return Lead::where('status', Statuses::LEAD_PENDING)->latest()->take(10)->get();
-        });
 
         return view('index', compact(
-            'users_count',
-            'total_sales_today',
-            'total_monthly_sales',
+            'today_sales',
+            'today_revenue',
+            'today_approved',
+            'today_declined',
+            'mtd_sales',
             'total_revenue',
+            'revenue_period_label',
+            'selected_period',
+            'revenue_by_carrier',
+            'revenue_total_submissions',
             'done_count',
             'approved_count',
-            'underwriting_count',
             'declined_count',
             'attendance',
             'present_count',
             'absent_count',
+            'total_attendance_count',
             'sales_per_closer',
             'peregrine_count',
             'ravens_count',
+            'manager_breakdown',
+            'mgr_total_pending',
+            'mgr_total_declined',
+            'mgr_total_premium',
             'cb_this_count',
             'cb_this_amt',
             'cb_last_count',
             'cb_last_amt',
             'retention_cb',
             'retention_retained',
-            'retention_pending',
-            'financial_received',
-            'financial_pending',
-            'financial_balance',
-            'agent_revenue',
-            'avg_agent_revenue',
-            'per_agent',
-            'pending_leads_count',
-            'pending_leads'
+            'retention_pending'
         ));
     }
 
@@ -329,230 +316,157 @@ class DashboardController extends Controller
      * Get KPI data for live dashboard updates (API endpoint)
      * Returns fresh KPI data without page layout
      */
-    public function getKpiData()
+    public function getKpiData(Request $request)
     {
-        // Get current month and today
         $today = today();
-        
-        // Sales counts using submission_status field and sale_at date (same as root method)
-        $total_sales_today = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->whereDate('sale_at', $today)
-            ->count();
-            
-        // Month-to-date sales (all submitted)
-        $total_monthly_sales = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->count();
-        
-        // Sales status counts by submission_status (MTD) - consistent with root method
-        $done_count = $total_monthly_sales; // Total submitted MTD
-        $approved_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->where('submission_status', Statuses::SUB_APPROVED)
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->count();
-            
-        $underwriting_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->where('submission_status', Statuses::SUB_UNDERWRITING)
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->count();
-            
-        $declined_count = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->where('submission_status', Statuses::SUB_DECLINED)
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->count();
 
-        // Attendance - Use local database
-        $usaToday = now()->toDateString();
+        // ── Period: accept ?period=YYYY-MM ───────────────────────
+        $periodParam = $request->get('period');
+        if ($periodParam && preg_match('/^\d{4}-\d{2}$/', $periodParam)) {
+            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->startOfMonth();
+        } else {
+            $anchor = $today->copy();
+        }
+        if ($anchor->day >= 3) {
+            $rev_start = $anchor->copy()->setDay(3)->startOfDay();
+            $rev_end   = $anchor->copy()->addMonthNoOverflow()->setDay(3)->endOfDay();
+        } else {
+            $rev_start = $anchor->copy()->subMonthNoOverflow()->setDay(3)->startOfDay();
+            $rev_end   = $anchor->copy()->setDay(3)->endOfDay();
+        }
+
+        $revLeads = Lead::whereNotNull('pending_contract_at')
+            ->whereDate('pending_contract_at', '>=', $rev_start)
+            ->whereDate('pending_contract_at', '<=', $rev_end)
+            ->get(['id', 'monthly_premium', 'closer_name', 'submission_status', 'pending_contract_at']);
+
+        $done_count     = $revLeads->count();
+        $total_revenue  = $revLeads->sum('monthly_premium');
+        $approved_count = $revLeads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $declined_count = $revLeads->where('submission_status', Statuses::SUB_DECLINED)->count();
+
+        // Today metrics (filter from MTD set)
+        $todayRevLeads  = $revLeads->filter(fn($l) =>
+            $l->pending_contract_at && \Carbon\Carbon::parse($l->pending_contract_at)->isSameDay($today)
+        );
+        $today_sales    = $todayRevLeads->count();
+        $today_revenue  = $todayRevLeads->sum('monthly_premium');
+        $today_approved = $todayRevLeads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $today_declined = $todayRevLeads->where('submission_status', Statuses::SUB_DECLINED)->count();
+
+        // Attendance
         $todayAttendances = \App\Models\Attendance::with('user')
-            ->whereDate('date', $usaToday)
+            ->whereDate('date', $today->toDateString())
             ->get();
-        
-        $attendance = $todayAttendances->map(function($att) {
-            return [
-                'name' => $att->user->name,
-                'status' => $att->status,
-            ];
-        })->toArray();
 
-        // Sales per closer - Calculate from local database (same as root method)
-        $closers = Lead::whereNotNull('closer_name')
-            ->whereNotNull('sale_at')
-            ->whereMonth('sale_at', now()->month)
-            ->whereYear('sale_at', now()->year)
-            ->get()
-            ->groupBy('closer_name');
-            
+        $attendance = $todayAttendances->map(fn($att) => [
+            'name'   => optional($att->user)->name ?? '—',
+            'status' => $att->status,
+        ])->toArray();
+
+        $present_count          = $todayAttendances->whereIn('status', [Statuses::ATTENDANCE_PRESENT, Statuses::ATTENDANCE_LATE])->count();
+        $total_attendance_count = $todayAttendances->count();
+
+        // Sales per closer (uses revLeads = 3rd→3rd period)
+        $closerGroupsKpi = $revLeads->filter(fn($l) => !empty($l->closer_name))->groupBy('closer_name');
+
         $sales_per_closer = [];
-        foreach ($closers as $closerName => $sales) {
-            $todaySales = $sales->filter(function($sale) use ($today) {
-                return $sale->sale_at && $sale->sale_at->isSameDay($today);
-            })->count();
-            
-            // Get user to determine team
+        foreach ($closerGroupsKpi as $closerName => $sales) {
+            $todaySalesKpi = $sales->filter(fn($s) =>
+                $s->pending_contract_at && \Carbon\Carbon::parse($s->pending_contract_at)->isSameDay($today)
+            )->count();
             $user = User::where('name', $closerName)->first();
-            $team = Teams::RAVENS; // default
-            if ($user) {
-                if ($user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-                    $team = Teams::PEREGRINE;
-                }
-            }
-            
-            // Count statuses
-            $approvedSales = $sales->where('submission_status', Statuses::SUB_APPROVED)->count();
-            $declinedSales = $sales->where('submission_status', Statuses::SUB_DECLINED)->count();
-            $uwSales = $sales->where('submission_status', Statuses::SUB_UNDERWRITING)->count();
-            
+            $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
+                ? Teams::PEREGRINE : Teams::RAVENS;
+
             $sales_per_closer[] = [
-                'closer' => $closerName,
-                'today' => $todaySales,
-                'mtd' => $sales->count(),
-                'approved' => $approvedSales,
-                'declined' => $declinedSales,
-                'uw' => $uwSales,
-                'team' => $team
+                'closer'   => $closerName,
+                'today'    => $todaySalesKpi,
+                'mtd'      => $sales->count(),
+                'approved' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
+                'declined' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
+                'uw'       => 0,
+                'team'     => $team,
             ];
         }
-        
-        // Sort by MTD sales descending
-        usort($sales_per_closer, function($a, $b) {
-            return $b['mtd'] - $a['mtd'];
-        });
+        usort($sales_per_closer, fn($a, $b) => $b['mtd'] - $a['mtd']);
+
+        // Manager breakdown today
+        $managerTodayLeads = Lead::where(fn($q) => $q->whereDate('pending_contract_at', $today)
+                ->orWhereDate('declined_at', $today))
+            ->whereNotNull('submission_by')
+            ->select('id', 'submission_by', 'pending_contract_at', 'declined_at', 'monthly_premium')
+            ->get();
+
+        $currentAction = function ($lead) {
+            if ($lead->pending_contract_at && $lead->declined_at) {
+                return $lead->pending_contract_at > $lead->declined_at ? 'pending_contract' : 'declined';
+            }
+            return $lead->pending_contract_at ? 'pending_contract' : 'declined';
+        };
+
+        $managerGroups = $managerTodayLeads->groupBy('submission_by');
+        $managerIds    = $managerGroups->keys()->filter()->toArray();
+        $managerUsers  = User::withTrashed()->whereIn('id', $managerIds)->get()->keyBy('id');
+
+        $manager_breakdown = $managerGroups->map(function ($group, $managerId) use ($managerUsers, $currentAction) {
+            $pending  = $group->filter(fn($l) => $currentAction($l) === 'pending_contract');
+            $declined = $group->filter(fn($l) => $currentAction($l) === 'declined');
+            $manager  = $managerUsers->get($managerId);
+            return [
+                'manager_name'     => $manager ? $manager->name : 'Unknown',
+                'pending_contract' => $pending->count(),
+                'declined'         => $declined->count(),
+                'total'            => $group->count(),
+                'total_premium'    => (float) $pending->sum('monthly_premium'),
+                'decline_rate'     => $group->count() > 0 ? round($declined->count() / $group->count() * 100) : 0,
+            ];
+        })->sortByDesc('total')->values()->toArray();
 
         // Chargebacks
         $thisMonthStart = now()->startOfMonth();
-        $lastMonthStart = now()->subMonth()->startOfMonth();
-        $lastMonthEnd = now()->subMonth()->endOfMonth();
-        
-        $cb_this_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where('updated_at', '>=', $thisMonthStart)
-            ->count();
-        $cb_this_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where('updated_at', '>=', $thisMonthStart)
-            ->sum('monthly_premium') ?? 0;
-        
-        $cb_last_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
-            ->count();
-        $cb_last_amt = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
-            ->sum('monthly_premium') ?? 0;
+        $lastMonthStart = now()->subMonthNoOverflow()->startOfMonth();
+        $lastMonthEnd   = now()->subMonthNoOverflow()->endOfMonth();
 
-        // Retention — matches RetentionController logic
-        $retention_cb = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
+        $cb_this_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)->where('updated_at', '>=', $thisMonthStart)->count();
+        $cb_this_amt   = Lead::where('status', Statuses::LEAD_CHARGEBACK)->where('updated_at', '>=', $thisMonthStart)->sum('monthly_premium') ?? 0;
+        $cb_last_count = Lead::where('status', Statuses::LEAD_CHARGEBACK)->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])->count();
+        $cb_last_amt   = Lead::where('status', Statuses::LEAD_CHARGEBACK)->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])->sum('monthly_premium') ?? 0;
+
+        // Retention
+        $retention_cb       = Lead::where('status', Statuses::LEAD_CHARGEBACK)->count();
         $retention_retained = Lead::where('retention_status', Statuses::RETENTION_RETAINED)->count();
-        $retention_pending = Lead::where('status', Statuses::LEAD_CHARGEBACK)
-            ->where(function($q) {
-                $q->whereNull('retention_status')
-                  ->orWhere('retention_status', Statuses::RETENTION_PENDING);
-            })
+        $retention_pending  = Lead::where('status', Statuses::LEAD_CHARGEBACK)
+            ->where(fn($q) => $q->whereNull('retention_status')->orWhere('retention_status', Statuses::RETENTION_PENDING))
             ->count();
 
-        // Calculate revenue from issued and approved sales (same logic as root method)
-        // Use agent_revenue (calculated commission) with fallback to monthly_premium
-        $issued_sales = Lead::where('status', Statuses::LEAD_ACCEPTED)
-            ->where('submission_status', Statuses::SUB_APPROVED)
-            ->where('issuance_status', Statuses::ISSUANCE_ISSUED)
-            ->get();
-            
-        $total_revenue = $issued_sales->sum(function($lead) {
-            return $lead->agent_revenue ?? $lead->monthly_premium ?? 0;
-        });
-
-        // Return as JSON for AJAX updates
         return response()->json([
-            'success' => true,
-            'timestamp' => now()->toIso8601String(),
-            'totalSalesToday' => $total_sales_today,
-            'done' => $done_count,
-            'approved' => $approved_count,
-            'underwriting' => $underwriting_count,
-            'declined' => $declined_count,
-            'totalRevenue' => $total_revenue,
-            'attendance' => $attendance,
-            'salesPerCloser' => $sales_per_closer,
+            'success'            => true,
+            'timestamp'          => now()->toIso8601String(),
+            'revPeriodLabel'     => $rev_start->format('M j') . ' → ' . $rev_end->format('M j'),
+            'done'               => $done_count,
+            'approved'           => $approved_count,
+            'declined'           => $declined_count,
+            'totalRevenue'       => $total_revenue,
+            'todaySales'         => $today_sales,
+            'todayRevenue'       => $today_revenue,
+            'todayApproved'      => $today_approved,
+            'todayDeclined'      => $today_declined,
+            'attendance'         => $attendance,
+            'presentCount'       => $present_count,
+            'totalAttendance'    => $total_attendance_count,
+            'salesPerCloser'     => $sales_per_closer,
+            'managerBreakdown'   => $manager_breakdown,
             'chargebacks' => [
-                'thisMonth' => [
-                    'count' => $cb_this_count,
-                    'amount' => $cb_this_amt
-                ],
-                'lastMonth' => [
-                    'count' => $cb_last_count,
-                    'amount' => $cb_last_amt
-                ]
+                'thisMonth' => ['count' => $cb_this_count, 'amount' => $cb_this_amt],
+                'lastMonth' => ['count' => $cb_last_count, 'amount' => $cb_last_amt],
             ],
             'retention' => [
-                'cb' => $retention_cb,
+                'cb'       => $retention_cb,
                 'retained' => $retention_retained,
-                'pending' => $retention_pending
-            ]
+                'pending'  => $retention_pending,
+            ],
         ]);
-    }
-
-    /**
-     * Fetch data from boss's dashboard endpoint with caching
-     */
-    private function fetchBossDashboardData()
-    {
-        try {
-            return Cache::remember('boss_dashboard_data', $this->cacheDuration, function () {
-                $response = Http::timeout(30)
-                    ->withHeaders(['Accept' => 'application/json'])
-                    ->get($this->bossEndpoint);
-
-                if ($response->successful()) {
-                    return $response->json();
-                }
-
-                // Return empty array if request fails
-                \Log::warning('Failed to fetch boss dashboard data', [
-                    'status' => $response->status(),
-                    'error' => $response->body()
-                ]);
-
-                return [];
-            });
-        } catch (\Exception $e) {
-            \Log::error('Boss dashboard fetch error', [
-                'error' => $e->getMessage()
-            ]);
-
-            return [];
-        }
-    }
-
-    /**
-     * Count present employees
-     */
-    private function countPresent($attendance)
-    {
-        if (!is_array($attendance)) return 0;
-
-        return collect($attendance)->filter(function($att) {
-            $status = strtolower($att['status'] ?? '');
-            return in_array($status, ['present', 'p', 'on time', 'ontime', 'late', 'half day']);
-        })->count();
-    }
-
-    /**
-     * Count absent employees
-     */
-    private function countAbsent($attendance)
-    {
-        if (!is_array($attendance)) return 0;
-
-        return collect($attendance)->filter(function($att) {
-            $status = strtolower($att['status'] ?? '');
-            return in_array($status, ['absent', 'a']);
-        })->count();
     }
 
     /**

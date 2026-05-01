@@ -2079,67 +2079,12 @@ async function selectConversation(conversationId, conversationName, element) {
         const conversationItem = element.closest ? element.closest('.conversation-item') : element;
         if (conversationItem) {
             conversationItem.classList.add('active');
-            // Clear unread badge when opening conversation
-            const badge = conversationItem.querySelector('.unread-badge');
-            if (badge) badge.remove();
         }
     }
 
     // Load messages
     await loadMessages(conversationId, conversationName);
 }
-
-// Called by chat-notifications.js poll when new messages arrive from any conversation
-window._chatUIUpdate = function(msg) {
-    const convId = msg.conversation_id;
-    if (!convId) return;
-
-    const isCurrentConv = (String(convId) === String(window.currentConversationId));
-
-    if (isCurrentConv) {
-        // Current conversation open — trigger immediate refresh so message appears
-        // without waiting for the 5-second interval (Echo is primary; this is the fallback)
-        if (!window._sendingMessage && typeof refreshMessages === 'function') {
-            refreshMessages();
-        }
-        return;
-    }
-
-    // Different conversation — update sidebar item
-    const listEl = document.getElementById('conversationsList');
-    if (!listEl) return;
-
-    const item = listEl.querySelector(`.conversation-item[data-conv-id="${convId}"]`);
-    if (item) {
-        // Update preview text with sender prefix
-        const preview = item.querySelector('.conversation-preview');
-        if (preview) {
-            const firstName = msg.sender_name ? msg.sender_name.split(' ')[0] + ': ' : '';
-            preview.textContent = (firstName + (msg.message || '📎 Attachment')).substring(0, 42) + '...';
-        }
-        // Update timestamp
-        const time = item.querySelector('.conversation-time');
-        if (time) time.textContent = 'Just now';
-        // Increment unread badge
-        let badge = item.querySelector('.unread-badge');
-        if (!badge) {
-            badge = document.createElement('span');
-            badge.className = 'unread-badge';
-            item.appendChild(badge);
-        }
-        badge.textContent = (parseInt(badge.textContent) || 0) + 1;
-        // Move conversation to top of list
-        const sectionLabel = listEl.querySelector('.sidebar-section-label');
-        if (sectionLabel && sectionLabel.nextSibling) {
-            listEl.insertBefore(item, sectionLabel.nextSibling);
-        } else {
-            listEl.prepend(item);
-        }
-    } else {
-        // Conversation not rendered yet — reload the sidebar
-        if (typeof loadConversations === 'function') loadConversations();
-    }
-};
 
 // Load messages
 async function loadMessages(conversationId, conversationName) {
@@ -2467,12 +2412,15 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     let typingWhisperActive = false;
     if (msgInputEl) {
         msgInputEl.addEventListener('input', () => {
-            if (echoInstance && window.currentConversationId && !typingWhisperActive) {
+            if (!typingWhisperActive && window.currentConversationId) {
                 typingWhisperActive = true;
-                try {
-                    echoInstance.private(`chat.conversation.${window.currentConversationId}`)
-                        .whisper('typing', { name: window.currentUserName });
-                } catch(e) { console.warn('Typing whisper error:', e); }
+                initEcho().then(echo => {
+                    if (!echo) return;
+                    try {
+                        echo.private(`chat.conversation.${window.currentConversationId}`)
+                            .whisper('typing', { name: window.currentUserName });
+                    } catch(e) { console.warn('[Echo] Typing whisper error:', e); }
+                });
             }
             clearTimeout(typingWhisperTimer);
             typingWhisperTimer = setTimeout(() => { typingWhisperActive = false; }, 2500);
@@ -2790,8 +2738,9 @@ function renderMessages(messages) {
             ? `<img src="${userAvatar}" alt="${userName}" class="message-avatar">` 
             : `<div class="message-avatar">${userName.charAt(0).toUpperCase()}</div>`;
         html += `
-        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}" data-message-id="${msg.id}" style="position: relative;">
+        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}" data-message-id="${msg.id}">
             ${!isSender ? avatarHtml : ''}
+            <div class="message-bubble-wrap">
             <div class="message-content">
                 ${!isSender ? `<div class="message-username">${userName}</div>` : ''}
                 ${msg.forwarded_from_user_name ? `<div class="message-forwarded" style="font-size:.7rem;color:#8b5cf6;margin-bottom:4px;"><i class="bx bx-share" style="font-size:.7rem;"></i> Forwarded from <strong>${escapeHtml(msg.forwarded_from_user_name)}</strong></div>` : ''}
@@ -2872,21 +2821,22 @@ function renderMessages(messages) {
                 ` : ''}
                 <div class="message-time">${messageTime}${isSender ? `<span class="msg-ticks ${msg.is_read ? 'ticks-read' : ''}"><i class="bx ${msg.is_read ? 'bx-check-double' : 'bx-check'}"></i></span><span data-ts="${msg.created_at}" style="display:none"></span>` : ''}</div>
                 ${renderReactionPills(msg.reactions || [], msg.id, isSender)}
-                ${isSender ? `
-                <div class="message-actions">
-                    <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
-                    <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
-                    <button onclick="startEditMessage(${msg.id}, ${JSON.stringify(msg.message || '').replace(/"/g, '&quot;')})" title="Edit"><i class="bx bx-edit-alt"></i></button>
-                    <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
-                    <button onclick="togglePin(${msg.id})" title="${msg.is_pinned ? 'Unpin' : 'Pin'}"><i class="bx bx-pin"></i></button>
-                    <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
-                </div>` : `
-                <div class="message-actions">
-                    <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
-                    <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
-                    <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
-                    <button onclick="togglePin(${msg.id})" title="${msg.is_pinned ? 'Unpin' : 'Pin'}"><i class="bx bx-pin"></i></button>
-                </div>`}
+            </div>
+            ${isSender ? `
+            <div class="message-actions">
+                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
+                <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
+                <button onclick="startEditMessage(${msg.id}, ${JSON.stringify(msg.message || '').replace(/"/g, '&quot;')})" title="Edit"><i class="bx bx-edit-alt"></i></button>
+                <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
+                <button onclick="togglePin(${msg.id})" title="${msg.is_pinned ? 'Unpin' : 'Pin'}"><i class="bx bx-pin"></i></button>
+                <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
+            </div>` : `
+            <div class="message-actions">
+                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
+                <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
+                <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
+                <button onclick="togglePin(${msg.id})" title="${msg.is_pinned ? 'Unpin' : 'Pin'}"><i class="bx bx-pin"></i></button>
+            </div>`}
             </div>
         </div>
     `;
@@ -2964,11 +2914,21 @@ async function refreshMessages() {
             messagesEl.scrollTop = messagesEl.scrollHeight;
             window.lastRenderedMessageId = messages[messages.length - 1].id;
         } else if (isDelta) {
-            // Delta response: all returned messages are new — just append
-            const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
-            const frag = document.createRange().createContextualFragment(renderMessages(messages));
-            messagesEl.appendChild(frag);
-            if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+            // Delta response: skip messages already in DOM, and skip own messages
+            // still in-flight (optimistic bubble present) to avoid race-condition duplicates
+            const newMessages = messages.filter(m => {
+                if (messagesEl.querySelector(`[data-message-id="${m.id}"]`)) return false;
+                // If we're mid-send and this is our own message, let sendMessage handle it
+                if (window._sendingMessage && m.user_id === window.currentUserId) return false;
+                return true;
+            });
+            if (newMessages.length > 0) {
+                const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
+                const frag = document.createRange().createContextualFragment(renderMessages(newMessages));
+                messagesEl.appendChild(frag);
+                if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            // Always advance the cursor to the highest ID returned
             window.lastRenderedMessageId = messages[messages.length - 1].id;
             if (typeof window.lastMessageId === 'undefined') window.lastMessageId = 0;
             const latest = messages[messages.length - 1];
@@ -2987,7 +2947,10 @@ async function refreshMessages() {
                 window.lastRenderedMessageId = messages[messages.length - 1].id;
             } else {
                 // Append only new messages (these will animate in naturally)
-                const newMessages = messages.filter(m => m.id > window.lastRenderedMessageId);
+                const newMessages = messages.filter(m =>
+                    m.id > window.lastRenderedMessageId &&
+                    !messagesEl.querySelector(`[data-message-id="${m.id}"]`)
+                );
                 if (newMessages.length > 0) {
                     const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
                     const frag = document.createRange().createContextualFragment(renderMessages(newMessages));
@@ -3022,11 +2985,11 @@ async function deleteMessage(messageId) {
         const el = document.querySelector(`.message-item[data-message-id="${messageId}"]`);
         if (el) el.remove();
         // Whisper to other participants so they see it removed instantly
-        if (echoInstance && window.currentConversationId) {
-            try {
-                echoInstance.private(`chat.conversation.${window.currentConversationId}`)
-                    .whisper('message_action', { type: 'delete', id: messageId });
-            } catch(e) {}
+        if (window.currentConversationId) {
+            initEcho().then(echo => {
+                if (!echo) return;
+                try { echo.private(`chat.conversation.${window.currentConversationId}`).whisper('message_action', { type: 'delete', id: messageId }); } catch(e) {}
+            });
         }
         loadConversations();
     } catch (error) {
@@ -3086,11 +3049,11 @@ async function saveEditMessage() {
             }
         }
         // Whisper edit to others
-        if (echoInstance && window.currentConversationId) {
-            try {
-                echoInstance.private(`chat.conversation.${window.currentConversationId}`)
-                    .whisper('message_action', { type: 'edit', id: messageId, text: newText });
-            } catch(e) {}
+        if (window.currentConversationId) {
+            initEcho().then(echo => {
+                if (!echo) return;
+                try { echo.private(`chat.conversation.${window.currentConversationId}`).whisper('message_action', { type: 'edit', id: messageId, text: newText }); } catch(e) {}
+            });
         }
     } catch (error) {
         console.error('Error editing message:', error);
@@ -3391,6 +3354,10 @@ async function sendMessage() {
             // Update the optimistic element in-place (most reliable)
             const optEl = document.querySelector(`[data-optimistic-id="${optimisticId}"]`);
             if (optEl) {
+                // Remove any copy the poll may have race-appended before we responded
+                if (messagesEl) {
+                    messagesEl.querySelectorAll(`[data-message-id="${msg.id}"]`).forEach(el => el.remove());
+                }
                 optEl.setAttribute('data-message-id', msg.id);
                 optEl.removeAttribute('data-optimistic-id');
                 optEl.style.opacity = '1';
@@ -3695,138 +3662,140 @@ window.addEventListener('beforeunload', () => {
 });
 
 // -------------------------
-// Laravel Echo (Pusher) setup for self-hosted laravel-websockets
-// This uses CDN scripts (pusher-js + laravel-echo) so you don't have to
-// install npm packages immediately. It is safe if broadcasting isn't
-// configured — the code will try to initialize Echo and silently fail.
+// Laravel Echo + Reverb real-time setup
 // -------------------------
 
-// Configuration from environment (100% local Reverb, no Pusher)
-// Use var to prevent "already declared" errors if script is loaded twice
 if (typeof echoConfig === 'undefined') {
     var echoConfig = {!! json_encode([
-        'key' => env('REVERB_APP_KEY', ''),
-        'host' => env('REVERB_HOST', '127.0.0.1'),
-        'port' => intval(env('REVERB_PORT', 8080)),
-        'scheme' => env('REVERB_SCHEME', 'http'),
+        'key'      => env('REVERB_APP_KEY', ''),
+        'host'     => env('REVERB_HOST', '127.0.0.1'),
+        'port'     => intval(env('REVERB_PORT', 8080)),
+        'scheme'   => env('REVERB_SCHEME', 'http'),
         'forceTLS' => env('REVERB_SCHEME', 'http') === 'https',
     ]) !!};
 }
 
-// Prevent redeclaration if script loads multiple times
-if (typeof echoInstance === 'undefined') {
-    var echoInstance = null;
-}
-if (typeof subscribedChannel === 'undefined') {
-    var subscribedChannel = null;
-}
+if (typeof echoInstance === 'undefined') { var echoInstance = null; }
+if (typeof subscribedChannel === 'undefined') { var subscribedChannel = null; }
 
+// Returns a Promise that resolves when Echo is fully initialised.
+// Calling initEcho() multiple times is safe — returns the same promise.
+var _echoInitPromise = null;
 function initEcho() {
-    // Load Pusher and Echo from CDN if not already present
+    if (_echoInitPromise) return _echoInitPromise;
+    if (!echoConfig.key) return Promise.resolve(null);
+
     function loadScript(src) {
         return new Promise((resolve, reject) => {
-            if (document.querySelector(`script[src="${src}"]`)) return resolve();
+            if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
             const s = document.createElement('script');
-            s.src = src;
-            s.onload = resolve;
-            s.onerror = reject;
+            s.src = src; s.onload = resolve; s.onerror = reject;
             document.head.appendChild(s);
         });
     }
 
-    // Only attempt if a key exists
-    if (!echoConfig.key) return;
-
-    // If Echo already initialized, return
-    if (window.Echo || echoInstance) return;
-
-    Promise.resolve()
-        .then(() => loadScript('https://js.pusher.com/8.4.0/pusher.min.js'))
+    _echoInitPromise = loadScript('https://js.pusher.com/8.4.0/pusher.min.js')
         .then(() => loadScript('https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js'))
         .then(() => {
-            try {
-                echoInstance = new Echo({
-                    broadcaster: 'reverb',
-                    key: echoConfig.key,
-                    wsHost: echoConfig.host,
-                    wsPort: echoConfig.port,
-                    wssPort: echoConfig.port,
-                    forceTLS: echoConfig.forceTLS,
-                    enabledTransports: ['ws', 'wss'],
-                });
-                console.log('Echo initialized successfully with Reverb');
-            } catch (e) {
-                console.warn('Echo initialization failed', e);
-            }
+            if (echoInstance) return echoInstance;
+            echoInstance = new Echo({
+                broadcaster:        'reverb',
+                key:                echoConfig.key,
+                wsHost:             echoConfig.host,
+                wsPort:             echoConfig.port,
+                wssPort:            echoConfig.port,
+                forceTLS:           echoConfig.forceTLS,
+                enabledTransports:  ['ws', 'wss'],
+                authEndpoint:       '/broadcasting/auth',
+                auth: { headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                }},
+            });
+            console.log('[Echo] Initialized');
+            return echoInstance;
         })
-        .catch(err => console.warn('Failed to load Echo/Pusher scripts', err));
+        .catch(err => { console.warn('[Echo] Init failed:', err); return null; });
+
+    return _echoInitPromise;
 }
 
 function subscribeToConversation(conversationId) {
-    if (!echoInstance) initEcho();
-
-    // Unsubscribe previous
-    try {
-        if (subscribedChannel && echoInstance) {
-            echoInstance.leave(`chat.conversation.${subscribedChannel}`);
-        }
-    } catch (e) { /* ignore */ }
-
+    // Unsubscribe previous channel immediately (sync, best-effort)
+    if (subscribedChannel && echoInstance) {
+        try { echoInstance.leave(`chat.conversation.${subscribedChannel}`); } catch(e) {}
+    }
     subscribedChannel = conversationId;
 
-    // Wait until Echo is ready
-    const waitForEcho = setInterval(() => {
-        if (!echoInstance) return;
-
-        clearInterval(waitForEcho);
+    initEcho().then(echo => {
+        if (!echo) { console.warn('[Echo] Not available, real-time disabled'); return; }
+        if (subscribedChannel !== conversationId) return; // conversation changed while waiting
 
         try {
-            // Subscribe to the private channel using the correct channel name from MessageSent event
-            echoInstance.private(`chat.conversation.${conversationId}`)
-                .subscribed(() => {
-                    console.log(`[Echo] Subscribed to chat.conversation.${conversationId}`);
-                })
-                .error((err) => {
-                    console.error(`[Echo] Channel auth error for chat.conversation.${conversationId}:`, err);
-                })
+            echo.private(`chat.conversation.${conversationId}`)
+                .subscribed(() => console.log(`[Echo] Subscribed to chat.conversation.${conversationId}`))
+                .error(err  => console.error(`[Echo] Auth error for chat.conversation.${conversationId}:`, err))
+
                 .listen('.message.sent', (e) => {
-                    // Received a new message — append if same conversation
                     if (conversationId !== window.currentConversationId) return;
+                    const newId = e.id;
+                    if (!newId) return;
 
-                    const newId = e.id || e.message?.id;
-                    // Skip messages we already rendered (e.g. our own optimistic render)
-                    if (newId && newId <= (window.lastRenderedMessageId || 0)) return;
+                    const messagesEl = document.getElementById('chatMessages');
+                    if (!messagesEl) return;
 
-                    if (e.user && e.user.id !== window.currentUserId) {
-                        // Other user's message — append directly
-                        const msgData = e;
-                        const messagesEl = document.getElementById('chatMessages');
-                        if (messagesEl && msgData) {
-                            // Guard: skip if already in DOM
-                            if (messagesEl.querySelector(`[data-message-id="${newId}"]`)) return;
-                            const placeholder = messagesEl.querySelector('.no-messages');
-                            if (placeholder) placeholder.remove();
-                            const tmp = document.createElement('div');
-                            tmp.innerHTML = renderMessages([msgData]);
-                            while (tmp.firstChild) messagesEl.appendChild(tmp.firstChild);
-                            messagesEl.scrollTop = messagesEl.scrollHeight;
-                            if (newId) window.lastRenderedMessageId = Math.max(window.lastRenderedMessageId || 0, newId);
-                        }
-                        // Notify if window not focused
-                        if (!document.hasFocus() && window.ChatNotify?.playSound) {
-                            window.ChatNotify.playSound();
-                        }
-                    } else if (newId) {
-                        // Our own message — just update the lastRenderedMessageId
+                    // Always skip if already in DOM (covers optimistic & poll duplicates)
+                    if (messagesEl.querySelector(`[data-message-id="${newId}"]`)) {
                         window.lastRenderedMessageId = Math.max(window.lastRenderedMessageId || 0, newId);
+                        return;
                     }
+
+                    // Own message still in-flight as optimistic bubble — let sendMessage handle
+                    if (window._sendingMessage && e.user_id === window.currentUserId) {
+                        window.lastRenderedMessageId = Math.max(window.lastRenderedMessageId || 0, newId);
+                        return;
+                    }
+
+                    // Append new message from other user
+                    const placeholder = messagesEl.querySelector('.no-messages');
+                    if (placeholder) placeholder.remove();
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = renderMessages([e]);
+                    const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 60;
+                    while (tmp.firstChild) messagesEl.appendChild(tmp.firstChild);
+                    if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+                    window.lastRenderedMessageId = Math.max(window.lastRenderedMessageId || 0, newId);
+
+                    // Remove typing indicator if visible
+                    const tr = document.getElementById('typingIndicatorRow');
+                    if (tr) tr.remove();
+
+                    // Play sound if window not focused
+                    if (!document.hasFocus() && window.ChatNotify?.playSound) window.ChatNotify.playSound();
                 })
+
                 .listenForWhisper('typing', (e) => {
-                    if (e.name && e.name !== window.currentUserName &&
-                        conversationId === window.currentConversationId) {
-                        showTypingIndicator(e.name);
-                    }
+                    if (!e.name || e.name === window.currentUserName) return;
+                    if (conversationId !== window.currentConversationId) return;
+                    showTypingIndicator(e.name);
                 })
+
+                .listen('.message.read', (e) => {
+                    // Other user read the conversation — update all our sent ticks to double-blue
+                    if (conversationId !== window.currentConversationId) return;
+                    const readAt = new Date(e.read_at);
+                    const messagesEl = document.getElementById('chatMessages');
+                    if (!messagesEl) return;
+                    messagesEl.querySelectorAll('.message-item.message-sender[data-message-id]').forEach(el => {
+                        const tickEl = el.querySelector('.msg-ticks');
+                        if (!tickEl || tickEl.classList.contains('ticks-read')) return;
+                        const tsEl = el.querySelector('[data-ts]');
+                        if (tsEl && new Date(tsEl.getAttribute('data-ts')) <= readAt) {
+                            tickEl.classList.add('ticks-read');
+                            tickEl.innerHTML = '<i class="bx bx-check-double"></i>';
+                        }
+                    });
+                })
+
                 .listenForWhisper('message_action', (e) => {
                     if (conversationId !== window.currentConversationId) return;
                     if (e.type === 'delete') {
@@ -3845,18 +3814,15 @@ function subscribeToConversation(conversationId) {
                     }
                 });
         } catch (e) {
-            console.warn('Failed to subscribe to conversation channel', e);
+            console.warn('[Echo] Subscribe failed:', e);
         }
-    }, 200);
+    });
 }
 
 // Subscribe to community announcement channels
 let subscribedCommunityChannels = [];
 
 function subscribeToCommunityAnnouncements(communityIdOrArray) {
-    if (!echoInstance) initEcho();
-    
-    // Handle both single ID and array of communities
     let communityIds = [];
     if (typeof communityIdOrArray === 'number') {
         communityIds = [communityIdOrArray];
@@ -3865,13 +3831,10 @@ function subscribeToCommunityAnnouncements(communityIdOrArray) {
     } else {
         return;
     }
-    
     if (communityIds.length === 0) return;
 
-    // Wait until Echo is ready
-    const waitForEcho = setInterval(() => {
-        if (!echoInstance) return;
-        clearInterval(waitForEcho);
+    initEcho().then(echo => {
+        if (!echo) return;
 
         try {
             // Subscribe to each community's announcement channel

@@ -349,7 +349,12 @@ class ChatController extends Controller
                 ->first();
 
             if ($participant) {
-                $participant->update(['last_read_at' => now()]);
+                $readAt = now();
+                $participant->update(['last_read_at' => $readAt]);
+                // Broadcast read receipt to other participants so sender sees double ticks instantly
+                try {
+                    broadcast(new \App\Events\MessageRead($conversationId, $userId, $readAt->toISOString()))->toOthers();
+                } catch (\Throwable $e) { /* non-critical */ }
             }
         }
 
@@ -400,25 +405,15 @@ class ChatController extends Controller
      */
     public function sendMessage(Request $request)
     {
-        // Log the incoming request data for debugging
-        \Log::info('SendMessage Request Data', [
-            'conversation_id' => $request->conversation_id,
-            'message' => $request->message,
-            'has_attachments' => $request->hasFile('attachments'),
-            'all_data' => $request->all(),
-            'user_id' => Auth::id()
-        ]);
-
         try {
             $request->validate([
                 'conversation_id' => 'required|exists:chat_conversations,id',
-                'message' => 'nullable|string|max:5000', // Changed to nullable for files-only messages
+                'message' => 'nullable|string|max:5000',
                 'attachments' => 'nullable|array',
-                'attachments.*' => 'file|max:10240', // 10MB max per file
+                'attachments.*' => 'file|max:10240',
                 'reply_to_id' => 'nullable|integer|exists:chat_messages,id',
             ]);
-            
-            // Additional validation: require either message or attachments
+
             if (empty($request->message) && (!$request->hasFile('attachments') || count($request->file('attachments')) === 0)) {
                 return response()->json([
                     'success' => false,
@@ -426,11 +421,6 @@ class ChatController extends Controller
                 ], 422);
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('SendMessage Validation Failed', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all(),
-                'user_id' => Auth::id()
-            ]);
             throw $e;
         }
 

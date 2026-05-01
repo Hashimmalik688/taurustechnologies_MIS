@@ -153,12 +153,6 @@
                 if (notifiedIds[msg.id]) continue; // Already notified
 
                 notifiedIds[msg.id] = true;
-
-                // Update chat page UI (sidebar + open conversation) if on chat page
-                if (typeof window._chatUIUpdate === 'function') {
-                    window._chatUIUpdate(msg);
-                }
-
                 showDesktopNotification(
                     msg.sender_name,
                     msg.message,
