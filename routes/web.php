@@ -1076,6 +1076,16 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
     Route::get('/users', [ChatController::class, 'getUsers']);
     Route::get('/search', [ChatController::class, 'search']);
+
+    // Online presence
+    Route::post('/heartbeat', [ChatController::class, 'heartbeat']);
+
+    // Message reactions
+    Route::post('/messages/{messageId}/react', [ChatController::class, 'react']);
+
+    // Pin / unpin messages
+    Route::post('/messages/{messageId}/pin', [ChatController::class, 'pinMessage']);
+    Route::delete('/messages/{messageId}/pin', [ChatController::class, 'unpinMessage']);
 });
 
 // Chargebacks — access controlled by role.permission:chargebacks,view

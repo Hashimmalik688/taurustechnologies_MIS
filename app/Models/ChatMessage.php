@@ -18,12 +18,16 @@ class ChatMessage extends Model
         'is_edited',
         'forwarded_from_message_id',
         'forwarded_from_user_name',
+        'reply_to_id',
+        'is_pinned',
+        'pinned_by',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'is_edited' => 'boolean',
+        'is_edited'  => 'boolean',
+        'is_pinned'  => 'boolean',
     ];
 
     protected $with = ['user', 'attachments'];
@@ -50,6 +54,22 @@ class ChatMessage extends Model
     public function attachments()
     {
         return $this->hasMany(ChatAttachment::class, 'message_id');
+    }
+
+    /**
+     * Get the message this one is replying to
+     */
+    public function replyTo()
+    {
+        return $this->belongsTo(ChatMessage::class, 'reply_to_id')->with('user:id,name');
+    }
+
+    /**
+     * Get reactions for this message
+     */
+    public function reactions()
+    {
+        return $this->hasMany(ChatMessageReaction::class, 'message_id');
     }
 
     /**

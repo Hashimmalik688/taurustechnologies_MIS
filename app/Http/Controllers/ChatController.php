@@ -39,12 +39,28 @@ class ChatController extends Controller
             $query->where('user_id', $userId);
         })
             ->where('type', 'direct') // Only show direct conversations in Messages list
-            ->with(['latestMessage.user', 'users', 'participants' => function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            }])
+            ->with(['latestMessage.user', 'users', 'participants'])
             ->latest('updated_at')
-            ->get()
-            ->map(function ($conversation) use ($userId) {
+            ->get();
+
+        // Single-query unread counts for all conversations (avoids N+1)
+        $unreadCounts = \Illuminate\Support\Facades\DB::table('chat_messages')
+            ->join('chat_participants', function ($join) use ($userId) {
+                $join->on('chat_participants.conversation_id', '=', 'chat_messages.conversation_id')
+                     ->where('chat_participants.user_id', $userId);
+            })
+            ->whereIn('chat_messages.conversation_id', $conversations->pluck('id'))
+            ->where('chat_messages.user_id', '!=', $userId)
+            ->whereNull('chat_messages.deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('chat_participants.last_read_at')
+                  ->orWhereColumn('chat_messages.created_at', '>', 'chat_participants.last_read_at');
+            })
+            ->selectRaw('chat_messages.conversation_id, COUNT(*) as cnt')
+            ->groupBy('chat_messages.conversation_id')
+            ->pluck('cnt', 'chat_messages.conversation_id');
+
+        $conversations = $conversations->map(function ($conversation) use ($userId, $unreadCounts) {
                 // Get other participants (for direct chats, show the other person's name)
                 $otherUsers = $conversation->users->filter(fn($user) => $user->id !== $userId);
                 $otherUser = $otherUsers->first();
@@ -66,12 +82,15 @@ class ChatController extends Controller
                     'type' => $conversation->type,
                     'community_id' => $conversation->community_id,
                     'avatar' => $avatarUrl,
+                    'is_online' => $otherUser && $otherUser->last_seen_at
+                        ? $otherUser->last_seen_at->gt(now()->subMinutes(2))
+                        : false,
                     'latest_message' => $conversation->latestMessage ? [
                         'message' => $conversation->latestMessage->message,
                         'created_at' => $conversation->latestMessage->created_at->diffForHumans(),
                         'user_name' => $conversation->latestMessage->user?->name ?? 'Unknown',
                     ] : null,
-                    'unread_count' => $conversation->unreadCount($userId),
+                    'unread_count' => $unreadCounts[$conversation->id] ?? 0,
                     'updated_at' => $conversation->updated_at->diffForHumans(),
                 ];
             });
@@ -287,13 +306,35 @@ class ChatController extends Controller
         })->findOrFail($conversationId);
 
         $query = ChatMessage::where('conversation_id', $conversationId)
-            ->with(['user', 'attachments'])
+            ->with(['user', 'attachments', 'reactions.user:id,name', 'replyTo.user:id,name'])
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc');
 
         // Cursor: load messages older than the given message ID
         if ($request->filled('before_id')) {
             $query->where('id', '<', (int) $request->before_id);
+        }
+
+        // Delta poll: return only messages newer than the given ID (used by 5-second refresh)
+        if ($request->filled('since_id')) {
+            $newMessages = ChatMessage::where('conversation_id', $conversationId)
+                ->where('id', '>', (int) $request->since_id)
+                ->with(['user', 'attachments', 'reactions.user:id,name', 'replyTo.user:id,name'])
+                ->orderBy('id', 'asc')
+                ->get();
+
+            // Also return the other participants' latest last_read_at so the sender
+            // can update double-tick (read receipt) on already-rendered messages.
+            $otherLastRead = ChatParticipant::where('conversation_id', $conversationId)
+                ->where('user_id', '!=', $userId)
+                ->max('last_read_at');
+
+            return response()->json([
+                'success'    => true,
+                'messages'   => $newMessages,
+                'is_delta'   => true,
+                'read_up_to' => $otherLastRead,
+            ]);
         }
 
         $messages = $query->take(50)->get()->reverse()->values();
@@ -312,11 +353,39 @@ class ChatController extends Controller
             }
         }
 
+        // Annotate sender's messages with is_read flag (single extra query)
+        $otherLastRead = ChatParticipant::where('conversation_id', $conversationId)
+            ->where('user_id', '!=', $userId)
+            ->pluck('last_read_at');
+
+        if ($otherLastRead->isNotEmpty()) {
+            $messages = $messages->map(function ($msg) use ($userId, $otherLastRead) {
+                if ($msg->user_id == $userId) {
+                    $msg->is_read = $otherLastRead->every(
+                        fn ($t) => $t !== null && $t >= $msg->created_at
+                    );
+                }
+                return $msg;
+            });
+        }
+
+        // Find the most-recently pinned message in this conversation (if any)
+        $pinnedMessage = ChatMessage::where('conversation_id', $conversationId)
+            ->where('is_pinned', true)
+            ->with('user:id,name')
+            ->latest('updated_at')
+            ->first();
+
         return response()->json([
             'success'    => true,
             'messages'   => $messages,
             'has_more'   => $hasMore,
             'oldest_id'  => $oldestId,
+            'pinned_message' => $pinnedMessage ? [
+                'id'      => $pinnedMessage->id,
+                'message' => $pinnedMessage->message,
+                'user'    => ['name' => $pinnedMessage->user?->name ?? 'Unknown'],
+            ] : null,
             'conversation' => [
                 'id'           => $conversation->id,
                 'name'         => $conversation->name,
@@ -346,6 +415,7 @@ class ChatController extends Controller
                 'message' => 'nullable|string|max:5000', // Changed to nullable for files-only messages
                 'attachments' => 'nullable|array',
                 'attachments.*' => 'file|max:10240', // 10MB max per file
+                'reply_to_id' => 'nullable|integer|exists:chat_messages,id',
             ]);
             
             // Additional validation: require either message or attachments
@@ -409,6 +479,7 @@ class ChatController extends Controller
                 'user_id' => $userId,
                 'message' => $request->message,
                 'type' => $type,
+                'reply_to_id' => $request->reply_to_id ?: null,
             ]);
 
             // Handle file attachments
@@ -435,7 +506,7 @@ class ChatController extends Controller
 
 
         // Load relationships for response
-        $message->load(['user', 'attachments']);
+        $message->load(['user', 'attachments', 'reactions.user:id,name', 'replyTo.user:id,name']);
 
         // Handle @mentions - notify mentioned users
         $mentionedUsers = $message->getMentionedUsers();
@@ -667,7 +738,7 @@ class ChatController extends Controller
         ]);
 
         $userId = Auth::id();
-        $query = $request->query;
+        $query = $request->input('query');
 
         // Search in user's conversations
         $conversations = ChatConversation::whereHas('participants', function ($q) use ($userId) {
@@ -1039,23 +1110,25 @@ class ChatController extends Controller
     {
         $userId = Auth::id();
 
-        // Get unread chat messages
-        $totalUnread = ChatConversation::whereHas('participants', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->get()
-            ->sum(function ($conversation) use ($userId) {
-                return $conversation->unreadCount($userId);
-            });
-
-        // Announcement count no longer included in badge - handled by popup polling system
-        $announcementCount = 0;
+        // Single-query unread count — avoids N+1 per-conversation round trips
+        $totalUnread = \Illuminate\Support\Facades\DB::table('chat_messages')
+            ->join('chat_participants', function ($join) use ($userId) {
+                $join->on('chat_participants.conversation_id', '=', 'chat_messages.conversation_id')
+                     ->where('chat_participants.user_id', $userId);
+            })
+            ->where('chat_messages.user_id', '!=', $userId)
+            ->whereNull('chat_messages.deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('chat_participants.last_read_at')
+                  ->orWhereColumn('chat_messages.created_at', '>', 'chat_participants.last_read_at');
+            })
+            ->count();
 
         return response()->json([
-            'success' => true,
-            'unread_count' => $totalUnread,
-            'announcement_count' => $announcementCount,
-            'total_count' => $totalUnread,
+            'success'            => true,
+            'unread_count'       => $totalUnread,
+            'announcement_count' => 0,
+            'total_count'        => $totalUnread,
         ]);
     }
 
@@ -1182,5 +1255,112 @@ class ChatController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Update the authenticated user's last_seen_at timestamp (heartbeat for online presence)
+     */
+    public function heartbeat()
+    {
+        Auth::user()->update(['last_seen_at' => now()]);
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Toggle a reaction emoji on a message (add if not present, remove if already reacted)
+     */
+    public function react(Request $request, $messageId)
+    {
+        $request->validate(['emoji' => 'required|string|max:20']);
+
+        $userId  = Auth::id();
+        $message = ChatMessage::findOrFail($messageId);
+
+        // Ensure the user is a participant in that conversation
+        $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $message->conversation_id)
+            ->where('user_id', $userId)
+            ->exists();
+        abort_unless($isParticipant, 403);
+
+        $existing = \App\Models\ChatMessageReaction::where([
+            'message_id' => $messageId,
+            'user_id'    => $userId,
+            'emoji'      => $request->emoji,
+        ])->first();
+
+        if ($existing) {
+            $existing->delete();
+        } else {
+            \App\Models\ChatMessageReaction::create([
+                'message_id' => $messageId,
+                'user_id'    => $userId,
+                'emoji'      => $request->emoji,
+            ]);
+        }
+
+        // Return updated reaction summary for this message
+        $reactions = \App\Models\ChatMessageReaction::where('message_id', $messageId)
+            ->with('user:id,name')
+            ->get()
+            ->groupBy('emoji')
+            ->map(function ($group) use ($userId) {
+                return [
+                    'emoji'   => $group->first()->emoji,
+                    'count'   => $group->count(),
+                    'users'   => $group->pluck('user.name')->filter()->values(),
+                    'reacted' => $group->contains('user_id', $userId),
+                ];
+            })
+            ->values();
+
+        return response()->json(['success' => true, 'reactions' => $reactions]);
+    }
+
+    /**
+     * Pin a message in its conversation
+     */
+    public function pinMessage($messageId)
+    {
+        $userId  = Auth::id();
+        $message = ChatMessage::findOrFail($messageId);
+
+        $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $message->conversation_id)
+            ->where('user_id', $userId)
+            ->exists();
+        abort_unless($isParticipant, 403);
+
+        // Unpin any previously pinned message in the same conversation
+        ChatMessage::where('conversation_id', $message->conversation_id)
+            ->where('is_pinned', true)
+            ->update(['is_pinned' => false, 'pinned_by' => null]);
+
+        $message->update(['is_pinned' => true, 'pinned_by' => $userId]);
+
+        return response()->json([
+            'success' => true,
+            'pinned_message' => [
+                'id'      => $message->id,
+                'message' => $message->message,
+                'user'    => ['name' => Auth::user()->name],
+            ],
+        ]);
+    }
+
+    /**
+     * Unpin a message
+     */
+    public function unpinMessage($messageId)
+    {
+        $userId  = Auth::id();
+        $message = ChatMessage::findOrFail($messageId);
+
+        $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $message->conversation_id)
+            ->where('user_id', $userId)
+            ->exists();
+        abort_unless($isParticipant, 403);
+
+        $message->update(['is_pinned' => false, 'pinned_by' => null]);
+
+        return response()->json(['success' => true]);
     }
 }

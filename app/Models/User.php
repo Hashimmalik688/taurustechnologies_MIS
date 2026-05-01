@@ -60,6 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'zoom_number',
         'zoom_user_id',
         'zoom_extension',
+        'last_seen_at',
     ];
 
     /**
@@ -79,8 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_login_at' => 'datetime',
-        'time_in' => 'datetime',
+        'last_login_at'     => 'datetime',
+        'last_seen_at'      => 'datetime',
+        'time_in'           => 'datetime',
         'time_out' => 'datetime',
         'salary_start_date' => 'date',
         'salary_end_date' => 'date',

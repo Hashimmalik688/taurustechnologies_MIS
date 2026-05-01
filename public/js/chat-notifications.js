@@ -114,7 +114,7 @@
 
             notification.onclick = function() {
                 window.focus();
-                window.location.href = '/chat';
+                window.location.href = '/chat' + (conversationId ? '?open=' + conversationId : '');
                 notification.close();
             };
 
@@ -153,6 +153,12 @@
                 if (notifiedIds[msg.id]) continue; // Already notified
 
                 notifiedIds[msg.id] = true;
+
+                // Update chat page UI (sidebar + open conversation) if on chat page
+                if (typeof window._chatUIUpdate === 'function') {
+                    window._chatUIUpdate(msg);
+                }
+
                 showDesktopNotification(
                     msg.sender_name,
                     msg.message,
