@@ -866,6 +866,9 @@ const translations = {
 if (typeof window.messagesRefreshInterval === 'undefined') {
     window.messagesRefreshInterval = null;
 }
+if (typeof window._typingPollInterval === 'undefined') {
+    window._typingPollInterval = null;
+}
 if (typeof window.conversationsRefreshInterval === 'undefined') {
     window.conversationsRefreshInterval = null;
 }
@@ -2209,6 +2212,8 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     window.currentConversationId = conversationId;
     window.currentConversationName = conversationName;
     window.currentCommunityId = communityId;
+    // Close in-chat search when switching conversations
+    if (typeof closeInChatSearch === 'function') closeInChatSearch();
 
     // Check if this is a community conversation
     const isCommunity = communityId !== null && communityId !== undefined;
@@ -2244,6 +2249,17 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
             </div>
             <div class="chat-header-actions">
                 ${conversationType === 'group' && conversationId && !isCommunity ? `<button class="btn btn-sm btn-outline-primary me-2" onclick="openGroupManagement(${conversationId})" title="Manage Group"><i class="bx bx-cog"></i> Manage</button>` : ''}
+                <button class="btn btn-sm btn-outline-secondary" id="inChatSearchToggle" onclick="toggleInChatSearch()" title="Search in this conversation"><i class="bx bx-search-alt-2"></i></button>
+            </div>
+        </div>
+        <div class="in-chat-search-bar" id="inChatSearchBar">
+            <i class="bx bx-search" style="color:var(--bs-secondary-color,#6b7280);font-size:.9rem;"></i>
+            <input type="text" id="inChatSearchInput" placeholder="Search in conversation…" oninput="runInChatSearch(this.value)" onkeydown="inChatSearchKey(event)" autocomplete="off">
+            <div class="in-chat-search-nav">
+                <span id="inChatSearchCount"></span>
+                <button onclick="stepInChatSearch(-1)" title="Previous"><i class="bx bx-chevron-up"></i></button>
+                <button onclick="stepInChatSearch(1)" title="Next"><i class="bx bx-chevron-down"></i></button>
+                <button onclick="closeInChatSearch()" title="Close"><i class="bx bx-x"></i></button>
             </div>
         </div>
 
@@ -2406,24 +2422,23 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
     // Add GIF button listener
     document.getElementById('gifBtn').addEventListener('click', showGifPicker);
 
-    // Typing whisper — broadcast to other participants while user types (debounced)
+    // Typing indicator — POST to server on input, poll server for others' typing state
     const msgInputEl = document.getElementById('messageInput');
-    let typingWhisperTimer = null;
-    let typingWhisperActive = false;
+    let _typingPostTimer = null;
+    let _typingPosted = false;
     if (msgInputEl) {
         msgInputEl.addEventListener('input', () => {
-            if (!typingWhisperActive && window.currentConversationId) {
-                typingWhisperActive = true;
-                initEcho().then(echo => {
-                    if (!echo) return;
-                    try {
-                        echo.private(`chat.conversation.${window.currentConversationId}`)
-                            .whisper('typing', { name: window.currentUserName });
-                    } catch(e) { console.warn('[Echo] Typing whisper error:', e); }
-                });
+            if (!window.currentConversationId) return;
+            // Throttle: only POST once every 3s per burst
+            if (!_typingPosted) {
+                _typingPosted = true;
+                fetch(`/chat/conversations/${window.currentConversationId}/typing`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '', 'X-Requested-With': 'XMLHttpRequest' }
+                }).catch(() => {});
             }
-            clearTimeout(typingWhisperTimer);
-            typingWhisperTimer = setTimeout(() => { typingWhisperActive = false; }, 2500);
+            clearTimeout(_typingPostTimer);
+            _typingPostTimer = setTimeout(() => { _typingPosted = false; }, 3000);
         });
     }
 
@@ -2432,12 +2447,134 @@ async function renderChatArea(conversationName, messages, conversationType = 'di
 
     // Start auto-refresh for messages (5 seconds for near real-time updates)
     clearInterval(window.messagesRefreshInterval);
+    // 15s poll — Echo handles real-time; this is just a safety net for missed events
     window.messagesRefreshInterval = setInterval(() => {
         if (window.currentConversationId) {
             refreshMessages();
         }
-    }, 5000); // 5 seconds - animation removed so refresh is invisible
+    }, 15000);
+
+    // Typing status poll — check every 2s who is typing in this conversation
+    clearInterval(window._typingPollInterval);
+    window._typingPollInterval = setInterval(() => {
+        const convId = window.currentConversationId;
+        if (!convId) return;
+        fetch(`/chat/conversations/${convId}/typing-status`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data) return;
+            if (data.typers && data.typers.length > 0) {
+                showTypingIndicator(data.typers[0]);
+            } else {
+                // No one typing — hide indicator if shown
+                const tr = document.getElementById('typingIndicatorRow');
+                if (tr) { tr.remove(); }
+            }
+        })
+        .catch(() => {});
+    }, 2000);
 }
+
+// ── In-chat message search ────────────────────────────────────────────────
+var _inChatSearchMatches = [];
+var _inChatSearchIndex   = -1;
+
+function toggleInChatSearch() {
+    const bar   = document.getElementById('inChatSearchBar');
+    const input = document.getElementById('inChatSearchInput');
+    if (!bar) return;
+    if (bar.classList.contains('visible')) {
+        closeInChatSearch();
+    } else {
+        bar.classList.add('visible');
+        if (input) input.focus();
+    }
+}
+
+function closeInChatSearch() {
+    clearInChatHighlights();
+    const bar   = document.getElementById('inChatSearchBar');
+    const input = document.getElementById('inChatSearchInput');
+    const count = document.getElementById('inChatSearchCount');
+    if (bar)   bar.classList.remove('visible');
+    if (input) input.value = '';
+    if (count) count.textContent = '';
+    _inChatSearchMatches = [];
+    _inChatSearchIndex   = -1;
+}
+
+function runInChatSearch(query) {
+    clearInChatHighlights();
+    _inChatSearchMatches = [];
+    _inChatSearchIndex   = -1;
+    document.getElementById('inChatSearchCount').textContent = '';
+    if (!query || query.trim().length < 2) return;
+
+    const term   = query.trim();
+    const re     = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const textEls = document.querySelectorAll('#chatMessages .message-text');
+
+    textEls.forEach(el => {
+        const original = el.innerHTML;
+        // Highlight all matches within the element
+        const highlighted = original.replace(/<[^>]+>/g, m => m)
+            .replace(/(?<=>|^)([^<]+)/g, (seg) =>
+                seg.replace(re, m => `<mark class="msg-search-highlight">${escapeHtml(m)}</mark>`)
+            );
+        if (highlighted !== original) {
+            el.innerHTML = highlighted;
+            el.querySelectorAll('.msg-search-highlight').forEach(mark => {
+                _inChatSearchMatches.push(mark);
+            });
+        }
+    });
+
+    if (_inChatSearchMatches.length > 0) {
+        _inChatSearchIndex = 0;
+        _activateSearchMatch(0);
+    }
+    _updateSearchCount();
+}
+
+function _activateSearchMatch(idx) {
+    _inChatSearchMatches.forEach(m => m.classList.remove('current'));
+    if (_inChatSearchMatches[idx]) {
+        _inChatSearchMatches[idx].classList.add('current');
+        _inChatSearchMatches[idx].scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+}
+
+function stepInChatSearch(dir) {
+    if (!_inChatSearchMatches.length) return;
+    _inChatSearchIndex = (_inChatSearchIndex + dir + _inChatSearchMatches.length) % _inChatSearchMatches.length;
+    _activateSearchMatch(_inChatSearchIndex);
+    _updateSearchCount();
+}
+
+function _updateSearchCount() {
+    const el = document.getElementById('inChatSearchCount');
+    if (!el) return;
+    el.textContent = !_inChatSearchMatches.length
+        ? 'No results'
+        : `${_inChatSearchIndex + 1} / ${_inChatSearchMatches.length}`;
+}
+
+function clearInChatHighlights() {
+    document.querySelectorAll('#chatMessages .msg-search-highlight').forEach(mark => {
+        const parent = mark.parentNode;
+        if (!parent) return;
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+    });
+}
+
+function inChatSearchKey(e) {
+    if (e.key === 'Enter') { stepInChatSearch(e.shiftKey ? -1 : 1); e.preventDefault(); }
+    if (e.key === 'Escape') { closeInChatSearch(); }
+}
+// ─────────────────────────────────────────────────────────────────────────
 
 // Helper function to escape HTML
 function escapeHtml(text) {
@@ -2737,12 +2874,23 @@ function renderMessages(messages) {
         const avatarHtml = userAvatar 
             ? `<img src="${userAvatar}" alt="${userName}" class="message-avatar">` 
             : `<div class="message-avatar">${userName.charAt(0).toUpperCase()}</div>`;
+
+        // Consecutive grouping: same sender, within 60 seconds, same date — hide avatar/name
+        const prevMsg = index > 0 ? messages[index - 1] : null;
+        const prevUserId = prevMsg ? (prevMsg.user_id || prevMsg.user?.id) : null;
+        const timeDiff = prevMsg && prevMsg.created_at && msg.created_at
+            ? Math.abs(new Date(msg.created_at) - new Date(prevMsg.created_at)) / 1000
+            : Infinity;
+        const isConsecutive = !!(prevMsg && prevUserId === (msg.user_id || msg.user?.id)
+            && timeDiff < 60
+            && getDateKey(msg.created_at) === getDateKey(prevMsg.created_at));
+
         html += `
-        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}" data-message-id="${msg.id}">
+        <div class="message-item ${isSender ? 'message-sender' : 'message-receiver'}${isConsecutive ? ' message-consecutive' : ''}" data-message-id="${msg.id}">
             ${!isSender ? avatarHtml : ''}
             <div class="message-bubble-wrap">
             <div class="message-content">
-                ${!isSender ? `<div class="message-username">${userName}</div>` : ''}
+                ${!isSender && !isConsecutive ? `<div class="message-username">${userName}</div>` : ''}
                 ${msg.forwarded_from_user_name ? `<div class="message-forwarded" style="font-size:.7rem;color:#8b5cf6;margin-bottom:4px;"><i class="bx bx-share" style="font-size:.7rem;"></i> Forwarded from <strong>${escapeHtml(msg.forwarded_from_user_name)}</strong></div>` : ''}
                 ${msg.reply_to ? `<div class="reply-preview" onclick="scrollToMessage(${msg.reply_to.id})"><div class="reply-preview-name">${escapeHtml(msg.reply_to.user?.name || 'Unknown')}</div><div class="reply-preview-text">${escapeHtml((msg.reply_to.message || '\u{1f4ce} Attachment').substring(0, 80))}</div></div>` : ''}
                 ${msg.message ? `<div class="message-text">${formatMessageText(msg.message)}</div>` : ''}
@@ -2924,8 +3072,10 @@ async function refreshMessages() {
             });
             if (newMessages.length > 0) {
                 const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
-                const frag = document.createRange().createContextualFragment(renderMessages(newMessages));
-                messagesEl.appendChild(frag);
+                const tmp = document.createElement('div');
+                tmp.innerHTML = renderMessages(newMessages);
+                tmp.querySelectorAll('.message-item').forEach(el => el.style.animation = 'none');
+                while (tmp.firstChild) messagesEl.appendChild(tmp.firstChild);
                 if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
             }
             // Always advance the cursor to the highest ID returned
@@ -2953,8 +3103,10 @@ async function refreshMessages() {
                 );
                 if (newMessages.length > 0) {
                     const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 4;
-                    const frag = document.createRange().createContextualFragment(renderMessages(newMessages));
-                    messagesEl.appendChild(frag);
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = renderMessages(newMessages);
+                    tmp.querySelectorAll('.message-item').forEach(el => el.style.animation = 'none');
+                    while (tmp.firstChild) messagesEl.appendChild(tmp.firstChild);
                     if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
                     window.lastRenderedMessageId = newMessages[newMessages.length - 1].id;
 
@@ -2985,11 +3137,8 @@ async function deleteMessage(messageId) {
         const el = document.querySelector(`.message-item[data-message-id="${messageId}"]`);
         if (el) el.remove();
         // Whisper to other participants so they see it removed instantly
-        if (window.currentConversationId) {
-            initEcho().then(echo => {
-                if (!echo) return;
-                try { echo.private(`chat.conversation.${window.currentConversationId}`).whisper('message_action', { type: 'delete', id: messageId }); } catch(e) {}
-            });
+        if (window._echoChannel) {
+            try { window._echoChannel.whisper('message_action', { type: 'delete', id: messageId }); } catch(e) {}
         }
         loadConversations();
     } catch (error) {
@@ -3049,11 +3198,8 @@ async function saveEditMessage() {
             }
         }
         // Whisper edit to others
-        if (window.currentConversationId) {
-            initEcho().then(echo => {
-                if (!echo) return;
-                try { echo.private(`chat.conversation.${window.currentConversationId}`).whisper('message_action', { type: 'edit', id: messageId, text: newText }); } catch(e) {}
-            });
+        if (window._echoChannel) {
+            try { window._echoChannel.whisper('message_action', { type: 'edit', id: messageId, text: newText }); } catch(e) {}
         }
     } catch (error) {
         console.error('Error editing message:', error);
@@ -3659,6 +3805,7 @@ window.conversationsRefreshInterval = setInterval(loadConversations, 60000);
 window.addEventListener('beforeunload', () => {
     clearInterval(window.messagesRefreshInterval);
     clearInterval(window.conversationsRefreshInterval);
+    clearInterval(window._typingPollInterval);
 });
 
 // -------------------------
@@ -3677,6 +3824,8 @@ if (typeof echoConfig === 'undefined') {
 
 if (typeof echoInstance === 'undefined') { var echoInstance = null; }
 if (typeof subscribedChannel === 'undefined') { var subscribedChannel = null; }
+// Stored channel object — reused for all whispers so we never re-subscribe
+if (typeof window._echoChannel === 'undefined') { window._echoChannel = null; }
 
 // Returns a Promise that resolves when Echo is fully initialised.
 // Calling initEcho() multiple times is safe — returns the same promise.
@@ -3724,6 +3873,7 @@ function subscribeToConversation(conversationId) {
     if (subscribedChannel && echoInstance) {
         try { echoInstance.leave(`chat.conversation.${subscribedChannel}`); } catch(e) {}
     }
+    window._echoChannel = null;
     subscribedChannel = conversationId;
 
     initEcho().then(echo => {
@@ -3731,7 +3881,8 @@ function subscribeToConversation(conversationId) {
         if (subscribedChannel !== conversationId) return; // conversation changed while waiting
 
         try {
-            echo.private(`chat.conversation.${conversationId}`)
+            // Store channel object so whispers can reuse it without re-subscribing
+            window._echoChannel = echo.private(`chat.conversation.${conversationId}`)
                 .subscribed(() => console.log(`[Echo] Subscribed to chat.conversation.${conversationId}`))
                 .error(err  => console.error(`[Echo] Auth error for chat.conversation.${conversationId}:`, err))
 
@@ -3755,12 +3906,14 @@ function subscribeToConversation(conversationId) {
                         return;
                     }
 
-                    // Append new message from other user
+                    // Append new message from other user (no animation flash)
                     const placeholder = messagesEl.querySelector('.no-messages');
                     if (placeholder) placeholder.remove();
                     const tmp = document.createElement('div');
                     tmp.innerHTML = renderMessages([e]);
                     const atBottom = messagesEl.scrollHeight - messagesEl.scrollTop <= messagesEl.clientHeight + 60;
+                    // Suppress entry animation for Echo-delivered messages
+                    tmp.querySelectorAll('.message-item').forEach(el => el.style.animation = 'none');
                     while (tmp.firstChild) messagesEl.appendChild(tmp.firstChild);
                     if (atBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
                     window.lastRenderedMessageId = Math.max(window.lastRenderedMessageId || 0, newId);
@@ -3771,12 +3924,6 @@ function subscribeToConversation(conversationId) {
 
                     // Play sound if window not focused
                     if (!document.hasFocus() && window.ChatNotify?.playSound) window.ChatNotify.playSound();
-                })
-
-                .listenForWhisper('typing', (e) => {
-                    if (!e.name || e.name === window.currentUserName) return;
-                    if (conversationId !== window.currentConversationId) return;
-                    showTypingIndicator(e.name);
                 })
 
                 .listen('.message.read', (e) => {

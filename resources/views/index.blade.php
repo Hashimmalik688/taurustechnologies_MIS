@@ -239,15 +239,16 @@
         <select id="periodSelector" onchange="changePeriod(this.value)" style="font-size:.72rem;font-weight:600;padding:.25rem .55rem;border-radius:.4rem;border:1px solid var(--bs-surface-300);background:var(--bs-card-bg);color:inherit;cursor:pointer;">
             @php
                 $periodOptions = [];
-                $p = today()->copy()->setDay(3)->startOfMonth();
+                // Start from the current period (rev_period_start is already the correct anchor)
+                $p = \Carbon\Carbon::createFromFormat('Y-m', $selected_period)->setDay(3);
                 for ($i = 0; $i < 12; $i++) {
-                    $pStart = $p->copy()->setDay(3)->startOfDay();
-                    $pEnd   = $p->copy()->addMonthNoOverflow()->setDay(3)->endOfDay();
+                    $pStart = $p->copy();
+                    $pEnd   = $p->copy()->addMonthNoOverflow()->setDay(3);
                     $periodOptions[] = [
                         'value' => $pStart->format('Y-m'),
                         'label' => $pStart->format('M j') . ' → ' . $pEnd->format('M j, Y'),
                     ];
-                    $p->subMonthNoOverflow();
+                    $p->subMonthNoOverflow()->setDay(3);
                 }
             @endphp
             @foreach($periodOptions as $opt)
@@ -267,22 +268,16 @@
 {{-- ROW 1: Primary KPIs --}}
 <div class="kpi-grid mb-1">
     <div class="kpi-card kpi-gold ex-card">
-        <div class="kpi-icon"><i class="bx bx-trending-up"></i></div>
-        <div class="kpi-val" id="kpiAvgPremium" data-mtd="{{ $mtd_sales > 0 ? number_format($total_revenue / $mtd_sales, 0) : '0' }}" data-today="{{ $today_sales > 0 ? number_format($today_revenue / $today_sales, 0) : '0' }}">${{ $mtd_sales > 0 ? number_format($total_revenue / $mtd_sales, 0) : '0' }}</div>
-        <div class="kpi-lbl" id="kpiAvgPremiumLbl">Avg Premium · MTD</div>
-        <div class="kpi-sub" id="kpiAvgPremiumSub">{{ $revenue_period_label }}</div>
+        <div class="kpi-icon"><i class="bx bx-calendar-week"></i></div>
+        <div class="kpi-val" id="kpiDailyAvg" data-mtd="{{ number_format($daily_avg_premium, 0) }}" data-today="{{ number_format($today_revenue, 0) }}">${{ number_format($daily_avg_premium, 0) }}</div>
+        <div class="kpi-lbl" id="kpiDailyAvgLbl">Daily Avg Premium · MTD</div>
+        <div class="kpi-sub" id="kpiDailyAvgSub">{{ $distinct_sale_days }} sale days · {{ $revenue_period_label }}</div>
     </div>
     <div class="kpi-card kpi-green ex-card">
         <div class="kpi-icon"><i class="bx bx-dollar-circle"></i></div>
-        <div class="kpi-val" id="kpiRevenue" data-mtd="{{ number_format($total_revenue, 0) }}" data-today="{{ number_format($today_revenue, 0) }}">${{ number_format($total_revenue, 0) }}</div>
-        <div class="kpi-lbl" id="kpiRevenueLbl">Total Premium · MTD</div>
-        <div class="kpi-sub" id="revPeriod">{{ $revenue_period_label }}</div>
-    </div>
-    <div class="kpi-card kpi-blue ex-card">
-        <div class="kpi-icon"><i class="bx bx-check-circle"></i></div>
-        <div class="kpi-val" id="kpiApproved" data-mtd="{{ $approved_count }}" data-today="{{ $today_approved }}">{{ $approved_count }}</div>
-        <div class="kpi-lbl" id="kpiApprovedLbl">Approved · MTD</div>
-        <div class="kpi-sub"><span id="kpiDeclined" data-mtd="{{ $declined_count }}" data-today="{{ $today_declined }}">{{ $declined_count }}</span> declined</div>
+        <div class="kpi-val" id="kpiEstRevenue" data-mtd="{{ number_format($est_commission, 0) }}" data-today="{{ number_format($today_est_commission, 0) }}">${{ number_format($est_commission, 0) }}</div>
+        <div class="kpi-lbl" id="kpiEstRevenueLbl">Est. Revenue · MTD</div>
+        <div class="kpi-sub" id="kpiEstRevenueSub">{{ $revenue_period_label }}</div>
     </div>
     <div class="kpi-card kpi-purple ex-card">
         <div class="kpi-icon"><i class="bx bx-user-check"></i></div>
@@ -296,7 +291,7 @@
 <div class="pipeline-flow ex-card mb-2">
     <div class="pipeline-stage ps-blue">
         <i class="bx bx-send ps-icon"></i>
-        <div class="ps-val" id="pipeSubmitted" data-mtd="{{ $done_count }}" data-today="{{ $today_sales }}">{{ $done_count }}</div>
+        <div class="ps-val" id="pipeSubmitted" data-mtd="{{ $submitted_count }}" data-today="{{ $today_sales }}">{{ $submitted_count }}</div>
         <div class="ps-lbl" id="pipeLblSubmitted">Submitted MTD</div>
     </div>
     <div class="pipeline-stage ps-green">
@@ -306,12 +301,12 @@
     </div>
     <div class="pipeline-stage ps-red">
         <i class="bx bx-x-circle ps-icon"></i>
-        <div class="ps-val" id="pipeDeclined" data-mtd="{{ $declined_count }}" data-today="{{ $today_declined }}">{{ $declined_count }}</div>
+        <div class="ps-val" id="pipeDeclined" data-mtd="{{ $sub_declined_count }}" data-today="{{ $today_declined }}">{{ $sub_declined_count }}</div>
         <div class="ps-lbl" id="pipeLblDeclined">Declined MTD</div>
     </div>
     <div class="pipeline-stage" style="background:rgba(212,175,55,.06)">
         <i class="bx bx-stats ps-icon" style="color:#b89730"></i>
-        <div class="ps-val" style="color:#b89730" id="pipeApprovalRate">{{ $done_count > 0 ? round($approved_count / $done_count * 100) : 0 }}%</div>
+        <div class="ps-val" style="color:#b89730" id="pipeApprovalRate">{{ $submitted_count > 0 ? round($approved_count / $submitted_count * 100) : 0 }}%</div>
         <div class="ps-lbl">Approval Rate</div>
     </div>
 </div>
@@ -373,36 +368,36 @@
         <div class="ex-card sec-card">
             <div class="sec-hdr">
                 <h6><i class="bx bx-dollar-circle"></i> Revenue Summary</h6>
-                <span class="period-badge">{{ $revenue_period_label }}</span>
+                <span class="period-badge" id="revSummaryPeriod">{{ $revenue_period_label }}</span>
             </div>
             <div class="sec-body">
                 <div class="row g-2 mb-3">
                     <div class="col-4 text-center">
-                        <div style="font-size:1.3rem;font-weight:800;color:#1a8754">${{ number_format($total_revenue, 0) }}</div>
+                        <div id="revTotalPremium" style="font-size:1.3rem;font-weight:800;color:#1a8754">${{ number_format($total_revenue, 0) }}</div>
                         <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Total Premium</div>
                     </div>
                     <div class="col-4 text-center">
-                        <div style="font-size:1.3rem;font-weight:800;color:#556ee6">{{ $revenue_total_submissions }}</div>
-                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Submissions</div>
+                        <div id="revSubmissions" style="font-size:1.3rem;font-weight:800;color:#556ee6">{{ $mtd_sales }}</div>
+                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Contracted</div>
                     </div>
                     <div class="col-4 text-center">
-                        <div style="font-size:1.3rem;font-weight:800;color:#b89730">${{ $revenue_total_submissions > 0 ? number_format($total_revenue / $revenue_total_submissions, 0) : '0' }}</div>
+                        <div id="revAvgSale" style="font-size:1.3rem;font-weight:800;color:#b89730">${{ $mtd_sales > 0 ? number_format($total_revenue / $mtd_sales, 0) : '0' }}</div>
                         <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Avg / Sale</div>
                     </div>
                 </div>
-                @php $maxPremium = collect($revenue_by_carrier)->max('premium') ?: 1; @endphp
-                @forelse($revenue_by_carrier as $carrier)
-                <div class="rev-carrier-bar">
-                    <div class="rev-carrier-name">{{ $carrier['carrier'] ?: '—' }}</div>
-                    <div class="rev-bar-track">
-                        <div class="rev-bar-fill" style="width:{{ min(100, round($carrier['premium'] / $maxPremium * 100)) }}%"></div>
+                <div id="revCarrierBars">
+                    @php $maxPremium = collect($revenue_by_carrier)->max('premium') ?: 1; @endphp
+                    @forelse($revenue_by_carrier as $carrier)
+                    <div class="rev-carrier-bar">
+                        <div class="rev-carrier-name">{{ $carrier['carrier'] ?: '—' }}</div>
+                        <div class="rev-bar-track"><div class="rev-bar-fill" style="width:{{ min(100, round($carrier['premium'] / $maxPremium * 100)) }}%"></div></div>
+                        <div style="font-size:0.65rem;color:var(--bs-surface-400);min-width:22px;text-align:right">{{ $carrier['count'] }}</div>
+                        <div class="rev-premium-val">${{ number_format($carrier['premium'], 0) }}</div>
                     </div>
-                    <div style="font-size:0.65rem;color:var(--bs-surface-400);min-width:22px;text-align:right">{{ $carrier['count'] }}</div>
-                    <div class="rev-premium-val">${{ number_format($carrier['premium'], 0) }}</div>
+                    @empty
+                    <div class="text-center py-2" style="color:var(--bs-surface-400);font-size:.78rem">No revenue data for this period</div>
+                    @endforelse
                 </div>
-                @empty
-                <div class="text-center py-2" style="color:var(--bs-surface-400);font-size:.78rem">No revenue data for this period</div>
-                @endforelse
             </div>
         </div>
 
@@ -526,23 +521,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 var SD = {
-    done:            {{ $done_count }},
-    approved:        {{ $approved_count }},
-    declined:        {{ $declined_count }},
-    totalRevenue:    {{ $total_revenue }},
-    mtdSales:        {{ $mtd_sales }},
-    todaySales:      {{ $today_sales }},
-    todayRevenue:    {{ $today_revenue }},
-    todayApproved:   {{ $today_approved }},
-    todayDeclined:   {{ $today_declined }},
-    presentCount:    {{ $present_count }},
-    totalAttendance: {{ $total_attendance_count }},
-    salesPerCloser:  @json($sales_per_closer),
-    managerBreakdown:@json($manager_breakdown),
-    attendance:      @json($attendance),
-    revByCarrier:    @json($revenue_by_carrier),
-    revPeriodLabel:  '{{ $revenue_period_label }}',
-    selectedPeriod:  '{{ $selected_period }}',
+    done:              {{ $done_count }},
+    submitted:         {{ $submitted_count }},
+    approved:          {{ $approved_count }},
+    declined:          {{ $sub_declined_count }},
+    totalRevenue:      {{ $total_revenue }},
+    mtdSales:          {{ $mtd_sales }},
+    dailyAvgPremium:   {{ $daily_avg_premium }},
+    estCommission:     {{ $est_commission }},
+    distinctSaleDays:  {{ $distinct_sale_days }},
+    todaySales:        {{ $today_sales }},
+    todayRevenue:      {{ $today_revenue }},
+    todayApproved:     {{ $today_approved }},
+    todayDeclined:     {{ $today_declined }},
+    todayEstCommission:{{ $today_est_commission }},
+    presentCount:      {{ $present_count }},
+    totalAttendance:   {{ $total_attendance_count }},
+    salesPerCloser:    @json($sales_per_closer),
+    managerBreakdown:  @json($manager_breakdown),
+    attendance:        @json($attendance),
+    revByCarrier:      @json($revenue_by_carrier),
+    revPeriodLabel:    '{{ $revenue_period_label }}',
+    selectedPeriod:    '{{ $selected_period }}',
 };
 
 var currentTeam = 'peregrine';
@@ -556,78 +556,116 @@ var currentPeriod = SD.selectedPeriod;
 
 function changePeriod(val) {
     currentPeriod = val;
-    // Fetch new data for this period
     fetch('{{ route('dashboard.kpi-data') }}?period=' + val)
         .then(r => r.json())
         .then(d => {
             if (!d.success) return;
             allData = Object.assign({}, allData, d);
-            // Rebuild data-* attributes and refresh display
             rebuildDataAttrs(d);
             setViewMode(currentMode);
-            // Update period badge in Revenue Summary
-            document.querySelectorAll('.period-badge').forEach(el => el.textContent = d.revPeriodLabel || '');
-            // Update MTD toggle label
             const lbl = document.getElementById('toggleMTDLabel');
-            if (lbl) lbl.textContent = d.revPeriodLabel || '';
-            // Rebuild carrier chart with new data
+            if (lbl && d.revPeriodLabel) lbl.textContent = d.revPeriodLabel;
             if (d.revByCarrier) { allData.revByCarrier = d.revByCarrier; buildCarrierChart(); }
-            if (d.salesPerCloser) { buildCloserTodayChart(d.salesPerCloser); }
-            if (d.managerBreakdown) { renderManagerTable(d.managerBreakdown); }
+            if (d.salesPerCloser) {
+                renderClosers(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()===currentTeam));
+                buildCloserTodayChart(d.salesPerCloser);
+            }
+            if (d.managerBreakdown) { renderManagerTable(d.managerBreakdown); buildManagerChart(d.managerBreakdown); }
             if (d.attendance) renderAttendance(d.attendance);
         })
         .catch(e => console.error('Period change error:', e));
 }
 
+function updateKPIs(d) {
+    allData = Object.assign({}, allData, d);
+    rebuildDataAttrs(d);
+    setViewMode(currentMode);
+
+    $('#attPresent').text(d.presentCount ?? SD.presentCount);
+    $('#attTotal').text(d.totalAttendance ?? SD.totalAttendance);
+
+    if (d.revPeriodLabel) {
+        const lbl = document.getElementById('toggleMTDLabel');
+        if (lbl) lbl.textContent = d.revPeriodLabel;
+        allData.revPeriodLabel = d.revPeriodLabel;
+    }
+    if (d.salesPerCloser) {
+        $('#peregrineCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='peregrine').length);
+        $('#ravensCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='ravens').length);
+        renderClosers(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()===currentTeam));
+        buildCloserTodayChart(d.salesPerCloser);
+    }
+    if (d.revByCarrier) { allData.revByCarrier = d.revByCarrier; buildCarrierChart(); }
+    if (d.managerBreakdown) { renderManagerTable(d.managerBreakdown); buildManagerChart(d.managerBreakdown); }
+    if (d.attendance) renderAttendance(d.attendance);
+    $('#lastUpdated').text(new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}));
+}
+
 function rebuildDataAttrs(d) {
-    const mtdSales = d.done ?? 0;
-    const tdSales  = d.todaySales ?? 0;
-    const mtdRev   = d.totalRevenue ?? 0;
-    const tdRev    = d.todayRevenue ?? 0;
-    const mtdApp   = d.approved ?? 0;
-    const tdApp    = d.todayApproved ?? 0;
-    const mtdDec   = d.declined ?? 0;
-    const tdDec    = d.todayDeclined ?? 0;
-    const mtdAvg   = mtdSales > 0 ? Math.round(mtdRev / mtdSales) : 0;
-    const tdAvg    = tdSales  > 0 ? Math.round(tdRev  / tdSales)  : 0;
+    const mtdSales    = d.mtdSales ?? d.done ?? 0;
+    const submitted   = d.submitted ?? 0;
+    const tdSales     = d.todaySales ?? 0;
+    const mtdRev      = d.totalRevenue ?? 0;
+    const tdRev       = d.todayRevenue ?? 0;
+    const mtdApp      = d.approved ?? 0;
+    const tdApp       = d.todayApproved ?? 0;
+    const mtdDec      = d.declined ?? 0;
+    const tdDec       = d.todayDeclined ?? 0;
+    const dailyAvg    = d.dailyAvgPremium ?? (d.distinctSaleDays > 0 ? Math.round(mtdRev / d.distinctSaleDays) : 0);
+    const estComm     = d.estCommission ?? 0;
+    const todayEst    = d.todayEstCommission ?? 0;
 
     const setData = (id, mtd, today) => {
         const el = document.getElementById(id); if (!el) return;
         el.dataset.mtd = mtd; el.dataset.today = today;
     };
-    setData('kpiAvgPremium',  fmt(mtdAvg),  fmt(tdAvg));
-    setData('kpiRevenue',     fmt(mtdRev),  fmt(tdRev));
-    setData('kpiApproved',    mtdApp,       tdApp);
-    setData('kpiDeclined',    mtdDec,       tdDec);
-    setData('pipeSubmitted',  mtdSales,     tdSales);
-    setData('pipeApproved',   mtdApp,       tdApp);
-    setData('pipeDeclined',   mtdDec,       tdDec);
+    setData('kpiDailyAvg',    fmt(dailyAvg),    fmt(tdRev));
+    setData('kpiEstRevenue',  fmt(estComm),      fmt(todayEst));
+    setData('pipeSubmitted',  submitted,         tdSales);
+    setData('pipeApproved',   mtdApp,            tdApp);
+    setData('pipeDeclined',   mtdDec,            tdDec);
+
+    // Revenue Summary stats (always show MTD — period-based, not toggle-sensitive)
+    const revPrem = document.getElementById('revTotalPremium');
+    const revSub  = document.getElementById('revSubmissions');
+    const revAvg  = document.getElementById('revAvgSale');
+    if (revPrem) revPrem.textContent = '$' + fmt(mtdRev);
+    if (revSub)  revSub.textContent  = mtdSales;
+    if (revAvg)  revAvg.textContent  = '$' + (mtdSales > 0 ? fmt(Math.round(mtdRev / mtdSales)) : '0');
+
+    // Revenue Summary period label
+    const revPeriodEl = document.getElementById('revSummaryPeriod');
+    if (revPeriodEl && d.revPeriodLabel) revPeriodEl.textContent = d.revPeriodLabel;
+
+    // Carrier bars in Revenue Summary
+    if (d.revByCarrier) renderCarrierBars(d.revByCarrier);
 }
 
 function setViewMode(mode) {
     currentMode = mode;
     document.getElementById('toggleMTD').classList.toggle('active', mode === 'mtd');
     document.getElementById('toggleToday').classList.toggle('active', mode === 'today');
-    const suffix = mode === 'mtd' ? 'MTD' : 'Today';
+    const suffix    = mode === 'mtd' ? 'MTD' : 'Today';
     const periodLbl = mode === 'mtd' ? (allData.revPeriodLabel || SD.revPeriodLabel) : 'Today · PT';
+    const days      = allData.distinctSaleDays || SD.distinctSaleDays || 1;
 
-    // Apply data-* values
-    ['kpiAvgPremium', 'kpiRevenue'].forEach(id => {
+    // Dollar KPIs
+    ['kpiDailyAvg', 'kpiEstRevenue'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
         el.textContent = '$' + (el.dataset[mode] !== undefined ? el.dataset[mode] : '0');
     });
-    ['kpiApproved', 'kpiDeclined', 'pipeSubmitted', 'pipeApproved', 'pipeDeclined'].forEach(id => {
+    // Numeric KPIs
+    ['pipeSubmitted', 'pipeApproved', 'pipeDeclined'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
         if (el.dataset[mode] !== undefined) el.textContent = el.dataset[mode];
     });
 
     // Labels
     const lblMap = {
-        kpiAvgPremiumLbl: 'Avg Premium · ' + suffix,
-        kpiAvgPremiumSub: periodLbl,
-        kpiRevenueLbl:    'Total Premium · ' + suffix,
-        revPeriod:        periodLbl,
-        kpiApprovedLbl:   'Approved · ' + suffix,
+        kpiDailyAvgLbl:   mode === 'mtd' ? 'Daily Avg Premium · MTD' : 'Today Total Premium',
+        kpiDailyAvgSub:   mode === 'mtd' ? days + ' sale days · ' + periodLbl : periodLbl,
+        kpiEstRevenueLbl: 'Est. Revenue · ' + suffix,
+        kpiEstRevenueSub: periodLbl,
         pipeLblSubmitted: 'Submitted ' + suffix,
         pipeLblApproved:  'Approved ' + suffix,
         pipeLblDeclined:  'Declined ' + suffix,
@@ -636,8 +674,8 @@ function setViewMode(mode) {
     Object.entries(lblMap).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 
     // Approval rate
-    const sub = mode === 'mtd' ? +(document.getElementById('pipeSubmitted')?.dataset.mtd||0) : +(document.getElementById('pipeSubmitted')?.dataset.today||0);
-    const app = mode === 'mtd' ? +(document.getElementById('pipeApproved')?.dataset.mtd||0)  : +(document.getElementById('pipeApproved')?.dataset.today||0);
+    const sub = +(document.getElementById('pipeSubmitted')?.dataset[mode] || 0);
+    const app = +(document.getElementById('pipeApproved')?.dataset[mode]  || 0);
     const rateEl = document.getElementById('pipeApprovalRate');
     if (rateEl) rateEl.textContent = sub > 0 ? Math.round(app / sub * 100) + '%' : '0%';
 
@@ -749,10 +787,22 @@ function buildCarrierChart() {
     });
 }
 
-function updateCarrierChart(revByCarrier) {
-    if (!revByCarrier) return;
-    allData.revByCarrier = revByCarrier;
-    buildCarrierChart();
+function renderCarrierBars(carriers) {
+    const container = document.getElementById('revCarrierBars'); if (!container) return;
+    if (!carriers || !carriers.length) {
+        container.innerHTML = '<div class="text-center py-2" style="color:var(--bs-surface-400);font-size:.78rem">No revenue data for this period</div>';
+        return;
+    }
+    const maxPremium = Math.max(...carriers.map(c => c.premium || 0)) || 1;
+    container.innerHTML = carriers.slice(0, 5).map(c => {
+        const pct = Math.min(100, Math.round((c.premium || 0) / maxPremium * 100));
+        return `<div class="rev-carrier-bar">
+            <div class="rev-carrier-name">${c.carrier || '—'}</div>
+            <div class="rev-bar-track"><div class="rev-bar-fill" style="width:${pct}%"></div></div>
+            <div style="font-size:0.65rem;color:var(--bs-surface-400);min-width:22px;text-align:right">${c.count}</div>
+            <div class="rev-premium-val">$${fmt(c.premium || 0)}</div>
+        </div>`;
+    }).join('');
 }
 
 function buildManagerChart(data) {
@@ -823,13 +873,7 @@ $(document).ready(function () {
     setInterval(updateClocks, 1000);
 
     // Seed allData from server-rendered SD
-    allData = Object.assign({}, SD, {
-        done: SD.done, approved: SD.approved, declined: SD.declined,
-        mtdSales: SD.mtdSales, totalRevenue: SD.totalRevenue,
-        todaySales: SD.todaySales, todayRevenue: SD.todayRevenue,
-        todayApproved: SD.todayApproved, todayDeclined: SD.todayDeclined,
-        revPeriodLabel: SD.revPeriodLabel,
-    });
+    allData = Object.assign({}, SD);
 
     renderClosers(SD.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='peregrine'));
     renderAttendance(SD.attendance||[]);

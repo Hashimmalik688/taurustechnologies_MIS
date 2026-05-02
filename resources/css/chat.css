@@ -468,6 +468,17 @@
     gap: .5rem;
     max-width: 70%;
     animation: msgIn .2s ease;
+    margin-top: .35rem;
+}
+/* Consecutive messages from same sender — tighter spacing, no avatar gap */
+.message-item.message-consecutive {
+    margin-top: .1rem;
+}
+.message-item.message-consecutive .message-avatar {
+    visibility: hidden;
+}
+.message-item.message-consecutive .message-username {
+    display: none;
 }
 @keyframes msgIn {
     from { opacity: 0; transform: translateY(6px); }
@@ -1799,3 +1810,28 @@
    HIDDEN — old icon sidebar (removed from layout)
    ══════════════════════════════════════════════ */
 .chat-icon-sidebar { display: none !important; }
+
+/* ── In-chat message search ───────────────────── */
+.in-chat-search-bar {
+    display: none;
+    align-items: center;
+    gap: .5rem;
+    padding: .4rem .75rem;
+    background: var(--bs-body-bg, #fff);
+    border-bottom: 1px solid var(--bs-border-color, rgba(0,0,0,.08));
+    position: relative;
+}
+.in-chat-search-bar.visible { display: flex; }
+.in-chat-search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: .8rem;
+    color: inherit;
+}
+.in-chat-search-nav { display: flex; align-items: center; gap: .35rem; font-size: .72rem; color: var(--bs-secondary-color, #6b7280); }
+.in-chat-search-nav button { background: none; border: none; cursor: pointer; padding: 2px 4px; color: inherit; font-size: .85rem; line-height: 1; }
+.in-chat-search-nav button:hover { color: #d4af37; }
+.msg-search-highlight { background: rgba(212,175,55,.45); border-radius: 2px; font-weight: 600; }
+.msg-search-highlight.current { background: rgba(212,175,55,.85); }

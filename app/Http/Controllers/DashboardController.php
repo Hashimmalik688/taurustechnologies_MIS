@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Lead;
 use App\Models\User;
+use App\Services\CommissionCalculationService;
 use App\Services\RevenueCalculationService;
 use App\Support\Roles;
 use App\Support\Statuses;
@@ -103,6 +104,31 @@ class DashboardController extends Controller
         return redirect()->route('attendance.dashboard');
     }
 
+    // ── Commission helpers — same logic as Submission Performance report ──
+    private function resolveSettlementKey($lead): string
+    {
+        $raw = strtolower(trim($lead->settlement_type ?: $lead->policy_type ?: ''));
+        if (str_contains($raw, 'g.i') || str_contains($raw, 'gi')) return 'gi';
+        if (str_contains($raw, 'grad')) return 'graded';
+        if (str_contains($raw, 'modif')) return 'modified';
+        return 'level';
+    }
+
+    private function calcLeadRevenue($lead): float
+    {
+        $premium = (float) ($lead->monthly_premium ?? 0);
+        if ($premium <= 0) return 0.0;
+        if (empty($lead->partner_id) || empty($lead->insurance_carrier_id)) return 0.0;
+        $result = app(CommissionCalculationService::class)->calculateCommission(
+            (int) $lead->partner_id,
+            (int) $lead->insurance_carrier_id,
+            $lead->state ?? '',
+            $this->resolveSettlementKey($lead),
+            $premium
+        );
+        return round($result['commission'] ?? 0, 2);
+    }
+
     /**
      * Executive Dashboard (Company Overview) with live data.
      * Accessible at /dashboard with role.permission:dashboard,view middleware.
@@ -114,7 +140,8 @@ class DashboardController extends Controller
         // ── Period: accept ?period=YYYY-MM or default to current 3rd→3rd ──
         $periodParam = $request->get('period'); // e.g. "2026-04"
         if ($periodParam && preg_match('/^\d{4}-\d{2}$/', $periodParam)) {
-            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->startOfMonth();
+            // period='2026-04' means the period STARTING on Apr 3 → set anchor to Apr 3
+            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->setDay(3);
         } else {
             $anchor = $today->copy();
         }
@@ -129,31 +156,68 @@ class DashboardController extends Controller
         // For the selector: which month is the "anchor" (the start month of the period)
         $selected_period = $rev_period_start->format('Y-m');
 
-        // ── All MTD leads in the 3rd→3rd period ──────────────────
+        // ── All MTD leads in the 3rd→3rd period (Pending Contract page) ──
         $revenue_leads = Lead::whereNotNull('pending_contract_at')
             ->whereDate('pending_contract_at', '>=', $rev_period_start)
             ->whereDate('pending_contract_at', '<=', $rev_period_end)
-            ->get(['id', 'monthly_premium', 'carrier_name', 'assigned_partner',
-                   'closer_name', 'submission_status', 'pending_contract_at']);
+            ->get(['id', 'monthly_premium', 'carrier_name', 'assigned_partner', 'closer_name',
+                   'submission_status', 'pending_contract_at',
+                   'partner_id', 'insurance_carrier_id', 'state', 'settlement_type', 'policy_type']);
 
         $mtd_sales      = $revenue_leads->count();
-        $total_revenue  = $revenue_leads->sum('monthly_premium');   // Total Premium (raw sum)
-        $mtd_approved   = $revenue_leads->where('submission_status', Statuses::SUB_APPROVED)->count();
-        $mtd_declined   = $revenue_leads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $total_revenue  = $revenue_leads->sum('monthly_premium');
+
+        // Daily avg premium: total premium / distinct days that had sales
+        $distinct_sale_days = max(1, $revenue_leads->groupBy(
+            fn($l) => \Carbon\Carbon::parse($l->pending_contract_at)->toDateString()
+        )->count());
+        $daily_avg_premium = round($total_revenue / $distinct_sale_days, 0);
+
+        // Est. commission — same calculation as Submission Performance report (premium × 9 × commission%)
+        $est_commission = 0;
+        foreach ($revenue_leads as $lead) { $est_commission += $this->calcLeadRevenue($lead); }
+        $est_commission = round($est_commission, 0);
+
+        // ── Submitted / Approved / Declined from Pending Submission page ──
+        // Matches PendingsApprovedController baseConditions exactly (sale_date based)
+        $subBase = Lead::where(function ($q) {
+                $q->where('ravens_validation_status', 'valid')
+                  ->orWhereNotNull('validated_at');
+            })
+            ->whereNotNull('closer_name')
+            ->whereNotNull('cn_name')->where('cn_name', '!=', '')
+            ->where(function ($q) { $q->whereNotNull('sale_at')->orWhereNotNull('sale_date'); })
+            ->where(function ($q) {
+                $q->where(function ($s) { $s->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            })
+            ->whereDate('sale_date', '>=', $rev_period_start)
+            ->whereDate('sale_date', '<=', $rev_period_end);
+
+        $submitted_count    = (clone $subBase)->count();
+        // Approved = submission_status='approved' (includes those moved to Pending Contract)
+        $mtd_approved       = (clone $subBase)->where('submission_status', Statuses::SUB_APPROVED)->count();
+        // Declined = still in submission stage (pending_contract_at IS NULL) + declined
+        $sub_declined_count = (clone $subBase)->whereNull('pending_contract_at')
+                                ->where('submission_status', Statuses::SUB_DECLINED)->count();
 
         // ── Today leads (filter from MTD set) ────────────────────
         $today_leads    = $revenue_leads->filter(fn($l) =>
             $l->pending_contract_at && \Carbon\Carbon::parse($l->pending_contract_at)->isSameDay($today)
         );
-        $today_sales    = $today_leads->count();
-        $today_revenue  = $today_leads->sum('monthly_premium');
-        $today_approved = $today_leads->where('submission_status', Statuses::SUB_APPROVED)->count();
-        $today_declined = $today_leads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $today_sales         = $today_leads->count();
+        $today_revenue       = $today_leads->sum('monthly_premium');
+        $today_approved      = $today_leads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $today_declined      = $today_leads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $today_est_commission = 0;
+        foreach ($today_leads as $lead) { $today_est_commission += $this->calcLeadRevenue($lead); }
+        $today_est_commission = round($today_est_commission, 0);
 
         // Aliases for pipeline / backward compat
-        $done_count     = $mtd_sales;
+        $done_count     = $submitted_count;
         $approved_count = $mtd_approved;
-        $declined_count = $mtd_declined;
+        $declined_count = $sub_declined_count;
 
         // Revenue by carrier (top 5 for summary panel)
         $revenue_by_carrier = $revenue_leads
@@ -282,8 +346,14 @@ class DashboardController extends Controller
             'today_revenue',
             'today_approved',
             'today_declined',
+            'today_est_commission',
             'mtd_sales',
             'total_revenue',
+            'daily_avg_premium',
+            'est_commission',
+            'distinct_sale_days',
+            'submitted_count',
+            'sub_declined_count',
             'revenue_period_label',
             'selected_period',
             'revenue_by_carrier',
@@ -323,7 +393,8 @@ class DashboardController extends Controller
         // ── Period: accept ?period=YYYY-MM ───────────────────────
         $periodParam = $request->get('period');
         if ($periodParam && preg_match('/^\d{4}-\d{2}$/', $periodParam)) {
-            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->startOfMonth();
+            // period='2026-04' means the period STARTING on Apr 3 → anchor = Apr 3
+            $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->setDay(3);
         } else {
             $anchor = $today->copy();
         }
@@ -338,21 +409,65 @@ class DashboardController extends Controller
         $revLeads = Lead::whereNotNull('pending_contract_at')
             ->whereDate('pending_contract_at', '>=', $rev_start)
             ->whereDate('pending_contract_at', '<=', $rev_end)
-            ->get(['id', 'monthly_premium', 'closer_name', 'submission_status', 'pending_contract_at']);
+            ->get(['id', 'monthly_premium', 'closer_name', 'submission_status', 'pending_contract_at',
+                   'carrier_name', 'assigned_partner',
+                   'partner_id', 'insurance_carrier_id', 'state', 'settlement_type', 'policy_type']);
 
-        $done_count     = $revLeads->count();
-        $total_revenue  = $revLeads->sum('monthly_premium');
-        $approved_count = $revLeads->where('submission_status', Statuses::SUB_APPROVED)->count();
-        $declined_count = $revLeads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $done_count    = $revLeads->count();
+        $total_revenue = $revLeads->sum('monthly_premium');
 
-        // Today metrics (filter from MTD set)
+        // Daily avg premium
+        $distinct_sale_days = max(1, $revLeads->groupBy(
+            fn($l) => \Carbon\Carbon::parse($l->pending_contract_at)->toDateString()
+        )->count());
+        $daily_avg_premium = round($total_revenue / $distinct_sale_days, 0);
+
+        // Est. commission — same as Submission Performance report (premium × 9 × commission%)
+        $est_commission = 0;
+        foreach ($revLeads as $lead) { $est_commission += $this->calcLeadRevenue($lead); }
+        $est_commission = round($est_commission, 0);
+
+        // Submitted / Approved / Declined — matching Pending Submission page exactly
+        $subBase = Lead::where(function ($q) {
+                $q->where('ravens_validation_status', 'valid')
+                  ->orWhereNotNull('validated_at');
+            })
+            ->whereNotNull('closer_name')
+            ->whereNotNull('cn_name')->where('cn_name', '!=', '')
+            ->where(function ($q) { $q->whereNotNull('sale_at')->orWhereNotNull('sale_date'); })
+            ->where(function ($q) {
+                $q->where(function ($s) { $s->whereNotNull('ssn')->where('ssn', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('carrier_name')->where('carrier_name', '!=', ''); })
+                  ->orWhere(function ($s) { $s->whereNotNull('monthly_premium')->where('monthly_premium', '>', 0); });
+            })
+            ->whereDate('sale_date', '>=', $rev_start)
+            ->whereDate('sale_date', '<=', $rev_end);
+
+        $submitted_count = (clone $subBase)->count();
+        $approved_count  = (clone $subBase)->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $declined_count  = (clone $subBase)->whereNull('pending_contract_at')
+                             ->where('submission_status', Statuses::SUB_DECLINED)->count();
+
+        // Today metrics (filter from revLeads — Pending Contract page)
         $todayRevLeads  = $revLeads->filter(fn($l) =>
             $l->pending_contract_at && \Carbon\Carbon::parse($l->pending_contract_at)->isSameDay($today)
         );
-        $today_sales    = $todayRevLeads->count();
-        $today_revenue  = $todayRevLeads->sum('monthly_premium');
-        $today_approved = $todayRevLeads->where('submission_status', Statuses::SUB_APPROVED)->count();
-        $today_declined = $todayRevLeads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $today_sales         = $todayRevLeads->count();
+        $today_revenue       = $todayRevLeads->sum('monthly_premium');
+        $today_approved      = $todayRevLeads->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $today_declined      = $todayRevLeads->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $today_est_commission = 0;
+        foreach ($todayRevLeads as $lead) { $today_est_commission += $this->calcLeadRevenue($lead); }
+        $today_est_commission = round($today_est_commission, 0);
+
+        // Revenue by carrier
+        $rev_by_carrier = $revLeads->groupBy('carrier_name')
+            ->map(fn($g) => [
+                'carrier' => $g->first()->carrier_name ?? 'Unknown',
+                'count'   => $g->count(),
+                'premium' => $g->sum('monthly_premium'),
+            ])
+            ->sortByDesc('premium')->values()->take(5)->toArray();
 
         // Attendance
         $todayAttendances = \App\Models\Attendance::with('user')
@@ -445,27 +560,24 @@ class DashboardController extends Controller
             'timestamp'          => now()->toIso8601String(),
             'revPeriodLabel'     => $rev_start->format('M j') . ' → ' . $rev_end->format('M j'),
             'done'               => $done_count,
+            'submitted'          => $submitted_count,
             'approved'           => $approved_count,
             'declined'           => $declined_count,
             'totalRevenue'       => $total_revenue,
+            'dailyAvgPremium'    => $daily_avg_premium,
+            'estCommission'      => $est_commission,
+            'distinctSaleDays'   => $distinct_sale_days,
             'todaySales'         => $today_sales,
             'todayRevenue'       => $today_revenue,
             'todayApproved'      => $today_approved,
             'todayDeclined'      => $today_declined,
+            'todayEstCommission' => $today_est_commission,
+            'revByCarrier'       => $rev_by_carrier,
             'attendance'         => $attendance,
             'presentCount'       => $present_count,
             'totalAttendance'    => $total_attendance_count,
             'salesPerCloser'     => $sales_per_closer,
             'managerBreakdown'   => $manager_breakdown,
-            'chargebacks' => [
-                'thisMonth' => ['count' => $cb_this_count, 'amount' => $cb_this_amt],
-                'lastMonth' => ['count' => $cb_last_count, 'amount' => $cb_last_amt],
-            ],
-            'retention' => [
-                'cb'       => $retention_cb,
-                'retained' => $retention_retained,
-                'pending'  => $retention_pending,
-            ],
         ]);
     }
 

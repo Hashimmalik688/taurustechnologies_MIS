@@ -1086,6 +1086,10 @@ Route::group(['prefix' => 'api/chat', 'middleware' => ['auth']], function () {
     // Pin / unpin messages
     Route::post('/messages/{messageId}/pin', [ChatController::class, 'pinMessage']);
     Route::delete('/messages/{messageId}/pin', [ChatController::class, 'unpinMessage']);
+
+    // Typing indicator (cache-based, polled by clients)
+    Route::post('/conversations/{conversationId}/typing', [ChatController::class, 'typing']);
+    Route::get('/conversations/{conversationId}/typing-status', [ChatController::class, 'typingStatus']);
 });
 
 // Chargebacks — access controlled by role.permission:chargebacks,view

@@ -1353,4 +1353,44 @@ class ChatController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Record that the authenticated user is typing in a conversation.
+     * Stores name in cache for 5 seconds, keyed so other participants can poll it.
+     */
+    public function typing($conversationId)
+    {
+        $userId = Auth::id();
+        $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $conversationId)
+            ->where('user_id', $userId)->exists();
+        abort_unless($isParticipant, 403);
+
+        $name = Auth::user()->name;
+        cache()->put("chat_typing:{$conversationId}:{$userId}", $name, now()->addSeconds(5));
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Return names of users currently typing in a conversation (excluding self).
+     */
+    public function typingStatus($conversationId)
+    {
+        $userId = Auth::id();
+        $isParticipant = \App\Models\ChatParticipant::where('conversation_id', $conversationId)
+            ->where('user_id', $userId)->exists();
+        abort_unless($isParticipant, 403);
+
+        $participants = \App\Models\ChatParticipant::where('conversation_id', $conversationId)
+            ->where('user_id', '!=', $userId)
+            ->pluck('user_id');
+
+        $typers = [];
+        foreach ($participants as $pid) {
+            $name = cache()->get("chat_typing:{$conversationId}:{$pid}");
+            if ($name) $typers[] = $name;
+        }
+
+        return response()->json(['typers' => $typers]);
+    }
 }
