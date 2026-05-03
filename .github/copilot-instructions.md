@@ -145,32 +145,54 @@ php artisan config:cache
 
 ## Knowledge Graph (RAG)
 
-A knowledge graph of this codebase is stored in `graphify-out/graph.json` (3,286 nodes, 5,507 edges, 428 communities from AST extraction of all app PHP/JS/Blade files — third-party libs excluded).
+This codebase has a live knowledge graph at `graphify-out/graph.json` (3,286 nodes, 5,507 edges, 428 communities — app code only, third-party libs excluded). Use it. It saves reading raw files.
 
-**For deep codebase questions, use this order (only when needed):**
+### Mandatory rules — follow these every session
 
-1. **Optionally read `graphify-out/GRAPH_REPORT.md`** for high-level orientation — it contains god nodes (highest-degree concepts), community clusters, and cross-file connections. Only consult it when the question spans many files or you need architectural context; do NOT load it for every prompt.
-
-2. **Query the graph for specific questions** instead of grepping raw files:
-   ```
-   graphify query "what connects LeadController to the salary system?" --graph graphify-out/graph.json
-   graphify path "LeadsImport" "Lead" --graph graphify-out/graph.json
-   graphify explain "AttendanceService" --graph graphify-out/graph.json
-   ```
-
-3. **Only fall back to reading raw files** when the graph query doesn't have enough detail.
-
-**Obsidian vault** (visual exploration): `/var/www/taurus-crm/obsidian-vaults/taurus-crm/` — open in Obsidian desktop for linked node graph. Start from `index.md`.
-
-**Update the graph** after significant code changes:
+**Before using grep_search or file_search, ALWAYS run graphify first:**
 ```bash
-cd /var/www/taurus-crm && python3 graphify/graphify_step3a.py && python3 graphify/graphify_merge.py && python3 graphify/graphify_step4.py && python3 graphify/graphify_step5_obsidian.py
+# Find connections between two things
+graphify path "LeadController" "Lead" --graph /var/www/taurus-crm/graphify-out/graph.json
+
+# Broad architecture question
+graphify query "how does salary calculation work" --graph /var/www/taurus-crm/graphify-out/graph.json --budget 500
+
+# What does a class/file do and what does it connect to
+graphify explain "AttendanceService" --graph /var/www/taurus-crm/graphify-out/graph.json
 ```
-Or in Copilot Chat: `/graphify /var/www/taurus-crm --update`
 
-## graphify
+**At the start of any architecture or multi-file question, read the report first:**
+```
+read_file: graphify-out/GRAPH_REPORT.md  (lines 100–300)
+```
+This gives god nodes (highest-degree = most important classes), community clusters, and cross-module connections in one read — no grepping needed.
 
-Before answering architecture or codebase questions, read `graphify-out/GRAPH_REPORT.md` if it exists.
-If `graphify-out/wiki/index.md` exists, navigate it for deep questions.
-Type `/graphify` in Copilot Chat to build or update the knowledge graph.
+**Decision tree — use this order, stop as soon as you have enough:**
+1. `graphify path A B` — for "how does X connect to Y" questions
+2. `graphify query "..."` — for "what does X do / what touches X" questions
+3. `graphify explain "X"` — for "what is X and what does it relate to"
+4. Read `graphify-out/GRAPH_REPORT.md` — for session-start orientation
+5. `grep_search` / `file_search` — ONLY if graph didn't give enough detail
+6. `read_file` on specific file — ONLY after you know from graph which file to read
+
+**Never** scan directories blindly or read multiple files speculatively when the graph can tell you which one to open.
+
+**After modifying code files**, run to keep the graph current (AST-only, no API cost):
+```bash
+cd /var/www/taurus-crm && graphify update .
+```
+
+### Key nodes to know (top god nodes by connection count)
+- `Lead` — central model, 51 connections
+- `LeadController` — main entry point, 42 connections
+- `EPMSProject` — project management module, 54 connections
+- `Attendance` — attendance tracking, 50 connections
+- `QaCall` — QA pipeline, 43 connections
+- `AuditLog` — audit trail, 35 connections
+- `QADashboardController` — QA reporting hub, 34 connections
+
+### graphify
+
+Type `/graphify` in Copilot Chat to rebuild the knowledge graph.
+Obsidian vault (visual): `/var/www/taurus-crm/obsidian-vaults/taurus-crm/` — open in Obsidian, start from `index.md`.
 
