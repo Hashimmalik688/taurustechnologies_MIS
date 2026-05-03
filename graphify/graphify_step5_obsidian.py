@@ -8,7 +8,7 @@ from pathlib import Path
 from networkx.readwrite import json_graph
 
 OUT = Path('/var/www/taurus-crm/graphify-out')
-OBSIDIAN = Path('/root/obsidian-vaults/taurus-crm')
+OBSIDIAN = Path('/var/www/taurus-crm/obsidian-vaults/taurus-crm')
 OBSIDIAN.mkdir(parents=True, exist_ok=True)
 
 extraction = json.loads((OUT / '.graphify_extract.json').read_text())

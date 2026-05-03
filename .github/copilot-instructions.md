@@ -145,7 +145,7 @@ php artisan config:cache
 
 ## Knowledge Graph (RAG)
 
-A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,702 nodes, 27,187 edges, 803 communities from AST extraction of all 1,281 PHP/JS/TS files).
+A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,735 nodes, 27,233 edges, 810 communities from AST extraction of all 1,294 PHP/JS/TS files).
 
 **For deep codebase questions, use this order (only when needed):**
 
@@ -167,3 +167,10 @@ A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,702
 cd /var/www/taurus-crm && python3 graphify/graphify_step3a.py && python3 graphify/graphify_merge.py && python3 graphify/graphify_step4.py && python3 graphify/graphify_step5_obsidian.py
 ```
 Or in Copilot Chat: `/graphify /var/www/taurus-crm --update`
+
+## graphify
+
+Before answering architecture or codebase questions, read `graphify-out/GRAPH_REPORT.md` if it exists.
+If `graphify-out/wiki/index.md` exists, navigate it for deep questions.
+Type `/graphify` in Copilot Chat to build or update the knowledge graph.
+
