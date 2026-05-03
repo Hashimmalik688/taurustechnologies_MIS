@@ -7,7 +7,6 @@
 @endsection
 
 @section('css')
-    {{-- <link href="{{ URL::asset('/assets/libs/datatables/datatables.min.css') }}" rel="stylesheet" type="text/css" /> --}}
     <style>
         /* Fixed Table Container - Scrollable */
         .top-scrollbar-wrapper {
@@ -207,7 +206,6 @@
                                 <tr>
                                     <td>{{ $lead->id }}</td>
 
-                                    {{-- <td>{{ $lead->date ? \Carbon\Carbon::parse($lead->date)->format('M d, Y') : 'N/A' }} --}}
                                     <td>{{ $lead->date ? $lead->date : 'N/A' }}
                                     </td>
                                     <td>{{ $lead->cn_name }}</td>
@@ -760,8 +758,6 @@
 @endsection
 
 @section('script')
-    {{-- <script src="{{ URL::asset('/assets/libs/datatables/datatables.min.js') }}"></script>
-    <script src="{{ URL::asset('/assets/js/pages/datatables.init.js') }}"></script> --}}
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
     <script>

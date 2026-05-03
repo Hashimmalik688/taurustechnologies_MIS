@@ -593,7 +593,6 @@ class LeadController extends Controller
                             'phone' => $carrierInfo['phone'],
                             'email' => $carrierInfo['email'],
                             'website' => $carrierInfo['website'],
-                            // 'status' => $carrierInfo['status'] ?? 'active',
                             'notes' => $carrierInfo['notes'],
                             'forwarded_by' => auth()->id(),
                             'sale_at' => now(),
@@ -610,7 +609,6 @@ class LeadController extends Controller
                                 'phone' => $carrierInfo['phone'],
                                 'email' => $carrierInfo['email'],
                                 'website' => $carrierInfo['website'],
-                                // 'status' => $carrierInfo['status'],
                                 'notes' => $carrierInfo['notes'],
                                 'forwarded_by' => count($carrierData) == 1 ? auth()->id() : $carrier->forwarded_by,
                             ]);
@@ -618,14 +616,6 @@ class LeadController extends Controller
                     }
                 }
             }
-
-            // Handle carrier deletions
-            // if ($request->has('deleted_carriers')) {
-            //     $deletedCarriers = $request->input('deleted_carriers');
-            //     foreach ($deletedCarriers as $carrierId) {
-            //         $lead->carriers()->where('id', $carrierId)->delete();
-            //     }
-            // }
 
             return redirect()->back()->with('success', 'Lead updated successfully.');
         } catch (\Exception $e) {

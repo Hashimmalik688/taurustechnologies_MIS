@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Lead;
-use App\Support\Statuses;
 use App\Support\Teams;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

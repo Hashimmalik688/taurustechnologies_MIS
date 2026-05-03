@@ -23,10 +23,7 @@ class ZoomWebhookController extends Controller
     public function handleWebhook(Request $request)
     {
         // Log ALL incoming webhook data for debugging
-        Log::info('🔔 ZOOM WEBHOOK RECEIVED', [
-            'event' => $request->input('event'),
-            'full_payload' => $request->all()
-        ]);
+        Log::info('Zoom webhook received: ' . $request->input('event'));
         
         // 1. ZOOM URL VERIFICATION CHALLENGE
         // Zoom sends this when you first configure the webhook URL
@@ -35,7 +32,7 @@ class ZoomWebhookController extends Controller
             $secret = env('ZOOM_WEBHOOK_SECRET_TOKEN', config('zoom.webhook_secret_token', ''));
             
             if (!$secret) {
-                Log::warning('⚠️ ZOOM WEBHOOK: No secret token configured for URL validation');
+                Log::warning('[Zoom] No webhook secret token configured for URL validation');
                 // If no secret, just echo back the plain token (some Zoom apps allow this)
                 return response()->json([
                     'plainToken' => $plainToken,
@@ -45,10 +42,7 @@ class ZoomWebhookController extends Controller
             
             $encryptedToken = hash_hmac('sha256', $plainToken, $secret);
             
-            Log::info('✅ ZOOM WEBHOOK: URL Verification Challenge', [
-                'plainToken' => $plainToken,
-                'encryptedToken' => $encryptedToken
-            ]);
+            Log::info('Zoom webhook: URL verification challenge responded');
             
             return response()->json([
                 'plainToken' => $plainToken,
@@ -73,7 +67,7 @@ class ZoomWebhookController extends Controller
             $callerNumber = $callLog['caller_did_number'] ?? $callLog['caller_number'] ?? null;
             $calleeNumber = $callLog['callee_did_number'] ?? $callLog['callee_number'] ?? null;
             
-            Log::info('📋 Extracted from call_logs array', [
+            Log::info('[Zoom] Phone extracted from call_logs', [
                 'caller' => $callerNumber,
                 'callee' => $calleeNumber,
                 'result' => $callLog['result'] ?? 'unknown'
@@ -97,7 +91,7 @@ class ZoomWebhookController extends Controller
                            $request->input('payload.object.caller_number') ?? null;
         }
 
-        Log::info('📞 WEBHOOK: Extracted phone numbers', [
+        Log::info('[Zoom] Extracted phone numbers', [
             'event' => $event,
             'callerNumber' => $callerNumber,
             'calleeNumber' => $calleeNumber
@@ -152,22 +146,10 @@ class ZoomWebhookController extends Controller
 
     private function handleCallConnected($callerNumber, $calleeNumber, $rawWebhookData)
     {
-        Log::info('🔔 HANDLE CALL CONNECTED', [
-            'callerNumber' => $callerNumber,
-            'calleeNumber' => $calleeNumber,
-        ]);
+        Log::info('[Zoom] Call connected', ['caller' => $callerNumber, 'callee' => $calleeNumber]);
         
         // Extract Zoom user info for fallback matching (internal calls)
         $payload = $rawWebhookData['payload']['object'] ?? [];
-        $zoomUserEmail = $payload['caller']['email'] ?? $payload['callee']['email'] ?? null;
-        $zoomUserId = $payload['caller']['user_id'] ?? $payload['callee']['user_id'] ?? null;
-        $zoomExtNumber = $payload['caller']['extension_number'] ?? $payload['callee']['extension_number'] ?? null;
-        
-        Log::info('🔍 Zoom user info', [
-            'email' => $zoomUserEmail,
-            'user_id' => $zoomUserId,
-            'extension' => $zoomExtNumber,
-        ]);
         
         // Try to find lead by either caller or callee number
         $phoneToSearch = $calleeNumber ?? $callerNumber;
@@ -177,13 +159,6 @@ class ZoomWebhookController extends Controller
             // Strip '+' and any non-digit characters, get last 10 digits
             $cleanPhone = preg_replace('/[^\d]/', '', $phoneToSearch);
             $last10Digits = substr($cleanPhone, -10);
-            
-            Log::info('🔍 Searching for lead by phone', [
-                'original_phone' => $phoneToSearch,
-                'clean_phone' => $cleanPhone,
-                'last_10' => $last10Digits,
-                'search_pattern' => '%' . $last10Digits . '%'
-            ]);
 
             // Search for lead by phone number (last 10 digits)
             $lead = Lead::where('phone_number', 'like', '%' . $last10Digits . '%')->first();
@@ -193,7 +168,6 @@ class ZoomWebhookController extends Controller
                 $cleanCaller = preg_replace('/[^\d]/', '', $callerNumber);
                 $last10Caller = substr($cleanCaller, -10);
                 $lead = Lead::where('phone_number', 'like', '%' . $last10Caller . '%')->first();
-                Log::info('🔍 Tried caller number', ['last_10' => $last10Caller, 'found' => $lead ? 'yes' : 'no']);
             }
         }
         
@@ -223,12 +197,6 @@ class ZoomWebhookController extends Controller
                 $user = User::where('zoom_number', 'like', '%' . $last10Caller . '%')->first();
             }
             
-            Log::info('🔍 FALLBACK: User matching result', [
-                'zoom_user_id' => $zoomUserId,
-                'zoom_email' => $zoomUserEmail,
-                'found' => $user ? $user->name : 'NONE'
-            ]);
-            
             if ($user) {
                 // Find most recent pending call log from this user (within last 5 minutes)
                 $recentCallLog = \App\Models\CallLog::where('agent_id', $user->id)
@@ -239,30 +207,18 @@ class ZoomWebhookController extends Controller
                     
                 if ($recentCallLog) {
                     $lead = Lead::find($recentCallLog->lead_id);
-                    Log::info('🔍 FALLBACK: Found lead via Zoom user\'s recent call', [
-                        'user_email' => $zoomUserEmail,
-                        'user_id' => $user->id,
-                        'call_log_id' => $recentCallLog->id,
-                        'lead_id' => $lead?->id,
-                    ]);
                 }
             }
         }
         
         if (!$lead && !$phoneToSearch) {
-            Log::warning('❌ No phone number or user match for call connected event', [
+            Log::warning('[Zoom] No phone number or user match for call connected event', [
                 'raw_data' => $rawWebhookData
             ]);
             return;
         }
 
         if ($lead) {
-            Log::info('✅ Lead found!', [
-                'lead_id' => $lead->id,
-                'lead_name' => $lead->cn_name,
-                'lead_phone' => $lead->phone_number
-            ]);
-            
             // Find the most recent call log for this lead (within last 10 minutes)
             $callLog = \App\Models\CallLog::where('lead_id', $lead->id)
                 ->where('call_status', '!=', 'connected')
@@ -277,13 +233,7 @@ class ZoomWebhookController extends Controller
                     'call_start_time' => now(),
                 ]);
                 
-                Log::info('✅✅ CALL LOG UPDATED TO CONNECTED ✅✅', [
-                    'call_log_id' => $callLog->id,
-                    'lead_id' => $lead->id,
-                    'lead_name' => $lead->cn_name,
-                    'phone_number' => $lead->phone_number,
-                    'new_status' => 'connected',
-                ]);
+                Log::info('[Zoom] CallLog updated to connected', ['call_log_id' => $callLog->id, 'lead_id' => $lead->id]);
             } else {
                 // No existing call log - create one
                 $callLog = \App\Models\CallLog::create([
@@ -295,10 +245,7 @@ class ZoomWebhookController extends Controller
                     'call_start_time' => now(),
                 ]);
                 
-                Log::info('✅ Created new CallLog with connected status', [
-                    'call_log_id' => $callLog->id,
-                    'lead_id' => $lead->id
-                ]);
+                Log::info('[Zoom] New CallLog created with connected status', ['call_log_id' => $callLog->id, 'lead_id' => $lead->id]);
             }
             
             // Also store in CallEvent — identify user by zoom_user_id first
@@ -332,7 +279,7 @@ class ZoomWebhookController extends Controller
                 ]);
             }
         } else {
-            Log::warning('❌ No lead found for phone number', [
+            Log::warning('[Zoom] No lead found for phone number', [
                 'callee' => $calleeNumber,
                 'caller' => $callerNumber,
                 'searched_last_10' => $phoneToSearch ? substr(preg_replace('/[^\d]/', '', $phoneToSearch), -10) : 'N/A'
@@ -342,7 +289,7 @@ class ZoomWebhookController extends Controller
 
     private function handleCallEnded($phoneNumber, $rawWebhookData)
     {
-        Log::info('📞 Call ended webhook received', [
+        Log::info('[Zoom] Call ended', [
             'phoneNumber' => $phoneNumber,
             'sanitized_phone' => $this->sanitizePhoneForChannel($phoneNumber),
         ]);
@@ -367,13 +314,13 @@ class ZoomWebhookController extends Controller
                     'duration_seconds' => now()->diffInSeconds($callLog->call_start_time),
                 ]);
                 
-                Log::info('✅ WEBHOOK: CallLog updated to ENDED', [
+                Log::info('[Zoom] CallLog updated to ended', [
                     'call_log_id' => $callLog->id,
                     'lead_id' => $lead->id,
                     'duration' => $callLog->duration_seconds,
                 ]);
             } else {
-                Log::warning('⚠️ No active CallLog found to mark as ended (or too recent)', ['lead_id' => $lead->id]);
+                Log::warning('[Zoom] No active CallLog found to mark as ended (or too recent)', ['lead_id' => $lead->id]);
             }
         } else {
             // Try to find user by zoom_user_id first (works for all numbers), then fallback to email/phone
@@ -405,7 +352,7 @@ class ZoomWebhookController extends Controller
                         'duration_seconds' => now()->diffInSeconds($callLog->call_start_time),
                     ]);
                     
-                    Log::info('✅ WEBHOOK: CallLog updated to ENDED (matched by agent)', [
+                    Log::info('[Zoom] CallLog updated to ended (matched by agent)', [
                         'call_log_id' => $callLog->id,
                         'agent_id' => $user->id,
                     ]);
@@ -426,7 +373,7 @@ class ZoomWebhookController extends Controller
 
     private function handleCallHistoryCompleted($callerNumber, $calleeNumber, $rawWebhookData, $payload)
     {
-        Log::info('📞 CALL LOG/HISTORY COMPLETED EVENT', [
+        Log::info('[Zoom] Call history completed event', [
             'callerNumber' => $callerNumber,
             'calleeNumber' => $calleeNumber,
             'call_logs_count' => count($payload['call_logs'] ?? []),
@@ -441,7 +388,7 @@ class ZoomWebhookController extends Controller
             $calleeDidNumber = $zoomCallLog['callee_did_number'] ?? $calleeNumber;
             $callerDidNumber = $zoomCallLog['caller_did_number'] ?? $callerNumber;
 
-            Log::info('📋 CALL RESULT', [
+            Log::info('[Zoom] Call result', [
                 'result' => $result,
                 'duration' => $duration,
                 'callee_did' => $calleeDidNumber,
@@ -450,7 +397,7 @@ class ZoomWebhookController extends Controller
 
             // If the call was connected, update our database
             if ($result === 'Call connected' || str_contains(strtolower($result), 'connected')) {
-                Log::info('✅ CALL WAS CONNECTED - Updating CallLog');
+                Log::info('[Zoom] Call was connected — updating CallLog');
                 
                 // Use the callee number (external phone) to find the lead
                 $phoneToSearch = $calleeDidNumber ?? $callerDidNumber;
@@ -472,7 +419,7 @@ class ZoomWebhookController extends Controller
                             'duration_seconds' => $duration,
                         ]);
                         
-                        Log::info('✅✅ CALL LOG UPDATED TO CONNECTED ✅✅', [
+                        Log::info('[Zoom] CallLog updated to connected', [
                             'call_log_id' => $callLog->id,
                             'lead_id' => $lead->id,
                             'lead_name' => $lead->cn_name,
@@ -480,13 +427,13 @@ class ZoomWebhookController extends Controller
                         ]);
                     }
                 } else {
-                    Log::warning('❌ No lead found for connected call', [
+                    Log::warning('[Zoom] No lead found for connected call', [
                         'phone_searched' => $last10Digits
                     ]);
                 }
             } else {
                 // Call was NOT connected (missed, no answer, etc.) - mark as completed
-                Log::info('❌ Call was not connected - marking as completed', ['result' => $result]);
+                Log::info('[Zoom] Call not connected — marking completed', ['result' => $result]);
                 
                 // Try to find the CallLog by either number
                 $phoneToSearch = $calleeDidNumber ?? $callerDidNumber ?? $callerNumber ?? $calleeNumber;
@@ -524,7 +471,7 @@ class ZoomWebhookController extends Controller
                                 'duration_seconds' => $duration,
                             ]);
                             
-                            Log::info('✅ CallLog marked as ' . $finalStatus, [
+                            Log::info('[Zoom] CallLog marked as ' . $finalStatus, [
                                 'call_log_id' => $callLog->id,
                                 'lead_id' => $lead->id,
                                 'result' => $result,
@@ -1130,7 +1077,7 @@ class ZoomWebhookController extends Controller
                 'processed_at' => now()->utc(),
             ]);
 
-            Log::info('✅ Webhook event saved to zoom_webhook_logs', [
+            Log::info('[Zoom] Webhook event saved to zoom_webhook_logs', [
                 'log_id' => $webhookLog->id,
                 'event' => $event,
                 'zoom_call_id' => $zoomCallId,
@@ -1139,7 +1086,7 @@ class ZoomWebhookController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('❌ Failed to save webhook log', [
+            Log::error('[Zoom] Failed to save webhook log', [
                 'event' => $event,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -1168,7 +1115,7 @@ class ZoomWebhookController extends Controller
             }
         }
 
-        Log::info('Broadcasting webhook data', [
+        Log::info('[Zoom] Broadcasting webhook data', [
             'eventType' => $eventType,
             'phoneNumber' => $phoneNumber,
             'sanitizedPhone' => $this->sanitizePhoneForChannel($phoneNumber),

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AgentCarrierState;
-use App\Models\AuditLog;
 use App\Models\InsuranceCarrier;
 use App\Models\Lead;
 use App\Models\Partner;

@@ -7,7 +7,6 @@ use App\Models\Lead;
 use App\Models\Partner;
 use App\Models\InsuranceCarrier;
 use App\Models\AgentCarrierState;
-use App\Models\User;
 use App\Services\CommissionCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

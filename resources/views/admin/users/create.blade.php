@@ -35,7 +35,6 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-body">
-                    {{-- <h4 class="card-title mb-4">Form Grid Layout</h4> --}}
 
                     <form method="POST" action="{{ route('users.store') }}">
                         @csrf

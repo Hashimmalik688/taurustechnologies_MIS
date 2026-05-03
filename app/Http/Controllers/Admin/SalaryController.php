@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
-use App\Models\Carrier;
 use App\Models\Lead;
 use App\Models\ManualPayrollEntry;
 use App\Models\SalaryDeduction;

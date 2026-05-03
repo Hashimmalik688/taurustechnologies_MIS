@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
-use App\Models\User;
 use App\Support\Statuses;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

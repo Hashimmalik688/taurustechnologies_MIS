@@ -54,13 +54,6 @@ class UserController extends Controller
             if (!empty($roles)) {
                 $user->syncRoles($roles);
             }
-            
-            // Verify roles were assigned
-            \Log::info("User created with roles", [
-                'email' => $user->email,
-                'requested_roles' => $roles,
-                'assigned_roles' => $user->roles->pluck('name')->toArray()
-            ]);
         } catch (\Exception $e) {
             \Log::error("Error assigning roles to user", [
                 'email' => $user->email,
@@ -135,14 +128,6 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, $id)
     {
-        \Log::info("=== USER UPDATE STARTED ===", [
-            'user_id' => $id,
-            'request_all' => $request->all(),
-            'request_roles' => $request->roles,
-            'has_roles' => $request->has('roles'),
-            'ip' => $request->ip()
-        ]);
-
         $user = User::findOrFail($id);
 
         // Store old values for audit log
@@ -181,12 +166,6 @@ class UserController extends Controller
 
         // Update user roles in Spatie - detach all first then attach new ones
         try {
-            \Log::info("Updating roles for user {$user->id}", [
-                'old_roles' => $oldRoles,
-                'new_roles' => $newRoles,
-                'request_data' => $request->only(['name', 'email', 'roles'])
-            ]);
-            
             // Detach all existing roles first
             $user->roles()->detach();
             
@@ -196,10 +175,6 @@ class UserController extends Controller
             // Clear permission cache for this user
             $permissionService = app(\App\Services\PermissionService::class);
             $permissionService->clearUserPermissionCache($user->id);
-            
-            \Log::info("Roles updated successfully for user {$user->id}", [
-                'final_roles' => $user->fresh()->roles->pluck('name')->toArray()
-            ]);
         } catch (\Exception $e) {
             \Log::error("Error updating roles for user", [
                 'user_id' => $user->id,
