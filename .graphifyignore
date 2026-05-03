@@ -1,39 +1,38 @@
-# graphify — skip generated, binary, and vendor content
-vendor/
-node_modules/
-storage/
-public/build/
-public/hot
-bootstrap/cache/
-.git/
+# graphifyignore — exclude non-app code from the knowledge graph
+# gitignore-style patterns, relative to this file's directory
 
-# Third-party frontend libraries (not your code)
+# PHP vendor dependencies
+vendor/
+
+# Node modules
+node_modules/
+
+# Frontend build output
+public/build/
+public/js/
+public/css/
+
+# Third-party frontend libraries bundled in resources
 resources/libs/
 resources/fonts/
-public/css/
-public/js/
 
-# graphify's own output (don't self-index)
+# Compiled assets
+resources/css/
+public/images/
+
+# Graphify tooling itself
+graphify/
 graphify-out/
-AGENTS.md
-CLAUDE.md
 
-# compiled / lock files
-composer.lock
-package-lock.json
-*.min.js
-*.min.css
-*.map
+# Storage / logs / caches
+storage/
+bootstrap/cache/
 
-# large data / logs
-*.log
-*.sql
-*.csv
-*.xlsx
-*.pdf
+# Test snapshots and fixtures (keep test PHP files themselves)
+tests/fixtures/
 
-# local scripts not part of the codebase
-clear_cs.php
-sync_missing_sales.php
+# Obsidian vault (markdown only, not code)
+obsidian-vaults/
+
+# Scripts (one-off utility scripts, not app code)
 scripts/
-worked/
