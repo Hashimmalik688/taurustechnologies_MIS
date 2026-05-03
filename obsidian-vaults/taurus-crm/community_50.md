@@ -2,14 +2,15 @@
 **5 nodes**
 
 ## Members
-- [[app_notifications_mentionedinchatnotification_php]]
-- [[mentionedinchatnotification_mentionedinchatnotification]]
-- [[mentionedinchatnotification_mentionedinchatnotification_construct]]
-- [[mentionedinchatnotification_mentionedinchatnotification_toarray]]
-- [[mentionedinchatnotification_mentionedinchatnotification_via]]
+- [[app_providers_telescopeserviceprovider_php]]
+- [[telescopeserviceprovider_telescopeserviceprovider]]
+- [[telescopeserviceprovider_telescopeserviceprovider_gate]]
+- [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]]
+- [[telescopeserviceprovider_telescopeserviceprovider_register]]
 
 ## Internal connections
-- [[app_notifications_mentionedinchatnotification_php]] —contains→ [[mentionedinchatnotification_mentionedinchatnotification]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_construct]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_via]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_toarray]] `EXTRACTED`
+- [[app_providers_telescopeserviceprovider_php]] —contains→ [[telescopeserviceprovider_telescopeserviceprovider]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_register]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_gate]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider_register]] —calls→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`

@@ -1,9 +1,11 @@
 # Community 213
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[app_http_middleware_trustproxies_php]]
-- [[trustproxies_trustproxies]]
+- [[2026_02_02_115043_add_avatar_to_communities_table_down]]
+- [[2026_02_02_115043_add_avatar_to_communities_table_up]]
+- [[database_migrations_2026_02_02_115043_add_avatar_to_communities_table_php]]
 
 ## Internal connections
-- [[app_http_middleware_trustproxies_php]] —contains→ [[trustproxies_trustproxies]] `EXTRACTED`
+- [[database_migrations_2026_02_02_115043_add_avatar_to_communities_table_php]] —contains→ [[2026_02_02_115043_add_avatar_to_communities_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_02_115043_add_avatar_to_communities_table_php]] —contains→ [[2026_02_02_115043_add_avatar_to_communities_table_down]] `EXTRACTED`

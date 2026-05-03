@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[bs_translate]]
-- [[resources_libs_moment_locale_bs_js]]
+- [[alerts_init_alert]]
+- [[resources_js_pages_alerts_init_js]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_bs_js]] —contains→ [[bs_translate]] `EXTRACTED`
+- [[resources_js_pages_alerts_init_js]] —contains→ [[alerts_init_alert]] `EXTRACTED`

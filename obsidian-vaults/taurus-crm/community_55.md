@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_http_middleware_checkdailyattendance_php]]
-- [[checkdailyattendance_checkdailyattendance]]
-- [[checkdailyattendance_checkdailyattendance_construct]]
-- [[checkdailyattendance_checkdailyattendance_handle]]
-- [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]]
+- [[app_http_requests_updateuserrequest_php]]
+- [[updateuserrequest_updateuserrequest]]
+- [[updateuserrequest_updateuserrequest_authorize]]
+- [[updateuserrequest_updateuserrequest_messages]]
+- [[updateuserrequest_updateuserrequest_rules]]
 
 ## Internal connections
-- [[app_http_middleware_checkdailyattendance_php]] —contains→ [[checkdailyattendance_checkdailyattendance]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_construct]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_handle]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance_handle]] —calls→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`
+- [[app_http_requests_updateuserrequest_php]] —contains→ [[updateuserrequest_updateuserrequest]] `EXTRACTED`
+- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_authorize]] `EXTRACTED`
+- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_rules]] `EXTRACTED`
+- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_messages]] `EXTRACTED`

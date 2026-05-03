@@ -2,20 +2,16 @@
 **6 nodes**
 
 ## Members
-- [[lt_forms]]
-- [[lt_special]]
-- [[lt_translate]]
-- [[lt_translateseconds]]
-- [[lt_translatesingular]]
-- [[resources_libs_moment_locale_lt_js]]
+- [[accountcreatedmail_accountcreatedmail]]
+- [[accountcreatedmail_accountcreatedmail_attachments]]
+- [[accountcreatedmail_accountcreatedmail_construct]]
+- [[accountcreatedmail_accountcreatedmail_content]]
+- [[accountcreatedmail_accountcreatedmail_envelope]]
+- [[app_mail_accountcreatedmail_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translateseconds]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translatesingular]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_special]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_forms]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translate]] `EXTRACTED`
-- [[lt_translatesingular]] —calls→ [[lt_forms]] `EXTRACTED`
-- [[lt_translatesingular]] —calls→ [[lt_translate]] `EXTRACTED`
-- [[lt_special]] —calls→ [[lt_translate]] `EXTRACTED`
-- [[lt_forms]] —calls→ [[lt_translate]] `EXTRACTED`
+- [[app_mail_accountcreatedmail_php]] —contains→ [[accountcreatedmail_accountcreatedmail]] `EXTRACTED`
+- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_construct]] `EXTRACTED`
+- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_envelope]] `EXTRACTED`
+- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_content]] `EXTRACTED`
+- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_attachments]] `EXTRACTED`

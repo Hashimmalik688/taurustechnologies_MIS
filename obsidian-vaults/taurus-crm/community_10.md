@@ -1,168 +1,115 @@
 # Community 10
-**132 nodes**
+**79 nodes**
 
 ## Members
-- [[2014_10_12_000000_create_users_table_createuserstable]]
-- [[2014_10_12_000000_create_users_table_createuserstable_down]]
-- [[2014_10_12_000000_create_users_table_createuserstable_up]]
-- [[2025_05_24_041616_create_attendances_table_down]]
-- [[2025_05_24_041616_create_attendances_table_up]]
-- [[2025_06_01_005217_create_salary_records_table_down]]
-- [[2025_06_01_005217_create_salary_records_table_up]]
-- [[2025_12_09_030100_create_insurance_carriers_table_down]]
-- [[2025_12_09_030100_create_insurance_carriers_table_up]]
-- [[2026_01_02_021649_add_beneficiaries_json_to_leads_table_down]]
-- [[2026_01_02_021649_add_beneficiaries_json_to_leads_table_up]]
-- [[2026_01_09_024924_add_zoom_call_id_to_call_logs_table_down]]
-- [[2026_01_09_024924_add_zoom_call_id_to_call_logs_table_up]]
-- [[2026_01_21_051206_create_chart_of_accounts_table_down]]
-- [[2026_01_21_051206_create_chart_of_accounts_table_up]]
-- [[2026_01_21_221340_create_petty_cash_ledgers_table_down]]
-- [[2026_01_21_221340_create_petty_cash_ledgers_table_up]]
-- [[2026_01_22_000000_create_employees_table_down]]
-- [[2026_01_22_000000_create_employees_table_up]]
-- [[2026_01_24_081548_create_community_announcement_reads_table_down]]
-- [[2026_01_24_081548_create_community_announcement_reads_table_up]]
-- [[2026_01_28_create_chat_notification_preferences_table_down]]
-- [[2026_01_28_create_chat_notification_preferences_table_up]]
-- [[2026_02_03_240001_create_sticky_notes_table_down]]
-- [[2026_02_03_240001_create_sticky_notes_table_up]]
-- [[2026_02_05_043818_create_manual_payroll_entries_table_down]]
-- [[2026_02_05_043818_create_manual_payroll_entries_table_up]]
-- [[2026_03_03_120000_add_sale_fields_to_qa_results_table_down]]
-- [[2026_03_03_120000_add_sale_fields_to_qa_results_table_up]]
-- [[2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_down]]
-- [[2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_up]]
-- [[2026_03_24_143027_add_ravens_validation_status_to_leads_table_down]]
-- [[2026_03_24_143027_add_ravens_validation_status_to_leads_table_up]]
-- [[2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_down]]
-- [[2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_up]]
-- [[2026_04_08_000002_create_lead_field_highlights_table_down]]
-- [[2026_04_08_000002_create_lead_field_highlights_table_up]]
-- [[2026_04_23_120000_optimize_carrier_sheet_indexes_down]]
-- [[2026_04_23_120000_optimize_carrier_sheet_indexes_up]]
-- [[addbeneficiary]]
-- [[alloweddevice_alloweddevice]]
-- [[alloweddevice_alloweddevice_addedby]]
-- [[alloweddevice_alloweddevice_isapproved]]
-- [[alloweddevice_alloweddevice_isdisabled]]
-- [[alloweddevice_alloweddevice_ispending]]
-- [[alloweddevice_alloweddevice_isrejected]]
-- [[app_http_controllers_admin_devicecontroller_php]]
-- [[app_http_controllers_partner_partnerauthcontroller_php]]
-- [[app_http_middleware_partnerauthenticate_php]]
-- [[app_http_middleware_preventpartneraccess_php]]
-- [[app_http_middleware_preventuseraccess_php]]
-- [[app_http_middleware_redirectifauthenticated_php]]
-- [[app_http_middleware_restricttoalloweddevice_php]]
-- [[app_http_requests_updateagentrequest_php]]
-- [[app_http_requests_updateuserrequest_php]]
-- [[app_listeners_loguserlogout_php]]
-- [[app_models_alloweddevice_php]]
-- [[app_models_epmsexternalcost_php]]
-- [[app_models_userdetail_php]]
-- [[chart_pluginservice_invalidate]]
-- [[database_migrations_2014_10_12_000000_create_users_table_php]]
-- [[database_migrations_2025_05_24_041616_create_attendances_table_php]]
-- [[database_migrations_2025_06_01_005217_create_salary_records_table_php]]
-- [[database_migrations_2025_12_09_030100_create_insurance_carriers_table_php]]
-- [[database_migrations_2026_01_02_021649_add_beneficiaries_json_to_leads_table_php]]
-- [[database_migrations_2026_01_09_024924_add_zoom_call_id_to_call_logs_table_php]]
-- [[database_migrations_2026_01_21_051206_create_chart_of_accounts_table_php]]
-- [[database_migrations_2026_01_21_221340_create_petty_cash_ledgers_table_php]]
-- [[database_migrations_2026_01_22_000000_create_employees_table_php]]
-- [[database_migrations_2026_01_24_081548_create_community_announcement_reads_table_php]]
-- [[database_migrations_2026_01_28_create_chat_notification_preferences_table_php]]
-- [[database_migrations_2026_02_03_240001_create_sticky_notes_table_php]]
-- [[database_migrations_2026_02_05_043818_create_manual_payroll_entries_table_php]]
-- [[database_migrations_2026_03_03_120000_add_sale_fields_to_qa_results_table_php]]
-- [[database_migrations_2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_php]]
-- [[database_migrations_2026_03_24_143027_add_ravens_validation_status_to_leads_table_php]]
-- [[database_migrations_2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_php]]
-- [[database_migrations_2026_04_08_000002_create_lead_field_highlights_table_php]]
-- [[database_migrations_2026_04_23_120000_optimize_carrier_sheet_indexes_php]]
-- [[devicecontroller_devicecontroller]]
-- [[devicecontroller_devicecontroller_approve]]
-- [[devicecontroller_devicecontroller_destroy]]
-- [[devicecontroller_devicecontroller_disable]]
-- [[devicecontroller_devicecontroller_enable]]
-- [[devicecontroller_devicecontroller_index]]
-- [[devicecontroller_devicecontroller_rejectallpending]]
-- [[devicecontroller_devicecontroller_store]]
-- [[devicecontroller_devicecontroller_update]]
-- [[echarts_esm_check]]
-- [[epmsexternalcost_epmsexternalcost]]
-- [[epmsexternalcost_epmsexternalcost_project]]
-- [[loguserlogout_loguserlogout]]
-- [[loguserlogout_loguserlogout_construct]]
-- [[partnerauthcontroller_partnerauthcontroller]]
-- [[partnerauthcontroller_partnerauthcontroller_login]]
-- [[partnerauthcontroller_partnerauthcontroller_logout]]
-- [[partnerauthcontroller_partnerauthcontroller_showloginform]]
-- [[partnerauthenticate_partnerauthenticate]]
-- [[partnerauthenticate_partnerauthenticate_handle]]
-- [[partneruserseparationtest_partneruserseparationtest]]
-- [[partneruserseparationtest_partneruserseparationtest_partner_cannot_access_user_routes]]
-- [[partneruserseparationtest_partneruserseparationtest_partner_guard_uses_partners_table]]
-- [[partneruserseparationtest_partneruserseparationtest_user_cannot_access_partner_routes]]
-- [[partneruserseparationtest_partneruserseparationtest_user_guard_uses_users_table]]
-- [[preventpartneraccess_preventpartneraccess]]
-- [[preventpartneraccess_preventpartneraccess_handle]]
-- [[preventuseraccess_preventuseraccess]]
-- [[preventuseraccess_preventuseraccess_handle]]
-- [[redirectifauthenticated_redirectifauthenticated]]
-- [[redirectifauthenticated_redirectifauthenticated_handle]]
-- [[removebeneficiary_index]]
-- [[resources_views_livewire_create_lead_blade_php]]
-- [[restricttoalloweddevice_restricttoalloweddevice]]
-- [[restricttoalloweddevice_restricttoalloweddevice_disabledresponse]]
-- [[restricttoalloweddevice_restricttoalloweddevice_handle]]
-- [[restricttoalloweddevice_restricttoalloweddevice_makecookie]]
-- [[restricttoalloweddevice_restricttoalloweddevice_pendingresponse]]
-- [[tests_feature_partneruserseparationtest_php]]
-- [[updateagentrequest_updateagentrequest]]
-- [[updateagentrequest_updateagentrequest_authorize]]
-- [[updateagentrequest_updateagentrequest_messages]]
-- [[updateagentrequest_updateagentrequest_rules]]
-- [[updateuserrequest_updateuserrequest]]
-- [[updateuserrequest_updateuserrequest_authorize]]
-- [[updateuserrequest_updateuserrequest_messages]]
-- [[updateuserrequest_updateuserrequest_rules]]
-- [[userdetail_userdetail]]
-- [[userdetail_userdetail_getactivestatesstringattribute]]
-- [[userdetail_userdetail_getcarriersstringattribute]]
-- [[userdetail_userdetail_setactivestatesattribute]]
-- [[userdetail_userdetail_setcarriersattribute]]
-- [[userdetail_userdetail_user]]
+- [[app_http_controllers_admin_notificationcontroller_php]]
+- [[app_listeners_sendleadcreatednotification_php]]
+- [[app_listeners_sendsalecreatednotification_php]]
+- [[app_models_notification_php]]
+- [[app_models_user_php]]
+- [[app_services_notificationservice_php]]
+- [[app_support_sidebarhelper_php]]
+- [[chatcontroller_chatcontroller_getgroupconversations]]
+- [[notification_notification]]
+- [[notification_notification_createforuser]]
+- [[notification_notification_getdategroupattribute]]
+- [[notification_notification_getdategrouplabelattribute]]
+- [[notification_notification_gettimeagoattribute]]
+- [[notification_notification_isread]]
+- [[notification_notification_isunread]]
+- [[notification_notification_markasread]]
+- [[notification_notification_markasunread]]
+- [[notification_notification_scopeimportant]]
+- [[notification_notification_scoperead]]
+- [[notification_notification_scoperecent]]
+- [[notification_notification_scopeunread]]
+- [[notification_notification_user]]
+- [[notificationcontroller_notificationcontroller]]
+- [[notificationcontroller_notificationcontroller_createtest]]
+- [[notificationcontroller_notificationcontroller_destroy]]
+- [[notificationcontroller_notificationcontroller_index]]
+- [[notificationcontroller_notificationcontroller_markallasread]]
+- [[notificationcontroller_notificationcontroller_markasread]]
+- [[notificationcontroller_notificationcontroller_markasunread]]
+- [[notificationcontroller_notificationcontroller_topbar]]
+- [[notificationcontroller_notificationcontroller_unreadcount]]
+- [[notificationservice_notificationservice]]
+- [[notificationservice_notificationservice_cleanoldnotifications]]
+- [[notificationservice_notificationservice_createforallusers]]
+- [[notificationservice_notificationservice_createforuser]]
+- [[notificationservice_notificationservice_createforusers]]
+- [[notificationservice_notificationservice_createordernotification]]
+- [[notificationservice_notificationservice_createpaymentnotification]]
+- [[notificationservice_notificationservice_createsystemnotification]]
+- [[notificationservice_notificationservice_getusernotificationsbytype]]
+- [[notificationservice_notificationservice_getusernotificationstats]]
+- [[notificationservice_notificationservice_markmultipleasread]]
+- [[sendleadcreatednotification_sendleadcreatednotification]]
+- [[sendleadcreatednotification_sendleadcreatednotification_construct]]
+- [[sendleadcreatednotification_sendleadcreatednotification_handle]]
+- [[sendsalecreatednotification_sendsalecreatednotification]]
+- [[sendsalecreatednotification_sendsalecreatednotification_construct]]
+- [[sendsalecreatednotification_sendsalecreatednotification_handle]]
+- [[sidebarhelper_sidebarhelper]]
+- [[sidebarhelper_sidebarhelper_candelete]]
+- [[sidebarhelper_sidebarhelper_canedit]]
+- [[sidebarhelper_sidebarhelper_canview]]
+- [[sidebarhelper_sidebarhelper_getvisiblemodules]]
+- [[user_user]]
+- [[user_user_attendances]]
+- [[user_user_candeleteinmodule]]
+- [[user_user_caneditmodule]]
+- [[user_user_carriercommissions]]
+- [[user_user_carriersforwarded]]
+- [[user_user_carriersmanaged]]
+- [[user_user_carrierstates]]
+- [[user_user_chatconversations]]
+- [[user_user_chatparticipants]]
+- [[user_user_createnotification]]
+- [[user_user_getcommissionforcarrier]]
+- [[user_user_getpermissionformodule]]
+- [[user_user_getrecentnotificationsattribute]]
+- [[user_user_getunreadnotificationscountattribute]]
+- [[user_user_hasmodulepermission]]
+- [[user_user_leadsforwarded]]
+- [[user_user_markallnotificationsasread]]
+- [[user_user_notifications]]
+- [[user_user_permissionoverrides]]
+- [[user_user_salaryrecords]]
+- [[user_user_scopeemployeesonly]]
+- [[user_user_scopeexcludepartners]]
+- [[user_user_setemailattribute]]
+- [[user_user_todayattendance]]
+- [[user_user_userdetail]]
 
 ## Internal connections
-- [[app_models_alloweddevice_php]] —contains→ [[alloweddevice_alloweddevice]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_addedby]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isapproved]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_ispending]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isdisabled]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isrejected]] `EXTRACTED`
-- [[alloweddevice_alloweddevice]] —calls→ [[restricttoalloweddevice_restricttoalloweddevice_handle]] `INFERRED`
-- [[alloweddevice_alloweddevice]] —calls→ [[devicecontroller_devicecontroller_store]] `INFERRED`
-- [[alloweddevice_alloweddevice]] —calls→ [[devicecontroller_devicecontroller_rejectallpending]] `INFERRED`
-- [[app_models_userdetail_php]] —contains→ [[userdetail_userdetail]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_user]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getactivestatesstringattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getcarriersstringattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setactivestatesattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setcarriersattribute]] `EXTRACTED`
-- [[app_models_epmsexternalcost_php]] —contains→ [[epmsexternalcost_epmsexternalcost]] `EXTRACTED`
-- [[epmsexternalcost_epmsexternalcost]] —method→ [[epmsexternalcost_epmsexternalcost_project]] `EXTRACTED`
-- [[app_listeners_loguserlogout_php]] —contains→ [[loguserlogout_loguserlogout]] `EXTRACTED`
-- [[loguserlogout_loguserlogout]] —method→ [[loguserlogout_loguserlogout_construct]] `EXTRACTED`
-- [[app_http_middleware_preventpartneraccess_php]] —contains→ [[preventpartneraccess_preventpartneraccess]] `EXTRACTED`
-- [[preventpartneraccess_preventpartneraccess]] —method→ [[preventpartneraccess_preventpartneraccess_handle]] `EXTRACTED`
-- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[echarts_esm_check]] `INFERRED`
-- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[partnerauthcontroller_partnerauthcontroller_logout]] `INFERRED`
-- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[chart_pluginservice_invalidate]] `INFERRED`
-- [[app_http_middleware_restricttoalloweddevice_php]] —contains→ [[restricttoalloweddevice_restricttoalloweddevice]] `EXTRACTED`
-- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_handle]] `EXTRACTED`
-- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_makecookie]] `EXTRACTED`
-- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_pendingresponse]] `EXTRACTED`
-- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_disabledresponse]] `EXTRACTED`
-- [[restricttoalloweddevice_restricttoalloweddevice_handle]] —calls→ [[restricttoalloweddevice_restricttoalloweddevice_makecookie]] `EXTRACTED`
+- [[app_services_notificationservice_php]] —contains→ [[notificationservice_notificationservice]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforuser]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_getusernotificationstats]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_cleanoldnotifications]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_getusernotificationsbytype]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_markmultipleasread]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notification_notification]] `INFERRED`
+- [[notificationservice_notificationservice_createforusers]] —calls→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_getusernotificationstats]] —calls→ [[user_user_notifications]] `INFERRED`
+- [[notificationservice_notificationservice_cleanoldnotifications]] —calls→ [[notification_notification]] `INFERRED`
+- [[notificationservice_notificationservice_getusernotificationsbytype]] —calls→ [[user_user_notifications]] `INFERRED`
+- [[notificationservice_notificationservice_markmultipleasread]] —calls→ [[user_user_notifications]] `INFERRED`
+- [[app_support_sidebarhelper_php]] —contains→ [[sidebarhelper_sidebarhelper]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_getvisiblemodules]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_canview]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_canedit]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_candelete]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper_canedit]] —calls→ [[user_user_caneditmodule]] `INFERRED`
+- [[sidebarhelper_sidebarhelper_candelete]] —calls→ [[user_user_candeleteinmodule]] `INFERRED`
+- [[app_models_user_php]] —contains→ [[user_user]] `EXTRACTED`
+- [[user_user]] —method→ [[user_user_setemailattribute]] `EXTRACTED`

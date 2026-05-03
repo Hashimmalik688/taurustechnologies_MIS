@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_03_07_000001_create_allowed_devices_table_down]]
-- [[2026_03_07_000001_create_allowed_devices_table_up]]
-- [[database_migrations_2026_03_07_000001_create_allowed_devices_table_php]]
+- [[2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_down]]
+- [[2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_up]]
+- [[database_migrations_2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_php]]
 
 ## Internal connections
-- [[database_migrations_2026_03_07_000001_create_allowed_devices_table_php]] —contains→ [[2026_03_07_000001_create_allowed_devices_table_up]] `EXTRACTED`
-- [[database_migrations_2026_03_07_000001_create_allowed_devices_table_php]] —contains→ [[2026_03_07_000001_create_allowed_devices_table_down]] `EXTRACTED`
+- [[database_migrations_2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_php]] —contains→ [[2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_up]] `EXTRACTED`
+- [[database_migrations_2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_php]] —contains→ [[2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers_down]] `EXTRACTED`

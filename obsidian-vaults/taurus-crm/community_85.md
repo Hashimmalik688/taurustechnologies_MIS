@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[cs_plural]]
-- [[cs_translate]]
-- [[resources_libs_moment_locale_cs_js]]
+- [[2026_02_04_000002_add_late_days_to_users_table_down]]
+- [[2026_02_04_000002_add_late_days_to_users_table_up]]
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_cs_js]] —contains→ [[cs_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_cs_js]] —contains→ [[cs_translate]] `EXTRACTED`
-- [[cs_plural]] —calls→ [[cs_translate]] `EXTRACTED`
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]] —contains→ [[2026_02_04_000002_add_late_days_to_users_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]] —contains→ [[2026_02_04_000002_add_late_days_to_users_table_down]] `EXTRACTED`

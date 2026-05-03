@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_http_requests_storeagentrequest_php]]
-- [[storeagentrequest_storeagentrequest]]
-- [[storeagentrequest_storeagentrequest_authorize]]
-- [[storeagentrequest_storeagentrequest_messages]]
-- [[storeagentrequest_storeagentrequest_rules]]
+- [[app_http_requests_updateagentrequest_php]]
+- [[updateagentrequest_updateagentrequest]]
+- [[updateagentrequest_updateagentrequest_authorize]]
+- [[updateagentrequest_updateagentrequest_messages]]
+- [[updateagentrequest_updateagentrequest_rules]]
 
 ## Internal connections
-- [[app_http_requests_storeagentrequest_php]] —contains→ [[storeagentrequest_storeagentrequest]] `EXTRACTED`
-- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_authorize]] `EXTRACTED`
-- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_rules]] `EXTRACTED`
-- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_messages]] `EXTRACTED`
+- [[app_http_requests_updateagentrequest_php]] —contains→ [[updateagentrequest_updateagentrequest]] `EXTRACTED`
+- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_authorize]] `EXTRACTED`
+- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_rules]] `EXTRACTED`
+- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_messages]] `EXTRACTED`

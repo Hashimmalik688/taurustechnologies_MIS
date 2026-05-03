@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[fi_translate]]
-- [[fi_verbalnumber]]
-- [[resources_libs_moment_locale_fi_js]]
+- [[2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_down]]
+- [[2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_up]]
+- [[database_migrations_2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_fi_js]] —contains→ [[fi_translate]] `EXTRACTED`
-- [[resources_libs_moment_locale_fi_js]] —contains→ [[fi_verbalnumber]] `EXTRACTED`
-- [[fi_translate]] —calls→ [[fi_verbalnumber]] `EXTRACTED`
+- [[database_migrations_2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_php]] —contains→ [[2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_php]] —contains→ [[2026_04_27_120000_add_ledger_sales_return_status_to_leads_table_down]] `EXTRACTED`

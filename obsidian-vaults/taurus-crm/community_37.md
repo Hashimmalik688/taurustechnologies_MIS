@@ -2,18 +2,18 @@
 **7 nodes**
 
 ## Members
-- [[components_hub_styles]]
-- [[resources_views_admin_finance_hub_blade_php]]
-- [[resources_views_admin_hr_hub_blade_php]]
-- [[resources_views_admin_leads_hub_blade_php]]
-- [[resources_views_admin_reports_hub_blade_php]]
-- [[resources_views_admin_sales_hub_blade_php]]
-- [[resources_views_admin_settings_hub_blade_php]]
+- [[app_repositories_contracts_leadrepositoryinterface_php]]
+- [[leadrepositoryinterface_createlead]]
+- [[leadrepositoryinterface_getallleads]]
+- [[leadrepositoryinterface_getleadbyid]]
+- [[leadrepositoryinterface_getleadsbystatus]]
+- [[leadrepositoryinterface_getleadsbyuser]]
+- [[leadrepositoryinterface_updatelead]]
 
 ## Internal connections
-- [[resources_views_admin_sales_hub_blade_php]] —includes→ [[components_hub_styles]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_reports_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_settings_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_leads_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_hr_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_finance_hub_blade_php]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getallleads]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadbyid]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_createlead]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_updatelead]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadsbystatus]] `EXTRACTED`
+- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadsbyuser]] `EXTRACTED`

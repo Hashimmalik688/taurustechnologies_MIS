@@ -1,19 +1,21 @@
 # Community 34
-**7 nodes**
+**8 nodes**
 
 ## Members
-- [[app_repositories_contracts_leadrepositoryinterface_php]]
-- [[leadrepositoryinterface_createlead]]
-- [[leadrepositoryinterface_getallleads]]
-- [[leadrepositoryinterface_getleadbyid]]
-- [[leadrepositoryinterface_getleadsbystatus]]
-- [[leadrepositoryinterface_getleadsbyuser]]
-- [[leadrepositoryinterface_updatelead]]
+- [[app_models_community_php]]
+- [[community_community]]
+- [[community_community_announcements]]
+- [[community_community_chatconversations]]
+- [[community_community_communityannouncements]]
+- [[community_community_createdbymanagers]]
+- [[community_community_creator]]
+- [[community_community_members]]
 
 ## Internal connections
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getallleads]] `EXTRACTED`
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadbyid]] `EXTRACTED`
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_createlead]] `EXTRACTED`
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_updatelead]] `EXTRACTED`
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadsbystatus]] `EXTRACTED`
-- [[app_repositories_contracts_leadrepositoryinterface_php]] —contains→ [[leadrepositoryinterface_getleadsbyuser]] `EXTRACTED`
+- [[app_models_community_php]] —contains→ [[community_community]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_creator]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_announcements]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_communityannouncements]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_chatconversations]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_members]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_createdbymanagers]] `EXTRACTED`

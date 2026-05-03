@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_03_04_080335_update_qa_results_compliance_columns_v2_down]]
-- [[2026_03_04_080335_update_qa_results_compliance_columns_v2_up]]
-- [[database_migrations_2026_03_04_080335_update_qa_results_compliance_columns_v2_php]]
+- [[2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_down]]
+- [[2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_up]]
+- [[database_migrations_2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_03_04_080335_update_qa_results_compliance_columns_v2_php]] —contains→ [[2026_03_04_080335_update_qa_results_compliance_columns_v2_up]] `EXTRACTED`
-- [[database_migrations_2026_03_04_080335_update_qa_results_compliance_columns_v2_php]] —contains→ [[2026_03_04_080335_update_qa_results_compliance_columns_v2_down]] `EXTRACTED`
+- [[database_migrations_2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_php]] —contains→ [[2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_php]] —contains→ [[2026_02_23_102500_add_soft_deletes_to_sticky_notes_table_down]] `EXTRACTED`

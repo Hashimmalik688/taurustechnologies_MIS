@@ -1,95 +1,112 @@
 # Community 12
-**59 nodes**
+**76 nodes**
 
 ## Members
-- [[app_http_controllers_admin_projectcontroller_php]]
-- [[app_models_pabsproject_php]]
-- [[app_models_pabsprojectapproval_php]]
-- [[app_models_pabsprojectcomment_php]]
-- [[app_services_projectauthorizationservice_php]]
-- [[pabsproject_pabsproject]]
-- [[pabsproject_pabsproject_allocatedby]]
-- [[pabsproject_pabsproject_approvals]]
-- [[pabsproject_pabsproject_approver]]
-- [[pabsproject_pabsproject_assignedto]]
-- [[pabsproject_pabsproject_comments]]
-- [[pabsproject_pabsproject_creator]]
-- [[pabsproject_pabsproject_getvarianceamount]]
-- [[pabsproject_pabsproject_getvariancepercentage]]
-- [[pabsproject_pabsproject_hasvariance]]
-- [[pabsproject_pabsproject_scopeactive]]
-- [[pabsproject_pabsproject_scopebysection]]
-- [[pabsproject_pabsproject_scopebystatus]]
-- [[pabsproject_pabsproject_scopecompleted]]
-- [[pabsproject_pabsproject_scopepending]]
-- [[pabsproject_pabsproject_scopinglead]]
-- [[pabsproject_pabsproject_tickets]]
-- [[pabsprojectapproval_pabsprojectapproval]]
-- [[pabsprojectapproval_pabsprojectapproval_approver]]
-- [[pabsprojectapproval_pabsprojectapproval_project]]
-- [[pabsprojectcomment_pabsprojectcomment]]
-- [[pabsprojectcomment_pabsprojectcomment_project]]
-- [[pabsprojectcomment_pabsprojectcomment_user]]
-- [[projectauthorizationservice_projectauthorizationservice]]
-- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]]
-- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]]
-- [[projectauthorizationservice_projectauthorizationservice_approveproject]]
-- [[projectauthorizationservice_projectauthorizationservice_archiveproject]]
-- [[projectauthorizationservice_projectauthorizationservice_completeproject]]
-- [[projectauthorizationservice_projectauthorizationservice_completescopingandquote]]
-- [[projectauthorizationservice_projectauthorizationservice_createproject]]
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]]
-- [[projectauthorizationservice_projectauthorizationservice_getsectionname]]
-- [[projectauthorizationservice_projectauthorizationservice_getsections]]
-- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]]
-- [[projectauthorizationservice_projectauthorizationservice_movetoscoping]]
-- [[projectauthorizationservice_projectauthorizationservice_rejectproject]]
-- [[projectauthorizationservice_projectauthorizationservice_requestclarification]]
-- [[projectauthorizationservice_projectauthorizationservice_startexecution]]
-- [[projectcontroller_projectcontroller]]
-- [[projectcontroller_projectcontroller_addcomment]]
-- [[projectcontroller_projectcontroller_addquotes]]
-- [[projectcontroller_projectcontroller_approval]]
-- [[projectcontroller_projectcontroller_archive]]
-- [[projectcontroller_projectcontroller_complete]]
-- [[projectcontroller_projectcontroller_construct]]
-- [[projectcontroller_projectcontroller_create]]
-- [[projectcontroller_projectcontroller_edit]]
-- [[projectcontroller_projectcontroller_index]]
-- [[projectcontroller_projectcontroller_movetoscoping]]
-- [[projectcontroller_projectcontroller_processapproval]]
-- [[projectcontroller_projectcontroller_show]]
-- [[projectcontroller_projectcontroller_startexecution]]
-- [[projectcontroller_projectcontroller_update]]
+- [[2025_04_23_213306_create_permission_tables_down]]
+- [[2025_04_23_213306_create_permission_tables_up]]
+- [[app_console_commands_chatbackup_php]]
+- [[app_http_controllers_admin_chatshadowcontroller_php]]
+- [[app_http_controllers_chatcontroller_php]]
+- [[app_models_chatattachment_php]]
+- [[app_models_chatconversation_php]]
+- [[app_models_chatmessage_php]]
+- [[app_models_chatparticipant_php]]
+- [[app_models_stickynote_php]]
+- [[chatattachment_chatattachment]]
+- [[chatattachment_chatattachment_getfilesizehumanattribute]]
+- [[chatattachment_chatattachment_geturlattribute]]
+- [[chatattachment_chatattachment_message]]
+- [[chatbackup_chatbackup]]
+- [[chatbackup_chatbackup_handle]]
+- [[chatcontroller_chatcontroller]]
+- [[chatcontroller_chatcontroller_addmember]]
+- [[chatcontroller_chatcontroller_creategroup]]
+- [[chatcontroller_chatcontroller_deleteconversation]]
+- [[chatcontroller_chatcontroller_deletemessage]]
+- [[chatcontroller_chatcontroller_getcommunities]]
+- [[chatcontroller_chatcontroller_getconversation]]
+- [[chatcontroller_chatcontroller_getconversationmembers]]
+- [[chatcontroller_chatcontroller_getconversations]]
+- [[chatcontroller_chatcontroller_getconversationusers]]
+- [[chatcontroller_chatcontroller_getmessages]]
+- [[chatcontroller_chatcontroller_getnewmessages]]
+- [[chatcontroller_chatcontroller_getorcreateconversation]]
+- [[chatcontroller_chatcontroller_getunreadcount]]
+- [[chatcontroller_chatcontroller_getusers]]
+- [[chatcontroller_chatcontroller_heartbeat]]
+- [[chatcontroller_chatcontroller_index]]
+- [[chatcontroller_chatcontroller_pinmessage]]
+- [[chatcontroller_chatcontroller_react]]
+- [[chatcontroller_chatcontroller_removemember]]
+- [[chatcontroller_chatcontroller_sendmessage]]
+- [[chatcontroller_chatcontroller_typing]]
+- [[chatcontroller_chatcontroller_typingstatus]]
+- [[chatcontroller_chatcontroller_unpinmessage]]
+- [[chatcontroller_chatcontroller_updateconversation]]
+- [[chatcontroller_chatcontroller_updateconversationavatar]]
+- [[chatcontroller_chatcontroller_updatemessage]]
+- [[chatconversation_chatconversation]]
+- [[chatconversation_chatconversation_community]]
+- [[chatconversation_chatconversation_creator]]
+- [[chatconversation_chatconversation_latestmessage]]
+- [[chatconversation_chatconversation_messages]]
+- [[chatconversation_chatconversation_participants]]
+- [[chatconversation_chatconversation_unreadcount]]
+- [[chatconversation_chatconversation_users]]
+- [[chatmessage_chatmessage]]
+- [[chatmessage_chatmessage_attachments]]
+- [[chatmessage_chatmessage_conversation]]
+- [[chatmessage_chatmessage_getmentioneduserids]]
+- [[chatmessage_chatmessage_getmentionedusers]]
+- [[chatmessage_chatmessage_getparsedmessage]]
+- [[chatmessage_chatmessage_isreadby]]
+- [[chatmessage_chatmessage_mentionsuser]]
+- [[chatmessage_chatmessage_reactions]]
+- [[chatmessage_chatmessage_reads]]
+- [[chatmessage_chatmessage_replyto]]
+- [[chatmessage_chatmessage_user]]
+- [[chatparticipant_chatparticipant]]
+- [[chatparticipant_chatparticipant_conversation]]
+- [[chatparticipant_chatparticipant_user]]
+- [[chatshadowcontroller_chatshadowcontroller]]
+- [[chatshadowcontroller_chatshadowcontroller_getconversations]]
+- [[chatshadowcontroller_chatshadowcontroller_getmessages]]
+- [[chatshadowcontroller_chatshadowcontroller_getnotes]]
+- [[chatshadowcontroller_chatshadowcontroller_index]]
+- [[communitycontroller_communitycontroller_store]]
+- [[database_migrations_2025_04_23_213306_create_permission_tables_php]]
+- [[stickynote_stickynote]]
+- [[stickynote_stickynote_user]]
+- [[usercontroller_usercontroller_trashed]]
 
 ## Internal connections
-- [[app_services_projectauthorizationservice_php]] —contains→ [[projectauthorizationservice_projectauthorizationservice]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsections]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetoscoping]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_completescopingandquote]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_approveproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_rejectproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_requestclarification]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_startexecution]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_completeproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_archiveproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsectionname]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_index]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_create]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_show]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_edit]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_approval]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_createproject]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_approveproject]] —calls→ [[pabsprojectapproval_pabsprojectapproval]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_approveproject]] —calls→ [[projectcontroller_projectcontroller_processapproval]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_rejectproject]] —calls→ [[pabsprojectapproval_pabsprojectapproval]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_rejectproject]] —calls→ [[projectcontroller_projectcontroller_processapproval]] `INFERRED`
+- [[app_console_commands_chatbackup_php]] —contains→ [[chatbackup_chatbackup]] `EXTRACTED`
+- [[chatbackup_chatbackup]] —method→ [[chatbackup_chatbackup_handle]] `EXTRACTED`
+- [[chatbackup_chatbackup_handle]] —calls→ [[chatconversation_chatconversation]] `INFERRED`
+- [[chatbackup_chatbackup_handle]] —calls→ [[chatparticipant_chatparticipant]] `INFERRED`
+- [[chatbackup_chatbackup_handle]] —calls→ [[chatmessage_chatmessage]] `INFERRED`
+- [[chatbackup_chatbackup_handle]] —calls→ [[chatattachment_chatattachment]] `INFERRED`
+- [[app_models_chatmessage_php]] —contains→ [[chatmessage_chatmessage]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_conversation]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_user]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_attachments]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —references_constant→ [[chatmessage_chatmessage_replyto]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_reactions]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_getmentionedusers]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_getmentioneduserids]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_mentionsuser]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_getparsedmessage]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_reads]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —method→ [[chatmessage_chatmessage_isreadby]] `EXTRACTED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_getmessages]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_sendmessage]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_deletemessage]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_updatemessage]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_deleteconversation]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_getnewmessages]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_react]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_pinmessage]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatcontroller_chatcontroller_unpinmessage]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatshadowcontroller_chatshadowcontroller_getconversations]] `INFERRED`
+- [[chatmessage_chatmessage]] —calls→ [[chatshadowcontroller_chatshadowcontroller_getmessages]] `INFERRED`
+- [[chatmessage_chatmessage_user]] —calls→ [[chatmessage_chatmessage_getmentioneduserids]] `EXTRACTED`

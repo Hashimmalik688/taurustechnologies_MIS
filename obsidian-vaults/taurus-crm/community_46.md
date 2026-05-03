@@ -1,15 +1,17 @@
 # Community 46
-**5 nodes**
+**6 nodes**
 
 ## Members
-- [[accountcreatedmail_accountcreatedmail]]
-- [[accountcreatedmail_accountcreatedmail_attachments]]
-- [[accountcreatedmail_accountcreatedmail_construct]]
-- [[accountcreatedmail_accountcreatedmail_envelope]]
-- [[app_mail_accountcreatedmail_php]]
+- [[app_mail_rolechangedmail_php]]
+- [[rolechangedmail_rolechangedmail]]
+- [[rolechangedmail_rolechangedmail_attachments]]
+- [[rolechangedmail_rolechangedmail_construct]]
+- [[rolechangedmail_rolechangedmail_content]]
+- [[rolechangedmail_rolechangedmail_envelope]]
 
 ## Internal connections
-- [[app_mail_accountcreatedmail_php]] —contains→ [[accountcreatedmail_accountcreatedmail]] `EXTRACTED`
-- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_construct]] `EXTRACTED`
-- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_envelope]] `EXTRACTED`
-- [[accountcreatedmail_accountcreatedmail]] —method→ [[accountcreatedmail_accountcreatedmail_attachments]] `EXTRACTED`
+- [[app_mail_rolechangedmail_php]] —contains→ [[rolechangedmail_rolechangedmail]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_construct]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_envelope]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_content]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_attachments]] `EXTRACTED`

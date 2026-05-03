@@ -2,12 +2,13 @@
 **4 nodes**
 
 ## Members
-- [[app_models_leadfieldhighlight_php]]
-- [[leadfieldhighlight_leadfieldhighlight]]
-- [[leadfieldhighlight_leadfieldhighlight_lead]]
-- [[leadfieldhighlight_leadfieldhighlight_updatedby]]
+- [[app_observers_leadobserver_php]]
+- [[leadobserver_leadobserver]]
+- [[leadobserver_leadobserver_resolvesettlementtype]]
+- [[leadobserver_leadobserver_updating]]
 
 ## Internal connections
-- [[app_models_leadfieldhighlight_php]] —contains→ [[leadfieldhighlight_leadfieldhighlight]] `EXTRACTED`
-- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_lead]] `EXTRACTED`
-- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_updatedby]] `EXTRACTED`
+- [[app_observers_leadobserver_php]] —contains→ [[leadobserver_leadobserver]] `EXTRACTED`
+- [[leadobserver_leadobserver]] —method→ [[leadobserver_leadobserver_updating]] `EXTRACTED`
+- [[leadobserver_leadobserver]] —method→ [[leadobserver_leadobserver_resolvesettlementtype]] `EXTRACTED`
+- [[leadobserver_leadobserver_updating]] —calls→ [[leadobserver_leadobserver_resolvesettlementtype]] `EXTRACTED`

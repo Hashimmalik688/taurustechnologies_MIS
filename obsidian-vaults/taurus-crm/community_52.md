@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_console_kernel_php]]
-- [[app_http_kernel_php]]
-- [[kernel_kernel]]
-- [[kernel_kernel_commands]]
-- [[kernel_kernel_schedule]]
+- [[app_support_carrieraliases_php]]
+- [[carrieraliases_carrieraliases]]
+- [[carrieraliases_carrieraliases_applyfilter]]
+- [[carrieraliases_carrieraliases_applyotherfilter]]
+- [[carrieraliases_carrieraliases_resolve]]
 
 ## Internal connections
-- [[app_console_kernel_php]] —contains→ [[kernel_kernel]] `EXTRACTED`
-- [[kernel_kernel]] —method→ [[kernel_kernel_schedule]] `EXTRACTED`
-- [[kernel_kernel]] —method→ [[kernel_kernel_commands]] `EXTRACTED`
-- [[kernel_kernel]] —contains→ [[app_http_kernel_php]] `EXTRACTED`
+- [[app_support_carrieraliases_php]] —contains→ [[carrieraliases_carrieraliases]] `EXTRACTED`
+- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyfilter]] `EXTRACTED`
+- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyotherfilter]] `EXTRACTED`
+- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_resolve]] `EXTRACTED`

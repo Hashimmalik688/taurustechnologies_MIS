@@ -1,87 +1,111 @@
 # Community 13
-**51 nodes**
+**75 nodes**
 
 ## Members
-- [[app_models_lead_php]]
-- [[lead_lead]]
-- [[lead_lead_assignedagent]]
-- [[lead_lead_assignedcloser]]
-- [[lead_lead_assignedvalidator]]
-- [[lead_lead_bankverifiedbyuser]]
-- [[lead_lead_bankverifier]]
-- [[lead_lead_bankverifierassignedbyuser]]
-- [[lead_lead_boot]]
-- [[lead_lead_calllogs]]
-- [[lead_lead_carriers]]
-- [[lead_lead_cbsenttoretentionby]]
-- [[lead_lead_chargebackmarkedby]]
-- [[lead_lead_chargebackpaidby]]
-- [[lead_lead_dials]]
-- [[lead_lead_dispositionofficer]]
-- [[lead_lead_fieldhighlights]]
-- [[lead_lead_followupassignedbyuser]]
-- [[lead_lead_followupdoneby]]
-- [[lead_lead_followupperson]]
-- [[lead_lead_forwardedby]]
-- [[lead_lead_getageattribute]]
-- [[lead_lead_insurancecarrier]]
-- [[lead_lead_issuedbyuser]]
-- [[lead_lead_ledgerchargebackpaidentry]]
-- [[lead_lead_ledgerentries]]
-- [[lead_lead_ledgersalesreturnentry]]
-- [[lead_lead_ledgersalesreturnpostedby]]
-- [[lead_lead_managedby]]
-- [[lead_lead_notissuedby]]
-- [[lead_lead_notissuedresolvedby]]
-- [[lead_lead_notpaidby]]
-- [[lead_lead_paidby]]
-- [[lead_lead_partner]]
-- [[lead_lead_pendingcontractby]]
-- [[lead_lead_pendingdraftby]]
-- [[lead_lead_policydiedby]]
-- [[lead_lead_qauser]]
-- [[lead_lead_recallrequestedby]]
-- [[lead_lead_retactionupdatedby]]
-- [[lead_lead_retentionofficer]]
-- [[lead_lead_scopefollowuppending]]
-- [[lead_lead_scopenotissued]]
-- [[lead_lead_scopepaidsales]]
-- [[lead_lead_scopependingcontract]]
-- [[lead_lead_scopependingdraft]]
-- [[lead_lead_scopependingsapproved]]
-- [[lead_lead_scopepolicydied]]
-- [[lead_lead_submissionreviewer]]
-- [[lead_lead_validator]]
-- [[lead_lead_verifier]]
+- [[accountswitchingdetector_accountswitchingdetector]]
+- [[accountswitchingdetector_accountswitchingdetector_detectsuspiciouslogin]]
+- [[accountswitchingdetector_accountswitchingdetector_logsuspiciousactivity]]
+- [[agentdashboardcontroller_agentdashboardcontroller]]
+- [[agentdashboardcontroller_agentdashboardcontroller_construct]]
+- [[agentdashboardcontroller_agentdashboardcontroller_index]]
+- [[app_http_controllers_admin_notepadcontroller_php]]
+- [[app_http_controllers_agentdashboardcontroller_php]]
+- [[app_http_controllers_auth_logincontroller_php]]
+- [[app_http_controllers_auth_verificationcontroller_php]]
+- [[app_http_controllers_chatnotificationcontroller_php]]
+- [[app_http_controllers_homecontroller_php]]
+- [[app_http_controllers_localizationcontroller_php]]
+- [[app_http_controllers_profilecontroller_php]]
+- [[app_models_chatnotificationpreference_php]]
+- [[app_models_notepadnote_php]]
+- [[app_providers_routeserviceprovider_php]]
+- [[app_services_accountswitchingdetector_php]]
+- [[chatcontroller_chatcontroller_construct]]
+- [[chatnotificationcontroller_chatnotificationcontroller]]
+- [[chatnotificationcontroller_chatnotificationcontroller_construct]]
+- [[chatnotificationcontroller_chatnotificationcontroller_getpreferences]]
+- [[chatnotificationcontroller_chatnotificationcontroller_isinquiethours]]
+- [[chatnotificationcontroller_chatnotificationcontroller_requestpermission]]
+- [[chatnotificationcontroller_chatnotificationcontroller_settingsview]]
+- [[chatnotificationcontroller_chatnotificationcontroller_shouldnotify]]
+- [[chatnotificationcontroller_chatnotificationcontroller_subscribetonotifications]]
+- [[chatnotificationcontroller_chatnotificationcontroller_updatepreferences]]
+- [[chatnotificationpreference_chatnotificationpreference]]
+- [[chatnotificationpreference_chatnotificationpreference_user]]
+- [[chatshadowcontroller_chatshadowcontroller_construct]]
+- [[chatshadowcontroller_chatshadowcontroller_getnotepadnotes]]
+- [[dashboardcontroller_dashboardcontroller_construct]]
+- [[employeecontroller_employeecontroller_construct]]
+- [[homecontroller_homecontroller]]
+- [[homecontroller_homecontroller_construct]]
+- [[homecontroller_homecontroller_countabsent]]
+- [[homecontroller_homecontroller_countpresent]]
+- [[homecontroller_homecontroller_fetchbossdashboarddata]]
+- [[homecontroller_homecontroller_index]]
+- [[homecontroller_homecontroller_lang]]
+- [[homecontroller_homecontroller_root]]
+- [[homecontroller_homecontroller_updatepassword]]
+- [[localizationcontroller_localizationcontroller]]
+- [[localizationcontroller_localizationcontroller_construct]]
+- [[localizationcontroller_localizationcontroller_lang]]
+- [[logincontroller_logincontroller]]
+- [[logincontroller_logincontroller_authenticated]]
+- [[logincontroller_logincontroller_construct]]
+- [[logincontroller_logincontroller_credentials]]
+- [[logincontroller_logincontroller_redirectto]]
+- [[notepadcontroller_notepadcontroller]]
+- [[notepadcontroller_notepadcontroller_construct]]
+- [[notepadcontroller_notepadcontroller_destroy]]
+- [[notepadcontroller_notepadcontroller_formatnote]]
+- [[notepadcontroller_notepadcontroller_getshares]]
+- [[notepadcontroller_notepadcontroller_index]]
+- [[notepadcontroller_notepadcontroller_poll]]
+- [[notepadcontroller_notepadcontroller_store]]
+- [[notepadcontroller_notepadcontroller_update]]
+- [[notepadcontroller_notepadcontroller_updateshares]]
+- [[notepadnote_notepadnote]]
+- [[notepadnote_notepadnote_sharedwith]]
+- [[notepadnote_notepadnote_user]]
+- [[partnerdashboardcontroller_partnerdashboardcontroller_construct]]
+- [[profilecontroller_profilecontroller]]
+- [[profilecontroller_profilecontroller_construct]]
+- [[profilecontroller_profilecontroller_updatepassword]]
+- [[roles_roles_middleware]]
+- [[routeserviceprovider_routeserviceprovider]]
+- [[routeserviceprovider_routeserviceprovider_boot]]
+- [[routeserviceprovider_routeserviceprovider_configureratelimiting]]
+- [[verificationcontroller_verificationcontroller]]
+- [[verificationcontroller_verificationcontroller_construct]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_construct]]
 
 ## Internal connections
-- [[app_models_lead_php]] —contains→ [[lead_lead]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_boot]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_getageattribute]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_carriers]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_calllogs]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_dials]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_forwardedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_managedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_validator]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedvalidator]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedcloser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_verifier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_ledgerentries]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_insurancecarrier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_retentionofficer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_dispositionofficer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_qauser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_submissionreviewer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_issuedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedagent]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_partner]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupperson]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupassignedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifierassignedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifiedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_pendingcontractby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_notissuedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_notissuedresolvedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupdoneby]] `EXTRACTED`
+- [[app_providers_routeserviceprovider_php]] —contains→ [[routeserviceprovider_routeserviceprovider]] `EXTRACTED`
+- [[routeserviceprovider_routeserviceprovider]] —method→ [[routeserviceprovider_routeserviceprovider_boot]] `EXTRACTED`
+- [[routeserviceprovider_routeserviceprovider]] —method→ [[routeserviceprovider_routeserviceprovider_configureratelimiting]] `EXTRACTED`
+- [[routeserviceprovider_routeserviceprovider_boot]] —calls→ [[routeserviceprovider_routeserviceprovider_configureratelimiting]] `EXTRACTED`
+- [[routeserviceprovider_routeserviceprovider_boot]] —calls→ [[roles_roles_middleware]] `INFERRED`
+- [[app_services_accountswitchingdetector_php]] —contains→ [[accountswitchingdetector_accountswitchingdetector]] `EXTRACTED`
+- [[accountswitchingdetector_accountswitchingdetector]] —method→ [[accountswitchingdetector_accountswitchingdetector_detectsuspiciouslogin]] `EXTRACTED`
+- [[accountswitchingdetector_accountswitchingdetector]] —method→ [[accountswitchingdetector_accountswitchingdetector_logsuspiciousactivity]] `EXTRACTED`
+- [[accountswitchingdetector_accountswitchingdetector]] —calls→ [[logincontroller_logincontroller_authenticated]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[chatcontroller_chatcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[chatnotificationcontroller_chatnotificationcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[dashboardcontroller_dashboardcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[agentdashboardcontroller_agentdashboardcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[localizationcontroller_localizationcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[profilecontroller_profilecontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[homecontroller_homecontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[logincontroller_logincontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[verificationcontroller_verificationcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[partnerdashboardcontroller_partnerdashboardcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[zoomphoneembedcontroller_zoomphoneembedcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[chatshadowcontroller_chatshadowcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[notepadcontroller_notepadcontroller_construct]] `INFERRED`
+- [[roles_roles_middleware]] —calls→ [[employeecontroller_employeecontroller_construct]] `INFERRED`
+- [[app_models_notepadnote_php]] —contains→ [[notepadnote_notepadnote]] `EXTRACTED`
+- [[notepadnote_notepadnote]] —method→ [[notepadnote_notepadnote_user]] `EXTRACTED`
+- [[notepadnote_notepadnote]] —method→ [[notepadnote_notepadnote_sharedwith]] `EXTRACTED`
+- [[notepadnote_notepadnote]] —calls→ [[chatshadowcontroller_chatshadowcontroller_getnotepadnotes]] `INFERRED`
+- [[notepadnote_notepadnote]] —calls→ [[notepadcontroller_notepadcontroller_index]] `INFERRED`
+- [[notepadnote_notepadnote]] —calls→ [[notepadcontroller_notepadcontroller_store]] `INFERRED`
+- [[notepadnote_notepadnote_user]] —references_constant→ [[notepadnote_notepadnote_sharedwith]] `EXTRACTED`

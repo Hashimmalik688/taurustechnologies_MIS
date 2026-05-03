@@ -1,52 +1,64 @@
 # Community 19
-**19 nodes**
+**28 nodes**
 
 ## Members
-- [[announcement_announcement]]
-- [[announcement_announcement_createdby]]
-- [[announcement_announcement_getanimationclass]]
-- [[announcement_announcement_getbackgroundclass]]
-- [[announcement_announcement_getcurrent]]
-- [[announcement_announcement_geticonclass]]
-- [[announcement_announcement_scopeactive]]
-- [[announcementcontroller_announcementcontroller]]
-- [[announcementcontroller_announcementcontroller_destroy]]
-- [[announcementcontroller_announcementcontroller_getcurrent]]
-- [[announcementcontroller_announcementcontroller_index]]
-- [[announcementcontroller_announcementcontroller_store]]
-- [[announcementcontroller_announcementcontroller_toggle]]
-- [[announcementcontroller_announcementcontroller_update]]
-- [[announcementseeder_announcementseeder]]
-- [[announcementseeder_announcementseeder_run]]
-- [[app_http_controllers_admin_announcementcontroller_php]]
-- [[app_models_announcement_php]]
-- [[database_seeders_announcementseeder_php]]
+- [[app_http_controllers_admin_ticketcontroller_php]]
+- [[app_models_pabsticket_php]]
+- [[app_models_pabsticketcomment_php]]
+- [[pabsticket_pabsticket]]
+- [[pabsticket_pabsticket_assignee]]
+- [[pabsticket_pabsticket_comments]]
+- [[pabsticket_pabsticket_creator]]
+- [[pabsticket_pabsticket_project]]
+- [[pabsticket_pabsticket_scopebysection]]
+- [[pabsticket_pabsticket_scopebystatus]]
+- [[pabsticket_pabsticket_scopeclosed]]
+- [[pabsticket_pabsticket_scopeopen]]
+- [[pabsticketcomment_pabsticketcomment]]
+- [[pabsticketcomment_pabsticketcomment_ticket]]
+- [[pabsticketcomment_pabsticketcomment_user]]
+- [[ticketcontroller_ticketcontroller]]
+- [[ticketcontroller_ticketcontroller_addcomment]]
+- [[ticketcontroller_ticketcontroller_approve]]
+- [[ticketcontroller_ticketcontroller_close]]
+- [[ticketcontroller_ticketcontroller_create]]
+- [[ticketcontroller_ticketcontroller_destroy]]
+- [[ticketcontroller_ticketcontroller_generateticketcode]]
+- [[ticketcontroller_ticketcontroller_index]]
+- [[ticketcontroller_ticketcontroller_reject]]
+- [[ticketcontroller_ticketcontroller_resolve]]
+- [[ticketcontroller_ticketcontroller_show]]
+- [[ticketcontroller_ticketcontroller_store]]
+- [[ticketcontroller_ticketcontroller_update]]
 
 ## Internal connections
-- [[app_models_announcement_php]] —contains→ [[announcement_announcement]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_createdby]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_scopeactive]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_getcurrent]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_getanimationclass]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_getbackgroundclass]] `EXTRACTED`
-- [[announcement_announcement]] —method→ [[announcement_announcement_geticonclass]] `EXTRACTED`
-- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_index]] `INFERRED`
-- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_store]] `INFERRED`
-- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_update]] `INFERRED`
-- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_toggle]] `INFERRED`
-- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
-- [[announcement_announcement]] —calls→ [[announcementseeder_announcementseeder_run]] `INFERRED`
-- [[announcement_announcement_getanimationclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
-- [[announcement_announcement_getbackgroundclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
-- [[announcement_announcement_geticonclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
-- [[app_http_controllers_admin_announcementcontroller_php]] —contains→ [[announcementcontroller_announcementcontroller]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_index]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_store]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_update]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_toggle]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_destroy]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_getcurrent]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller_store]] —calls→ [[announcementcontroller_announcementcontroller_update]] `EXTRACTED`
-- [[announcementcontroller_announcementcontroller_update]] —calls→ [[announcementcontroller_announcementcontroller_toggle]] `EXTRACTED`
-- [[database_seeders_announcementseeder_php]] —contains→ [[announcementseeder_announcementseeder]] `EXTRACTED`
-- [[announcementseeder_announcementseeder]] —method→ [[announcementseeder_announcementseeder_run]] `EXTRACTED`
+- [[app_models_pabsticketcomment_php]] —contains→ [[pabsticketcomment_pabsticketcomment]] `EXTRACTED`
+- [[pabsticketcomment_pabsticketcomment]] —method→ [[pabsticketcomment_pabsticketcomment_ticket]] `EXTRACTED`
+- [[pabsticketcomment_pabsticketcomment]] —method→ [[pabsticketcomment_pabsticketcomment_user]] `EXTRACTED`
+- [[pabsticketcomment_pabsticketcomment]] —calls→ [[ticketcontroller_ticketcontroller_addcomment]] `INFERRED`
+- [[pabsticketcomment_pabsticketcomment]] —calls→ [[ticketcontroller_ticketcontroller_approve]] `INFERRED`
+- [[pabsticketcomment_pabsticketcomment]] —calls→ [[ticketcontroller_ticketcontroller_reject]] `INFERRED`
+- [[app_models_pabsticket_php]] —contains→ [[pabsticket_pabsticket]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_project]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_creator]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_assignee]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_comments]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_scopebysection]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_scopebystatus]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_scopeopen]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —method→ [[pabsticket_pabsticket_scopeclosed]] `EXTRACTED`
+- [[pabsticket_pabsticket]] —calls→ [[ticketcontroller_ticketcontroller_index]] `INFERRED`
+- [[pabsticket_pabsticket]] —calls→ [[ticketcontroller_ticketcontroller_store]] `INFERRED`
+- [[pabsticket_pabsticket]] —calls→ [[ticketcontroller_ticketcontroller_generateticketcode]] `INFERRED`
+- [[app_http_controllers_admin_ticketcontroller_php]] —contains→ [[ticketcontroller_ticketcontroller]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_index]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_create]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_store]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_show]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_update]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_addcomment]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_resolve]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_close]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_approve]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_reject]] `EXTRACTED`
+- [[ticketcontroller_ticketcontroller]] —method→ [[ticketcontroller_ticketcontroller_destroy]] `EXTRACTED`

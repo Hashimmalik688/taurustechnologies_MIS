@@ -1,21 +1,37 @@
 # Community 28
-**8 nodes**
+**13 nodes**
 
 ## Members
-- [[app_models_community_php]]
-- [[community_community]]
-- [[community_community_announcements]]
-- [[community_community_chatconversations]]
-- [[community_community_communityannouncements]]
-- [[community_community_createdbymanagers]]
-- [[community_community_creator]]
-- [[community_community_members]]
+- [[app_services_fileuploadservice_php]]
+- [[fileuploadservice_fileuploadservice]]
+- [[fileuploadservice_fileuploadservice_deletefile]]
+- [[fileuploadservice_fileuploadservice_fileexists]]
+- [[fileuploadservice_fileuploadservice_generateuniquefilename]]
+- [[fileuploadservice_fileuploadservice_getallowedmimes]]
+- [[fileuploadservice_fileuploadservice_getfilesizemb]]
+- [[fileuploadservice_fileuploadservice_getfileurl]]
+- [[fileuploadservice_fileuploadservice_uploadavatar]]
+- [[fileuploadservice_fileuploadservice_uploaddocument]]
+- [[fileuploadservice_fileuploadservice_uploadfile]]
+- [[fileuploadservice_fileuploadservice_validateandstore]]
+- [[fileuploadservice_fileuploadservice_validatemimetype]]
 
 ## Internal connections
-- [[app_models_community_php]] —contains→ [[community_community]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_creator]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_announcements]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_communityannouncements]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_chatconversations]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_members]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_createdbymanagers]] `EXTRACTED`
+- [[app_services_fileuploadservice_php]] —contains→ [[fileuploadservice_fileuploadservice]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploadavatar]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploaddocument]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploadfile]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_validatemimetype]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_getallowedmimes]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_generateuniquefilename]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_deletefile]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_getfileurl]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_fileexists]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_getfilesizemb]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_uploadavatar]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_uploaddocument]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_uploadfile]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_validateandstore]] —calls→ [[fileuploadservice_fileuploadservice_validatemimetype]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_validateandstore]] —calls→ [[fileuploadservice_fileuploadservice_generateuniquefilename]] `EXTRACTED`
+- [[fileuploadservice_fileuploadservice_validatemimetype]] —calls→ [[fileuploadservice_fileuploadservice_getallowedmimes]] `EXTRACTED`

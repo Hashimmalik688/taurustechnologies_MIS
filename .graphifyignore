@@ -7,6 +7,12 @@ public/hot
 bootstrap/cache/
 .git/
 
+# Third-party frontend libraries (not your code)
+resources/libs/
+resources/fonts/
+public/css/
+public/js/
+
 # graphify's own output (don't self-index)
 graphify-out/
 AGENTS.md

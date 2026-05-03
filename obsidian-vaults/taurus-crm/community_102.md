@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_02_02_233447_add_is_partner_flag_to_users_table_down]]
-- [[2026_02_02_233447_add_is_partner_flag_to_users_table_up]]
-- [[database_migrations_2026_02_02_233447_add_is_partner_flag_to_users_table_php]]
+- [[2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_down]]
+- [[2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_up]]
+- [[database_migrations_2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_php]]
 
 ## Internal connections
-- [[database_migrations_2026_02_02_233447_add_is_partner_flag_to_users_table_php]] —contains→ [[2026_02_02_233447_add_is_partner_flag_to_users_table_up]] `EXTRACTED`
-- [[database_migrations_2026_02_02_233447_add_is_partner_flag_to_users_table_php]] —contains→ [[2026_02_02_233447_add_is_partner_flag_to_users_table_down]] `EXTRACTED`
+- [[database_migrations_2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_php]] —contains→ [[2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_up]] `EXTRACTED`
+- [[database_migrations_2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_php]] —contains→ [[2026_04_07_000000_add_other_reason_to_not_issued_disposition_and_comment_column_down]] `EXTRACTED`

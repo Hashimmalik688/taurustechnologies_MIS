@@ -1,17 +1,19 @@
 # Community 38
-**6 nodes**
+**7 nodes**
 
 ## Members
-- [[app_events_communityannouncementposted_php]]
-- [[communityannouncementposted_communityannouncementposted]]
-- [[communityannouncementposted_communityannouncementposted_broadcastas]]
-- [[communityannouncementposted_communityannouncementposted_broadcaston]]
-- [[communityannouncementposted_communityannouncementposted_broadcastwith]]
-- [[communityannouncementposted_communityannouncementposted_construct]]
+- [[app_repositories_contracts_userrepositoryinterface_php]]
+- [[userrepositoryinterface_createuser]]
+- [[userrepositoryinterface_deleteuser]]
+- [[userrepositoryinterface_getallusers]]
+- [[userrepositoryinterface_getuserbyid]]
+- [[userrepositoryinterface_getusersbyrole]]
+- [[userrepositoryinterface_updateuser]]
 
 ## Internal connections
-- [[app_events_communityannouncementposted_php]] —contains→ [[communityannouncementposted_communityannouncementposted]] `EXTRACTED`
-- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_construct]] `EXTRACTED`
-- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcaston]] `EXTRACTED`
-- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcastas]] `EXTRACTED`
-- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcastwith]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getallusers]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getuserbyid]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_createuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_updateuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_deleteuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getusersbyrole]] `EXTRACTED`

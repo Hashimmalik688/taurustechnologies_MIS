@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_chatmessageread_php]]
-- [[chatmessageread_chatmessageread]]
-- [[chatmessageread_chatmessageread_message]]
-- [[chatmessageread_chatmessageread_user]]
+- [[app_models_chatmessagereaction_php]]
+- [[chatmessagereaction_chatmessagereaction]]
+- [[chatmessagereaction_chatmessagereaction_message]]
+- [[chatmessagereaction_chatmessagereaction_user]]
 
 ## Internal connections
-- [[app_models_chatmessageread_php]] —contains→ [[chatmessageread_chatmessageread]] `EXTRACTED`
-- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_message]] `EXTRACTED`
-- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_user]] `EXTRACTED`
+- [[app_models_chatmessagereaction_php]] —contains→ [[chatmessagereaction_chatmessagereaction]] `EXTRACTED`
+- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_message]] `EXTRACTED`
+- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_user]] `EXTRACTED`

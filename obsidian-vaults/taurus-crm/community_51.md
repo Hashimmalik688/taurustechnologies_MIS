@@ -2,14 +2,15 @@
 **5 nodes**
 
 ## Members
-- [[app_notifications_mentionedinannouncementnotification_php]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]]
+- [[app_providers_appserviceprovider_php]]
+- [[appserviceprovider_appserviceprovider]]
+- [[appserviceprovider_appserviceprovider_boot]]
+- [[appserviceprovider_appserviceprovider_register]]
+- [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]]
 
 ## Internal connections
-- [[app_notifications_mentionedinannouncementnotification_php]] —contains→ [[mentionedinannouncementnotification_mentionedinannouncementnotification]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]] `EXTRACTED`
+- [[app_providers_appserviceprovider_php]] —contains→ [[appserviceprovider_appserviceprovider]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_register]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_boot]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider_boot]] —calls→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`

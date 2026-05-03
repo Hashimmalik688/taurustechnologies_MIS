@@ -1,16 +1,17 @@
 # Community 48
-**5 nodes**
+**6 nodes**
 
 ## Members
-- [[app_providers_appserviceprovider_php]]
-- [[appserviceprovider_appserviceprovider]]
-- [[appserviceprovider_appserviceprovider_boot]]
-- [[appserviceprovider_appserviceprovider_register]]
-- [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]]
+- [[app_http_requests_updateleadrequest_php]]
+- [[updateleadrequest_updateleadrequest]]
+- [[updateleadrequest_updateleadrequest_authorize]]
+- [[updateleadrequest_updateleadrequest_messages]]
+- [[updateleadrequest_updateleadrequest_prepareforvalidation]]
+- [[updateleadrequest_updateleadrequest_rules]]
 
 ## Internal connections
-- [[app_providers_appserviceprovider_php]] —contains→ [[appserviceprovider_appserviceprovider]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_register]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_boot]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider_boot]] —calls→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
+- [[app_http_requests_updateleadrequest_php]] —contains→ [[updateleadrequest_updateleadrequest]] `EXTRACTED`
+- [[updateleadrequest_updateleadrequest]] —method→ [[updateleadrequest_updateleadrequest_authorize]] `EXTRACTED`
+- [[updateleadrequest_updateleadrequest]] —method→ [[updateleadrequest_updateleadrequest_rules]] `EXTRACTED`
+- [[updateleadrequest_updateleadrequest]] —method→ [[updateleadrequest_updateleadrequest_prepareforvalidation]] `EXTRACTED`
+- [[updateleadrequest_updateleadrequest]] —method→ [[updateleadrequest_updateleadrequest_messages]] `EXTRACTED`

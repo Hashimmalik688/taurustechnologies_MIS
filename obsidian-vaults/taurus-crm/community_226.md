@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_ru_js]]
-- [[ru_n]]
+- [[app_models_pettycashledger_php]]
+- [[pettycashledger_pettycashledger]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_ru_js]] —contains→ [[ru_n]] `EXTRACTED`
+- [[app_models_pettycashledger_php]] —contains→ [[pettycashledger_pettycashledger]] `EXTRACTED`

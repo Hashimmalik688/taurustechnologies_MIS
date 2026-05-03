@@ -1,61 +1,104 @@
 # Community 15
-**25 nodes**
+**68 nodes**
 
 ## Members
-- [[app_models_notification_php]]
-- [[app_services_notificationservice_php]]
-- [[notification_notification]]
-- [[notification_notification_createforuser]]
-- [[notification_notification_getdategroupattribute]]
-- [[notification_notification_getdategrouplabelattribute]]
-- [[notification_notification_gettimeagoattribute]]
-- [[notification_notification_isread]]
-- [[notification_notification_isunread]]
-- [[notification_notification_markasread]]
-- [[notification_notification_markasunread]]
-- [[notification_notification_scopeimportant]]
-- [[notification_notification_scoperead]]
-- [[notification_notification_scoperecent]]
-- [[notification_notification_scopeunread]]
-- [[notification_notification_user]]
-- [[notificationservice_notificationservice]]
-- [[notificationservice_notificationservice_cleanoldnotifications]]
-- [[notificationservice_notificationservice_createforallusers]]
-- [[notificationservice_notificationservice_createforuser]]
-- [[notificationservice_notificationservice_createforusers]]
-- [[notificationservice_notificationservice_createordernotification]]
-- [[notificationservice_notificationservice_createpaymentnotification]]
-- [[notificationservice_notificationservice_createsystemnotification]]
-- [[user_user_createnotification]]
+- [[app_http_controllers_admin_carriersheetcontroller_php]]
+- [[app_models_carriersheetentry_php]]
+- [[app_models_carriersheetopeningcb_php]]
+- [[app_models_carriersheetrate_php]]
+- [[app_services_carriersheetservice_php]]
+- [[carriersheetcontroller_carriersheetcontroller]]
+- [[carriersheetcontroller_carriersheetcontroller_construct]]
+- [[carriersheetcontroller_carriersheetcontroller_dashboard]]
+- [[carriersheetcontroller_carriersheetcontroller_deleteentry]]
+- [[carriersheetcontroller_carriersheetcontroller_deriveperiodmonth]]
+- [[carriersheetcontroller_carriersheetcontroller_export]]
+- [[carriersheetcontroller_carriersheetcontroller_import]]
+- [[carriersheetcontroller_carriersheetcontroller_leadlookup]]
+- [[carriersheetcontroller_carriersheetcontroller_matchleadtocarriersheet]]
+- [[carriersheetcontroller_carriersheetcontroller_normalizepolicytype]]
+- [[carriersheetcontroller_carriersheetcontroller_normalizestatus]]
+- [[carriersheetcontroller_carriersheetcontroller_parsedate]]
+- [[carriersheetcontroller_carriersheetcontroller_rates]]
+- [[carriersheetcontroller_carriersheetcontroller_show]]
+- [[carriersheetcontroller_carriersheetcontroller_storecarrier]]
+- [[carriersheetcontroller_carriersheetcontroller_storeentry]]
+- [[carriersheetcontroller_carriersheetcontroller_updateentry]]
+- [[carriersheetcontroller_carriersheetcontroller_updateopeningbalance]]
+- [[carriersheetcontroller_carriersheetcontroller_updateopeningchargeback]]
+- [[carriersheetcontroller_carriersheetcontroller_updaterate]]
+- [[carriersheetentry_carriersheetentry]]
+- [[carriersheetentry_carriersheetentry_carrierrate]]
+- [[carriersheetentry_carriersheetentry_clearbatchleadcache]]
+- [[carriersheetentry_carriersheetentry_creator]]
+- [[carriersheetentry_carriersheetentry_extractcarrierkeyword]]
+- [[carriersheetentry_carriersheetentry_generateleadcachekey]]
+- [[carriersheetentry_carriersheetentry_getpipelinestage]]
+- [[carriersheetentry_carriersheetentry_getstatusbadgeclass]]
+- [[carriersheetentry_carriersheetentry_getstatuscolor]]
+- [[carriersheetentry_carriersheetentry_ischargeback]]
+- [[carriersheetentry_carriersheetentry_isdeclined]]
+- [[carriersheetentry_carriersheetentry_ispaid]]
+- [[carriersheetentry_carriersheetentry_isplaceholderpolicynumber]]
+- [[carriersheetentry_carriersheetentry_isplaceholderpolicynumberstatic]]
+- [[carriersheetentry_carriersheetentry_lead]]
+- [[carriersheetentry_carriersheetentry_preloadleads]]
+- [[carriersheetentry_carriersheetentry_scopeactive]]
+- [[carriersheetentry_carriersheetentry_scopebystatus]]
+- [[carriersheetentry_carriersheetentry_scopeforperiod]]
+- [[carriersheetentry_carriersheetentry_scopewithstandardrelations]]
+- [[carriersheetopeningcb_carriersheetopeningcb]]
+- [[carriersheetopeningcb_carriersheetopeningcb_carrierrate]]
+- [[carriersheetrate_carriersheetrate]]
+- [[carriersheetrate_carriersheetrate_entries]]
+- [[carriersheetrate_carriersheetrate_getmultiplier]]
+- [[carriersheetrate_carriersheetrate_getpolicytypes]]
+- [[carriersheetrate_carriersheetrate_getratefortype]]
+- [[carriersheetrate_carriersheetrate_openingchargebacks]]
+- [[carriersheetrate_carriersheetrate_scopeactive]]
+- [[carriersheetrate_carriersheetrate_scopeordered]]
+- [[carriersheetservice_carriersheetservice]]
+- [[carriersheetservice_carriersheetservice_calculatebalance]]
+- [[carriersheetservice_carriersheetservice_clearcache]]
+- [[carriersheetservice_carriersheetservice_getavailablemonths]]
+- [[carriersheetservice_carriersheetservice_getcarriersummary]]
+- [[carriersheetservice_carriersheetservice_getdailysummary]]
+- [[carriersheetservice_carriersheetservice_getdashboardcachekey]]
+- [[carriersheetservice_carriersheetservice_getdashboardsummary]]
+- [[carriersheetservice_carriersheetservice_getsummarycachekey]]
+- [[carriersheetservice_carriersheetservice_recalculateallentries]]
+- [[carriersheetservice_carriersheetservice_recalculateentry]]
+- [[carriersheetservice_carriersheetservice_scopebyperiodmonth]]
+- [[permissioncontroller_permissioncontroller_clearcache]]
 
 ## Internal connections
-- [[app_services_notificationservice_php]] —contains→ [[notificationservice_notificationservice]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforuser]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
-- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_cleanoldnotifications]] `EXTRACTED`
-- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
-- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
-- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
-- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
-- [[notificationservice_notificationservice_createforuser]] —calls→ [[notification_notification]] `INFERRED`
-- [[notificationservice_notificationservice_createforusers]] —calls→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
-- [[notificationservice_notificationservice_cleanoldnotifications]] —calls→ [[notification_notification]] `INFERRED`
-- [[user_user_createnotification]] —calls→ [[notification_notification]] `INFERRED`
-- [[app_models_notification_php]] —contains→ [[notification_notification]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_user]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_scopeunread]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_scoperead]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_scoperecent]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_scopeimportant]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_markasread]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_markasunread]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_isread]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_isunread]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_gettimeagoattribute]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_getdategroupattribute]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_getdategrouplabelattribute]] `EXTRACTED`
-- [[notification_notification]] —method→ [[notification_notification_createforuser]] `EXTRACTED`
+- [[app_services_carriersheetservice_php]] —contains→ [[carriersheetservice_carriersheetservice]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getsummarycachekey]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getdashboardcachekey]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_clearcache]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_calculatebalance]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_recalculateentry]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_recalculateallentries]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getcarriersummary]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getdashboardsummary]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getdailysummary]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_getavailablemonths]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice]] —method→ [[carriersheetservice_carriersheetservice_scopebyperiodmonth]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_getsummarycachekey]] —calls→ [[carriersheetservice_carriersheetservice_clearcache]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_getsummarycachekey]] —calls→ [[carriersheetservice_carriersheetservice_getcarriersummary]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_getdashboardcachekey]] —calls→ [[carriersheetservice_carriersheetservice_clearcache]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_getdashboardcachekey]] —calls→ [[carriersheetservice_carriersheetservice_getdashboardsummary]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_clearcache]] —calls→ [[carriersheetservice_carriersheetservice_recalculateentry]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_clearcache]] —calls→ [[carriersheetservice_carriersheetservice_recalculateallentries]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_clearcache]] —calls→ [[carriersheetrate_carriersheetrate]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_calculatebalance]] —calls→ [[carriersheetservice_carriersheetservice_recalculateentry]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_calculatebalance]] —calls→ [[carriersheetcontroller_carriersheetcontroller_updateentry]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateentry]] —calls→ [[carriersheetservice_carriersheetservice_recalculateallentries]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_recalculateentry]] —calls→ [[carriersheetrate_carriersheetrate]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateentry]] —calls→ [[carriersheetcontroller_carriersheetcontroller_storeentry]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateentry]] —calls→ [[carriersheetcontroller_carriersheetcontroller_updateentry]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateentry]] —calls→ [[carriersheetcontroller_carriersheetcontroller_import]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateallentries]] —calls→ [[carriersheetservice_carriersheetservice_scopebyperiodmonth]] `EXTRACTED`
+- [[carriersheetservice_carriersheetservice_recalculateallentries]] —calls→ [[carriersheetrate_carriersheetrate_entries]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateallentries]] —calls→ [[carriersheetentry_carriersheetentry]] `INFERRED`
+- [[carriersheetservice_carriersheetservice_recalculateallentries]] —calls→ [[carriersheetcontroller_carriersheetcontroller_updaterate]] `INFERRED`

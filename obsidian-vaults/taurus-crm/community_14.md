@@ -1,62 +1,105 @@
 # Community 14
-**26 nodes**
+**69 nodes**
 
 ## Members
-- [[app_models_ledgerjournalentry_php]]
-- [[app_services_ledgerservice_php]]
-- [[ledgerjournalcontroller_ledgerjournalcontroller_storegeneral]]
-- [[ledgerjournalcontroller_ledgerjournalcontroller_storeopeningbalance]]
-- [[ledgerjournalcontroller_ledgerjournalcontroller_storepayment]]
-- [[ledgerjournalentry_ledgerjournalentry]]
-- [[ledgerjournalentry_ledgerjournalentry_creator]]
-- [[ledgerjournalentry_ledgerjournalentry_generateentrynumber]]
-- [[ledgerjournalentry_ledgerjournalentry_gettypelabelattribute]]
-- [[ledgerjournalentry_ledgerjournalentry_lead]]
-- [[ledgerjournalentry_ledgerjournalentry_lines]]
-- [[ledgerjournalentry_ledgerjournalentry_scopedaterange]]
-- [[ledgerjournalentry_ledgerjournalentry_scopeoftype]]
-- [[ledgerjournalentry_ledgerjournalentry_typelabel]]
-- [[ledgerservice_ledgerservice]]
-- [[ledgerservice_ledgerservice_account]]
-- [[ledgerservice_ledgerservice_createchargebackentry]]
-- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]]
-- [[ledgerservice_ledgerservice_creategeneralentry]]
-- [[ledgerservice_ledgerservice_createopeningbalanceentry]]
-- [[ledgerservice_ledgerservice_createpaymententry]]
-- [[ledgerservice_ledgerservice_createsaleentry]]
-- [[ledgerservice_ledgerservice_createsalesreturnentry]]
-- [[ledgerservice_ledgerservice_line]]
-- [[ledgerservice_ledgerservice_persist]]
-- [[ledgerservice_ledgerservice_updateaccountbalances]]
+- [[app_console_commands_synczoomcalllogs_php]]
+- [[app_console_commands_synczoomrecordings_php]]
+- [[app_console_commands_zoomphonereportprobe_php]]
+- [[app_http_controllers_admin_zoomphoneembedcontroller_php]]
+- [[app_models_zoomwebhooklog_php]]
+- [[app_services_qa_zoomoauthservice_php]]
+- [[app_services_zoomphoneapiservice_php]]
+- [[communityannouncement_communityannouncement_isexpired]]
+- [[qacall_qacall_calllog]]
+- [[ravensdashboardcontroller_ravensdashboardcontroller_getcallsconnectedcount]]
+- [[ravensdashboardcontroller_ravensdashboardcontroller_getdialedtodaycount]]
+- [[synczoomcalllogs_synczoomcalllogs]]
+- [[synczoomcalllogs_synczoomcalllogs_handle]]
+- [[synczoomrecordings_synczoomrecordings]]
+- [[synczoomrecordings_synczoomrecordings_handle]]
+- [[zoomcontroller_zoomcontroller_playrecording]]
+- [[zoomoauthservice_zoomoauthservice]]
+- [[zoomoauthservice_zoomoauthservice_downloadrecording]]
+- [[zoomoauthservice_zoomoauthservice_downloadtranscriptfromurl]]
+- [[zoomoauthservice_zoomoauthservice_fetchsignedurlfromapi]]
+- [[zoomoauthservice_zoomoauthservice_fetchzoomtranscript]]
+- [[zoomoauthservice_zoomoauthservice_getaccesstoken]]
+- [[zoomoauthservice_zoomoauthservice_parsejsontranscripttolabeledtext]]
+- [[zoomoauthservice_zoomoauthservice_parsevtttolabeledtext]]
+- [[zoomphoneapiservice_zoomphoneapiservice]]
+- [[zoomphoneapiservice_zoomphoneapiservice_fetchaccountcalllogs]]
+- [[zoomphoneapiservice_zoomphoneapiservice_fetchdownloadurlbyrecordingid]]
+- [[zoomphoneapiservice_zoomphoneapiservice_fetchusercalllogs]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getadminaccesstoken]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getcalllogs]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getrecordingurl]]
+- [[zoomphoneapiservice_zoomphoneapiservice_getusercalllogs]]
+- [[zoomphoneapiservice_zoomphoneapiservice_refreshtoken]]
+- [[zoomphoneapiservice_zoomphoneapiservice_synccalllogs]]
+- [[zoomphoneapiservice_zoomphoneapiservice_syncmosdata]]
+- [[zoomphoneapiservice_zoomphoneapiservice_testconnection]]
+- [[zoomphoneapiservice_zoomphoneapiservice_upsertcalllog]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_generatetoken]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_getcalllogrecording]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_getcompanydids]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_gets2stoken]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_getusertoken]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_hasvalidtoken]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_index]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_mycalllogs]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_mydids]]
+- [[zoomphoneembedcontroller_zoomphoneembedcontroller_refreshusertoken]]
+- [[zoomphonereportprobe_zoomphonereportprobe]]
+- [[zoomphonereportprobe_zoomphonereportprobe_handle]]
+- [[zoomwebhooklog_zoomwebhooklog]]
+- [[zoomwebhooklog_zoomwebhooklog_agent]]
+- [[zoomwebhooklog_zoomwebhooklog_getdisplaynameattribute]]
+- [[zoomwebhooklog_zoomwebhooklog_getdisplayphoneattribute]]
+- [[zoomwebhooklog_zoomwebhooklog_getformatteddurationattribute]]
+- [[zoomwebhooklog_zoomwebhooklog_getformattedfilesizeattribute]]
+- [[zoomwebhooklog_zoomwebhooklog_islinkedtomis]]
+- [[zoomwebhooklog_zoomwebhooklog_lead]]
+- [[zoomwebhooklog_zoomwebhooklog_matchedcalllog]]
+- [[zoomwebhooklog_zoomwebhooklog_scopeanswered]]
+- [[zoomwebhooklog_zoomwebhooklog_scopedaterange]]
+- [[zoomwebhooklog_zoomwebhooklog_scopeeventtype]]
+- [[zoomwebhooklog_zoomwebhooklog_scopemissed]]
+- [[zoomwebhooklog_zoomwebhooklog_scopeunprocessed]]
+- [[zoomwebhooklog_zoomwebhooklog_scopewithrecording]]
+- [[zoomwebhooklog_zoomwebhooklog_scopewithtranscript]]
+- [[zoomwebhooklog_zoomwebhooklog_wasanswered]]
 
 ## Internal connections
-- [[app_services_ledgerservice_php]] —contains→ [[ledgerservice_ledgerservice]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsaleentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsalesreturnentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createpaymententry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createopeningbalanceentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_creategeneralentry]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_updateaccountbalances]] `EXTRACTED`
-- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerjournalcontroller_ledgerjournalcontroller_storepayment]] `INFERRED`
-- [[ledgerservice_ledgerservice_createopeningbalanceentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
-- [[ledgerservice_ledgerservice_createopeningbalanceentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[app_services_zoomphoneapiservice_php]] —contains→ [[zoomphoneapiservice_zoomphoneapiservice]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_refreshtoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getadminaccesstoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getrecordingurl]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_fetchdownloadurlbyrecordingid]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_testconnection]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getcalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_getusercalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_synccalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_fetchaccountcalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_fetchusercalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_upsertcalllog]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice]] —method→ [[zoomphoneapiservice_zoomphoneapiservice_syncmosdata]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_refreshtoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_testconnection]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_getcalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_getusercalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstoken]] —calls→ [[communityannouncement_communityannouncement_isexpired]] `INFERRED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_refreshtoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_getadminaccesstoken]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_synccalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_fetchaccountcalllogs]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_syncmosdata]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[communityannouncement_communityannouncement_isexpired]] `INFERRED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getaccesstokenforrecord]] —calls→ [[zoomphonereportprobe_zoomphonereportprobe_handle]] `INFERRED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getadminaccesstoken]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_getrecordingurl]] `EXTRACTED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getadminaccesstoken]] —calls→ [[synczoomrecordings_synczoomrecordings_handle]] `INFERRED`
+- [[zoomphoneapiservice_zoomphoneapiservice_getrecordingurl]] —calls→ [[zoomphoneapiservice_zoomphoneapiservice_fetchdownloadurlbyrecordingid]] `EXTRACTED`

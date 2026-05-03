@@ -1,9 +1,11 @@
 # Community 218
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[resources_js_pages_toastr_init_js]]
-- [[toastr_init_getlasttoast]]
+- [[2026_02_22_112206_add_audit_timestamps_to_leads_table_down]]
+- [[2026_02_22_112206_add_audit_timestamps_to_leads_table_up]]
+- [[database_migrations_2026_02_22_112206_add_audit_timestamps_to_leads_table_php]]
 
 ## Internal connections
-- [[resources_js_pages_toastr_init_js]] —contains→ [[toastr_init_getlasttoast]] `EXTRACTED`
+- [[database_migrations_2026_02_22_112206_add_audit_timestamps_to_leads_table_php]] —contains→ [[2026_02_22_112206_add_audit_timestamps_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_22_112206_add_audit_timestamps_to_leads_table_php]] —contains→ [[2026_02_22_112206_add_audit_timestamps_to_leads_table_down]] `EXTRACTED`

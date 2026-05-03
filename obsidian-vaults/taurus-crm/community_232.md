@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[mn_translate]]
-- [[resources_libs_moment_locale_mn_js]]
+- [[graphify_graphify_viz_py]]
+- [[graphify_viz_rationale_1]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_mn_js]] —contains→ [[mn_translate]] `EXTRACTED`
+- [[graphify_graphify_viz_py]] —rationale_for→ [[graphify_viz_rationale_1]] `EXTRACTED`

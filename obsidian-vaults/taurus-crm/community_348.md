@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_datatables_net_buttons_js_buttons_colvis_min_mjs]]
+- [[resources_views_admin_announcement_create_blade_php]]

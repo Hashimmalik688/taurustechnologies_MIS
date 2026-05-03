@@ -2,16 +2,16 @@
 **6 nodes**
 
 ## Members
-- [[agentrepositoryinterface_createagent]]
-- [[agentrepositoryinterface_getagentbyid]]
-- [[agentrepositoryinterface_getagentsbystate]]
-- [[agentrepositoryinterface_getallagents]]
-- [[agentrepositoryinterface_updateagent]]
-- [[app_repositories_contracts_agentrepositoryinterface_php]]
+- [[app_events_messagesent_php]]
+- [[messagesent_messagesent]]
+- [[messagesent_messagesent_broadcastas]]
+- [[messagesent_messagesent_broadcaston]]
+- [[messagesent_messagesent_broadcastwith]]
+- [[messagesent_messagesent_construct]]
 
 ## Internal connections
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getallagents]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentbyid]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_createagent]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_updateagent]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentsbystate]] `EXTRACTED`
+- [[app_events_messagesent_php]] —contains→ [[messagesent_messagesent]] `EXTRACTED`
+- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_construct]] `EXTRACTED`
+- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_broadcaston]] `EXTRACTED`
+- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_broadcastwith]] `EXTRACTED`
+- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_broadcastas]] `EXTRACTED`

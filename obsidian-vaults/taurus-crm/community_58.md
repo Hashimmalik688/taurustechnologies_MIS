@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_http_requests_storeledgerentryrequest_php]]
-- [[storeledgerentryrequest_storeledgerentryrequest]]
-- [[storeledgerentryrequest_storeledgerentryrequest_authorize]]
-- [[storeledgerentryrequest_storeledgerentryrequest_messages]]
-- [[storeledgerentryrequest_storeledgerentryrequest_rules]]
+- [[app_http_requests_storeagentrequest_php]]
+- [[storeagentrequest_storeagentrequest]]
+- [[storeagentrequest_storeagentrequest_authorize]]
+- [[storeagentrequest_storeagentrequest_messages]]
+- [[storeagentrequest_storeagentrequest_rules]]
 
 ## Internal connections
-- [[app_http_requests_storeledgerentryrequest_php]] —contains→ [[storeledgerentryrequest_storeledgerentryrequest]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_authorize]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_rules]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_messages]] `EXTRACTED`
+- [[app_http_requests_storeagentrequest_php]] —contains→ [[storeagentrequest_storeagentrequest]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_authorize]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_rules]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_messages]] `EXTRACTED`

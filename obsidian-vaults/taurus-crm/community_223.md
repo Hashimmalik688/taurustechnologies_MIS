@@ -1,9 +1,11 @@
 # Community 223
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_uk_js]]
-- [[uk_n]]
+- [[database_seeders_databaseseeder_php]]
+- [[databaseseeder_databaseseeder]]
+- [[databaseseeder_databaseseeder_run]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_uk_js]] —contains→ [[uk_n]] `EXTRACTED`
+- [[database_seeders_databaseseeder_php]] —contains→ [[databaseseeder_databaseseeder]] `EXTRACTED`
+- [[databaseseeder_databaseseeder]] —method→ [[databaseseeder_databaseseeder_run]] `EXTRACTED`

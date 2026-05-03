@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_eu_js]]
+- [[resources_views_layouts_vendor_scripts_blade_php]]

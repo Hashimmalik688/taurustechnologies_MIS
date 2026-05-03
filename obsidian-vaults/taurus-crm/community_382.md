@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_parsleyjs_i18n_en_js]]
+- [[resources_views_admin_pending_draft_index_blade_php]]

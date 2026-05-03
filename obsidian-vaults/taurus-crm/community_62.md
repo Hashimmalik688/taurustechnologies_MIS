@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_events_leadcreated_php]]
-- [[leadcreated_leadcreated]]
-- [[leadcreated_leadcreated_broadcaston]]
-- [[leadcreated_leadcreated_construct]]
+- [[app_events_salecreated_php]]
+- [[salecreated_salecreated]]
+- [[salecreated_salecreated_broadcaston]]
+- [[salecreated_salecreated_construct]]
 
 ## Internal connections
-- [[app_events_leadcreated_php]] —contains→ [[leadcreated_leadcreated]] `EXTRACTED`
-- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_construct]] `EXTRACTED`
-- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_broadcaston]] `EXTRACTED`
+- [[app_events_salecreated_php]] —contains→ [[salecreated_salecreated]] `EXTRACTED`
+- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_construct]] `EXTRACTED`
+- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_broadcaston]] `EXTRACTED`

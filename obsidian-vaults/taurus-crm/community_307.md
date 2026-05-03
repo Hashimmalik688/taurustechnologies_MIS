@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_gl_js]]
+- [[resources_views_components_community_announcements_banner_blade_php]]

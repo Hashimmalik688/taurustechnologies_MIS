@@ -1,59 +1,96 @@
 # Community 18
-**23 nodes**
+**60 nodes**
 
 ## Members
-- [[app_console_commands_cleanupanalyze_php]]
-- [[app_services_fileuploadservice_php]]
-- [[cleanupanalyze_cleanupanalyze]]
-- [[cleanupanalyze_cleanupanalyze_finddanglingviews]]
-- [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]]
-- [[cleanupanalyze_cleanupanalyze_findunreferencedcontrollers]]
-- [[cleanupanalyze_cleanupanalyze_handle]]
-- [[cleanupanalyze_cleanupanalyze_section]]
-- [[echarts_esm_confinetooltipposition]]
-- [[echarts_esm_getcomputedstyle]]
-- [[echarts_esm_getsize]]
-- [[echarts_esm_parseint10]]
-- [[echarts_esm_refixtooltipposition]]
-- [[fileuploadservice_fileuploadservice]]
-- [[fileuploadservice_fileuploadservice_fileexists]]
-- [[fileuploadservice_fileuploadservice_generateuniquefilename]]
-- [[fileuploadservice_fileuploadservice_getallowedmimes]]
-- [[fileuploadservice_fileuploadservice_getfileurl]]
-- [[fileuploadservice_fileuploadservice_uploadavatar]]
-- [[fileuploadservice_fileuploadservice_uploaddocument]]
-- [[fileuploadservice_fileuploadservice_uploadfile]]
-- [[fileuploadservice_fileuploadservice_validateandstore]]
-- [[fileuploadservice_fileuploadservice_validatemimetype]]
+- [[agentcarriercommission_agentcarriercommission]]
+- [[agentcarriercommission_agentcarriercommission_carrierstates]]
+- [[agentcarrierstate_agentcarrierstate]]
+- [[agentcarrierstate_agentcarrierstate_getsettlementpercentage]]
+- [[agentcarrierstate_agentcarrierstate_insurancecarrier]]
+- [[agentcarrierstate_agentcarrierstate_user]]
+- [[app_http_controllers_admin_insurancecarriercontroller_php]]
+- [[app_models_agentcarriercommission_php]]
+- [[app_models_agentcarrierstate_php]]
+- [[app_models_insurancecarrier_php]]
+- [[app_repositories_contracts_partnerledgerrepositoryinterface_php]]
+- [[app_services_commissioncalculationservice_php]]
+- [[app_services_partnerrevenueservice_php]]
+- [[commissioncalculationservice_commissioncalculationservice]]
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommission]]
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommissionlegacy]]
+- [[commissioncalculationservice_commissioncalculationservice_canpartnersellinstate]]
+- [[commissioncalculationservice_commissioncalculationservice_getpartnerstatesforcarrier]]
+- [[commissioncalculationservice_commissioncalculationservice_normalizesettlementtype]]
+- [[employeedashboardcontroller_employeedashboardcontroller_leads]]
+- [[insurancecarrier_insurancecarrier]]
+- [[insurancecarrier_insurancecarrier_agentcommissions]]
+- [[insurancecarrier_insurancecarrier_agentstates]]
+- [[insurancecarrier_insurancecarrier_commissionbrackets]]
+- [[insurancecarrier_insurancecarrier_getcommissionforage]]
+- [[insurancecarrier_insurancecarrier_getcommissionforagent]]
+- [[insurancecarrier_insurancecarrier_leads]]
+- [[insurancecarriercontroller_insurancecarriercontroller]]
+- [[insurancecarriercontroller_insurancecarriercontroller_create]]
+- [[insurancecarriercontroller_insurancecarriercontroller_destroy]]
+- [[insurancecarriercontroller_insurancecarriercontroller_edit]]
+- [[insurancecarriercontroller_insurancecarriercontroller_show]]
+- [[insurancecarriercontroller_insurancecarriercontroller_update]]
+- [[partnerapicontroller_partnerapicontroller_getbalance]]
+- [[partnerapicontroller_partnerapicontroller_getpartnerships]]
+- [[partnerapicontroller_partnerapicontroller_getrevenuemetrics]]
+- [[partnercontroller_partnercontroller_removecarrierassignment]]
+- [[partnerdashboardcontroller_partnerdashboardcontroller_index]]
+- [[partnerdashboardcontroller_partnerdashboardcontroller_ledger]]
+- [[partnerledgerrepositoryinterface_getbalance]]
+- [[partnerledgerrepositoryinterface_getbalanceaging]]
+- [[partnerledgerrepositoryinterface_getchargebackssummary]]
+- [[partnerledgerrepositoryinterface_getdashboardstats]]
+- [[partnerledgerrepositoryinterface_getledger]]
+- [[partnerledgerrepositoryinterface_getledgerbycarrier]]
+- [[partnerledgerrepositoryinterface_getpaymentssummary]]
+- [[partnerledgerrepositoryinterface_getsalessummary]]
+- [[partnerrevenueservice_partnerrevenueservice]]
+- [[partnerrevenueservice_partnerrevenueservice_construct]]
+- [[partnerrevenueservice_partnerrevenueservice_estimatecommission]]
+- [[partnerrevenueservice_partnerrevenueservice_getactivecarriers]]
+- [[partnerrevenueservice_partnerrevenueservice_getauthorizedstates]]
+- [[partnerrevenueservice_partnerrevenueservice_getearnedrevenue]]
+- [[partnerrevenueservice_partnerrevenueservice_getmonthlybreakdown]]
+- [[partnerrevenueservice_partnerrevenueservice_getpartnerbalance]]
+- [[partnerrevenueservice_partnerrevenueservice_getpartnerearnedshare]]
+- [[partnerrevenueservice_partnerrevenueservice_getpartnerprojectedshare]]
+- [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]]
+- [[partnerrevenueservice_partnerrevenueservice_gettotalchargebacks]]
+- [[partnerrevenueservice_partnerrevenueservice_getyeartodatemetrics]]
 
 ## Internal connections
-- [[app_services_fileuploadservice_php]] —contains→ [[fileuploadservice_fileuploadservice]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploadavatar]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploaddocument]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_uploadfile]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_validatemimetype]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_getallowedmimes]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_generateuniquefilename]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_getfileurl]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice]] —method→ [[fileuploadservice_fileuploadservice_fileexists]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_uploadavatar]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_uploaddocument]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_uploadfile]] —calls→ [[fileuploadservice_fileuploadservice_validateandstore]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_validateandstore]] —calls→ [[fileuploadservice_fileuploadservice_validatemimetype]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_validateandstore]] —calls→ [[fileuploadservice_fileuploadservice_generateuniquefilename]] `EXTRACTED`
-- [[fileuploadservice_fileuploadservice_validateandstore]] —calls→ [[echarts_esm_getsize]] `INFERRED`
-- [[fileuploadservice_fileuploadservice_validatemimetype]] —calls→ [[fileuploadservice_fileuploadservice_getallowedmimes]] `EXTRACTED`
-- [[app_console_commands_cleanupanalyze_php]] —contains→ [[cleanupanalyze_cleanupanalyze]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze]] —method→ [[cleanupanalyze_cleanupanalyze_handle]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze]] —method→ [[cleanupanalyze_cleanupanalyze_section]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze]] —method→ [[cleanupanalyze_cleanupanalyze_findunreferencedcontrollers]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze]] —method→ [[cleanupanalyze_cleanupanalyze_finddanglingviews]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze]] —method→ [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze_handle]] —calls→ [[cleanupanalyze_cleanupanalyze_findunreferencedcontrollers]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze_handle]] —calls→ [[cleanupanalyze_cleanupanalyze_finddanglingviews]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze_handle]] —calls→ [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze_handle]] —calls→ [[cleanupanalyze_cleanupanalyze_section]] `EXTRACTED`
-- [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]] —calls→ [[echarts_esm_getsize]] `INFERRED`
-- [[echarts_esm_parseint10]] —calls→ [[echarts_esm_getsize]] `EXTRACTED`
-- [[echarts_esm_getsize]] —calls→ [[echarts_esm_getcomputedstyle]] `EXTRACTED`
+- [[app_services_commissioncalculationservice_php]] —contains→ [[commissioncalculationservice_commissioncalculationservice]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice]] —method→ [[commissioncalculationservice_commissioncalculationservice_calculatecommission]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice]] —method→ [[commissioncalculationservice_commissioncalculationservice_canpartnersellinstate]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice]] —method→ [[commissioncalculationservice_commissioncalculationservice_getpartnerstatesforcarrier]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice]] —method→ [[commissioncalculationservice_commissioncalculationservice_normalizesettlementtype]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice]] —method→ [[commissioncalculationservice_commissioncalculationservice_calculatecommissionlegacy]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommission]] —calls→ [[commissioncalculationservice_commissioncalculationservice_calculatecommissionlegacy]] `EXTRACTED`
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommission]] —calls→ [[agentcarrierstate_agentcarrierstate]] `INFERRED`
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommission]] —calls→ [[agentcarrierstate_agentcarrierstate_getsettlementpercentage]] `INFERRED`
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommission]] —calls→ [[agentcarriercommission_agentcarriercommission]] `INFERRED`
+- [[commissioncalculationservice_commissioncalculationservice_canpartnersellinstate]] —calls→ [[agentcarrierstate_agentcarrierstate]] `INFERRED`
+- [[commissioncalculationservice_commissioncalculationservice_getpartnerstatesforcarrier]] —calls→ [[agentcarrierstate_agentcarrierstate]] `INFERRED`
+- [[commissioncalculationservice_commissioncalculationservice_calculatecommissionlegacy]] —calls→ [[agentcarrierstate_agentcarrierstate]] `INFERRED`
+- [[app_services_partnerrevenueservice_php]] —contains→ [[partnerrevenueservice_partnerrevenueservice]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_construct]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getearnedrevenue]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_gettotalchargebacks]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getpartnerbalance]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getpartnerearnedshare]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getpartnerprojectedshare]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getyeartodatemetrics]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getmonthlybreakdown]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getactivecarriers]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_getauthorizedstates]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice]] —method→ [[partnerrevenueservice_partnerrevenueservice_estimatecommission]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]] —calls→ [[partnerrevenueservice_partnerrevenueservice_getpartnerprojectedshare]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]] —calls→ [[partnerrevenueservice_partnerrevenueservice_getyeartodatemetrics]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]] —calls→ [[partnerrevenueservice_partnerrevenueservice_getmonthlybreakdown]] `EXTRACTED`
+- [[partnerrevenueservice_partnerrevenueservice_getprojectedrevenue]] —calls→ [[partnerdashboardcontroller_partnerdashboardcontroller_index]] `INFERRED`

@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_chatmessagereaction_php]]
-- [[chatmessagereaction_chatmessagereaction]]
-- [[chatmessagereaction_chatmessagereaction_message]]
-- [[chatmessagereaction_chatmessagereaction_user]]
+- [[app_models_partner_php]]
+- [[partner_partner]]
+- [[partner_partner_carriers]]
+- [[partner_partner_carrierstates]]
 
 ## Internal connections
-- [[app_models_chatmessagereaction_php]] —contains→ [[chatmessagereaction_chatmessagereaction]] `EXTRACTED`
-- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_message]] `EXTRACTED`
-- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_user]] `EXTRACTED`
+- [[app_models_partner_php]] —contains→ [[partner_partner]] `EXTRACTED`
+- [[partner_partner]] —method→ [[partner_partner_carrierstates]] `EXTRACTED`
+- [[partner_partner]] —method→ [[partner_partner_carriers]] `EXTRACTED`

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_models_salarydeduction_php]]
-- [[salarydeduction_salarydeduction]]
-- [[salarydeduction_salarydeduction_getcalculatedamountattribute]]
+- [[app_console_commands_setupgooglesheetheaders_php]]
+- [[setupgooglesheetheaders_setupgooglesheetheaders]]
+- [[setupgooglesheetheaders_setupgooglesheetheaders_handle]]
 
 ## Internal connections
-- [[app_models_salarydeduction_php]] —contains→ [[salarydeduction_salarydeduction]] `EXTRACTED`
-- [[salarydeduction_salarydeduction]] —method→ [[salarydeduction_salarydeduction_getcalculatedamountattribute]] `EXTRACTED`
+- [[app_console_commands_setupgooglesheetheaders_php]] —contains→ [[setupgooglesheetheaders_setupgooglesheetheaders]] `EXTRACTED`
+- [[setupgooglesheetheaders_setupgooglesheetheaders]] —method→ [[setupgooglesheetheaders_setupgooglesheetheaders_handle]] `EXTRACTED`

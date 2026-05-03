@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[pl_plural]]
-- [[pl_translate]]
-- [[resources_libs_moment_locale_pl_js]]
+- [[2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_down]]
+- [[2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_up]]
+- [[database_migrations_2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_pl_js]] —contains→ [[pl_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_pl_js]] —contains→ [[pl_translate]] `EXTRACTED`
-- [[pl_plural]] —calls→ [[pl_translate]] `EXTRACTED`
+- [[database_migrations_2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_php]] —contains→ [[2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_up]] `EXTRACTED`
+- [[database_migrations_2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_php]] —contains→ [[2026_03_07_214532_add_zoom_transcript_url_to_qa_calls_table_down]] `EXTRACTED`

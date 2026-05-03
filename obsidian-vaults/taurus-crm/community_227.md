@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[lv_e]]
-- [[resources_libs_select2_js_i18n_lv_js]]
+- [[app_http_middleware_trimstrings_php]]
+- [[trimstrings_trimstrings]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_lv_js]] —contains→ [[lv_e]] `EXTRACTED`
+- [[app_http_middleware_trimstrings_php]] —contains→ [[trimstrings_trimstrings]] `EXTRACTED`

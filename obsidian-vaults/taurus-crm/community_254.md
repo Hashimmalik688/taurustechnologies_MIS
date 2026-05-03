@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[public_js_service_worker_js]]
+- [[resources_js_echo_js]]

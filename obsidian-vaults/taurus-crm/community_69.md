@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_partner_php]]
-- [[partner_partner]]
-- [[partner_partner_carriers]]
-- [[partner_partner_carrierstates]]
+- [[materialdesign_init_geticonitem]]
+- [[materialdesign_init_isdeprecated]]
+- [[materialdesign_init_isnew]]
+- [[resources_js_pages_materialdesign_init_js]]
 
 ## Internal connections
-- [[app_models_partner_php]] —contains→ [[partner_partner]] `EXTRACTED`
-- [[partner_partner]] —method→ [[partner_partner_carrierstates]] `EXTRACTED`
-- [[partner_partner]] —method→ [[partner_partner_carriers]] `EXTRACTED`
+- [[resources_js_pages_materialdesign_init_js]] —contains→ [[materialdesign_init_isnew]] `EXTRACTED`
+- [[resources_js_pages_materialdesign_init_js]] —contains→ [[materialdesign_init_isdeprecated]] `EXTRACTED`
+- [[resources_js_pages_materialdesign_init_js]] —contains→ [[materialdesign_init_geticonitem]] `EXTRACTED`

@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_listeners_markattendanceonlogin_php]]
-- [[markattendanceonlogin_markattendanceonlogin]]
-- [[markattendanceonlogin_markattendanceonlogin_construct]]
-- [[markattendanceonlogin_markattendanceonlogin_handle]]
-- [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]]
+- [[app_models_carrier_php]]
+- [[carrier_carrier]]
+- [[carrier_carrier_forwardedby]]
+- [[carrier_carrier_lead]]
+- [[carrier_carrier_managedby]]
 
 ## Internal connections
-- [[app_listeners_markattendanceonlogin_php]] —contains→ [[markattendanceonlogin_markattendanceonlogin]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_construct]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_handle]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin_handle]] —calls→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`
+- [[app_models_carrier_php]] —contains→ [[carrier_carrier]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_lead]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_forwardedby]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_managedby]] `EXTRACTED`

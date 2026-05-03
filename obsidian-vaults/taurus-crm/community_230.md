@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[gom_latn_processrelativetime]]
-- [[resources_libs_moment_locale_gom_latn_js]]
+- [[app_http_middleware_preventrequestsduringmaintenance_php]]
+- [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_gom_latn_js]] —contains→ [[gom_latn_processrelativetime]] `EXTRACTED`
+- [[app_http_middleware_preventrequestsduringmaintenance_php]] —contains→ [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]] `EXTRACTED`

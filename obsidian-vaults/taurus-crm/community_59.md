@@ -2,16 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[lb_eifelerregelappliestonumber]]
-- [[lb_processfuturetime]]
-- [[lb_processpasttime]]
-- [[lb_processrelativetime]]
-- [[resources_libs_moment_locale_lb_js]]
+- [[app_http_requests_storeledgerentryrequest_php]]
+- [[storeledgerentryrequest_storeledgerentryrequest]]
+- [[storeledgerentryrequest_storeledgerentryrequest_authorize]]
+- [[storeledgerentryrequest_storeledgerentryrequest_messages]]
+- [[storeledgerentryrequest_storeledgerentryrequest_rules]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processrelativetime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processfuturetime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processpasttime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
-- [[lb_processfuturetime]] —calls→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
-- [[lb_processpasttime]] —calls→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
+- [[app_http_requests_storeledgerentryrequest_php]] —contains→ [[storeledgerentryrequest_storeledgerentryrequest]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_authorize]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_rules]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_messages]] `EXTRACTED`

@@ -1,9 +1,11 @@
 # Community 210
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[app_support_statuses_php]]
-- [[statuses_statuses]]
+- [[2026_02_22_114436_add_assignment_tracking_to_leads_table_down]]
+- [[2026_02_22_114436_add_assignment_tracking_to_leads_table_up]]
+- [[database_migrations_2026_02_22_114436_add_assignment_tracking_to_leads_table_php]]
 
 ## Internal connections
-- [[app_support_statuses_php]] —contains→ [[statuses_statuses]] `EXTRACTED`
+- [[database_migrations_2026_02_22_114436_add_assignment_tracking_to_leads_table_php]] —contains→ [[2026_02_22_114436_add_assignment_tracking_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_22_114436_add_assignment_tracking_to_leads_table_php]] —contains→ [[2026_02_22_114436_add_assignment_tracking_to_leads_table_down]] `EXTRACTED`

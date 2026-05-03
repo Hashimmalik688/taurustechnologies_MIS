@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_carriercommissionbracket_php]]
-- [[carriercommissionbracket_carriercommissionbracket]]
-- [[carriercommissionbracket_carriercommissionbracket_containsage]]
-- [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]]
+- [[app_models_chatmessageread_php]]
+- [[chatmessageread_chatmessageread]]
+- [[chatmessageread_chatmessageread_message]]
+- [[chatmessageread_chatmessageread_user]]
 
 ## Internal connections
-- [[app_models_carriercommissionbracket_php]] —contains→ [[carriercommissionbracket_carriercommissionbracket]] `EXTRACTED`
-- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]] `EXTRACTED`
-- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_containsage]] `EXTRACTED`
+- [[app_models_chatmessageread_php]] —contains→ [[chatmessageread_chatmessageread]] `EXTRACTED`
+- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_message]] `EXTRACTED`
+- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_user]] `EXTRACTED`

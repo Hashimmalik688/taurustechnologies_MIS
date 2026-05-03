@@ -1,16 +1,17 @@
 # Community 47
-**5 nodes**
+**6 nodes**
 
 ## Members
-- [[app_providers_telescopeserviceprovider_php]]
-- [[telescopeserviceprovider_telescopeserviceprovider]]
-- [[telescopeserviceprovider_telescopeserviceprovider_gate]]
-- [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]]
-- [[telescopeserviceprovider_telescopeserviceprovider_register]]
+- [[agentrepositoryinterface_createagent]]
+- [[agentrepositoryinterface_getagentbyid]]
+- [[agentrepositoryinterface_getagentsbystate]]
+- [[agentrepositoryinterface_getallagents]]
+- [[agentrepositoryinterface_updateagent]]
+- [[app_repositories_contracts_agentrepositoryinterface_php]]
 
 ## Internal connections
-- [[app_providers_telescopeserviceprovider_php]] —contains→ [[telescopeserviceprovider_telescopeserviceprovider]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_register]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_gate]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider_register]] —calls→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
+- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getallagents]] `EXTRACTED`
+- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentbyid]] `EXTRACTED`
+- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_createagent]] `EXTRACTED`
+- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_updateagent]] `EXTRACTED`
+- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentsbystate]] `EXTRACTED`

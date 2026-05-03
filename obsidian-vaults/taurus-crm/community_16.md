@@ -1,61 +1,102 @@
 # Community 16
-**25 nodes**
+**66 nodes**
 
 ## Members
-- [[app_models_salarycomponent_php]]
-- [[app_services_salaryservice_php]]
-- [[salarycomponent_salarycomponent]]
-- [[salarycomponent_salarycomponent_deductions]]
-- [[salarycomponent_salarycomponent_getattendancepercentageattribute]]
-- [[salarycomponent_salarycomponent_getcomponentlabelattribute]]
-- [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]]
-- [[salarycomponent_salarycomponent_gethassalesdataattribute]]
-- [[salarycomponent_salarycomponent_getmonthnameattribute]]
-- [[salarycomponent_salarycomponent_getsalestargetstatusattribute]]
-- [[salarycomponent_salarycomponent_scopebasic]]
-- [[salarycomponent_salarycomponent_scopebonus]]
-- [[salarycomponent_salarycomponent_scopeforperiod]]
-- [[salarycomponent_salarycomponent_scopeunpaid]]
-- [[salarycomponent_salarycomponent_user]]
-- [[salarycontroller_salarycontroller_showcomponent]]
-- [[salaryservice_salaryservice]]
-- [[salaryservice_salaryservice_calculatebasicsalary]]
-- [[salaryservice_salaryservice_calculatebonussalary]]
-- [[salaryservice_salaryservice_construct]]
-- [[salaryservice_salaryservice_createsalarycomponents]]
-- [[salaryservice_salaryservice_getattendancedata]]
-- [[salaryservice_salaryservice_getpaymentdate]]
-- [[salaryservice_salaryservice_getsalesdata]]
-- [[salaryservice_salaryservice_qualifiesforpunctualitybonus]]
+- [[partials_custom_select_datepicker_styles]]
+- [[partials_pipeline_dashboard_styles]]
+- [[partials_sl_filter_assets]]
+- [[peregrine_closers_form]]
+- [[resources_views_admin_account_switching_log_blade_php]]
+- [[resources_views_admin_attendance_history_blade_php]]
+- [[resources_views_admin_attendance_index_blade_php]]
+- [[resources_views_admin_audit_logs_index_blade_php]]
+- [[resources_views_admin_audit_logs_show_blade_php]]
+- [[resources_views_admin_bank_verification_index_blade_php]]
+- [[resources_views_admin_chargebacks_index_blade_php]]
+- [[resources_views_admin_chart_of_accounts_create_blade_php]]
+- [[resources_views_admin_chart_of_accounts_edit_blade_php]]
+- [[resources_views_admin_chart_of_accounts_index_blade_php]]
+- [[resources_views_admin_chart_of_accounts_show_blade_php]]
+- [[resources_views_admin_dock_index_blade_php]]
+- [[resources_views_admin_dupe_checker_index_blade_php]]
+- [[resources_views_admin_employee_ems_blade_php]]
+- [[resources_views_admin_finance_petty_cash_blade_php]]
+- [[resources_views_admin_followup_done_blade_php]]
+- [[resources_views_admin_issuance_index_blade_php]]
+- [[resources_views_admin_leads_index_simple_blade_php]]
+- [[resources_views_admin_leads_peregrine_blade_php]]
+- [[resources_views_admin_ledger_create_blade_php]]
+- [[resources_views_admin_ledger_index_blade_php]]
+- [[resources_views_admin_ledger_show_blade_php]]
+- [[resources_views_admin_ledger_summary_blade_php]]
+- [[resources_views_admin_notifications_index_blade_php]]
+- [[resources_views_admin_pabs_tickets_create_blade_php]]
+- [[resources_views_admin_pabs_tickets_index_blade_php]]
+- [[resources_views_admin_pabs_tickets_show_blade_php]]
+- [[resources_views_admin_payroll_index_blade_php]]
+- [[resources_views_admin_permissions_edit_role_blade_php]]
+- [[resources_views_admin_permissions_index_blade_php]]
+- [[resources_views_admin_public_holidays_create_blade_php]]
+- [[resources_views_admin_public_holidays_edit_blade_php]]
+- [[resources_views_admin_public_holidays_index_blade_php]]
+- [[resources_views_admin_qa_review_blade_php]]
+- [[resources_views_admin_reports_closer_report_blade_php]]
+- [[resources_views_admin_reports_closer_report_drilldown_blade_php]]
+- [[resources_views_admin_reports_disposition_report_blade_php]]
+- [[resources_views_admin_reports_index_blade_php]]
+- [[resources_views_admin_reports_manager_submission_drilldown_blade_php]]
+- [[resources_views_admin_reports_manager_submission_report_blade_php]]
+- [[resources_views_admin_reports_per_closer_blade_php]]
+- [[resources_views_admin_reports_peregrine_team_report_blade_php]]
+- [[resources_views_admin_reports_policy_type_report_blade_php]]
+- [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]]
+- [[resources_views_admin_reports_sales_status_blade_php]]
+- [[resources_views_admin_reports_sales_status_drilldown_blade_php]]
+- [[resources_views_admin_reports_submission_performance_blade_php]]
+- [[resources_views_admin_reports_submission_performance_drilldown_blade_php]]
+- [[resources_views_admin_reports_submission_performance_new_blade_php]]
+- [[resources_views_admin_reports_zoom_agent_performance_blade_php]]
+- [[resources_views_admin_reports_zoom_logs_blade_php]]
+- [[resources_views_admin_retention_index_blade_php]]
+- [[resources_views_admin_settings_devices_blade_php]]
+- [[resources_views_admin_settings_index_blade_php]]
+- [[resources_views_admin_users_index_blade_php]]
+- [[resources_views_peregrine_closers_index_blade_php]]
+- [[resources_views_ravens_bad_leads_blade_php]]
+- [[resources_views_ravens_dashboard_blade_php]]
+- [[resources_views_ravens_validation_blade_php]]
+- [[resources_views_validator_edit_blade_php]]
+- [[resources_views_validator_index_blade_php]]
+- [[resources_views_verifier_dashboard_blade_php]]
 
 ## Internal connections
-- [[app_services_salaryservice_php]] —contains→ [[salaryservice_salaryservice]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_construct]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_createsalarycomponents]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
-- [[salaryservice_salaryservice_getattendancedata]] —calls→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
-- [[app_models_salarycomponent_php]] —contains→ [[salarycomponent_salarycomponent]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_user]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_deductions]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getmonthnameattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getcomponentlabelattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getattendancepercentageattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethassalesdataattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getsalestargetstatusattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebasic]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebonus]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopeforperiod]] `EXTRACTED`
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_pipeline_dashboard_styles]] `EXTRACTED`
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[peregrine_closers_form]] `EXTRACTED`
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_sl_filter_assets]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_verifier_dashboard_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_dashboard_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_validation_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_bad_leads_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_validator_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_account_switching_log_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_followup_done_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_show_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_edit_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_create_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_retention_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_dupe_checker_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_submission_performance_new_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_closer_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_logs_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_per_closer_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_agent_performance_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_disposition_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_report_blade_php]] `EXTRACTED`

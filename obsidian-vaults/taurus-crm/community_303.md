@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_is_js]]
+- [[resources_views_components_announcement_bar_blade_php]]

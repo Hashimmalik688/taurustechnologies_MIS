@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[lt_n]]
-- [[resources_libs_select2_js_i18n_lt_js]]
+- [[app_support_statuses_php]]
+- [[statuses_statuses]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_lt_js]] —contains→ [[lt_n]] `EXTRACTED`
+- [[app_support_statuses_php]] —contains→ [[statuses_statuses]] `EXTRACTED`

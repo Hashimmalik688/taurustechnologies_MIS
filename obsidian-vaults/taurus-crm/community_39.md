@@ -1,17 +1,19 @@
 # Community 39
-**6 nodes**
+**7 nodes**
 
 ## Members
-- [[app_events_messageread_php]]
-- [[messageread_messageread]]
-- [[messageread_messageread_broadcastas]]
-- [[messageread_messageread_broadcaston]]
-- [[messageread_messageread_broadcastwith]]
-- [[messageread_messageread_construct]]
+- [[app_models_userdetail_php]]
+- [[userdetail_userdetail]]
+- [[userdetail_userdetail_getactivestatesstringattribute]]
+- [[userdetail_userdetail_getcarriersstringattribute]]
+- [[userdetail_userdetail_setactivestatesattribute]]
+- [[userdetail_userdetail_setcarriersattribute]]
+- [[userdetail_userdetail_user]]
 
 ## Internal connections
-- [[app_events_messageread_php]] —contains→ [[messageread_messageread]] `EXTRACTED`
-- [[messageread_messageread]] —method→ [[messageread_messageread_construct]] `EXTRACTED`
-- [[messageread_messageread]] —method→ [[messageread_messageread_broadcaston]] `EXTRACTED`
-- [[messageread_messageread]] —method→ [[messageread_messageread_broadcastwith]] `EXTRACTED`
-- [[messageread_messageread]] —method→ [[messageread_messageread_broadcastas]] `EXTRACTED`
+- [[app_models_userdetail_php]] —contains→ [[userdetail_userdetail]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_user]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getactivestatesstringattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getcarriersstringattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setactivestatesattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setcarriersattribute]] `EXTRACTED`

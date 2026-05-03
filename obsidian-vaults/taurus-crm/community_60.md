@@ -2,16 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[lv_format]]
-- [[lv_relativeseconds]]
-- [[lv_relativetimewithplural]]
-- [[lv_relativetimewithsingular]]
-- [[resources_libs_moment_locale_lv_js]]
+- [[partner_partials_carrier_filter]]
+- [[resources_views_partner_carriers_blade_php]]
+- [[resources_views_partner_dashboard_advanced_blade_php]]
+- [[resources_views_partner_ledger_blade_php]]
+- [[resources_views_partner_sales_blade_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_format]] `EXTRACTED`
-- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativetimewithplural]] `EXTRACTED`
-- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativetimewithsingular]] `EXTRACTED`
-- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativeseconds]] `EXTRACTED`
-- [[lv_format]] —calls→ [[lv_relativetimewithplural]] `EXTRACTED`
-- [[lv_format]] —calls→ [[lv_relativetimewithsingular]] `EXTRACTED`
+- [[resources_views_partner_dashboard_advanced_blade_php]] —includes→ [[partner_partials_carrier_filter]] `EXTRACTED`
+- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_carriers_blade_php]] `EXTRACTED`
+- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_sales_blade_php]] `EXTRACTED`
+- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_ledger_blade_php]] `EXTRACTED`

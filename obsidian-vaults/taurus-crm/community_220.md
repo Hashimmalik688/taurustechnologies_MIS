@@ -1,9 +1,11 @@
 # Community 220
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_sr_cyrl_js]]
-- [[sr_cyrl_n]]
+- [[2026_05_01_000001_add_last_seen_at_to_users_table_down]]
+- [[2026_05_01_000001_add_last_seen_at_to_users_table_up]]
+- [[database_migrations_2026_05_01_000001_add_last_seen_at_to_users_table_php]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_sr_cyrl_js]] —contains→ [[sr_cyrl_n]] `EXTRACTED`
+- [[database_migrations_2026_05_01_000001_add_last_seen_at_to_users_table_php]] —contains→ [[2026_05_01_000001_add_last_seen_at_to_users_table_up]] `EXTRACTED`
+- [[database_migrations_2026_05_01_000001_add_last_seen_at_to_users_table_php]] —contains→ [[2026_05_01_000001_add_last_seen_at_to_users_table_down]] `EXTRACTED`

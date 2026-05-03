@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[is_plural]]
-- [[is_translate]]
-- [[resources_libs_moment_locale_is_js]]
+- [[admin_epms_partials_wbs_item]]
+- [[resources_views_admin_epms_partials_wbs_item_blade_php]]
+- [[resources_views_admin_epms_show_blade_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_is_js]] —contains→ [[is_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_is_js]] —contains→ [[is_translate]] `EXTRACTED`
-- [[is_plural]] —calls→ [[is_translate]] `EXTRACTED`
+- [[resources_views_admin_epms_show_blade_php]] —includes→ [[admin_epms_partials_wbs_item]] `EXTRACTED`
+- [[admin_epms_partials_wbs_item]] —includes→ [[resources_views_admin_epms_partials_wbs_item_blade_php]] `EXTRACTED`

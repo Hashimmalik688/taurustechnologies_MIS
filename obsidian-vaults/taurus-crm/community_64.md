@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_support_carrieraliases_php]]
-- [[carrieraliases_carrieraliases]]
-- [[carrieraliases_carrieraliases_applyfilter]]
-- [[carrieraliases_carrieraliases_applyotherfilter]]
+- [[app_models_carriercommissionbracket_php]]
+- [[carriercommissionbracket_carriercommissionbracket]]
+- [[carriercommissionbracket_carriercommissionbracket_containsage]]
+- [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]]
 
 ## Internal connections
-- [[app_support_carrieraliases_php]] —contains→ [[carrieraliases_carrieraliases]] `EXTRACTED`
-- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyfilter]] `EXTRACTED`
-- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyotherfilter]] `EXTRACTED`
+- [[app_models_carriercommissionbracket_php]] —contains→ [[carriercommissionbracket_carriercommissionbracket]] `EXTRACTED`
+- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]] `EXTRACTED`
+- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_containsage]] `EXTRACTED`

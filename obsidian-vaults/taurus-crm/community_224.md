@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[bs_e]]
-- [[resources_libs_select2_js_i18n_bs_js]]
+- [[app_support_teams_php]]
+- [[teams_teams]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_bs_js]] —contains→ [[bs_e]] `EXTRACTED`
+- [[app_support_teams_php]] —contains→ [[teams_teams]] `EXTRACTED`

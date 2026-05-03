@@ -1,43 +1,64 @@
 # Community 20
-**19 nodes**
+**28 nodes**
 
 ## Members
-- [[admin_accounting_nav]]
-- [[resources_views_admin_accounting_dashboard_blade_php]]
-- [[resources_views_admin_accounting_journal_create_blade_php]]
-- [[resources_views_admin_accounting_journal_index_blade_php]]
-- [[resources_views_admin_accounting_journal_show_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_index_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_overview_blade_php]]
-- [[resources_views_admin_accounting_quick_chargeback_blade_php]]
-- [[resources_views_admin_accounting_quick_opening_balance_blade_php]]
-- [[resources_views_admin_accounting_quick_payment_blade_php]]
-- [[resources_views_admin_accounting_quick_sale_blade_php]]
-- [[resources_views_admin_accounting_reports_balance_sheet_blade_php]]
-- [[resources_views_admin_accounting_reports_expense_tracker_blade_php]]
-- [[resources_views_admin_accounting_reports_profit_loss_blade_php]]
-- [[resources_views_admin_accounting_reports_trial_balance_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_index_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_partner_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_returns_blade_php]]
+- [[app_livewire_createlead_php]]
+- [[calendar_init_changenewschedulecalendar]]
+- [[calendar_init_createnewschedule]]
+- [[calendar_init_getdataaction]]
+- [[calendar_init_gettimetemplate]]
+- [[calendar_init_onchangecalendars]]
+- [[calendar_init_onchangenewschedulecalendar]]
+- [[calendar_init_onclickmenu]]
+- [[calendar_init_onclicknavi]]
+- [[calendar_init_onnewschedule]]
+- [[calendar_init_refreshschedulevisibility]]
+- [[calendar_init_savenewschedule]]
+- [[calendar_init_setdropdowncalendartype]]
+- [[calendar_init_seteventlistener]]
+- [[calendar_init_setrenderrangetext]]
+- [[calendar_init_setschedules]]
+- [[calendars_addcalendar]]
+- [[calendars_calendarinfo]]
+- [[calendars_findcalendar]]
+- [[calendars_hextorgba]]
+- [[createlead_createlead]]
+- [[createlead_createlead_addbeneficiary]]
+- [[createlead_createlead_mount]]
+- [[createlead_createlead_removebeneficiary]]
+- [[createlead_createlead_render]]
+- [[createlead_createlead_updated]]
+- [[resources_js_pages_calendar_init_js]]
+- [[resources_js_pages_calendars_js]]
 
 ## Internal connections
-- [[resources_views_admin_accounting_dashboard_blade_php]] —includes→ [[admin_accounting_nav]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_overview_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_partner_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_returns_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_profit_loss_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_balance_sheet_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_trial_balance_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_expense_tracker_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_chargeback_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_opening_balance_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_payment_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_sale_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_show_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_create_blade_php]] `EXTRACTED`
+- [[app_livewire_createlead_php]] —contains→ [[createlead_createlead]] `EXTRACTED`
+- [[createlead_createlead]] —method→ [[createlead_createlead_mount]] `EXTRACTED`
+- [[createlead_createlead]] —method→ [[createlead_createlead_addbeneficiary]] `EXTRACTED`
+- [[createlead_createlead]] —method→ [[createlead_createlead_removebeneficiary]] `EXTRACTED`
+- [[createlead_createlead]] —method→ [[createlead_createlead_updated]] `EXTRACTED`
+- [[createlead_createlead]] —method→ [[createlead_createlead_render]] `EXTRACTED`
+- [[createlead_createlead_render]] —calls→ [[calendar_init_refreshschedulevisibility]] `INFERRED`
+- [[resources_js_pages_calendars_js]] —contains→ [[calendars_calendarinfo]] `EXTRACTED`
+- [[resources_js_pages_calendars_js]] —contains→ [[calendars_addcalendar]] `EXTRACTED`
+- [[resources_js_pages_calendars_js]] —contains→ [[calendars_findcalendar]] `EXTRACTED`
+- [[resources_js_pages_calendars_js]] —contains→ [[calendars_hextorgba]] `EXTRACTED`
+- [[calendars_findcalendar]] —calls→ [[calendar_init_changenewschedulecalendar]] `INFERRED`
+- [[calendars_findcalendar]] —calls→ [[calendar_init_savenewschedule]] `INFERRED`
+- [[calendars_findcalendar]] —calls→ [[calendar_init_onchangecalendars]] `INFERRED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_gettimetemplate]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_onclickmenu]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_onclicknavi]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_onnewschedule]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_onchangenewschedulecalendar]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_changenewschedulecalendar]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_createnewschedule]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_savenewschedule]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_onchangecalendars]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_refreshschedulevisibility]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_setdropdowncalendartype]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_setrenderrangetext]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_setschedules]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_seteventlistener]] `EXTRACTED`
+- [[resources_js_pages_calendar_init_js]] —contains→ [[calendar_init_getdataaction]] `EXTRACTED`
+- [[calendar_init_onclickmenu]] —calls→ [[calendar_init_getdataaction]] `EXTRACTED`

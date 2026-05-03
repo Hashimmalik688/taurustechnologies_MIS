@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_listeners_sendsalecreatednotification_php]]
-- [[sendsalecreatednotification_sendsalecreatednotification]]
-- [[sendsalecreatednotification_sendsalecreatednotification_construct]]
+- [[app_http_middleware_trusthosts_php]]
+- [[trusthosts_trusthosts]]
+- [[trusthosts_trusthosts_hosts]]
 
 ## Internal connections
-- [[app_listeners_sendsalecreatednotification_php]] —contains→ [[sendsalecreatednotification_sendsalecreatednotification]] `EXTRACTED`
-- [[sendsalecreatednotification_sendsalecreatednotification]] —method→ [[sendsalecreatednotification_sendsalecreatednotification_construct]] `EXTRACTED`
+- [[app_http_middleware_trusthosts_php]] —contains→ [[trusthosts_trusthosts]] `EXTRACTED`
+- [[trusthosts_trusthosts]] —method→ [[trusthosts_trusthosts_hosts]] `EXTRACTED`

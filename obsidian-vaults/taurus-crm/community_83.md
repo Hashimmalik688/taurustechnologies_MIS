@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_observers_userobserver_php]]
-- [[userobserver_userobserver]]
-- [[userobserver_userobserver_created]]
+- [[admin_agents_partials_carrier_states]]
+- [[resources_views_admin_agents_create_blade_php]]
+- [[resources_views_admin_agents_edit_blade_php]]
 
 ## Internal connections
-- [[app_observers_userobserver_php]] —contains→ [[userobserver_userobserver]] `EXTRACTED`
-- [[userobserver_userobserver]] —method→ [[userobserver_userobserver_created]] `EXTRACTED`
+- [[resources_views_admin_agents_edit_blade_php]] —includes→ [[admin_agents_partials_carrier_states]] `EXTRACTED`
+- [[admin_agents_partials_carrier_states]] —includes→ [[resources_views_admin_agents_create_blade_php]] `EXTRACTED`

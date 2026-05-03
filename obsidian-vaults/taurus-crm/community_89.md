@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[be_plural]]
-- [[be_relativetimewithplural]]
-- [[resources_libs_moment_locale_be_js]]
+- [[2026_02_03_043223_remove_can_message_from_community_members_table_down]]
+- [[2026_02_03_043223_remove_can_message_from_community_members_table_up]]
+- [[database_migrations_2026_02_03_043223_remove_can_message_from_community_members_table_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_be_js]] —contains→ [[be_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_be_js]] —contains→ [[be_relativetimewithplural]] `EXTRACTED`
-- [[be_plural]] —calls→ [[be_relativetimewithplural]] `EXTRACTED`
+- [[database_migrations_2026_02_03_043223_remove_can_message_from_community_members_table_php]] —contains→ [[2026_02_03_043223_remove_can_message_from_community_members_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_03_043223_remove_can_message_from_community_members_table_php]] —contains→ [[2026_02_03_043223_remove_can_message_from_community_members_table_down]] `EXTRACTED`

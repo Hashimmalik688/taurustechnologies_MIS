@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[mr_relativetimemr]]
-- [[resources_libs_moment_locale_mr_js]]
+- [[resources_js_pages_toastr_init_js]]
+- [[toastr_init_getlasttoast]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_mr_js]] —contains→ [[mr_relativetimemr]] `EXTRACTED`
+- [[resources_js_pages_toastr_init_js]] —contains→ [[toastr_init_getlasttoast]] `EXTRACTED`

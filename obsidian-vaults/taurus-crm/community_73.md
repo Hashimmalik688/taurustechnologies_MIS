@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_providers_broadcastserviceprovider_php]]
-- [[broadcastserviceprovider_broadcastserviceprovider]]
-- [[broadcastserviceprovider_broadcastserviceprovider_boot]]
+- [[app_providers_eventserviceprovider_php]]
+- [[eventserviceprovider_eventserviceprovider]]
+- [[eventserviceprovider_eventserviceprovider_boot]]
 
 ## Internal connections
-- [[app_providers_broadcastserviceprovider_php]] —contains→ [[broadcastserviceprovider_broadcastserviceprovider]] `EXTRACTED`
-- [[broadcastserviceprovider_broadcastserviceprovider]] —method→ [[broadcastserviceprovider_broadcastserviceprovider_boot]] `EXTRACTED`
+- [[app_providers_eventserviceprovider_php]] —contains→ [[eventserviceprovider_eventserviceprovider]] `EXTRACTED`
+- [[eventserviceprovider_eventserviceprovider]] —method→ [[eventserviceprovider_eventserviceprovider_boot]] `EXTRACTED`

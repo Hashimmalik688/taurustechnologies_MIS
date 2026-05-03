@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_sk_js]]
-- [[sk_plural]]
-- [[sk_translate]]
+- [[2026_01_06_013733_add_secondary_phone_to_leads_table_down]]
+- [[2026_01_06_013733_add_secondary_phone_to_leads_table_up]]
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_sk_js]] —contains→ [[sk_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_sk_js]] —contains→ [[sk_translate]] `EXTRACTED`
-- [[sk_plural]] —calls→ [[sk_translate]] `EXTRACTED`
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]] —contains→ [[2026_01_06_013733_add_secondary_phone_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]] —contains→ [[2026_01_06_013733_add_secondary_phone_to_leads_table_down]] `EXTRACTED`

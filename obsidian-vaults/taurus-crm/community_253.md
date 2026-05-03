@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[public_js_device_fingerprint_js]]
+- [[resources_js_plugin_js]]

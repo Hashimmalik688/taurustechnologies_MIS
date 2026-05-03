@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_ja_js]]
+- [[resources_views_components_teams_announcement_banner_blade_php]]

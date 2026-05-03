@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_tzl_js]]
-- [[tzl_processrelativetime]]
+- [[admin_leads_index_table]]
+- [[resources_views_admin_leads_index_blade_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_tzl_js]] —contains→ [[tzl_processrelativetime]] `EXTRACTED`
+- [[resources_views_admin_leads_index_blade_php]] —includes→ [[admin_leads_index_table]] `EXTRACTED`

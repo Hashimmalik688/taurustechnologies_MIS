@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[de_ch_processrelativetime]]
-- [[resources_libs_moment_locale_de_ch_js]]
+- [[admin_partners_partials_carrier_states]]
+- [[resources_views_admin_partners_edit_blade_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_de_ch_js]] —contains→ [[de_ch_processrelativetime]] `EXTRACTED`
+- [[resources_views_admin_partners_edit_blade_php]] —includes→ [[admin_partners_partials_carrier_states]] `EXTRACTED`

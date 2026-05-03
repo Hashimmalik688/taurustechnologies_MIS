@@ -1,9 +1,11 @@
 # Community 215
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[app_http_middleware_preventrequestsduringmaintenance_php]]
-- [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]]
+- [[2026_03_24_103413_create_notepad_notes_table_down]]
+- [[2026_03_24_103413_create_notepad_notes_table_up]]
+- [[database_migrations_2026_03_24_103413_create_notepad_notes_table_php]]
 
 ## Internal connections
-- [[app_http_middleware_preventrequestsduringmaintenance_php]] —contains→ [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]] `EXTRACTED`
+- [[database_migrations_2026_03_24_103413_create_notepad_notes_table_php]] —contains→ [[2026_03_24_103413_create_notepad_notes_table_up]] `EXTRACTED`
+- [[database_migrations_2026_03_24_103413_create_notepad_notes_table_php]] —contains→ [[2026_03_24_103413_create_notepad_notes_table_down]] `EXTRACTED`

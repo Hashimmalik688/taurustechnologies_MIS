@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_parsleyjs_i18n_cs_js]]
+- [[resources_views_admin_salary_component_payslip_blade_php]]

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[database_seeders_roleseeder_php]]
-- [[roleseeder_roleseeder]]
-- [[roleseeder_roleseeder_run]]
+- [[2026_02_05_000000_add_followup_schedule_to_leads_table_down]]
+- [[2026_02_05_000000_add_followup_schedule_to_leads_table_up]]
+- [[database_migrations_2026_02_05_000000_add_followup_schedule_to_leads_table_php]]
 
 ## Internal connections
-- [[database_seeders_roleseeder_php]] —contains→ [[roleseeder_roleseeder]] `EXTRACTED`
-- [[roleseeder_roleseeder]] —method→ [[roleseeder_roleseeder_run]] `EXTRACTED`
+- [[database_migrations_2026_02_05_000000_add_followup_schedule_to_leads_table_php]] —contains→ [[2026_02_05_000000_add_followup_schedule_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_05_000000_add_followup_schedule_to_leads_table_php]] —contains→ [[2026_02_05_000000_add_followup_schedule_to_leads_table_down]] `EXTRACTED`

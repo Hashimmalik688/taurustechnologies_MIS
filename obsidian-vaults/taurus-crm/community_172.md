@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_01_06_025009_add_account_title_and_policy_number_to_leads_down]]
-- [[2026_01_06_025009_add_account_title_and_policy_number_to_leads_up]]
-- [[database_migrations_2026_01_06_025009_add_account_title_and_policy_number_to_leads_php]]
+- [[2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_down]]
+- [[2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_up]]
+- [[database_migrations_2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_01_06_025009_add_account_title_and_policy_number_to_leads_php]] —contains→ [[2026_01_06_025009_add_account_title_and_policy_number_to_leads_up]] `EXTRACTED`
-- [[database_migrations_2026_01_06_025009_add_account_title_and_policy_number_to_leads_php]] —contains→ [[2026_01_06_025009_add_account_title_and_policy_number_to_leads_down]] `EXTRACTED`
+- [[database_migrations_2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_php]] —contains→ [[2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_php]] —contains→ [[2026_04_07_170551_add_chargeback_audit_fields_to_leads_table_down]] `EXTRACTED`

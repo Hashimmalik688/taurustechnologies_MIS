@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[jquery_colorhelpers_clamp]]
-- [[resources_libs_flot_charts_jquery_colorhelpers_js]]
+- [[app_http_middleware_trustproxies_php]]
+- [[trustproxies_trustproxies]]
 
 ## Internal connections
-- [[resources_libs_flot_charts_jquery_colorhelpers_js]] —contains→ [[jquery_colorhelpers_clamp]] `EXTRACTED`
+- [[app_http_middleware_trustproxies_php]] —contains→ [[trustproxies_trustproxies]] `EXTRACTED`

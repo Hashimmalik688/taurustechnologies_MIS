@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_js_bootstrap_js]]
+- [[resources_js_pages_profile_init_js]]

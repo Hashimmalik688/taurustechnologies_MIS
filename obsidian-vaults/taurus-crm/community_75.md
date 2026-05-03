@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_http_middleware_checkmodulepermissionwithrole_php]]
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]]
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]]
+- [[app_providers_authserviceprovider_php]]
+- [[authserviceprovider_authserviceprovider]]
+- [[authserviceprovider_authserviceprovider_boot]]
 
 ## Internal connections
-- [[app_http_middleware_checkmodulepermissionwithrole_php]] —contains→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] `EXTRACTED`
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] —method→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]] `EXTRACTED`
+- [[app_providers_authserviceprovider_php]] —contains→ [[authserviceprovider_authserviceprovider]] `EXTRACTED`
+- [[authserviceprovider_authserviceprovider]] —method→ [[authserviceprovider_authserviceprovider_boot]] `EXTRACTED`

@@ -1,19 +1,29 @@
 # Community 32
-**7 nodes**
+**9 nodes**
 
 ## Members
-- [[app_livewire_createlead_php]]
-- [[createlead_createlead]]
-- [[createlead_createlead_addbeneficiary]]
-- [[createlead_createlead_mount]]
-- [[createlead_createlead_removebeneficiary]]
-- [[createlead_createlead_render]]
-- [[createlead_createlead_updated]]
+- [[announcementpolicy_announcementpolicy]]
+- [[announcementpolicy_announcementpolicy_create]]
+- [[announcementpolicy_announcementpolicy_delete]]
+- [[announcementpolicy_announcementpolicy_forcedelete]]
+- [[announcementpolicy_announcementpolicy_isauthorized]]
+- [[announcementpolicy_announcementpolicy_restore]]
+- [[announcementpolicy_announcementpolicy_update]]
+- [[announcementpolicy_announcementpolicy_viewany]]
+- [[app_policies_announcementpolicy_php]]
 
 ## Internal connections
-- [[app_livewire_createlead_php]] —contains→ [[createlead_createlead]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_mount]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_addbeneficiary]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_removebeneficiary]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_updated]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_render]] `EXTRACTED`
+- [[app_policies_announcementpolicy_php]] —contains→ [[announcementpolicy_announcementpolicy]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_isauthorized]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_viewany]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_create]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_update]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_delete]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_restore]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_forcedelete]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_viewany]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_create]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_update]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_delete]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_restore]] `EXTRACTED`
+- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_forcedelete]] `EXTRACTED`

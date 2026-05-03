@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_js_pages_table_editable_int_js]]
+- [[resources_js_pages_jquery_knob_init_js]]

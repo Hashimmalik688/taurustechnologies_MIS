@@ -1,15 +1,13 @@
 # Community 61
-**5 nodes**
+**4 nodes**
 
 ## Members
-- [[partner_partials_carrier_filter]]
-- [[resources_views_partner_carriers_blade_php]]
-- [[resources_views_partner_dashboard_advanced_blade_php]]
-- [[resources_views_partner_ledger_blade_php]]
-- [[resources_views_partner_sales_blade_php]]
+- [[app_events_leadcreated_php]]
+- [[leadcreated_leadcreated]]
+- [[leadcreated_leadcreated_broadcaston]]
+- [[leadcreated_leadcreated_construct]]
 
 ## Internal connections
-- [[resources_views_partner_dashboard_advanced_blade_php]] —includes→ [[partner_partials_carrier_filter]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_carriers_blade_php]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_sales_blade_php]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_ledger_blade_php]] `EXTRACTED`
+- [[app_events_leadcreated_php]] —contains→ [[leadcreated_leadcreated]] `EXTRACTED`
+- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_construct]] `EXTRACTED`
+- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_broadcaston]] `EXTRACTED`

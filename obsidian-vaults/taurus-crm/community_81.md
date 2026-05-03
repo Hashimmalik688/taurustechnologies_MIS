@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_http_middleware_trusthosts_php]]
-- [[trusthosts_trusthosts]]
-- [[trusthosts_trusthosts_hosts]]
+- [[app_http_middleware_authenticate_php]]
+- [[authenticate_authenticate]]
+- [[authenticate_authenticate_redirectto]]
 
 ## Internal connections
-- [[app_http_middleware_trusthosts_php]] —contains→ [[trusthosts_trusthosts]] `EXTRACTED`
-- [[trusthosts_trusthosts]] —method→ [[trusthosts_trusthosts_hosts]] `EXTRACTED`
+- [[app_http_middleware_authenticate_php]] —contains→ [[authenticate_authenticate]] `EXTRACTED`
+- [[authenticate_authenticate]] —method→ [[authenticate_authenticate_redirectto]] `EXTRACTED`

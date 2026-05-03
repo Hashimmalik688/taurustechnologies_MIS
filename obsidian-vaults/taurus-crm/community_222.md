@@ -1,9 +1,11 @@
 # Community 222
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[cs_e]]
-- [[resources_libs_select2_js_i18n_cs_js]]
+- [[2026_01_23_034335_add_avatar_to_users_table_down]]
+- [[2026_01_23_034335_add_avatar_to_users_table_up]]
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]]
 
 ## Internal connections
-- [[resources_libs_select2_js_i18n_cs_js]] —contains→ [[cs_e]] `EXTRACTED`
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]] —contains→ [[2026_01_23_034335_add_avatar_to_users_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]] —contains→ [[2026_01_23_034335_add_avatar_to_users_table_down]] `EXTRACTED`

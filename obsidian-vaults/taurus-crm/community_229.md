@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[hr_translate]]
-- [[resources_libs_moment_locale_hr_js]]
+- [[app_http_middleware_encryptcookies_php]]
+- [[encryptcookies_encryptcookies]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_hr_js]] —contains→ [[hr_translate]] `EXTRACTED`
+- [[app_http_middleware_encryptcookies_php]] —contains→ [[encryptcookies_encryptcookies]] `EXTRACTED`

@@ -1,9 +1,11 @@
 # Community 214
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[app_http_middleware_encryptcookies_php]]
-- [[encryptcookies_encryptcookies]]
+- [[2025_10_07_140849_add_remaining_optional_fields_to_leads_table_down]]
+- [[2025_10_07_140849_add_remaining_optional_fields_to_leads_table_up]]
+- [[database_migrations_2025_10_07_140849_add_remaining_optional_fields_to_leads_table_php]]
 
 ## Internal connections
-- [[app_http_middleware_encryptcookies_php]] —contains→ [[encryptcookies_encryptcookies]] `EXTRACTED`
+- [[database_migrations_2025_10_07_140849_add_remaining_optional_fields_to_leads_table_php]] —contains→ [[2025_10_07_140849_add_remaining_optional_fields_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2025_10_07_140849_add_remaining_optional_fields_to_leads_table_php]] —contains→ [[2025_10_07_140849_add_remaining_optional_fields_to_leads_table_down]] `EXTRACTED`

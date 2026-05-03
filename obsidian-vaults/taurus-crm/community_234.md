@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[el_isfunction]]
-- [[resources_libs_moment_locale_el_js]]
+- [[resources_js_pages_task_form_init_js]]
+- [[task_form_init_makeid]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_el_js]] —contains→ [[el_isfunction]] `EXTRACTED`
+- [[resources_js_pages_task_form_init_js]] —contains→ [[task_form_init_makeid]] `EXTRACTED`

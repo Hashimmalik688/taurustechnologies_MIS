@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_ru_js]]
-- [[ru_plural]]
-- [[ru_relativetimewithplural]]
+- [[2026_04_01_100050_add_score_disposition_to_qa_results_down]]
+- [[2026_04_01_100050_add_score_disposition_to_qa_results_up]]
+- [[database_migrations_2026_04_01_100050_add_score_disposition_to_qa_results_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_ru_js]] —contains→ [[ru_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_ru_js]] —contains→ [[ru_relativetimewithplural]] `EXTRACTED`
-- [[ru_plural]] —calls→ [[ru_relativetimewithplural]] `EXTRACTED`
+- [[database_migrations_2026_04_01_100050_add_score_disposition_to_qa_results_php]] —contains→ [[2026_04_01_100050_add_score_disposition_to_qa_results_up]] `EXTRACTED`
+- [[database_migrations_2026_04_01_100050_add_score_disposition_to_qa_results_php]] —contains→ [[2026_04_01_100050_add_score_disposition_to_qa_results_down]] `EXTRACTED`

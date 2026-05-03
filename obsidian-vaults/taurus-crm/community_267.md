@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_js_pages_form_xeditable_init_js]]
+- [[resources_js_pages_table_responsive_init_js]]

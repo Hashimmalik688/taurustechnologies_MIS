@@ -1,221 +1,126 @@
 # Community 9
-**185 nodes**
+**90 nodes**
 
 ## Members
-- [[buttons_print_min_b]]
-- [[buttons_print_min_r]]
-- [[chat_notifications_isviewingconversation]]
-- [[chat_notifications_playnotificationsound]]
-- [[chat_notifications_pollnewmessages]]
-- [[chat_notifications_savenotifiedids]]
-- [[chat_notifications_showdesktopnotification]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_accept]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfilesfromdirectory]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfilesfromitems]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addformelementdata]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_cancelupload]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_createthumbnail]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_createthumbnailfromurl]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_destroy]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_disable]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_displayexistingfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_drop]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enable]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuethumbnail]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_errorprocessing]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_finished]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_finisheduploading]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getacceptedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getactivefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getaddedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getchunk]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getfileswithstatus]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getfileswithxhr]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getparamname]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getqueuedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getuploadingfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_handlefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_handleuploaderror]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_initclass]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_paste]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processqueue]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processthumbnailqueue]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removeallfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removeeventlisteners]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_renamefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_resizeimage]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_resolveoption]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_setupeventlisteners]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_submitrequest]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_transformfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatefilesuploadprogress]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatemaxfilesreachedclass]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatetotaluploadprogress]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploaddata]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploadfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploadfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uuidv4]]
-- [[dropzone_3ed269f2f0fb224b_var_camelize]]
-- [[dropzone_3ed269f2f0fb224b_var_guard]]
-- [[dropzone_3ed269f2f0fb224b_var_guardmethod]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_off]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_on]]
-- [[dropzone_a601ff30f483e917_var_exifrestore]]
-- [[dropzone_a601ff30f483e917_var_guard]]
-- [[dropzone_a601ff30f483e917_var_guardmethod]]
-- [[dropzone_b1d17cfb1d15c36a_export_2e2bcd8739ae039]]
-- [[dropzone_checkelements]]
-- [[dropzone_parcel_defineinteropflag]]
-- [[dropzone_parcel_export]]
-- [[dropzone_parcel_interopdefault]]
-- [[echarts_esm_close]]
-- [[echarts_esm_connect]]
-- [[jquery_1_11_1_actualdisplay]]
-- [[jquery_1_11_1_addcombinator]]
-- [[jquery_1_11_1_addgethookif]]
-- [[jquery_1_11_1_addhandle]]
-- [[jquery_1_11_1_ajaxextend]]
-- [[jquery_1_11_1_ajaxhandleresponses]]
-- [[jquery_1_11_1_animation]]
-- [[jquery_1_11_1_augmentwidthorheight]]
-- [[jquery_1_11_1_clonecopyevent]]
-- [[jquery_1_11_1_condense]]
-- [[jquery_1_11_1_createactivexhr]]
-- [[jquery_1_11_1_createbuttonpseudo]]
-- [[jquery_1_11_1_createcache]]
-- [[jquery_1_11_1_createfxnow]]
-- [[jquery_1_11_1_createinputpseudo]]
-- [[jquery_1_11_1_createoptions]]
-- [[jquery_1_11_1_createpositionalpseudo]]
-- [[jquery_1_11_1_createstandardxhr]]
-- [[jquery_1_11_1_createtween]]
-- [[jquery_1_11_1_defaultdisplay]]
-- [[jquery_1_11_1_defaultprefilter]]
-- [[jquery_1_11_1_detach]]
-- [[jquery_1_11_1_disablescript]]
-- [[jquery_1_11_1_done]]
-- [[jquery_1_11_1_elementmatcher]]
-- [[jquery_1_11_1_fixclonenodeissues]]
-- [[jquery_1_11_1_fixdefaultchecked]]
-- [[jquery_1_11_1_genfx]]
-- [[jquery_1_11_1_getall]]
-- [[jquery_1_11_1_getwidthorheight]]
-- [[jquery_1_11_1_getwindow]]
-- [[jquery_1_11_1_inspectprefiltersortransports]]
-- [[jquery_1_11_1_internalremovedata]]
-- [[jquery_1_11_1_isarraylike]]
-- [[jquery_1_11_1_isemptydataobject]]
-- [[jquery_1_11_1_markfunction]]
-- [[jquery_1_11_1_matcherfromgroupmatchers]]
-- [[jquery_1_11_1_matcherfromtokens]]
-- [[jquery_1_11_1_multiplecontexts]]
-- [[jquery_1_11_1_propfilter]]
-- [[jquery_1_11_1_restorescript]]
-- [[jquery_1_11_1_returnfalse]]
-- [[jquery_1_11_1_returntrue]]
-- [[jquery_1_11_1_safeactiveelement]]
-- [[jquery_1_11_1_setfilters]]
-- [[jquery_1_11_1_setglobaleval]]
-- [[jquery_1_11_1_setmatcher]]
-- [[jquery_1_11_1_setpositivenumber]]
-- [[jquery_1_11_1_showhide]]
-- [[jquery_1_11_1_sibling]]
-- [[jquery_1_11_1_siblingcheck]]
-- [[jquery_1_11_1_sizzle]]
-- [[jquery_1_11_1_testcontext]]
-- [[jquery_1_11_1_toselector]]
-- [[jquery_1_11_1_tween]]
-- [[jquery_1_11_1_vendorpropname]]
-- [[jquery_addcombinator]]
-- [[jquery_ajaxconvert]]
-- [[jquery_ajaxextend]]
-- [[jquery_ajaxhandleresponses]]
-- [[jquery_animation]]
-- [[jquery_augmentwidthorheight]]
-- [[jquery_clonecopyevent]]
-- [[jquery_clonefixattributes]]
-- [[jquery_condense]]
-- [[jquery_createactivexhr]]
-- [[jquery_createbuttonpseudo]]
-- [[jquery_createfxnow]]
-- [[jquery_createinputpseudo]]
-- [[jquery_createoptions]]
-- [[jquery_createpositionalpseudo]]
-- [[jquery_createstandardxhr]]
-- [[jquery_createtweens]]
-- [[jquery_defaultprefilter]]
-- [[jquery_done]]
-- [[jquery_elementmatcher]]
-- [[jquery_fixdefaultchecked]]
-- [[jquery_genfx]]
-- [[jquery_getall]]
-- [[jquery_getwidthorheight]]
-- [[jquery_getwindow]]
-- [[jquery_inspectprefiltersortransports]]
-- [[jquery_isdisconnected]]
-- [[jquery_isemptydataobject]]
-- [[jquery_ishidden]]
-- [[jquery_jquerysub]]
-- [[jquery_matcherfromgroupmatchers]]
-- [[jquery_matcherfromtokens]]
-- [[jquery_multiplecontexts]]
-- [[jquery_propfilter]]
-- [[jquery_returnfalse]]
-- [[jquery_returntrue]]
-- [[jquery_setfilters]]
-- [[jquery_setmatcher]]
-- [[jquery_setpositivenumber]]
-- [[jquery_showhide]]
-- [[jquery_sibling]]
-- [[jquery_siblingcheck]]
-- [[jquery_sizzle]]
-- [[jquery_tween]]
-- [[jquery_vendorpropname]]
-- [[public_js_chat_notifications_js]]
-- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]]
-- [[resources_libs_dropzone_dropzone_js]]
-- [[resources_libs_dropzone_dropzone_mjs]]
-- [[resources_libs_flot_charts_jquery_js]]
-- [[resources_libs_jquery_repeater_jquery_1_11_1_js]]
+- [[app_console_commands_cleanupanalyze_php]]
+- [[app_console_commands_cleanupformat_php]]
+- [[app_console_commands_cleanupkit_php]]
+- [[app_console_commands_cleanuppsr4_php]]
+- [[app_console_commands_fixattendanceworkinghours_php]]
+- [[app_console_commands_qatestpipeline_php]]
+- [[app_console_commands_verifyattendanceschema_php]]
+- [[app_models_ledgerjournalentry_php]]
+- [[app_models_ledgerjournalentryline_php]]
+- [[app_notifications_mentionedinchatnotification_php]]
+- [[app_services_ledgerservice_php]]
+- [[app_services_qa_geminiservice_php]]
+- [[app_services_qa_whisperservice_php]]
+- [[app_support_cleanup_namespacefixer_php]]
+- [[cleanupanalyze_cleanupanalyze]]
+- [[cleanupanalyze_cleanupanalyze_finddanglingviews]]
+- [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]]
+- [[cleanupanalyze_cleanupanalyze_findunreferencedcontrollers]]
+- [[cleanupanalyze_cleanupanalyze_handle]]
+- [[cleanupanalyze_cleanupanalyze_section]]
+- [[cleanupformat_cleanupformat]]
+- [[cleanupformat_cleanupformat_handle]]
+- [[cleanupkit_cleanupkit]]
+- [[cleanupkit_cleanupkit_handle]]
+- [[cleanupkit_cleanupkit_task]]
+- [[cleanuppsr4_cleanuppsr4]]
+- [[cleanuppsr4_cleanuppsr4_handle]]
+- [[database_seeders_importemsdataseeder_php]]
+- [[epmscomment_epmscomment_task]]
+- [[fixattendanceworkinghours_fixattendanceworkinghours]]
+- [[fixattendanceworkinghours_fixattendanceworkinghours_handle]]
+- [[geminiservice_geminiservice]]
+- [[geminiservice_geminiservice_construct]]
+- [[geminiservice_geminiservice_extractjsonfromtext]]
+- [[geminiservice_geminiservice_scorecall]]
+- [[importemsdataseeder_importemsdataseeder]]
+- [[importemsdataseeder_importemsdataseeder_run]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storechargeback]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storegeneral]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storeopeningbalance]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storepayment]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storesale]]
+- [[ledgerjournalentry_ledgerjournalentry]]
+- [[ledgerjournalentry_ledgerjournalentry_creator]]
+- [[ledgerjournalentry_ledgerjournalentry_generateentrynumber]]
+- [[ledgerjournalentry_ledgerjournalentry_gettypelabelattribute]]
+- [[ledgerjournalentry_ledgerjournalentry_lead]]
+- [[ledgerjournalentry_ledgerjournalentry_lines]]
+- [[ledgerjournalentry_ledgerjournalentry_scopedaterange]]
+- [[ledgerjournalentry_ledgerjournalentry_scopeoftype]]
+- [[ledgerjournalentry_ledgerjournalentry_typelabel]]
+- [[ledgerjournalentryline_ledgerjournalentryline]]
+- [[ledgerjournalentryline_ledgerjournalentryline_account]]
+- [[ledgerjournalentryline_ledgerjournalentryline_carrier]]
+- [[ledgerjournalentryline_ledgerjournalentryline_journalentry]]
+- [[ledgerjournalentryline_ledgerjournalentryline_partner]]
+- [[ledgerservice_ledgerservice]]
+- [[ledgerservice_ledgerservice_account]]
+- [[ledgerservice_ledgerservice_createchargebackentry]]
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]]
+- [[ledgerservice_ledgerservice_creategeneralentry]]
+- [[ledgerservice_ledgerservice_createopeningbalanceentry]]
+- [[ledgerservice_ledgerservice_createpaymententry]]
+- [[ledgerservice_ledgerservice_createsaleentry]]
+- [[ledgerservice_ledgerservice_createsalesreturnentry]]
+- [[ledgerservice_ledgerservice_getpartnercarrierledger]]
+- [[ledgerservice_ledgerservice_getpartnerledger]]
+- [[ledgerservice_ledgerservice_line]]
+- [[ledgerservice_ledgerservice_persist]]
+- [[ledgerservice_ledgerservice_updateaccountbalances]]
+- [[mentionedinchatnotification_mentionedinchatnotification]]
+- [[mentionedinchatnotification_mentionedinchatnotification_construct]]
+- [[mentionedinchatnotification_mentionedinchatnotification_toarray]]
+- [[mentionedinchatnotification_mentionedinchatnotification_tomail]]
+- [[mentionedinchatnotification_mentionedinchatnotification_via]]
+- [[namespacefixer_namespacefixer]]
+- [[namespacefixer_namespacefixer_construct]]
+- [[namespacefixer_namespacefixer_expectednamespacefor]]
+- [[namespacefixer_namespacefixer_fixapp]]
+- [[qatestpipeline_qatestpipeline]]
+- [[qatestpipeline_qatestpipeline_getsampletranscript]]
+- [[qatestpipeline_qatestpipeline_handle]]
+- [[qatestpipeline_qatestpipeline_runtextonlytest]]
+- [[qatestpipeline_qatestpipeline_showscoreresults]]
+- [[qatestpipeline_qatestpipeline_showtranscriptsample]]
+- [[verifyattendanceschema_verifyattendanceschema]]
+- [[verifyattendanceschema_verifyattendanceschema_handle]]
+- [[whisperservice_whisperservice]]
+- [[whisperservice_whisperservice_construct]]
+- [[whisperservice_whisperservice_transcribe]]
 
 ## Internal connections
-- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_playnotificationsound]] `EXTRACTED`
-- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_savenotifiedids]] `EXTRACTED`
-- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_isviewingconversation]] `EXTRACTED`
-- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
-- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
-- [[chat_notifications_playnotificationsound]] —calls→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
-- [[chat_notifications_playnotificationsound]] —calls→ [[echarts_esm_connect]] `INFERRED`
-- [[chat_notifications_playnotificationsound]] —calls→ [[echarts_esm_close]] `INFERRED`
-- [[chat_notifications_savenotifiedids]] —calls→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
-- [[chat_notifications_isviewingconversation]] —calls→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
-- [[chat_notifications_showdesktopnotification]] —calls→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
-- [[chat_notifications_showdesktopnotification]] —calls→ [[echarts_esm_close]] `INFERRED`
-- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]] —contains→ [[buttons_print_min_r]] `EXTRACTED`
-- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]] —contains→ [[buttons_print_min_b]] `EXTRACTED`
-- [[buttons_print_min_b]] —calls→ [[echarts_esm_close]] `INFERRED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_parcel_interopdefault]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_checkelements]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_camelize]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_guard]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_guardmethod]] `EXTRACTED`
-- [[dropzone_parcel_interopdefault]] —contains→ [[resources_libs_dropzone_dropzone_js]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_on]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_off]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatetotaluploadprogress]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatemaxfilesreachedclass]] `EXTRACTED`
+- [[app_services_ledgerservice_php]] —contains→ [[ledgerservice_ledgerservice]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsaleentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsalesreturnentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createpaymententry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createopeningbalanceentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_creategeneralentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_getpartnerledger]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_getpartnercarrierledger]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_updateaccountbalances]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerjournalcontroller_ledgerjournalcontroller_storesale]] `INFERRED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerjournalcontroller_ledgerjournalcontroller_storechargeback]] `INFERRED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`

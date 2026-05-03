@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_listeners_sendleadcreatednotification_php]]
-- [[sendleadcreatednotification_sendleadcreatednotification]]
-- [[sendleadcreatednotification_sendleadcreatednotification_construct]]
+- [[app_exceptions_handler_php]]
+- [[handler_handler]]
+- [[handler_handler_register]]
 
 ## Internal connections
-- [[app_listeners_sendleadcreatednotification_php]] —contains→ [[sendleadcreatednotification_sendleadcreatednotification]] `EXTRACTED`
-- [[sendleadcreatednotification_sendleadcreatednotification]] —method→ [[sendleadcreatednotification_sendleadcreatednotification_construct]] `EXTRACTED`
+- [[app_exceptions_handler_php]] —contains→ [[handler_handler]] `EXTRACTED`
+- [[handler_handler]] —method→ [[handler_handler_register]] `EXTRACTED`

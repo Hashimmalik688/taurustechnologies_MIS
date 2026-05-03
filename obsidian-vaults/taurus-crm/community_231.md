@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[et_processrelativetime]]
-- [[resources_libs_moment_locale_et_js]]
+- [[app_http_controllers_controller_php]]
+- [[controller_controller]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_et_js]] —contains→ [[et_processrelativetime]] `EXTRACTED`
+- [[app_http_controllers_controller_php]] —contains→ [[controller_controller]] `EXTRACTED`

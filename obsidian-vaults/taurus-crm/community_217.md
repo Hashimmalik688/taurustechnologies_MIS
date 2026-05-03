@@ -1,9 +1,11 @@
 # Community 217
-**2 nodes**
+**3 nodes**
 
 ## Members
-- [[graphify_graphify_viz_py]]
-- [[graphify_viz_rationale_1]]
+- [[2026_02_03_223101_add_audio_type_to_chat_messages_table_down]]
+- [[2026_02_03_223101_add_audio_type_to_chat_messages_table_up]]
+- [[database_migrations_2026_02_03_223101_add_audio_type_to_chat_messages_table_php]]
 
 ## Internal connections
-- [[graphify_graphify_viz_py]] —rationale_for→ [[graphify_viz_rationale_1]] `EXTRACTED`
+- [[database_migrations_2026_02_03_223101_add_audio_type_to_chat_messages_table_php]] —contains→ [[2026_02_03_223101_add_audio_type_to_chat_messages_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_03_223101_add_audio_type_to_chat_messages_table_php]] —contains→ [[2026_02_03_223101_add_audio_type_to_chat_messages_table_down]] `EXTRACTED`

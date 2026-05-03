@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_http_middleware_checkmodulepermission_php]]
-- [[checkmodulepermission_checkmodulepermission]]
-- [[checkmodulepermission_checkmodulepermission_construct]]
+- [[product_list_init_filteritems]]
+- [[product_list_init_loadproductdata]]
+- [[resources_js_pages_product_list_init_js]]
 
 ## Internal connections
-- [[app_http_middleware_checkmodulepermission_php]] —contains→ [[checkmodulepermission_checkmodulepermission]] `EXTRACTED`
-- [[checkmodulepermission_checkmodulepermission]] —method→ [[checkmodulepermission_checkmodulepermission_construct]] `EXTRACTED`
+- [[resources_js_pages_product_list_init_js]] —contains→ [[product_list_init_loadproductdata]] `EXTRACTED`
+- [[resources_js_pages_product_list_init_js]] —contains→ [[product_list_init_filteritems]] `EXTRACTED`

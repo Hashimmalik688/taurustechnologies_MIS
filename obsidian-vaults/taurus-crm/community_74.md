@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_providers_authserviceprovider_php]]
-- [[authserviceprovider_authserviceprovider]]
-- [[authserviceprovider_authserviceprovider_boot]]
+- [[app_providers_broadcastserviceprovider_php]]
+- [[broadcastserviceprovider_broadcastserviceprovider]]
+- [[broadcastserviceprovider_broadcastserviceprovider_boot]]
 
 ## Internal connections
-- [[app_providers_authserviceprovider_php]] —contains→ [[authserviceprovider_authserviceprovider]] `EXTRACTED`
-- [[authserviceprovider_authserviceprovider]] —method→ [[authserviceprovider_authserviceprovider_boot]] `EXTRACTED`
+- [[app_providers_broadcastserviceprovider_php]] —contains→ [[broadcastserviceprovider_broadcastserviceprovider]] `EXTRACTED`
+- [[broadcastserviceprovider_broadcastserviceprovider]] —method→ [[broadcastserviceprovider_broadcastserviceprovider_boot]] `EXTRACTED`

@@ -1,102 +1,113 @@
 # Community 11
-**66 nodes**
+**77 nodes**
 
 ## Members
-- [[partials_custom_select_datepicker_styles]]
-- [[partials_pipeline_dashboard_styles]]
-- [[partials_sl_filter_assets]]
-- [[peregrine_closers_form]]
-- [[resources_views_admin_account_switching_log_blade_php]]
-- [[resources_views_admin_attendance_history_blade_php]]
-- [[resources_views_admin_attendance_index_blade_php]]
-- [[resources_views_admin_audit_logs_index_blade_php]]
-- [[resources_views_admin_audit_logs_show_blade_php]]
-- [[resources_views_admin_bank_verification_index_blade_php]]
-- [[resources_views_admin_chargebacks_index_blade_php]]
-- [[resources_views_admin_chart_of_accounts_create_blade_php]]
-- [[resources_views_admin_chart_of_accounts_edit_blade_php]]
-- [[resources_views_admin_chart_of_accounts_index_blade_php]]
-- [[resources_views_admin_chart_of_accounts_show_blade_php]]
-- [[resources_views_admin_dock_index_blade_php]]
-- [[resources_views_admin_dupe_checker_index_blade_php]]
-- [[resources_views_admin_employee_ems_blade_php]]
-- [[resources_views_admin_finance_petty_cash_blade_php]]
-- [[resources_views_admin_followup_done_blade_php]]
-- [[resources_views_admin_issuance_index_blade_php]]
-- [[resources_views_admin_leads_index_simple_blade_php]]
-- [[resources_views_admin_leads_peregrine_blade_php]]
-- [[resources_views_admin_ledger_create_blade_php]]
-- [[resources_views_admin_ledger_index_blade_php]]
-- [[resources_views_admin_ledger_show_blade_php]]
-- [[resources_views_admin_ledger_summary_blade_php]]
-- [[resources_views_admin_notifications_index_blade_php]]
-- [[resources_views_admin_pabs_tickets_create_blade_php]]
-- [[resources_views_admin_pabs_tickets_index_blade_php]]
-- [[resources_views_admin_pabs_tickets_show_blade_php]]
-- [[resources_views_admin_payroll_index_blade_php]]
-- [[resources_views_admin_permissions_edit_role_blade_php]]
-- [[resources_views_admin_permissions_index_blade_php]]
-- [[resources_views_admin_public_holidays_create_blade_php]]
-- [[resources_views_admin_public_holidays_edit_blade_php]]
-- [[resources_views_admin_public_holidays_index_blade_php]]
-- [[resources_views_admin_qa_review_blade_php]]
-- [[resources_views_admin_reports_closer_report_blade_php]]
-- [[resources_views_admin_reports_closer_report_drilldown_blade_php]]
-- [[resources_views_admin_reports_disposition_report_blade_php]]
-- [[resources_views_admin_reports_index_blade_php]]
-- [[resources_views_admin_reports_manager_submission_drilldown_blade_php]]
-- [[resources_views_admin_reports_manager_submission_report_blade_php]]
-- [[resources_views_admin_reports_per_closer_blade_php]]
-- [[resources_views_admin_reports_peregrine_team_report_blade_php]]
-- [[resources_views_admin_reports_policy_type_report_blade_php]]
-- [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]]
-- [[resources_views_admin_reports_sales_status_blade_php]]
-- [[resources_views_admin_reports_sales_status_drilldown_blade_php]]
-- [[resources_views_admin_reports_submission_performance_blade_php]]
-- [[resources_views_admin_reports_submission_performance_drilldown_blade_php]]
-- [[resources_views_admin_reports_submission_performance_new_blade_php]]
-- [[resources_views_admin_reports_zoom_agent_performance_blade_php]]
-- [[resources_views_admin_reports_zoom_logs_blade_php]]
-- [[resources_views_admin_retention_index_blade_php]]
-- [[resources_views_admin_settings_devices_blade_php]]
-- [[resources_views_admin_settings_index_blade_php]]
-- [[resources_views_admin_users_index_blade_php]]
-- [[resources_views_peregrine_closers_index_blade_php]]
-- [[resources_views_ravens_bad_leads_blade_php]]
-- [[resources_views_ravens_dashboard_blade_php]]
-- [[resources_views_ravens_validation_blade_php]]
-- [[resources_views_validator_edit_blade_php]]
-- [[resources_views_validator_index_blade_php]]
-- [[resources_views_verifier_dashboard_blade_php]]
+- [[app_console_commands_markabsent_php]]
+- [[app_getlanguage]]
+- [[app_init]]
+- [[app_initactivemenu]]
+- [[app_initcheckall]]
+- [[app_initcomponents]]
+- [[app_initdropdownmenu]]
+- [[app_initfullscreen]]
+- [[app_inithorimenuactive]]
+- [[app_initlanguage]]
+- [[app_initleftmenucollapse]]
+- [[app_initmenuitemscroll]]
+- [[app_initmetismenu]]
+- [[app_initpreloader]]
+- [[app_initrightsidebar]]
+- [[app_initsettings]]
+- [[app_models_lead_php]]
+- [[app_setlanguage]]
+- [[app_updatemenu]]
+- [[app_updatethemesetting]]
+- [[attendance_attendance_boot]]
+- [[epmswbsitem_epmswbsitem_parent]]
+- [[lead_lead]]
+- [[lead_lead_assignedagent]]
+- [[lead_lead_assignedcloser]]
+- [[lead_lead_assignedvalidator]]
+- [[lead_lead_bankverifiedbyuser]]
+- [[lead_lead_bankverifier]]
+- [[lead_lead_bankverifierassignedbyuser]]
+- [[lead_lead_boot]]
+- [[lead_lead_calllogs]]
+- [[lead_lead_carriers]]
+- [[lead_lead_cbsenttoretentionby]]
+- [[lead_lead_chargebackmarkedby]]
+- [[lead_lead_chargebackpaidby]]
+- [[lead_lead_dials]]
+- [[lead_lead_dispositionofficer]]
+- [[lead_lead_fieldhighlights]]
+- [[lead_lead_followupassignedbyuser]]
+- [[lead_lead_followupdoneby]]
+- [[lead_lead_followupperson]]
+- [[lead_lead_forwardedby]]
+- [[lead_lead_getageattribute]]
+- [[lead_lead_insurancecarrier]]
+- [[lead_lead_issuedbyuser]]
+- [[lead_lead_ledgerchargebackpaidentry]]
+- [[lead_lead_ledgerentries]]
+- [[lead_lead_ledgersalesreturnentry]]
+- [[lead_lead_ledgersalesreturnpostedby]]
+- [[lead_lead_managedby]]
+- [[lead_lead_notissuedby]]
+- [[lead_lead_notissuedresolvedby]]
+- [[lead_lead_notpaidby]]
+- [[lead_lead_paidby]]
+- [[lead_lead_partner]]
+- [[lead_lead_pendingcontractby]]
+- [[lead_lead_pendingdraftby]]
+- [[lead_lead_policydiedby]]
+- [[lead_lead_qauser]]
+- [[lead_lead_recallrequestedby]]
+- [[lead_lead_retactionupdatedby]]
+- [[lead_lead_retentionofficer]]
+- [[lead_lead_scopefollowuppending]]
+- [[lead_lead_scopenotissued]]
+- [[lead_lead_scopepaidsales]]
+- [[lead_lead_scopependingcontract]]
+- [[lead_lead_scopependingdraft]]
+- [[lead_lead_scopependingsapproved]]
+- [[lead_lead_scopepolicydied]]
+- [[lead_lead_submissionreviewer]]
+- [[lead_lead_validator]]
+- [[lead_lead_verifier]]
+- [[markabsent_markabsent]]
+- [[markabsent_markabsent_construct]]
+- [[markabsent_markabsent_handle]]
+- [[resources_js_app_js]]
+- [[user_user_boot]]
 
 ## Internal connections
-- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_pipeline_dashboard_styles]] `EXTRACTED`
-- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[peregrine_closers_form]] `EXTRACTED`
-- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_sl_filter_assets]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_verifier_dashboard_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_dashboard_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_validation_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_bad_leads_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_validator_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_account_switching_log_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_followup_done_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_show_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_edit_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_create_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_retention_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_dupe_checker_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_drilldown_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_submission_performance_new_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_closer_report_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_logs_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_index_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_per_closer_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_drilldown_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_agent_performance_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_disposition_report_blade_php]] `EXTRACTED`
-- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_report_blade_php]] `EXTRACTED`
+- [[app_console_commands_markabsent_php]] —contains→ [[markabsent_markabsent]] `EXTRACTED`
+- [[markabsent_markabsent]] —method→ [[markabsent_markabsent_construct]] `EXTRACTED`
+- [[markabsent_markabsent]] —method→ [[markabsent_markabsent_handle]] `EXTRACTED`
+- [[markabsent_markabsent_construct]] —calls→ [[epmswbsitem_epmswbsitem_parent]] `INFERRED`
+- [[epmswbsitem_epmswbsitem_parent]] —calls→ [[user_user_boot]] `INFERRED`
+- [[epmswbsitem_epmswbsitem_parent]] —calls→ [[attendance_attendance_boot]] `INFERRED`
+- [[epmswbsitem_epmswbsitem_parent]] —calls→ [[lead_lead_boot]] `INFERRED`
+- [[epmswbsitem_epmswbsitem_parent]] —calls→ [[app_initactivemenu]] `INFERRED`
+- [[epmswbsitem_epmswbsitem_parent]] —calls→ [[app_inithorimenuactive]] `INFERRED`
+- [[app_models_lead_php]] —contains→ [[lead_lead]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_boot]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_getageattribute]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_carriers]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_calllogs]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_dials]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_forwardedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_managedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_validator]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedvalidator]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedcloser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_verifier]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_ledgerentries]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_insurancecarrier]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_retentionofficer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_dispositionofficer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_qauser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_submissionreviewer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_issuedbyuser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedagent]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_partner]] `EXTRACTED`

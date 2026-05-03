@@ -1,9 +1,5 @@
 # Community 241
-**2 nodes**
+**1 nodes**
 
 ## Members
-- [[de_at_processrelativetime]]
-- [[resources_libs_moment_locale_de_at_js]]
-
-## Internal connections
-- [[resources_libs_moment_locale_de_at_js]] —contains→ [[de_at_processrelativetime]] `EXTRACTED`
+- [[lang_en_pagination_php]]

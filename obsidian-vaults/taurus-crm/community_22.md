@@ -1,39 +1,62 @@
 # Community 22
-**17 nodes**
+**26 nodes**
 
 ## Members
-- [[app_models_zoomwebhooklog_php]]
-- [[zoomwebhooklog_zoomwebhooklog]]
-- [[zoomwebhooklog_zoomwebhooklog_agent]]
-- [[zoomwebhooklog_zoomwebhooklog_getdisplaynameattribute]]
-- [[zoomwebhooklog_zoomwebhooklog_getdisplayphoneattribute]]
-- [[zoomwebhooklog_zoomwebhooklog_getformatteddurationattribute]]
-- [[zoomwebhooklog_zoomwebhooklog_islinkedtomis]]
-- [[zoomwebhooklog_zoomwebhooklog_lead]]
-- [[zoomwebhooklog_zoomwebhooklog_matchedcalllog]]
-- [[zoomwebhooklog_zoomwebhooklog_scopeanswered]]
-- [[zoomwebhooklog_zoomwebhooklog_scopedaterange]]
-- [[zoomwebhooklog_zoomwebhooklog_scopeeventtype]]
-- [[zoomwebhooklog_zoomwebhooklog_scopemissed]]
-- [[zoomwebhooklog_zoomwebhooklog_scopeunprocessed]]
-- [[zoomwebhooklog_zoomwebhooklog_scopewithrecording]]
-- [[zoomwebhooklog_zoomwebhooklog_scopewithtranscript]]
-- [[zoomwebhooklog_zoomwebhooklog_wasanswered]]
+- [[announcement_announcement]]
+- [[announcement_announcement_community]]
+- [[announcement_announcement_createdby]]
+- [[announcement_announcement_getanimationclass]]
+- [[announcement_announcement_getbackgroundclass]]
+- [[announcement_announcement_getcurrent]]
+- [[announcement_announcement_geticonclass]]
+- [[announcement_announcement_scopeactive]]
+- [[announcementcontroller_announcementcontroller]]
+- [[announcementcontroller_announcementcontroller_create]]
+- [[announcementcontroller_announcementcontroller_destroy]]
+- [[announcementcontroller_announcementcontroller_edit]]
+- [[announcementcontroller_announcementcontroller_getcurrent]]
+- [[announcementcontroller_announcementcontroller_index]]
+- [[announcementcontroller_announcementcontroller_store]]
+- [[announcementcontroller_announcementcontroller_toggle]]
+- [[announcementcontroller_announcementcontroller_update]]
+- [[announcementseeder_announcementseeder]]
+- [[announcementseeder_announcementseeder_run]]
+- [[app_console_commands_cleanupemptycommunities_php]]
+- [[app_http_controllers_admin_announcementcontroller_php]]
+- [[app_models_announcement_php]]
+- [[cleanupemptycommunities_cleanupemptycommunities]]
+- [[cleanupemptycommunities_cleanupemptycommunities_handle]]
+- [[communitycontroller_communitycontroller_getforannouncements]]
+- [[database_seeders_announcementseeder_php]]
 
 ## Internal connections
-- [[app_models_zoomwebhooklog_php]] —contains→ [[zoomwebhooklog_zoomwebhooklog]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_lead]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_agent]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_matchedcalllog]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopewithrecording]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopewithtranscript]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopeanswered]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopemissed]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopedaterange]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopeeventtype]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_scopeunprocessed]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_getformatteddurationattribute]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_wasanswered]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_getdisplayphoneattribute]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_getdisplaynameattribute]] `EXTRACTED`
-- [[zoomwebhooklog_zoomwebhooklog]] —method→ [[zoomwebhooklog_zoomwebhooklog_islinkedtomis]] `EXTRACTED`
+- [[app_console_commands_cleanupemptycommunities_php]] —contains→ [[cleanupemptycommunities_cleanupemptycommunities]] `EXTRACTED`
+- [[cleanupemptycommunities_cleanupemptycommunities]] —method→ [[cleanupemptycommunities_cleanupemptycommunities_handle]] `EXTRACTED`
+- [[cleanupemptycommunities_cleanupemptycommunities_handle]] —calls→ [[announcement_announcement_community]] `INFERRED`
+- [[app_models_announcement_php]] —contains→ [[announcement_announcement]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_createdby]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_community]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_scopeactive]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getcurrent]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getanimationclass]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getbackgroundclass]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_geticonclass]] `EXTRACTED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_index]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_store]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_update]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_toggle]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementseeder_announcementseeder_run]] `INFERRED`
+- [[announcement_announcement_community]] —calls→ [[communitycontroller_communitycontroller_getforannouncements]] `INFERRED`
+- [[announcement_announcement_getanimationclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement_getbackgroundclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement_geticonclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[app_http_controllers_admin_announcementcontroller_php]] —contains→ [[announcementcontroller_announcementcontroller]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_index]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_create]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_store]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_edit]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_update]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_toggle]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_destroy]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_getcurrent]] `EXTRACTED`

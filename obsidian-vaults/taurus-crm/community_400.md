@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_parsleyjs_i18n_es_js]]
+- [[resources_views_qa_manual_blade_php]]
