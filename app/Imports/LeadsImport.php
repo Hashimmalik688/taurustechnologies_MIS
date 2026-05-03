@@ -155,14 +155,20 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                     // Merge other important fields
                     $fieldsToMerge = [
                         'date_of_birth' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['dob', 'date of birth'])),
+                        'first_name' => $this->getValueFromRow($lowercaseRow, ['first name', 'first_name']),
+                        'last_name' => $this->getValueFromRow($lowercaseRow, ['last name', 'last_name']),
                         'gender' => $this->getValueFromRow($lowercaseRow, ['gender']),
                         'address' => $this->getValueFromRow($lowercaseRow, ['street address', 'address', 'street adress', 'street address/address']),
                         'bank_name' => $this->getValueFromRow($lowercaseRow, ['bank name']),
+                        'bank_address' => $this->getValueFromRow($lowercaseRow, ['bank address', 'bank_address']),
                         'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
                         'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
                         'account_verified_by' => $this->getValueFromRow($lowercaseRow, ['acc verified by bank/chq book', 'account verified', 'account verified by']),
                         'beneficiary' => $this->getValueFromRow($lowercaseRow, ['beneficiary']),
                         'beneficiary_dob' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['beneficiary dob', 'beneficiary date of birth'])),
+                        'settlement_type' => $this->getValueFromRow($lowercaseRow, ['settlement type', 'settlement_type']),
+                        'source_type' => $this->getValueFromRow($lowercaseRow, ['source type', 'source_type']),
+                        'app_id' => $this->getValueFromRow($lowercaseRow, ['app id', 'app_id', 'application id']),
                     ];
                     
                     foreach ($fieldsToMerge as $field => $value) {
@@ -219,6 +225,8 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'phone_number' => $normalizedPhoneNumber,
                         'secondary_phone_number' => $normalizedSecondaryPhone,
                         'cn_name' => $this->getValueFromRow($lowercaseRow, ['customer name', 'name']),
+                        'first_name' => $this->getValueFromRow($lowercaseRow, ['first name', 'first_name']),
+                        'last_name' => $this->getValueFromRow($lowercaseRow, ['last name', 'last_name']),
                         'date_of_birth' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['dob', 'date of birth'])),
                         'gender' => $this->getValueFromRow($lowercaseRow, ['gender']),
                         'smoker' => $smoker,
@@ -240,6 +248,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'carrier_name' => $this->getValueFromRow($lowercaseRow, ['carrier name']),
                         'coverage_amount' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['coverage amount', 'covaerge amount'])) ?? 0,
                         'monthly_premium' => ImportSanitizer::parseMoney($this->getValueFromRow($lowercaseRow, ['monthly premium', 'premium'])) ?? 0,
+                        'settlement_type' => $this->getValueFromRow($lowercaseRow, ['settlement type', 'settlement_type']),
                         'beneficiary' => $this->getValueFromRow($lowercaseRow, ['beneficiary']),
                         'beneficiary_dob' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['beneficiary dob', 'beneficiary date of birth'])),
                         'emergency_contact' => $this->getValueFromRow($lowercaseRow, ['emergency contact']),
@@ -248,6 +257,7 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'initial_draft_date' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['initial draft date'])) ?? now()->format('Y-m-d'),
                         'future_draft_date' => ImportSanitizer::parseExcelDate($this->getValueFromRow($lowercaseRow, ['future draft date'])),
                         'bank_name' => $this->getValueFromRow($lowercaseRow, ['bank name']),
+                        'bank_address' => $this->getValueFromRow($lowercaseRow, ['bank address', 'bank_address']),
                         'account_title' => $this->getValueFromRow($lowercaseRow, ['account title', 'acc title', 'account_title']),
                         'account_type' => $this->getValueFromRow($lowercaseRow, ['acc type', 'account type']),
                         'routing_number' => $this->getValueFromRow($lowercaseRow, ['routing number']),
@@ -260,9 +270,11 @@ class LeadsImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
                         'cvv' => $this->getValueFromRow($lowercaseRow, ['cvv']),
                         'expiry_date' => $this->getValueFromRow($lowercaseRow, ['expiry date', 'expiry']),
                         'source' => $this->getValueFromRow($lowercaseRow, ['source']),
+                        'source_type' => $this->getValueFromRow($lowercaseRow, ['source type', 'source_type']),
                         'team' => $this->getValueFromRow($lowercaseRow, ['team']) ?? \App\Support\Teams::RAVENS,
                         'closer_name' => $this->getValueFromRow($lowercaseRow, ['closer name', 'closer']),
                         'assigned_partner' => $this->getValueFromRow($lowercaseRow, ['assigned partner', 'partner']),
+                        'app_id' => $this->getValueFromRow($lowercaseRow, ['app id', 'app_id', 'application id']),
                         'preset_line' => $this->getValueFromRow($lowercaseRow, ['preset line', 'preset']),
                         'comments' => $this->getValueFromRow($lowercaseRow, ['comments', 'notes']),
                         'status' => Statuses::LEAD_CLOSED, // Mark imported leads as closed so they appear in All Leads
