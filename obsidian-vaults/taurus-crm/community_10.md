@@ -1,107 +1,168 @@
 # Community 10
-**71 nodes**
+**132 nodes**
 
 ## Members
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_accept]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfilesfromdirectory]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfilesfromitems]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addformelementdata]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_cancelupload]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_createthumbnail]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_createthumbnailfromurl]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_destroy]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_disable]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_displayexistingfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_drop]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enable]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_enqueuethumbnail]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_errorprocessing]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_finished]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_finisheduploading]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getacceptedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getactivefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getaddedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getchunk]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getfileswithstatus]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getfileswithxhr]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getparamname]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getqueuedfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getuploadingfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_handlefiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_handleuploaderror]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_initclass]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_paste]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processqueue]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processthumbnailqueue]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removeallfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removeeventlisteners]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_renamefile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_resizeimage]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_resolveoption]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_setupeventlisteners]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_submitrequest]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_transformfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatefilesuploadprogress]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatemaxfilesreachedclass]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatetotaluploadprogress]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploaddata]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploadfile]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploadfiles]]
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uuidv4]]
-- [[dropzone_3ed269f2f0fb224b_var_camelize]]
-- [[dropzone_3ed269f2f0fb224b_var_guard]]
-- [[dropzone_3ed269f2f0fb224b_var_guardmethod]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_off]]
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_on]]
-- [[dropzone_a601ff30f483e917_var_exifrestore]]
-- [[dropzone_a601ff30f483e917_var_guard]]
-- [[dropzone_a601ff30f483e917_var_guardmethod]]
-- [[dropzone_b1d17cfb1d15c36a_export_2e2bcd8739ae039]]
-- [[dropzone_checkelements]]
-- [[dropzone_parcel_defineinteropflag]]
-- [[dropzone_parcel_export]]
-- [[dropzone_parcel_interopdefault]]
-- [[resources_libs_dropzone_dropzone_js]]
-- [[resources_libs_dropzone_dropzone_mjs]]
+- [[2014_10_12_000000_create_users_table_createuserstable]]
+- [[2014_10_12_000000_create_users_table_createuserstable_down]]
+- [[2014_10_12_000000_create_users_table_createuserstable_up]]
+- [[2025_05_24_041616_create_attendances_table_down]]
+- [[2025_05_24_041616_create_attendances_table_up]]
+- [[2025_06_01_005217_create_salary_records_table_down]]
+- [[2025_06_01_005217_create_salary_records_table_up]]
+- [[2025_12_09_030100_create_insurance_carriers_table_down]]
+- [[2025_12_09_030100_create_insurance_carriers_table_up]]
+- [[2026_01_02_021649_add_beneficiaries_json_to_leads_table_down]]
+- [[2026_01_02_021649_add_beneficiaries_json_to_leads_table_up]]
+- [[2026_01_09_024924_add_zoom_call_id_to_call_logs_table_down]]
+- [[2026_01_09_024924_add_zoom_call_id_to_call_logs_table_up]]
+- [[2026_01_21_051206_create_chart_of_accounts_table_down]]
+- [[2026_01_21_051206_create_chart_of_accounts_table_up]]
+- [[2026_01_21_221340_create_petty_cash_ledgers_table_down]]
+- [[2026_01_21_221340_create_petty_cash_ledgers_table_up]]
+- [[2026_01_22_000000_create_employees_table_down]]
+- [[2026_01_22_000000_create_employees_table_up]]
+- [[2026_01_24_081548_create_community_announcement_reads_table_down]]
+- [[2026_01_24_081548_create_community_announcement_reads_table_up]]
+- [[2026_01_28_create_chat_notification_preferences_table_down]]
+- [[2026_01_28_create_chat_notification_preferences_table_up]]
+- [[2026_02_03_240001_create_sticky_notes_table_down]]
+- [[2026_02_03_240001_create_sticky_notes_table_up]]
+- [[2026_02_05_043818_create_manual_payroll_entries_table_down]]
+- [[2026_02_05_043818_create_manual_payroll_entries_table_up]]
+- [[2026_03_03_120000_add_sale_fields_to_qa_results_table_down]]
+- [[2026_03_03_120000_add_sale_fields_to_qa_results_table_up]]
+- [[2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_down]]
+- [[2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_up]]
+- [[2026_03_24_143027_add_ravens_validation_status_to_leads_table_down]]
+- [[2026_03_24_143027_add_ravens_validation_status_to_leads_table_up]]
+- [[2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_down]]
+- [[2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_up]]
+- [[2026_04_08_000002_create_lead_field_highlights_table_down]]
+- [[2026_04_08_000002_create_lead_field_highlights_table_up]]
+- [[2026_04_23_120000_optimize_carrier_sheet_indexes_down]]
+- [[2026_04_23_120000_optimize_carrier_sheet_indexes_up]]
+- [[addbeneficiary]]
+- [[alloweddevice_alloweddevice]]
+- [[alloweddevice_alloweddevice_addedby]]
+- [[alloweddevice_alloweddevice_isapproved]]
+- [[alloweddevice_alloweddevice_isdisabled]]
+- [[alloweddevice_alloweddevice_ispending]]
+- [[alloweddevice_alloweddevice_isrejected]]
+- [[app_http_controllers_admin_devicecontroller_php]]
+- [[app_http_controllers_partner_partnerauthcontroller_php]]
+- [[app_http_middleware_partnerauthenticate_php]]
+- [[app_http_middleware_preventpartneraccess_php]]
+- [[app_http_middleware_preventuseraccess_php]]
+- [[app_http_middleware_redirectifauthenticated_php]]
+- [[app_http_middleware_restricttoalloweddevice_php]]
+- [[app_http_requests_updateagentrequest_php]]
+- [[app_http_requests_updateuserrequest_php]]
+- [[app_listeners_loguserlogout_php]]
+- [[app_models_alloweddevice_php]]
+- [[app_models_epmsexternalcost_php]]
+- [[app_models_userdetail_php]]
+- [[chart_pluginservice_invalidate]]
+- [[database_migrations_2014_10_12_000000_create_users_table_php]]
+- [[database_migrations_2025_05_24_041616_create_attendances_table_php]]
+- [[database_migrations_2025_06_01_005217_create_salary_records_table_php]]
+- [[database_migrations_2025_12_09_030100_create_insurance_carriers_table_php]]
+- [[database_migrations_2026_01_02_021649_add_beneficiaries_json_to_leads_table_php]]
+- [[database_migrations_2026_01_09_024924_add_zoom_call_id_to_call_logs_table_php]]
+- [[database_migrations_2026_01_21_051206_create_chart_of_accounts_table_php]]
+- [[database_migrations_2026_01_21_221340_create_petty_cash_ledgers_table_php]]
+- [[database_migrations_2026_01_22_000000_create_employees_table_php]]
+- [[database_migrations_2026_01_24_081548_create_community_announcement_reads_table_php]]
+- [[database_migrations_2026_01_28_create_chat_notification_preferences_table_php]]
+- [[database_migrations_2026_02_03_240001_create_sticky_notes_table_php]]
+- [[database_migrations_2026_02_05_043818_create_manual_payroll_entries_table_php]]
+- [[database_migrations_2026_03_03_120000_add_sale_fields_to_qa_results_table_php]]
+- [[database_migrations_2026_03_04_005736_add_zoom_user_id_and_zoom_extension_to_users_table_php]]
+- [[database_migrations_2026_03_24_143027_add_ravens_validation_status_to_leads_table_php]]
+- [[database_migrations_2026_04_01_000001_add_assemblyai_fields_to_qa_calls_table_php]]
+- [[database_migrations_2026_04_08_000002_create_lead_field_highlights_table_php]]
+- [[database_migrations_2026_04_23_120000_optimize_carrier_sheet_indexes_php]]
+- [[devicecontroller_devicecontroller]]
+- [[devicecontroller_devicecontroller_approve]]
+- [[devicecontroller_devicecontroller_destroy]]
+- [[devicecontroller_devicecontroller_disable]]
+- [[devicecontroller_devicecontroller_enable]]
+- [[devicecontroller_devicecontroller_index]]
+- [[devicecontroller_devicecontroller_rejectallpending]]
+- [[devicecontroller_devicecontroller_store]]
+- [[devicecontroller_devicecontroller_update]]
+- [[echarts_esm_check]]
+- [[epmsexternalcost_epmsexternalcost]]
+- [[epmsexternalcost_epmsexternalcost_project]]
+- [[loguserlogout_loguserlogout]]
+- [[loguserlogout_loguserlogout_construct]]
+- [[partnerauthcontroller_partnerauthcontroller]]
+- [[partnerauthcontroller_partnerauthcontroller_login]]
+- [[partnerauthcontroller_partnerauthcontroller_logout]]
+- [[partnerauthcontroller_partnerauthcontroller_showloginform]]
+- [[partnerauthenticate_partnerauthenticate]]
+- [[partnerauthenticate_partnerauthenticate_handle]]
+- [[partneruserseparationtest_partneruserseparationtest]]
+- [[partneruserseparationtest_partneruserseparationtest_partner_cannot_access_user_routes]]
+- [[partneruserseparationtest_partneruserseparationtest_partner_guard_uses_partners_table]]
+- [[partneruserseparationtest_partneruserseparationtest_user_cannot_access_partner_routes]]
+- [[partneruserseparationtest_partneruserseparationtest_user_guard_uses_users_table]]
+- [[preventpartneraccess_preventpartneraccess]]
+- [[preventpartneraccess_preventpartneraccess_handle]]
+- [[preventuseraccess_preventuseraccess]]
+- [[preventuseraccess_preventuseraccess_handle]]
+- [[redirectifauthenticated_redirectifauthenticated]]
+- [[redirectifauthenticated_redirectifauthenticated_handle]]
+- [[removebeneficiary_index]]
+- [[resources_views_livewire_create_lead_blade_php]]
+- [[restricttoalloweddevice_restricttoalloweddevice]]
+- [[restricttoalloweddevice_restricttoalloweddevice_disabledresponse]]
+- [[restricttoalloweddevice_restricttoalloweddevice_handle]]
+- [[restricttoalloweddevice_restricttoalloweddevice_makecookie]]
+- [[restricttoalloweddevice_restricttoalloweddevice_pendingresponse]]
+- [[tests_feature_partneruserseparationtest_php]]
+- [[updateagentrequest_updateagentrequest]]
+- [[updateagentrequest_updateagentrequest_authorize]]
+- [[updateagentrequest_updateagentrequest_messages]]
+- [[updateagentrequest_updateagentrequest_rules]]
+- [[updateuserrequest_updateuserrequest]]
+- [[updateuserrequest_updateuserrequest_authorize]]
+- [[updateuserrequest_updateuserrequest_messages]]
+- [[updateuserrequest_updateuserrequest_rules]]
+- [[userdetail_userdetail]]
+- [[userdetail_userdetail_getactivestatesstringattribute]]
+- [[userdetail_userdetail_getcarriersstringattribute]]
+- [[userdetail_userdetail_setactivestatesattribute]]
+- [[userdetail_userdetail_setcarriersattribute]]
+- [[userdetail_userdetail_user]]
 
 ## Internal connections
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_parcel_interopdefault]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_checkelements]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_camelize]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_guard]] `EXTRACTED`
-- [[resources_libs_dropzone_dropzone_mjs]] —contains→ [[dropzone_3ed269f2f0fb224b_var_guardmethod]] `EXTRACTED`
-- [[dropzone_parcel_interopdefault]] —contains→ [[resources_libs_dropzone_dropzone_js]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_on]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039]] —method→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_off]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_makeevent]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatetotaluploadprogress]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatemaxfilesreachedclass]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_drop]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_paste]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_accept]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_addfile]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_removefile]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_displayexistingfile]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_processfiles]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_cancelupload]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_uploaddata]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_updatefilesuploadprogress]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_finished]] `EXTRACTED`
-- [[dropzone_4040acfd8584338d_export_2e2bcd8739ae039_emit]] —calls→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_errorprocessing]] `EXTRACTED`
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]] —method→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_initclass]] `EXTRACTED`
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]] —method→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getacceptedfiles]] `EXTRACTED`
-- [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039]] —method→ [[dropzone_3ed269f2f0fb224b_export_2e2bcd8739ae039_getfileswithstatus]] `EXTRACTED`
+- [[app_models_alloweddevice_php]] —contains→ [[alloweddevice_alloweddevice]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_addedby]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isapproved]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_ispending]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isdisabled]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —method→ [[alloweddevice_alloweddevice_isrejected]] `EXTRACTED`
+- [[alloweddevice_alloweddevice]] —calls→ [[restricttoalloweddevice_restricttoalloweddevice_handle]] `INFERRED`
+- [[alloweddevice_alloweddevice]] —calls→ [[devicecontroller_devicecontroller_store]] `INFERRED`
+- [[alloweddevice_alloweddevice]] —calls→ [[devicecontroller_devicecontroller_rejectallpending]] `INFERRED`
+- [[app_models_userdetail_php]] —contains→ [[userdetail_userdetail]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_user]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getactivestatesstringattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getcarriersstringattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setactivestatesattribute]] `EXTRACTED`
+- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setcarriersattribute]] `EXTRACTED`
+- [[app_models_epmsexternalcost_php]] —contains→ [[epmsexternalcost_epmsexternalcost]] `EXTRACTED`
+- [[epmsexternalcost_epmsexternalcost]] —method→ [[epmsexternalcost_epmsexternalcost_project]] `EXTRACTED`
+- [[app_listeners_loguserlogout_php]] —contains→ [[loguserlogout_loguserlogout]] `EXTRACTED`
+- [[loguserlogout_loguserlogout]] —method→ [[loguserlogout_loguserlogout_construct]] `EXTRACTED`
+- [[app_http_middleware_preventpartneraccess_php]] —contains→ [[preventpartneraccess_preventpartneraccess]] `EXTRACTED`
+- [[preventpartneraccess_preventpartneraccess]] —method→ [[preventpartneraccess_preventpartneraccess_handle]] `EXTRACTED`
+- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[echarts_esm_check]] `INFERRED`
+- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[partnerauthcontroller_partnerauthcontroller_logout]] `INFERRED`
+- [[preventpartneraccess_preventpartneraccess_handle]] —calls→ [[chart_pluginservice_invalidate]] `INFERRED`
+- [[app_http_middleware_restricttoalloweddevice_php]] —contains→ [[restricttoalloweddevice_restricttoalloweddevice]] `EXTRACTED`
+- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_handle]] `EXTRACTED`
+- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_makecookie]] `EXTRACTED`
+- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_pendingresponse]] `EXTRACTED`
+- [[restricttoalloweddevice_restricttoalloweddevice]] —method→ [[restricttoalloweddevice_restricttoalloweddevice_disabledresponse]] `EXTRACTED`
+- [[restricttoalloweddevice_restricttoalloweddevice_handle]] —calls→ [[restricttoalloweddevice_restricttoalloweddevice_makecookie]] `EXTRACTED`

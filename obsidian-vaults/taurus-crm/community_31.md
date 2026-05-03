@@ -2,20 +2,21 @@
 **8 nodes**
 
 ## Members
-- [[app_models_community_php]]
-- [[community_community]]
-- [[community_community_announcements]]
-- [[community_community_chatconversations]]
-- [[community_community_communityannouncements]]
-- [[community_community_createdbymanagers]]
-- [[community_community_creator]]
-- [[community_community_members]]
+- [[components_freeloaders_widget]]
+- [[components_sticky_notes]]
+- [[components_zoom_phone_widget]]
+- [[layouts_head_css]]
+- [[layouts_sidebar]]
+- [[layouts_vendor_scripts]]
+- [[resources_views_layouts_master_blade_php]]
+- [[resources_views_layouts_master_without_nav_blade_php]]
 
 ## Internal connections
-- [[app_models_community_php]] —contains→ [[community_community]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_creator]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_announcements]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_communityannouncements]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_chatconversations]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_members]] `EXTRACTED`
-- [[community_community]] —method→ [[community_community_createdbymanagers]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[layouts_head_css]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[layouts_sidebar]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[components_freeloaders_widget]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[layouts_vendor_scripts]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[components_zoom_phone_widget]] `EXTRACTED`
+- [[resources_views_layouts_master_blade_php]] —includes→ [[components_sticky_notes]] `EXTRACTED`
+- [[layouts_head_css]] —includes→ [[resources_views_layouts_master_without_nav_blade_php]] `EXTRACTED`
+- [[layouts_vendor_scripts]] —includes→ [[resources_views_layouts_master_without_nav_blade_php]] `EXTRACTED`

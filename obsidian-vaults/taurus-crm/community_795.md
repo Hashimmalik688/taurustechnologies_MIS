@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[config_telescope_php]]
+- [[config_cors_php]]

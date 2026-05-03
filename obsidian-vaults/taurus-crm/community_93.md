@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[addbeneficiary]]
-- [[removebeneficiary_index]]
-- [[resources_views_livewire_create_lead_blade_php]]
+- [[2026_02_04_000002_add_late_days_to_users_table_down]]
+- [[2026_02_04_000002_add_late_days_to_users_table_up]]
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]]
 
 ## Internal connections
-- [[resources_views_livewire_create_lead_blade_php]] —binds_method→ [[removebeneficiary_index]] `EXTRACTED`
-- [[resources_views_livewire_create_lead_blade_php]] —binds_method→ [[addbeneficiary]] `EXTRACTED`
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]] —contains→ [[2026_02_04_000002_add_late_days_to_users_table_up]] `EXTRACTED`
+- [[database_migrations_2026_02_04_000002_add_late_days_to_users_table_php]] —contains→ [[2026_02_04_000002_add_late_days_to_users_table_down]] `EXTRACTED`

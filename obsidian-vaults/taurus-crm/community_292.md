@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_nb_js]]
+- [[resources_js_pages_product_filter_range_init_js]]

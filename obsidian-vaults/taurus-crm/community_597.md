@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_tinymce_icons_default_index_js]]
+- [[resources_libs_tinymce_skins_content_dark_content_js]]

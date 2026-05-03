@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_http_requests_updateuserrequest_php]]
-- [[updateuserrequest_updateuserrequest]]
-- [[updateuserrequest_updateuserrequest_authorize]]
-- [[updateuserrequest_updateuserrequest_messages]]
-- [[updateuserrequest_updateuserrequest_rules]]
+- [[app_http_requests_storeledgerentryrequest_php]]
+- [[storeledgerentryrequest_storeledgerentryrequest]]
+- [[storeledgerentryrequest_storeledgerentryrequest_authorize]]
+- [[storeledgerentryrequest_storeledgerentryrequest_messages]]
+- [[storeledgerentryrequest_storeledgerentryrequest_rules]]
 
 ## Internal connections
-- [[app_http_requests_updateuserrequest_php]] —contains→ [[updateuserrequest_updateuserrequest]] `EXTRACTED`
-- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_authorize]] `EXTRACTED`
-- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_rules]] `EXTRACTED`
-- [[updateuserrequest_updateuserrequest]] —method→ [[updateuserrequest_updateuserrequest_messages]] `EXTRACTED`
+- [[app_http_requests_storeledgerentryrequest_php]] —contains→ [[storeledgerentryrequest_storeledgerentryrequest]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_authorize]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_rules]] `EXTRACTED`
+- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_messages]] `EXTRACTED`

@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_support_carrieraliases_php]]
-- [[carrieraliases_carrieraliases]]
-- [[carrieraliases_carrieraliases_applyfilter]]
-- [[carrieraliases_carrieraliases_applyotherfilter]]
+- [[app_models_leadfieldhighlight_php]]
+- [[leadfieldhighlight_leadfieldhighlight]]
+- [[leadfieldhighlight_leadfieldhighlight_lead]]
+- [[leadfieldhighlight_leadfieldhighlight_updatedby]]
 
 ## Internal connections
-- [[app_support_carrieraliases_php]] —contains→ [[carrieraliases_carrieraliases]] `EXTRACTED`
-- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyfilter]] `EXTRACTED`
-- [[carrieraliases_carrieraliases]] —method→ [[carrieraliases_carrieraliases_applyotherfilter]] `EXTRACTED`
+- [[app_models_leadfieldhighlight_php]] —contains→ [[leadfieldhighlight_leadfieldhighlight]] `EXTRACTED`
+- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_lead]] `EXTRACTED`
+- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_updatedby]] `EXTRACTED`

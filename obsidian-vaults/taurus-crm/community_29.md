@@ -1,23 +1,23 @@
 # Community 29
-**9 nodes**
+**8 nodes**
 
 ## Members
-- [[accountswitchingdetector_accountswitchingdetector]]
-- [[accountswitchingdetector_accountswitchingdetector_logsuspiciousactivity]]
-- [[app_http_controllers_auth_logincontroller_php]]
-- [[app_services_accountswitchingdetector_php]]
-- [[logincontroller_logincontroller]]
-- [[logincontroller_logincontroller_authenticated]]
-- [[logincontroller_logincontroller_construct]]
-- [[logincontroller_logincontroller_credentials]]
-- [[logincontroller_logincontroller_redirectto]]
+- [[app_models_insurancecarrier_php]]
+- [[insurancecarrier_insurancecarrier]]
+- [[insurancecarrier_insurancecarrier_agentcommissions]]
+- [[insurancecarrier_insurancecarrier_agentstates]]
+- [[insurancecarrier_insurancecarrier_commissionbrackets]]
+- [[insurancecarrier_insurancecarrier_getcommissionforage]]
+- [[insurancecarrier_insurancecarrier_getcommissionforagent]]
+- [[insurancecarrier_insurancecarrier_leads]]
 
 ## Internal connections
-- [[app_services_accountswitchingdetector_php]] —contains→ [[accountswitchingdetector_accountswitchingdetector]] `EXTRACTED`
-- [[accountswitchingdetector_accountswitchingdetector]] —method→ [[accountswitchingdetector_accountswitchingdetector_logsuspiciousactivity]] `EXTRACTED`
-- [[accountswitchingdetector_accountswitchingdetector]] —calls→ [[logincontroller_logincontroller_authenticated]] `INFERRED`
-- [[app_http_controllers_auth_logincontroller_php]] —contains→ [[logincontroller_logincontroller]] `EXTRACTED`
-- [[logincontroller_logincontroller]] —method→ [[logincontroller_logincontroller_construct]] `EXTRACTED`
-- [[logincontroller_logincontroller]] —method→ [[logincontroller_logincontroller_redirectto]] `EXTRACTED`
-- [[logincontroller_logincontroller]] —method→ [[logincontroller_logincontroller_credentials]] `EXTRACTED`
-- [[logincontroller_logincontroller]] —method→ [[logincontroller_logincontroller_authenticated]] `EXTRACTED`
+- [[app_models_insurancecarrier_php]] —contains→ [[insurancecarrier_insurancecarrier]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_leads]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_commissionbrackets]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_getcommissionforage]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_agentcommissions]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_agentstates]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier]] —method→ [[insurancecarrier_insurancecarrier_getcommissionforagent]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier_commissionbrackets]] —calls→ [[insurancecarrier_insurancecarrier_getcommissionforage]] `EXTRACTED`
+- [[insurancecarrier_insurancecarrier_agentcommissions]] —calls→ [[insurancecarrier_insurancecarrier_getcommissionforagent]] `EXTRACTED`

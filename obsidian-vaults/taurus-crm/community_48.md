@@ -1,20 +1,16 @@
 # Community 48
-**6 nodes**
+**5 nodes**
 
 ## Members
-- [[br_lastnumber]]
-- [[br_mutation]]
-- [[br_relativetimewithmutation]]
-- [[br_softmutation]]
-- [[br_specialmutationforyears]]
-- [[resources_libs_moment_locale_br_js]]
+- [[app_providers_appserviceprovider_php]]
+- [[appserviceprovider_appserviceprovider]]
+- [[appserviceprovider_appserviceprovider_boot]]
+- [[appserviceprovider_appserviceprovider_register]]
+- [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_br_js]] —contains→ [[br_relativetimewithmutation]] `EXTRACTED`
-- [[resources_libs_moment_locale_br_js]] —contains→ [[br_specialmutationforyears]] `EXTRACTED`
-- [[resources_libs_moment_locale_br_js]] —contains→ [[br_lastnumber]] `EXTRACTED`
-- [[resources_libs_moment_locale_br_js]] —contains→ [[br_mutation]] `EXTRACTED`
-- [[resources_libs_moment_locale_br_js]] —contains→ [[br_softmutation]] `EXTRACTED`
-- [[br_relativetimewithmutation]] —calls→ [[br_mutation]] `EXTRACTED`
-- [[br_specialmutationforyears]] —calls→ [[br_lastnumber]] `EXTRACTED`
-- [[br_mutation]] —calls→ [[br_softmutation]] `EXTRACTED`
+- [[app_providers_appserviceprovider_php]] —contains→ [[appserviceprovider_appserviceprovider]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_register]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_boot]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
+- [[appserviceprovider_appserviceprovider_boot]] —calls→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`

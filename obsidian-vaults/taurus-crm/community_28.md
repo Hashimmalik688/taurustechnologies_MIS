@@ -1,23 +1,21 @@
 # Community 28
-**9 nodes**
+**8 nodes**
 
 ## Members
-- [[app_models_calllog_php]]
-- [[calllog_calllog]]
-- [[calllog_calllog_agent]]
-- [[calllog_calllog_creator]]
-- [[calllog_calllog_getformatteddurationattribute]]
-- [[calllog_calllog_lead]]
-- [[calllog_calllog_scopebyagent]]
-- [[calllog_calllog_scopeneedsfollowup]]
-- [[calllog_calllog_scopesuccessful]]
+- [[app_models_community_php]]
+- [[community_community]]
+- [[community_community_announcements]]
+- [[community_community_chatconversations]]
+- [[community_community_communityannouncements]]
+- [[community_community_createdbymanagers]]
+- [[community_community_creator]]
+- [[community_community_members]]
 
 ## Internal connections
-- [[app_models_calllog_php]] —contains→ [[calllog_calllog]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_lead]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_agent]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_creator]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_scopeneedsfollowup]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_scopebyagent]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_scopesuccessful]] `EXTRACTED`
-- [[calllog_calllog]] —method→ [[calllog_calllog_getformatteddurationattribute]] `EXTRACTED`
+- [[app_models_community_php]] —contains→ [[community_community]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_creator]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_announcements]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_communityannouncements]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_chatconversations]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_members]] `EXTRACTED`
+- [[community_community]] —method→ [[community_community_createdbymanagers]] `EXTRACTED`

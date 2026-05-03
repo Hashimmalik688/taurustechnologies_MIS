@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_leadfieldhighlight_php]]
-- [[leadfieldhighlight_leadfieldhighlight]]
-- [[leadfieldhighlight_leadfieldhighlight_lead]]
-- [[leadfieldhighlight_leadfieldhighlight_updatedby]]
+- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]]
+- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_down]]
+- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_up]]
+- [[database_migrations_2019_08_19_000000_create_failed_jobs_table_php]]
 
 ## Internal connections
-- [[app_models_leadfieldhighlight_php]] —contains→ [[leadfieldhighlight_leadfieldhighlight]] `EXTRACTED`
-- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_lead]] `EXTRACTED`
-- [[leadfieldhighlight_leadfieldhighlight]] —method→ [[leadfieldhighlight_leadfieldhighlight_updatedby]] `EXTRACTED`
+- [[database_migrations_2019_08_19_000000_create_failed_jobs_table_php]] —contains→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] `EXTRACTED`
+- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] —method→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_up]] `EXTRACTED`
+- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] —method→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_down]] `EXTRACTED`

@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_parsleyjs_i18n_sr_js]]
+- [[resources_libs_parsleyjs_i18n_hu_js]]

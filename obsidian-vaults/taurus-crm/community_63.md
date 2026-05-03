@@ -1,17 +1,13 @@
 # Community 63
-**5 nodes**
+**4 nodes**
 
 ## Members
-- [[lb_eifelerregelappliestonumber]]
-- [[lb_processfuturetime]]
-- [[lb_processpasttime]]
-- [[lb_processrelativetime]]
-- [[resources_libs_moment_locale_lb_js]]
+- [[app_events_salecreated_php]]
+- [[salecreated_salecreated]]
+- [[salecreated_salecreated_broadcaston]]
+- [[salecreated_salecreated_construct]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processrelativetime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processfuturetime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_processpasttime]] `EXTRACTED`
-- [[resources_libs_moment_locale_lb_js]] —contains→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
-- [[lb_processfuturetime]] —calls→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
-- [[lb_processpasttime]] —calls→ [[lb_eifelerregelappliestonumber]] `EXTRACTED`
+- [[app_events_salecreated_php]] —contains→ [[salecreated_salecreated]] `EXTRACTED`
+- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_construct]] `EXTRACTED`
+- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_broadcaston]] `EXTRACTED`

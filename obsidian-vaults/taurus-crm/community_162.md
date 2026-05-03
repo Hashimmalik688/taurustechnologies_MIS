@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_down]]
-- [[2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_up]]
-- [[database_migrations_2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_php]]
+- [[2026_01_30_044322_add_revenue_and_commission_to_leads_table_down]]
+- [[2026_01_30_044322_add_revenue_and_commission_to_leads_table_up]]
+- [[database_migrations_2026_01_30_044322_add_revenue_and_commission_to_leads_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_php]] —contains→ [[2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_up]] `EXTRACTED`
-- [[database_migrations_2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_php]] —contains→ [[2026_01_06_225720_add_device_fingerprint_to_attendances_and_audit_logs_down]] `EXTRACTED`
+- [[database_migrations_2026_01_30_044322_add_revenue_and_commission_to_leads_table_php]] —contains→ [[2026_01_30_044322_add_revenue_and_commission_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_30_044322_add_revenue_and_commission_to_leads_table_php]] —contains→ [[2026_01_30_044322_add_revenue_and_commission_to_leads_table_down]] `EXTRACTED`

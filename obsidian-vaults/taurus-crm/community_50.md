@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_events_messagesent_php]]
-- [[messagesent_messagesent]]
-- [[messagesent_messagesent_broadcastas]]
-- [[messagesent_messagesent_broadcaston]]
-- [[messagesent_messagesent_construct]]
+- [[app_notifications_mentionedinchatnotification_php]]
+- [[mentionedinchatnotification_mentionedinchatnotification]]
+- [[mentionedinchatnotification_mentionedinchatnotification_construct]]
+- [[mentionedinchatnotification_mentionedinchatnotification_toarray]]
+- [[mentionedinchatnotification_mentionedinchatnotification_via]]
 
 ## Internal connections
-- [[app_events_messagesent_php]] —contains→ [[messagesent_messagesent]] `EXTRACTED`
-- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_construct]] `EXTRACTED`
-- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_broadcaston]] `EXTRACTED`
-- [[messagesent_messagesent]] —method→ [[messagesent_messagesent_broadcastas]] `EXTRACTED`
+- [[app_notifications_mentionedinchatnotification_php]] —contains→ [[mentionedinchatnotification_mentionedinchatnotification]] `EXTRACTED`
+- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_construct]] `EXTRACTED`
+- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_via]] `EXTRACTED`
+- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_toarray]] `EXTRACTED`

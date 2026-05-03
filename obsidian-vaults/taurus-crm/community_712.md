@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_admin_zoom_phone_embed_blade_php]]
+- [[resources_views_admin_pendings_approved_index_blade_php]]

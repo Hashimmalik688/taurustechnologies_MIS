@@ -1,60 +1,61 @@
 # Community 15
-**24 nodes**
+**25 nodes**
 
 ## Members
-- [[app_models_salarycomponent_php]]
-- [[app_services_salaryservice_php]]
-- [[salarycomponent_salarycomponent]]
-- [[salarycomponent_salarycomponent_deductions]]
-- [[salarycomponent_salarycomponent_getattendancepercentageattribute]]
-- [[salarycomponent_salarycomponent_getcomponentlabelattribute]]
-- [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]]
-- [[salarycomponent_salarycomponent_gethassalesdataattribute]]
-- [[salarycomponent_salarycomponent_getmonthnameattribute]]
-- [[salarycomponent_salarycomponent_getsalestargetstatusattribute]]
-- [[salarycomponent_salarycomponent_scopebasic]]
-- [[salarycomponent_salarycomponent_scopebonus]]
-- [[salarycomponent_salarycomponent_scopeforperiod]]
-- [[salarycomponent_salarycomponent_scopeunpaid]]
-- [[salarycomponent_salarycomponent_user]]
-- [[salaryservice_salaryservice]]
-- [[salaryservice_salaryservice_calculatebasicsalary]]
-- [[salaryservice_salaryservice_calculatebonussalary]]
-- [[salaryservice_salaryservice_construct]]
-- [[salaryservice_salaryservice_createsalarycomponents]]
-- [[salaryservice_salaryservice_getattendancedata]]
-- [[salaryservice_salaryservice_getpaymentdate]]
-- [[salaryservice_salaryservice_getsalesdata]]
-- [[salaryservice_salaryservice_qualifiesforpunctualitybonus]]
+- [[app_models_notification_php]]
+- [[app_services_notificationservice_php]]
+- [[notification_notification]]
+- [[notification_notification_createforuser]]
+- [[notification_notification_getdategroupattribute]]
+- [[notification_notification_getdategrouplabelattribute]]
+- [[notification_notification_gettimeagoattribute]]
+- [[notification_notification_isread]]
+- [[notification_notification_isunread]]
+- [[notification_notification_markasread]]
+- [[notification_notification_markasunread]]
+- [[notification_notification_scopeimportant]]
+- [[notification_notification_scoperead]]
+- [[notification_notification_scoperecent]]
+- [[notification_notification_scopeunread]]
+- [[notification_notification_user]]
+- [[notificationservice_notificationservice]]
+- [[notificationservice_notificationservice_cleanoldnotifications]]
+- [[notificationservice_notificationservice_createforallusers]]
+- [[notificationservice_notificationservice_createforuser]]
+- [[notificationservice_notificationservice_createforusers]]
+- [[notificationservice_notificationservice_createordernotification]]
+- [[notificationservice_notificationservice_createpaymentnotification]]
+- [[notificationservice_notificationservice_createsystemnotification]]
+- [[user_user_createnotification]]
 
 ## Internal connections
-- [[app_services_salaryservice_php]] —contains→ [[salaryservice_salaryservice]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_construct]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_createsalarycomponents]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
-- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
-- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
-- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
-- [[salaryservice_salaryservice_getattendancedata]] —calls→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
-- [[app_models_salarycomponent_php]] —contains→ [[salarycomponent_salarycomponent]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_user]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_deductions]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getmonthnameattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getcomponentlabelattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getattendancepercentageattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethassalesdataattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getsalestargetstatusattribute]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebasic]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebonus]] `EXTRACTED`
-- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopeforperiod]] `EXTRACTED`
+- [[app_services_notificationservice_php]] —contains→ [[notificationservice_notificationservice]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforuser]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_cleanoldnotifications]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notification_notification]] `INFERRED`
+- [[notificationservice_notificationservice_createforusers]] —calls→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_cleanoldnotifications]] —calls→ [[notification_notification]] `INFERRED`
+- [[user_user_createnotification]] —calls→ [[notification_notification]] `INFERRED`
+- [[app_models_notification_php]] —contains→ [[notification_notification]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_user]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_scopeunread]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_scoperead]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_scoperecent]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_scopeimportant]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_markasread]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_markasunread]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_isread]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_isunread]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_gettimeagoattribute]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_getdategroupattribute]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_getdategrouplabelattribute]] `EXTRACTED`
+- [[notification_notification]] —method→ [[notification_notification_createforuser]] `EXTRACTED`

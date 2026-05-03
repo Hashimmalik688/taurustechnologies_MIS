@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[app_support_statuses_php]]
-- [[statuses_statuses]]
+- [[app_models_pettycashledger_php]]
+- [[pettycashledger_pettycashledger]]
 
 ## Internal connections
-- [[app_support_statuses_php]] —contains→ [[statuses_statuses]] `EXTRACTED`
+- [[app_models_pettycashledger_php]] —contains→ [[pettycashledger_pettycashledger]] `EXTRACTED`

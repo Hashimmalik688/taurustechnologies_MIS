@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[app_http_middleware_trimstrings_php]]
-- [[trimstrings_trimstrings]]
+- [[app_http_middleware_trustproxies_php]]
+- [[trustproxies_trustproxies]]
 
 ## Internal connections
-- [[app_http_middleware_trimstrings_php]] —contains→ [[trimstrings_trimstrings]] `EXTRACTED`
+- [[app_http_middleware_trustproxies_php]] —contains→ [[trustproxies_trustproxies]] `EXTRACTED`

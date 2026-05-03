@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_providers_authserviceprovider_php]]
-- [[authserviceprovider_authserviceprovider]]
-- [[authserviceprovider_authserviceprovider_boot]]
+- [[app_listeners_sendleadcreatednotification_php]]
+- [[sendleadcreatednotification_sendleadcreatednotification]]
+- [[sendleadcreatednotification_sendleadcreatednotification_construct]]
 
 ## Internal connections
-- [[app_providers_authserviceprovider_php]] —contains→ [[authserviceprovider_authserviceprovider]] `EXTRACTED`
-- [[authserviceprovider_authserviceprovider]] —method→ [[authserviceprovider_authserviceprovider_boot]] `EXTRACTED`
+- [[app_listeners_sendleadcreatednotification_php]] —contains→ [[sendleadcreatednotification_sendleadcreatednotification]] `EXTRACTED`
+- [[sendleadcreatednotification_sendleadcreatednotification]] —method→ [[sendleadcreatednotification_sendleadcreatednotification_construct]] `EXTRACTED`

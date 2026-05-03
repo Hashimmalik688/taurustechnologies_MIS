@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_chat_notifications_settings_blade_php]]
+- [[resources_views_notepad_index_blade_php]]

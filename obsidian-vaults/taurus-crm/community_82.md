@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_listeners_sendsalecreatednotification_php]]
-- [[sendsalecreatednotification_sendsalecreatednotification]]
-- [[sendsalecreatednotification_sendsalecreatednotification_construct]]
+- [[app_http_middleware_checkmodulepermission_php]]
+- [[checkmodulepermission_checkmodulepermission]]
+- [[checkmodulepermission_checkmodulepermission_construct]]
 
 ## Internal connections
-- [[app_listeners_sendsalecreatednotification_php]] —contains→ [[sendsalecreatednotification_sendsalecreatednotification]] `EXTRACTED`
-- [[sendsalecreatednotification_sendsalecreatednotification]] —method→ [[sendsalecreatednotification_sendsalecreatednotification_construct]] `EXTRACTED`
+- [[app_http_middleware_checkmodulepermission_php]] —contains→ [[checkmodulepermission_checkmodulepermission]] `EXTRACTED`
+- [[checkmodulepermission_checkmodulepermission]] —method→ [[checkmodulepermission_checkmodulepermission_construct]] `EXTRACTED`

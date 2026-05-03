@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_listeners_markattendanceonlogin_php]]
-- [[markattendanceonlogin_markattendanceonlogin]]
-- [[markattendanceonlogin_markattendanceonlogin_construct]]
-- [[markattendanceonlogin_markattendanceonlogin_handle]]
-- [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]]
+- [[app_http_requests_storeuserrequest_php]]
+- [[storeuserrequest_storeuserrequest]]
+- [[storeuserrequest_storeuserrequest_authorize]]
+- [[storeuserrequest_storeuserrequest_messages]]
+- [[storeuserrequest_storeuserrequest_rules]]
 
 ## Internal connections
-- [[app_listeners_markattendanceonlogin_php]] —contains→ [[markattendanceonlogin_markattendanceonlogin]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_construct]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_handle]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`
-- [[markattendanceonlogin_markattendanceonlogin_handle]] —calls→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`
+- [[app_http_requests_storeuserrequest_php]] —contains→ [[storeuserrequest_storeuserrequest]] `EXTRACTED`
+- [[storeuserrequest_storeuserrequest]] —method→ [[storeuserrequest_storeuserrequest_authorize]] `EXTRACTED`
+- [[storeuserrequest_storeuserrequest]] —method→ [[storeuserrequest_storeuserrequest_rules]] `EXTRACTED`
+- [[storeuserrequest_storeuserrequest]] —method→ [[storeuserrequest_storeuserrequest_messages]] `EXTRACTED`

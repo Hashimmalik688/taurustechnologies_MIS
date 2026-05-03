@@ -2,16 +2,20 @@
 **6 nodes**
 
 ## Members
-- [[agentrepositoryinterface_createagent]]
-- [[agentrepositoryinterface_getagentbyid]]
-- [[agentrepositoryinterface_getagentsbystate]]
-- [[agentrepositoryinterface_getallagents]]
-- [[agentrepositoryinterface_updateagent]]
-- [[app_repositories_contracts_agentrepositoryinterface_php]]
+- [[lt_forms]]
+- [[lt_special]]
+- [[lt_translate]]
+- [[lt_translateseconds]]
+- [[lt_translatesingular]]
+- [[resources_libs_moment_locale_lt_js]]
 
 ## Internal connections
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getallagents]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentbyid]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_createagent]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_updateagent]] `EXTRACTED`
-- [[app_repositories_contracts_agentrepositoryinterface_php]] —contains→ [[agentrepositoryinterface_getagentsbystate]] `EXTRACTED`
+- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translateseconds]] `EXTRACTED`
+- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translatesingular]] `EXTRACTED`
+- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_special]] `EXTRACTED`
+- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_forms]] `EXTRACTED`
+- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translate]] `EXTRACTED`
+- [[lt_translatesingular]] —calls→ [[lt_forms]] `EXTRACTED`
+- [[lt_translatesingular]] —calls→ [[lt_translate]] `EXTRACTED`
+- [[lt_special]] —calls→ [[lt_translate]] `EXTRACTED`
+- [[lt_forms]] —calls→ [[lt_translate]] `EXTRACTED`

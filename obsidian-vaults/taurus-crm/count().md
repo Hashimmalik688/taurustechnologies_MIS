@@ -1,6 +1,6 @@
 # count()
 
-**Degree:** 239  
+**Degree:** 238  
 **File:** N/A
 
 ## Connected to

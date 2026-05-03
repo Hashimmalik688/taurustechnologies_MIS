@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_my_js]]
+- [[resources_libs_moment_locale_ka_js]]

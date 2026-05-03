@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[app_models_pettycashledger_php]]
-- [[pettycashledger_pettycashledger]]
+- [[app_http_middleware_trimstrings_php]]
+- [[trimstrings_trimstrings]]
 
 ## Internal connections
-- [[app_models_pettycashledger_php]] —contains→ [[pettycashledger_pettycashledger]] `EXTRACTED`
+- [[app_http_middleware_trimstrings_php]] —contains→ [[trimstrings_trimstrings]] `EXTRACTED`

@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_zh_hk_js]]
+- [[resources_libs_moment_locale_tet_js]]

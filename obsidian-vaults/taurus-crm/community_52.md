@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_providers_appserviceprovider_php]]
-- [[appserviceprovider_appserviceprovider]]
-- [[appserviceprovider_appserviceprovider_boot]]
-- [[appserviceprovider_appserviceprovider_register]]
-- [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]]
+- [[app_console_kernel_php]]
+- [[app_http_kernel_php]]
+- [[kernel_kernel]]
+- [[kernel_kernel_commands]]
+- [[kernel_kernel_schedule]]
 
 ## Internal connections
-- [[app_providers_appserviceprovider_php]] —contains→ [[appserviceprovider_appserviceprovider]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_register]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_boot]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider]] —method→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
-- [[appserviceprovider_appserviceprovider_boot]] —calls→ [[appserviceprovider_appserviceprovider_registerpermissionbladedirectives]] `EXTRACTED`
+- [[app_console_kernel_php]] —contains→ [[kernel_kernel]] `EXTRACTED`
+- [[kernel_kernel]] —method→ [[kernel_kernel_schedule]] `EXTRACTED`
+- [[kernel_kernel]] —method→ [[kernel_kernel_commands]] `EXTRACTED`
+- [[kernel_kernel]] —contains→ [[app_http_kernel_php]] `EXTRACTED`

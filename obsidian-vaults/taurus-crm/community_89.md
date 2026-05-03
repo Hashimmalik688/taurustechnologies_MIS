@@ -2,11 +2,11 @@
 **3 nodes**
 
 ## Members
-- [[resources_libs_moment_locale_sk_js]]
-- [[sk_plural]]
-- [[sk_translate]]
+- [[be_plural]]
+- [[be_relativetimewithplural]]
+- [[resources_libs_moment_locale_be_js]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_sk_js]] —contains→ [[sk_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_sk_js]] —contains→ [[sk_translate]] `EXTRACTED`
-- [[sk_plural]] —calls→ [[sk_translate]] `EXTRACTED`
+- [[resources_libs_moment_locale_be_js]] —contains→ [[be_plural]] `EXTRACTED`
+- [[resources_libs_moment_locale_be_js]] —contains→ [[be_relativetimewithplural]] `EXTRACTED`
+- [[be_plural]] —calls→ [[be_relativetimewithplural]] `EXTRACTED`

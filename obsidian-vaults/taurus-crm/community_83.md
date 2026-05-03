@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_exceptions_handler_php]]
-- [[handler_handler]]
-- [[handler_handler_register]]
+- [[app_observers_userobserver_php]]
+- [[userobserver_userobserver]]
+- [[userobserver_userobserver_created]]
 
 ## Internal connections
-- [[app_exceptions_handler_php]] —contains→ [[handler_handler]] `EXTRACTED`
-- [[handler_handler]] —method→ [[handler_handler_register]] `EXTRACTED`
+- [[app_observers_userobserver_php]] —contains→ [[userobserver_userobserver]] `EXTRACTED`
+- [[userobserver_userobserver]] —method→ [[userobserver_userobserver_created]] `EXTRACTED`

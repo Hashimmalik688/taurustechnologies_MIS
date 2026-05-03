@@ -1,15 +1,13 @@
 # Community 65
-**5 nodes**
+**4 nodes**
 
 ## Members
-- [[partner_partials_carrier_filter]]
-- [[resources_views_partner_carriers_blade_php]]
-- [[resources_views_partner_dashboard_advanced_blade_php]]
-- [[resources_views_partner_ledger_blade_php]]
-- [[resources_views_partner_sales_blade_php]]
+- [[app_models_carriercommissionbracket_php]]
+- [[carriercommissionbracket_carriercommissionbracket]]
+- [[carriercommissionbracket_carriercommissionbracket_containsage]]
+- [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]]
 
 ## Internal connections
-- [[resources_views_partner_dashboard_advanced_blade_php]] —includes→ [[partner_partials_carrier_filter]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_carriers_blade_php]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_sales_blade_php]] `EXTRACTED`
-- [[partner_partials_carrier_filter]] —includes→ [[resources_views_partner_ledger_blade_php]] `EXTRACTED`
+- [[app_models_carriercommissionbracket_php]] —contains→ [[carriercommissionbracket_carriercommissionbracket]] `EXTRACTED`
+- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]] `EXTRACTED`
+- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_containsage]] `EXTRACTED`

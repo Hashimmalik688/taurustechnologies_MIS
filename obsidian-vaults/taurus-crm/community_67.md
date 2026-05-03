@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_events_salecreated_php]]
-- [[salecreated_salecreated]]
-- [[salecreated_salecreated_broadcaston]]
-- [[salecreated_salecreated_construct]]
+- [[app_models_chatmessagereaction_php]]
+- [[chatmessagereaction_chatmessagereaction]]
+- [[chatmessagereaction_chatmessagereaction_message]]
+- [[chatmessagereaction_chatmessagereaction_user]]
 
 ## Internal connections
-- [[app_events_salecreated_php]] —contains→ [[salecreated_salecreated]] `EXTRACTED`
-- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_construct]] `EXTRACTED`
-- [[salecreated_salecreated]] —method→ [[salecreated_salecreated_broadcaston]] `EXTRACTED`
+- [[app_models_chatmessagereaction_php]] —contains→ [[chatmessagereaction_chatmessagereaction]] `EXTRACTED`
+- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_message]] `EXTRACTED`
+- [[chatmessagereaction_chatmessagereaction]] —method→ [[chatmessagereaction_chatmessagereaction_user]] `EXTRACTED`

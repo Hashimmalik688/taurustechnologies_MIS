@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_02_04_022718_fix_pabs_tickets_add_missing_columns_down]]
-- [[2026_02_04_022718_fix_pabs_tickets_add_missing_columns_up]]
-- [[database_migrations_2026_02_04_022718_fix_pabs_tickets_add_missing_columns_php]]
+- [[2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_down]]
+- [[2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_up]]
+- [[database_migrations_2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_02_04_022718_fix_pabs_tickets_add_missing_columns_php]] —contains→ [[2026_02_04_022718_fix_pabs_tickets_add_missing_columns_up]] `EXTRACTED`
-- [[database_migrations_2026_02_04_022718_fix_pabs_tickets_add_missing_columns_php]] —contains→ [[2026_02_04_022718_fix_pabs_tickets_add_missing_columns_down]] `EXTRACTED`
+- [[database_migrations_2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_php]] —contains→ [[2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_up]] `EXTRACTED`
+- [[database_migrations_2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_php]] —contains→ [[2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table_down]] `EXTRACTED`

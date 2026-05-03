@@ -1,32 +1,23 @@
 # Community 26
-**10 nodes**
+**9 nodes**
 
 ## Members
-- [[announcementpolicy_announcementpolicy]]
-- [[announcementpolicy_announcementpolicy_create]]
-- [[announcementpolicy_announcementpolicy_delete]]
-- [[announcementpolicy_announcementpolicy_forcedelete]]
-- [[announcementpolicy_announcementpolicy_isauthorized]]
-- [[announcementpolicy_announcementpolicy_restore]]
-- [[announcementpolicy_announcementpolicy_update]]
-- [[announcementpolicy_announcementpolicy_view]]
-- [[announcementpolicy_announcementpolicy_viewany]]
-- [[app_policies_announcementpolicy_php]]
+- [[app_models_calllog_php]]
+- [[calllog_calllog]]
+- [[calllog_calllog_agent]]
+- [[calllog_calllog_creator]]
+- [[calllog_calllog_getformatteddurationattribute]]
+- [[calllog_calllog_lead]]
+- [[calllog_calllog_scopebyagent]]
+- [[calllog_calllog_scopeneedsfollowup]]
+- [[calllog_calllog_scopesuccessful]]
 
 ## Internal connections
-- [[app_policies_announcementpolicy_php]] —contains→ [[announcementpolicy_announcementpolicy]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_isauthorized]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_viewany]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_view]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_create]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_update]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_delete]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_restore]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy]] —method→ [[announcementpolicy_announcementpolicy_forcedelete]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_viewany]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_view]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_create]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_update]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_delete]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_restore]] `EXTRACTED`
-- [[announcementpolicy_announcementpolicy_isauthorized]] —calls→ [[announcementpolicy_announcementpolicy_forcedelete]] `EXTRACTED`
+- [[app_models_calllog_php]] —contains→ [[calllog_calllog]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_lead]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_agent]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_creator]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_scopeneedsfollowup]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_scopebyagent]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_scopesuccessful]] `EXTRACTED`
+- [[calllog_calllog]] —method→ [[calllog_calllog_getformatteddurationattribute]] `EXTRACTED`

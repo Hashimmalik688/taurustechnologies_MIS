@@ -1,86 +1,62 @@
 # Community 14
-**50 nodes**
+**26 nodes**
 
 ## Members
-- [[app_models_lead_php]]
-- [[lead_lead]]
-- [[lead_lead_assignedagent]]
-- [[lead_lead_assignedcloser]]
-- [[lead_lead_assignedvalidator]]
-- [[lead_lead_bankverifiedbyuser]]
-- [[lead_lead_bankverifier]]
-- [[lead_lead_bankverifierassignedbyuser]]
-- [[lead_lead_boot]]
-- [[lead_lead_calllogs]]
-- [[lead_lead_carriers]]
-- [[lead_lead_cbsenttoretentionby]]
-- [[lead_lead_chargebackmarkedby]]
-- [[lead_lead_chargebackpaidby]]
-- [[lead_lead_dials]]
-- [[lead_lead_dispositionofficer]]
-- [[lead_lead_fieldhighlights]]
-- [[lead_lead_followupassignedbyuser]]
-- [[lead_lead_followupdoneby]]
-- [[lead_lead_followupperson]]
-- [[lead_lead_forwardedby]]
-- [[lead_lead_getageattribute]]
-- [[lead_lead_insurancecarrier]]
-- [[lead_lead_issuedbyuser]]
-- [[lead_lead_ledgerchargebackpaidentry]]
-- [[lead_lead_ledgerentries]]
-- [[lead_lead_ledgersalesreturnentry]]
-- [[lead_lead_managedby]]
-- [[lead_lead_notissuedby]]
-- [[lead_lead_notissuedresolvedby]]
-- [[lead_lead_notpaidby]]
-- [[lead_lead_paidby]]
-- [[lead_lead_partner]]
-- [[lead_lead_pendingcontractby]]
-- [[lead_lead_pendingdraftby]]
-- [[lead_lead_policydiedby]]
-- [[lead_lead_qauser]]
-- [[lead_lead_recallrequestedby]]
-- [[lead_lead_retactionupdatedby]]
-- [[lead_lead_retentionofficer]]
-- [[lead_lead_scopefollowuppending]]
-- [[lead_lead_scopenotissued]]
-- [[lead_lead_scopepaidsales]]
-- [[lead_lead_scopependingcontract]]
-- [[lead_lead_scopependingdraft]]
-- [[lead_lead_scopependingsapproved]]
-- [[lead_lead_scopepolicydied]]
-- [[lead_lead_submissionreviewer]]
-- [[lead_lead_validator]]
-- [[lead_lead_verifier]]
+- [[app_models_ledgerjournalentry_php]]
+- [[app_services_ledgerservice_php]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storegeneral]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storeopeningbalance]]
+- [[ledgerjournalcontroller_ledgerjournalcontroller_storepayment]]
+- [[ledgerjournalentry_ledgerjournalentry]]
+- [[ledgerjournalentry_ledgerjournalentry_creator]]
+- [[ledgerjournalentry_ledgerjournalentry_generateentrynumber]]
+- [[ledgerjournalentry_ledgerjournalentry_gettypelabelattribute]]
+- [[ledgerjournalentry_ledgerjournalentry_lead]]
+- [[ledgerjournalentry_ledgerjournalentry_lines]]
+- [[ledgerjournalentry_ledgerjournalentry_scopedaterange]]
+- [[ledgerjournalentry_ledgerjournalentry_scopeoftype]]
+- [[ledgerjournalentry_ledgerjournalentry_typelabel]]
+- [[ledgerservice_ledgerservice]]
+- [[ledgerservice_ledgerservice_account]]
+- [[ledgerservice_ledgerservice_createchargebackentry]]
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]]
+- [[ledgerservice_ledgerservice_creategeneralentry]]
+- [[ledgerservice_ledgerservice_createopeningbalanceentry]]
+- [[ledgerservice_ledgerservice_createpaymententry]]
+- [[ledgerservice_ledgerservice_createsaleentry]]
+- [[ledgerservice_ledgerservice_createsalesreturnentry]]
+- [[ledgerservice_ledgerservice_line]]
+- [[ledgerservice_ledgerservice_persist]]
+- [[ledgerservice_ledgerservice_updateaccountbalances]]
 
 ## Internal connections
-- [[app_models_lead_php]] —contains→ [[lead_lead]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_boot]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_getageattribute]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_carriers]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_calllogs]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_dials]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_forwardedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_managedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_validator]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedvalidator]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedcloser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_verifier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_ledgerentries]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_insurancecarrier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_retentionofficer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_dispositionofficer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_qauser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_submissionreviewer]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_issuedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_assignedagent]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_partner]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupperson]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupassignedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifier]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifierassignedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_bankverifiedbyuser]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_pendingcontractby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_notissuedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_notissuedresolvedby]] `EXTRACTED`
-- [[lead_lead]] —method→ [[lead_lead_followupdoneby]] `EXTRACTED`
+- [[app_services_ledgerservice_php]] —contains→ [[ledgerservice_ledgerservice]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsaleentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createsalesreturnentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createpaymententry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_createopeningbalanceentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_creategeneralentry]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_updateaccountbalances]] `EXTRACTED`
+- [[ledgerservice_ledgerservice]] —method→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsaleentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createsalesreturnentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createchargebackrecoveryentry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerservice_ledgerservice_persist]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createpaymententry]] —calls→ [[ledgerjournalcontroller_ledgerjournalcontroller_storepayment]] `INFERRED`
+- [[ledgerservice_ledgerservice_createopeningbalanceentry]] —calls→ [[ledgerservice_ledgerservice_account]] `EXTRACTED`
+- [[ledgerservice_ledgerservice_createopeningbalanceentry]] —calls→ [[ledgerservice_ledgerservice_line]] `EXTRACTED`

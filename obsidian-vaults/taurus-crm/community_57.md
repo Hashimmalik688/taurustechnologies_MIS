@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_http_middleware_checkdailyattendance_php]]
-- [[checkdailyattendance_checkdailyattendance]]
-- [[checkdailyattendance_checkdailyattendance_construct]]
-- [[checkdailyattendance_checkdailyattendance_handle]]
-- [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]]
+- [[app_http_requests_storeagentrequest_php]]
+- [[storeagentrequest_storeagentrequest]]
+- [[storeagentrequest_storeagentrequest_authorize]]
+- [[storeagentrequest_storeagentrequest_messages]]
+- [[storeagentrequest_storeagentrequest_rules]]
 
 ## Internal connections
-- [[app_http_middleware_checkdailyattendance_php]] —contains→ [[checkdailyattendance_checkdailyattendance]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_construct]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_handle]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`
-- [[checkdailyattendance_checkdailyattendance_handle]] —calls→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`
+- [[app_http_requests_storeagentrequest_php]] —contains→ [[storeagentrequest_storeagentrequest]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_authorize]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_rules]] `EXTRACTED`
+- [[storeagentrequest_storeagentrequest]] —method→ [[storeagentrequest_storeagentrequest_messages]] `EXTRACTED`

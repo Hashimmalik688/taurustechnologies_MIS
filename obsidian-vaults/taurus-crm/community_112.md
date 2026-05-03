@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_down]]
-- [[2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_up]]
-- [[database_migrations_2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_php]]
+- [[2026_04_07_000001_add_dnc_judge_to_qa_results_down]]
+- [[2026_04_07_000001_add_dnc_judge_to_qa_results_up]]
+- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]]
 
 ## Internal connections
-- [[database_migrations_2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_php]] —contains→ [[2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_up]] `EXTRACTED`
-- [[database_migrations_2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_php]] —contains→ [[2025_10_07_141032_increase_encrypted_fields_length_in_leads_table_down]] `EXTRACTED`
+- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]] —contains→ [[2026_04_07_000001_add_dnc_judge_to_qa_results_up]] `EXTRACTED`
+- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]] —contains→ [[2026_04_07_000001_add_dnc_judge_to_qa_results_down]] `EXTRACTED`

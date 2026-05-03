@@ -1,17 +1,16 @@
 # Community 47
-**6 nodes**
+**5 nodes**
 
 ## Members
-- [[app_http_requests_storeleadrequest_php]]
-- [[storeleadrequest_storeleadrequest]]
-- [[storeleadrequest_storeleadrequest_authorize]]
-- [[storeleadrequest_storeleadrequest_messages]]
-- [[storeleadrequest_storeleadrequest_prepareforvalidation]]
-- [[storeleadrequest_storeleadrequest_rules]]
+- [[app_providers_telescopeserviceprovider_php]]
+- [[telescopeserviceprovider_telescopeserviceprovider]]
+- [[telescopeserviceprovider_telescopeserviceprovider_gate]]
+- [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]]
+- [[telescopeserviceprovider_telescopeserviceprovider_register]]
 
 ## Internal connections
-- [[app_http_requests_storeleadrequest_php]] —contains→ [[storeleadrequest_storeleadrequest]] `EXTRACTED`
-- [[storeleadrequest_storeleadrequest]] —method→ [[storeleadrequest_storeleadrequest_authorize]] `EXTRACTED`
-- [[storeleadrequest_storeleadrequest]] —method→ [[storeleadrequest_storeleadrequest_rules]] `EXTRACTED`
-- [[storeleadrequest_storeleadrequest]] —method→ [[storeleadrequest_storeleadrequest_prepareforvalidation]] `EXTRACTED`
-- [[storeleadrequest_storeleadrequest]] —method→ [[storeleadrequest_storeleadrequest_messages]] `EXTRACTED`
+- [[app_providers_telescopeserviceprovider_php]] —contains→ [[telescopeserviceprovider_telescopeserviceprovider]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_register]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_gate]] `EXTRACTED`
+- [[telescopeserviceprovider_telescopeserviceprovider_register]] —calls→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2025_12_17_000003_add_salary_period_and_fines_to_users_down]]
-- [[2025_12_17_000003_add_salary_period_and_fines_to_users_up]]
-- [[database_migrations_2025_12_17_000003_add_salary_period_and_fines_to_users_php]]
+- [[2026_01_23_000004_add_community_id_to_chat_conversations_down]]
+- [[2026_01_23_000004_add_community_id_to_chat_conversations_up]]
+- [[database_migrations_2026_01_23_000004_add_community_id_to_chat_conversations_php]]
 
 ## Internal connections
-- [[database_migrations_2025_12_17_000003_add_salary_period_and_fines_to_users_php]] —contains→ [[2025_12_17_000003_add_salary_period_and_fines_to_users_up]] `EXTRACTED`
-- [[database_migrations_2025_12_17_000003_add_salary_period_and_fines_to_users_php]] —contains→ [[2025_12_17_000003_add_salary_period_and_fines_to_users_down]] `EXTRACTED`
+- [[database_migrations_2026_01_23_000004_add_community_id_to_chat_conversations_php]] —contains→ [[2026_01_23_000004_add_community_id_to_chat_conversations_up]] `EXTRACTED`
+- [[database_migrations_2026_01_23_000004_add_community_id_to_chat_conversations_php]] —contains→ [[2026_01_23_000004_add_community_id_to_chat_conversations_down]] `EXTRACTED`

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_providers_eventserviceprovider_php]]
-- [[eventserviceprovider_eventserviceprovider]]
-- [[eventserviceprovider_eventserviceprovider_boot]]
+- [[database_seeders_settingsseeder_php]]
+- [[settingsseeder_settingsseeder]]
+- [[settingsseeder_settingsseeder_run]]
 
 ## Internal connections
-- [[app_providers_eventserviceprovider_php]] —contains→ [[eventserviceprovider_eventserviceprovider]] `EXTRACTED`
-- [[eventserviceprovider_eventserviceprovider]] —method→ [[eventserviceprovider_eventserviceprovider_boot]] `EXTRACTED`
+- [[database_seeders_settingsseeder_php]] —contains→ [[settingsseeder_settingsseeder]] `EXTRACTED`
+- [[settingsseeder_settingsseeder]] —method→ [[settingsseeder_settingsseeder_run]] `EXTRACTED`

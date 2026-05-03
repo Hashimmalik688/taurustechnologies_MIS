@@ -2,86 +2,86 @@
 **51 nodes**
 
 ## Members
-- [[app_http_controllers_admin_projectcontroller_php]]
-- [[app_models_pabsproject_php]]
-- [[app_models_pabsprojectcomment_php]]
-- [[app_services_projectauthorizationservice_php]]
-- [[pabsproject_pabsproject]]
-- [[pabsproject_pabsproject_allocatedby]]
-- [[pabsproject_pabsproject_approvals]]
-- [[pabsproject_pabsproject_approver]]
-- [[pabsproject_pabsproject_assignedto]]
-- [[pabsproject_pabsproject_comments]]
-- [[pabsproject_pabsproject_creator]]
-- [[pabsproject_pabsproject_getvarianceamount]]
-- [[pabsproject_pabsproject_getvariancepercentage]]
-- [[pabsproject_pabsproject_hasvariance]]
-- [[pabsproject_pabsproject_scopeactive]]
-- [[pabsproject_pabsproject_scopebysection]]
-- [[pabsproject_pabsproject_scopebystatus]]
-- [[pabsproject_pabsproject_scopecompleted]]
-- [[pabsproject_pabsproject_scopepending]]
-- [[pabsproject_pabsproject_scopinglead]]
-- [[pabsproject_pabsproject_tickets]]
-- [[pabsprojectcomment_pabsprojectcomment]]
-- [[pabsprojectcomment_pabsprojectcomment_project]]
-- [[pabsprojectcomment_pabsprojectcomment_user]]
-- [[projectauthorizationservice_projectauthorizationservice]]
-- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]]
-- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]]
-- [[projectauthorizationservice_projectauthorizationservice_archiveproject]]
-- [[projectauthorizationservice_projectauthorizationservice_createproject]]
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]]
-- [[projectauthorizationservice_projectauthorizationservice_getsectionname]]
-- [[projectauthorizationservice_projectauthorizationservice_getsections]]
-- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]]
-- [[projectauthorizationservice_projectauthorizationservice_movetoscoping]]
-- [[projectauthorizationservice_projectauthorizationservice_startexecution]]
-- [[projectcontroller_projectcontroller]]
-- [[projectcontroller_projectcontroller_addcomment]]
-- [[projectcontroller_projectcontroller_addquotes]]
-- [[projectcontroller_projectcontroller_approval]]
-- [[projectcontroller_projectcontroller_archive]]
-- [[projectcontroller_projectcontroller_complete]]
-- [[projectcontroller_projectcontroller_completescopingandquote]]
-- [[projectcontroller_projectcontroller_construct]]
-- [[projectcontroller_projectcontroller_create]]
-- [[projectcontroller_projectcontroller_edit]]
-- [[projectcontroller_projectcontroller_index]]
-- [[projectcontroller_projectcontroller_movetoscoping]]
-- [[projectcontroller_projectcontroller_show]]
-- [[projectcontroller_projectcontroller_startexecution]]
-- [[projectcontroller_projectcontroller_store]]
-- [[projectcontroller_projectcontroller_update]]
+- [[app_models_lead_php]]
+- [[lead_lead]]
+- [[lead_lead_assignedagent]]
+- [[lead_lead_assignedcloser]]
+- [[lead_lead_assignedvalidator]]
+- [[lead_lead_bankverifiedbyuser]]
+- [[lead_lead_bankverifier]]
+- [[lead_lead_bankverifierassignedbyuser]]
+- [[lead_lead_boot]]
+- [[lead_lead_calllogs]]
+- [[lead_lead_carriers]]
+- [[lead_lead_cbsenttoretentionby]]
+- [[lead_lead_chargebackmarkedby]]
+- [[lead_lead_chargebackpaidby]]
+- [[lead_lead_dials]]
+- [[lead_lead_dispositionofficer]]
+- [[lead_lead_fieldhighlights]]
+- [[lead_lead_followupassignedbyuser]]
+- [[lead_lead_followupdoneby]]
+- [[lead_lead_followupperson]]
+- [[lead_lead_forwardedby]]
+- [[lead_lead_getageattribute]]
+- [[lead_lead_insurancecarrier]]
+- [[lead_lead_issuedbyuser]]
+- [[lead_lead_ledgerchargebackpaidentry]]
+- [[lead_lead_ledgerentries]]
+- [[lead_lead_ledgersalesreturnentry]]
+- [[lead_lead_ledgersalesreturnpostedby]]
+- [[lead_lead_managedby]]
+- [[lead_lead_notissuedby]]
+- [[lead_lead_notissuedresolvedby]]
+- [[lead_lead_notpaidby]]
+- [[lead_lead_paidby]]
+- [[lead_lead_partner]]
+- [[lead_lead_pendingcontractby]]
+- [[lead_lead_pendingdraftby]]
+- [[lead_lead_policydiedby]]
+- [[lead_lead_qauser]]
+- [[lead_lead_recallrequestedby]]
+- [[lead_lead_retactionupdatedby]]
+- [[lead_lead_retentionofficer]]
+- [[lead_lead_scopefollowuppending]]
+- [[lead_lead_scopenotissued]]
+- [[lead_lead_scopepaidsales]]
+- [[lead_lead_scopependingcontract]]
+- [[lead_lead_scopependingdraft]]
+- [[lead_lead_scopependingsapproved]]
+- [[lead_lead_scopepolicydied]]
+- [[lead_lead_submissionreviewer]]
+- [[lead_lead_validator]]
+- [[lead_lead_verifier]]
 
 ## Internal connections
-- [[app_services_projectauthorizationservice_php]] —contains→ [[projectauthorizationservice_projectauthorizationservice]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsections]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetoscoping]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_startexecution]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_archiveproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsectionname]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_index]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_create]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_show]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_edit]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_approval]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
-- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_createproject]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_createproject]] —calls→ [[projectcontroller_projectcontroller_store]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] —calls→ [[pabsprojectcomment_pabsprojectcomment]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] —calls→ [[projectcontroller_projectcontroller_addcomment]] `INFERRED`
-- [[projectauthorizationservice_projectauthorizationservice_archiveproject]] —calls→ [[projectcontroller_projectcontroller_archive]] `INFERRED`
-- [[app_models_pabsproject_php]] —contains→ [[pabsproject_pabsproject]] `EXTRACTED`
-- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_creator]] `EXTRACTED`
-- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_scopinglead]] `EXTRACTED`
-- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_approver]] `EXTRACTED`
-- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_allocatedby]] `EXTRACTED`
+- [[app_models_lead_php]] —contains→ [[lead_lead]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_boot]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_getageattribute]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_carriers]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_calllogs]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_dials]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_forwardedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_managedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_validator]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedvalidator]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedcloser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_verifier]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_ledgerentries]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_insurancecarrier]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_retentionofficer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_dispositionofficer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_qauser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_submissionreviewer]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_issuedbyuser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_assignedagent]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_partner]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_followupperson]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_followupassignedbyuser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_bankverifier]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_bankverifierassignedbyuser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_bankverifiedbyuser]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_pendingcontractby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_notissuedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_notissuedresolvedby]] `EXTRACTED`
+- [[lead_lead]] —method→ [[lead_lead_followupdoneby]] `EXTRACTED`

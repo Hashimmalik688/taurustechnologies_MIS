@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_chatmessageread_php]]
-- [[chatmessageread_chatmessageread]]
-- [[chatmessageread_chatmessageread_message]]
-- [[chatmessageread_chatmessageread_user]]
+- [[jquery_flot_image_drawseries]]
+- [[jquery_flot_image_init]]
+- [[jquery_flot_image_processrawdata]]
+- [[resources_libs_flot_charts_jquery_flot_image_js]]
 
 ## Internal connections
-- [[app_models_chatmessageread_php]] —contains→ [[chatmessageread_chatmessageread]] `EXTRACTED`
-- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_message]] `EXTRACTED`
-- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_user]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_image_js]] —contains→ [[jquery_flot_image_drawseries]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_image_js]] —contains→ [[jquery_flot_image_processrawdata]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_image_js]] —contains→ [[jquery_flot_image_init]] `EXTRACTED`

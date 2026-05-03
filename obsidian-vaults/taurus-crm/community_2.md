@@ -2,7 +2,6 @@
 **957 nodes**
 
 ## Members
-- [[apexcharts_init_getchartcolorsarray]]
 - [[chart_abstract]]
 - [[chart_addbox]]
 - [[chart_addiffound]]
@@ -11,6 +10,7 @@
 - [[chart_addnormalrectpath]]
 - [[chart_addpointsbelow]]
 - [[chart_addtick]]
+- [[chart_afterdatasetsupdate]]
 - [[chart_afterdraw]]
 - [[chart_afterevent]]
 - [[chart_afterinit]]
@@ -64,14 +64,12 @@
 - [[chart_barcontroller_getstacks]]
 - [[chart_barcontroller_initialize]]
 - [[chart_barcontroller_parsearraydata]]
-- [[chart_barcontroller_parseobjectdata]]
 - [[chart_barcontroller_parseprimitivedata]]
 - [[chart_barcontroller_update]]
 - [[chart_barcontroller_updateelements]]
 - [[chart_barcontroller_updaterangefromparsed]]
 - [[chart_barelement]]
 - [[chart_barelement_constructor]]
-- [[chart_barelement_draw]]
 - [[chart_barelement_getcenterpoint]]
 - [[chart_barelement_getrange]]
 - [[chart_barelement_inrange]]
@@ -143,6 +141,7 @@
 - [[chart_chart_destroy]]
 - [[chart_chart_destroydatasetmeta]]
 - [[chart_chart_draw]]
+- [[chart_chart_drawdataset]]
 - [[chart_chart_drawdatasets]]
 - [[chart_chart_ensurescaleshaveids]]
 - [[chart_chart_eventhandler]]
@@ -156,6 +155,7 @@
 - [[chart_chart_getuniformdatachanges]]
 - [[chart_chart_getvisibledatasetcount]]
 - [[chart_chart_handleevent]]
+- [[chart_chart_hide]]
 - [[chart_chart_initialize]]
 - [[chart_chart_isdatasetvisible]]
 - [[chart_chart_ispluginenabled]]
@@ -171,9 +171,12 @@
 - [[chart_chart_resize]]
 - [[chart_chart_setactiveelements]]
 - [[chart_chart_setdatasetvisibility]]
+- [[chart_chart_show]]
 - [[chart_chart_stop]]
 - [[chart_chart_tobase64image]]
+- [[chart_chart_toggledatavisibility]]
 - [[chart_chart_unbindevents]]
+- [[chart_chart_unregister]]
 - [[chart_chart_update]]
 - [[chart_chart_updatedataset]]
 - [[chart_chart_updatedatasets]]
@@ -201,13 +204,13 @@
 - [[chart_config_chartoptionscopes]]
 - [[chart_config_constructor]]
 - [[chart_config_createresolver]]
+- [[chart_config_data]]
 - [[chart_config_datasetanimationscopekeys]]
 - [[chart_config_datasetelementscopekeys]]
 - [[chart_config_datasetscopekeys]]
 - [[chart_config_getoptionscopes]]
 - [[chart_config_pluginscopekeys]]
 - [[chart_config_resolvenamedoptions]]
-- [[chart_config_update]]
 - [[chart_configure]]
 - [[chart_containscolorsdefinition]]
 - [[chart_containscolorsdefinitions]]
@@ -329,9 +332,12 @@
 - [[chart_doughnutcontroller_getrotationextents]]
 - [[chart_doughnutcontroller_getvisibledatasetweighttotal]]
 - [[chart_doughnutcontroller_linkscales]]
+- [[chart_doughnutcontroller_parse]]
 - [[chart_doughnutcontroller_update]]
 - [[chart_doughnutcontroller_updateelements]]
 - [[chart_draw]]
+- [[chart_drawfill]]
+- [[chart_drawpointlabelbox]]
 - [[chart_drawpointlabels]]
 - [[chart_drawradiusline]]
 - [[chart_element]]
@@ -404,6 +410,7 @@
 - [[chart_gettickmarklength]]
 - [[chart_gettickslimit]]
 - [[chart_gettitleheight]]
+- [[chart_gettooltipsize]]
 - [[chart_getuserbounds]]
 - [[chart_handlemaxpadding]]
 - [[chart_hasfunction]]
@@ -412,10 +419,12 @@
 - [[chart_inflaterect]]
 - [[chart_initcanvas]]
 - [[chart_initconfig]]
+- [[chart_initdata]]
 - [[chart_initoptions]]
 - [[chart_inrange]]
 - [[chart_inrange_1]]
 - [[chart_interpolate]]
+- [[chart_invalidateplugins]]
 - [[chart_invokecallbackwithfallback]]
 - [[chart_isdirectupdatemode]]
 - [[chart_isfloatbar]]
@@ -432,6 +441,7 @@
 - [[chart_legend_buildlabels]]
 - [[chart_legend_computetitleheight]]
 - [[chart_legend_constructor]]
+- [[chart_legend_draw]]
 - [[chart_legend_drawtitle]]
 - [[chart_legend_fit]]
 - [[chart_legend_fitcols]]
@@ -490,6 +500,7 @@
 - [[chart_offsetfromedge]]
 - [[chart_onanimationprogress]]
 - [[chart_onanimationscomplete]]
+- [[chart_onclick]]
 - [[chart_onwindowresize]]
 - [[chart_overridecallbacks]]
 - [[chart_parse]]
@@ -499,8 +510,6 @@
 - [[chart_parseborderwidth]]
 - [[chart_parseedge]]
 - [[chart_parsefilloption]]
-- [[chart_parsefloatbar]]
-- [[chart_parsevalue]]
 - [[chart_pathradiusline]]
 - [[chart_pathsegment]]
 - [[chart_pathvars]]
@@ -619,6 +628,7 @@
 - [[chart_scale_draw]]
 - [[chart_scale_drawbackground]]
 - [[chart_scale_drawgrid]]
+- [[chart_scale_drawlabels]]
 - [[chart_scale_drawtitle]]
 - [[chart_scale_fit]]
 - [[chart_scale_generateticklabels]]
@@ -704,7 +714,6 @@
 - [[chart_timescale_getvalueforpixel]]
 - [[chart_timescale_initoffsets]]
 - [[chart_timescale_normalize]]
-- [[chart_timescale_parse]]
 - [[chart_timescale_tickformatfunction]]
 - [[chart_timeseriesscale]]
 - [[chart_timeseriesscale_buildlookuptable]]
@@ -724,6 +733,7 @@
 - [[chart_toclip]]
 - [[chart_tooltip]]
 - [[chart_tooltip_constructor]]
+- [[chart_tooltip_createitems]]
 - [[chart_tooltip_draw]]
 - [[chart_tooltip_drawbackground]]
 - [[chart_tooltip_drawbody]]
@@ -742,6 +752,7 @@
 - [[chart_tooltip_initialize]]
 - [[chart_tooltip_positionchanged]]
 - [[chart_tooltip_resolveanimations]]
+- [[chart_tooltip_setactiveelements]]
 - [[chart_tooltip_updateanimationtarget]]
 - [[chart_tooltip_willrender]]
 - [[chart_toradiuscorners]]
@@ -761,29 +772,26 @@
 - [[chart_x]]
 - [[chart_y]]
 - [[chart_yforangle]]
-- [[chartjs_init_generatechart]]
-- [[chartjs_init_getchartcolorsarray]]
 - [[communityannouncement_communityannouncement_scopeforbanner]]
-- [[dashboard_blog_init_getchartcolorsarray]]
-- [[dashboard_init_getchartcolorsarray]]
-- [[dashboard_job_init_getchartcolorsarray]]
 - [[datatables_buttons_fadein]]
 - [[datatables_buttons_fadeout]]
 - [[datatables_buttons_min_fadein]]
 - [[datatables_buttons_min_o]]
 - [[echarts_esm_checkpointerandtrigger]]
-- [[echarts_esm_createparallelcoordsys]]
+- [[echarts_esm_createpathoptions]]
 - [[echarts_esm_createpolygon]]
 - [[echarts_esm_defaultloading]]
+- [[echarts_esm_diffdata]]
 - [[echarts_esm_disconnect]]
-- [[echarts_esm_getendlabelstatespecified]]
 - [[echarts_esm_getpointdimindex]]
+- [[echarts_esm_getter]]
+- [[echarts_esm_ispathproxy]]
+- [[echarts_esm_mergepath]]
 - [[echarts_esm_min_om]]
-- [[echarts_esm_radar]]
 - [[echarts_esm_stopevent]]
 - [[echarts_esm_zrender]]
-- [[echarts_init_getchartcolorsarray]]
 - [[helpers_segment_addgrace]]
+- [[helpers_segment_addroundedrectpath]]
 - [[helpers_segment_addscopes]]
 - [[helpers_segment_addscopesfromkey]]
 - [[helpers_segment_alignpixel]]
@@ -815,12 +823,12 @@
 - [[helpers_segment_createsubresolver]]
 - [[helpers_segment_debounce]]
 - [[helpers_segment_decimalplaces]]
+- [[helpers_segment_decoratetext]]
 - [[helpers_segment_defaults]]
 - [[helpers_segment_defaults_constructor]]
 - [[helpers_segment_defaults_describe]]
 - [[helpers_segment_defaults_override]]
 - [[helpers_segment_defined]]
-- [[helpers_segment_deprecated]]
 - [[helpers_segment_descriptors]]
 - [[helpers_segment_distancebetweenpoints]]
 - [[helpers_segment_dosplitbystyles]]
@@ -836,7 +844,6 @@
 - [[helpers_segment_formatnumber]]
 - [[helpers_segment_getanglefrompoint]]
 - [[helpers_segment_getcanvasposition]]
-- [[helpers_segment_getcomputedstyle]]
 - [[helpers_segment_getcontainersize]]
 - [[helpers_segment_getkeyresolver]]
 - [[helpers_segment_getkeysfromallscopes]]
@@ -890,6 +897,7 @@
 - [[helpers_segment_readstyle]]
 - [[helpers_segment_readusedsize]]
 - [[helpers_segment_readvaluetoprops]]
+- [[helpers_segment_rendertext]]
 - [[helpers_segment_resolve]]
 - [[helpers_segment_resolvearray]]
 - [[helpers_segment_resolvefallback]]
@@ -926,12 +934,14 @@
 - [[helpers_segment_toradians]]
 - [[helpers_segment_totrbl]]
 - [[helpers_segment_totrblcorners]]
+- [[helpers_segment_uncliparea]]
 - [[helpers_segment_unlistenarrayevents]]
 - [[helpers_segment_updatebeziercontrolpoints]]
 - [[helpers_segment_useoffsetpos]]
 - [[helpers_segment_valueordefault]]
 - [[jquery_1_11_1_winnow]]
 - [[jquery_addtoprefiltersortransports]]
+- [[jquery_flot_clamp]]
 - [[jquery_flot_errorbars_draw]]
 - [[jquery_flot_errorbars_drawerror]]
 - [[jquery_flot_errorbars_drawpath]]
@@ -939,55 +949,45 @@
 - [[jquery_flot_errorbars_init]]
 - [[jquery_flot_errorbars_parseerrors]]
 - [[jquery_flot_errorbars_processrawdata]]
+- [[jquery_flot_floorinbase]]
+- [[jquery_flot_plot]]
 - [[jquery_winnow]]
 - [[jquery_z]]
-- [[leaflet_pe]]
-- [[leaflet_src_esm_getstyle]]
-- [[leaflet_src_getstyle]]
 - [[moment_sign]]
-- [[resources_js_pages_apexcharts_init_js]]
-- [[resources_js_pages_chartjs_init_js]]
-- [[resources_js_pages_dashboard_blog_init_js]]
-- [[resources_js_pages_dashboard_init_js]]
-- [[resources_js_pages_dashboard_job_init_js]]
-- [[resources_js_pages_echarts_init_js]]
-- [[resources_js_pages_saas_dashboard_init_js]]
-- [[resources_js_pages_tui_charts_init_js]]
 - [[resources_libs_chart_js_chart_js]]
 - [[resources_libs_chart_js_chunks_helpers_segment_js]]
 - [[resources_libs_datatables_net_buttons_js_datatables_buttons_mjs]]
 - [[resources_libs_flot_charts_jquery_flot_errorbars_js]]
-- [[saas_dashboard_init_getchartcolorsarray]]
-- [[tui_charts_init_getchartcolorsarray]]
+- [[resources_libs_flot_charts_jquery_flot_js]]
 
 ## Internal connections
 - [[communityannouncement_communityannouncement_scopeforbanner]] —calls→ [[chart_animation_active]] `INFERRED`
-- [[resources_js_pages_echarts_init_js]] —contains→ [[echarts_init_getchartcolorsarray]] `EXTRACTED`
-- [[echarts_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[echarts_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_apexcharts_init_js]] —contains→ [[apexcharts_init_getchartcolorsarray]] `EXTRACTED`
-- [[apexcharts_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[apexcharts_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_tui_charts_init_js]] —contains→ [[tui_charts_init_getchartcolorsarray]] `EXTRACTED`
-- [[tui_charts_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[tui_charts_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_saas_dashboard_init_js]] —contains→ [[saas_dashboard_init_getchartcolorsarray]] `EXTRACTED`
-- [[saas_dashboard_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[saas_dashboard_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_dashboard_blog_init_js]] —contains→ [[dashboard_blog_init_getchartcolorsarray]] `EXTRACTED`
-- [[dashboard_blog_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[dashboard_blog_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_dashboard_init_js]] —contains→ [[dashboard_init_getchartcolorsarray]] `EXTRACTED`
-- [[dashboard_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[dashboard_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_chartjs_init_js]] —contains→ [[chartjs_init_getchartcolorsarray]] `EXTRACTED`
-- [[resources_js_pages_chartjs_init_js]] —contains→ [[chartjs_init_generatechart]] `EXTRACTED`
-- [[chartjs_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[chartjs_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
-- [[resources_js_pages_dashboard_job_init_js]] —contains→ [[dashboard_job_init_getchartcolorsarray]] `EXTRACTED`
-- [[dashboard_job_init_getchartcolorsarray]] —calls→ [[chart_timescale_parse]] `INFERRED`
-- [[dashboard_job_init_getchartcolorsarray]] —calls→ [[helpers_segment_getcomputedstyle]] `INFERRED`
 - [[datatables_buttons_min_fadein]] —calls→ [[chart_stop]] `INFERRED`
 - [[datatables_buttons_min_o]] —calls→ [[chart_animation_active]] `INFERRED`
 - [[resources_libs_datatables_net_buttons_js_datatables_buttons_mjs]] —contains→ [[datatables_buttons_fadein]] `EXTRACTED`
 - [[resources_libs_datatables_net_buttons_js_datatables_buttons_mjs]] —contains→ [[datatables_buttons_fadeout]] `EXTRACTED`
+- [[datatables_buttons_fadein]] —calls→ [[chart_stop]] `INFERRED`
+- [[datatables_buttons_fadeout]] —calls→ [[chart_stop]] `INFERRED`
+- [[jquery_1_11_1_winnow]] —calls→ [[helpers_segment_isfunction]] `INFERRED`
+- [[jquery_z]] —calls→ [[helpers_segment_isfunction]] `INFERRED`
+- [[resources_libs_flot_charts_jquery_flot_js]] —contains→ [[jquery_flot_clamp]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_js]] —contains→ [[jquery_flot_plot]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_js]] —contains→ [[jquery_flot_floorinbase]] `EXTRACTED`
+- [[jquery_flot_plot]] —calls→ [[chart_chart_resize]] `INFERRED`
+- [[jquery_flot_plot]] —calls→ [[chart_tooltip_draw]] `INFERRED`
+- [[jquery_flot_plot]] —calls→ [[chart_chart_bindevents]] `INFERRED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_processrawdata]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_parseerrors]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_drawserieserrors]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_drawerror]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_drawpath]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_draw]] `EXTRACTED`
+- [[resources_libs_flot_charts_jquery_flot_errorbars_js]] —contains→ [[jquery_flot_errorbars_init]] `EXTRACTED`
+- [[jquery_flot_errorbars_parseerrors]] —calls→ [[jquery_flot_errorbars_drawserieserrors]] `EXTRACTED`
+- [[jquery_flot_errorbars_drawserieserrors]] —calls→ [[jquery_flot_errorbars_drawerror]] `EXTRACTED`
+- [[jquery_flot_errorbars_drawserieserrors]] —calls→ [[jquery_flot_errorbars_draw]] `EXTRACTED`
+- [[jquery_flot_errorbars_drawerror]] —calls→ [[jquery_flot_errorbars_drawpath]] `EXTRACTED`
+- [[jquery_flot_errorbars_drawerror]] —calls→ [[helpers_segment_isfunction]] `INFERRED`
+- [[jquery_winnow]] —calls→ [[helpers_segment_isfunction]] `INFERRED`
+- [[jquery_addtoprefiltersortransports]] —calls→ [[helpers_segment_isfunction]] `INFERRED`
+- [[moment_sign]] —calls→ [[chart_applystack]] `INFERRED`

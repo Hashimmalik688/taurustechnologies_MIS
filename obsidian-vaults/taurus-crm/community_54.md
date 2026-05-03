@@ -2,14 +2,15 @@
 **5 nodes**
 
 ## Members
-- [[app_console_kernel_php]]
-- [[app_http_kernel_php]]
-- [[kernel_kernel]]
-- [[kernel_kernel_commands]]
-- [[kernel_kernel_schedule]]
+- [[app_listeners_markattendanceonlogin_php]]
+- [[markattendanceonlogin_markattendanceonlogin]]
+- [[markattendanceonlogin_markattendanceonlogin_construct]]
+- [[markattendanceonlogin_markattendanceonlogin_handle]]
+- [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]]
 
 ## Internal connections
-- [[app_console_kernel_php]] —contains→ [[kernel_kernel]] `EXTRACTED`
-- [[kernel_kernel]] —method→ [[kernel_kernel_schedule]] `EXTRACTED`
-- [[kernel_kernel]] —method→ [[kernel_kernel_commands]] `EXTRACTED`
-- [[kernel_kernel]] —contains→ [[app_http_kernel_php]] `EXTRACTED`
+- [[app_listeners_markattendanceonlogin_php]] —contains→ [[markattendanceonlogin_markattendanceonlogin]] `EXTRACTED`
+- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_construct]] `EXTRACTED`
+- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_handle]] `EXTRACTED`
+- [[markattendanceonlogin_markattendanceonlogin]] —method→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`
+- [[markattendanceonlogin_markattendanceonlogin_handle]] —calls→ [[markattendanceonlogin_markattendanceonlogin_shouldmarkattendance]] `EXTRACTED`

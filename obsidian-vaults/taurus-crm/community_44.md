@@ -2,15 +2,19 @@
 **6 nodes**
 
 ## Members
-- [[app_http_middleware_checkmodulepermission_php]]
-- [[app_http_middleware_checkmodulepermissionwithrole_php]]
-- [[checkmodulepermission_checkmodulepermission]]
-- [[checkmodulepermission_checkmodulepermission_construct]]
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]]
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]]
+- [[br_lastnumber]]
+- [[br_mutation]]
+- [[br_relativetimewithmutation]]
+- [[br_softmutation]]
+- [[br_specialmutationforyears]]
+- [[resources_libs_moment_locale_br_js]]
 
 ## Internal connections
-- [[app_http_middleware_checkmodulepermissionwithrole_php]] —contains→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] `EXTRACTED`
-- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] —method→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]] `EXTRACTED`
-- [[app_http_middleware_checkmodulepermission_php]] —contains→ [[checkmodulepermission_checkmodulepermission]] `EXTRACTED`
-- [[checkmodulepermission_checkmodulepermission]] —method→ [[checkmodulepermission_checkmodulepermission_construct]] `EXTRACTED`
+- [[resources_libs_moment_locale_br_js]] —contains→ [[br_relativetimewithmutation]] `EXTRACTED`
+- [[resources_libs_moment_locale_br_js]] —contains→ [[br_specialmutationforyears]] `EXTRACTED`
+- [[resources_libs_moment_locale_br_js]] —contains→ [[br_lastnumber]] `EXTRACTED`
+- [[resources_libs_moment_locale_br_js]] —contains→ [[br_mutation]] `EXTRACTED`
+- [[resources_libs_moment_locale_br_js]] —contains→ [[br_softmutation]] `EXTRACTED`
+- [[br_relativetimewithmutation]] —calls→ [[br_mutation]] `EXTRACTED`
+- [[br_specialmutationforyears]] —calls→ [[br_lastnumber]] `EXTRACTED`
+- [[br_mutation]] —calls→ [[br_softmutation]] `EXTRACTED`

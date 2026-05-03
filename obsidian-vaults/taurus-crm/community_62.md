@@ -1,15 +1,13 @@
 # Community 62
-**5 nodes**
+**4 nodes**
 
 ## Members
-- [[app_http_requests_storeledgerentryrequest_php]]
-- [[storeledgerentryrequest_storeledgerentryrequest]]
-- [[storeledgerentryrequest_storeledgerentryrequest_authorize]]
-- [[storeledgerentryrequest_storeledgerentryrequest_messages]]
-- [[storeledgerentryrequest_storeledgerentryrequest_rules]]
+- [[app_events_leadcreated_php]]
+- [[leadcreated_leadcreated]]
+- [[leadcreated_leadcreated_broadcaston]]
+- [[leadcreated_leadcreated_construct]]
 
 ## Internal connections
-- [[app_http_requests_storeledgerentryrequest_php]] —contains→ [[storeledgerentryrequest_storeledgerentryrequest]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_authorize]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_rules]] `EXTRACTED`
-- [[storeledgerentryrequest_storeledgerentryrequest]] —method→ [[storeledgerentryrequest_storeledgerentryrequest_messages]] `EXTRACTED`
+- [[app_events_leadcreated_php]] —contains→ [[leadcreated_leadcreated]] `EXTRACTED`
+- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_construct]] `EXTRACTED`
+- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_broadcaston]] `EXTRACTED`

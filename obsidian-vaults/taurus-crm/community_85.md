@@ -2,10 +2,11 @@
 **3 nodes**
 
 ## Members
-- [[app_observers_userobserver_php]]
-- [[userobserver_userobserver]]
-- [[userobserver_userobserver_created]]
+- [[cs_plural]]
+- [[cs_translate]]
+- [[resources_libs_moment_locale_cs_js]]
 
 ## Internal connections
-- [[app_observers_userobserver_php]] —contains→ [[userobserver_userobserver]] `EXTRACTED`
-- [[userobserver_userobserver]] —method→ [[userobserver_userobserver_created]] `EXTRACTED`
+- [[resources_libs_moment_locale_cs_js]] —contains→ [[cs_plural]] `EXTRACTED`
+- [[resources_libs_moment_locale_cs_js]] —contains→ [[cs_translate]] `EXTRACTED`
+- [[cs_plural]] —calls→ [[cs_translate]] `EXTRACTED`

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2025_12_17_000007_add_ssn_last4_to_user_details_down]]
-- [[2025_12_17_000007_add_ssn_last4_to_user_details_up]]
-- [[database_migrations_2025_12_17_000007_add_ssn_last4_to_user_details_php]]
+- [[2026_01_27_230000_add_bank_verification_to_leads_table_down]]
+- [[2026_01_27_230000_add_bank_verification_to_leads_table_up]]
+- [[database_migrations_2026_01_27_230000_add_bank_verification_to_leads_table_php]]
 
 ## Internal connections
-- [[database_migrations_2025_12_17_000007_add_ssn_last4_to_user_details_php]] —contains→ [[2025_12_17_000007_add_ssn_last4_to_user_details_up]] `EXTRACTED`
-- [[database_migrations_2025_12_17_000007_add_ssn_last4_to_user_details_php]] —contains→ [[2025_12_17_000007_add_ssn_last4_to_user_details_down]] `EXTRACTED`
+- [[database_migrations_2026_01_27_230000_add_bank_verification_to_leads_table_php]] —contains→ [[2026_01_27_230000_add_bank_verification_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_27_230000_add_bank_verification_to_leads_table_php]] —contains→ [[2026_01_27_230000_add_bank_verification_to_leads_table_down]] `EXTRACTED`

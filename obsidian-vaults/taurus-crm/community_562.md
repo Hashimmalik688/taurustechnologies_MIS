@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_tui_chart_maps_japan_js]]
+- [[resources_libs_admin_resources_jquery_vectormap_maps_jquery_jvectormap_ca_lcc_en_js]]

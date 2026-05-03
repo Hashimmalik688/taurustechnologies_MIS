@@ -1,13 +1,11 @@
 # Community 74
-**4 nodes**
+**3 nodes**
 
 ## Members
-- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]]
-- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_down]]
-- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_up]]
-- [[database_migrations_2019_08_19_000000_create_failed_jobs_table_php]]
+- [[app_providers_authserviceprovider_php]]
+- [[authserviceprovider_authserviceprovider]]
+- [[authserviceprovider_authserviceprovider_boot]]
 
 ## Internal connections
-- [[database_migrations_2019_08_19_000000_create_failed_jobs_table_php]] —contains→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] `EXTRACTED`
-- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] —method→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_up]] `EXTRACTED`
-- [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable]] —method→ [[2019_08_19_000000_create_failed_jobs_table_createfailedjobstable_down]] `EXTRACTED`
+- [[app_providers_authserviceprovider_php]] —contains→ [[authserviceprovider_authserviceprovider]] `EXTRACTED`
+- [[authserviceprovider_authserviceprovider]] —method→ [[authserviceprovider_authserviceprovider_boot]] `EXTRACTED`

@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_01_07_025622_increase_expiry_date_column_length_down]]
-- [[2026_01_07_025622_increase_expiry_date_column_length_up]]
-- [[database_migrations_2026_01_07_025622_increase_expiry_date_column_length_php]]
+- [[2026_01_23_034335_add_avatar_to_users_table_down]]
+- [[2026_01_23_034335_add_avatar_to_users_table_up]]
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_01_07_025622_increase_expiry_date_column_length_php]] —contains→ [[2026_01_07_025622_increase_expiry_date_column_length_up]] `EXTRACTED`
-- [[database_migrations_2026_01_07_025622_increase_expiry_date_column_length_php]] —contains→ [[2026_01_07_025622_increase_expiry_date_column_length_down]] `EXTRACTED`
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]] —contains→ [[2026_01_23_034335_add_avatar_to_users_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_23_034335_add_avatar_to_users_table_php]] —contains→ [[2026_01_23_034335_add_avatar_to_users_table_down]] `EXTRACTED`

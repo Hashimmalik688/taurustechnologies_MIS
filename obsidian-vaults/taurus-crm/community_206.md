@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_down]]
-- [[2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_up]]
-- [[database_migrations_2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_php]]
+- [[database_seeders_databaseseeder_php]]
+- [[databaseseeder_databaseseeder]]
+- [[databaseseeder_databaseseeder_run]]
 
 ## Internal connections
-- [[database_migrations_2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_php]] —contains→ [[2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_up]] `EXTRACTED`
-- [[database_migrations_2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_php]] —contains→ [[2026_03_04_004502_add_zoom_call_log_id_to_qa_calls_table_down]] `EXTRACTED`
+- [[database_seeders_databaseseeder_php]] —contains→ [[databaseseeder_databaseseeder]] `EXTRACTED`
+- [[databaseseeder_databaseseeder]] —method→ [[databaseseeder_databaseseeder_run]] `EXTRACTED`

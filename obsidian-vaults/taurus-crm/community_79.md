@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[app_models_stickynote_php]]
-- [[stickynote_stickynote]]
-- [[stickynote_stickynote_user]]
+- [[app_listeners_sendsalecreatednotification_php]]
+- [[sendsalecreatednotification_sendsalecreatednotification]]
+- [[sendsalecreatednotification_sendsalecreatednotification_construct]]
 
 ## Internal connections
-- [[app_models_stickynote_php]] —contains→ [[stickynote_stickynote]] `EXTRACTED`
-- [[stickynote_stickynote]] —method→ [[stickynote_stickynote_user]] `EXTRACTED`
+- [[app_listeners_sendsalecreatednotification_php]] —contains→ [[sendsalecreatednotification_sendsalecreatednotification]] `EXTRACTED`
+- [[sendsalecreatednotification_sendsalecreatednotification]] —method→ [[sendsalecreatednotification_sendsalecreatednotification_construct]] `EXTRACTED`

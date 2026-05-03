@@ -2,18 +2,18 @@
 **7 nodes**
 
 ## Members
-- [[app_repositories_contracts_userrepositoryinterface_php]]
-- [[userrepositoryinterface_createuser]]
-- [[userrepositoryinterface_deleteuser]]
-- [[userrepositoryinterface_getallusers]]
-- [[userrepositoryinterface_getuserbyid]]
-- [[userrepositoryinterface_getusersbyrole]]
-- [[userrepositoryinterface_updateuser]]
+- [[components_hub_styles]]
+- [[resources_views_admin_finance_hub_blade_php]]
+- [[resources_views_admin_hr_hub_blade_php]]
+- [[resources_views_admin_leads_hub_blade_php]]
+- [[resources_views_admin_reports_hub_blade_php]]
+- [[resources_views_admin_sales_hub_blade_php]]
+- [[resources_views_admin_settings_hub_blade_php]]
 
 ## Internal connections
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getallusers]] `EXTRACTED`
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getuserbyid]] `EXTRACTED`
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_createuser]] `EXTRACTED`
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_updateuser]] `EXTRACTED`
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_deleteuser]] `EXTRACTED`
-- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getusersbyrole]] `EXTRACTED`
+- [[resources_views_admin_sales_hub_blade_php]] —includes→ [[components_hub_styles]] `EXTRACTED`
+- [[components_hub_styles]] —includes→ [[resources_views_admin_reports_hub_blade_php]] `EXTRACTED`
+- [[components_hub_styles]] —includes→ [[resources_views_admin_settings_hub_blade_php]] `EXTRACTED`
+- [[components_hub_styles]] —includes→ [[resources_views_admin_leads_hub_blade_php]] `EXTRACTED`
+- [[components_hub_styles]] —includes→ [[resources_views_admin_hr_hub_blade_php]] `EXTRACTED`
+- [[components_hub_styles]] —includes→ [[resources_views_admin_finance_hub_blade_php]] `EXTRACTED`

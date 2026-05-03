@@ -2,11 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[be_plural]]
-- [[be_relativetimewithplural]]
-- [[resources_libs_moment_locale_be_js]]
+- [[admin_agents_partials_carrier_states]]
+- [[resources_views_admin_agents_create_blade_php]]
+- [[resources_views_admin_agents_edit_blade_php]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_be_js]] —contains→ [[be_plural]] `EXTRACTED`
-- [[resources_libs_moment_locale_be_js]] —contains→ [[be_relativetimewithplural]] `EXTRACTED`
-- [[be_plural]] —calls→ [[be_relativetimewithplural]] `EXTRACTED`
+- [[resources_views_admin_agents_edit_blade_php]] —includes→ [[admin_agents_partials_carrier_states]] `EXTRACTED`
+- [[admin_agents_partials_carrier_states]] —includes→ [[resources_views_admin_agents_create_blade_php]] `EXTRACTED`

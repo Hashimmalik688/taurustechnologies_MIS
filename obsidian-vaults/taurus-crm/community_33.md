@@ -1,21 +1,18 @@
 # Community 33
-**8 nodes**
+**7 nodes**
 
 ## Members
-- [[app_models_qa_qaresult_php]]
-- [[qaresult_qaresult]]
-- [[qaresult_qaresult_complianceflags]]
-- [[qaresult_qaresult_getcompliancechecksattribute]]
-- [[qaresult_qaresult_getscorebreakdownattribute]]
-- [[qaresult_qaresult_qacall]]
-- [[qaresult_qaresult_scopecompliancefail]]
-- [[qaresult_qaresult_scopevoidrisk]]
+- [[app_http_controllers_auth_verificationcontroller_php]]
+- [[app_http_controllers_localizationcontroller_php]]
+- [[localizationcontroller_localizationcontroller]]
+- [[localizationcontroller_localizationcontroller_construct]]
+- [[localizationcontroller_localizationcontroller_lang]]
+- [[verificationcontroller_verificationcontroller]]
+- [[verificationcontroller_verificationcontroller_construct]]
 
 ## Internal connections
-- [[app_models_qa_qaresult_php]] —contains→ [[qaresult_qaresult]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_qacall]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_complianceflags]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_getcompliancechecksattribute]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_getscorebreakdownattribute]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_scopecompliancefail]] `EXTRACTED`
-- [[qaresult_qaresult]] —method→ [[qaresult_qaresult_scopevoidrisk]] `EXTRACTED`
+- [[app_http_controllers_localizationcontroller_php]] —contains→ [[localizationcontroller_localizationcontroller]] `EXTRACTED`
+- [[localizationcontroller_localizationcontroller]] —method→ [[localizationcontroller_localizationcontroller_construct]] `EXTRACTED`
+- [[localizationcontroller_localizationcontroller]] —method→ [[localizationcontroller_localizationcontroller_lang]] `EXTRACTED`
+- [[app_http_controllers_auth_verificationcontroller_php]] —contains→ [[verificationcontroller_verificationcontroller]] `EXTRACTED`
+- [[verificationcontroller_verificationcontroller]] —method→ [[verificationcontroller_verificationcontroller_construct]] `EXTRACTED`

@@ -2,14 +2,16 @@
 **5 nodes**
 
 ## Members
-- [[app_http_requests_updateagentrequest_php]]
-- [[updateagentrequest_updateagentrequest]]
-- [[updateagentrequest_updateagentrequest_authorize]]
-- [[updateagentrequest_updateagentrequest_messages]]
-- [[updateagentrequest_updateagentrequest_rules]]
+- [[lv_format]]
+- [[lv_relativeseconds]]
+- [[lv_relativetimewithplural]]
+- [[lv_relativetimewithsingular]]
+- [[resources_libs_moment_locale_lv_js]]
 
 ## Internal connections
-- [[app_http_requests_updateagentrequest_php]] —contains→ [[updateagentrequest_updateagentrequest]] `EXTRACTED`
-- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_authorize]] `EXTRACTED`
-- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_rules]] `EXTRACTED`
-- [[updateagentrequest_updateagentrequest]] —method→ [[updateagentrequest_updateagentrequest_messages]] `EXTRACTED`
+- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_format]] `EXTRACTED`
+- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativetimewithplural]] `EXTRACTED`
+- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativetimewithsingular]] `EXTRACTED`
+- [[resources_libs_moment_locale_lv_js]] —contains→ [[lv_relativeseconds]] `EXTRACTED`
+- [[lv_format]] —calls→ [[lv_relativetimewithplural]] `EXTRACTED`
+- [[lv_format]] —calls→ [[lv_relativetimewithsingular]] `EXTRACTED`

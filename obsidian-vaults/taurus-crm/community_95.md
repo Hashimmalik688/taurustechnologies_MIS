@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[admin_epms_partials_wbs_item]]
-- [[resources_views_admin_epms_partials_wbs_item_blade_php]]
-- [[resources_views_admin_epms_show_blade_php]]
+- [[2026_01_06_013733_add_secondary_phone_to_leads_table_down]]
+- [[2026_01_06_013733_add_secondary_phone_to_leads_table_up]]
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]]
 
 ## Internal connections
-- [[resources_views_admin_epms_show_blade_php]] —includes→ [[admin_epms_partials_wbs_item]] `EXTRACTED`
-- [[admin_epms_partials_wbs_item]] —includes→ [[resources_views_admin_epms_partials_wbs_item_blade_php]] `EXTRACTED`
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]] —contains→ [[2026_01_06_013733_add_secondary_phone_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_01_06_013733_add_secondary_phone_to_leads_table_php]] —contains→ [[2026_01_06_013733_add_secondary_phone_to_leads_table_down]] `EXTRACTED`

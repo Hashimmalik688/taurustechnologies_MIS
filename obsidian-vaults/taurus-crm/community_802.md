@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[config_hashing_php]]
+- [[config_telescope_php]]

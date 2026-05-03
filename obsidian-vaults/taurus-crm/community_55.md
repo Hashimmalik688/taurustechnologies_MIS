@@ -2,14 +2,15 @@
 **5 nodes**
 
 ## Members
-- [[app_models_carrier_php]]
-- [[carrier_carrier]]
-- [[carrier_carrier_forwardedby]]
-- [[carrier_carrier_lead]]
-- [[carrier_carrier_managedby]]
+- [[app_http_middleware_checkdailyattendance_php]]
+- [[checkdailyattendance_checkdailyattendance]]
+- [[checkdailyattendance_checkdailyattendance_construct]]
+- [[checkdailyattendance_checkdailyattendance_handle]]
+- [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]]
 
 ## Internal connections
-- [[app_models_carrier_php]] —contains→ [[carrier_carrier]] `EXTRACTED`
-- [[carrier_carrier]] —method→ [[carrier_carrier_lead]] `EXTRACTED`
-- [[carrier_carrier]] —method→ [[carrier_carrier_forwardedby]] `EXTRACTED`
-- [[carrier_carrier]] —method→ [[carrier_carrier_managedby]] `EXTRACTED`
+- [[app_http_middleware_checkdailyattendance_php]] —contains→ [[checkdailyattendance_checkdailyattendance]] `EXTRACTED`
+- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_construct]] `EXTRACTED`
+- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_handle]] `EXTRACTED`
+- [[checkdailyattendance_checkdailyattendance]] —method→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`
+- [[checkdailyattendance_checkdailyattendance_handle]] —calls→ [[checkdailyattendance_checkdailyattendance_shouldcheckattendance]] `EXTRACTED`

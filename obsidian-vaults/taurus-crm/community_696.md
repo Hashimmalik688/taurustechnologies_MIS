@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_partner_dashboard_blade_php]]
+- [[resources_views_chat_notifications_modal_blade_php]]

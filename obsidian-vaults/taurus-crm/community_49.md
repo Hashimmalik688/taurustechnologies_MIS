@@ -1,21 +1,16 @@
 # Community 49
-**6 nodes**
+**5 nodes**
 
 ## Members
-- [[lt_forms]]
-- [[lt_special]]
-- [[lt_translate]]
-- [[lt_translateseconds]]
-- [[lt_translatesingular]]
-- [[resources_libs_moment_locale_lt_js]]
+- [[app_support_cleanup_namespacefixer_php]]
+- [[namespacefixer_namespacefixer]]
+- [[namespacefixer_namespacefixer_construct]]
+- [[namespacefixer_namespacefixer_expectednamespacefor]]
+- [[namespacefixer_namespacefixer_fixapp]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translateseconds]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translatesingular]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_special]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_forms]] `EXTRACTED`
-- [[resources_libs_moment_locale_lt_js]] —contains→ [[lt_translate]] `EXTRACTED`
-- [[lt_translatesingular]] —calls→ [[lt_forms]] `EXTRACTED`
-- [[lt_translatesingular]] —calls→ [[lt_translate]] `EXTRACTED`
-- [[lt_special]] —calls→ [[lt_translate]] `EXTRACTED`
-- [[lt_forms]] —calls→ [[lt_translate]] `EXTRACTED`
+- [[app_support_cleanup_namespacefixer_php]] —contains→ [[namespacefixer_namespacefixer]] `EXTRACTED`
+- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_construct]] `EXTRACTED`
+- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_fixapp]] `EXTRACTED`
+- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_expectednamespacefor]] `EXTRACTED`
+- [[namespacefixer_namespacefixer_fixapp]] —calls→ [[namespacefixer_namespacefixer_expectednamespacefor]] `EXTRACTED`

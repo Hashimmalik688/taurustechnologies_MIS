@@ -1,19 +1,17 @@
 # Community 40
-**7 nodes**
+**6 nodes**
 
 ## Members
-- [[components_hub_styles]]
-- [[resources_views_admin_finance_hub_blade_php]]
-- [[resources_views_admin_hr_hub_blade_php]]
-- [[resources_views_admin_leads_hub_blade_php]]
-- [[resources_views_admin_reports_hub_blade_php]]
-- [[resources_views_admin_sales_hub_blade_php]]
-- [[resources_views_admin_settings_hub_blade_php]]
+- [[app_mail_rolechangedmail_php]]
+- [[rolechangedmail_rolechangedmail]]
+- [[rolechangedmail_rolechangedmail_attachments]]
+- [[rolechangedmail_rolechangedmail_construct]]
+- [[rolechangedmail_rolechangedmail_content]]
+- [[rolechangedmail_rolechangedmail_envelope]]
 
 ## Internal connections
-- [[resources_views_admin_sales_hub_blade_php]] —includes→ [[components_hub_styles]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_reports_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_settings_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_leads_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_hr_hub_blade_php]] `EXTRACTED`
-- [[components_hub_styles]] —includes→ [[resources_views_admin_finance_hub_blade_php]] `EXTRACTED`
+- [[app_mail_rolechangedmail_php]] —contains→ [[rolechangedmail_rolechangedmail]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_construct]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_envelope]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_content]] `EXTRACTED`
+- [[rolechangedmail_rolechangedmail]] —method→ [[rolechangedmail_rolechangedmail_attachments]] `EXTRACTED`

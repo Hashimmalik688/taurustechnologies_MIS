@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DeviceController;
 use App\Http\Controllers\Admin\ChatShadowController;
 use App\Http\Controllers\Admin\NotepadController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\PublicHolidayController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\EmployeeDashboardController;
@@ -1013,6 +1014,17 @@ Route::group(['prefix' => 'admin/public-holidays', 'as' => 'admin.public-holiday
     Route::post('/{holiday}/toggle', [PublicHolidayController::class, 'toggle'])->name('toggle')->middleware('role.permission:public-holidays,edit');
     Route::post('/check-date', [PublicHolidayController::class, 'checkDate'])->name('check-date')->middleware('role.permission:public-holidays,view');
     Route::get('/month', [PublicHolidayController::class, 'getMonthHolidays'])->name('month');
+});
+
+// Announcement Management (Super Admin / Manager only)
+Route::group(['prefix' => 'admin/announcements', 'as' => 'admin.announcements.', 'middleware' => ['auth', 'role:Super Admin|Manager']], function () {
+    Route::get('/', [AnnouncementController::class, 'index'])->name('index');
+    Route::get('/create', [AnnouncementController::class, 'create'])->name('create');
+    Route::post('/', [AnnouncementController::class, 'store'])->name('store');
+    Route::get('/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('edit');
+    Route::put('/{announcement}', [AnnouncementController::class, 'update'])->name('update');
+    Route::delete('/{announcement}', [AnnouncementController::class, 'destroy'])->name('destroy');
+    Route::post('/{announcement}/toggle', [AnnouncementController::class, 'toggle'])->name('toggle');
 });
 
 // Profile Update

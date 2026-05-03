@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Partner;
+use App\Repositories\Contracts\PartnerLedgerRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
  * Handles all partner-specific ledger queries and balance calculations
  * Using the chart_of_accounts and ledger_journal_entry_lines system
  */
-class PartnerLedgerRepository
+class PartnerLedgerRepository implements PartnerLedgerRepositoryInterface
 {
     protected const ACCOUNT_AR = '1200'; // Accounts Receivable – Partners
 

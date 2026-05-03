@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[app_http_middleware_preventrequestsduringmaintenance_php]]
-- [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]]
+- [[app_http_controllers_controller_php]]
+- [[controller_controller]]
 
 ## Internal connections
-- [[app_http_middleware_preventrequestsduringmaintenance_php]] —contains→ [[preventrequestsduringmaintenance_preventrequestsduringmaintenance]] `EXTRACTED`
+- [[app_http_controllers_controller_php]] —contains→ [[controller_controller]] `EXTRACTED`

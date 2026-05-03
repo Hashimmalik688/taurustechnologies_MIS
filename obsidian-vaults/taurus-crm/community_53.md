@@ -2,14 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_notifications_mentionedinannouncementnotification_php]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]]
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]]
+- [[app_models_carrier_php]]
+- [[carrier_carrier]]
+- [[carrier_carrier_forwardedby]]
+- [[carrier_carrier_lead]]
+- [[carrier_carrier_managedby]]
 
 ## Internal connections
-- [[app_notifications_mentionedinannouncementnotification_php]] —contains→ [[mentionedinannouncementnotification_mentionedinannouncementnotification]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]] `EXTRACTED`
-- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]] `EXTRACTED`
+- [[app_models_carrier_php]] —contains→ [[carrier_carrier]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_lead]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_forwardedby]] `EXTRACTED`
+- [[carrier_carrier]] —method→ [[carrier_carrier_managedby]] `EXTRACTED`

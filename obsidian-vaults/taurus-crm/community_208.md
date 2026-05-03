@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[database_seeders_databaseseeder_php]]
-- [[databaseseeder_databaseseeder]]
-- [[databaseseeder_databaseseeder_run]]
+- [[database_seeders_insurancecarrierseeder_php]]
+- [[insurancecarrierseeder_insurancecarrierseeder]]
+- [[insurancecarrierseeder_insurancecarrierseeder_run]]
 
 ## Internal connections
-- [[database_seeders_databaseseeder_php]] —contains→ [[databaseseeder_databaseseeder]] `EXTRACTED`
-- [[databaseseeder_databaseseeder]] —method→ [[databaseseeder_databaseseeder_run]] `EXTRACTED`
+- [[database_seeders_insurancecarrierseeder_php]] —contains→ [[insurancecarrierseeder_insurancecarrierseeder]] `EXTRACTED`
+- [[insurancecarrierseeder_insurancecarrierseeder]] —method→ [[insurancecarrierseeder_insurancecarrierseeder_run]] `EXTRACTED`

@@ -2,15 +2,14 @@
 **5 nodes**
 
 ## Members
-- [[app_providers_telescopeserviceprovider_php]]
-- [[telescopeserviceprovider_telescopeserviceprovider]]
-- [[telescopeserviceprovider_telescopeserviceprovider_gate]]
-- [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]]
-- [[telescopeserviceprovider_telescopeserviceprovider_register]]
+- [[app_notifications_mentionedinannouncementnotification_php]]
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification]]
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]]
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]]
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]]
 
 ## Internal connections
-- [[app_providers_telescopeserviceprovider_php]] —contains→ [[telescopeserviceprovider_telescopeserviceprovider]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_register]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider]] —method→ [[telescopeserviceprovider_telescopeserviceprovider_gate]] `EXTRACTED`
-- [[telescopeserviceprovider_telescopeserviceprovider_register]] —calls→ [[telescopeserviceprovider_telescopeserviceprovider_hidesensitiverequestdetails]] `EXTRACTED`
+- [[app_notifications_mentionedinannouncementnotification_php]] —contains→ [[mentionedinannouncementnotification_mentionedinannouncementnotification]] `EXTRACTED`
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_construct]] `EXTRACTED`
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_via]] `EXTRACTED`
+- [[mentionedinannouncementnotification_mentionedinannouncementnotification]] —method→ [[mentionedinannouncementnotification_mentionedinannouncementnotification_toarray]] `EXTRACTED`

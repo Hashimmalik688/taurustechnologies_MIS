@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_select2_js_i18n_km_js]]
+- [[resources_libs_select2_js_i18n_sk_js]]

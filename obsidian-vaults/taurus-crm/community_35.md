@@ -2,18 +2,18 @@
 **7 nodes**
 
 ## Members
-- [[app_livewire_createlead_php]]
-- [[createlead_createlead]]
-- [[createlead_createlead_addbeneficiary]]
-- [[createlead_createlead_mount]]
-- [[createlead_createlead_removebeneficiary]]
-- [[createlead_createlead_render]]
-- [[createlead_createlead_updated]]
+- [[app_repositories_contracts_userrepositoryinterface_php]]
+- [[userrepositoryinterface_createuser]]
+- [[userrepositoryinterface_deleteuser]]
+- [[userrepositoryinterface_getallusers]]
+- [[userrepositoryinterface_getuserbyid]]
+- [[userrepositoryinterface_getusersbyrole]]
+- [[userrepositoryinterface_updateuser]]
 
 ## Internal connections
-- [[app_livewire_createlead_php]] —contains→ [[createlead_createlead]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_mount]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_addbeneficiary]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_removebeneficiary]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_updated]] `EXTRACTED`
-- [[createlead_createlead]] —method→ [[createlead_createlead_render]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getallusers]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getuserbyid]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_createuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_updateuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_deleteuser]] `EXTRACTED`
+- [[app_repositories_contracts_userrepositoryinterface_php]] —contains→ [[userrepositoryinterface_getusersbyrole]] `EXTRACTED`

@@ -1,29 +1,23 @@
 # Community 4
-**778 nodes**
+**768 nodes**
 
 ## Members
-- [[apexcharts_amd_i]]
 - [[app_http_middleware_authenticate_php]]
 - [[authenticate_authenticate]]
 - [[authenticate_authenticate_redirectto]]
 - [[chart_arcelement_draw]]
-- [[chart_chart_drawdataset]]
+- [[chart_barelement_draw]]
 - [[chart_cliparc]]
 - [[chart_clipbounds]]
 - [[chart_clipvertical]]
 - [[chart_dofill]]
 - [[chart_drawarc]]
 - [[chart_drawborder]]
-- [[chart_drawfill]]
-- [[chart_drawpointlabelbox]]
 - [[chart_fill]]
-- [[chart_gettooltipsize]]
 - [[chart_interpolatedlineto]]
-- [[chart_legend_draw]]
 - [[chart_lineto]]
 - [[chart_patharc]]
 - [[chart_scale_drawborder]]
-- [[chart_scale_drawlabels]]
 - [[chart_simplearc_pathsegment]]
 - [[chart_umd]]
 - [[chart_umd_a]]
@@ -132,7 +126,6 @@
 - [[chart_umd_bs]]
 - [[chart_umd_bt]]
 - [[chart_umd_buildlookuptable]]
-- [[chart_umd_buildticks]]
 - [[chart_umd_c]]
 - [[chart_umd_ca]]
 - [[chart_umd_calculatebarindexpixels]]
@@ -220,6 +213,7 @@
 - [[chart_umd_fo]]
 - [[chart_umd_fs]]
 - [[chart_umd_ft]]
+- [[chart_umd_g]]
 - [[chart_umd_ga]]
 - [[chart_umd_ge]]
 - [[chart_umd_generate]]
@@ -745,46 +739,44 @@
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_insertexif]]
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]]
 - [[echarts_esm_arc]]
+- [[echarts_esm_buildpath]]
 - [[echarts_esm_clip]]
 - [[echarts_esm_create]]
-- [[echarts_esm_createobject]]
 - [[echarts_esm_ellipse]]
+- [[echarts_esm_keys]]
+- [[echarts_esm_random]]
 - [[echarts_esm_rect]]
 - [[echarts_esm_reduce]]
+- [[echarts_esm_stringify]]
 - [[echarts_esm_translate]]
-- [[helpers_segment_addroundedrectpath]]
+- [[echarts_esm_updateclipstatus]]
 - [[helpers_segment_cliparea]]
-- [[helpers_segment_decoratetext]]
 - [[helpers_segment_drawpointlegend]]
 - [[helpers_segment_gethovercolor]]
-- [[helpers_segment_rendertext]]
 - [[helpers_segment_setrenderopts]]
-- [[helpers_segment_uncliparea]]
 - [[index_c]]
 - [[index_d]]
 - [[index_e]]
 - [[index_extends]]
 - [[index_f]]
 - [[index_simplebar]]
-- [[jquery_cb]]
-- [[jquery_flot_crosshair_init]]
-- [[jquery_flot_selection_init]]
 - [[jquery_flot_symbol_init]]
 - [[jquery_flot_symbol_processrawdata]]
-- [[jquery_flot_tooltip_source_mousemove]]
 - [[jquery_ua]]
-- [[jquery_va]]
+- [[jquery_xa]]
+- [[resources_js_pages_task_form_init_js]]
 - [[resources_libs_chart_js_chart_umd_js]]
 - [[resources_libs_curiosityx_bootstrap_session_timeout_index_js]]
-- [[resources_libs_flot_charts_jquery_flot_crosshair_js]]
-- [[resources_libs_flot_charts_jquery_flot_selection_js]]
 - [[resources_libs_flot_charts_jquery_flot_symbol_js]]
 - [[resources_libs_simplebar_index_mjs]]
+- [[task_form_init_makeid]]
 
 ## Internal connections
 - [[app_http_middleware_authenticate_php]] —contains→ [[authenticate_authenticate]] `EXTRACTED`
 - [[authenticate_authenticate]] —method→ [[authenticate_authenticate_redirectto]] `EXTRACTED`
 - [[authenticate_authenticate_redirectto]] —calls→ [[chart_umd_is]] `INFERRED`
+- [[resources_js_pages_task_form_init_js]] —contains→ [[task_form_init_makeid]] `EXTRACTED`
+- [[task_form_init_makeid]] —calls→ [[echarts_esm_random]] `INFERRED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore]] —method→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_initclass]] `EXTRACTED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore]] —method→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_encode64]] `EXTRACTED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore]] —method→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] `EXTRACTED`
@@ -795,8 +787,6 @@
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_encode64]] —calls→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] `EXTRACTED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_decode64]] `EXTRACTED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[dropzone_3ed269f2f0fb224b_var_exifrestore_exifmanipulation]] `EXTRACTED`
-- [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[jquery_flot_crosshair_init]] `INFERRED`
-- [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[jquery_flot_selection_init]] `INFERRED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[chart_umd_oe]] `INFERRED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[chart_umd_te]] `INFERRED`
 - [[dropzone_3ed269f2f0fb224b_var_exifrestore_restore]] —calls→ [[chart_umd_ee]] `INFERRED`

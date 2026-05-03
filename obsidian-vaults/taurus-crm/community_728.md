@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_admin_revenue_analytics_index_blade_php]]
+- [[resources_views_admin_reports_results_blade_php]]

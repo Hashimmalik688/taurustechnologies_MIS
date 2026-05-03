@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_04_07_000001_add_dnc_judge_to_qa_results_down]]
-- [[2026_04_07_000001_add_dnc_judge_to_qa_results_up]]
-- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]]
+- [[2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_down]]
+- [[2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_up]]
+- [[database_migrations_2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]] —contains→ [[2026_04_07_000001_add_dnc_judge_to_qa_results_up]] `EXTRACTED`
-- [[database_migrations_2026_04_07_000001_add_dnc_judge_to_qa_results_php]] —contains→ [[2026_04_07_000001_add_dnc_judge_to_qa_results_down]] `EXTRACTED`
+- [[database_migrations_2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_php]] —contains→ [[2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_up]] `EXTRACTED`
+- [[database_migrations_2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_php]] —contains→ [[2026_03_25_133358_add_edit_and_forward_to_chat_messages_table_down]] `EXTRACTED`

@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_models_carriercommissionbracket_php]]
-- [[carriercommissionbracket_carriercommissionbracket]]
-- [[carriercommissionbracket_carriercommissionbracket_containsage]]
-- [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]]
+- [[app_models_partner_php]]
+- [[partner_partner]]
+- [[partner_partner_carriers]]
+- [[partner_partner_carrierstates]]
 
 ## Internal connections
-- [[app_models_carriercommissionbracket_php]] —contains→ [[carriercommissionbracket_carriercommissionbracket]] `EXTRACTED`
-- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_insurancecarrier]] `EXTRACTED`
-- [[carriercommissionbracket_carriercommissionbracket]] —method→ [[carriercommissionbracket_carriercommissionbracket_containsage]] `EXTRACTED`
+- [[app_models_partner_php]] —contains→ [[partner_partner]] `EXTRACTED`
+- [[partner_partner]] —method→ [[partner_partner_carrierstates]] `EXTRACTED`
+- [[partner_partner]] —method→ [[partner_partner_carriers]] `EXTRACTED`

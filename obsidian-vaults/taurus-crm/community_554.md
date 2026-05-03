@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_libs_admin_resources_jquery_vectormap_maps_jquery_jvectormap_au_mill_en_js]]
+- [[resources_libs_admin_resources_jquery_vectormap_maps_jquery_jvectormap_europe_mill_en_js]]

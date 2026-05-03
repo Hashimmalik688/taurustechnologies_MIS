@@ -1,5 +1,5 @@
 # Community 11
-**65 nodes**
+**66 nodes**
 
 ## Members
 - [[partials_custom_select_datepicker_styles]]
@@ -47,6 +47,7 @@
 - [[resources_views_admin_reports_manager_submission_drilldown_blade_php]]
 - [[resources_views_admin_reports_manager_submission_report_blade_php]]
 - [[resources_views_admin_reports_per_closer_blade_php]]
+- [[resources_views_admin_reports_peregrine_team_report_blade_php]]
 - [[resources_views_admin_reports_policy_type_report_blade_php]]
 - [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]]
 - [[resources_views_admin_reports_sales_status_blade_php]]

@@ -1,13 +1,11 @@
 # Community 72
-**4 nodes**
+**3 nodes**
 
 ## Members
-- [[app_models_partner_php]]
-- [[partner_partner]]
-- [[partner_partner_carriers]]
-- [[partner_partner_carrierstates]]
+- [[app_providers_eventserviceprovider_php]]
+- [[eventserviceprovider_eventserviceprovider]]
+- [[eventserviceprovider_eventserviceprovider_boot]]
 
 ## Internal connections
-- [[app_models_partner_php]] —contains→ [[partner_partner]] `EXTRACTED`
-- [[partner_partner]] —method→ [[partner_partner_carrierstates]] `EXTRACTED`
-- [[partner_partner]] —method→ [[partner_partner_carriers]] `EXTRACTED`
+- [[app_providers_eventserviceprovider_php]] —contains→ [[eventserviceprovider_eventserviceprovider]] `EXTRACTED`
+- [[eventserviceprovider_eventserviceprovider]] —method→ [[eventserviceprovider_eventserviceprovider_boot]] `EXTRACTED`

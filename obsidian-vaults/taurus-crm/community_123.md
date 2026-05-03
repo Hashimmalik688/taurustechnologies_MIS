@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2025_12_09_030327_add_retention_fields_to_leads_table_down]]
-- [[2025_12_09_030327_add_retention_fields_to_leads_table_up]]
-- [[database_migrations_2025_12_09_030327_add_retention_fields_to_leads_table_php]]
+- [[2026_04_08_000001_add_retention_disposition_to_leads_table_down]]
+- [[2026_04_08_000001_add_retention_disposition_to_leads_table_up]]
+- [[database_migrations_2026_04_08_000001_add_retention_disposition_to_leads_table_php]]
 
 ## Internal connections
-- [[database_migrations_2025_12_09_030327_add_retention_fields_to_leads_table_php]] —contains→ [[2025_12_09_030327_add_retention_fields_to_leads_table_up]] `EXTRACTED`
-- [[database_migrations_2025_12_09_030327_add_retention_fields_to_leads_table_php]] —contains→ [[2025_12_09_030327_add_retention_fields_to_leads_table_down]] `EXTRACTED`
+- [[database_migrations_2026_04_08_000001_add_retention_disposition_to_leads_table_php]] —contains→ [[2026_04_08_000001_add_retention_disposition_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2026_04_08_000001_add_retention_disposition_to_leads_table_php]] —contains→ [[2026_04_08_000001_add_retention_disposition_to_leads_table_down]] `EXTRACTED`

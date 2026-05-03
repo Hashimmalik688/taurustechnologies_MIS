@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_components_teams_announcement_banner_blade_php]]
+- [[resources_views_agent_dashboard_blade_php]]

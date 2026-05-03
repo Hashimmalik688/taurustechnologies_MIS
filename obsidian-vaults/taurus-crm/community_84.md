@@ -2,10 +2,11 @@
 **3 nodes**
 
 ## Members
-- [[app_http_middleware_trusthosts_php]]
-- [[trusthosts_trusthosts]]
-- [[trusthosts_trusthosts_hosts]]
+- [[is_plural]]
+- [[is_translate]]
+- [[resources_libs_moment_locale_is_js]]
 
 ## Internal connections
-- [[app_http_middleware_trusthosts_php]] —contains→ [[trusthosts_trusthosts]] `EXTRACTED`
-- [[trusthosts_trusthosts]] —method→ [[trusthosts_trusthosts_hosts]] `EXTRACTED`
+- [[resources_libs_moment_locale_is_js]] —contains→ [[is_plural]] `EXTRACTED`
+- [[resources_libs_moment_locale_is_js]] —contains→ [[is_translate]] `EXTRACTED`
+- [[is_plural]] —calls→ [[is_translate]] `EXTRACTED`

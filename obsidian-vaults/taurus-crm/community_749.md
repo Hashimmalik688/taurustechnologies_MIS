@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_admin_leads_edit_blade_php]]
+- [[resources_views_admin_salary_records_blade_php]]

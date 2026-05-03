@@ -2,10 +2,10 @@
 **3 nodes**
 
 ## Members
-- [[2026_01_21_051206_create_chart_of_accounts_table_down]]
-- [[2026_01_21_051206_create_chart_of_accounts_table_up]]
-- [[database_migrations_2026_01_21_051206_create_chart_of_accounts_table_php]]
+- [[2025_12_13_031001_add_manager_fields_to_leads_table_down]]
+- [[2025_12_13_031001_add_manager_fields_to_leads_table_up]]
+- [[database_migrations_2025_12_13_031001_add_manager_fields_to_leads_table_php]]
 
 ## Internal connections
-- [[database_migrations_2026_01_21_051206_create_chart_of_accounts_table_php]] —contains→ [[2026_01_21_051206_create_chart_of_accounts_table_up]] `EXTRACTED`
-- [[database_migrations_2026_01_21_051206_create_chart_of_accounts_table_php]] —contains→ [[2026_01_21_051206_create_chart_of_accounts_table_down]] `EXTRACTED`
+- [[database_migrations_2025_12_13_031001_add_manager_fields_to_leads_table_php]] —contains→ [[2025_12_13_031001_add_manager_fields_to_leads_table_up]] `EXTRACTED`
+- [[database_migrations_2025_12_13_031001_add_manager_fields_to_leads_table_php]] —contains→ [[2025_12_13_031001_add_manager_fields_to_leads_table_down]] `EXTRACTED`

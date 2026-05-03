@@ -1,11 +1,9 @@
 # Community 209
-**3 nodes**
+**2 nodes**
 
 ## Members
-- [[database_seeders_roleseeder_php]]
-- [[roleseeder_roleseeder]]
-- [[roleseeder_roleseeder_run]]
+- [[app_support_teams_php]]
+- [[teams_teams]]
 
 ## Internal connections
-- [[database_seeders_roleseeder_php]] —contains→ [[roleseeder_roleseeder]] `EXTRACTED`
-- [[roleseeder_roleseeder]] —method→ [[roleseeder_roleseeder_run]] `EXTRACTED`
+- [[app_support_teams_php]] —contains→ [[teams_teams]] `EXTRACTED`

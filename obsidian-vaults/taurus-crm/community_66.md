@@ -2,12 +2,12 @@
 **4 nodes**
 
 ## Members
-- [[app_events_leadcreated_php]]
-- [[leadcreated_leadcreated]]
-- [[leadcreated_leadcreated_broadcaston]]
-- [[leadcreated_leadcreated_construct]]
+- [[app_models_chatmessageread_php]]
+- [[chatmessageread_chatmessageread]]
+- [[chatmessageread_chatmessageread_message]]
+- [[chatmessageread_chatmessageread_user]]
 
 ## Internal connections
-- [[app_events_leadcreated_php]] —contains→ [[leadcreated_leadcreated]] `EXTRACTED`
-- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_construct]] `EXTRACTED`
-- [[leadcreated_leadcreated]] —method→ [[leadcreated_leadcreated_broadcaston]] `EXTRACTED`
+- [[app_models_chatmessageread_php]] —contains→ [[chatmessageread_chatmessageread]] `EXTRACTED`
+- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_message]] `EXTRACTED`
+- [[chatmessageread_chatmessageread]] —method→ [[chatmessageread_chatmessageread_user]] `EXTRACTED`

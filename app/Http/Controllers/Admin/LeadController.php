@@ -10,7 +10,6 @@ use App\Models\AuditLog;
 use App\Models\Lead;
 use App\Events\LeadCreated;
 use App\Events\SaleCreated;
-use App\Services\CarrierSheetLeadSyncService;
 use App\Services\CommissionCalculationService;
 use App\Services\LedgerService;
 use App\Traits\CommissionResolver;

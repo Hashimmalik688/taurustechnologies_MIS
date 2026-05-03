@@ -1,46 +1,43 @@
 # Community 20
-**18 nodes**
+**19 nodes**
 
 ## Members
-- [[app_models_carriersheetentry_php]]
-- [[carriersheetentry_carriersheetentry]]
-- [[carriersheetentry_carriersheetentry_carrierrate]]
-- [[carriersheetentry_carriersheetentry_clearbatchleadcache]]
-- [[carriersheetentry_carriersheetentry_creator]]
-- [[carriersheetentry_carriersheetentry_generateleadcachekey]]
-- [[carriersheetentry_carriersheetentry_getpipelinestage]]
-- [[carriersheetentry_carriersheetentry_getstatusbadgeclass]]
-- [[carriersheetentry_carriersheetentry_getstatuscolor]]
-- [[carriersheetentry_carriersheetentry_ischargeback]]
-- [[carriersheetentry_carriersheetentry_isdeclined]]
-- [[carriersheetentry_carriersheetentry_ispaid]]
-- [[carriersheetentry_carriersheetentry_isplaceholderpolicynumber]]
-- [[carriersheetentry_carriersheetentry_lead]]
-- [[carriersheetentry_carriersheetentry_scopeactive]]
-- [[carriersheetentry_carriersheetentry_scopebystatus]]
-- [[carriersheetentry_carriersheetentry_scopeforperiod]]
-- [[carriersheetentry_carriersheetentry_scopewithstandardrelations]]
+- [[admin_accounting_nav]]
+- [[resources_views_admin_accounting_dashboard_blade_php]]
+- [[resources_views_admin_accounting_journal_create_blade_php]]
+- [[resources_views_admin_accounting_journal_index_blade_php]]
+- [[resources_views_admin_accounting_journal_show_blade_php]]
+- [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]]
+- [[resources_views_admin_accounting_partner_ledger_index_blade_php]]
+- [[resources_views_admin_accounting_partner_ledger_overview_blade_php]]
+- [[resources_views_admin_accounting_quick_chargeback_blade_php]]
+- [[resources_views_admin_accounting_quick_opening_balance_blade_php]]
+- [[resources_views_admin_accounting_quick_payment_blade_php]]
+- [[resources_views_admin_accounting_quick_sale_blade_php]]
+- [[resources_views_admin_accounting_reports_balance_sheet_blade_php]]
+- [[resources_views_admin_accounting_reports_expense_tracker_blade_php]]
+- [[resources_views_admin_accounting_reports_profit_loss_blade_php]]
+- [[resources_views_admin_accounting_reports_trial_balance_blade_php]]
+- [[resources_views_admin_accounting_sales_ledger_index_blade_php]]
+- [[resources_views_admin_accounting_sales_ledger_partner_blade_php]]
+- [[resources_views_admin_accounting_sales_ledger_returns_blade_php]]
 
 ## Internal connections
-- [[app_models_carriersheetentry_php]] —contains→ [[carriersheetentry_carriersheetentry]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_carrierrate]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_creator]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_lead]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_generateleadcachekey]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_clearbatchleadcache]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_scopewithstandardrelations]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_scopeforperiod]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_scopebystatus]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_scopeactive]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_isplaceholderpolicynumber]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_isdeclined]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_ischargeback]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_ispaid]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_getstatuscolor]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_getstatusbadgeclass]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry]] —method→ [[carriersheetentry_carriersheetentry_getpipelinestage]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry_lead]] —calls→ [[carriersheetentry_carriersheetentry_generateleadcachekey]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry_lead]] —calls→ [[carriersheetentry_carriersheetentry_isplaceholderpolicynumber]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry_lead]] —calls→ [[carriersheetentry_carriersheetentry_getpipelinestage]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry_isdeclined]] —calls→ [[carriersheetentry_carriersheetentry_getpipelinestage]] `EXTRACTED`
-- [[carriersheetentry_carriersheetentry_ischargeback]] —calls→ [[carriersheetentry_carriersheetentry_getpipelinestage]] `EXTRACTED`
+- [[resources_views_admin_accounting_dashboard_blade_php]] —includes→ [[admin_accounting_nav]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_index_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_overview_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_partner_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_index_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_returns_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_profit_loss_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_balance_sheet_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_trial_balance_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_expense_tracker_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_chargeback_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_opening_balance_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_payment_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_sale_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_index_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_show_blade_php]] `EXTRACTED`
+- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_create_blade_php]] `EXTRACTED`

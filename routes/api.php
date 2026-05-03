@@ -18,6 +18,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// Public announcement endpoint (no auth required — displays to all logged-in users)
+Route::get('/announcements/current', [App\Http\Controllers\Admin\AnnouncementController::class, 'getCurrent'])->middleware('auth')->name('api.announcements.current');
+
 // ══════════════════════════════════════════════════════════════════════
 // Partner Portal API Routes (Partner Guard)
 // ══════════════════════════════════════════════════════════════════════

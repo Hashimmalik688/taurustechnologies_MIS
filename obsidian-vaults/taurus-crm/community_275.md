@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_js_pages_session_timeout_init_js]]
+- [[resources_js_pages_table_responsive_init_js]]

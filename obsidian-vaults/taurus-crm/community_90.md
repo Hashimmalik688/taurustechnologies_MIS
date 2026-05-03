@@ -2,11 +2,11 @@
 **3 nodes**
 
 ## Members
-- [[fi_translate]]
-- [[fi_verbalnumber]]
-- [[resources_libs_moment_locale_fi_js]]
+- [[resources_libs_moment_locale_ru_js]]
+- [[ru_plural]]
+- [[ru_relativetimewithplural]]
 
 ## Internal connections
-- [[resources_libs_moment_locale_fi_js]] —contains→ [[fi_translate]] `EXTRACTED`
-- [[resources_libs_moment_locale_fi_js]] —contains→ [[fi_verbalnumber]] `EXTRACTED`
-- [[fi_translate]] —calls→ [[fi_verbalnumber]] `EXTRACTED`
+- [[resources_libs_moment_locale_ru_js]] —contains→ [[ru_plural]] `EXTRACTED`
+- [[resources_libs_moment_locale_ru_js]] —contains→ [[ru_relativetimewithplural]] `EXTRACTED`
+- [[ru_plural]] —calls→ [[ru_relativetimewithplural]] `EXTRACTED`

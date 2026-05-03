@@ -1,81 +1,20 @@
 # Community 6
-**442 nodes**
+**356 nodes**
 
 ## Members
-- [[app_console_commands_autocheckoutattendance_php]]
-- [[app_console_commands_cleanupanalyze_php]]
-- [[app_console_commands_cleanupformat_php]]
-- [[app_console_commands_cleanupkit_php]]
-- [[app_console_commands_cleanuppsr4_php]]
-- [[app_console_commands_deduplicateleads_php]]
-- [[app_console_commands_importemsdata_php]]
-- [[app_console_commands_qarescorecall_php]]
-- [[app_console_commands_qatestpipeline_php]]
-- [[app_console_commands_recalculatecommissions_php]]
-- [[app_console_commands_setupgooglesheetheaders_php]]
-- [[app_console_commands_synczoomcalllogs_php]]
-- [[app_console_commands_verifyattendanceschema_php]]
-- [[app_console_commands_zoomapitest_php]]
-- [[app_console_commands_zoomphonereportprobe_php]]
 - [[app_models_epmscomment_php]]
-- [[app_notifications_mentionedinchatnotification_php]]
-- [[app_services_qa_geminiservice_php]]
-- [[app_support_cleanup_namespacefixer_php]]
-- [[autocheckoutattendance_autocheckoutattendance]]
-- [[autocheckoutattendance_autocheckoutattendance_handle]]
+- [[chart_domplatform_addeventlistener]]
 - [[chart_domplatform_removeeventlistener]]
 - [[chart_removelistener]]
-- [[cleanupanalyze_cleanupanalyze]]
-- [[cleanupanalyze_cleanupanalyze_finddanglingviews]]
-- [[cleanupanalyze_cleanupanalyze_findsuspiciouslargefiles]]
-- [[cleanupanalyze_cleanupanalyze_findunreferencedcontrollers]]
-- [[cleanupanalyze_cleanupanalyze_handle]]
-- [[cleanupanalyze_cleanupanalyze_section]]
-- [[cleanupformat_cleanupformat]]
-- [[cleanupformat_cleanupformat_handle]]
-- [[cleanupkit_cleanupkit]]
-- [[cleanupkit_cleanupkit_handle]]
-- [[cleanupkit_cleanupkit_task]]
-- [[cleanuppsr4_cleanuppsr4]]
-- [[cleanuppsr4_cleanuppsr4_handle]]
-- [[database_seeders_defaultpermissionsseeder_php]]
-- [[database_seeders_employeeemsdataseeder_php]]
-- [[database_seeders_importemsdataseeder_php]]
-- [[database_seeders_qaroleseeder_php]]
-- [[deduplicateleads_deduplicateleads]]
-- [[deduplicateleads_deduplicateleads_handle]]
-- [[defaultpermissionsseeder_defaultpermissionsseeder]]
-- [[defaultpermissionsseeder_defaultpermissionsseeder_run]]
 - [[echarts_esm_create_2]]
 - [[echarts_esm_doenter]]
-- [[echarts_esm_getdefaultcolorkey]]
-- [[echarts_esm_getitemvisualfromdata]]
-- [[echarts_esm_getstylemapper]]
 - [[echarts_esm_handler]]
-- [[echarts_esm_line]]
-- [[echarts_esm_loginvalidzerror]]
-- [[echarts_esm_min_zg]]
 - [[echarts_esm_onleave]]
-- [[echarts_esm_setitemvisualfromdata]]
-- [[echarts_esm_task]]
 - [[echarts_esm_updatebboxfrompoints]]
-- [[echarts_esm_updatesymbols]]
-- [[echarts_esm_warn]]
-- [[echarts_esm_warndeprecated]]
-- [[employeeemsdataseeder_employeeemsdataseeder]]
-- [[employeeemsdataseeder_employeeemsdataseeder_run]]
 - [[epmscomment_epmscomment]]
 - [[epmscomment_epmscomment_project]]
 - [[epmscomment_epmscomment_task]]
 - [[epmscomment_epmscomment_user]]
-- [[geminiservice_geminiservice]]
-- [[geminiservice_geminiservice_construct]]
-- [[geminiservice_geminiservice_extractjsonfromtext]]
-- [[geminiservice_geminiservice_scorecall]]
-- [[importemsdata_importemsdata]]
-- [[importemsdata_importemsdata_handle]]
-- [[importemsdataseeder_importemsdataseeder]]
-- [[importemsdataseeder_importemsdataseeder_run]]
 - [[leaflet]]
 - [[leaflet_a]]
 - [[leaflet_ae]]
@@ -126,6 +65,7 @@
 - [[leaflet_o]]
 - [[leaflet_oe]]
 - [[leaflet_oi]]
+- [[leaflet_pe]]
 - [[leaflet_pi]]
 - [[leaflet_q]]
 - [[leaflet_qe]]
@@ -148,7 +88,6 @@
 - [[leaflet_src_cancelanimframe]]
 - [[leaflet_src_canvas]]
 - [[leaflet_src_centroid]]
-- [[leaflet_src_checkdeprecatedmixinevents]]
 - [[leaflet_src_circle]]
 - [[leaflet_src_circlemarker]]
 - [[leaflet_src_class]]
@@ -180,7 +119,6 @@
 - [[leaflet_src_esm_cancelanimframe]]
 - [[leaflet_src_esm_canvas]]
 - [[leaflet_src_esm_centroid]]
-- [[leaflet_src_esm_checkdeprecatedmixinevents]]
 - [[leaflet_src_esm_circle]]
 - [[leaflet_src_esm_circlemarker]]
 - [[leaflet_src_esm_class]]
@@ -220,6 +158,7 @@
 - [[leaflet_src_esm_getpropagationpath]]
 - [[leaflet_src_esm_getscale]]
 - [[leaflet_src_esm_getsizedparentnode]]
+- [[leaflet_src_esm_getstyle]]
 - [[leaflet_src_esm_getwheeldelta]]
 - [[leaflet_src_esm_globalpointerdown]]
 - [[leaflet_src_esm_globalpointermove]]
@@ -268,7 +207,6 @@
 - [[leaflet_src_esm_sqdist]]
 - [[leaflet_src_esm_stamp]]
 - [[leaflet_src_esm_stop]]
-- [[leaflet_src_esm_stoppropagation]]
 - [[leaflet_src_esm_svg]]
 - [[leaflet_src_esm_svgcreate]]
 - [[leaflet_src_esm_svgoverlay]]
@@ -312,6 +250,7 @@
 - [[leaflet_src_getpropagationpath]]
 - [[leaflet_src_getscale]]
 - [[leaflet_src_getsizedparentnode]]
+- [[leaflet_src_getstyle]]
 - [[leaflet_src_getwheeldelta]]
 - [[leaflet_src_globalpointerdown]]
 - [[leaflet_src_globalpointermove]]
@@ -407,72 +346,47 @@
 - [[leaflet_z]]
 - [[leaflet_ze]]
 - [[leaflet_zi]]
-- [[mentionedinchatnotification_mentionedinchatnotification]]
-- [[mentionedinchatnotification_mentionedinchatnotification_construct]]
-- [[mentionedinchatnotification_mentionedinchatnotification_toarray]]
-- [[mentionedinchatnotification_mentionedinchatnotification_tomail]]
-- [[mentionedinchatnotification_mentionedinchatnotification_via]]
-- [[namespacefixer_namespacefixer]]
-- [[namespacefixer_namespacefixer_construct]]
-- [[namespacefixer_namespacefixer_expectednamespacefor]]
-- [[namespacefixer_namespacefixer_fixapp]]
-- [[qarescorecall_qarescorecall]]
-- [[qarescorecall_qarescorecall_handle]]
-- [[qaroleseeder_qaroleseeder]]
-- [[qaroleseeder_qaroleseeder_run]]
-- [[qatestpipeline_qatestpipeline]]
-- [[qatestpipeline_qatestpipeline_getsampletranscript]]
-- [[qatestpipeline_qatestpipeline_handle]]
-- [[qatestpipeline_qatestpipeline_runtextonlytest]]
-- [[qatestpipeline_qatestpipeline_showscoreresults]]
-- [[qatestpipeline_qatestpipeline_showtranscriptsample]]
-- [[recalculatecommissions_recalculatecommissions]]
-- [[recalculatecommissions_recalculatecommissions_getsettlementtype]]
-- [[recalculatecommissions_recalculatecommissions_handle]]
+- [[permissions_manager_autosavepermission]]
+- [[permissions_manager_initmodulesearch]]
+- [[permissions_manager_initpermissionmatrix]]
+- [[permissions_manager_initunsavedchangeswarning]]
+- [[permissions_manager_setallpermissions]]
+- [[permissions_manager_setcategorypermissions]]
+- [[permissions_manager_showloadingindicator]]
+- [[permissions_manager_showsuccessindicator]]
+- [[public_js_permissions_manager_js]]
 - [[resources_libs_leaflet_leaflet_js]]
 - [[resources_libs_leaflet_leaflet_src_esm_js]]
 - [[resources_libs_leaflet_leaflet_src_js]]
-- [[setupgooglesheetheaders_setupgooglesheetheaders]]
-- [[setupgooglesheetheaders_setupgooglesheetheaders_handle]]
-- [[synczoomcalllogs_synczoomcalllogs]]
-- [[synczoomcalllogs_synczoomcalllogs_handle]]
-- [[toastr_error]]
-- [[toastr_info]]
-- [[verifyattendanceschema_verifyattendanceschema]]
-- [[verifyattendanceschema_verifyattendanceschema_handle]]
-- [[zoomapitest_zoomapitest]]
-- [[zoomapitest_zoomapitest_handle]]
-- [[zoomphonereportprobe_zoomphonereportprobe]]
-- [[zoomphonereportprobe_zoomphonereportprobe_handle]]
 
 ## Internal connections
-- [[app_services_qa_geminiservice_php]] —contains→ [[geminiservice_geminiservice]] `EXTRACTED`
-- [[geminiservice_geminiservice]] —method→ [[geminiservice_geminiservice_construct]] `EXTRACTED`
-- [[geminiservice_geminiservice]] —method→ [[geminiservice_geminiservice_scorecall]] `EXTRACTED`
-- [[geminiservice_geminiservice]] —method→ [[geminiservice_geminiservice_extractjsonfromtext]] `EXTRACTED`
-- [[geminiservice_geminiservice_scorecall]] —calls→ [[geminiservice_geminiservice_extractjsonfromtext]] `EXTRACTED`
-- [[geminiservice_geminiservice_scorecall]] —calls→ [[qatestpipeline_qatestpipeline_handle]] `INFERRED`
-- [[geminiservice_geminiservice_scorecall]] —calls→ [[qatestpipeline_qatestpipeline_runtextonlytest]] `INFERRED`
-- [[app_support_cleanup_namespacefixer_php]] —contains→ [[namespacefixer_namespacefixer]] `EXTRACTED`
-- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_construct]] `EXTRACTED`
-- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_fixapp]] `EXTRACTED`
-- [[namespacefixer_namespacefixer]] —method→ [[namespacefixer_namespacefixer_expectednamespacefor]] `EXTRACTED`
-- [[namespacefixer_namespacefixer_fixapp]] —calls→ [[namespacefixer_namespacefixer_expectednamespacefor]] `EXTRACTED`
-- [[namespacefixer_namespacefixer_fixapp]] —calls→ [[cleanuppsr4_cleanuppsr4_handle]] `INFERRED`
-- [[app_notifications_mentionedinchatnotification_php]] —contains→ [[mentionedinchatnotification_mentionedinchatnotification]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_construct]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_via]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_tomail]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification]] —method→ [[mentionedinchatnotification_mentionedinchatnotification_toarray]] `EXTRACTED`
-- [[mentionedinchatnotification_mentionedinchatnotification_tomail]] —calls→ [[echarts_esm_line]] `INFERRED`
-- [[app_console_commands_zoomphonereportprobe_php]] —contains→ [[zoomphonereportprobe_zoomphonereportprobe]] `EXTRACTED`
-- [[zoomphonereportprobe_zoomphonereportprobe]] —method→ [[zoomphonereportprobe_zoomphonereportprobe_handle]] `EXTRACTED`
-- [[zoomphonereportprobe_zoomphonereportprobe_handle]] —calls→ [[toastr_info]] `INFERRED`
-- [[zoomphonereportprobe_zoomphonereportprobe_handle]] —calls→ [[echarts_esm_warn]] `INFERRED`
-- [[zoomphonereportprobe_zoomphonereportprobe_handle]] —calls→ [[toastr_error]] `INFERRED`
-- [[zoomphonereportprobe_zoomphonereportprobe_handle]] —calls→ [[echarts_esm_line]] `INFERRED`
-- [[app_console_commands_cleanupkit_php]] —contains→ [[cleanupkit_cleanupkit]] `EXTRACTED`
-- [[cleanupkit_cleanupkit]] —method→ [[cleanupkit_cleanupkit_handle]] `EXTRACTED`
-- [[cleanupkit_cleanupkit]] —method→ [[cleanupkit_cleanupkit_task]] `EXTRACTED`
-- [[cleanupkit_cleanupkit_handle]] —calls→ [[cleanupkit_cleanupkit_task]] `EXTRACTED`
-- [[cleanupkit_cleanupkit_handle]] —calls→ [[toastr_info]] `INFERRED`
+- [[app_models_epmscomment_php]] —contains→ [[epmscomment_epmscomment]] `EXTRACTED`
+- [[epmscomment_epmscomment]] —method→ [[epmscomment_epmscomment_project]] `EXTRACTED`
+- [[epmscomment_epmscomment]] —method→ [[epmscomment_epmscomment_task]] `EXTRACTED`
+- [[epmscomment_epmscomment]] —method→ [[epmscomment_epmscomment_user]] `EXTRACTED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_e]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_hi]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_src_polygoncenter]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_src_polylinecenter]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_src_esm_polygoncenter]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[leaflet_src_esm_polylinecenter]] `INFERRED`
+- [[epmscomment_epmscomment_project]] —calls→ [[echarts_esm_updatebboxfrompoints]] `INFERRED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_initpermissionmatrix]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_setallpermissions]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_setcategorypermissions]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_autosavepermission]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_showloadingindicator]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_showsuccessindicator]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_initmodulesearch]] `EXTRACTED`
+- [[public_js_permissions_manager_js]] —contains→ [[permissions_manager_initunsavedchangeswarning]] `EXTRACTED`
+- [[permissions_manager_initpermissionmatrix]] —calls→ [[permissions_manager_setallpermissions]] `EXTRACTED`
+- [[permissions_manager_initpermissionmatrix]] —calls→ [[chart_domplatform_addeventlistener]] `INFERRED`
+- [[permissions_manager_autosavepermission]] —calls→ [[permissions_manager_showloadingindicator]] `EXTRACTED`
+- [[permissions_manager_initmodulesearch]] —calls→ [[chart_domplatform_addeventlistener]] `INFERRED`
+- [[permissions_manager_initunsavedchangeswarning]] —calls→ [[chart_domplatform_addeventlistener]] `INFERRED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_l]] `EXTRACTED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_n]] `EXTRACTED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_a]] `EXTRACTED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_h]] `EXTRACTED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_j]] `EXTRACTED`
+- [[resources_libs_leaflet_leaflet_js]] —contains→ [[leaflet_i]] `EXTRACTED`

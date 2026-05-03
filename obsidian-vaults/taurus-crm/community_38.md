@@ -1,19 +1,17 @@
 # Community 38
-**7 nodes**
+**6 nodes**
 
 ## Members
-- [[app_models_userdetail_php]]
-- [[userdetail_userdetail]]
-- [[userdetail_userdetail_getactivestatesstringattribute]]
-- [[userdetail_userdetail_getcarriersstringattribute]]
-- [[userdetail_userdetail_setactivestatesattribute]]
-- [[userdetail_userdetail_setcarriersattribute]]
-- [[userdetail_userdetail_user]]
+- [[app_events_communityannouncementposted_php]]
+- [[communityannouncementposted_communityannouncementposted]]
+- [[communityannouncementposted_communityannouncementposted_broadcastas]]
+- [[communityannouncementposted_communityannouncementposted_broadcaston]]
+- [[communityannouncementposted_communityannouncementposted_broadcastwith]]
+- [[communityannouncementposted_communityannouncementposted_construct]]
 
 ## Internal connections
-- [[app_models_userdetail_php]] —contains→ [[userdetail_userdetail]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_user]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getactivestatesstringattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_getcarriersstringattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setactivestatesattribute]] `EXTRACTED`
-- [[userdetail_userdetail]] —method→ [[userdetail_userdetail_setcarriersattribute]] `EXTRACTED`
+- [[app_events_communityannouncementposted_php]] —contains→ [[communityannouncementposted_communityannouncementposted]] `EXTRACTED`
+- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_construct]] `EXTRACTED`
+- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcaston]] `EXTRACTED`
+- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcastas]] `EXTRACTED`
+- [[communityannouncementposted_communityannouncementposted]] —method→ [[communityannouncementposted_communityannouncementposted_broadcastwith]] `EXTRACTED`

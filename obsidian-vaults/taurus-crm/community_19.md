@@ -2,42 +2,51 @@
 **19 nodes**
 
 ## Members
-- [[admin_accounting_nav]]
-- [[resources_views_admin_accounting_dashboard_blade_php]]
-- [[resources_views_admin_accounting_journal_create_blade_php]]
-- [[resources_views_admin_accounting_journal_index_blade_php]]
-- [[resources_views_admin_accounting_journal_show_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_index_blade_php]]
-- [[resources_views_admin_accounting_partner_ledger_overview_blade_php]]
-- [[resources_views_admin_accounting_quick_chargeback_blade_php]]
-- [[resources_views_admin_accounting_quick_opening_balance_blade_php]]
-- [[resources_views_admin_accounting_quick_payment_blade_php]]
-- [[resources_views_admin_accounting_quick_sale_blade_php]]
-- [[resources_views_admin_accounting_reports_balance_sheet_blade_php]]
-- [[resources_views_admin_accounting_reports_expense_tracker_blade_php]]
-- [[resources_views_admin_accounting_reports_profit_loss_blade_php]]
-- [[resources_views_admin_accounting_reports_trial_balance_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_index_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_partner_blade_php]]
-- [[resources_views_admin_accounting_sales_ledger_returns_blade_php]]
+- [[announcement_announcement]]
+- [[announcement_announcement_createdby]]
+- [[announcement_announcement_getanimationclass]]
+- [[announcement_announcement_getbackgroundclass]]
+- [[announcement_announcement_getcurrent]]
+- [[announcement_announcement_geticonclass]]
+- [[announcement_announcement_scopeactive]]
+- [[announcementcontroller_announcementcontroller]]
+- [[announcementcontroller_announcementcontroller_destroy]]
+- [[announcementcontroller_announcementcontroller_getcurrent]]
+- [[announcementcontroller_announcementcontroller_index]]
+- [[announcementcontroller_announcementcontroller_store]]
+- [[announcementcontroller_announcementcontroller_toggle]]
+- [[announcementcontroller_announcementcontroller_update]]
+- [[announcementseeder_announcementseeder]]
+- [[announcementseeder_announcementseeder_run]]
+- [[app_http_controllers_admin_announcementcontroller_php]]
+- [[app_models_announcement_php]]
+- [[database_seeders_announcementseeder_php]]
 
 ## Internal connections
-- [[resources_views_admin_accounting_dashboard_blade_php]] —includes→ [[admin_accounting_nav]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_carrier_show_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_partner_ledger_overview_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_partner_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_sales_ledger_returns_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_profit_loss_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_balance_sheet_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_trial_balance_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_reports_expense_tracker_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_chargeback_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_opening_balance_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_payment_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_quick_sale_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_index_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_show_blade_php]] `EXTRACTED`
-- [[admin_accounting_nav]] —includes→ [[resources_views_admin_accounting_journal_create_blade_php]] `EXTRACTED`
+- [[app_models_announcement_php]] —contains→ [[announcement_announcement]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_createdby]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_scopeactive]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getcurrent]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getanimationclass]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_getbackgroundclass]] `EXTRACTED`
+- [[announcement_announcement]] —method→ [[announcement_announcement_geticonclass]] `EXTRACTED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_index]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_store]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_update]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_toggle]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement]] —calls→ [[announcementseeder_announcementseeder_run]] `INFERRED`
+- [[announcement_announcement_getanimationclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement_getbackgroundclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[announcement_announcement_geticonclass]] —calls→ [[announcementcontroller_announcementcontroller_getcurrent]] `INFERRED`
+- [[app_http_controllers_admin_announcementcontroller_php]] —contains→ [[announcementcontroller_announcementcontroller]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_index]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_store]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_update]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_toggle]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_destroy]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller]] —method→ [[announcementcontroller_announcementcontroller_getcurrent]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller_store]] —calls→ [[announcementcontroller_announcementcontroller_update]] `EXTRACTED`
+- [[announcementcontroller_announcementcontroller_update]] —calls→ [[announcementcontroller_announcementcontroller_toggle]] `EXTRACTED`
+- [[database_seeders_announcementseeder_php]] —contains→ [[announcementseeder_announcementseeder]] `EXTRACTED`
+- [[announcementseeder_announcementseeder]] —method→ [[announcementseeder_announcementseeder_run]] `EXTRACTED`

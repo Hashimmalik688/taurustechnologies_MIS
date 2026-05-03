@@ -2,8 +2,8 @@
 **2 nodes**
 
 ## Members
-- [[app_http_controllers_controller_php]]
-- [[controller_controller]]
+- [[graphify_graphify_viz_py]]
+- [[graphify_viz_rationale_1]]
 
 ## Internal connections
-- [[app_http_controllers_controller_php]] —contains→ [[controller_controller]] `EXTRACTED`
+- [[graphify_graphify_viz_py]] —rationale_for→ [[graphify_viz_rationale_1]] `EXTRACTED`

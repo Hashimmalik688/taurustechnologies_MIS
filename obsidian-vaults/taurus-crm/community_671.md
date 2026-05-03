@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_agent_dashboard_blade_php]]
+- [[resources_views_partials_pipeline_dashboard_styles_blade_php]]

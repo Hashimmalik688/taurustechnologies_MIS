@@ -1,13 +1,11 @@
 # Community 75
-**4 nodes**
+**3 nodes**
 
 ## Members
-- [[2014_10_12_000000_create_users_table_createuserstable]]
-- [[2014_10_12_000000_create_users_table_createuserstable_down]]
-- [[2014_10_12_000000_create_users_table_createuserstable_up]]
-- [[database_migrations_2014_10_12_000000_create_users_table_php]]
+- [[app_http_middleware_checkmodulepermissionwithrole_php]]
+- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]]
+- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]]
 
 ## Internal connections
-- [[database_migrations_2014_10_12_000000_create_users_table_php]] —contains→ [[2014_10_12_000000_create_users_table_createuserstable]] `EXTRACTED`
-- [[2014_10_12_000000_create_users_table_createuserstable]] —method→ [[2014_10_12_000000_create_users_table_createuserstable_up]] `EXTRACTED`
-- [[2014_10_12_000000_create_users_table_createuserstable]] —method→ [[2014_10_12_000000_create_users_table_createuserstable_down]] `EXTRACTED`
+- [[app_http_middleware_checkmodulepermissionwithrole_php]] —contains→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] `EXTRACTED`
+- [[checkmodulepermissionwithrole_checkmodulepermissionwithrole]] —method→ [[checkmodulepermissionwithrole_checkmodulepermissionwithrole_construct]] `EXTRACTED`

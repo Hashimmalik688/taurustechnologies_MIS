@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_admin_followup_my_followups_blade_php]]
+- [[resources_views_partner_auth_login_blade_php]]

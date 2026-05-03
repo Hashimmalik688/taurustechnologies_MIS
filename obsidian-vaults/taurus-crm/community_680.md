@@ -2,4 +2,4 @@
 **1 nodes**
 
 ## Members
-- [[resources_views_components_zoom_phone_widget_blade_php]]
+- [[resources_views_components_sticky_notes_blade_php]]
