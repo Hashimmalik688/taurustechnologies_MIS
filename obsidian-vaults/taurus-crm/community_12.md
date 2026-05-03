@@ -1,0 +1,100 @@
+# Community 12
+**64 nodes**
+
+## Members
+- [[app_models_notification_php]]
+- [[app_models_user_php]]
+- [[app_services_notificationservice_php]]
+- [[app_support_permissionlevel_php]]
+- [[app_support_sidebarhelper_php]]
+- [[app_traits_sanitizesphonenumbers_php]]
+- [[notification_notification]]
+- [[notification_notification_createforuser]]
+- [[notification_notification_getdategroupattribute]]
+- [[notification_notification_getdategrouplabelattribute]]
+- [[notification_notification_gettimeagoattribute]]
+- [[notification_notification_isread]]
+- [[notification_notification_isunread]]
+- [[notification_notification_markasread]]
+- [[notification_notification_markasunread]]
+- [[notification_notification_scopeimportant]]
+- [[notification_notification_scoperead]]
+- [[notification_notification_scoperecent]]
+- [[notification_notification_scopeunread]]
+- [[notification_notification_user]]
+- [[notificationservice_notificationservice]]
+- [[notificationservice_notificationservice_cleanoldnotifications]]
+- [[notificationservice_notificationservice_createforallusers]]
+- [[notificationservice_notificationservice_createforuser]]
+- [[notificationservice_notificationservice_createforusers]]
+- [[notificationservice_notificationservice_createordernotification]]
+- [[notificationservice_notificationservice_createpaymentnotification]]
+- [[notificationservice_notificationservice_createsystemnotification]]
+- [[permissionlevel_permissionlevel]]
+- [[permissionlevel_permissionlevel_numeric]]
+- [[rolemodulepermission_rolemodulepermission_getnumericlevel]]
+- [[sanitizesphonenumbers_getoriginalphonenumber]]
+- [[sanitizesphonenumbers_sanitizephoneforchannel]]
+- [[sidebarhelper_sidebarhelper]]
+- [[sidebarhelper_sidebarhelper_candelete]]
+- [[sidebarhelper_sidebarhelper_canedit]]
+- [[sidebarhelper_sidebarhelper_canview]]
+- [[sidebarhelper_sidebarhelper_getvisiblemodules]]
+- [[user_user]]
+- [[user_user_attendances]]
+- [[user_user_candeleteinmodule]]
+- [[user_user_caneditmodule]]
+- [[user_user_canviewmodule]]
+- [[user_user_carriercommissions]]
+- [[user_user_carriersforwarded]]
+- [[user_user_carriersmanaged]]
+- [[user_user_carrierstates]]
+- [[user_user_chatconversations]]
+- [[user_user_chatparticipants]]
+- [[user_user_createnotification]]
+- [[user_user_getcommissionforcarrier]]
+- [[user_user_getpermissionformodule]]
+- [[user_user_getsanitizedzoomnumberattribute]]
+- [[user_user_hasmodulepermission]]
+- [[user_user_leadsforwarded]]
+- [[user_user_leadsmanaged]]
+- [[user_user_permissionoverrides]]
+- [[user_user_salaryrecords]]
+- [[user_user_scopeemployeesonly]]
+- [[user_user_scopeexcludepartners]]
+- [[user_user_setemailattribute]]
+- [[user_user_todayattendance]]
+- [[user_user_userdetail]]
+- [[usermodulepermission_usermodulepermission_getnumericlevel]]
+
+## Internal connections
+- [[app_traits_sanitizesphonenumbers_php]] —contains→ [[sanitizesphonenumbers_sanitizephoneforchannel]] `EXTRACTED`
+- [[app_traits_sanitizesphonenumbers_php]] —contains→ [[sanitizesphonenumbers_getoriginalphonenumber]] `EXTRACTED`
+- [[sanitizesphonenumbers_sanitizephoneforchannel]] —calls→ [[sanitizesphonenumbers_getoriginalphonenumber]] `EXTRACTED`
+- [[sanitizesphonenumbers_sanitizephoneforchannel]] —calls→ [[user_user_getsanitizedzoomnumberattribute]] `INFERRED`
+- [[app_services_notificationservice_php]] —contains→ [[notificationservice_notificationservice]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforuser]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice]] —method→ [[notificationservice_notificationservice_cleanoldnotifications]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createforusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createordernotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createpaymentnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notificationservice_notificationservice_createsystemnotification]] `EXTRACTED`
+- [[notificationservice_notificationservice_createforuser]] —calls→ [[notification_notification]] `INFERRED`
+- [[notificationservice_notificationservice_createforusers]] —calls→ [[notificationservice_notificationservice_createforallusers]] `EXTRACTED`
+- [[notificationservice_notificationservice_cleanoldnotifications]] —calls→ [[notification_notification]] `INFERRED`
+- [[app_support_sidebarhelper_php]] —contains→ [[sidebarhelper_sidebarhelper]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_getvisiblemodules]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_canview]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_canedit]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper]] —method→ [[sidebarhelper_sidebarhelper_candelete]] `EXTRACTED`
+- [[sidebarhelper_sidebarhelper_getvisiblemodules]] —calls→ [[user_user_canviewmodule]] `INFERRED`
+- [[sidebarhelper_sidebarhelper_canview]] —calls→ [[user_user_canviewmodule]] `INFERRED`
+- [[sidebarhelper_sidebarhelper_canedit]] —calls→ [[user_user_caneditmodule]] `INFERRED`
+- [[sidebarhelper_sidebarhelper_candelete]] —calls→ [[user_user_candeleteinmodule]] `INFERRED`
+- [[app_support_permissionlevel_php]] —contains→ [[permissionlevel_permissionlevel]] `EXTRACTED`
+- [[permissionlevel_permissionlevel]] —method→ [[permissionlevel_permissionlevel_numeric]] `EXTRACTED`

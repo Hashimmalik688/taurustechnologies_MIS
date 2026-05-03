@@ -4,7 +4,7 @@ Laravel 11 insurance CRM with role-based access, real-time chat (Laravel Reverb)
 
 ## Architecture & Key Components
 
-**Tech Stack:** Laravel 11, PHP 8.2, Livewire 3, Vite, Bootstrap 5, Laravel Reverb (WebSockets)
+**Tech Stack:** Laravel 11, PHP 8.3, Livewire 3, Vite, Bootstrap 5, Laravel Reverb (WebSockets)
 
 **Core Domain Areas:**
 - Lead Management (`app/Http/Controllers/Admin/LeadController.php`, `app/Models/Lead.php`)
@@ -147,9 +147,9 @@ php artisan config:cache
 
 A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,702 nodes, 27,187 edges, 803 communities from AST extraction of all 1,281 PHP/JS/TS files).
 
-**Always follow this order when answering codebase questions:**
+**For deep codebase questions, use this order (only when needed):**
 
-1. **Read `graphify-out/GRAPH_REPORT.md` first** — it contains god nodes (highest-degree concepts), community clusters, and surprising cross-file connections. Use it to orient before searching files.
+1. **Optionally read `graphify-out/GRAPH_REPORT.md`** for high-level orientation — it contains god nodes (highest-degree concepts), community clusters, and cross-file connections. Only consult it when the question spans many files or you need architectural context; do NOT load it for every prompt.
 
 2. **Query the graph for specific questions** instead of grepping raw files:
    ```
@@ -158,18 +158,12 @@ A knowledge graph of this codebase is stored in `graphify-out/graph.json` (9,702
    graphify explain "AttendanceService" --graph graphify-out/graph.json
    ```
 
-3. **Use the MCP server for programmatic graph access** (structured queries):
-   ```
-   python3 -m graphify.serve graphify-out/graph.json
-   ```
-   Exposes: `query_graph`, `get_node`, `get_neighbors`, `shortest_path`
+3. **Only fall back to reading raw files** when the graph query doesn't have enough detail.
 
-4. **Only fall back to reading raw files** when the graph query doesn't have enough detail.
-
-**Obsidian vault** (visual exploration): `/root/obsidian-vaults/taurus-crm/` — open in Obsidian desktop for linked node graph. Start from `index.md`.
+**Obsidian vault** (visual exploration): `/var/www/taurus-crm/obsidian-vaults/taurus-crm/` — open in Obsidian desktop for linked node graph. Start from `index.md`.
 
 **Update the graph** after significant code changes:
 ```bash
-cd /var/www/taurus-crm && python3 /root/graphify_step3a.py && python3 /root/graphify_merge.py && python3 /root/graphify_step4.py && python3 /root/graphify_step5_obsidian.py
+cd /var/www/taurus-crm && python3 graphify/graphify_step3a.py && python3 graphify/graphify_merge.py && python3 graphify/graphify_step4.py && python3 graphify/graphify_step5_obsidian.py
 ```
 Or in Copilot Chat: `/graphify /var/www/taurus-crm --update`

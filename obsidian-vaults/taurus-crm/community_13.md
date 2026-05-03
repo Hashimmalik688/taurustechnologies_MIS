@@ -1,0 +1,87 @@
+# Community 13
+**51 nodes**
+
+## Members
+- [[app_http_controllers_admin_projectcontroller_php]]
+- [[app_models_pabsproject_php]]
+- [[app_models_pabsprojectcomment_php]]
+- [[app_services_projectauthorizationservice_php]]
+- [[pabsproject_pabsproject]]
+- [[pabsproject_pabsproject_allocatedby]]
+- [[pabsproject_pabsproject_approvals]]
+- [[pabsproject_pabsproject_approver]]
+- [[pabsproject_pabsproject_assignedto]]
+- [[pabsproject_pabsproject_comments]]
+- [[pabsproject_pabsproject_creator]]
+- [[pabsproject_pabsproject_getvarianceamount]]
+- [[pabsproject_pabsproject_getvariancepercentage]]
+- [[pabsproject_pabsproject_hasvariance]]
+- [[pabsproject_pabsproject_scopeactive]]
+- [[pabsproject_pabsproject_scopebysection]]
+- [[pabsproject_pabsproject_scopebystatus]]
+- [[pabsproject_pabsproject_scopecompleted]]
+- [[pabsproject_pabsproject_scopepending]]
+- [[pabsproject_pabsproject_scopinglead]]
+- [[pabsproject_pabsproject_tickets]]
+- [[pabsprojectcomment_pabsprojectcomment]]
+- [[pabsprojectcomment_pabsprojectcomment_project]]
+- [[pabsprojectcomment_pabsprojectcomment_user]]
+- [[projectauthorizationservice_projectauthorizationservice]]
+- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]]
+- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]]
+- [[projectauthorizationservice_projectauthorizationservice_archiveproject]]
+- [[projectauthorizationservice_projectauthorizationservice_createproject]]
+- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]]
+- [[projectauthorizationservice_projectauthorizationservice_getsectionname]]
+- [[projectauthorizationservice_projectauthorizationservice_getsections]]
+- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]]
+- [[projectauthorizationservice_projectauthorizationservice_movetoscoping]]
+- [[projectauthorizationservice_projectauthorizationservice_startexecution]]
+- [[projectcontroller_projectcontroller]]
+- [[projectcontroller_projectcontroller_addcomment]]
+- [[projectcontroller_projectcontroller_addquotes]]
+- [[projectcontroller_projectcontroller_approval]]
+- [[projectcontroller_projectcontroller_archive]]
+- [[projectcontroller_projectcontroller_complete]]
+- [[projectcontroller_projectcontroller_completescopingandquote]]
+- [[projectcontroller_projectcontroller_construct]]
+- [[projectcontroller_projectcontroller_create]]
+- [[projectcontroller_projectcontroller_edit]]
+- [[projectcontroller_projectcontroller_index]]
+- [[projectcontroller_projectcontroller_movetoscoping]]
+- [[projectcontroller_projectcontroller_show]]
+- [[projectcontroller_projectcontroller_startexecution]]
+- [[projectcontroller_projectcontroller_store]]
+- [[projectcontroller_projectcontroller_update]]
+
+## Internal connections
+- [[app_services_projectauthorizationservice_php]] —contains→ [[projectauthorizationservice_projectauthorizationservice]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsections]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetoscoping]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_startexecution]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_archiveproject]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —method→ [[projectauthorizationservice_projectauthorizationservice_getsectionname]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_index]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_create]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_show]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_edit]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice]] —calls→ [[projectcontroller_projectcontroller_approval]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[projectauthorizationservice_projectauthorizationservice_createproject]] `EXTRACTED`
+- [[projectauthorizationservice_projectauthorizationservice_generateprojectcode]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_createproject]] —calls→ [[pabsproject_pabsproject]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_createproject]] —calls→ [[projectcontroller_projectcontroller_store]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_addvendorquotes]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_movetopendingapproval]] —calls→ [[projectcontroller_projectcontroller_addquotes]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] —calls→ [[pabsprojectcomment_pabsprojectcomment]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_addprogresscomment]] —calls→ [[projectcontroller_projectcontroller_addcomment]] `INFERRED`
+- [[projectauthorizationservice_projectauthorizationservice_archiveproject]] —calls→ [[projectcontroller_projectcontroller_archive]] `INFERRED`
+- [[app_models_pabsproject_php]] —contains→ [[pabsproject_pabsproject]] `EXTRACTED`
+- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_creator]] `EXTRACTED`
+- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_scopinglead]] `EXTRACTED`
+- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_approver]] `EXTRACTED`
+- [[pabsproject_pabsproject]] —method→ [[pabsproject_pabsproject_allocatedby]] `EXTRACTED`

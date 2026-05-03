@@ -1,0 +1,101 @@
+# Community 11
+**65 nodes**
+
+## Members
+- [[partials_custom_select_datepicker_styles]]
+- [[partials_pipeline_dashboard_styles]]
+- [[partials_sl_filter_assets]]
+- [[peregrine_closers_form]]
+- [[resources_views_admin_account_switching_log_blade_php]]
+- [[resources_views_admin_attendance_history_blade_php]]
+- [[resources_views_admin_attendance_index_blade_php]]
+- [[resources_views_admin_audit_logs_index_blade_php]]
+- [[resources_views_admin_audit_logs_show_blade_php]]
+- [[resources_views_admin_bank_verification_index_blade_php]]
+- [[resources_views_admin_chargebacks_index_blade_php]]
+- [[resources_views_admin_chart_of_accounts_create_blade_php]]
+- [[resources_views_admin_chart_of_accounts_edit_blade_php]]
+- [[resources_views_admin_chart_of_accounts_index_blade_php]]
+- [[resources_views_admin_chart_of_accounts_show_blade_php]]
+- [[resources_views_admin_dock_index_blade_php]]
+- [[resources_views_admin_dupe_checker_index_blade_php]]
+- [[resources_views_admin_employee_ems_blade_php]]
+- [[resources_views_admin_finance_petty_cash_blade_php]]
+- [[resources_views_admin_followup_done_blade_php]]
+- [[resources_views_admin_issuance_index_blade_php]]
+- [[resources_views_admin_leads_index_simple_blade_php]]
+- [[resources_views_admin_leads_peregrine_blade_php]]
+- [[resources_views_admin_ledger_create_blade_php]]
+- [[resources_views_admin_ledger_index_blade_php]]
+- [[resources_views_admin_ledger_show_blade_php]]
+- [[resources_views_admin_ledger_summary_blade_php]]
+- [[resources_views_admin_notifications_index_blade_php]]
+- [[resources_views_admin_pabs_tickets_create_blade_php]]
+- [[resources_views_admin_pabs_tickets_index_blade_php]]
+- [[resources_views_admin_pabs_tickets_show_blade_php]]
+- [[resources_views_admin_payroll_index_blade_php]]
+- [[resources_views_admin_permissions_edit_role_blade_php]]
+- [[resources_views_admin_permissions_index_blade_php]]
+- [[resources_views_admin_public_holidays_create_blade_php]]
+- [[resources_views_admin_public_holidays_edit_blade_php]]
+- [[resources_views_admin_public_holidays_index_blade_php]]
+- [[resources_views_admin_qa_review_blade_php]]
+- [[resources_views_admin_reports_closer_report_blade_php]]
+- [[resources_views_admin_reports_closer_report_drilldown_blade_php]]
+- [[resources_views_admin_reports_disposition_report_blade_php]]
+- [[resources_views_admin_reports_index_blade_php]]
+- [[resources_views_admin_reports_manager_submission_drilldown_blade_php]]
+- [[resources_views_admin_reports_manager_submission_report_blade_php]]
+- [[resources_views_admin_reports_per_closer_blade_php]]
+- [[resources_views_admin_reports_policy_type_report_blade_php]]
+- [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]]
+- [[resources_views_admin_reports_sales_status_blade_php]]
+- [[resources_views_admin_reports_sales_status_drilldown_blade_php]]
+- [[resources_views_admin_reports_submission_performance_blade_php]]
+- [[resources_views_admin_reports_submission_performance_drilldown_blade_php]]
+- [[resources_views_admin_reports_submission_performance_new_blade_php]]
+- [[resources_views_admin_reports_zoom_agent_performance_blade_php]]
+- [[resources_views_admin_reports_zoom_logs_blade_php]]
+- [[resources_views_admin_retention_index_blade_php]]
+- [[resources_views_admin_settings_devices_blade_php]]
+- [[resources_views_admin_settings_index_blade_php]]
+- [[resources_views_admin_users_index_blade_php]]
+- [[resources_views_peregrine_closers_index_blade_php]]
+- [[resources_views_ravens_bad_leads_blade_php]]
+- [[resources_views_ravens_dashboard_blade_php]]
+- [[resources_views_ravens_validation_blade_php]]
+- [[resources_views_validator_edit_blade_php]]
+- [[resources_views_validator_index_blade_php]]
+- [[resources_views_verifier_dashboard_blade_php]]
+
+## Internal connections
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_pipeline_dashboard_styles]] `EXTRACTED`
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[peregrine_closers_form]] `EXTRACTED`
+- [[resources_views_peregrine_closers_index_blade_php]] —includes→ [[partials_sl_filter_assets]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_verifier_dashboard_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_dashboard_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_validation_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_ravens_bad_leads_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_validator_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_account_switching_log_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_followup_done_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_audit_logs_show_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_edit_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_public_holidays_create_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_retention_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_dupe_checker_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_submission_performance_new_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_policy_type_report_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_closer_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_logs_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_index_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_per_closer_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_drilldown_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_zoom_agent_performance_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_sales_status_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_disposition_report_blade_php]] `EXTRACTED`
+- [[partials_pipeline_dashboard_styles]] —includes→ [[resources_views_admin_reports_manager_submission_report_blade_php]] `EXTRACTED`

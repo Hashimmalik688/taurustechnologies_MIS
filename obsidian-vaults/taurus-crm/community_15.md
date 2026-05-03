@@ -1,0 +1,60 @@
+# Community 15
+**24 nodes**
+
+## Members
+- [[app_models_salarycomponent_php]]
+- [[app_services_salaryservice_php]]
+- [[salarycomponent_salarycomponent]]
+- [[salarycomponent_salarycomponent_deductions]]
+- [[salarycomponent_salarycomponent_getattendancepercentageattribute]]
+- [[salarycomponent_salarycomponent_getcomponentlabelattribute]]
+- [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]]
+- [[salarycomponent_salarycomponent_gethassalesdataattribute]]
+- [[salarycomponent_salarycomponent_getmonthnameattribute]]
+- [[salarycomponent_salarycomponent_getsalestargetstatusattribute]]
+- [[salarycomponent_salarycomponent_scopebasic]]
+- [[salarycomponent_salarycomponent_scopebonus]]
+- [[salarycomponent_salarycomponent_scopeforperiod]]
+- [[salarycomponent_salarycomponent_scopeunpaid]]
+- [[salarycomponent_salarycomponent_user]]
+- [[salaryservice_salaryservice]]
+- [[salaryservice_salaryservice_calculatebasicsalary]]
+- [[salaryservice_salaryservice_calculatebonussalary]]
+- [[salaryservice_salaryservice_construct]]
+- [[salaryservice_salaryservice_createsalarycomponents]]
+- [[salaryservice_salaryservice_getattendancedata]]
+- [[salaryservice_salaryservice_getpaymentdate]]
+- [[salaryservice_salaryservice_getsalesdata]]
+- [[salaryservice_salaryservice_qualifiesforpunctualitybonus]]
+
+## Internal connections
+- [[app_services_salaryservice_php]] —contains→ [[salaryservice_salaryservice]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_construct]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_createsalarycomponents]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
+- [[salaryservice_salaryservice]] —method→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
+- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_getpaymentdate]] `EXTRACTED`
+- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebasicsalary]] `EXTRACTED`
+- [[salaryservice_salaryservice_createsalarycomponents]] —calls→ [[salaryservice_salaryservice_calculatebonussalary]] `EXTRACTED`
+- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
+- [[salaryservice_salaryservice_calculatebasicsalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
+- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getsalesdata]] `EXTRACTED`
+- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salaryservice_salaryservice_getattendancedata]] `EXTRACTED`
+- [[salaryservice_salaryservice_calculatebonussalary]] —calls→ [[salarycomponent_salarycomponent]] `INFERRED`
+- [[salaryservice_salaryservice_getattendancedata]] —calls→ [[salaryservice_salaryservice_qualifiesforpunctualitybonus]] `EXTRACTED`
+- [[app_models_salarycomponent_php]] —contains→ [[salarycomponent_salarycomponent]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_user]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_deductions]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getmonthnameattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getcomponentlabelattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getattendancepercentageattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethasperfectattendanceattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_gethassalesdataattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_getsalestargetstatusattribute]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebasic]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopebonus]] `EXTRACTED`
+- [[salarycomponent_salarycomponent]] —method→ [[salarycomponent_salarycomponent_scopeforperiod]] `EXTRACTED`

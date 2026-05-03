@@ -1,0 +1,156 @@
+# Community 9
+**120 nodes**
+
+## Members
+- [[buttons_print_min_b]]
+- [[buttons_print_min_r]]
+- [[chart_chart_hide]]
+- [[chart_chart_show]]
+- [[chart_chart_toggledatavisibility]]
+- [[chart_onclick]]
+- [[chat_notifications_isviewingconversation]]
+- [[chat_notifications_playnotificationsound]]
+- [[chat_notifications_pollnewmessages]]
+- [[chat_notifications_savenotifiedids]]
+- [[chat_notifications_showdesktopnotification]]
+- [[echarts_esm_close]]
+- [[echarts_esm_connect]]
+- [[jquery_1_11_1_actualdisplay]]
+- [[jquery_1_11_1_addcombinator]]
+- [[jquery_1_11_1_addgethookif]]
+- [[jquery_1_11_1_addhandle]]
+- [[jquery_1_11_1_ajaxhandleresponses]]
+- [[jquery_1_11_1_animation]]
+- [[jquery_1_11_1_augmentwidthorheight]]
+- [[jquery_1_11_1_condense]]
+- [[jquery_1_11_1_createactivexhr]]
+- [[jquery_1_11_1_createbuttonpseudo]]
+- [[jquery_1_11_1_createcache]]
+- [[jquery_1_11_1_createfxnow]]
+- [[jquery_1_11_1_createinputpseudo]]
+- [[jquery_1_11_1_createoptions]]
+- [[jquery_1_11_1_createpositionalpseudo]]
+- [[jquery_1_11_1_createstandardxhr]]
+- [[jquery_1_11_1_createtween]]
+- [[jquery_1_11_1_defaultdisplay]]
+- [[jquery_1_11_1_defaultprefilter]]
+- [[jquery_1_11_1_detach]]
+- [[jquery_1_11_1_disablescript]]
+- [[jquery_1_11_1_done]]
+- [[jquery_1_11_1_elementmatcher]]
+- [[jquery_1_11_1_fixclonenodeissues]]
+- [[jquery_1_11_1_fixdefaultchecked]]
+- [[jquery_1_11_1_genfx]]
+- [[jquery_1_11_1_getall]]
+- [[jquery_1_11_1_getwidthorheight]]
+- [[jquery_1_11_1_getwindow]]
+- [[jquery_1_11_1_inspectprefiltersortransports]]
+- [[jquery_1_11_1_internalremovedata]]
+- [[jquery_1_11_1_isarraylike]]
+- [[jquery_1_11_1_isemptydataobject]]
+- [[jquery_1_11_1_markfunction]]
+- [[jquery_1_11_1_matcherfromgroupmatchers]]
+- [[jquery_1_11_1_matcherfromtokens]]
+- [[jquery_1_11_1_multiplecontexts]]
+- [[jquery_1_11_1_propfilter]]
+- [[jquery_1_11_1_restorescript]]
+- [[jquery_1_11_1_returnfalse]]
+- [[jquery_1_11_1_returntrue]]
+- [[jquery_1_11_1_safeactiveelement]]
+- [[jquery_1_11_1_setfilters]]
+- [[jquery_1_11_1_setglobaleval]]
+- [[jquery_1_11_1_setmatcher]]
+- [[jquery_1_11_1_setpositivenumber]]
+- [[jquery_1_11_1_showhide]]
+- [[jquery_1_11_1_sibling]]
+- [[jquery_1_11_1_siblingcheck]]
+- [[jquery_1_11_1_sizzle]]
+- [[jquery_1_11_1_testcontext]]
+- [[jquery_1_11_1_toselector]]
+- [[jquery_1_11_1_tween]]
+- [[jquery_1_11_1_vendorpropname]]
+- [[jquery_addcombinator]]
+- [[jquery_ajaxconvert]]
+- [[jquery_ajaxextend]]
+- [[jquery_ajaxhandleresponses]]
+- [[jquery_animation]]
+- [[jquery_augmentwidthorheight]]
+- [[jquery_clonecopyevent]]
+- [[jquery_clonefixattributes]]
+- [[jquery_condense]]
+- [[jquery_createactivexhr]]
+- [[jquery_createbuttonpseudo]]
+- [[jquery_createfxnow]]
+- [[jquery_createinputpseudo]]
+- [[jquery_createoptions]]
+- [[jquery_createpositionalpseudo]]
+- [[jquery_createstandardxhr]]
+- [[jquery_createtweens]]
+- [[jquery_defaultprefilter]]
+- [[jquery_done]]
+- [[jquery_elementmatcher]]
+- [[jquery_fixdefaultchecked]]
+- [[jquery_genfx]]
+- [[jquery_getall]]
+- [[jquery_getwidthorheight]]
+- [[jquery_getwindow]]
+- [[jquery_inspectprefiltersortransports]]
+- [[jquery_isdisconnected]]
+- [[jquery_isemptydataobject]]
+- [[jquery_ishidden]]
+- [[jquery_jquerysub]]
+- [[jquery_la]]
+- [[jquery_ma]]
+- [[jquery_matcherfromgroupmatchers]]
+- [[jquery_matcherfromtokens]]
+- [[jquery_multiplecontexts]]
+- [[jquery_nb]]
+- [[jquery_ob]]
+- [[jquery_propfilter]]
+- [[jquery_returnfalse]]
+- [[jquery_returntrue]]
+- [[jquery_setfilters]]
+- [[jquery_setmatcher]]
+- [[jquery_setpositivenumber]]
+- [[jquery_showhide]]
+- [[jquery_sibling]]
+- [[jquery_siblingcheck]]
+- [[jquery_sizzle]]
+- [[jquery_tween]]
+- [[jquery_vendorpropname]]
+- [[public_js_chat_notifications_js]]
+- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]]
+- [[resources_libs_flot_charts_jquery_js]]
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]]
+
+## Internal connections
+- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_playnotificationsound]] `EXTRACTED`
+- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_savenotifiedids]] `EXTRACTED`
+- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_isviewingconversation]] `EXTRACTED`
+- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
+- [[public_js_chat_notifications_js]] —contains→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
+- [[chat_notifications_playnotificationsound]] —calls→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
+- [[chat_notifications_playnotificationsound]] —calls→ [[echarts_esm_connect]] `INFERRED`
+- [[chat_notifications_playnotificationsound]] —calls→ [[echarts_esm_close]] `INFERRED`
+- [[chat_notifications_savenotifiedids]] —calls→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
+- [[chat_notifications_isviewingconversation]] —calls→ [[chat_notifications_showdesktopnotification]] `EXTRACTED`
+- [[chat_notifications_showdesktopnotification]] —calls→ [[chat_notifications_pollnewmessages]] `EXTRACTED`
+- [[chat_notifications_showdesktopnotification]] —calls→ [[echarts_esm_close]] `INFERRED`
+- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]] —contains→ [[buttons_print_min_r]] `EXTRACTED`
+- [[resources_libs_datatables_net_buttons_js_buttons_print_min_mjs]] —contains→ [[buttons_print_min_b]] `EXTRACTED`
+- [[buttons_print_min_b]] —calls→ [[echarts_esm_close]] `INFERRED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_isarraylike]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_sizzle]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_createcache]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_markfunction]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_addhandle]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_siblingcheck]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_createinputpseudo]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_createbuttonpseudo]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_createpositionalpseudo]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_testcontext]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_setfilters]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_toselector]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_addcombinator]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_elementmatcher]] `EXTRACTED`
+- [[resources_libs_jquery_repeater_jquery_1_11_1_js]] —contains→ [[jquery_1_11_1_multiplecontexts]] `EXTRACTED`
