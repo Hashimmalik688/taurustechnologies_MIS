@@ -3798,13 +3798,24 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initial load is handled in DOMContentLoaded listener above (line ~426)
 // Removed duplicate call here to prevent refresh loop
 
-// Auto-refresh conversations every 60 seconds (reduced frequency to prevent fading)
-window.conversationsRefreshInterval = setInterval(loadConversations, 60000);
+// Replace 60s conversation list poll with WebSocket push
+// ConversationUpdated fires on user.{id} channel whenever a recipient gets a new message
+initEcho().then(echo => {
+    if (!echo) return;
+    try {
+        echo.private('user.{{ Auth::id() }}').listen('.conversation.updated', function (e) {
+            // Only refresh if we're not already viewing that conversation
+            if (window.currentConversationId && String(e.conversation_id) === String(window.currentConversationId)) return;
+            loadConversations();
+        });
+    } catch (err) {
+        console.warn('[Echo] ConversationUpdated listener failed:', err);
+    }
+});
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     clearInterval(window.messagesRefreshInterval);
-    clearInterval(window.conversationsRefreshInterval);
     clearInterval(window._typingPollInterval);
 });
 

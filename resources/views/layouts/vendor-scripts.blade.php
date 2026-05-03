@@ -8,6 +8,105 @@
 <!-- App js -->
 <script src="{{ URL::asset('build/js/app.js') }}"></script>
 
+<!-- Global Reverb/Echo bootstrap for all MIS pages -->
+<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
+<script>
+(function () {
+    const reverbConfig = {
+        key: '{{ env("REVERB_APP_KEY", "") }}',
+        host: '{{ env("REVERB_HOST", "127.0.0.1") }}',
+        port: {{ intval(env("REVERB_PORT", 8080)) }},
+        scheme: '{{ env("REVERB_SCHEME", "http") }}',
+    };
+
+    function createEchoInstance() {
+        if (window.Echo && typeof window.Echo.channel === 'function') {
+            return true;
+        }
+
+        const EchoCtor = typeof window.Echo === 'function'
+            ? window.Echo
+            : (window.LaravelEcho && (window.LaravelEcho.Echo || window.LaravelEcho.default));
+
+        if (!EchoCtor || !window.Pusher || !reverbConfig.key) {
+            return false;
+        }
+
+        window.Echo = new EchoCtor({
+            broadcaster: 'reverb',
+            key: reverbConfig.key,
+            wsHost: reverbConfig.host,
+            wsPort: reverbConfig.port,
+            wssPort: reverbConfig.port,
+            forceTLS: reverbConfig.scheme === 'https',
+            enabledTransports: ['ws', 'wss'],
+        });
+
+        return !!(window.Echo && typeof window.Echo.channel === 'function');
+    }
+
+    createEchoInstance();
+
+    if (!window.MISRealtime) {
+        window.MISRealtime = {
+            handlers: [],
+            register: function (domains, handler) {
+                const normalized = Array.isArray(domains) ? domains : ['*'];
+                this.handlers.push({ domains: normalized, handler: handler });
+            },
+            emit: function (payload) {
+                const payloadDomains = Array.isArray(payload && payload.domains)
+                    ? payload.domains.map((d) => String(d).toLowerCase())
+                    : [];
+
+                this.handlers.forEach((entry) => {
+                    const matchAny = entry.domains.includes('*');
+                    const matchDomain = entry.domains.some((d) => payloadDomains.includes(String(d).toLowerCase()));
+                    if (matchAny || matchDomain) {
+                        try {
+                            entry.handler(payload);
+                        } catch (err) {
+                            console.warn('MIS realtime handler error', err);
+                        }
+                    }
+                });
+
+                window.dispatchEvent(new CustomEvent('mis:realtime-update', { detail: payload }));
+            }
+        };
+    }
+
+    function subscribeMISChannel() {
+        if (window.__misRealtimeSubscribed) {
+            return true;
+        }
+        if (!window.Echo || typeof window.Echo.channel !== 'function') {
+            return false;
+        }
+
+        window.__misRealtimeSubscribed = true;
+        window.Echo.channel('mis.updates').listen('.mis.data.updated', function (event) {
+            if (window.MISRealtime && typeof window.MISRealtime.emit === 'function') {
+                window.MISRealtime.emit(event || {});
+            }
+        });
+        return true;
+    }
+
+    if (!subscribeMISChannel()) {
+        let tries = 0;
+        const iv = setInterval(function () {
+            tries += 1;
+            createEchoInstance();
+            if (subscribeMISChannel() || tries > 40) {
+                clearInterval(iv);
+            }
+        }, 250);
+    }
+})();
+</script>
+
 <!-- Global Chat Notifications (badge counter only, no Echo needed) -->
 <script src="{{ URL::asset('js/chat-notifications.js') }}?v={{ filemtime(public_path('js/chat-notifications.js')) }}"></script>
 

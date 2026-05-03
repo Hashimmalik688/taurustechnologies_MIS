@@ -45,13 +45,6 @@
     }
     .zt-btn-reauth:hover{background:linear-gradient(135deg,#1558b0,#0a46a3);color:#fff;box-shadow:0 3px 10px rgba(26,115,232,.45);transform:translateY(-1px)}
     .zt-btn-reauth i{font-size:.95rem}
-    /* Caller ID selector */
-    .zt-cid-wrap{display:flex;align-items:center;gap:.4rem;font-size:.72rem}
-    .zt-cid-wrap label{color:#64748b;font-weight:600;white-space:nowrap}
-    .zt-cid-select{border:1px solid #d1d5db;border-radius:6px;padding:.25rem .5rem;font-size:.72rem;background:#f8f9fa;color:#1e293b;cursor:pointer;max-width:200px}
-    .zt-cid-select:focus{outline:2px solid #1a73e8}
-    .zt-cid-select:disabled{opacity:.6;cursor:wait}
-    :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-cid-select{background:#0d1526;border-color:rgba(255,255,255,.15);color:#e2e8f0}
     :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar{background:#0d1526;border-bottom-color:rgba(255,255,255,.06)}
     :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar .zt-msg{color:#94a3b8}
     :is([data-theme="emerald-glass"],[data-theme="midnight-black"],[data-theme="ocean-blue"],[data-theme="royal-purple"],[data-theme="rose-gold"],[data-theme="copper-steel"]) .zt-bar.warn{background:#2d200a;border-bottom-color:#b38600}
@@ -76,17 +69,19 @@
             Token expired &mdash; calls will fail until you re-authorize
         @endif
     </span>
-    {{-- Caller ID selector (populated dynamically from Zoom) --}}
-    <div class="zt-cid-wrap">
-        <label for="zt-cid-sel"><i class="bx bx-phone-outgoing"></i> Caller ID:</label>
-        <select id="zt-cid-sel" class="zt-cid-select" disabled>
-            <option value="">Loading...</option>
-        </select>
-    </div>
     <a href="{{ route('zoom.authorize') }}" class="zt-btn-reauth">
         <i class="bx bx-refresh"></i>
         Re-authorize Zoom
     </a>
+</div>
+
+{{-- "No available device" help banner — shown if the Zoom iframe reports no device --}}
+<div id="zt-no-device-hint" style="display:none;align-items:center;gap:.6rem;padding:.45rem .85rem;background:#fff3cd;border-bottom:1px solid #ffc107;font-size:.75rem;color:#856404;flex-wrap:wrap">
+    <i class="bx bx-info-circle" style="font-size:1rem;flex-shrink:0"></i>
+    <span><strong>No available device?</strong> This means Zoom can&rsquo;t find an active phone on your account.
+    <strong>Fix:</strong> Open the <strong>Zoom desktop app</strong>, sign in, and make sure it&rsquo;s running &mdash; then refresh this page.
+    To make calls from the Lead list, the desktop app must be open.</span>
+    <button onclick="this.parentElement.style.display='none'" style="margin-left:auto;background:none;border:none;font-size:1rem;cursor:pointer;color:#856404" title="Dismiss">&times;</button>
 </div>
 <div class="zse-wrap">
     <iframe
@@ -101,59 +96,16 @@
 <script>
 const zpIframe = document.getElementById('zoom-embeddable-phone-iframe');
 
-// Default caller ID — populated async from Zoom; updates once DIDs are loaded
-window._zpCallerId = '';
-
-/**
- * Fetch the current user's DIDs from Zoom API and populate the Caller ID dropdown.
- * Called once on page load.
- */
-async function _zpLoadDids() {
-    const sel = document.getElementById('zt-cid-sel');
-    try {
-        const resp = await fetch('{{ route('zoom.phone.my-dids') }}', {
-            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-        });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        const dids = data.dids || [];
-        if (dids.length === 0) throw new Error('empty');
-
-        sel.innerHTML = '';
-        dids.forEach(function(d, i) {
-            const opt = document.createElement('option');
-            opt.value = d.number;
-            opt.textContent = d.label + ' (' + d.number + ')'
-                + (d.primary ? ' \u2605' : '');
-            if (i === 0) opt.selected = true;
-            sel.appendChild(opt);
-        });
-        sel.disabled = false;
-        window._zpCallerId = sel.value;
-        sel.addEventListener('change', function() { window._zpCallerId = this.value; });
-        console.log('[ZoomPhone] ✅ Loaded ' + dids.length + ' caller IDs from Zoom (source: ' + data.source + ')');
-    } catch (err) {
-        sel.innerHTML = '<option value="">No caller IDs available</option>';
-        sel.disabled = false;
-        console.warn('[ZoomPhone] Could not load DIDs:', err);
-    }
-}
-_zpLoadDids();
-
-// Internal dial — NOT window.zoomDial, so the widget can't overwrite it
+// Internal dial — passes number to Smart Embed; Zoom manages its own Caller ID internally
 function _zpDial(number) {
     if (!number) return;
     number = String(number).replace(/[^\d+*#]/g, '');
     if (/^\d{10}$/.test(number)) number = '+1' + number;
     if (!number) return;
-    // Prefer dropdown selection → last loaded default → empty (Zoom account default)
-    const callerId = (document.getElementById('zt-cid-sel')?.value
-                      || window._zpCallerId
-                      || '');
-    console.log('[ZoomPhone] 📞 Sending zp-make-call to iframe:', number, '| callerId:', callerId || '(zoom default)');
+    console.log('[ZoomPhone] 📞 Sending zp-make-call to iframe:', number);
     zpIframe.contentWindow.postMessage({
         type: 'zp-make-call',
-        data: { number, callerId, autoDial: true }
+        data: { number, autoDial: true }
     }, 'https://applications.zoom.us');
 }
 
@@ -322,6 +274,15 @@ window.addEventListener('message', async function(e) {
                     result:       data.result,
                     ts:           Date.now()
                 }));
+            }
+            break;
+
+        // Zoom fires this when it can't find an active phone device
+        case 'zp-no-devices-event':
+        case 'zp-device-status-changed-event':
+            if (!data || !data.devices || data.devices.length === 0) {
+                const hint = document.getElementById('zt-no-device-hint');
+                if (hint) hint.style.display = 'flex';
             }
             break;
     }

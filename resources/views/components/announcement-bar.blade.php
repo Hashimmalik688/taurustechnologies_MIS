@@ -646,8 +646,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load announcement on page load
     fetchAnnouncement();
 
-    // Refresh announcement every 30 seconds
-    pollInterval = setInterval(fetchAnnouncement, 30000);
+    // Refresh announcement every 30 seconds — skip when tab is not visible
+    pollInterval = setInterval(() => { if (document.visibilityState === 'visible') fetchAnnouncement(); }, 30000);
     
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {

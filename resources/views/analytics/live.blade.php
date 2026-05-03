@@ -884,5 +884,19 @@ function stopAutoRefresh() {
 }
 
 startAutoRefresh();
+
+// Realtime hook: refresh instantly when upstream MIS data changes.
+let analyticsRealtimeDebounce = null;
+if (window.MISRealtime && typeof window.MISRealtime.register === 'function') {
+    window.MISRealtime.register(['analytics', 'reports', 'revenue'], function () {
+        if (document.visibilityState !== 'visible') {
+            return;
+        }
+        clearTimeout(analyticsRealtimeDebounce);
+        analyticsRealtimeDebounce = setTimeout(function () {
+            fetchLiveData();
+        }, 900);
+    });
+}
 </script>
 @endsection

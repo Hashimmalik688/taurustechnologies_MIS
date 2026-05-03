@@ -138,15 +138,34 @@ class Notification extends Model
      */
     public static function createForUser($userId, $title, $message, $options = [])
     {
-        return self::create([
-            'user_id' => $userId,
-            'title' => $title,
-            'message' => $message,
-            'type' => $options['type'] ?? 'info',
-            'icon' => $options['icon'] ?? null,
-            'color' => $options['color'] ?? 'primary',
-            'data' => $options['data'] ?? null,
+        $notification = self::create([
+            'user_id'      => $userId,
+            'title'        => $title,
+            'message'      => $message,
+            'type'         => $options['type'] ?? 'info',
+            'icon'         => $options['icon'] ?? null,
+            'color'        => $options['color'] ?? 'primary',
+            'data'         => $options['data'] ?? null,
             'is_important' => $options['is_important'] ?? false,
         ]);
+
+        // Push real-time badge update to the user's personal channel
+        try {
+            $unreadCount = self::where('user_id', $userId)->whereNull('read_at')->count();
+            broadcast(new \App\Events\UserNotified(
+                userId:      $userId,
+                title:       $title,
+                message:     $message,
+                type:        $options['type']  ?? 'info',
+                icon:        $options['icon']  ?? 'bx-bell',
+                color:       $options['color'] ?? 'primary',
+                unreadCount: $unreadCount,
+                data:        $options['data']  ?? null,
+            ));
+        } catch (\Throwable) {
+            // Broadcasting unavailable — non-fatal, notification is saved
+        }
+
+        return $notification;
     }
 }

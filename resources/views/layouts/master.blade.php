@@ -5,7 +5,16 @@
     <title>@yield('title') | Taurus CRM</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
+    <!-- Early theme init — runs before CSS applies to prevent flash of wrong theme -->
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme') || 'light';
+            if (t === 'dark') { t = 'midnight-black'; localStorage.setItem('theme', t); }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ URL::asset('images/favicon.ico') }}">
     
@@ -20,7 +29,7 @@
 
 
     <!-- Custom Themes -->
-    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ filemtime(public_path('css/themes.css')) }}">
 
     <!-- Custom Layout Styles - Optimized -->
     @vite(['resources/css/custom-layout.css'])
@@ -239,17 +248,17 @@
                         <span class="th-clock-label">ET</span>
                         <span class="th-clock-time" id="navEasternTime">--:--</span>
                     </div>
-                    <span class="th-clock-dot"></span>
-                    <div class="th-clock">
+                    <span class="th-clock-dot th-dot-ct"></span>
+                    <div class="th-clock th-clock-ct">
                         <span class="th-clock-label">CT</span>
                         <span class="th-clock-time" id="navCentralTime">--:--</span>
                     </div>
-                    <span class="th-clock-dot"></span>
-                    <div class="th-clock">
+                    <span class="th-clock-dot th-dot-mt"></span>
+                    <div class="th-clock th-clock-mt">
                         <span class="th-clock-label">MT</span>
                         <span class="th-clock-time" id="navMountainTime">--:--</span>
                     </div>
-                    <span class="th-clock-dot"></span>
+                    <span class="th-clock-dot th-dot-ct"></span>
                     <div class="th-clock">
                         <span class="th-clock-label">PT</span>
                         <span class="th-clock-time" id="navPacificTime">--:--</span>
@@ -558,6 +567,29 @@
             .catch(error => console.error('Error marking notifications as read:', error));
         }
 
+        // Real-time notification bell — updates badge instantly when a new notification is pushed
+        (function waitForNotifChannel() {
+            const iv = setInterval(() => {
+                if (!window.Echo) return;
+                clearInterval(iv);
+                window.Echo.private('user.{{ Auth::id() }}')
+                    .listen('.notification.created', (e) => {
+                        // Update badge counter
+                        const badge = document.getElementById('notifBadge');
+                        if (badge) {
+                            const current = parseInt(badge.textContent) || 0;
+                            const newCount = e.unread_count || (current + 1);
+                            badge.textContent = newCount;
+                            badge.style.display = 'inline-flex';
+                        }
+                        // Show a brief toast so the user sees it without opening the dropdown
+                        if (window.showToast) {
+                            window.showToast(e.title, e.message, e.type || 'info');
+                        }
+                    });
+            }, 200);
+        })();
+
         // Close notifications when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('notificationDropdown');
@@ -747,48 +779,45 @@
 
     </script>
 
-    <!-- Chat Unread Count Script -->
+    <!-- Chat Unread Count — real-time via WebSocket (replaces 3s polling) -->
     <script>
-    // Load chat unread count immediately and then every 3 seconds
-    function loadChatUnreadCount() {
-        fetch('/api/chat/unread-count', {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const totalCount = data.total_count || data.unread_count || 0;
-                    updateChatBadge(totalCount);
-                }
-            })
-            .catch(error => {
-                // Silent fail - don't spam console
-            });
-    }
-
     function updateChatBadge(unreadCount) {
         const badge = document.querySelector('.chat-badge');
-        if (badge) {
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.classList.remove('d-none');
-            } else {
-                badge.classList.add('d-none');
-            }
+        if (!badge) return;
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            badge.classList.remove('d-none');
         } else {
-            console.log('Badge element not found');
+            badge.classList.add('d-none');
         }
     }
 
-    // Start loading immediately without waiting for DOM ready
+    // One-time load on page open to get the current count
+    function loadChatUnreadCount() {
+        fetch('/api/chat/unread-count', {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            }
+        })
+        .then(r => r.json())
+        .then(data => { if (data.success) updateChatBadge(data.total_count || data.unread_count || 0); })
+        .catch(() => {});
+    }
     loadChatUnreadCount();
-    
-    // Then refresh every 3 seconds for real-time notifications
-    setInterval(loadChatUnreadCount, 3000);
+
+    // Real-time: listen for new messages on the personal user channel
+    // Fires instantly when someone sends us a chat message — no polling needed
+    (function waitForUserChannel() {
+        const interval = setInterval(() => {
+            if (!window.Echo) return;
+            clearInterval(interval);
+            window.Echo.private('user.{{ Auth::id() }}')
+                .listen('.chat.unread', (e) => {
+                    updateChatBadge(e.unread_count);
+                });
+        }, 200);
+    })();
     </script>
 
     <!-- Profile Settings Modal -->
@@ -1112,6 +1141,7 @@
             return false;
         }
 
+        // Initial fetch on page load — catch up on any announcements missed since last visit
         function pollAnnouncements() {
             const url = lastPollTime
                 ? '/api/chat/announcements/poll?since=' + encodeURIComponent(lastPollTime)
@@ -1166,9 +1196,36 @@
                 if (isChecked) btn.classList.add('checked');
             }
 
-            // Start polling: first after 2s, then every 10s
-            setTimeout(pollAnnouncements, 2000);
-            setInterval(pollAnnouncements, 10000);
+            // One-time catch-up fetch on page load (replaces recurring poll)
+            pollAnnouncements();
+
+            // Real-time: subscribe to each community channel the user belongs to.
+            // Announcements arrive instantly via WebSocket — no polling needed.
+            @php
+                $userCommunityIds = auth()->check()
+                    ? \Illuminate\Support\Facades\DB::table('community_members')
+                        ->where('user_id', auth()->id())
+                        ->pluck('community_id')
+                        ->toArray()
+                    : [];
+            @endphp
+
+            (function waitForEchoAnn() {
+                const iv = setInterval(() => {
+                    if (!window.Echo) return;
+                    clearInterval(iv);
+                    const communityIds = @json($userCommunityIds);
+                    communityIds.forEach(function(cid) {
+                        window.Echo.private('community.' + cid)
+                            .listen('.announcement.posted', (e) => {
+                                const ann = e.announcement;
+                                if (ann && isNewOrEdited(ann)) {
+                                    showPopup(ann, true);
+                                }
+                            });
+                    });
+                }, 200);
+            })();
         });
     })();
     </script>

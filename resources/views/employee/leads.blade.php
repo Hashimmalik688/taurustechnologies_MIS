@@ -470,6 +470,7 @@
     let autoDialActive = false;
     let currentLeadIndex = 0;
     let dialedLeads = new Set();
+    let currentEventId = null; // tracks last processed call event (replaces 2s poll)
     let isCallActive = false;
     let autoDialTimeout = null;
 
@@ -477,53 +478,54 @@
     window.zoomNumber = '{{ Auth::user()->zoom_number ?? '' }}';
     window.sanitizedZoomNumber = '{{ Auth::user()->sanitized_zoom_number ?? '' }}';
 
-    // Setup Echo for call status monitoring
+    // ── Echo-based call monitoring (uses global Reverb Echo from master layout) ──
+    // Replaces: local Pusher Echo instance + 2s poll for call events
     @if(Auth::user()->zoom_number)
-    window.Echo = new Echo({
-        broadcaster: 'pusher',
-        key: '{{ env('PUSHER_APP_KEY') }}',
-        cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
-        forceTLS: true,
-        authEndpoint: '/broadcasting/auth',
-        auth: {
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        }
-    });
+    (function setupCallEcho() {
+        const echo = window.Echo;
+        if (!echo) { console.warn('[Employee] Echo not available'); return; }
 
-    // Listen for call status changes
-    window.Echo.private('calls.' + window.sanitizedZoomNumber)
-        .listen('CallStatusChanged', (e) => {
-            console.log('Call status:', e.status);
-
-            if (e.status === 'connected') {
-                isCallActive = true;
-                console.log('Call connected - Auto-dial paused');
-            } else if (e.status === 'disconnected' || e.status === 'ended') {
-                isCallActive = false;
-                console.log('Call ended - Resuming auto-dial in 2 seconds');
-
-                // Mark current lead as dialed
-                if (currentLeadIndex >= 0) {
-                    const rows = document.querySelectorAll('.lead-row');
-                    if (rows[currentLeadIndex]) {
-                        const leadId = rows[currentLeadIndex].dataset.leadId;
-                        dialedLeads.add(leadId);
-                        rows[currentLeadIndex].classList.remove('calling');
-                        rows[currentLeadIndex].classList.add('dialed');
+        // Call status changes (call connected / ended) — drives auto-dial pause/resume
+        echo.private('calls.' + window.sanitizedZoomNumber)
+            .listen('.CallStatusChanged', (e) => {
+                console.log('[Employee] Call status:', e.status);
+                if (e.status === 'connected') {
+                    isCallActive = true;
+                } else if (e.status === 'disconnected' || e.status === 'ended') {
+                    isCallActive = false;
+                    if (currentLeadIndex >= 0) {
+                        const rows = document.querySelectorAll('.lead-row');
+                        if (rows[currentLeadIndex]) {
+                            const leadId = rows[currentLeadIndex].dataset.leadId;
+                            dialedLeads.add(leadId);
+                            rows[currentLeadIndex].classList.remove('calling');
+                            rows[currentLeadIndex].classList.add('dialed');
+                        }
+                    }
+                    if (autoDialActive) {
+                        setTimeout(() => { currentLeadIndex++; autoDialNext(); }, 2000);
                     }
                 }
+            });
 
-                // Resume auto-dial after 2 seconds if active
-                if (autoDialActive) {
-                    setTimeout(() => {
-                        currentLeadIndex++;
-                        autoDialNext();
-                    }, 2000);
+        // Inbound call event notifications — replaces 2s poll
+        echo.private('user.{{ Auth::id() }}')
+            .listen('.call.event.received', (e) => {
+                console.log('[Employee] Call event received:', e);
+                if (e.callEventId && e.callEventId !== currentEventId) {
+                    currentEventId = e.callEventId;
+                    showCallModal({
+                        has_call:      true,
+                        lead_id:       e.leadId,
+                        status:        e.status,
+                        lead_data:     e.leadData,
+                        caller_number: e.callerNumber,
+                        callee_number: e.calleeNumber,
+                        event_id:      e.callEventId,
+                    });
                 }
-            }
-        });
+            });
+    })();
     @endif
 
     // Auto-dial toggle button
@@ -637,33 +639,6 @@
                 row.classList.add('dialed');
             }, 1000);
         }
-    }
-
-    // ===== LOCAL POLLING SYSTEM FOR CALL POPUP =====
-    let currentEventId = null;
-    let pollInterval = null;
-
-    function startCallPolling() {
-        console.log('Starting call event polling...');
-        pollInterval = setInterval(checkForCallEvents, 2000);
-        checkForCallEvents(); // Check immediately
-    }
-
-    function checkForCallEvents() {
-        fetch('/api/call-events/poll', {
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_call && data.event_id !== currentEventId) {
-                currentEventId = data.event_id;
-                showCallModal(data);
-            }
-        })
-        .catch(error => console.error('Polling error:', error));
     }
 
     // ===== PHASE NAVIGATION SYSTEM =====
@@ -808,7 +783,7 @@
     }
 
     // Start polling
-    startCallPolling();
+    // (removed — replaced by Echo WebSocket listener above)
 
     // Demo test call popup removed
 </script>

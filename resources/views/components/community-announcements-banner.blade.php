@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial fetch and polling
     fetchAnnouncements();
-    setInterval(fetchAnnouncements, 60000); // Poll every 60 seconds
+    setInterval(() => { if (document.visibilityState === 'visible') fetchAnnouncements(); }, 60000); // Poll every 60s (skips hidden tabs)
 
     // Cleanup on page unload
     window.addEventListener('beforeunload', function() {

@@ -40,3 +40,8 @@ Broadcast::channel('community.{communityId}', function ($user, $communityId) {
         ->where('user_id', $user->id)
         ->exists();
 });
+
+// Personal user channel — notifications, chat badge updates, real-time pings
+Broadcast::channel('user.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});

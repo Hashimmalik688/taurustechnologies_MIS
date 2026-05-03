@@ -36,7 +36,6 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\CloserReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamDashboardController;
-use App\Http\Controllers\AgentDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LocalizationController;
 use App\Http\Controllers\HomeController;
@@ -63,7 +62,9 @@ Route::prefix('partner')->group(function () {
     // Login routes (accessible always, but prevent logged-in users from accessing)
     Route::middleware('prevent.user')->group(function () {
         Route::get('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'showLoginForm'])->name('partner.login');
-        Route::post('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'login'])->name('partner.login.submit');
+        Route::post('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'login'])
+            ->middleware('throttle:partner-login')
+            ->name('partner.login.submit');
     });
 
     // Protected partner routes (only partners can access)
@@ -333,7 +334,7 @@ Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['aut
     // View and update followups - only shows leads assigned to the user
     Route::get('/my-followups', [\App\Http\Controllers\Admin\FollowupController::class, 'myFollowups'])->name('my-followups');
     Route::get('/report', [\App\Http\Controllers\Admin\FollowupController::class, 'report'])->name('report')->middleware('role.permission:issuance,view');
-    Route::post('/{id}/update-status', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupStatus'])->name('updateStatus');
+    Route::post('/{id}/update-status', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupStatus'])->name('update-status');
     // Route::post('/{id}/update-bank-verification', [\App\Http\Controllers\Admin\FollowupController::class, 'updateBankVerification'])->name('updateBankVerification'); // Bank verification disabled
     Route::post('/{id}/mark-done', [\App\Http\Controllers\Admin\FollowupController::class, 'markFollowupDone'])->name('mark-done');
     Route::get('/followup-done', [\App\Http\Controllers\Admin\FollowupController::class, 'followupDone'])->name('followup-done')->middleware('role.permission:issuance,view');
@@ -1145,6 +1146,7 @@ Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'
 // Revenue Analytics — access controlled by role.permission:revenue-analytics,level
 Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [\App\Http\Controllers\Admin\RevenueAnalyticsController::class, 'index'])->name('index')->middleware('role.permission:revenue-analytics,view');
+    Route::get('/live-data', [\App\Http\Controllers\Admin\RevenueAnalyticsController::class, 'liveData'])->name('live-data')->middleware('role.permission:revenue-analytics,view');
 });
 
 // Ravens Routes — access controlled by role.permission:ravens*,level
@@ -1213,14 +1215,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/zoom/phone/auto-log', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'autoLog'])->name('zoom.phone.auto-log');
     Route::get('/zoom/phone/my-calls', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'myCallLogs'])->name('zoom.phone.my-calls');
     Route::get('/zoom/phone/my-dids', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'myDids'])->name('zoom.phone.my-dids');
+    Route::post('/zoom/phone/set-active-number', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'setActiveNumber'])->name('zoom.phone.set-active-number');
     Route::get('/zoom/phone/recording/{id}', [App\Http\Controllers\Admin\ZoomPhoneEmbedController::class, 'getCallLogRecording'])->name('zoom.phone.call-recording');
 });
 
-// Zoom API Testing Routes (for proper development)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/zoom/test-api', [App\Http\Controllers\ZoomController::class, 'testApiCapabilities'])->name('zoom.test-api');
-    Route::get('/zoom/test-phone-auth', [App\Http\Controllers\ZoomController::class, 'testPhoneAuth'])->name('zoom.test-phone-auth');
-});
+
 
 // Call Events API (moved from api.php for proper web authentication)
 Route::middleware(['auth'])->group(function () {

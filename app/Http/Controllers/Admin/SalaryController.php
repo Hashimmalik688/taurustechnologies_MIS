@@ -101,7 +101,7 @@ class SalaryController extends Controller
             }
         });
 
-        return redirect()->route('salary.index')
+        return redirect()->route('payroll.index')
             ->with('success', 'Salaries calculated successfully for selected employees!');
     }
 

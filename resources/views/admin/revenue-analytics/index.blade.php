@@ -335,6 +335,9 @@
     <span style="font-size:0.62rem;color:var(--bs-surface-400);margin-left:0.25rem;">
         {{ $periodStart->format('M d') }} &ndash; {{ $periodEnd->format('M d, Y') }}
     </span>
+    <span id="revenueLiveUpdatedAt" style="font-size:0.62rem;color:var(--bs-surface-400);margin-left:0.35rem;">
+        Updated {{ now('America/Los_Angeles')->format('M d, Y h:i:s A') }} PT
+    </span>
 
     <form method="GET" action="{{ route('revenue-analytics.index') }}" class="pn-custom">
         <span style="font-size:0.65rem;color:var(--bs-surface-500);">Custom:</span>
@@ -349,18 +352,18 @@
 <div class="kpi-row">
     <div class="kpi-card k-purple ex-card">
         <i class="bx bx-time-five k-icon"></i>
-        <div class="k-val">${{ number_format($projected_revenue, 0) }}</div>
-        <div class="k-sub" style="color:#5b49c7;">{{ $pending_count }} drafts</div>
+        <div class="k-val" id="revKpiProjected">${{ number_format($projected_revenue, 0) }}</div>
+        <div class="k-sub" style="color:#5b49c7;" id="revKpiProjectedSub">{{ $pending_count }} drafts</div>
         <div class="k-lbl">Projected Revenue</div>
     </div>
     <div class="kpi-card k-teal ex-card">
         <i class="bx bx-loader-alt k-icon"></i>
-        <div class="k-val">{{ $pending_count }}</div>
+        <div class="k-val" id="revKpiPending">{{ $pending_count }}</div>
         <div class="k-lbl">Pending Drafts</div>
     </div>
     <div class="kpi-card k-green ex-card">
         <i class="bx bx-money k-icon"></i>
-        <div class="k-val">${{ number_format($pending_premium, 0) }}</div>
+        <div class="k-val" id="revKpiPremium">${{ number_format($pending_premium, 0) }}</div>
         <div class="k-lbl">Drafts Premium</div>
     </div>
 </div>
@@ -624,6 +627,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }).render();
     } else {
         document.querySelector('#monthlyRevenueChart').innerHTML = '<div style="text-align:center;padding:40px 0;color:' + txtColor + '"><i class="bx bx-bar-chart-alt-2" style="font-size:1.5rem;opacity:.4;"></i><p style="margin-top:4px;font-size:.72rem;">No monthly data</p></div>';
+    }
+
+    const liveDataUrl = '{{ route('revenue-analytics.live-data') }}' + window.location.search;
+    let revenueRealtimeDebounce = null;
+
+    function formatMoney(value) {
+        return '$' + Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    function applyLiveRevenue(data) {
+        const projected = document.getElementById('revKpiProjected');
+        const projectedSub = document.getElementById('revKpiProjectedSub');
+        const pending = document.getElementById('revKpiPending');
+        const premium = document.getElementById('revKpiPremium');
+        const updatedAt = document.getElementById('revenueLiveUpdatedAt');
+
+        if (projected) projected.textContent = formatMoney(data.projected_revenue);
+        if (projectedSub) projectedSub.textContent = (data.pending_count || 0) + ' drafts';
+        if (pending) pending.textContent = data.pending_count || 0;
+        if (premium) premium.textContent = formatMoney(data.pending_premium);
+        if (updatedAt && data.updated_at) updatedAt.textContent = 'Updated ' + data.updated_at;
+    }
+
+    function refreshRevenueLiveData() {
+        fetch(liveDataUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json())
+            .then(applyLiveRevenue)
+            .catch(() => {});
+    }
+
+    if (window.MISRealtime && typeof window.MISRealtime.register === 'function') {
+        window.MISRealtime.register(['revenue', 'analytics', 'reports'], function() {
+            if (document.visibilityState !== 'visible') return;
+            clearTimeout(revenueRealtimeDebounce);
+            revenueRealtimeDebounce = setTimeout(refreshRevenueLiveData, 1200);
+        });
     }
 });
 </script>

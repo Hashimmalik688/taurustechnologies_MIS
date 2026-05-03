@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\CallEventReceived;
 use App\Events\CallStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Jobs\QA\DownloadAndProcessRecording;
@@ -266,7 +267,7 @@ class ZoomWebhookController extends Controller
             }
             
             if ($user) {
-                CallEvent::create([
+                $callEvent = CallEvent::create([
                     'lead_id' => $lead->id,
                     'user_id' => $user->id,
                     'caller_number' => $callerNumber,
@@ -277,6 +278,17 @@ class ZoomWebhookController extends Controller
                     'is_read' => false,
                     'event_time' => now(),
                 ]);
+
+                // Push real-time notification to the employee — replaces 2s poll
+                broadcast(new CallEventReceived(
+                    userId:        $user->id,
+                    callEventId:   $callEvent->id,
+                    leadId:        $lead->id,
+                    status:        'connected',
+                    leadData:      $lead->toArray(),
+                    callerNumber:  $callerNumber,
+                    calleeNumber:  $calleeNumber,
+                ));
             }
         } else {
             Log::warning('[Zoom] No lead found for phone number', [

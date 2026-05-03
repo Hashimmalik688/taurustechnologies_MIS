@@ -71,6 +71,11 @@
         .lead-row.dialed{opacity:.55}
         .lead-row.dialed-by-me{background-color:rgba(78,115,223,.05)!important;border-left:3px solid var(--bs-primary)}
         .lead-row.dialed-by-others{background-color:rgba(231,74,59,.03)!important}
+        .lead-row.realtime-highlight{animation:leadRealtimePulse .9s ease}
+        .lead-row.lead-disposed{opacity:.55;background:rgba(220,53,69,.08)!important;border-left:3px solid var(--bs-danger)}
+        .lead-live-status{display:none}
+
+        @keyframes leadRealtimePulse{0%{box-shadow:inset 0 0 0 999px rgba(13,110,253,.16)}100%{box-shadow:inset 0 0 0 999px rgba(13,110,253,0)}}
 
         .bg-purple{background-color:var(--bs-ui-purple,#6f42c1)!important;color:#fff!important}
 
@@ -186,9 +191,19 @@
         .auto-dial-btn{position:relative;min-width:150px}
         .auto-dial-btn.active{background:var(--bs-danger)!important;border-color:var(--bs-danger)!important}
 
+        /* DID pill buttons — "My Numbers" bar */
+
+
         /* Locked lead states */
         .dial-btn.locked{background:#e74a3b!important;cursor:not-allowed;opacity:.75}
         .dial-btn.locked:hover{transform:none;filter:none}
+
+        /* Split dial button — primary + alternate (secondary phone) */
+        .dial-split{display:inline-flex;gap:0;border-radius:22px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+        .dial-split .dial-btn-primary{border-radius:22px 0 0 22px;padding:.35rem .8rem}
+        .dial-split .dial-btn-alt{border-radius:0 22px 22px 0;padding:.35rem .6rem;background:rgba(0,0,0,.15);border-left:1px solid rgba(255,255,255,.2)}
+        .dial-split .dial-btn-alt:hover{background:rgba(0,0,0,.28);filter:none}
+        .dial-split .dial-btn{margin:0;border-radius:0}
         .lead-row.in-call{background-color:rgba(231,74,59,.07)!important;border-left:3px solid #e74a3b}
         .live-badge{display:inline-flex;align-items:center;gap:.3rem;background:#e74a3b;color:#fff;border-radius:12px;padding:.15rem .55rem;font-size:.7rem;font-weight:700;animation:pulseLive 1.5s ease-in-out infinite;margin-right:3px}
         .live-badge.mine{background:#1cc88a}
@@ -252,7 +267,7 @@
                 <span><span class="dial-badge is-mine d-inline-flex" style="width:18px;height:18px;background:var(--bs-primary);font-size:.5rem">ME</span> You</span>
                 <span><span class="dial-badge d-inline-flex" style="width:18px;height:18px;background:var(--bs-danger);font-size:.5rem">AB</span> Others</span>
                 <span><span class="live-badge" style="animation:none;font-size:.65rem;padding:.1rem .4rem">⬤ LIVE</span> In call now</span>
-                <span style="opacity:.6">Hover badge for details · Auto-refreshes every 10s</span>
+                <span style="opacity:.6">Hover badge for details · Live via WebSocket</span>
             </div>
         </div>
         <div class="sl-card-body" style="padding:.5rem .75rem">
@@ -273,6 +288,7 @@
                                 <td>{{ $leads->firstItem() + $index }}</td>
                                 <td>
                                     <strong>{{ $lead->cn_name ?? 'N/A' }}</strong>
+                                    <span class="badge bg-secondary ms-1 lead-live-status" data-lead-id="{{ $lead->id }}"></span>
                                     @if($lead->sale_at && $lead->closer_name)
                                         <span class="badge bg-success ms-1" style="border-radius:8px;font-size:.68rem">Sale by {{ $lead->closer_name }} · {{ $lead->sale_at->format('M d, Y') }}</span>
                                     @endif
@@ -299,19 +315,29 @@
                                     <input type="text" class="callback-note-input" data-lead-id="{{ $lead->id }}"
                                         value="{{ $noteValue }}" placeholder="e.g., callback 2pm"
                                         onblur="saveCallbackNote({{ $lead->id }}, this.value)">
-                                    @if($showNote && $lead->callback_note_updated_at)
-                                        <small class="text-muted d-block mt-1" style="font-size:.72rem">
-                                            <i class="bx bx-time-five"></i> {{ $lead->callback_note_updated_at->diffForHumans() }}
-                                        </small>
-                                    @endif
+                                    <small class="text-muted d-block mt-1 callback-note-meta" data-lead-id="{{ $lead->id }}" style="font-size:.72rem;{{ $showNote && $lead->callback_note_updated_at ? '' : 'display:none' }}">
+                                        <i class="bx bx-time-five"></i>
+                                        <span class="callback-note-meta-text">{{ $showNote && $lead->callback_note_updated_at ? $lead->callback_note_updated_at->diffForHumans() : '' }}</span>
+                                    </small>
                                 </td>
                                 <td class="text-center">
                                     <div class="dial-badges" id="dial-badges-{{ $lead->id }}"></div>
                                 </td>
                                 <td class="text-center">
-                                    <button class="dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)">
+                                    @if($lead->secondary_phone_number)
+                                    <div class="dial-split">
+                                        <button class="dial-btn dial-btn-primary" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)" title="Primary: {{ $lead->phone_number }}">
+                                            <i class="bx bx-phone-call"></i> Call
+                                        </button>
+                                        <button class="dial-btn dial-btn-alt" onclick="makeCall('{{ $lead->id }}', '{{ $lead->secondary_phone_number }}', this)" title="Secondary: {{ $lead->secondary_phone_number }}">
+                                            <i class="bx bx-phone"></i>
+                                        </button>
+                                    </div>
+                                    @else
+                                    <button class="dial-btn" onclick="makeCall('{{ $lead->id }}', '{{ $lead->phone_number }}', this)" title="{{ $lead->phone_number }}">
                                         <i class="bx bx-phone-call"></i> Call
                                     </button>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -1166,8 +1192,32 @@
 
 @section('script')
 <script src="{{ URL::asset('build/libs/toastr/build/toastr.min.js') }}"></script>
-<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
+<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo/dist/echo.iife.js"></script>
+<script>
+    // Initialise Reverb Echo instance (echo.iife.js sets window.Echo = class, not instance)
+    (function () {
+        var _reverbKey    = '{{ env("REVERB_APP_KEY", "") }}';
+        var _reverbHost   = '{{ env("REVERB_HOST", "127.0.0.1") }}';
+        var _reverbPort   = {{ intval(env("REVERB_PORT", 8080)) }};
+        var _reverbScheme = '{{ env("REVERB_SCHEME", "http") }}';
+        if (_reverbKey && typeof Echo !== 'undefined') {
+            window.Echo = new Echo({
+                broadcaster:       'reverb',
+                key:               _reverbKey,
+                wsHost:            _reverbHost,
+                wsPort:            _reverbPort,
+                wssPort:           _reverbPort,
+                forceTLS:          _reverbScheme === 'https',
+                enabledTransports: ['ws', 'wss'],
+                authEndpoint:      '/broadcasting/auth',
+                auth: { headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                }},
+            });
+        }
+    })();
+</script>
 <script>
     // Use window scope for global variables to avoid conflicts
     window.autoDialActive = false;
@@ -1181,6 +1231,9 @@
     window.currentLeadData = null;
     window.autoSaveInterval = null; // Auto-save form data every 30 seconds
     window.dialStatusData = {}; // Server-synced dial status
+    window.CURRENT_USER_ID = {{ Auth::id() }};
+
+    // zoom_number is auto-populated from the Zoom API on first call — no UI needed here
 
     // ===== PERSISTENT DIAL TRACKING =====
     
@@ -1200,6 +1253,7 @@
             if (data.success) {
                 window.dialStatusData = data.dials || {};
                 window.activeLocks = data.locks || {};
+                window.CURRENT_USER_ID = data.current_user_id ?? window.CURRENT_USER_ID;
                 renderDialBadges(data.dials, data.current_user_id);
                 applyLockStates(data.locks, data.current_user_id);
             }
@@ -1333,18 +1387,172 @@
         .then(data => {
             if (data.success) {
                 console.log('✅ Dial recorded for lead', leadId);
-                // Refresh dial status to show updated badges
-                loadDialStatus();
+                // Badge update now arrives via WebSocket (DialStatusUpdated event)
             }
         })
         .catch(error => console.error('Failed to record dial:', error));
     }
 
-    // Load dial status on page load
+    // Load dial status once on page load (full snapshot)
     loadDialStatus();
-    
-    // Refresh dial status every 10 seconds to catch real-time lock changes
-    setInterval(loadDialStatus, 10000);
+
+    function getLeadRow(leadId) {
+        return document.querySelector(`.lead-row[data-lead-id="${leadId}"]`);
+    }
+
+    function pulseLeadRow(leadId) {
+        const row = getLeadRow(leadId);
+        if (!row) return;
+        row.classList.remove('realtime-highlight');
+        // Force reflow so repeated updates still animate.
+        void row.offsetWidth;
+        row.classList.add('realtime-highlight');
+    }
+
+    function applyLeadStatusBadge(leadId, status, disposition) {
+        const badge = document.querySelector(`.lead-live-status[data-lead-id="${leadId}"]`);
+        if (!badge) return;
+
+        const normalizedStatus = (status || '').toLowerCase().trim();
+        const normalizedDisposition = (disposition || '').replace(/_/g, ' ').trim();
+
+        if (!normalizedStatus && !normalizedDisposition) {
+            badge.style.display = 'none';
+            badge.textContent = '';
+            badge.className = 'badge bg-secondary ms-1 lead-live-status';
+            return;
+        }
+
+        badge.style.display = 'inline-block';
+        badge.className = 'badge ms-1 lead-live-status ' + (normalizedStatus === 'disposed' ? 'bg-danger' : 'bg-info');
+        badge.textContent = normalizedDisposition
+            ? `${normalizedStatus || 'updated'} · ${normalizedDisposition}`
+            : normalizedStatus;
+    }
+
+    function applyCallbackNoteRealtime(leadId, note, updatedAt) {
+        const input = document.querySelector(`input.callback-note-input[data-lead-id="${leadId}"]`);
+        const meta = document.querySelector(`.callback-note-meta[data-lead-id="${leadId}"]`);
+
+        if (input) {
+            input.value = note || '';
+        }
+
+        if (!meta) return;
+        const textNode = meta.querySelector('.callback-note-meta-text');
+
+        if (note && updatedAt) {
+            if (textNode) textNode.textContent = updatedAt;
+            meta.style.display = 'block';
+        } else {
+            if (textNode) textNode.textContent = '';
+            meta.style.display = 'none';
+        }
+    }
+
+    function markLeadDisposedRealtime(leadId, disposition) {
+        const row = getLeadRow(leadId);
+        if (!row) return;
+
+        row.classList.add('lead-disposed');
+        row.setAttribute('data-status', 'disposed');
+        applyLeadStatusBadge(leadId, 'disposed', disposition || 'disposed');
+
+        const callButtons = row.querySelectorAll('.dial-btn');
+        callButtons.forEach((btn) => {
+            btn.disabled = true;
+            btn.classList.add('locked');
+            btn.title = 'Lead disposed';
+        });
+    }
+
+    // Real-time dial badge + lock updates via WebSocket — replaces 10s polling
+    function waitForEcho(cb) {
+        if (window.Echo && typeof window.Echo.channel === 'function') { cb(); return; }
+        const iv = setInterval(() => {
+            if (window.Echo && typeof window.Echo.channel === 'function') { clearInterval(iv); cb(); }
+        }, 200);
+    }
+    waitForEcho(function () {
+        window.Echo.channel('ravens.calling').listen('.dial.status.updated', function (e) {
+            const leadId   = String(e.lead_id);
+            const action   = e.action;  // 'locked' | 'unlocked' | 'dialed'
+
+            if (action === 'locked') {
+                // Update local lock cache and disable the dial button
+                window.activeLocks = window.activeLocks || {};
+                window.activeLocks[leadId] = {
+                    user_id:   e.user_id,
+                    user_name: e.user_name,
+                    is_mine:   e.user_id === window.CURRENT_USER_ID,
+                    since:     'just now',
+                };
+                applyLockStates(window.activeLocks, window.CURRENT_USER_ID);
+            } else if (action === 'unlocked') {
+                window.activeLocks = window.activeLocks || {};
+                delete window.activeLocks[leadId];
+                applyLockStates(window.activeLocks, window.CURRENT_USER_ID);
+            } else if (action === 'dialed') {
+                // Merge this dial into the local dialMap and re-render badge for this lead
+                window.dialStatusData = window.dialStatusData || {};
+                const existing = (window.dialStatusData[leadId] || []);
+                const myEntry  = existing.find(d => d.user_id === e.user_id);
+                if (myEntry) {
+                    myEntry.count++;
+                    myEntry.dialed_at = e.dialed_at;
+                    myEntry.outcome   = e.outcome;
+                } else {
+                    existing.push({
+                        lead_id:   parseInt(leadId),
+                        user_id:   e.user_id,
+                        user_name: e.user_name,
+                        initials:  e.initials,
+                        color:     e.color,
+                        is_mine:   e.user_id === window.CURRENT_USER_ID,
+                        dialed_at: e.dialed_at,
+                        outcome:   e.outcome,
+                        count:     1,
+                    });
+                }
+                window.dialStatusData[leadId] = existing;
+                // Re-render only this lead's badge
+                const singleMap = {};
+                singleMap[leadId] = existing;
+                renderDialBadges(singleMap, window.CURRENT_USER_ID);
+            }
+        });
+
+        window.Echo.channel('ravens.calling').listen('.lead.updated', function (e) {
+            const leadId = String(e.lead_id || '');
+            const action = e.action;
+            if (!leadId || !action) return;
+
+            pulseLeadRow(leadId);
+
+            if (action === 'callback_note_updated') {
+                applyCallbackNoteRealtime(leadId, e.callback_note, e.callback_updated_at);
+            }
+
+            if (action === 'disposition_recorded') {
+                applyLeadStatusBadge(leadId, e.status || 'updated', e.disposition || '');
+            }
+
+            if (action === 'status_changed') {
+                applyLeadStatusBadge(leadId, e.status || 'updated', e.disposition || '');
+                if ((e.status || '').toLowerCase() === 'disposed') {
+                    markLeadDisposedRealtime(leadId, e.disposition || 'disposed');
+                }
+            }
+
+            if (action === 'lead_disposed') {
+                markLeadDisposedRealtime(leadId, e.disposition || 'disposed');
+            }
+
+            if (action === 'lead_saved') {
+                applyLeadStatusBadge(leadId, 'updated', 'details saved');
+            }
+        });
+    });
 
     // Clear any stale call status from before this page load
     localStorage.removeItem('zpw_call_status');
@@ -1463,31 +1671,7 @@
         .then(data => {
             if (data.success) {
                 console.log('✅ Callback note saved:', data.message);
-                // Update the timestamp display if note was saved
-                if (data.note && data.updated_at) {
-                    const input = document.querySelector(`input[data-lead-id="${leadId}"]`);
-                    if (input) {
-                        const existingTimestamp = input.nextElementSibling;
-                        if (existingTimestamp && existingTimestamp.tagName === 'SMALL') {
-                            existingTimestamp.innerHTML = `<i class="bx bx-time-five"></i> ${data.updated_at}`;
-                        } else {
-                            // Create timestamp display
-                            const timestamp = document.createElement('small');
-                            timestamp.className = 'text-muted d-block mt-1';
-                            timestamp.innerHTML = `<i class="bx bx-time-five"></i> ${data.updated_at}`;
-                            input.parentNode.insertBefore(timestamp, input.nextSibling);
-                        }
-                    }
-                } else {
-                    // Clear timestamp if note was cleared
-                    const input = document.querySelector(`input[data-lead-id="${leadId}"]`);
-                    if (input) {
-                        const existingTimestamp = input.nextElementSibling;
-                        if (existingTimestamp && existingTimestamp.tagName === 'SMALL') {
-                            existingTimestamp.remove();
-                        }
-                    }
-                }
+                applyCallbackNoteRealtime(String(leadId), data.note || '', data.updated_at || '');
             } else {
                 console.error('❌ Failed to save callback note:', data.message);
             }
@@ -1497,13 +1681,20 @@
         });
     }
 
-    // Unified call function - uses proper Zoom API integration
-    // Acquires an exclusive call-lock first to prevent two closers dialling the same lead
+    // Unified call function — dials immediately (user gesture context), then locks/records async
     window.makeCall = function(leadId, phoneNumber, button) {
-        console.log('makeCall called with:', leadId, phoneNumber);
-
         if (!phoneNumber) {
             alert('No phone number available for this lead');
+            return;
+        }
+
+        // Client-side lock check — don't bother dialling a lead someone else is on
+        const cachedLock = window.activeLocks?.[String(leadId)];
+        if (cachedLock && !cachedLock.is_mine) {
+            toastr.warning(
+                '🚫 ' + cachedLock.user_name + ' is currently calling this lead. Please pick another.',
+                'Lead Locked', { timeOut: 5000 }
+            );
             return;
         }
 
@@ -1515,127 +1706,85 @@
             window.currentLeadData = null;
         }
 
-        // Fast client-side check using cached lock state
-        const cachedLock = window.activeLocks?.[String(leadId)];
-        if (cachedLock && !cachedLock.is_mine) {
-            toastr.warning(
-                '🚫 ' + cachedLock.user_name + ' is currently calling this lead. Please pick another.',
-                'Lead Locked', { timeOut: 5000 }
-            );
-            return;
-        }
+        // ── DIAL IMMEDIATELY (must be synchronous from user gesture context) ──
+        // window.zoomDial opens/focuses the /zoom/phone tab and sends the number
+        // via BroadcastChannel so the Smart Embed auto-dials it.
+        window.zoomDial(phoneNumber);
 
+        // Visual feedback
+        window.isCallActive = true;
+        window.currentCallInfo = { leadId, phoneNumber, leadName: 'Lead' };
         const originalText = button.innerHTML;
         button.disabled = true;
-        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Locking…';
+        button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Calling…';
 
-        // Step 1: Acquire exclusive lock
+        const row = button.closest('.lead-row');
+        if (row) {
+            row.classList.add('calling');
+            setTimeout(() => { row.classList.remove('calling'); row.classList.add('dialed'); }, 1000);
+        }
+
+        // 10s form fallback — opens call form if webhook doesn't fire
+        if (window._formFallbackTimer) clearTimeout(window._formFallbackTimer);
+        window._formFallbackTimer = setTimeout(function() {
+            const modalEl = document.getElementById('callDetailsModal');
+            const isOpen = modalEl && modalEl.classList.contains('show');
+            if (!isOpen && window.currentCallInfo && String(window.currentCallInfo.leadId) === String(leadId)) {
+                showRavensFormForCall(leadId, phoneNumber, window.currentCallInfo.leadName, 'connected', 0);
+            }
+        }, 10000);
+
+        // ── BACKGROUND: acquire lock + record dial (no user gesture needed) ──
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         fetch('/ravens/leads/acquire-lock', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
             body: JSON.stringify({ lead_id: leadId })
         })
         .then(r => {
             if (r.status === 409) {
-                return r.json().then(d => Promise.reject({ locked: true, message: d.message }));
+                return r.json().then(d => {
+                    // Soft lock — call is already in progress, just warn
+                    toastr.warning('⚠️ ' + (d.message || 'Lead may already be called by someone else'), 'Note', { timeOut: 4000 });
+                    return null;
+                });
             }
-            if (!r.ok) throw new Error('Lock request failed (' + r.status + ')');
-            return r.json();
-        })
-        .then(() => {
-            // Lock acquired — update local cache immediately so UI is responsive
+            if (!r.ok) return null;
             window.activeLocks = window.activeLocks || {};
             window.activeLocks[String(leadId)] = { is_mine: true, user_name: 'You', since: 'just now' };
-
-            button.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Connecting…';
-
-            // Step 2: Initiate Zoom dial
-            return fetch(`/zoom/dial/${leadId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            });
+            return r.json();
         })
-        .then(response => {
-            if (!response.ok) {
-                if (response.status === 401) throw new Error('ZOOM_NOT_AUTHORIZED');
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        .then(() => fetch(`/zoom/dial/${leadId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ phone_number: phoneNumber })
+        }))
+        .then(r => r.json())
         .then(data => {
-            console.log('Zoom API response:', data);
+            if (data.lead_name && window.currentCallInfo && String(window.currentCallInfo.leadId) === String(leadId)) {
+                window.currentCallInfo.leadName = data.lead_name;
+            }
+            window.dialedLeads.add(leadId);
+            recordDial(leadId, 'dialed');
+            loadDialStatus();
 
-            if (data.success) {
-                console.log('✅ Call record created — dialling via Zoom Phone Smart Embed');
+            toastr.clear();
+            toastr.info('📞 Dialing ' + (data.lead_name || 'lead') + '…', 'Calling', {
+                timeOut: 0, extendedTimeOut: 0, closeButton: true
+            });
 
-                window.isCallActive = true;
-                window.zoomDial(phoneNumber);
-                window.dialedLeads.add(leadId);
-                recordDial(leadId, 'dialed');
-
-                const row = button.closest('.lead-row');
-                if (row) {
-                    row.classList.add('calling');
-                    setTimeout(() => {
-                        row.classList.remove('calling');
-                        row.classList.add('dialed');
-                    }, 1000);
-                }
-
-                console.log('📞 Call initiated via Smart Embed for ' + data.lead_name);
-                window.currentCallInfo = { leadId, phoneNumber, leadName: data.lead_name };
-                toastr.clear();
-                toastr.info('📞 Dialing ' + data.lead_name + '…', 'Calling', {
-                    timeOut: 0, extendedTimeOut: 0, closeButton: true
-                });
-
-                // Refresh badges so others see the LIVE indicator immediately
-                loadDialStatus();
-
-                // Open the call form automatically after 10 s — closer must close it manually
-                if (window._formFallbackTimer) clearTimeout(window._formFallbackTimer);
-                window._formFallbackTimer = setTimeout(function() {
-                    // Only open if the form is not already visible
-                    const modalEl = document.getElementById('callDetailsModal');
-                    const isOpen = modalEl && modalEl.classList.contains('show');
-                    if (!isOpen && window.currentCallInfo && String(window.currentCallInfo.leadId) === String(leadId)) {
-                        console.log('⏱ Auto-opening form after 10s for', data.lead_name);
-                        showRavensFormForCall(leadId, phoneNumber, data.lead_name, 'connected', 0);
-                    }
-                }, 10000);
-
-            } else {
-                // Zoom call failed — release lock so others can try
-                releaseLock(leadId);
-                if (data.error && data.error.includes('not authorized')) {
-                    alert('❌ Zoom Not Connected\n\nRedirecting to connect your Zoom account...');
-                    window.location.href = '/zoom/authorize';
-                } else {
-                    alert(`❌ API Error: ${data.error || 'Unknown error'}`);
-                }
+            if (data.error && data.error.includes('not authorized')) {
+                window.isCallActive = false;
+                toastr.warning(
+                    'Zoom Phone not connected — redirecting…',
+                    '⚠️ Zoom Not Connected',
+                    { timeOut: 3500, onHidden: () => { window.location.href = '/zoom/authorize'; } }
+                );
             }
         })
-        .catch(error => {
-            console.error('API request failed:', error);
-            if (error?.locked) {
-                toastr.warning('🚫 ' + error.message, 'Lead Already Being Called', { timeOut: 6000 });
-            } else if (error.message === 'ZOOM_NOT_AUTHORIZED') {
-                releaseLock(leadId);
-                toastr.warning(
-                    'Your Zoom Phone account is not connected. Redirecting to connect now...',
-                    '⚠️ Zoom Not Connected',
-                    { timeOut: 4000, onHidden: function() { window.location.href = '/zoom/authorize'; } }
-                );
-            } else {
-                releaseLock(leadId);
-                toastr.error('❌ Connection failed: ' + error.message + '. Please try again or contact support.', 'Call Failed');
-            }
+        .catch(err => {
+            console.error('Lock/record error:', err);
         })
         .finally(() => {
             button.disabled = false;

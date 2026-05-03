@@ -16,9 +16,10 @@
     border-left: 1px solid rgba(0,0,0,.09);
     padding-left: 1rem;
     margin-left: .5rem;
-    flex-shrink: 0;
+    flex-shrink: 1;  /* allow shrinking when viewport is narrow/zoomed */
     min-width: 0;
     max-width: 480px;
+    overflow: hidden;
 }
 .cp-topbar-label {
     font-size: .63rem;

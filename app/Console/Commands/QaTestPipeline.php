@@ -8,26 +8,24 @@ use App\Services\QA\ClaudeService;
 use App\Services\QA\GeminiService;
 use App\Services\QA\QAResultService;
 use App\Services\QA\QAScoringPrompt;
-use App\Services\QA\WhisperService;
 use Illuminate\Console\Command;
 
 class QaTestPipeline extends Command
 {
     protected $signature = 'qa:test
-        {audio? : Path to an audio file (mp3/wav/m4a). Optional — uses a built-in sample if omitted}
-        {--agent= : User ID of the agent (default: first Employee)}
-        {--engine=whisper : Transcription engine: whisper (WhisperX local)}
+        {--agent= : User ID of the agent (default: first available closer)}
         {--scorer=claude : AI scorer: claude or gemini}
-        {--skip-score : Skip AI scoring (test transcription only)}
         {--dry-run : Show what would happen without saving to DB}';
 
-    protected $description = 'Test the QA pipeline end-to-end: transcribe → score → save. Use to verify Whisper, Gemini/Claude, and the full flow.';
+    protected $description = 'Test the QA pipeline (text-only mode): score a sample transcript with Claude/Gemini and save to DB.';
 
     public function handle(): int
     {
         $this->newLine();
-        $this->components->info('🔬 QA Pipeline Test');
+        $this->components->info('🔬 QA Pipeline Test (text-only mode)');
         $this->line('─────────────────────────────────────────');
+        $this->line('  Transcription is handled via file upload in the QA scoring page (AssemblyAI).');
+        $this->line('  This command tests AI scoring only using a built-in sample transcript.');
 
         // ── Resolve agent ───────────────────────────────────────────────
         $agentId = $this->option('agent');
@@ -43,147 +41,15 @@ class QaTestPipeline extends Command
         }
         $this->line("  Agent: <fg=cyan>{$agent->name}</> ({$agent->email})");
 
-        // ── Resolve audio file ──────────────────────────────────────────
-        $audioPath = $this->argument('audio');
-
-        if (!$audioPath) {
-            // Create a quick test: use synthesized text instead
-            $this->components->warn('No audio file provided. Running in TEXT-ONLY mode (skip transcription, test scoring only).');
-            return $this->runTextOnlyTest($agent);
-        }
-
-        if (!file_exists($audioPath)) {
-            $this->components->error("Audio file not found: {$audioPath}");
-            return 1;
-        }
-
-        $fileSize = round(filesize($audioPath) / 1024 / 1024, 1);
-        $this->line("  Audio: <fg=cyan>{$audioPath}</> ({$fileSize} MB)");
-
-        // ── Step 1: Transcribe ──────────────────────────────────────────
-        $engine = $this->option('engine');
-        $transcript = null;
-
-        $this->newLine();
-        $this->components->task('Step 1: Transcription', function () use ($audioPath, $engine, &$transcript) {
-            if ($engine === 'whisper' || $engine === 'auto') {
-                $whisper = app(WhisperService::class);
-                $transcript = $whisper->transcribe($audioPath);
-                $this->line("    Engine: <fg=green>WhisperX (local, free)</>");
-                return true;
-            }
-
-            return false;
-        });
-
-        if (!$transcript) {
-            $this->components->error('Transcription failed.');
-            return 1;
-        }
-
-        $this->line("    Plain text: <fg=gray>" . strlen($transcript['plain']) . " chars</>");
-        $this->line("    Diarized: <fg=gray>" . strlen($transcript['diarized']) . " chars</>");
-
-        if ($this->output->isVerbose()) {
-            $this->newLine();
-            $this->components->info('Diarized Transcript (first 1000 chars):');
-            $this->line(substr($transcript['diarized'], 0, 1000));
-        }
-
-        // ── Step 2: AI Score ────────────────────────────────────────────
-        if ($this->option('skip-score')) {
-            $this->newLine();
-            $this->components->warn('Scoring skipped (--skip-score flag).');
-            $this->showTranscriptSample($transcript);
-            return 0;
-        }
-
-        $scorer = $this->option('scorer');
-        $aiResult = null;
-        $duration = 600; // Estimate
-
-        $this->newLine();
-        $this->components->task("Step 2: AI Scoring ({$scorer})", function () use ($transcript, $scorer, &$aiResult, $duration) {
-            $prompt = QAScoringPrompt::build($transcript['diarized'], $duration);
-
-            if ($scorer === 'claude') {
-                try {
-                    $claude = app(ClaudeService::class);
-                    $aiResult = $claude->scoreCall($prompt);
-                } catch (\Throwable $e) {
-                    $this->line("    Claude failed: {$e->getMessage()}");
-                    $this->line("    Falling back to Gemini...");
-                    $gemini = app(GeminiService::class);
-                    $aiResult = $gemini->scoreCall($prompt);
-                }
-            } else {
-                $gemini = app(GeminiService::class);
-                $aiResult = $gemini->scoreCall($prompt);
-            }
-
-            return $aiResult !== null;
-        });
-
-        if (!$aiResult) {
-            $this->components->error('AI scoring failed.');
-            return 1;
-        }
-
-        // ── Show results ────────────────────────────────────────────────
-        $this->newLine();
-        $this->showScoreResults($aiResult);
-
-        // ── Step 3: Save to DB ──────────────────────────────────────────
-        if ($this->option('dry-run')) {
-            $this->newLine();
-            $this->components->warn('Dry run — nothing saved to database.');
-            return 0;
-        }
-
-        $this->newLine();
-        $this->components->task('Step 3: Saving to database', function () use ($agent, $transcript, $aiResult, $scorer) {
-            $qaCall = QaCall::create([
-                'zoom_call_id' => 'TEST-' . uniqid(),
-                'agent_user_id' => $agent->id,
-                'agent_name' => $agent->name,
-                'agent_email' => $agent->email,
-                'duration_seconds' => 600,
-                'call_start_time' => now(),
-                'processing_status' => 'completed',
-                'scored_by' => $scorer,
-                'transcript_plain' => $transcript['plain'],
-                'transcript_diarized' => $transcript['diarized'],
-            ]);
-
-            $resultService = app(QAResultService::class);
-            $resultService->saveResult($qaCall, $aiResult);
-
-            $this->line("    QA Call ID: <fg=cyan>#{$qaCall->id}</>");
-            return true;
-        });
-
-        $this->newLine();
-        $this->components->info('✅ Pipeline test complete! Check the dashboard at /qa/scoring');
-
-        return 0;
+        return $this->runTextOnlyTest($agent);
     }
 
-    /**
-     * Test scoring-only mode using a sample transcript (no audio file needed).
-     */
     private function runTextOnlyTest(User $agent): int
     {
         $sampleTranscript = $this->getSampleTranscript($agent->name);
 
         $this->newLine();
-        $this->line("  Using sample Final Expense transcript ({" . strlen($sampleTranscript) . "} chars)");
-
-        if ($this->option('skip-score')) {
-            $this->newLine();
-            $this->components->info('Sample Transcript:');
-            $this->line($sampleTranscript);
-            return 0;
-        }
+        $this->line("  Using sample Final Expense transcript (" . strlen($sampleTranscript) . " chars)");
 
         $scorer = $this->option('scorer');
         $aiResult = null;
@@ -219,13 +85,13 @@ class QaTestPipeline extends Command
             $qaCall = QaCall::create([
                 'zoom_call_id' => 'TEST-TEXT-' . uniqid(),
                 'agent_user_id' => $agent->id,
-                'agent_name' => $agent->name,
-                'agent_email' => $agent->email,
+                'agent_name'    => $agent->name,
+                'agent_email'   => $agent->email,
                 'duration_seconds' => 480,
-                'call_start_time' => now(),
+                'call_start_time'  => now(),
                 'processing_status' => 'completed',
                 'scored_by' => $scorer,
-                'transcript_plain' => $sampleTranscript,
+                'transcript_plain'    => $sampleTranscript,
                 'transcript_diarized' => $sampleTranscript,
             ]);
 
@@ -240,9 +106,9 @@ class QaTestPipeline extends Command
 
     private function showScoreResults(array $result): void
     {
-        $disp = $result['disposition'] ?? 'N/A';
-        $score = $result['total_score'] ?? 0;
-        $color = $score >= 90 ? 'green' : ($score >= 75 ? 'blue' : ($score >= 60 ? 'yellow' : 'red'));
+        $disp   = $result['disposition'] ?? 'N/A';
+        $score  = $result['total_score'] ?? 0;
+        $color  = $score >= 90 ? 'green' : ($score >= 75 ? 'blue' : ($score >= 60 ? 'yellow' : 'red'));
 
         $this->components->info('Score Results:');
         $this->line("  Disposition: <fg={$color};options=bold>{$disp}</>");
@@ -254,11 +120,11 @@ class QaTestPipeline extends Command
             $this->line('  Category Scores:');
             $categories = ['opening', 'discovery', 'presentation', 'objection_handling', 'closing', 'soft_skills', 'call_control'];
             foreach ($categories as $cat) {
-                $v = $result['scores'][$cat] ?? 0;
-                $bar = str_repeat('█', $v) . str_repeat('░', 10 - $v);
-                $catColor = $v >= 8 ? 'green' : ($v >= 6 ? 'blue' : ($v >= 4 ? 'yellow' : 'red'));
+                $v     = $result['scores'][$cat] ?? 0;
+                $bar   = str_repeat('█', $v) . str_repeat('░', 10 - $v);
+                $c     = $v >= 8 ? 'green' : ($v >= 6 ? 'blue' : ($v >= 4 ? 'yellow' : 'red'));
                 $label = str_pad(ucwords(str_replace('_', ' ', $cat)), 20);
-                $this->line("    {$label} <fg={$catColor}>{$bar}</> {$v}/10");
+                $this->line("    {$label} <fg={$c}>{$bar}</> {$v}/10");
             }
         }
 
@@ -272,16 +138,6 @@ class QaTestPipeline extends Command
         }
     }
 
-    private function showTranscriptSample(array $transcript): void
-    {
-        $this->newLine();
-        $this->components->info('Diarized Transcript (first 500 chars):');
-        $this->line(substr($transcript['diarized'], 0, 500));
-    }
-
-    /**
-     * Realistic Final Expense outbound call sample transcript.
-     */
     private function getSampleTranscript(string $agentName): string
     {
         return <<<TRANSCRIPT

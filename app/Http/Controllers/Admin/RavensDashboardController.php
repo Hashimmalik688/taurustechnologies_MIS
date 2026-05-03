@@ -12,6 +12,8 @@ use App\Models\QA\QaCall;
 use App\Services\NotificationService;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Events\DialStatusUpdated;
+use App\Events\RavensLeadUpdated;
 use App\Jobs\SyncSaleToGoogleSheets;
 use App\Support\Roles;
 use App\Support\Teams;
@@ -713,6 +715,12 @@ class RavensDashboardController extends Controller
             if (!empty($updateData)) {
                 $lead->update($updateData);
 
+                $this->broadcastLeadUpdate(
+                    leadId: (int) $lead->id,
+                    action: 'lead_saved',
+                    message: 'Lead details updated in call flow'
+                );
+
                 AuditLog::logAction(
                     'lead_updated',
                     Auth::user(),
@@ -972,6 +980,13 @@ class RavensDashboardController extends Controller
             }
 
             $lead->update($updateData);
+
+            $this->broadcastLeadUpdate(
+                leadId: (int) $lead->id,
+                action: 'status_changed',
+                status: 'pending',
+                message: 'Lead moved to pending after sale submission'
+            );
 
             // Sync sale to Google Sheets (async — never blocks the closer's response)
             SyncSaleToGoogleSheets::dispatch($lead->fresh());
@@ -1251,6 +1266,7 @@ class RavensDashboardController extends Controller
             ]);
 
             $lead = Lead::findOrFail($request->input('lead_id'));
+            $disposition = $request->input('disposition');
 
             // Create a snapshot of lead data before disposing
             $leadSnapshot = $lead->only([
@@ -1262,12 +1278,18 @@ class RavensDashboardController extends Controller
             $badLead = BadLead::create([
                 'lead_id' => $lead->id,
                 'disposed_by' => Auth::id(),
-                'disposition' => $request->input('disposition'),
+                'disposition' => $disposition,
                 'notes' => $request->input('notes'),
                 'lead_name' => $lead->cn_name,
                 'lead_phone' => $lead->phone_number,
                 'lead_ssn' => $lead->ssn,
             ]);
+
+            $affectedLeadIds = Lead::where('phone_number', $lead->phone_number)
+                ->where('status', '!=', 'disposed')
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
 
             // Mark original lead AND all duplicates with the same phone number as disposed
             // This prevents other closers from seeing/disposing the same contact again
@@ -1277,8 +1299,18 @@ class RavensDashboardController extends Controller
                     'status' => 'disposed',
                     'disposed_at' => now(),
                     'disposed_by' => Auth::id(),
-                    'disposition_reason' => $request->input('disposition'),
+                    'disposition_reason' => $disposition,
                 ]);
+
+            foreach ($affectedLeadIds as $affectedLeadId) {
+                $this->broadcastLeadUpdate(
+                    leadId: $affectedLeadId,
+                    action: 'lead_disposed',
+                    status: 'disposed',
+                    disposition: $disposition,
+                    message: 'Lead disposed and removed from call queue'
+                );
+            }
 
             // Log the disposition
             AuditLog::create([
@@ -1287,7 +1319,7 @@ class RavensDashboardController extends Controller
                 'model' => 'Lead',
                 'model_id' => $lead->id,
                 'changes' => json_encode([
-                    'disposition' => $request->input('disposition'),
+                    'disposition' => $disposition,
                     'notes' => $request->input('notes'),
                     'customer_name' => $lead->cn_name,
                     'duplicates_disposed' => $duplicateCount,
@@ -1298,7 +1330,7 @@ class RavensDashboardController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lead disposed successfully',
-                'disposition' => BadLead::getDispositionLabel($request->input('disposition'))
+                'disposition' => BadLead::getDispositionLabel($disposition)
             ]);
         } catch (\Exception $e) {
             Log::error('Error disposing lead: ' . $e->getMessage());
@@ -1330,9 +1362,11 @@ class RavensDashboardController extends Controller
             ]);
 
             $lead = Lead::findOrFail($request->input('lead_id'));
+            $disposition = $request->input('disposition');
+            $trigger = $request->input('trigger');
 
             // If Save & Exit, persist form field updates first
-            if ($request->input('trigger') === 'save_exit' && $request->has('form_data')) {
+            if ($trigger === 'save_exit' && $request->has('form_data')) {
                 $allowed = [
                     'cn_name', 'phone_number', 'secondary_phone_number', 'state', 'zip_code',
                     'date_of_birth', 'ssn', 'gender', 'address', 'emergency_contact',
@@ -1355,14 +1389,22 @@ class RavensDashboardController extends Controller
             BadLead::create([
                 'lead_id'          => $lead->id,
                 'disposed_by'      => Auth::id(),
-                'disposition'      => $request->input('disposition'),
+                'disposition'      => $disposition,
                 'notes'            => $request->input('notes'),
                 'lead_name'        => $lead->cn_name,
                 'lead_phone'       => $lead->phone_number,
                 'lead_ssn'         => $lead->ssn,
-                'trigger'          => $request->input('trigger'),
+                'trigger'          => $trigger,
                 'keeps_in_calling' => true,
             ]);
+
+            $this->broadcastLeadUpdate(
+                leadId: (int) $lead->id,
+                action: 'disposition_recorded',
+                status: (string) ($lead->status ?? ''),
+                disposition: $disposition,
+                message: 'Call disposition recorded via ' . $trigger
+            );
 
             AuditLog::create([
                 'user_id'    => Auth::id(),
@@ -1370,8 +1412,8 @@ class RavensDashboardController extends Controller
                 'model'      => 'Lead',
                 'model_id'   => $lead->id,
                 'changes'    => json_encode([
-                    'trigger'     => $request->input('trigger'),
-                    'disposition' => $request->input('disposition'),
+                    'trigger'     => $trigger,
+                    'disposition' => $disposition,
                     'notes'       => $request->input('notes'),
                 ]),
                 'ip_address' => $request->ip(),
@@ -1379,7 +1421,7 @@ class RavensDashboardController extends Controller
 
             return response()->json([
                 'success'     => true,
-                'disposition' => \App\Models\BadLead::getDispositionLabel($request->input('disposition')),
+                'disposition' => \App\Models\BadLead::getDispositionLabel($disposition),
                 'message'     => 'Disposition recorded successfully',
             ]);
         } catch (\Exception $e) {
@@ -1605,6 +1647,16 @@ class RavensDashboardController extends Controller
                 'callback_note_updated_at' => $note ? now() : null,
             ]);
 
+            $lead->refresh();
+
+            $this->broadcastLeadUpdate(
+                leadId: (int) $lead->id,
+                action: 'callback_note_updated',
+                callbackNote: $lead->callback_note,
+                callbackUpdatedAt: optional($lead->callback_note_updated_at)?->diffForHumans(),
+                message: $note ? 'Callback note saved' : 'Callback note cleared'
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => $note ? 'Callback note saved' : 'Callback note cleared',
@@ -1638,6 +1690,20 @@ class RavensDashboardController extends Controller
                 'dialed_at' => now(),
                 'outcome' => $request->input('outcome', 'dialed'),
             ]);
+
+            [$initials, $color] = $this->userBadgeInfo(Auth::user());
+            try {
+                broadcast(new DialStatusUpdated(
+                    leadId:   (int) $request->input('lead_id'),
+                    action:   'dialed',
+                    userId:   Auth::id(),
+                    userName: Auth::user()->name,
+                    initials: $initials,
+                    color:    $color,
+                    dialedAt: $dial->dialed_at->format('g:i A'),
+                    outcome:  $request->input('outcome', 'dialed'),
+                ));
+            } catch (\Throwable) { /* Non-fatal */ }
 
             return response()->json([
                 'success' => true,
@@ -1801,6 +1867,19 @@ class RavensDashboardController extends Controller
             }
 
             DB::commit();
+
+            [$initials, $color] = $this->userBadgeInfo(Auth::user());
+            try {
+                broadcast(new DialStatusUpdated(
+                    leadId:   $leadId,
+                    action:   'locked',
+                    userId:   $userId,
+                    userName: Auth::user()->name,
+                    initials: $initials,
+                    color:    $color,
+                ));
+            } catch (\Throwable) { /* Non-fatal — lock itself already committed */ }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -1847,13 +1926,72 @@ class RavensDashboardController extends Controller
      * Release the call-lock on a lead.
      * Only the user who owns the lock may release it.
      */
+    /** Build badge initials + color for a user (consistent with getDialStatus). */
+    private function userBadgeInfo(?User $user): array
+    {
+        if (! $user) return ['??', '#6c757d'];
+        $colorPalette = [
+            '#4e73df','#e74a3b','#1cc88a','#f6c23e','#36b9cc',
+            '#6f42c1','#fd7e14','#20c997','#e83e8c','#6610f2',
+        ];
+        $parts    = explode(' ', $user->name);
+        $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+        $color    = $colorPalette[$user->id % count($colorPalette)];
+        return [$initials, $color];
+    }
+
+    /**
+     * Broadcast a non-blocking Ravens lead update on the shared calling channel.
+     */
+    private function broadcastLeadUpdate(
+        int $leadId,
+        string $action,
+        ?string $status = null,
+        ?string $disposition = null,
+        ?string $callbackNote = null,
+        ?string $callbackUpdatedAt = null,
+        ?string $message = null,
+    ): void {
+        try {
+            $user = Auth::user();
+            if (! $user) {
+                return;
+            }
+
+            broadcast(new RavensLeadUpdated(
+                leadId: $leadId,
+                action: $action,
+                userId: (int) $user->id,
+                userName: (string) $user->name,
+                status: $status,
+                disposition: $disposition,
+                callbackNote: $callbackNote,
+                callbackUpdatedAt: $callbackUpdatedAt,
+                message: $message,
+            ));
+        } catch (\Throwable) {
+            // Non-fatal: business mutation should not fail if websocket push fails.
+        }
+    }
+
     public function releaseLock(Request $request)
     {
         $request->validate(['lead_id' => 'required|exists:leads,id']);
 
-        LeadLock::where('lead_id', $request->input('lead_id'))
+        $leadId = (int) $request->input('lead_id');
+
+        LeadLock::where('lead_id', $leadId)
             ->where('user_id', Auth::id())
             ->delete();
+
+        broadcast(new DialStatusUpdated(
+            leadId:   $leadId,
+            action:   'unlocked',
+            userId:   Auth::id(),
+            userName: Auth::user()->name ?? '',
+            initials: '',
+            color:    '',
+        ));
 
         return response()->json(['success' => true]);
     }

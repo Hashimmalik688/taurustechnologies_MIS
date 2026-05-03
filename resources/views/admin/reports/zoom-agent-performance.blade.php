@@ -732,6 +732,19 @@ document.addEventListener('DOMContentLoaded', () => {
     @endif
     @endif
     scheduleNext();
+
+    let zoomPerfRealtimeDebounce = null;
+    if (window.MISRealtime && typeof window.MISRealtime.register === 'function') {
+        window.MISRealtime.register(['reports', 'analytics'], function () {
+            if (!liveActive || document.visibilityState !== 'visible') {
+                return;
+            }
+            clearTimeout(zoomPerfRealtimeDebounce);
+            zoomPerfRealtimeDebounce = setTimeout(() => {
+                doRefresh();
+            }, 1200);
+        });
+    }
 });
 </script>
 @endpush

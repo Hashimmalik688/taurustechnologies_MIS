@@ -10,9 +10,8 @@ use Illuminate\Http\Request;
 
 class RevenueAnalyticsController extends Controller
 {
-    public function index(Request $request)
+    private function resolvePeriod(Request $request): array
     {
-        // ── Date Range ──────────────────────────────────────────────────────
         if ($request->filled('month')) {
             $periodStart = Carbon::parse($request->month . '-01')->startOfDay();
             $periodEnd   = $periodStart->copy()->endOfMonth()->endOfDay();
@@ -23,6 +22,14 @@ class RevenueAnalyticsController extends Controller
             $periodStart = Carbon::now()->startOfMonth()->startOfDay();
             $periodEnd   = Carbon::now()->endOfDay();
         }
+
+        return [$periodStart, $periodEnd];
+    }
+
+    public function index(Request $request)
+    {
+        // ── Date Range ──────────────────────────────────────────────────────
+        [$periodStart, $periodEnd] = $this->resolvePeriod($request);
 
         $periodLabel  = $periodStart->format('F Y');
         $prevMonth    = $periodStart->copy()->subMonth()->format('Y-m');
@@ -140,5 +147,49 @@ class RevenueAnalyticsController extends Controller
             'partner_carrier_breakdown',
             'top_closers',
         ));
+    }
+
+    public function liveData(Request $request)
+    {
+        [$periodStart, $periodEnd] = $this->resolvePeriod($request);
+
+        $commissionService = app(CommissionCalculationService::class);
+
+        $pendingLeads = Lead::whereNotNull('followup_done_at')
+            ->whereNull('paid_at')
+            ->whereNull('policy_died_at')
+            ->whereBetween('sale_date', [$periodStart, $periodEnd])
+            ->with(['partner'])
+            ->get();
+
+        $pendingCount = $pendingLeads->count();
+        $pendingPremium = (float) $pendingLeads->sum(fn ($l) => $l->monthly_premium ?? 0);
+
+        $projectedRevenue = 0.0;
+        foreach ($pendingLeads as $lead) {
+            $premium = (float) ($lead->monthly_premium ?? 0);
+            $raw = strtolower(trim($lead->settlement_type ?: $lead->policy_type ?: ''));
+            if (str_contains($raw, 'g.i') || str_contains($raw, 'gi')) $type = 'gi';
+            elseif (str_contains($raw, 'grad')) $type = 'graded';
+            elseif (str_contains($raw, 'modif')) $type = 'modified';
+            else $type = 'level';
+
+            $result = $commissionService->calculateCommission(
+                $lead->partner_id,
+                $lead->insurance_carrier_id,
+                $lead->state ?? '',
+                $type,
+                $premium
+            );
+            $projectedRevenue += (float) ($result['commission'] ?? 0);
+        }
+
+        return response()->json([
+            'pending_count' => $pendingCount,
+            'pending_premium' => round($pendingPremium, 2),
+            'projected_revenue' => round($projectedRevenue, 2),
+            'period_label' => $periodStart->format('F Y'),
+            'updated_at' => now('America/Los_Angeles')->format('M d, Y h:i:s A') . ' PT',
+        ]);
     }
 }

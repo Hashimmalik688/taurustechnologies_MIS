@@ -160,6 +160,8 @@ CREATE TABLE `bad_leads` (
   `disposed_by` bigint unsigned NOT NULL,
   `disposition` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `notes` text COLLATE utf8mb4_unicode_ci,
+  `trigger` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `keeps_in_calling` tinyint(1) NOT NULL DEFAULT '0',
   `lead_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `lead_phone` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `lead_ssn` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -259,6 +261,89 @@ CREATE TABLE `carrier_commission_brackets` (
   CONSTRAINT `carrier_commission_brackets_insurance_carrier_id_foreign` FOREIGN KEY (`insurance_carrier_id`) REFERENCES `insurance_carriers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `carrier_sheet_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `carrier_sheet_entries` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `carrier_sheet_rate_id` bigint unsigned NOT NULL,
+  `sr_number` int unsigned DEFAULT NULL,
+  `entry_date` date DEFAULT NULL,
+  `policy_number` varchar(60) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `face_value` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `premium` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `policy_type` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'approved',
+  `draft_date` date DEFAULT NULL,
+  `payment_date` date DEFAULT NULL,
+  `commission` decimal(12,2) DEFAULT NULL,
+  `paid_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `balance` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `chargeback_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `rate_override` decimal(10,4) DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `period_month` date DEFAULT NULL,
+  `created_by` bigint unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `carrier_sheet_entries_created_by_foreign` (`created_by`),
+  KEY `carrier_sheet_entries_carrier_sheet_rate_id_period_month_index` (`carrier_sheet_rate_id`,`period_month`),
+  KEY `carrier_sheet_entries_carrier_sheet_rate_id_status_index` (`carrier_sheet_rate_id`,`status`),
+  KEY `cs_entries_policy_number_idx` (`policy_number`),
+  KEY `cs_entries_name_idx` (`name`),
+  KEY `cs_entries_entry_date_idx` (`entry_date`),
+  KEY `cs_entries_carrier_period_status_idx` (`carrier_sheet_rate_id`,`period_month`,`status`),
+  KEY `cs_entries_carrier_sr_idx` (`carrier_sheet_rate_id`,`sr_number`),
+  KEY `cs_entries_deleted_at_idx` (`deleted_at`),
+  CONSTRAINT `carrier_sheet_entries_carrier_sheet_rate_id_foreign` FOREIGN KEY (`carrier_sheet_rate_id`) REFERENCES `carrier_sheet_rates` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `carrier_sheet_entries_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `carrier_sheet_opening_cbs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `carrier_sheet_opening_cbs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `carrier_sheet_rate_id` bigint unsigned NOT NULL,
+  `period_month` date NOT NULL,
+  `amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `opening_balance` decimal(12,2) NOT NULL DEFAULT '0.00' COMMENT 'Starting balance carried forward (+/−)',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cs_opening_cb_rate_month_unique` (`carrier_sheet_rate_id`,`period_month`),
+  KEY `cs_opening_cb_carrier_idx` (`carrier_sheet_rate_id`),
+  CONSTRAINT `carrier_sheet_opening_cbs_carrier_sheet_rate_id_foreign` FOREIGN KEY (`carrier_sheet_rate_id`) REFERENCES `carrier_sheet_rates` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `carrier_sheet_rates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `carrier_sheet_rates` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `carrier_slug` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `carrier_label` varchar(80) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `partner_code` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `level_rate` decimal(6,4) DEFAULT NULL,
+  `graded_rate` decimal(6,4) DEFAULT NULL,
+  `gi_rate` decimal(6,4) DEFAULT NULL,
+  `modified_rate` decimal(6,4) DEFAULT NULL,
+  `gi_multiplier` tinyint unsigned NOT NULL DEFAULT '9',
+  `custom_policy_types` json DEFAULT NULL,
+  `title_color` varchar(7) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '#1A237E',
+  `uses_hardcoded_rates` tinyint(1) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` smallint unsigned NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `carrier_sheet_rates_carrier_slug_unique` (`carrier_slug`),
+  KEY `cs_rates_active_sort_idx` (`is_active`,`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `carriers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -354,6 +439,23 @@ CREATE TABLE `chat_conversations` (
   CONSTRAINT `chat_conversations_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `chat_message_reactions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `chat_message_reactions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `message_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `emoji` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `chat_message_reactions_message_id_user_id_emoji_unique` (`message_id`,`user_id`,`emoji`),
+  KEY `chat_message_reactions_user_id_foreign` (`user_id`),
+  CONSTRAINT `chat_message_reactions_message_id_foreign` FOREIGN KEY (`message_id`) REFERENCES `chat_messages` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chat_message_reactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `chat_message_reads`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -384,6 +486,9 @@ CREATE TABLE `chat_messages` (
   `is_edited` tinyint(1) NOT NULL DEFAULT '0',
   `forwarded_from_message_id` bigint unsigned DEFAULT NULL,
   `forwarded_from_user_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reply_to_id` bigint unsigned DEFAULT NULL,
+  `is_pinned` tinyint(1) NOT NULL DEFAULT '0',
+  `pinned_by` bigint unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
@@ -392,7 +497,9 @@ CREATE TABLE `chat_messages` (
   KEY `chat_messages_user_id_index` (`user_id`),
   KEY `chat_messages_created_at_index` (`created_at`),
   KEY `chat_messages_conversation_id_created_at_index` (`conversation_id`,`created_at`),
+  KEY `chat_messages_reply_to_id_foreign` (`reply_to_id`),
   CONSTRAINT `chat_messages_conversation_id_foreign` FOREIGN KEY (`conversation_id`) REFERENCES `chat_conversations` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chat_messages_reply_to_id_foreign` FOREIGN KEY (`reply_to_id`) REFERENCES `chat_messages` (`id`) ON DELETE SET NULL,
   CONSTRAINT `chat_messages_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1010,6 +1117,8 @@ CREATE TABLE `leads` (
   `phone_number` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `secondary_phone_number` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `cn_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `first_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_name` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `date_of_birth` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `age` int DEFAULT NULL,
   `gender` enum('male','female','other') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1043,6 +1152,7 @@ CREATE TABLE `leads` (
   `initial_draft_date` date DEFAULT NULL,
   `future_draft_date` date DEFAULT NULL,
   `bank_name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_address` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `account_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `account_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `routing_number` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1073,6 +1183,8 @@ CREATE TABLE `leads` (
   `cb_sent_to_retention_at` timestamp NULL DEFAULT NULL,
   `cb_sent_to_retention_by_id` bigint unsigned DEFAULT NULL,
   `is_rewrite` tinyint(1) NOT NULL DEFAULT '0',
+  `rewrite_source_lead_id` bigint unsigned DEFAULT NULL,
+  `rewrite_sent_back_at` timestamp NULL DEFAULT NULL,
   `retention_notes` text COLLATE utf8mb4_unicode_ci,
   `ret_action_status` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'pending|in_progress|waiting_on_cx|fixed|cancelled|recalled',
   `ret_action_updated_at` timestamp NULL DEFAULT NULL,
@@ -1104,6 +1216,7 @@ CREATE TABLE `leads` (
   `verified_at` timestamp NULL DEFAULT NULL COMMENT 'When verifier submitted the lead',
   `validated_by` bigint unsigned DEFAULT NULL,
   `sale_at` timestamp NULL DEFAULT NULL,
+  `is_manual_sale` tinyint(1) NOT NULL DEFAULT '0',
   `disposed_at` timestamp NULL DEFAULT NULL,
   `sale_date` date DEFAULT NULL,
   `resale_count` smallint unsigned NOT NULL DEFAULT '0',
@@ -1170,13 +1283,16 @@ CREATE TABLE `leads` (
   `followup_done_by_id` bigint unsigned DEFAULT NULL,
   `pending_draft_at` timestamp NULL DEFAULT NULL,
   `pending_draft_by_id` bigint unsigned DEFAULT NULL,
-  `not_paid_fdfp_type` enum('unstable_to_locate','insufficient_fund','unauthorized_payments','manual_action') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `not_paid_fdfp_type` enum('unstable_to_locate','insufficient_fund','unauthorized_payments','manual_action','payment_stopped','account_closed') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `not_paid_manual_disposition` enum('email_missing','ssn_missing','postal_mail_missing','beneficiary_incomplete','doctor_info_missing','underwriting_by_law','cancelled_by_customer') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `not_paid_at` timestamp NULL DEFAULT NULL,
   `not_paid_by_id` bigint unsigned DEFAULT NULL,
   `not_paid_comment` text COLLATE utf8mb4_unicode_ci,
   `ledger_journal_entry_id` bigint unsigned DEFAULT NULL,
   `ledger_sales_return_entry_id` bigint unsigned DEFAULT NULL COMMENT 'FK to the sales-return journal entry posted when this lead is chargebacked',
+  `ledger_sales_return_status` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending' COMMENT 'pending = awaiting manual ledger post; posted = sales return entry confirmed to ledger',
+  `ledger_sales_return_posted_at` timestamp NULL DEFAULT NULL,
+  `ledger_sales_return_posted_by_id` bigint unsigned DEFAULT NULL,
   `ledger_chargeback_paid_entry_id` bigint unsigned DEFAULT NULL COMMENT 'Journal entry ID for chargeback recovery (Dr 1200 AR / Cr 4100 Sales)',
   `paid_at` timestamp NULL DEFAULT NULL,
   `paid_by_id` bigint unsigned DEFAULT NULL,
@@ -2236,6 +2352,7 @@ CREATE TABLE `users` (
   `country` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'USA',
   `status` enum('active','inactive','suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `last_login_at` timestamp NULL DEFAULT NULL,
+  `last_seen_at` timestamp NULL DEFAULT NULL,
   `last_login_ip` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `current_session_ip` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `time_in` timestamp NULL DEFAULT NULL,
@@ -2657,3 +2774,21 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (237,'2026_04_08_00
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (238,'2026_04_07_162648_add_ledger_chargeback_paid_entry_id_to_leads_table',106);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (239,'2026_04_07_170551_add_chargeback_audit_fields_to_leads_table',107);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (240,'2026_04_08_102838_add_cb_retention_audit_to_leads_table',108);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (241,'2026_04_10_000001_add_rewrite_tracking_to_leads_table',109);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (242,'2026_04_10_000001_add_qa_scoring_module',110);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (243,'2026_04_10_105735_add_payment_stopped_account_closed_to_fdfp_type',111);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (244,'2026_04_13_000001_create_carrier_sheet_tables',112);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (245,'2026_04_13_000002_seed_carrier_sheet_rates',113);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (246,'2026_04_13_102735_add_opening_balance_to_carrier_sheet_opening_cbs_table',114);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (247,'2026_04_16_114327_add_call_disposition_columns_to_bad_leads_table',115);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (248,'2026_04_16_154051_add_is_manual_sale_to_leads_table',116);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (249,'2026_04_21_112041_add_parent_carrier_id_to_insurance_carriers',117);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (250,'2026_04_23_120000_optimize_carrier_sheet_indexes',117);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (251,'2026_04_27_071821_add_name_and_bank_address_to_leads_table',117);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (252,'2026_04_27_115822_fix_rate_override_column_precision',118);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (253,'2026_04_27_115830_add_individual_report_modules',119);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (254,'2026_04_27_120000_add_ledger_sales_return_status_to_leads_table',120);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (255,'2026_05_01_000001_add_last_seen_at_to_users_table',121);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (256,'2026_05_01_000002_add_reply_to_and_pin_to_chat_messages_table',121);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (257,'2026_05_01_000003_create_chat_message_reactions_table',121);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (258,'2026_05_03_000001_rename_verifier_form_module_to_pjc',122);

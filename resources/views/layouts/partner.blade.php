@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="{{ URL::asset('css/light-theme.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('css/modern-white-theme.css') }}">
 
-    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ URL::asset('css/themes.css') }}?v={{ filemtime(public_path('css/themes.css')) }}">
     @vite(['resources/css/custom-layout.css'])
     <link rel="stylesheet" href="{{ URL::asset('css/admin-ui.css') }}">
 

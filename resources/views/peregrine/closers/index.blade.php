@@ -390,6 +390,64 @@
 @section('script')
 @include('partials.sl-filter-assets')
 <script>
-    // No additional JS needed — filter bar uses direct links + form submit
+// ── Real-time: new PJC submission appears instantly ──────────────────────────
+// When a PJC submits the verifier form and assigns it to the current closer,
+// a new row is prepended to the Pending Leads table without a page reload.
+(function () {
+    const CLOSER_ID = {{ Auth::id() }};
+    const tbody = document.querySelector('.ex-tbl tbody');
+    const countBadge = document.querySelector('.pipe-hdr .badge-count');
+
+    function waitForEcho(cb) {
+        const iv = setInterval(() => { if (window.Echo) { clearInterval(iv); cb(); } }, 200);
+    }
+
+    function incrementBadge() {
+        if (!countBadge) return;
+        const n = parseInt(countBadge.textContent) || 0;
+        countBadge.textContent = n + 1;
+    }
+
+    function prependLeadRow(e) {
+        if (!tbody) return;
+
+        // Remove the "no leads" empty row if present
+        const empty = tbody.querySelector('td[colspan]');
+        if (empty) empty.closest('tr').remove();
+
+        const tr = document.createElement('tr');
+        tr.className = 'clickable-row pjc-realtime-new';
+        tr.style.cssText = 'animation:pjc-flash 1.5s ease;';
+        tr.innerHTML = `
+            <td><strong>${e.cn_name || 'N/A'}</strong></td>
+            <td>${e.phone_number || 'N/A'}</td>
+            <td style="white-space:nowrap;">${e.date || 'Just now'}</td>
+            <td>${e.pjc_name || 'N/A'}</td>
+            <td class="text-center"><span class="s-pill s-transferred">Pending</span></td>
+            <td class="text-center">
+                <button class="act-btn a-primary" type="button" onclick="location.reload()">
+                    <i class="bx bx-refresh"></i> Load Form
+                </button>
+            </td>`;
+        tbody.prepend(tr);
+        incrementBadge();
+
+        // Show a brief toast notification
+        if (window.showToast) {
+            window.showToast('New Lead Assigned', `${e.cn_name} from PJC ${e.pjc_name}`, 'success');
+        }
+    }
+
+    waitForEcho(function () {
+        window.Echo.private('user.' + CLOSER_ID)
+            .listen('.pjc.lead.submitted', prependLeadRow);
+    });
+})();
 </script>
+<style>
+@keyframes pjc-flash {
+    0%   { background: rgba(52,195,143,.35); }
+    100% { background: transparent; }
+}
+</style>
 @endsection

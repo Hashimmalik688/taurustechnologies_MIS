@@ -1788,7 +1788,12 @@ loadAgentDetail(__myUserId);
 const __myMode = false;
 loadDashboard();
 loadQaStatus();
-S.refreshTimer = setInterval(() => { if (S.currentView === 'dashboard') loadDashboard(true); }, 60000);
+// Only auto-refresh when the tab is visible — no wasted DB queries while QA walks away
+S.refreshTimer = setInterval(() => {
+    if (S.currentView === 'dashboard' && document.visibilityState === 'visible') {
+        loadDashboard(true);
+    }
+}, 60000);
 @endif
 
 // Auto-open call detail if ?call= param is present (e.g. from upload page link)

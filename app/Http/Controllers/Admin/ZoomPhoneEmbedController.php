@@ -397,4 +397,24 @@ class ZoomPhoneEmbedController extends Controller
 
         return null;
     }
+
+    /**
+     * Save the user's chosen active outgoing number to users.zoom_number.
+     * Called from the "My Numbers" DID picker on the Ravens Calling page.
+     */
+    public function setActiveNumber(Request $request)
+    {
+        $request->validate([
+            'phone_number' => ['required', 'string', 'max:30', 'regex:/^[\d\+\-\(\)\s]+$/'],
+        ]);
+
+        $clean = preg_replace('/[^\d+]/', '', $request->input('phone_number'));
+        if (strlen($clean) < 7) {
+            return response()->json(['success' => false, 'message' => 'Invalid phone number'], 422);
+        }
+
+        Auth::user()->update(['zoom_number' => $clean]);
+
+        return response()->json(['success' => true, 'zoom_number' => $clean]);
+    }
 }

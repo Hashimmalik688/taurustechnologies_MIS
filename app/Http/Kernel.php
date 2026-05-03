@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\RestrictToAllowedDevice::class,
             \App\Http\Middleware\Localization::class,
             \App\Http\Middleware\LogUserActivity::class,
+            'throttle:web',
         ],
 
         'api' => [

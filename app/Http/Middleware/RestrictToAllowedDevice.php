@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\AllowedDevice;
+use App\Models\Setting;
 
 class RestrictToAllowedDevice
 {
@@ -27,6 +28,19 @@ class RestrictToAllowedDevice
         'api/zoom-webhook',
     ];
 
+    /**
+     * Known bot/crawler/scanner User-Agent keywords.
+     * Requests matching these never get a cookie or a DB record — they just get 403.
+     */
+    protected array $botSignatures = [
+        'bot', 'crawl', 'spider', 'slurp', 'mediapartners', 'adsbot',
+        'bingpreview', 'facebookexternalhit', 'ia_archiver', 'wget', 'curl',
+        'python-requests', 'go-http-client', 'java/', 'libwww',
+        'masscan', 'zgrab', 'nuclei', 'nmap', 'sqlmap', 'nikto',
+        'scanner', 'shodan', 'censys', 'internet-measurement',
+        'httpclient', 'okhttp', 'axios/', 'nessus', 'qualys',
+    ];
+
     public function handle(Request $request, Closure $next): Response
     {
         foreach ($this->except as $pattern) {
@@ -35,11 +49,56 @@ class RestrictToAllowedDevice
             }
         }
 
+        // ── Silently block known bots/scanners — no cookie, no DB record ──
+        $ua = strtolower($request->userAgent() ?? '');
+        foreach ($this->botSignatures as $sig) {
+            if (str_contains($ua, $sig)) {
+                return response('', 403);
+            }
+        }
+
+        // ── Also block headless/empty UA (scanners without a UA string) ───
+        if (empty($ua)) {
+            return response('', 403);
+        }
+
+        // ── Only allow device registration from office/trusted networks ───
+        // If the request has no cookie (i.e. first-time visit that would trigger
+        // a new pending record), verify the IP is in an office network first.
+        // Approved devices that already have a cookie bypass this — employees
+        // working remotely are already approved and just need to be validated.
+        $incomingToken = $request->cookie(self::COOKIE);
+        if (empty($incomingToken) && ! $this->isFromAllowedNetwork($request->ip())) {
+            return response('', 403);
+        }
+
         $token = $request->cookie(self::COOKIE);
         $newCookie = null;
 
         // ── No cookie at all → first visit on this device ─────────────────
         if (empty($token)) {
+            // If this IP already has a rejected entry, block immediately without
+            // creating a new record (prevents re-registration after rejection).
+            $existingRejected = AllowedDevice::where('last_seen_ip', $request->ip())
+                ->where('status', 'rejected')
+                ->exists();
+            if ($existingRejected) {
+                return $this->disabledResponse($request);
+            }
+
+            // If this IP already has a pending entry (e.g. different browser on
+            // same machine), reuse that token instead of flooding the queue.
+            $existingPending = AllowedDevice::where('last_seen_ip', $request->ip())
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+            if ($existingPending) {
+                $token = $existingPending->device_token;
+                $newCookie = $this->makeCookie($request, $token);
+                $response = $this->pendingResponse($request, $token);
+                return $newCookie ? $response->withCookie($newCookie) : $response;
+            }
+
             $token = (string) Str::uuid();
             $newCookie = $this->makeCookie($request, $token);
 
@@ -58,9 +117,16 @@ class RestrictToAllowedDevice
         // ── Token exists → look it up ──────────────────────────────────────
         $device = AllowedDevice::where('device_token', $token)->first();
 
-        // Token in cookie but not in DB (shouldn't normally happen — we keep rejected
-        // records). Treat as new device and issue a fresh pending token.
+        // Token in cookie but not in DB. Check if IP is already rejected before
+        // issuing a new pending record.
         if (! $device) {
+            $existingRejected = AllowedDevice::where('last_seen_ip', $request->ip())
+                ->where('status', 'rejected')
+                ->exists();
+            if ($existingRejected) {
+                return $this->disabledResponse($request);
+            }
+
             $token = (string) Str::uuid();
             $newCookie = $this->makeCookie($request, $token);
 
@@ -233,5 +299,51 @@ class RestrictToAllowedDevice
 </html>';
 
         return response($html, 403)->header('Content-Type', 'text/html');
+    }
+
+    /**
+     * Returns true if the IP belongs to one of the configured office/trusted networks.
+     * Reads from the same `office_networks` setting used by AttendanceService.
+     * If no networks are configured, falls back to allowing all IPs (open registration).
+     */
+    private function isFromAllowedNetwork(string $ip): bool
+    {
+        $networks = Setting::get('office_networks', []);
+
+        if (is_string($networks)) {
+            $networks = array_filter(array_map('trim', explode(',', $networks)));
+        }
+
+        // No networks configured → don't lock anyone out; behave as before.
+        if (empty($networks)) {
+            return true;
+        }
+
+        foreach ($networks as $network) {
+            $network = trim($network);
+            if (empty($network)) {
+                continue;
+            }
+
+            if (strpos($network, '/') === false) {
+                // Plain IP match
+                if ($ip === $network) {
+                    return true;
+                }
+            } else {
+                // CIDR range
+                [$subnet, $bits] = explode('/', $network, 2);
+                $ipLong     = ip2long($ip);
+                $subnetLong = ip2long($subnet);
+                if ($ipLong !== false && $subnetLong !== false) {
+                    $mask = -1 << (32 - (int) $bits);
+                    if (($ipLong & $mask) === ($subnetLong & $mask)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

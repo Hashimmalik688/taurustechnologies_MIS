@@ -515,6 +515,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('printSubtitle').textContent = typeLabel + ' Report — Generated ' + dateStr;
         window.print();
     });
+
+    // Global MIS realtime hook — keep the generated report card fresh.
+    let reportRealtimeDebounce = null;
+    if (window.MISRealtime && typeof window.MISRealtime.register === 'function') {
+        window.MISRealtime.register(['reports', 'analytics', 'revenue'], function() {
+            if (document.visibilityState !== 'visible') return;
+            if (!summaryRow || summaryRow.style.display === 'none') return;
+            clearTimeout(reportRealtimeDebounce);
+            reportRealtimeDebounce = setTimeout(function() {
+                loadReport();
+            }, 1200);
+        });
+    }
 });
 </script>
 @endsection

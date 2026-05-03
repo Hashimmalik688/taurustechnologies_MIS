@@ -59,5 +59,28 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+
+        // Strict rate limit for CRM login – 10 attempts per minute per IP
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip())->response(function () {
+                return response()->json(
+                    ['message' => 'Too many login attempts. Please wait before trying again.'],
+                    429
+                );
+            });
+        });
+
+        // Strict rate limit for partner portal login
+        RateLimiter::for('partner-login', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip())->response(function () {
+                return redirect()->back()
+                    ->withErrors(['email' => 'Too many login attempts. Please wait before trying again.']);
+            });
+        });
+
+        // General web rate limit – protects all web routes from flooding
+        RateLimiter::for('web', function (Request $request) {
+            return Limit::perMinute(300)->by(optional($request->user())->id ?: $request->ip());
+        });
     }
 }

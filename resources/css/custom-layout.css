@@ -184,6 +184,10 @@
     position: sticky;
     top: 0;
     z-index: 999;
+    overflow: hidden;        /* prevent children from expanding beyond viewport */
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* ── Topbar action icon colors ── */
@@ -204,6 +208,9 @@
 .th-left {
     display: flex;
     align-items: center;
+    flex: 1 1 auto;  /* allow it to shrink when space is tight */
+    min-width: 0;    /* prevent flex child from overflowing */
+    overflow: hidden;
 }
 .th-brand {
     display: flex;
@@ -252,6 +259,7 @@
     display: flex;
     align-items: center;
     gap: 0.2rem;
+    flex-shrink: 0;  /* right side (clocks + buttons) always stays fully visible */
 }
 
 /* Clocks */
@@ -591,4 +599,33 @@
     40% { transform: rotate(-15deg); }
     50% { transform: rotate(0deg); }
     100% { transform: rotate(0deg); }
+}}
+
+/* ── Topbar clock responsive ─────────────────────────────────────── */
+/* At 1200px (light zoom / small desktop): compress spacing */
+@media (max-width: 1200px) {
+    .th-clocks {
+        gap: 0.25rem;
+        padding: 0.3rem 0.5rem;
+        margin-right: 0.25rem;
+    }
+    .th-clock { gap: 0.2rem; }
+    .th-clock-time { font-size: 0.75rem; }
+    .th-clock-label { font-size: 0.58rem; }
+}
+/* At 1024px: hide Mountain Time */
+@media (max-width: 1024px) {
+    .th-clock-mt, .th-dot-mt { display: none !important; }
+}
+/* At 860px: hide Central + Mountain, keep only ET and PT */
+@media (max-width: 860px) {
+    .th-clock-ct, .th-dot-ct { display: none !important; }
+}
+/* At 680px: collapse entire clock row into a single icon-only toggle */
+@media (max-width: 680px) {
+    .th-clocks { display: none !important; }
+}
+/* At 900px: hide the Chill Party strip to reclaim space */
+@media (max-width: 900px) {
+    .cp-topbar { display: none !important; }
 }

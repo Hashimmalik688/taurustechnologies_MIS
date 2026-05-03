@@ -35,6 +35,13 @@ class AppServiceProvider extends ServiceProvider
         // Register LeadObserver — auto-recalculates agent_revenue when monthly_premium changes
         \App\Models\Lead::observe(\App\Observers\LeadObserver::class);
 
+        // Global MIS realtime domains (analytics / revenue / reports)
+        \App\Models\Lead::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'revenue', 'reports'], 'Lead'));
+        \App\Models\BadLead::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'reports'], 'BadLead'));
+        \App\Models\Attendance::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'reports'], 'Attendance'));
+        \App\Models\SalaryRecord::observe(new \App\Observers\MISRealtimeObserver(['revenue', 'reports'], 'SalaryRecord'));
+        \App\Models\ZoomWebhookLog::observe(new \App\Observers\MISRealtimeObserver(['reports', 'analytics'], 'ZoomWebhookLog'));
+
         // Force HTTPS in production
         if (config('app.env') === 'production') {
             URL::forceScheme('https');

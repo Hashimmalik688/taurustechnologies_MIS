@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Roles;
 use App\Support\Statuses;
 use App\Support\Teams;
+use App\Events\PjcLeadSubmitted;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -64,7 +65,7 @@ class VerifierController extends Controller
         $closer = User::findOrFail($validated['closer_id']);
 
         // Create a minimal Lead record with allowed fields
-        Lead::create([
+        $lead = Lead::create([
             'date' => $validated['date'],
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
@@ -93,6 +94,21 @@ class VerifierController extends Controller
             'transferred_at' => now(),
             'source_type' => Teams::PEREGRINE, // Mark as peregrine lead
         ]);
+
+        // Push real-time update to the assigned closer's dashboard
+        try {
+            broadcast(new PjcLeadSubmitted(
+                closerId:    $closer->id,
+                leadId:      $lead->id,
+                cnName:      $lead->cn_name ?? '',
+                phoneNumber: $lead->phone_number ?? '',
+                pjcName:     $validated['verifier_name'],
+                date:        $validated['date'],
+                status:      $lead->status ?? Statuses::LEAD_TRANSFERRED,
+            ));
+        } catch (\Throwable) {
+            // Non-fatal — lead is already saved
+        }
 
         return redirect()->route('verifier.create', ['team' => $team])
             ->with('success', 'Verification submission saved and transferred to closer.');

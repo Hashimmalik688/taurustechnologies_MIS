@@ -186,6 +186,9 @@ class ZoomController extends Controller
     public function makeCall(Request $request, $leadId)
     {
         $lead = Lead::findOrFail($leadId);
+
+        // Accept an optional phone override so callers can dial secondary numbers
+        $rawPhone = $request->input('phone_number') ?? $lead->phone_number;
         
         try {
             $token = $this->getValidToken();
@@ -194,19 +197,32 @@ class ZoomController extends Controller
                 return response()->json(['error' => 'Zoom not authorized. Please connect your Zoom account.'], 401);
             }
             
-            // Get user's Zoom Phone info to verify they have access
-            $phoneResponse = Http::timeout(15)->withToken($token)->get($this->baseUrl . '/phone/users/me');
-            
-            if (!$phoneResponse->successful()) {
-                Log::error('Failed to get Zoom phone info', ['response' => $phoneResponse->body()]);
-                return response()->json(['error' => 'Zoom Phone not found or not authorized'], 500);
+            // Get user's Zoom Phone number — use cached value from users.zoom_number to avoid
+            // hitting GET /phone/users/me on every call (rate-limit risk at 50+ simultaneous callers)
+            $user = Auth::user();
+            $cachedZoomNumber = $user->zoom_number ?? null;
+
+            if ($cachedZoomNumber) {
+                $zoomPhoneNumber = $cachedZoomNumber;
+            } else {
+                $phoneResponse = Http::timeout(15)->withToken($token)->get($this->baseUrl . '/phone/users/me');
+                
+                if (!$phoneResponse->successful()) {
+                    Log::error('Failed to get Zoom phone info', ['response' => $phoneResponse->body()]);
+                    return response()->json(['error' => 'Zoom Phone not found or not authorized'], 500);
+                }
+                
+                $phoneData       = $phoneResponse->json();
+                $zoomPhoneNumber = $phoneData['phone_numbers'][0]['number'] ?? null;
+
+                // Cache for future calls — avoids repeated API hits
+                if ($zoomPhoneNumber) {
+                    $user->update(['zoom_number' => $zoomPhoneNumber]);
+                }
             }
             
-            $phoneData = $phoneResponse->json();
-            $zoomPhoneNumber = $phoneData['phone_numbers'][0]['number'] ?? null;
-            
-            // Clean phone number
-            $cleanPhone = preg_replace('/[^\d+]/', '', $lead->phone_number);
+            // Clean phone number (use override if provided, otherwise lead's primary)
+            $cleanPhone = preg_replace('/[^\d+]/', '', $rawPhone);
             
             // Add +1 if it's a US number without country code
             if (strlen($cleanPhone) === 10) {
@@ -227,7 +243,7 @@ class ZoomController extends Controller
             $callRecord = \App\Models\CallLog::create([
                 'lead_id' => $lead->id,
                 'agent_id' => Auth::id() ?: 1,
-                'phone_number' => $lead->phone_number,
+                'phone_number' => $cleanPhone,  // Actual number dialed (may be secondary)
                 'call_type' => 'outbound',
                 'call_status' => 'no_answer', // Webhook will update this
                 'call_start_time' => now(),
@@ -676,111 +692,5 @@ class ZoomController extends Controller
         }
         
         return $tokenRecord->access_token;
-    }
-    
-    /**
-     * Test what Zoom API capabilities we have
-     */
-    public function testApiCapabilities()
-    {
-        $token = $this->getValidToken();
-        
-        if (!$token) {
-            return response()->json(['error' => 'Not authorized with Zoom'], 401);
-        }
-        
-        $results = [];
-        
-        try {
-            // Test 1: Get user info
-            $userResponse = Http::withToken($token)->get($this->baseUrl . '/users/me');
-            $results['user_info'] = [
-                'status' => $userResponse->status(),
-                'success' => $userResponse->successful(),
-                'data' => $userResponse->successful() ? $userResponse->json() : $userResponse->body()
-            ];
-            
-            // Test 2: Check phone features
-            if ($userResponse->successful()) {
-                $phoneResponse = Http::withToken($token)->get($this->baseUrl . '/phone/users/me');
-                $results['phone_info'] = [
-                    'status' => $phoneResponse->status(),
-                    'success' => $phoneResponse->successful(),
-                    'data' => $phoneResponse->successful() ? $phoneResponse->json() : $phoneResponse->body()
-                ];
-            }
-            
-            // Test 3: Get call history (last 10 calls)
-            $historyResponse = Http::withToken($token)->get($this->baseUrl . '/phone/users/me/call_logs', [
-                'page_size' => 10,
-                'from' => now()->subDays(7)->toDateString(),
-                'to' => now()->toDateString()
-            ]);
-            $results['call_history'] = [
-                'status' => $historyResponse->status(),
-                'success' => $historyResponse->successful(),
-                'data' => $historyResponse->successful() ? $historyResponse->json() : $historyResponse->body()
-            ];
-            
-            return response()->json([
-                'success' => true,
-                'capabilities' => $results,
-                'summary' => [
-                    'can_get_user_info' => $results['user_info']['success'],
-                    'has_phone_access' => isset($results['phone_info']) && $results['phone_info']['success'],
-                    'can_get_call_logs' => $results['call_history']['success']
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'API test failed',
-                'message' => $e->getMessage(),
-                'results' => $results
-            ], 500);
-        }
-    }
-    
-    /**
-     * Test if current user's phone is authorized
-     */
-    public function testPhoneAuth()
-    {
-        $token = $this->getValidToken();
-        
-        if (!$token) {
-            return response()->json(['error' => 'Not authorized with Zoom'], 401);
-        }
-        
-        try {
-            // Get phone user details
-            $response = Http::withToken($token)->get($this->baseUrl . '/phone/users/me');
-            
-            if ($response->successful()) {
-                $data = $response->json();
-                return response()->json([
-                    'success' => true,
-                    'phone_authorized' => true,
-                    'phone_number' => $data['phone_number'] ?? 'Not found',
-                    'calling_plans' => $data['calling_plans'] ?? [],
-                    'phone_user_id' => $data['id'] ?? null,
-                    'extension_number' => $data['extension_number'] ?? null,
-                    'full_data' => $data
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'phone_authorized' => false,
-                    'error' => 'Phone not authorized or not found',
-                    'response' => $response->body()
-                ], $response->status());
-            }
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Phone authorization test failed',
-                'message' => $e->getMessage()
-            ], 500);
-        }
     }
 }

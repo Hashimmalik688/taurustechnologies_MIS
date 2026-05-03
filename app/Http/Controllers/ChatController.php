@@ -7,6 +7,8 @@ use App\Models\ChatMessage;
 use App\Models\ChatAttachment;
 use App\Models\ChatParticipant;
 use App\Events\MessageSent;
+use App\Events\ChatUnreadUpdated;
+use App\Events\ConversationUpdated;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -543,17 +545,44 @@ class ChatController extends Controller
 
         // Broadcast event for real-time updates
         try {
-            // If this is a community announcement, broadcast globally to all community members
-            if ($conversation->community_id) {
-                broadcast(new \App\Events\CommunityAnnouncementPosted($message, $conversation));
-            }
-            
-            // Also broadcast to the conversation channel
+            // Broadcast to the conversation channel for active chat windows
             broadcast(new MessageSent($message))->toOthers();
+
+            // Push unread-count update to each recipient's personal channel.
+            // This replaces the 3-second HTTP polling for the chat badge.
+            $senderId     = $message->user_id;
+            $participants = $conversation->participants()
+                ->where('user_id', '!=', $senderId)
+                ->get();
+
+            foreach ($participants as $participant) {
+                $recipientId = $participant->user_id;
+                $unreadCount = \App\Models\ChatMessage::whereHas('conversation', function ($q) use ($recipientId) {
+                    $q->whereHas('participants', fn ($p) => $p->where('user_id', $recipientId));
+                })
+                ->whereDoesntHave('reads', fn ($q) => $q->where('user_id', $recipientId))
+                ->count();
+
+                broadcast(new ChatUnreadUpdated(
+                    userId:         $recipientId,
+                    unreadCount:    $unreadCount,
+                    conversationId: $conversation->id,
+                    senderName:     Auth::user()->name ?? 'Someone',
+                    preview:        mb_substr($message->message ?? '', 0, 60),
+                ));
+
+                // Also trigger a conversation-list refresh for this recipient
+                broadcast(new ConversationUpdated(
+                    userId:         $recipientId,
+                    conversationId: $conversation->id,
+                    senderName:     Auth::user()->name ?? 'Someone',
+                    preview:        mb_substr($message->message ?? '', 0, 60),
+                    updatedAt:      now()->diffForHumans(),
+                ));
+            }
         } catch (\Throwable $e) {
             // If broadcasting isn't configured yet (no pusher/websockets), don't fail the
-            // request — log silently. This keeps behavior safe while we wire up the
-            // broadcasting driver and front-end Echo listeners.
+            // request — log silently.
             report($e);
         }
 

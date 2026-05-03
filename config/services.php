@@ -37,15 +37,8 @@ return [
     ],
 
     // ── QA Scoring AI Services ─────────────────────────────────────────
-
-    'whisper' => [
-        'enabled' => env('WHISPER_ENABLED', true),
-        'python_bin' => env('WHISPER_PYTHON_BIN', '/opt/whisperx-env/bin/python'),
-        'model' => env('WHISPER_MODEL', 'distil-large-v3'),  // distil-large-v3: 6x faster than large-v2, ~97% accuracy, English-optimised
-        'hf_token' => env('HF_TOKEN'),                   // HuggingFace token for pyannote diarization
-        'cpu_threads' => env('WHISPER_CPU_THREADS', 12), // CPU threads — use all 12 cores (1 call at a time)
-        'batch_size' => env('WHISPER_BATCH_SIZE', 32),   // batch_size=32 saturates 48GB RAM for maximum throughput
-    ],
+    // Transcription: AssemblyAI (upload-based, via QA scoring page)
+    // Scoring: Claude (primary), Gemini (fallback)
 
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),

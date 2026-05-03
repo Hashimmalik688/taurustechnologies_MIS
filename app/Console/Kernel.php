@@ -49,6 +49,12 @@ class Kernel extends ConsoleKernel
             ->everyFiveMinutes()
             ->withoutOverlapping()
             ->runInBackground();
+
+        // Auto-reject pending devices that have been waiting more than 48 hours.
+        // Real employees are approved within minutes; anything older is a bot/scanner.
+        $schedule->command('device:purge-pending --hours=48')
+            ->dailyAt('03:00')
+            ->timezone('America/Los_Angeles');
     }
 
     /**

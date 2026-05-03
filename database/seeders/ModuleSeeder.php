@@ -121,9 +121,9 @@ class ModuleSeeder extends Seeder
                 'sort_order' => 121,
             ],
             [
-                'name' => 'Verifier Form',
+                'name' => 'PJC Form',
                 'slug' => 'peregrine-verifier',
-                'description' => 'Peregrine verifier form and submissions',
+                'description' => 'PJC (Peregrines Junior Closer) form and submissions',
                 'category' => 'Peregrine Operations',
                 'sort_order' => 122,
             ],
