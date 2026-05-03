@@ -1184,21 +1184,7 @@ Route::group(['prefix' => 'zoom', 'as' => 'zoom.', 'middleware' => ['auth']], fu
     Route::get('/recording/{id}/play', [App\Http\Controllers\ZoomController::class, 'playRecording'])->name('recording.play');
     Route::post('/dial/{leadId}', [App\Http\Controllers\ZoomController::class, 'makeCall'])->name('dial');
     Route::get('/call-status/{leadId}', [App\Http\Controllers\ZoomController::class, 'getCallStatusByLead'])->name('call.status');    
-    // Test endpoint to simulate webhook call connected
-    Route::get('/test-webhook-connected/{leadId}', function($leadId) {
-        $callLog = \App\Models\CallLog::where('lead_id', $leadId)->orderBy('created_at', 'desc')->first();
-        if ($callLog) {
-            $callLog->update(['call_status' => 'connected']);
-            return response()->json([
-                'success' => true, 
-                'message' => 'CallLog updated to connected for testing',
-                'call_log_id' => $callLog->id,
-                'lead_id' => $leadId,
-                'status' => 'connected'
-            ]);
-        }
-        return response()->json(['error' => 'CallLog not found for lead'], 404);
-    });});
+});
 
 // Zoom Webhook (public, no auth required)
 Route::post('/zoom/webhook', [App\Http\Controllers\Admin\ZoomWebhookController::class, 'handleWebhook'])->name('zoom.webhook');

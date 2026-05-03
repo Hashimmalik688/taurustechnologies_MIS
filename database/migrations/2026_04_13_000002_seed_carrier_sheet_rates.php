@@ -112,6 +112,15 @@ return new class extends Migration
 
         $now = now();
         foreach ($carriers as $c) {
+            // Idempotent: skip if a row for this partner_code already exists (safe re-run / fresh-install)
+            $exists = DB::table('carrier_sheet_rates')
+                ->where('partner_code', $c['partner_code'])
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
             DB::table('carrier_sheet_rates')->insert(array_merge($c, [
                 'uses_hardcoded_rates' => $c['uses_hardcoded_rates'] ?? false,
                 'custom_policy_types'  => $c['custom_policy_types'] ?? null,
