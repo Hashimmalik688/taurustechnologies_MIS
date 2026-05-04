@@ -35,10 +35,11 @@ class RetentionController extends Controller
         $applyFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
             if ($search) {
                 $query->where(function($q) use ($search) {
-                    $q->where('cn_name',      'like', "%{$search}%")
-                      ->orWhere('phone_number','like', "%{$search}%")
-                      ->orWhere('carrier_name','like', "%{$search}%")
-                      ->orWhere('closer_name', 'like', "%{$search}%");
+                    $q->where('cn_name',       'like', "%{$search}%")
+                      ->orWhere('phone_number', 'like', "%{$search}%")
+                      ->orWhere('carrier_name', 'like', "%{$search}%")
+                      ->orWhere('closer_name',  'like', "%{$search}%")
+                      ->orWhere('policy_number','like', "%{$search}%");
                 });
                 return $query; // skip date filters when searching — look across all time
             }
@@ -59,10 +60,11 @@ class RetentionController extends Controller
         $applyNpFilters = function($query) use ($search, $month, $year, $date_from, $date_to) {
             if ($search) {
                 $query->where(function($q) use ($search) {
-                    $q->where('cn_name',      'like', "%{$search}%")
-                      ->orWhere('phone_number','like', "%{$search}%")
-                      ->orWhere('carrier_name','like', "%{$search}%")
-                      ->orWhere('closer_name', 'like', "%{$search}%");
+                    $q->where('cn_name',       'like', "%{$search}%")
+                      ->orWhere('phone_number', 'like', "%{$search}%")
+                      ->orWhere('carrier_name', 'like', "%{$search}%")
+                      ->orWhere('closer_name',  'like', "%{$search}%")
+                      ->orWhere('policy_number','like', "%{$search}%");
                 });
                 return $query; // skip date filters when searching — look across all time
             }

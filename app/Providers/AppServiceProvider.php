@@ -36,11 +36,20 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Lead::observe(\App\Observers\LeadObserver::class);
 
         // Global MIS realtime domains (analytics / revenue / reports)
-        \App\Models\Lead::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'revenue', 'reports'], 'Lead'));
-        \App\Models\BadLead::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'reports'], 'BadLead'));
-        \App\Models\Attendance::observe(new \App\Observers\MISRealtimeObserver(['analytics', 'reports'], 'Attendance'));
-        \App\Models\SalaryRecord::observe(new \App\Observers\MISRealtimeObserver(['revenue', 'reports'], 'SalaryRecord'));
-        \App\Models\ZoomWebhookLog::observe(new \App\Observers\MISRealtimeObserver(['reports', 'analytics'], 'ZoomWebhookLog'));
+        // Must register via array callables — observe() only stores the class name string, which makes
+        // the container try to new-up the class without constructor args and throw a 500 on every save.
+        foreach ([
+            [\App\Models\Lead::class,          ['analytics', 'revenue', 'reports'], 'Lead'],
+            [\App\Models\BadLead::class,        ['analytics', 'reports'],            'BadLead'],
+            [\App\Models\Attendance::class,     ['analytics', 'reports'],            'Attendance'],
+            [\App\Models\SalaryRecord::class,   ['revenue', 'reports'],              'SalaryRecord'],
+            [\App\Models\ZoomWebhookLog::class, ['reports', 'analytics'],            'ZoomWebhookLog'],
+        ] as [$modelClass, $domains, $label]) {
+            $obs = new \App\Observers\MISRealtimeObserver($domains, $label);
+            $modelClass::created([$obs, 'created']);
+            $modelClass::updated([$obs, 'updated']);
+            $modelClass::deleted([$obs, 'deleted']);
+        }
 
         // Force HTTPS in production
         if (config('app.env') === 'production') {
