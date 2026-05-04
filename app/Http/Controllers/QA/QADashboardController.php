@@ -1002,7 +1002,7 @@ class QADashboardController extends Controller
      *
      * Resets all of today's completed QA calls back to 'pending' and re-queues
      * them for AI scoring with the latest prompt. Transcripts are already stored,
-     * so only the AI scoring step (and diarization for Whisper calls) is rerun.
+    * so only the AI scoring step (and legacy non-Zoom diarization) is rerun.
      */
     public function rerunToday(): JsonResponse
     {
@@ -1019,8 +1019,8 @@ class QADashboardController extends Controller
             // Delete existing QA result so it gets re-created fresh
             $call->qaResult()->delete();
 
-            // For Whisper calls, also clear the stale diarized transcript so the AI
-            // re-diarizes with the fixed speaker identification prompt.
+            // For legacy non-Zoom transcript sources, clear stale diarized text so
+            // the scorer re-generates speaker segmentation.
             $update = ['processing_status' => 'pending', 'failure_reason' => null, 'retry_count' => 0];
             if ($call->transcript_source !== 'zoom') {
                 $update['transcript_diarized'] = '';

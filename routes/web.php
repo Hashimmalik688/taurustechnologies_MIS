@@ -3,7 +3,6 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\SecurityController;
-use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ChargebackController;
 use App\Http\Controllers\Admin\EPMSProjectController;
@@ -697,7 +696,7 @@ Route::get('/leads/hub', function () {
 
 Route::get('/sales/hub', function () {
     $user = auth()->user();
-    if (!$user->canViewModule('sales') && !$user->canViewModule('qa-review') && !$user->canViewModule('issuance') && !$user->canViewModule('pendings-approved') && !$user->canViewModule('pending-draft') && !$user->canViewModule('paid-sales') && /* !$user->canViewModule('bank-verification') && */ !$user->canViewModule('revenue-analytics') && !$user->canViewModule('live-analytics')) {
+    if (!$user->canViewModule('sales') && !$user->canViewModule('qa-review') && !$user->canViewModule('issuance') && !$user->canViewModule('pendings-approved') && !$user->canViewModule('pending-draft') && !$user->canViewModule('paid-sales') && !$user->canViewModule('revenue-analytics') && !$user->canViewModule('live-analytics')) {
         abort(403, "You don't have permission to view any Sales Operations module.");
     }
     return view('admin.sales.hub');
@@ -1133,15 +1132,6 @@ Route::get('/retention-dashboard', [RetentionDashboardController::class, 'index'
     ->middleware(['auth', Roles::middleware(...Roles::ALL)])
     ->middleware('role.permission:retention,view')
     ->name('retention.dashboard');
-
-// Bank Verification — DISABLED
-// Route::group(['prefix' => 'bank-verification', 'as' => 'bank-verification.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
-//     Route::get('/', [\App\Http\Controllers\Admin\BankVerificationController::class, 'index'])->name('index')->middleware('role.permission:bank-verification,view');
-//     Route::get('/{id}/show', [\App\Http\Controllers\Admin\BankVerificationController::class, 'show'])->name('show')->middleware('role.permission:bank-verification,view');
-//     Route::post('/{id}/update', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateVerification'])->name('update')->middleware('role.permission:bank-verification,edit');
-//     Route::post('/{id}/assign-verifier', [\App\Http\Controllers\Admin\BankVerificationController::class, 'assignVerifier'])->name('assignVerifier')->middleware('role.permission:bank-verification,edit');
-//     Route::post('/{id}/update-assignment', [\App\Http\Controllers\Admin\BankVerificationController::class, 'updateAssignmentDetails'])->name('updateAssignment')->middleware('role.permission:bank-verification,edit');
-// });
 
 // Revenue Analytics — access controlled by role.permission:revenue-analytics,level
 Route::group(['prefix' => 'revenue-analytics', 'as' => 'revenue-analytics.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {

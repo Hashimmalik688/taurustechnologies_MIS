@@ -74,7 +74,7 @@ class QaScoreTranscribed extends Command
         foreach ($calls as $call) {
             // Reset calls stuck in 'scoring' so the job doesn't think another
             // process is mid-flight (retry_count guard in Step 4 only applies
-            // to WhisperX, but a clean status avoids confusion in logs).
+            // to legacy diarization flows, but a clean status avoids confusion in logs).
             if ($resetStuck && $call->processing_status === 'scoring') {
                 $call->update(['processing_status' => 'pending']);
                 $this->line("  ↺ Reset qa_call #{$call->id} from 'scoring' → 'pending'");

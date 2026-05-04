@@ -50,26 +50,7 @@ class SalaryController extends Controller
 
     public function index()
     {
-        $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
-
-        // Get all users (show everyone, not just those with salary configured)
-        $employees = User::with('roles')
-            ->where('status', '!=', 'inactive')
-            ->orderBy('name')
-            ->get();
-
-        // Get existing salary records for current month
-        $existingRecords = SalaryRecord::where('salary_month', $currentMonth)
-            ->where('salary_year', $currentYear)
-            ->with('user')
-            ->get()
-            ->keyBy('user_id');
-
-        // Get revenue summary for dashboard
-        $revenueSummary = $this->revenueService->getDashboardSummary($currentYear, $currentMonth);
-
-        return view('admin.salary.index', compact('employees', 'existingRecords', 'currentMonth', 'currentYear', 'revenueSummary'));
+        return redirect()->route('payroll.index');
     }
 
     public function calculate(Request $request)
@@ -111,42 +92,7 @@ class SalaryController extends Controller
      */
     public function components(Request $request)
     {
-        $query = SalaryComponent::with('user');
-
-        // Apply filters
-        if ($request->filled('employee')) {
-            $query->where('user_id', $request->employee);
-        }
-
-        if ($request->filled('month')) {
-            $query->where('salary_month', $request->month);
-        }
-
-        if ($request->filled('year')) {
-            $query->where('salary_year', $request->year);
-        }
-
-        if ($request->filled('component_type')) {
-            $query->where('component_type', $request->component_type);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Group by employee, month, component
-        $components = $query->orderBy('salary_year', 'desc')
-            ->orderBy('salary_month', 'desc')
-            ->orderBy('payment_date', 'asc')
-            ->paginate(20)
-            ->withQueryString();
-
-        // Get list of employees for filter dropdown
-        $employees = User::where('status', '!=', 'inactive')
-            ->orderBy('name')
-            ->get();
-
-        return view('admin.salary.components', compact('components', 'employees'));
+        return redirect()->route('payroll.index');
     }
 
     /**
@@ -154,9 +100,7 @@ class SalaryController extends Controller
      */
     public function showComponent($componentId)
     {
-        $component = SalaryComponent::with('user', 'deductions')->findOrFail($componentId);
-        
-        return view('admin.salary.component-detail', compact('component'));
+        return redirect()->route('payroll.index');
     }
 
     /**
@@ -800,76 +744,12 @@ class SalaryController extends Controller
 
     public function records(Request $request)
     {
-        $query = SalaryRecord::with(['user', 'deductions']);
-
-        // Apply filters
-        if ($request->filled('employee')) {
-            $query->where('user_id', $request->employee);
-        }
-
-        if ($request->filled('month')) {
-            $query->where('salary_month', $request->month);
-        }
-
-        if ($request->filled('year')) {
-            $query->where('salary_year', $request->year);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Default ordering
-        $query->orderBy('salary_year', 'desc')
-            ->orderBy('salary_month', 'desc')
-            ->orderBy('created_at', 'desc');
-
-        $salaryRecords = $query->paginate(20)->withQueryString();
-
-        return view('admin.salary.records', compact('salaryRecords'));
+        return redirect()->route('payroll.index');
     }
 
     public function show(SalaryRecord $salaryRecord)
     {
-        $salaryRecord->load(['user', 'deductions']);
-
-        // Get sales details for this period
-        $salesDetails = Lead::where('forwarded_by', $salaryRecord->user_id)
-            ->whereNotNull('sale_at')
-            ->whereMonth('sale_at', $salaryRecord->salary_month)
-            ->whereYear('sale_at', $salaryRecord->salary_year)
-            ->orderBy('sale_at', 'desc')
-            ->get();
-
-        // Get attendance details for this period using your existing model
-        $attendanceDetails = Attendance::where('user_id', $salaryRecord->user_id)
-            ->whereMonth('date', $salaryRecord->salary_month)
-            ->whereYear('date', $salaryRecord->salary_year)
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // Generate working days calendar
-        $workingDaysCalendar = $this->generateAttendanceCalendar(
-            $salaryRecord->user_id,
-            $salaryRecord->salary_month,
-            $salaryRecord->salary_year
-        );
-
-        // Get attendance settings for context
-        $attendanceSettings = [
-            'office_start_time' => Setting::get('office_start_time', '09:00'),
-            'late_threshold_minutes' => Setting::get('late_threshold_minutes', 15),
-            'allow_weekend_attendance' => Setting::get('allow_weekend_attendance', false),
-            'office_networks' => Setting::get('office_networks', []),
-        ];
-
-        return view('admin.salary.show', compact(
-            'salaryRecord',
-            'salesDetails',
-            'attendanceDetails',
-            'workingDaysCalendar',
-            'attendanceSettings'
-        ));
+        return redirect()->route('payroll.index');
     }
 
     /**
@@ -1003,61 +883,7 @@ class SalaryController extends Controller
 
     public function employees(Request $request)
     {
-        // Get all users (show everyone for salary configuration)
-        $query = User::with('roles')
-            ->where('status', '!=', 'inactive')
-            ->orderBy('name');
-
-        // Apply search filter
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        // Apply salary range filter
-        if ($request->filled('salary_range')) {
-            $range = $request->salary_range;
-            switch ($range) {
-                case '0-25000':
-                    $query->whereBetween('basic_salary', [0, 25000]);
-                    break;
-                case '25000-50000':
-                    $query->whereBetween('basic_salary', [25000, 50000]);
-                    break;
-                case '50000-100000':
-                    $query->whereBetween('basic_salary', [50000, 100000]);
-                    break;
-                case '100000+':
-                    $query->where('basic_salary', '>', 100000);
-                    break;
-            }
-        }
-
-        // Apply target sales filter
-        if ($request->filled('target_range')) {
-            $range = $request->target_range;
-            switch ($range) {
-                case '0-10':
-                    $query->whereBetween('target_sales', [0, 10]);
-                    break;
-                case '10-20':
-                    $query->whereBetween('target_sales', [10, 20]);
-                    break;
-                case '20-50':
-                    $query->whereBetween('target_sales', [20, 50]);
-                    break;
-                case '50+':
-                    $query->where('target_sales', '>', 50);
-                    break;
-            }
-        }
-
-        $employees = $query->orderBy('name')->paginate(20)->withQueryString();
-
-        return view('admin.salary.employees', compact('employees'));
+        return redirect()->route('payroll.index');
     }
 
     public function updateEmployee(Request $request, User $user)
@@ -1093,58 +919,7 @@ class SalaryController extends Controller
 
     public function downloadPayslip(SalaryRecord $salaryRecord)
     {
-        $salaryRecord->load(['user', 'deductions']);
-
-        // Get sales details for this period
-        $salesDetails = Lead::where('forwarded_by', $salaryRecord->user_id)
-            ->whereNotNull('sale_at')
-            ->whereMonth('sale_at', $salaryRecord->salary_month)
-            ->whereYear('sale_at', $salaryRecord->salary_year)
-            ->orderBy('sale_at', 'desc')
-            ->get();
-
-        // Get attendance details for this period
-        $attendanceDetails = Attendance::where('user_id', $salaryRecord->user_id)
-            ->whereMonth('date', $salaryRecord->salary_month)
-            ->whereYear('date', $salaryRecord->salary_year)
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // Get attendance settings for payslip context
-        $attendanceSettings = [
-            'office_start_time' => Setting::get('office_start_time', '09:00'),
-            'late_threshold_minutes' => Setting::get('late_threshold_minutes', 15),
-            'perfect_attendance_bonus' => self::PERFECT_ATTENDANCE_BONUS,
-            'sandwich_rule_days' => self::SANDWICH_RULE_PENALTY_DAYS,
-        ];
-
-        // Generate PDF
-        $pdf = PDF::loadView('admin.salary.payslip', compact(
-            'salaryRecord',
-            'salesDetails',
-            'attendanceDetails',
-            'attendanceSettings'
-        ));
-
-        // Set PDF options
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOptions([
-            'dpi' => 150,
-            'defaultFont' => 'DejaVu Sans',
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-        ]);
-
-        // Generate filename
-        $filename = sprintf(
-            'payslip_%s_%s_%s.pdf',
-            str_replace(' ', '_', strtolower($salaryRecord->user->name)),
-            strtolower($salaryRecord->month_name),
-            $salaryRecord->salary_year
-        );
-
-        // Return PDF download
-        return $pdf->download($filename);
+        return redirect()->route('payroll.index');
     }
 
     /**
