@@ -62,6 +62,73 @@ class GoogleSheetsService
         }
     }
 
+    public function appendPeregrineSale(\App\Models\Lead $lead): void
+    {
+        $url = config('services.google_sheets.peregrine_script_url');
+
+        if (empty($url)) {
+            Log::warning('GoogleSheetsService: GOOGLE_SHEETS_PEREGRINE_SCRIPT_URL is not set — skipping.');
+            return;
+        }
+
+        try {
+            $response = $this->http->post($url, [
+                'json' => $this->buildPeregrinePayload($lead),
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+
+            if (isset($data['status']) && $data['status'] === 'error') {
+                Log::error("GoogleSheetsService [Peregrine]: Apps Script error for Lead #{$lead->id}: " . ($data['message'] ?? ''));
+            } else {
+                Log::info("GoogleSheetsService [Peregrine]: Lead #{$lead->id} ({$lead->cn_name}) appended to Peregrines sheet.");
+            }
+        } catch (RequestException $e) {
+            $body = $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'no response';
+            Log::error("GoogleSheetsService [Peregrine]: HTTP error for Lead #{$lead->id} — {$e->getMessage()} | {$body}");
+        } catch (\Throwable $e) {
+            Log::error("GoogleSheetsService [Peregrine]: Unexpected error for Lead #{$lead->id} — {$e->getMessage()}");
+        }
+    }
+
+    private function buildPeregrinePayload(\App\Models\Lead $lead): array
+    {
+        $lead->loadMissing(['assignedCloser', 'assignedValidator']);
+
+        return [
+            'submission_date'     => $lead->sale_at ? \Carbon\Carbon::parse($lead->sale_at)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s'),
+            'closer_name'         => $lead->assignedCloser?->name ?? $lead->closer_name ?? '',
+            'validator_name'      => $lead->assignedValidator?->name ?? '',
+            'customer_name'       => $lead->cn_name ?? '',
+            'phone_number'        => $lead->phone_number ?? '',
+            'secondary_phone'     => $lead->secondary_phone_number ?? '',
+            'date_of_birth'       => $lead->date_of_birth ?? '',
+            'ssn'                 => $lead->ssn ?? '',
+            'gender'              => $lead->gender ?? '',
+            'state'               => $lead->state ?? '',
+            'zip_code'            => $lead->zip_code ?? '',
+            'address'             => $lead->address ?? '',
+            'carrier_name'        => $lead->carrier_name ?? '',
+            'assigned_partner'    => $lead->assigned_partner ?? '',
+            'policy_type'         => $lead->policy_type ?? '',
+            'coverage_amount'     => $lead->coverage_amount ?? '',
+            'monthly_premium'     => $lead->monthly_premium ?? '',
+            'initial_draft_date'  => $lead->initial_draft_date ?? '',
+            'bank_name'           => $lead->bank_name ?? '',
+            'account_type'        => $lead->account_type ?? '',
+            'routing_number'      => $lead->routing_number ?? '',
+            'account_number'      => $lead->acc_number ?? '',
+            'beneficiary'         => $lead->beneficiary ?? '',
+            'beneficiary_dob'     => $lead->beneficiary_dob ?? '',
+            'height'              => $lead->height ?? '',
+            'weight'              => $lead->weight ?? '',
+            'smoker'              => $lead->smoker ?? '',
+            'medical_issue'       => $lead->medical_issue ?? '',
+            'medications'         => $lead->medications ?? '',
+            'mis_lead_id'         => (string) $lead->id,
+        ];
+    }
+
     private function buildPayload(\App\Models\Lead $lead): array
     {
         return [

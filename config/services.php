@@ -71,7 +71,9 @@ return [
     */
     'google_sheets' => [
         // Apps Script Web App deployment URL — set GOOGLE_SHEETS_SCRIPT_URL in .env
-        'script_url' => env('GOOGLE_SHEETS_SCRIPT_URL'),
+        'script_url'           => env('GOOGLE_SHEETS_SCRIPT_URL'),
+        // Separate Apps Script URL for the MIS Peregrines Leads sheet
+        'peregrine_script_url' => env('GOOGLE_SHEETS_PEREGRINE_SCRIPT_URL'),
     ],
 
 ];

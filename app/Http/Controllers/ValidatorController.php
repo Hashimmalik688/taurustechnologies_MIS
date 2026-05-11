@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SyncPeregrineSaleToGoogleSheets;
+use App\Models\AgentCarrierState;
 use App\Models\Lead;
 use App\Models\User;
 use App\Support\Roles;
@@ -92,20 +94,23 @@ class ValidatorController extends Controller
         // Daily stats
         $todayStats = $this->getDailyStats(Auth::id(), $startDate, $endDate);
 
+        $carrierPartnerData = $this->buildCarrierPartnerData();
+
         return view('validator.index', compact(
-            'pendingLeads', 
-            'homeOfficeLeads', 
-            'completedLeads', 
-            'allLeads', 
-            'salesLeads', 
-            'declinedLeads', 
-            'returnedLeads', 
-            'submittedLeads', 
-            'todayStats', 
-            'filter', 
-            'startDate', 
+            'pendingLeads',
+            'homeOfficeLeads',
+            'completedLeads',
+            'allLeads',
+            'salesLeads',
+            'declinedLeads',
+            'returnedLeads',
+            'submittedLeads',
+            'todayStats',
+            'filter',
+            'startDate',
             'endDate',
-            'filteredTotal'
+            'filteredTotal',
+            'carrierPartnerData'
         ));
     }
 
@@ -134,6 +139,8 @@ class ValidatorController extends Controller
             'sale_at'                  => now(),
             'sale_date'                => now()->format('Y-m-d'),
         ]);
+
+        SyncPeregrineSaleToGoogleSheets::dispatch($lead->fresh());
 
         return redirect()->route('validator.index')
             ->with('success', 'Lead marked as Sale successfully.');
@@ -204,7 +211,9 @@ class ValidatorController extends Controller
 
         $validators = User::role([Roles::VERIFIER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])->get(['id', 'name']);
 
-        return view('validator.edit', compact('lead', 'validators'));
+        $carrierPartnerData = $this->buildCarrierPartnerData();
+
+        return view('validator.edit', compact('lead', 'validators', 'carrierPartnerData'));
     }
 
     /**
@@ -282,6 +291,8 @@ class ValidatorController extends Controller
         $validated['sale_date']                = now()->format('Y-m-d');
         
         $lead->update($validated);
+
+        SyncPeregrineSaleToGoogleSheets::dispatch($lead->fresh());
 
         return redirect()->route('validator.index')
             ->with('success', 'Lead marked as Sale successfully.');
@@ -361,6 +372,8 @@ class ValidatorController extends Controller
             'sale_at'                  => now(),
             'sale_date'                => now()->format('Y-m-d'),
         ]);
+
+        SyncPeregrineSaleToGoogleSheets::dispatch($lead->fresh());
 
         return redirect()->route('validator.index')
             ->with('success', 'Lead marked as Sale successfully.');
@@ -489,11 +502,34 @@ class ValidatorController extends Controller
                 $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
                 $end = Carbon::today($timezone)->setTime(17, 0, 0)->setTimezone('UTC');
                 return [$start, $end];
-            
+
             default:
                 $start = Carbon::today($timezone)->setTime(7, 0, 0)->setTimezone('UTC');
                 $end = Carbon::today($timezone)->setTime(17, 0, 0)->setTimezone('UTC');
                 return [$start, $end];
         }
+    }
+
+    private function buildCarrierPartnerData(): array
+    {
+        return AgentCarrierState::with(['insuranceCarrier', 'partner'])
+            ->whereHas('insuranceCarrier', fn($q) => $q->where('is_active', true))
+            ->whereHas('partner',          fn($q) => $q->where('is_active', true))
+            ->get()
+            ->groupBy(fn($item) => $item->insurance_carrier_id . '_' . $item->partner_id)
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'carrier_id'   => $first->insurance_carrier_id,
+                    'carrier_name' => $first->insuranceCarrier->name,
+                    'partner_id'   => $first->partner_id,
+                    'partner_name' => $first->partner->name,
+                    'partner_code' => $first->partner->code,
+                    'display_name' => $first->insuranceCarrier->name . ' (' . $first->partner->code . ')',
+                    'states'       => $group->pluck('state')->unique()->values()->toArray(),
+                ];
+            })
+            ->values()
+            ->toArray();
     }
 }
