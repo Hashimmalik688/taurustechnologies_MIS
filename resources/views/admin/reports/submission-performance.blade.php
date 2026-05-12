@@ -388,18 +388,29 @@ $grandTotal = $grandTotalSales;
             <label for="sp-to">To</label>
             <input type="date" id="sp-to" name="date_to" value="{{ $dateTo }}">
         </div>
+        <div>
+            <label for="sp-team">Team</label>
+            <select id="sp-team" name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--sp-border);background:var(--bs-input-bg,#f8fafc);color:var(--sp-text-1);outline:none;transition:border-color .15s;min-width:110px">
+                <option value="">All Teams</option>
+                <option value="peregrine" @selected($team === 'peregrine')>Peregrine</option>
+                <option value="ravens" @selected($team === 'ravens')>Ravens</option>
+            </select>
+        </div>
         <button type="submit" class="sp-btn sp-btn-apply" style="align-self:flex-end">
             <i class="bx bx-search-alt"></i> Apply
         </button>
         <a href="{{ route('settings.reports.submission-performance') }}" class="sp-btn sp-btn-reset" style="align-self:flex-end">
             <i class="bx bx-reset"></i> Reset
         </a>
-        @if($dateFrom || $dateTo)
+        @if($dateFrom || $dateTo || $team)
         <span class="sp-daterange">
             <i class="bx bx-calendar-check" style="color:var(--sp-gold);font-size:.82rem"></i>
             <strong>{{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : '—' }}</strong>
             <span style="color:var(--sp-text-4)">→</span>
             <strong>{{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : '—' }}</strong>
+            @if($team)
+                <span style="margin-left:.25rem;font-size:.62rem;font-weight:700;color:var(--sp-text-2)">· {{ ucfirst($team) }}</span>
+            @endif
         </span>
         @endif
     </form>
@@ -490,6 +501,7 @@ $grandTotal = $grandTotalSales;
                         $pcParams = ['date_from' => $dateFrom, 'date_to' => $dateTo];
                         if ($row->carrier_name)     $pcParams['carrier_name']     = $row->carrier_name;
                         $pcParams['assigned_partner'] = $row->assigned_partner ?? '';
+                        if ($team) $pcParams['team'] = $team;
                         $pcUrl = route('settings.reports.submission-performance.drilldown', $pcParams);
 
                         /* Partner badge variant — hash from text since partner_id may be absent */

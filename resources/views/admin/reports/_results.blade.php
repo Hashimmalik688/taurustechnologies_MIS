@@ -59,7 +59,15 @@
                         <td>{{ $lead->closer_user_name ?? $lead->closer_name ?? '—' }}</td>
                         <td>{{ $lead->partner_name ?? $lead->assigned_partner ?? '—' }}</td>
                         <td>{{ $lead->source ?? '—' }}</td>
-                        <td>{{ $lead->team ?? '—' }}</td>
+                        <td>
+                            @if(($lead->team ?? null) === 'peregrine')
+                                <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
+                            @elseif(($lead->team ?? null) === 'ravens')
+                                <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                            @else
+                                <span style="color:#94a3b8;font-size:.65rem">—</span>
+                            @endif
+                        </td>
                         <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M d, Y') : '—' }}</td>
                         <td>
                             @if($lead->qa_status)

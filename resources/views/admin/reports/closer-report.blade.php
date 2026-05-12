@@ -122,10 +122,18 @@
                     <input type="date" name="date_to" class="cr-filter-ctrl"
                            value="{{ $dateTo ?? '' }}" style="min-width:140px">
                 </div>
+                <div class="cr-filter-group">
+                    <span class="cr-filter-lbl">Team</span>
+                    <select name="team" class="cr-filter-ctrl" style="min-width:110px">
+                        <option value="">All Teams</option>
+                        <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
+                        <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+                    </select>
+                </div>
                 <button type="submit" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
                     <i class="bx bx-filter"></i> Filter
                 </button>
-                @if($dateFrom || $dateTo)
+                @if($dateFrom || $dateTo || ($team ?? null))
                     <a href="{{ route('settings.reports.closer-report') }}" class="act-btn a-secondary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
                         <i class="bx bx-x"></i> Clear
                     </a>
@@ -195,13 +203,19 @@
                         @foreach($closerStats as $stat)
                             <tr>
                                 <td>
-                                    <a href="{{ route('settings.reports.closer-report.drilldown', [
+                                    <a href="{{ route('settings.reports.closer-report.drilldown', array_filter([
                                         'closer_name' => $stat['closer_name'],
-                                        'date_from' => $dateFrom,
-                                        'date_to' => $dateTo
-                                    ]) }}" class="cr-closer-name">
+                                        'date_from'   => $dateFrom,
+                                        'date_to'     => $dateTo,
+                                        'team'        => $team ?? null,
+                                    ])) }}" class="cr-closer-name">
                                         {{ $stat['closer_name'] }}
                                     </a>
+                                    @if(($stat['team'] ?? null) === 'peregrine')
+                                        <span class="badge bg-purple" title="Peregrine" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">P</span>
+                                    @elseif(($stat['team'] ?? null) === 'ravens')
+                                        <span class="badge bg-dark" title="Ravens" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">R</span>
+                                    @endif
                                 </td>
                                 <td><span style="display:inline-block;padding:.2rem .5rem;background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-radius:.3rem;color:#0369a1;font-weight:700">{{ $stat['sales_count'] }}</span></td>
                                 <td><span style="display:inline-block;padding:.2rem .5rem;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:.3rem;color:#059669;font-weight:700">{{ $stat['approved_count'] }}</span></td>

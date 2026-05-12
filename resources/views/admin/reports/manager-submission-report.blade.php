@@ -153,6 +153,14 @@ function setToday() {
             @endforeach
         </select>
     </div>
+    <div>
+        <label>Team</label>
+        <select name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--msr-border);background:var(--bs-input-bg,#f8fafc);color:var(--msr-text-1);outline:none;min-width:110px">
+            <option value="">All Teams</option>
+            <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
+            <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+        </select>
+    </div>
     <button type="submit" class="msr-btn msr-btn-apply">
         <i class="bx bx-filter-alt"></i> Apply
     </button>
@@ -222,14 +230,14 @@ function setToday() {
                 <tr>
                     <td style="color:var(--msr-text-4);font-size:.65rem">{{ $i + 1 }}</td>
                     <td>
-                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType]))) }}"
+                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType, 'team' => $team ?? null]))) }}"
                            class="msr-mgr-link">
                             <i class="bx bx-user"></i>
                             {{ $row->manager_name }}
                         </a>
                     </td>
                     <td class="tr">
-                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => 'pending_contract'], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType]))) }}"
+                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => 'pending_contract'], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType, 'team' => $team ?? null]))) }}"
                            style="text-decoration:none">
                             <span class="msr-chip msr-chip-green">
                                 <i class="bx bx-check-circle"></i>
@@ -238,7 +246,7 @@ function setToday() {
                         </a>
                     </td>
                     <td class="tr">
-                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => 'declined'], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType]))) }}"
+                        <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_merge(['manager_id' => $row->manager_id, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => 'declined'], array_filter(['carrier_id' => $carrierId, 'partner_name' => $partnerName, 'policy_type' => $policyType, 'team' => $team ?? null]))) }}"
                            style="text-decoration:none">
                             <span class="msr-chip msr-chip-red">
                                 <i class="bx bx-x-circle"></i>

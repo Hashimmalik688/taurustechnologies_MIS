@@ -327,4 +327,7 @@ select.pipe-pill {
 /* ── Grid layout ── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* ── Team badges ── */
+.bg-purple { background-color: var(--bs-ui-purple, #6f42c1) !important; color: #fff !important; }
 </style>

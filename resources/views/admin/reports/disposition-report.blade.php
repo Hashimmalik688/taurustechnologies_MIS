@@ -162,6 +162,15 @@
                     </select>
                 </div>
 
+                <div class="dr-filter-group">
+                    <span class="dr-filter-lbl">Team</span>
+                    <select name="team" class="dr-filter-ctrl" style="min-width:110px">
+                        <option value="">All Teams</option>
+                        <option value="peregrine" {{ ($teamFilter ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
+                        <option value="ravens"    {{ ($teamFilter ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+                    </select>
+                </div>
+
                 <div class="dr-filter-group" style="justify-content:flex-end">
                     <span class="dr-filter-lbl">&nbsp;</span>
                     <button type="submit" class="act-btn a-primary" style="font-size:.72rem;padding:.32rem .7rem;height:fit-content">
@@ -294,9 +303,17 @@
                         @foreach($closerRows as $row)
                             @php
                                 $d = $row['dispositions'];
+                                $closerTeam = isset($row['id']) ? ($userTeamMap[$row['id']] ?? null) : null;
                             @endphp
                             <tr>
-                                <td>{{ $row['name'] }}</td>
+                                <td>
+                                    {{ $row['name'] }}
+                                    @if($closerTeam === 'peregrine')
+                                        <span class="badge bg-purple" title="Peregrine" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">P</span>
+                                    @elseif($closerTeam === 'ravens')
+                                        <span class="badge bg-dark" title="Ravens" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">R</span>
+                                    @endif
+                                </td>
                                 <td style="font-weight:800;color:#6366f1">{{ $row['total'] }}</td>
                                 <td>
                                     @if(($row['sales'] ?? 0) > 0)

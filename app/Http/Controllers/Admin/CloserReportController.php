@@ -30,7 +30,9 @@ class CloserReportController extends Controller
     {
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
-        
+        $team = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
+
         // Default to current month if no dates provided
         if (!$dateFrom && !$dateTo) {
             $dateFrom = now()->startOfMonth()->toDateString();
@@ -50,24 +52,33 @@ class CloserReportController extends Controller
         if ($dateTo) {
             $baseQuery->where('sale_date', '<=', $dateTo);
         }
+        if ($team) {
+            $baseQuery->where('team', $team);
+        }
 
         // Get all closers who have made sales
         $closerStats = (clone $baseQuery)
-            ->select('closer_name')
-            ->groupBy('closer_name')
+            ->select('closer_name', 'team')
+            ->groupBy('closer_name', 'team')
             ->get()
-            ->map(function ($item) use ($dateFrom, $dateTo) {
-                $closerName = $item->closer_name;
-                
+            ->groupBy('closer_name')
+            ->map(function ($items) use ($dateFrom, $dateTo, $team) {
+                $closerName = $items->first()->closer_name;
+                // Determine the closer's team: pick most-common non-null team value
+                $closerTeam = $items->pluck('team')->filter()->countBy()->sortDesc()->keys()->first();
+
                 // Base query for this closer
                 $closerQuery = Lead::where('closer_name', $closerName)
                     ->whereNotNull('sale_at');
-                
+
                 if ($dateFrom) {
                     $closerQuery->where('sale_date', '>=', $dateFrom);
                 }
                 if ($dateTo) {
                     $closerQuery->where('sale_date', '<=', $dateTo);
+                }
+                if ($team) {
+                    $closerQuery->where('team', $team);
                 }
 
                 // Total sales
@@ -99,6 +110,7 @@ class CloserReportController extends Controller
 
                 return [
                     'closer_name' => $closerName,
+                    'team' => $closerTeam,
                     'sales_count' => $salesCount,
                     'approved_count' => $approvedCount,
                     'declined_count' => $declinedCount,
@@ -127,7 +139,7 @@ class CloserReportController extends Controller
             'paid_percentage' => $totalApproved > 0 ? round(($totalPaid / $totalApproved) * 100, 1) : 0,
         ];
 
-        return view('admin.reports.closer-report', compact('closerStats', 'totals', 'dateFrom', 'dateTo'));
+        return view('admin.reports.closer-report', compact('closerStats', 'totals', 'dateFrom', 'dateTo', 'team'));
     }
 
     /**
@@ -139,6 +151,8 @@ class CloserReportController extends Controller
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
         $statusFilter = $request->get('status'); // sales, approved, declined, paid, chargeback
+        $team = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         if (!$closerName) {
             return redirect()->route('settings.reports.closer-report')
@@ -156,6 +170,9 @@ class CloserReportController extends Controller
         }
         if ($dateTo) {
             $query->where('sale_date', '<=', $dateTo);
+        }
+        if ($team) {
+            $query->where('team', $team);
         }
 
         // Apply status filter
@@ -212,7 +229,8 @@ class CloserReportController extends Controller
             'dateFrom',
             'dateTo',
             'statusFilter',
-            'stats'
+            'stats',
+            'team'
         ));
     }
 }

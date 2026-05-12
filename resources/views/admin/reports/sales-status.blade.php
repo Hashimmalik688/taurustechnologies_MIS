@@ -407,6 +407,14 @@ $grandTotal = $grandTotals['total_sales'] ?? 0;
                 @endforeach
             </select>
         </div>
+        <div>
+            <label for="ss-team">Team</label>
+            <select id="ss-team" name="team" style="min-width:110px">
+                <option value="">All Teams</option>
+                <option value="peregrine" @selected(($team ?? '') === 'peregrine')>Peregrine</option>
+                <option value="ravens"    @selected(($team ?? '') === 'ravens')>Ravens</option>
+            </select>
+        </div>
         <button type="submit" class="ss-btn ss-btn-apply" style="align-self:flex-end">
             <i class="bx bx-search-alt"></i> Apply
         </button>
@@ -505,13 +513,14 @@ $grandTotal = $grandTotals['total_sales'] ?? 0;
                     $rank   = $loop->iteration;
                     $color  = $palette[($rank - 1) % count($palette)];
                     $pct    = $grandTotal > 0 ? round(($row->total_sales / $grandTotal) * 100, 1) : 0;
-                    $baseParams = [
+                    $baseParams = array_filter([
                         'date_from'    => $dateFrom,
                         'date_to'      => $dateTo,
                         'date_field'   => $dateField,
                         'carrier_name' => $row->carrier_name,
                         'partner_id'   => $row->partner_id ?? 'none',
-                    ];
+                        'team'         => $team ?? null,
+                    ]);
                     $badgeVariants = ['ss-pb-gold','ss-pb-teal','ss-pb-indigo'];
                     $badgeClass = $row->partner_id ? $badgeVariants[$row->partner_id % count($badgeVariants)] : 'ss-pb-none';
                 @endphp

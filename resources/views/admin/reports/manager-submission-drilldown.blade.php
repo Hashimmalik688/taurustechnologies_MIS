@@ -112,7 +112,7 @@
             </span>
         </div>
     </div>
-    <a href="{{ route('settings.reports.manager-submission-report', ['date_from' => $dateFrom, 'date_to' => $dateTo]) }}" class="dd-back">
+    <a href="{{ route('settings.reports.manager-submission-report', array_filter(['date_from' => $dateFrom, 'date_to' => $dateTo, 'team' => $team ?? null])) }}" class="dd-back">
         <i class="bx bx-arrow-back"></i> Back to Report
     </a>
 </div>
@@ -172,10 +172,18 @@
             @endforeach
         </select>
     </div>
+    <div>
+        <label style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--dd-text-4);display:block;margin-bottom:.12rem">Team</label>
+        <select name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--dd-border);background:var(--bs-input-bg,#f8fafc);color:var(--dd-text-1);outline:none;min-width:110px">
+            <option value="">All Teams</option>
+            <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
+            <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+        </select>
+    </div>
     <button type="submit" style="font-size:.7rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.22rem;background:linear-gradient(135deg,var(--dd-gold),#b8941f);color:#0f172a">
         <i class="bx bx-filter-alt"></i> Filter
     </button>
-    @if($carrierId || $partnerName || $policyType)
+    @if($carrierId || $partnerName || $policyType || ($team ?? null))
     <a href="{{ route('settings.reports.manager-submission-report.drilldown', array_filter(['manager_id' => $managerId, 'date_from' => $dateFrom, 'date_to' => $dateTo, 'action' => $actionFilter])) }}"
        style="font-size:.7rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;border:1.5px solid var(--dd-border);background:transparent;color:var(--dd-text-3);text-decoration:none;display:inline-flex;align-items:center;gap:.22rem">
         <i class="bx bx-x"></i> Clear
@@ -250,6 +258,7 @@
                 <tr>
                     <th style="width:26px">#</th>
                     <th style="min-width:150px">Client</th>
+                    <th style="min-width:40px">Team</th>
                     <th style="min-width:120px">Carrier</th>
                     <th style="min-width:80px">Policy Type</th>
                     <th style="min-width:100px">Policy #</th>
@@ -299,6 +308,17 @@
                             @endif
                         </div>
                         <div class="dd-sub">ID #{{ $lead->id }}</div>
+                    </td>
+
+                    {{-- Team --}}
+                    <td>
+                        @if($lead->team === 'peregrine')
+                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
+                        @elseif($lead->team === 'ravens')
+                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @else
+                            <span style="color:var(--dd-text-4,#94a3b8);font-size:.65rem">—</span>
+                        @endif
                     </td>
 
                     {{-- Carrier --}}
@@ -400,7 +420,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5"></td>
+                    <td colspan="6"></td>
                     <td class="td-r">
                         <span class="dd-chip dd-chip-green">
                             <i class="bx bx-dollar" style="font-size:.68rem"></i>{{ number_format($totalPremium, 2) }}

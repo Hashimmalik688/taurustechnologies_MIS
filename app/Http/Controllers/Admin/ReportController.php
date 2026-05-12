@@ -752,6 +752,8 @@ class ReportController extends Controller
         // Default to current month
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $team     = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         $query = Lead::whereNotNull('pending_contract_at')
             ->whereNotNull('closer_name');
@@ -760,6 +762,7 @@ class ReportController extends Controller
         // so the report accurately shows what was submitted in the selected period.
         if ($dateFrom) $query->whereDate('pending_contract_at', '>=', $dateFrom);
         if ($dateTo)   $query->whereDate('pending_contract_at', '<=', $dateTo);
+        if ($team)     $query->where('team', $team);
 
         // Load all leads and calculate revenue from cluster rates (premium × 9 × commission%)
         $leads = $query->select(
@@ -799,7 +802,8 @@ class ReportController extends Controller
             'grandTotalPremium',
             'grandTotalRevenue',
             'dateFrom',
-            'dateTo'
+            'dateTo',
+            'team'
         ));
     }
 
@@ -813,6 +817,8 @@ class ReportController extends Controller
         $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $carrierName    = $request->get('carrier_name');
         $assignedPartner = $request->get('assigned_partner');
+        $team = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         $query = Lead::whereNotNull('pending_contract_at')
             ->whereNotNull('closer_name');
@@ -822,6 +828,7 @@ class ReportController extends Controller
         if ($dateTo)          $query->whereDate('pending_contract_at', '<=', $dateTo);
         if ($carrierName)     $query->where('carrier_name', $carrierName);
         if ($assignedPartner !== null) $query->where('assigned_partner', $assignedPartner ?: null);
+        if ($team)            $query->where('team', $team);
 
         $rawLeads = $query->select(
                 'id', 'cn_name', 'carrier_name', 'assigned_partner',
@@ -829,7 +836,7 @@ class ReportController extends Controller
                 'monthly_premium', 'agent_commission', 'agent_revenue', 'settlement_percentage',
                 'policy_type', 'settlement_type', 'state', 'sale_date',
                 'pending_contract_at', 'closer_name', 'issuance_status',
-                'policy_number',
+                'policy_number', 'team',
                 'commission_calculation_notes', 'commission_calculated_at'
             )
             ->orderByDesc('pending_contract_at')
@@ -856,7 +863,7 @@ class ReportController extends Controller
             'hasRevCount', 'noRevCount',
             'carrierLabel', 'partnerLabel',
             'dateFrom', 'dateTo',
-            'carrierName', 'assignedPartner'
+            'carrierName', 'assignedPartner', 'team'
         ));
     }
 
@@ -871,6 +878,8 @@ class ReportController extends Controller
         $dateTo    = $request->get('date_to',   now()->endOfMonth()->toDateString());
         $dateField = $request->get('date_field', 'sale_date'); // 'sale_date' | 'paid_at'
         $carrierId = $request->get('carrier_id'); // optional single carrier filter
+        $team      = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         // Allowed date fields (whitelist)
         if (!in_array($dateField, ['sale_date', 'paid_at'])) {
@@ -883,6 +892,7 @@ class ReportController extends Controller
         if ($dateFrom) $baseQuery->whereDate($dateField, '>=', $dateFrom);
         if ($dateTo)   $baseQuery->whereDate($dateField, '<=', $dateTo);
         if ($carrierId) $baseQuery->where('insurance_carrier_id', $carrierId);
+        if ($team)      $baseQuery->where('team', $team);
 
         // Pull all leads with necessary columns
         $leads = $baseQuery->select(
@@ -940,7 +950,7 @@ class ReportController extends Controller
         return view('admin.reports.sales-status', compact(
             'carriersData', 'grandTotals',
             'dateFrom', 'dateTo', 'dateField',
-            'carrierId', 'allCarriers'
+            'carrierId', 'allCarriers', 'team'
         ));
     }
 
@@ -957,6 +967,8 @@ class ReportController extends Controller
         $carrierId   = $request->get('carrier_id');   // fallback (legacy)
         $partnerId   = $request->get('partner_id');   // optional partner filter
         $stage       = $request->get('stage', 'total_sales');
+        $team        = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         if (!in_array($dateField, ['sale_date', 'paid_at'])) {
             $dateField = 'sale_date';
@@ -977,6 +989,7 @@ class ReportController extends Controller
         // partner filter (null partner_id = leads with no partner)
         if ($partnerId === 'none') $query->whereNull('partner_id');
         elseif ($partnerId)        $query->where('partner_id', $partnerId);
+        if ($team)               $query->where('team', $team);
 
         // Stage-specific filter
         match ($stage) {
@@ -998,7 +1011,7 @@ class ReportController extends Controller
             'sale_date', 'paid_at', 'pending_contract_at', 'not_issued_at',
             'declined_at',
             'issuance_status', 'not_issued_disposition',
-            'closer_name', 'status',
+            'closer_name', 'status', 'team',
             'policy_type', 'settlement_type', 'state'
         )->orderByDesc('sale_date')->get();
 
@@ -1025,7 +1038,7 @@ class ReportController extends Controller
             'leads', 'totalSales', 'totalPremium',
             'carrierLabel', 'partnerLabel', 'stageLabel', 'stage',
             'dateFrom', 'dateTo', 'dateField',
-            'carrierId', 'carrierName', 'partnerId'
+            'carrierId', 'carrierName', 'partnerId', 'team'
         ));
     }
 
@@ -1038,6 +1051,8 @@ class ReportController extends Controller
         abort_unless(auth()->user()->canViewModule('report-policy-type'), 403, 'Access denied.');
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->endOfMonth()->toDateString());
+        $team     = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         $query = Lead::whereNotNull('sale_at')
             ->whereNotNull('closer_name')
@@ -1046,6 +1061,7 @@ class ReportController extends Controller
 
         if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
         if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+        if ($team)     $query->where('team', $team);
 
         $leads = $query->select(
             'id', 'policy_type', 'monthly_premium', 'settlement_type',
@@ -1090,7 +1106,8 @@ class ReportController extends Controller
             'grandTotalPremium',
             'grandTotalRevenue',
             'dateFrom',
-            'dateTo'
+            'dateTo',
+            'team'
         ));
     }
 
@@ -1157,6 +1174,8 @@ class ReportController extends Controller
         $policyType      = $request->get('policy_type', 'Unknown');
         $carrierName     = $request->get('carrier_name');
         $assignedPartner = $request->get('assigned_partner');
+        $team            = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         $query = Lead::whereNotNull('sale_at')
             ->whereNotNull('closer_name')
@@ -1165,6 +1184,7 @@ class ReportController extends Controller
 
         if ($dateFrom) $query->whereDate('sale_date', '>=', $dateFrom);
         if ($dateTo)   $query->whereDate('sale_date', '<=', $dateTo);
+        if ($team)     $query->where('team', $team);
 
         if ($policyType === 'Unknown') {
             // All sales whose policy_type doesn't map to a canonical value
@@ -1188,7 +1208,7 @@ class ReportController extends Controller
         $rawLeads = $query->select(
             'id', 'cn_name', 'policy_type', 'carrier_name', 'assigned_partner',
             'insurance_carrier_id', 'partner_id',
-            'monthly_premium', 'settlement_type', 'state', 'sale_date',
+            'monthly_premium', 'settlement_type', 'state', 'sale_date', 'team',
             'policy_number', 'closer_name', 'issuance_status',
             'agent_commission', 'agent_revenue', 'settlement_percentage',
             'commission_calculation_notes', 'commission_calculated_at'
@@ -1210,7 +1230,7 @@ class ReportController extends Controller
             'leads', 'totalSales', 'totalPremium', 'totalRevenue',
             'policyType', 'carrierLabel', 'partnerLabel',
             'dateFrom', 'dateTo',
-            'carrierName', 'assignedPartner'
+            'carrierName', 'assignedPartner', 'team'
         ));
     }
 
@@ -1249,6 +1269,8 @@ class ReportController extends Controller
         $closerFilter      = $request->input('closer');
         $dispositionFilter = $request->input('disposition');
         $triggerFilter     = $request->input('trigger');
+        $teamFilter        = $request->input('team');
+        if (!in_array($teamFilter, \App\Support\Teams::ALL)) $teamFilter = null;
 
         // All disposition labels for reference
         $allDispositions = [
@@ -1258,6 +1280,16 @@ class ReportController extends Controller
             'callback_set', 'updated_data',
         ];
 
+        // Resolve team → user IDs by role name
+        $peregrineRoles = ['Peregrine Closer', 'Peregrine Manager', 'Peregrine Validator', 'Peregrines Junior Closer'];
+        $ravensRoles    = ['Ravens Closer'];
+        $peregrineIds   = User::role(\Spatie\Permission\Models\Role::whereIn('name', $peregrineRoles)->pluck('name')->toArray())->pluck('id')->toArray();
+        $ravensIds      = User::role(\Spatie\Permission\Models\Role::whereIn('name', $ravensRoles)->pluck('name')->toArray())->pluck('id')->toArray();
+
+        // Build user → team map for badge display
+        $userTeamMap = collect($peregrineIds)->mapWithKeys(fn($id) => [$id => 'peregrine'])
+            ->merge(collect($ravensIds)->mapWithKeys(fn($id) => [$id => 'ravens']));
+
         // Base query — disposed calls only (keeps_in_calling = true)
         $base = BadLead::where('keeps_in_calling', true)
             ->whereBetween('created_at', [$startDate, $endDate]);
@@ -1265,6 +1297,8 @@ class ReportController extends Controller
         if ($closerFilter) $base->where('disposed_by', $closerFilter);
         if ($dispositionFilter) $base->where('disposition', $dispositionFilter);
         if ($triggerFilter) $base->where('trigger', $triggerFilter);
+        if ($teamFilter === 'peregrine') $base->whereIn('disposed_by', $peregrineIds);
+        elseif ($teamFilter === 'ravens') $base->whereIn('disposed_by', $ravensIds);
 
         // Overall KPIs
         $totalCalls = (clone $base)->count();
@@ -1330,7 +1364,8 @@ class ReportController extends Controller
         return view('admin.reports.disposition-report', compact(
             'filter', 'customStart', 'customEnd',
             'totalCalls', 'totalSales', 'dispoCounts', 'closerRows', 'allDispositions',
-            'closersList', 'closerFilter', 'dispositionFilter', 'triggerFilter',
+            'closersList', 'closerFilter', 'dispositionFilter', 'triggerFilter', 'teamFilter',
+            'userTeamMap',
             'startDate', 'endDate'
         ));
     }
@@ -1348,6 +1383,8 @@ class ReportController extends Controller
         $carrierId   = $request->get('carrier_id');
         $partnerName = $request->get('partner_name');
         $policyType  = $request->get('policy_type');
+        $team        = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         // Leads where manager took action: approved to pending contract OR declined
         // Date range applies to the ACTION date, not sale_date
@@ -1366,6 +1403,7 @@ class ReportController extends Controller
         if ($carrierId)   $query->where('insurance_carrier_id', $carrierId);
         if ($partnerName) $query->where('assigned_partner', $partnerName);
         if ($policyType)  $query->where('policy_type', $policyType);
+        if ($team)        $query->where('team', $team);
 
         $leads = $query->select(
             'id', 'submission_by', 'pending_contract_at', 'declined_at', 'sale_date'
@@ -1414,7 +1452,7 @@ class ReportController extends Controller
         return view('admin.reports.manager-submission-report', compact(
             'rows', 'grandPendingContract', 'grandDeclined', 'grandTotal',
             'dateFrom', 'dateTo', 'carrierId', 'partnerName', 'policyType',
-            'allCarriers', 'allPartners', 'allPolicyTypes'
+            'allCarriers', 'allPartners', 'allPolicyTypes', 'team'
         ));
     }
 
@@ -1431,6 +1469,8 @@ class ReportController extends Controller
         $carrierId   = $request->get('carrier_id');
         $partnerName = $request->get('partner_name');
         $policyType  = $request->get('policy_type');
+        $team        = $request->get('team');
+        if (!in_array($team, \App\Support\Teams::ALL)) $team = null;
 
         $query = Lead::where(function ($q) use ($dateFrom, $dateTo, $actionFilter) {
             if ($actionFilter === 'pending_contract') {
@@ -1473,13 +1513,14 @@ class ReportController extends Controller
         if ($carrierId)   $query->where('insurance_carrier_id', $carrierId);
         if ($partnerName) $query->where('assigned_partner', $partnerName);
         if ($policyType)  $query->where('policy_type', $policyType);
+        if ($team)        $query->where('team', $team);
 
         $leads = $query->select(
             'id', 'cn_name', 'carrier_name', 'insurance_carrier_id',
             'assigned_partner', 'partner_id',
             'policy_type', 'settlement_type', 'policy_number',
             'monthly_premium', 'agent_commission', 'settlement_percentage',
-            'closer_name', 'sale_date', 'state',
+            'closer_name', 'sale_date', 'state', 'team',
             'pending_contract_at', 'declined_at', 'issuance_status',
             'submission_by', 'status'
         )->orderByDesc('pending_contract_at')->get();
@@ -1519,7 +1560,7 @@ class ReportController extends Controller
             'totalLeads', 'totalPendingContract', 'totalDeclined', 'totalPremium', 'totalCommission',
             'dateFrom', 'dateTo', 'actionFilter',
             'carrierId', 'partnerName', 'policyType',
-            'allCarriers', 'allPartners', 'allPolicyTypes'
+            'allCarriers', 'allPartners', 'allPolicyTypes', 'team'
         ));
     }
 

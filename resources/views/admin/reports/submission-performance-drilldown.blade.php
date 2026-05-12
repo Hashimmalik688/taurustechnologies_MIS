@@ -263,7 +263,7 @@
 
 @section('content')
 @php
-$backParams = ['date_from' => $dateFrom, 'date_to' => $dateTo];
+$backParams = array_filter(['date_from' => $dateFrom, 'date_to' => $dateTo, 'team' => $team ?? null]);
 $backUrl    = route('settings.reports.submission-performance', $backParams);
 $avgRevPerSale = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
 $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
@@ -376,6 +376,7 @@ $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
                 <tr>
                     <th style="width:26px">#</th>
                     <th style="min-width:140px">Client</th>
+                    <th style="min-width:40px">Team</th>
                     <th style="min-width:80px">Policy Type</th>
                     <th style="min-width:100px">Policy #</th>
                     <th style="min-width:45px">State</th>
@@ -407,6 +408,16 @@ $noRevPct = $totalSales > 0 ? round(($noRevCount / $totalSales) * 100) : 0;
                         <div class="dd-name">{{ $lead->cn_name ?: '—' }}</div>
                         @if($lead->state)
                         <div class="dd-sub">ID #{{ $lead->id }}</div>
+                        @endif
+                    </td>
+                    {{-- Team --}}
+                    <td>
+                        @if($lead->team === 'peregrine')
+                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
+                        @elseif($lead->team === 'ravens')
+                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @else
+                            <span style="color:var(--dd-text-4,#94a3b8);font-size:.65rem">—</span>
                         @endif
                     </td>
                     {{-- Policy type --}}

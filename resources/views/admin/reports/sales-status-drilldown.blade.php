@@ -351,6 +351,7 @@ $uniquePartners = $leads->whereNotNull('assigned_partner')->pluck('assigned_part
                 <tr>
                     <th style="width:26px;text-align:center">#</th>
                     <th style="min-width:140px">Client Name</th>
+                    <th style="min-width:40px">Team</th>
                     <th style="min-width:105px">Partner</th>
                     <th class="tr" style="min-width:90px;text-align:right">Sale Date</th>
                     <th class="tr" style="min-width:90px;text-align:right">Paid Date</th>
@@ -390,6 +391,16 @@ $uniquePartners = $leads->whereNotNull('assigned_partner')->pluck('assigned_part
                         <a href="{{ route('leads.show', $lead->id) }}" style="text-decoration:none">
                             <div class="ssd-name">{{ $lead->cn_name ?? '—' }}</div>
                         </a>
+                    </td>
+                    {{-- Team --}}
+                    <td>
+                        @if($lead->team === 'peregrine')
+                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
+                        @elseif($lead->team === 'ravens')
+                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @else
+                            <span style="color:var(--ssd-text-4,#94a3b8);font-size:.65rem">—</span>
+                        @endif
                     </td>
                     <td>
                         @if($lead->assigned_partner)
@@ -451,7 +462,7 @@ $uniquePartners = $leads->whereNotNull('assigned_partner')->pluck('assigned_part
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5" style="font-size:.7rem">
+                    <td colspan="6" style="font-size:.7rem">
                         <i class="bx bx-sum" style="color:var(--ssd-blue)"></i> TOTAL
                     </td>
                     <td class="td-r">
@@ -459,7 +470,7 @@ $uniquePartners = $leads->whereNotNull('assigned_partner')->pluck('assigned_part
                             <i class="bx bx-dollar" style="font-size:.65rem"></i>{{ number_format($totalPremium, 2) }}
                         </span>
                     </td>
-                    <td colspan="5"></td>
+                    <td colspan="4"></td>
                 </tr>
             </tfoot>
         </table>

@@ -155,7 +155,7 @@
 
 @section('content')
 @php
-$backParams     = ['date_from' => $dateFrom, 'date_to' => $dateTo];
+$backParams     = array_filter(['date_from' => $dateFrom, 'date_to' => $dateTo, 'team' => $team ?? null]);
 $backUrl        = route('settings.reports.policy-type-report', $backParams);
 $avgPremPerSale = $totalSales > 0 ? $totalPremium / $totalSales : 0;
 $avgRevPerSale  = $totalSales > 0 ? $totalRevenue / $totalSales : 0;
@@ -263,6 +263,7 @@ $typeColor = $typeColors[$policyType] ?? '#0891b2';
                 <tr>
                     <th style="width:26px">#</th>
                     <th style="min-width:145px">Client</th>
+                    <th style="min-width:40px">Team</th>
                     <th style="min-width:120px">Carrier</th>
                     <th style="min-width:110px">Partner</th>
                     <th style="min-width:45px">State</th>
@@ -289,6 +290,16 @@ $typeColor = $typeColors[$policyType] ?? '#0891b2';
                     <td>
                         <div class="dd-name">{{ $lead->cn_name ?: '—' }}</div>
                         <div class="dd-sub">#{{ $lead->id }}</div>
+                    </td>
+                    {{-- Team --}}
+                    <td>
+                        @if($lead->team === 'peregrine')
+                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
+                        @elseif($lead->team === 'ravens')
+                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @else
+                            <span style="color:var(--dd-text-4,#94a3b8);font-size:.65rem">—</span>
+                        @endif
                     </td>
                     {{-- Carrier --}}
                     <td style="font-size:.7rem;color:var(--dd-text-2);font-weight:600">
@@ -347,7 +358,7 @@ $typeColor = $typeColors[$policyType] ?? '#0891b2';
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="5"></td>
+                    <td colspan="6"></td>
                     <td style="font-size:.68rem;font-weight:800">
                         <span style="display:inline-flex;align-items:center;gap:.2rem">
                             <i class="bx bx-sum" style="color:var(--dd-teal)"></i> TOTAL

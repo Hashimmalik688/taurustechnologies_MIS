@@ -149,14 +149,25 @@ $grandTotal = $grandTotalSales;
     <form method="GET" action="{{ route('settings.reports.policy-type-report') }}" style="display:contents">
         <div><label for="pt-from">From</label><input type="date" id="pt-from" name="date_from" value="{{ $dateFrom }}"></div>
         <div><label for="pt-to">To</label><input type="date" id="pt-to" name="date_to" value="{{ $dateTo }}"></div>
+        <div>
+            <label for="pt-team">Team</label>
+            <select id="pt-team" name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--pt-border);background:var(--bs-input-bg,#f8fafc);color:var(--pt-text-1);outline:none;transition:border-color .15s;min-width:110px">
+                <option value="">All Teams</option>
+                <option value="peregrine" @selected(($team ?? '') === 'peregrine')>Peregrine</option>
+                <option value="ravens"    @selected(($team ?? '') === 'ravens')>Ravens</option>
+            </select>
+        </div>
         <button type="submit" class="pt-btn pt-btn-apply" style="align-self:flex-end"><i class="bx bx-search-alt"></i> Apply</button>
         <a href="{{ route('settings.reports.policy-type-report') }}" class="pt-btn pt-btn-reset" style="align-self:flex-end"><i class="bx bx-reset"></i> Reset</a>
-        @if($dateFrom || $dateTo)
+        @if($dateFrom || $dateTo || ($team ?? null))
         <span class="pt-daterange">
             <i class="bx bx-calendar-check" style="color:var(--pt-teal);font-size:.82rem"></i>
             <strong>{{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('M d, Y') : '—' }}</strong>
             <span style="color:var(--pt-text-4)">→</span>
             <strong>{{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('M d, Y') : '—' }}</strong>
+            @if($team ?? null)
+                <span style="margin-left:.25rem;font-size:.62rem;font-weight:700;color:var(--pt-text-2)">· {{ ucfirst($team) }}</span>
+            @endif
         </span>
         @endif
     </form>
@@ -231,13 +242,14 @@ $grandTotal = $grandTotalSales;
                         $badgeClass = $row->assigned_partner
                             ? $badgeVar[abs(crc32($row->assigned_partner)) % count($badgeVar)]
                             : 'pt-pb-none';
-                        $ddUrl = route('settings.reports.policy-type-report.drilldown', [
+                        $ddUrl = route('settings.reports.policy-type-report.drilldown', array_filter([
                             'date_from'        => $dateFrom,
                             'date_to'          => $dateTo,
                             'policy_type'      => $row->policy_type,
                             'carrier_name'     => $row->carrier_name ?? '',
                             'assigned_partner' => $row->assigned_partner ?? '',
-                        ]);
+                            'team'             => $team ?? null,
+                        ]));
                     @endphp
                     <tr class="pt-row" onclick="window.location='{{ $ddUrl }}'">
                         <td class="pt-rank {{ $rank===1?'rank-1':($rank===2?'rank-2':($rank===3?'rank-3':'')) }}">

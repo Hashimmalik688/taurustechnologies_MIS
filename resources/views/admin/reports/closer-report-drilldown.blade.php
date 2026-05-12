@@ -119,11 +119,19 @@
                         <option value="chargeback" {{ $statusFilter === 'chargeback' ? 'selected' : '' }}>Chargeback</option>
                     </select>
                 </div>
+                <div class="cr-filter-group">
+                    <span class="cr-filter-lbl">Team</span>
+                    <select name="team" class="cr-filter-ctrl" style="min-width:110px">
+                        <option value="">All Teams</option>
+                        <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
+                        <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+                    </select>
+                </div>
                 <button type="submit" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
                     <i class="bx bx-filter"></i> Filter
                 </button>
-                @if($dateFrom || $dateTo || $statusFilter)
-                    <a href="{{ route('settings.reports.closer-report.drilldown', ['closer_name' => $closerName]) }}" 
+                @if($dateFrom || $dateTo || $statusFilter || ($team ?? null))
+                    <a href="{{ route('settings.reports.closer-report.drilldown', ['closer_name' => $closerName]) }}"
                        class="act-btn a-secondary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
                         <i class="bx bx-x"></i> Clear
                     </a>
@@ -148,6 +156,7 @@
                     <thead>
                         <tr>
                             <th>Customer Name</th>
+                            <th style="min-width:40px">Team</th>
                             <th>Phone</th>
                             <th>Carrier</th>
                             <th>Sale Date</th>
@@ -161,6 +170,15 @@
                         @foreach($leads as $lead)
                             <tr>
                                 <td class="lead-name">{{ $lead->cn_name }}</td>
+                                <td>
+                                    @if($lead->team === 'peregrine')
+                                        <span class="badge bg-purple" title="Peregrine" style="font-size:.55rem;padding:.08rem .3rem">P</span>
+                                    @elseif($lead->team === 'ravens')
+                                        <span class="badge bg-dark" title="Ravens" style="font-size:.55rem;padding:.08rem .3rem">R</span>
+                                    @else
+                                        <span style="color:#94a3b8;font-size:.65rem">—</span>
+                                    @endif
+                                </td>
                                 <td class="lead-phone">{{ $lead->phone_number }}</td>
                                 <td>{{ $lead->carrier_name ?? '—' }}</td>
                                 <td>{{ $lead->sale_date ? $lead->sale_date->format('M d, Y') : '—' }}</td>
