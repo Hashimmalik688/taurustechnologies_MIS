@@ -20,6 +20,7 @@ class Roles
     public const CEO = 'CEO';
     public const MANAGER = 'Manager';
     public const COORDINATOR = 'Co-ordinator';
+    public const IT_MANAGER = 'IT Manager';
 
     // ── Operational Roles ──────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ class Roles
         self::CEO,
         self::MANAGER,
         self::COORDINATOR,
+        self::IT_MANAGER,
         self::EMPLOYEE,
         self::HR,
         self::QA,

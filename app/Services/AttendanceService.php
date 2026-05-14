@@ -80,19 +80,12 @@ class AttendanceService
             $lateTime = Carbon::createFromFormat('h:i A', $lateTimeRaw);
         }
 
-        // Allow marking attendance only at or after Office Start Time
-        if ($currentTime->lessThan($startTime)) {
-            return [
-                'success' => false,
-                'message' => 'Attendance cannot be marked before office start time (' . $startTime->format('g:i A') . ').',
-            ];
-        }
-
         // Get configurable attendance window settings
         $bufferHours = (int) Setting::get('attendance_buffer_hours', '1');
         $shiftDurationHours = (int) Setting::get('shift_duration_hours', '8');
 
         // Calculate allowed attendance window based on settings
+        // windowStart allows early check-in up to bufferHours before start time
         $windowStart = $startTime->copy()->subHours($bufferHours);
         $windowEnd = $startTime->copy()->addHours($shiftDurationHours + $bufferHours);
 

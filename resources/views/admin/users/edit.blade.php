@@ -169,6 +169,11 @@
                                                     {{ in_array(Roles::COORDINATOR, old('roles', $currentRoles)) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="role-co-ordinator">{{ Roles::COORDINATOR }}</label>
                                             </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::IT_MANAGER }}" id="role-it-manager"
+                                                    {{ in_array(Roles::IT_MANAGER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-it-manager">{{ Roles::IT_MANAGER }}</label>
+                                            </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">

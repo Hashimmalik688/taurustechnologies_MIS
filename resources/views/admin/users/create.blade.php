@@ -166,6 +166,10 @@
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::COORDINATOR }}" id="role-co-ordinator">
                                                 <label class="form-check-label" for="role-co-ordinator">Co-ordinator</label>
                                             </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::IT_MANAGER }}" id="role-it-manager">
+                                                <label class="form-check-label" for="role-it-manager">IT Manager</label>
+                                            </div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="form-check">

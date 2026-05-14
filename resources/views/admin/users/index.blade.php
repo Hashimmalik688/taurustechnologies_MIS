@@ -257,6 +257,10 @@
                                         <label for="mr-co-{{ $user->id }}">Co-ordinator</label>
                                     </div>
                                     <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::IT_MANAGER }}" id="mr-itm-{{ $user->id }}" {{ in_array(Roles::IT_MANAGER, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-itm-{{ $user->id }}">IT Manager</label>
+                                    </div>
+                                    <div class="role-check">
                                         <input type="checkbox" name="roles[]" value="{{ Roles::CEO }}" id="mr-ceo-{{ $user->id }}" {{ in_array(Roles::CEO, $currentRoles) ? 'checked' : '' }}>
                                         <label for="mr-ceo-{{ $user->id }}">CEO</label>
                                     </div>

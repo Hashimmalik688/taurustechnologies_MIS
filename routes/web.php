@@ -88,7 +88,7 @@ Route::get('/logout', function() {
 
 // Authenticated routes - Dashboard with role-based redirects
 // Prevent partners from accessing user/employee areas
-Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::PEREGRINE_MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR)]], function () {
+Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::PEREGRINE_MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR, Roles::IT_MANAGER)]], function () {
     // Smart router - redirects each user to their appropriate landing page
     Route::get('/', [DashboardController::class, 'root'])->name('root');
     

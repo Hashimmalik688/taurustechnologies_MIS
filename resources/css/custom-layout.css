@@ -426,20 +426,25 @@
     border: 1.5px solid #0f172a;
 }
 
-/* Notification Dropdown */
+/* Notification Dropdown — appended to <body> via JS portal to escape backdrop-filter containment */
 .notification-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: -10px;
+    position: fixed;
+    top: 66px;   /* overridden dynamically by JS */
+    right: 15px; /* overridden dynamically by JS */
+    left: auto;
     width: 380px;
     background: var(--bs-card-bg, #fff);
     border-radius: 16px;
     border: 1px solid rgba(0,0,0,.06);
     box-shadow: 0 12px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(212,175,55,.06);
     display: none;
-    z-index: 1050;
+    z-index: 10051;
     max-height: 520px;
-    overflow: hidden;
+    overflow: visible;
+}
+#notificationList {
+    max-height: 380px;
+    overflow-y: auto;
 }
 
 .notification-dropdown.show {

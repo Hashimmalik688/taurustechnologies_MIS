@@ -493,17 +493,46 @@
             localStorage.setItem('sidebarCollapsed', isCollapsed);
         }
 
+        // Move notification dropdown to <body> so backdrop-filter on .top-header
+        // (which breaks position:fixed containment) can't clip it.
+        (function portNotifDropdown() {
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown) document.body.appendChild(dropdown);
+        })();
+
+        function _positionNotifDropdown() {
+            const dropdown = document.getElementById('notificationDropdown');
+            const btn = document.querySelector('button[title="Notifications"]');
+            if (!dropdown || !btn) return;
+            const rect = btn.getBoundingClientRect();
+            // clientWidth excludes scrollbar — prevents right-edge shift
+            const vw = document.documentElement.clientWidth;
+            dropdown.style.top   = (rect.bottom + 6) + 'px';
+            // Align dropdown's right edge with button's right edge
+            dropdown.style.right = Math.max(4, vw - rect.right) + 'px';
+            dropdown.style.left  = 'auto';
+        }
+
         // Toggle Notifications
         function toggleNotifications() {
             const dropdown = document.getElementById('notificationDropdown');
             const isShowing = dropdown.classList.contains('show');
 
             if (!isShowing) {
+                _positionNotifDropdown();
                 loadNotifications();
             }
 
             dropdown.classList.toggle('show');
         }
+
+        // Re-anchor on window resize if open
+        window.addEventListener('resize', function() {
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                _positionNotifDropdown();
+            }
+        });
 
         // Load notifications via AJAX
         function loadNotifications() {
@@ -590,12 +619,14 @@
             }, 200);
         })();
 
-        // Close notifications when clicking outside
+        // Close notifications when clicking outside (dropdown now lives in body)
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('notificationDropdown');
-            const notifWrapper = event.target.closest('.position-relative');
+            if (!dropdown || !dropdown.classList.contains('show')) return;
 
-            if (!notifWrapper?.contains(dropdown) && dropdown && !dropdown.contains(event.target)) {
+            const btn = document.querySelector('button[title="Notifications"]');
+            // Close if click was outside the dropdown AND outside the bell button
+            if (!dropdown.contains(event.target) && (!btn || !btn.contains(event.target))) {
                 dropdown.classList.remove('show');
             }
         });

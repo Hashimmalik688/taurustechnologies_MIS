@@ -201,6 +201,11 @@ class DashboardController extends Controller
         // Declined = still in submission stage (pending_contract_at IS NULL) + declined
         $sub_declined_count = (clone $subBase)->whereNull('pending_contract_at')
                                 ->where('submission_status', Statuses::SUB_DECLINED)->count();
+        // Pending / Action Needed = in Pending Submission queue, not yet approved or declined
+        $pending_approval_count = (clone $subBase)->whereNull('pending_contract_at')
+                                ->where(fn($q) => $q->whereNull('submission_status')
+                                    ->orWhere('submission_status', Statuses::SUB_PENDING))
+                                ->count();
 
         // ── Today leads (filter from MTD set) ────────────────────
         $today_leads    = $revenue_leads->filter(fn($l) =>
@@ -354,6 +359,7 @@ class DashboardController extends Controller
             'distinct_sale_days',
             'submitted_count',
             'sub_declined_count',
+            'pending_approval_count',
             'revenue_period_label',
             'selected_period',
             'revenue_by_carrier',
@@ -443,10 +449,14 @@ class DashboardController extends Controller
             ->whereDate('sale_date', '>=', $rev_start)
             ->whereDate('sale_date', '<=', $rev_end);
 
-        $submitted_count = (clone $subBase)->count();
-        $approved_count  = (clone $subBase)->where('submission_status', Statuses::SUB_APPROVED)->count();
-        $declined_count  = (clone $subBase)->whereNull('pending_contract_at')
-                             ->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $submitted_count         = (clone $subBase)->count();
+        $approved_count          = (clone $subBase)->where('submission_status', Statuses::SUB_APPROVED)->count();
+        $declined_count          = (clone $subBase)->whereNull('pending_contract_at')
+                                     ->where('submission_status', Statuses::SUB_DECLINED)->count();
+        $pending_approval_count  = (clone $subBase)->whereNull('pending_contract_at')
+                                     ->where(fn($q) => $q->whereNull('submission_status')
+                                         ->orWhere('submission_status', Statuses::SUB_PENDING))
+                                     ->count();
 
         // Today metrics (filter from revLeads — Pending Contract page)
         $todayRevLeads  = $revLeads->filter(fn($l) =>
@@ -559,10 +569,11 @@ class DashboardController extends Controller
             'success'            => true,
             'timestamp'          => now()->toIso8601String(),
             'revPeriodLabel'     => $rev_start->format('M j') . ' → ' . $rev_end->format('M j'),
-            'done'               => $done_count,
-            'submitted'          => $submitted_count,
-            'approved'           => $approved_count,
-            'declined'           => $declined_count,
+            'done'                  => $done_count,
+            'submitted'             => $submitted_count,
+            'approved'              => $approved_count,
+            'declined'              => $declined_count,
+            'pendingApprovalCount'  => $pending_approval_count,
             'totalRevenue'       => $total_revenue,
             'dailyAvgPremium'    => $daily_avg_premium,
             'estCommission'      => $est_commission,

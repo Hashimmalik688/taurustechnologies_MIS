@@ -24,7 +24,8 @@
     gap: 0.55rem;
     margin-bottom: 0.55rem;
 }
-@media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .kpi-grid { grid-template-columns: 1fr; } }
 
 .kpi-card {
     padding: 0.75rem 0.85rem;
@@ -67,6 +68,30 @@
 .kpi-purple { background: rgba(124,105,239,.06); }
 .kpi-purple .kpi-icon { background: rgba(124,105,239,.12); color: #5b49c7; }
 .kpi-purple .kpi-val  { color: #5b49c7; }
+
+.kpi-teal::before { background: linear-gradient(90deg,#0ea5a0,#3dd6d0); }
+.kpi-teal { background: rgba(14,165,160,.06); }
+.kpi-teal .kpi-icon { background: rgba(14,165,160,.12); color: #0c8a87; }
+.kpi-teal .kpi-val  { color: #0c8a87; }
+
+/* Period navigator */
+.period-nav {
+    display: inline-flex; align-items: center; gap: .25rem;
+    background: var(--bs-card-bg); border: 1px solid var(--bs-surface-300,rgba(0,0,0,.1));
+    border-radius: .5rem; padding: .2rem .25rem;
+}
+.period-nav-btn {
+    width: 26px; height: 26px; border: none; background: transparent;
+    border-radius: .35rem; cursor: pointer; color: var(--bs-surface-500);
+    display: flex; align-items: center; justify-content: center; font-size: .85rem;
+    transition: all .15s;
+}
+.period-nav-btn:hover:not(:disabled) { background: rgba(212,175,55,.1); color: #b89730; }
+.period-nav-btn:disabled { opacity: .3; cursor: default; }
+.period-nav-label {
+    font-size: .72rem; font-weight: 700; color: var(--bs-surface-700,#374151);
+    padding: 0 .4rem; white-space: nowrap; min-width: 130px; text-align: center;
+}
 
 /* Section Cards */
 .sec-card { margin-bottom: 0.6rem; overflow: hidden; padding: 0; }
@@ -232,77 +257,97 @@
 </script>
 @endif
 
-{{-- View Mode Toggle + Period Selector --}}
+{{-- View Mode Toggle + Period Navigator --}}
+@php
+    $periodList = [];
+    $p = \Carbon\Carbon::createFromFormat('Y-m', $selected_period)->setDay(3);
+    for ($i = 0; $i < 12; $i++) {
+        $pStart = $p->copy();
+        $pEnd   = $p->copy()->addMonthNoOverflow()->setDay(3);
+        $periodList[] = [
+            'value' => $pStart->format('Y-m'),
+            'label' => $pStart->format('M j') . ' → ' . $pEnd->format('M j'),
+            'year'  => $pEnd->format('Y'),
+        ];
+        $p->subMonthNoOverflow()->setDay(3);
+    }
+    $periodListJson = json_encode($periodList);
+    $currentPeriodIdx = 0; // index 0 is always current
+@endphp
 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
     <div class="d-flex align-items-center gap-2">
-        <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Period:</span>
-        <select id="periodSelector" onchange="changePeriod(this.value)" style="font-size:.72rem;font-weight:600;padding:.25rem .55rem;border-radius:.4rem;border:1px solid var(--bs-surface-300);background:var(--bs-card-bg);color:inherit;cursor:pointer;">
-            @php
-                $periodOptions = [];
-                // Start from the current period (rev_period_start is already the correct anchor)
-                $p = \Carbon\Carbon::createFromFormat('Y-m', $selected_period)->setDay(3);
-                for ($i = 0; $i < 12; $i++) {
-                    $pStart = $p->copy();
-                    $pEnd   = $p->copy()->addMonthNoOverflow()->setDay(3);
-                    $periodOptions[] = [
-                        'value' => $pStart->format('Y-m'),
-                        'label' => $pStart->format('M j') . ' → ' . $pEnd->format('M j, Y'),
-                    ];
-                    $p->subMonthNoOverflow()->setDay(3);
-                }
-            @endphp
-            @foreach($periodOptions as $opt)
-            <option value="{{ $opt['value'] }}" {{ $opt['value'] === $selected_period ? 'selected' : '' }}>{{ $opt['label'] }}</option>
-            @endforeach
-        </select>
+        {{-- Arrow-based period navigator --}}
+        <div class="period-nav">
+            <button class="period-nav-btn" id="periodPrev" onclick="stepPeriod(1)" title="Previous period">
+                <i class="bx bx-chevron-left"></i>
+            </button>
+            <div class="period-nav-label" id="periodLabel">{{ $revenue_period_label }}</div>
+            <button class="period-nav-btn" id="periodNext" onclick="stepPeriod(-1)" title="Next period" disabled>
+                <i class="bx bx-chevron-right"></i>
+            </button>
+        </div>
+        <span style="font-size:.65rem;color:var(--bs-surface-400);font-weight:600" id="periodYear">{{ \Carbon\Carbon::createFromFormat('Y-m',$selected_period)->addMonthNoOverflow()->format('Y') }}</span>
     </div>
     <div class="d-flex align-items-center gap-2">
-        <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:600;text-transform:uppercase;letter-spacing:.5px">View:</span>
         <div class="view-toggle">
-            <button class="view-tog-btn active" id="toggleMTD" onclick="setViewMode('mtd')">MTD <span class="period-sm" id="toggleMTDLabel">{{ $revenue_period_label }}</span></button>
+            <button class="view-tog-btn active" id="toggleMTD" onclick="setViewMode('mtd')">Period</button>
             <button class="view-tog-btn" id="toggleToday" onclick="setViewMode('today')">Today · PT</button>
         </div>
     </div>
 </div>
+{{-- Hidden select kept for JS changePeriod compatibility --}}
+<select id="periodSelector" style="display:none">
+    @foreach($periodList as $opt)
+    <option value="{{ $opt['value'] }}" {{ $opt['value'] === $selected_period ? 'selected' : '' }}>{{ $opt['label'] }}</option>
+    @endforeach
+</select>
 
 {{-- ROW 1: Primary KPIs --}}
 <div class="kpi-grid mb-1">
+    <div class="kpi-card kpi-blue ex-card">
+        <div class="kpi-icon"><i class="bx bx-receipt"></i></div>
+        <div class="kpi-val" id="kpiTotalPremium" data-mtd="{{ number_format($total_revenue, 0) }}" data-today="{{ number_format($today_revenue, 0) }}">${{ number_format($total_revenue, 0) }}</div>
+        <div class="kpi-lbl" id="kpiTotalPremiumLbl">Total Premium · Period</div>
+        <div class="kpi-sub" id="kpiTotalPremiumSub">{{ $mtd_sales }} sales · {{ $revenue_period_label }}</div>
+    </div>
     <div class="kpi-card kpi-gold ex-card">
-        <div class="kpi-icon"><i class="bx bx-calendar-week"></i></div>
+        <div class="kpi-icon"><i class="bx bx-trending-up"></i></div>
         <div class="kpi-val" id="kpiDailyAvg" data-mtd="{{ number_format($daily_avg_premium, 0) }}" data-today="{{ number_format($today_revenue, 0) }}">${{ number_format($daily_avg_premium, 0) }}</div>
-        <div class="kpi-lbl" id="kpiDailyAvgLbl">Daily Avg Premium · MTD</div>
-        <div class="kpi-sub" id="kpiDailyAvgSub">{{ $distinct_sale_days }} sale days · {{ $revenue_period_label }}</div>
+        <div class="kpi-lbl" id="kpiDailyAvgLbl">Daily Avg Premium</div>
+        <div class="kpi-sub" id="kpiDailyAvgSub">{{ $distinct_sale_days }} active days</div>
     </div>
     <div class="kpi-card kpi-green ex-card">
         <div class="kpi-icon"><i class="bx bx-dollar-circle"></i></div>
         <div class="kpi-val" id="kpiEstRevenue" data-mtd="{{ number_format($est_commission, 0) }}" data-today="{{ number_format($today_est_commission, 0) }}">${{ number_format($est_commission, 0) }}</div>
-        <div class="kpi-lbl" id="kpiEstRevenueLbl">Est. Revenue · MTD</div>
-        <div class="kpi-sub" id="kpiEstRevenueSub">{{ $revenue_period_label }}</div>
+        <div class="kpi-lbl" id="kpiEstRevenueLbl">Est. Commission</div>
+        <div class="kpi-sub" id="kpiEstRevenueSub">premium × 9 × rate</div>
     </div>
-    <div class="kpi-card kpi-purple ex-card">
-        <div class="kpi-icon"><i class="bx bx-user-check"></i></div>
-        <div class="kpi-val"><span id="attPresent">{{ $present_count }}</span><span style="font-size:.75em;font-weight:500;opacity:.55">/</span><span id="attTotal">{{ $total_attendance_count }}</span></div>
-        <div class="kpi-lbl">Attendance</div>
-        <div class="kpi-sub">Present / Total</div>
+    <div class="kpi-card kpi-teal ex-card">
+        <div class="kpi-icon"><i class="bx bx-transfer"></i></div>
+        <div class="kpi-val" id="kpiSalesPeriod" data-mtd="{{ $submitted_count }}" data-today="{{ $today_sales }}">{{ $submitted_count }}</div>
+        <div class="kpi-lbl" id="kpiSalesPeriodLbl">Sales this Period</div>
+        <div class="kpi-sub" id="kpiSalesPeriodSub">validated + submitted</div>
     </div>
 </div>
 
 {{-- Pipeline Flow --}}
 <div class="pipeline-flow ex-card mb-2">
-    <div class="pipeline-stage ps-blue">
-        <i class="bx bx-send ps-icon"></i>
-        <div class="ps-val" id="pipeSubmitted" data-mtd="{{ $submitted_count }}" data-today="{{ $today_sales }}">{{ $submitted_count }}</div>
-        <div class="ps-lbl" id="pipeLblSubmitted">Submitted MTD</div>
+    <div class="pipeline-stage" style="background:rgba(241,180,76,.06)">
+        <i class="bx bx-time-five ps-icon" style="color:#b37a00"></i>
+        <div class="ps-val" style="color:#b37a00" id="pipePending">{{ $pending_approval_count }}</div>
+        <div class="ps-lbl">
+            <a href="{{ route('submissions.index') }}" style="color:inherit;text-decoration:none;font-size:inherit">Pending / Action Needed</a>
+        </div>
     </div>
     <div class="pipeline-stage ps-green">
         <i class="bx bx-check-double ps-icon"></i>
         <div class="ps-val" id="pipeApproved" data-mtd="{{ $approved_count }}" data-today="{{ $today_approved }}">{{ $approved_count }}</div>
-        <div class="ps-lbl" id="pipeLblApproved">Approved MTD</div>
+        <div class="ps-lbl" id="pipeLblApproved">Approved Period</div>
     </div>
     <div class="pipeline-stage ps-red">
         <i class="bx bx-x-circle ps-icon"></i>
         <div class="ps-val" id="pipeDeclined" data-mtd="{{ $sub_declined_count }}" data-today="{{ $today_declined }}">{{ $sub_declined_count }}</div>
-        <div class="ps-lbl" id="pipeLblDeclined">Declined MTD</div>
+        <div class="ps-lbl" id="pipeLblDeclined">Declined Period</div>
     </div>
     <div class="pipeline-stage" style="background:rgba(212,175,55,.06)">
         <i class="bx bx-stats ps-icon" style="color:#b89730"></i>
@@ -522,9 +567,10 @@
 <script>
 var SD = {
     done:              {{ $done_count }},
-    submitted:         {{ $submitted_count }},
-    approved:          {{ $approved_count }},
-    declined:          {{ $sub_declined_count }},
+    submitted:             {{ $submitted_count }},
+    approved:              {{ $approved_count }},
+    declined:              {{ $sub_declined_count }},
+    pendingApprovalCount:  {{ $pending_approval_count }},
     totalRevenue:      {{ $total_revenue }},
     mtdSales:          {{ $mtd_sales }},
     dailyAvgPremium:   {{ $daily_avg_premium }},
@@ -553,6 +599,29 @@ function fmt(n) { return new Intl.NumberFormat().format(Math.round(n)); }
 
 var currentMode = 'mtd';
 var currentPeriod = SD.selectedPeriod;
+var _periodList = {!! $periodListJson !!};
+var _periodIdx  = 0; // 0 = most recent (current)
+
+function stepPeriod(dir) {
+    // dir=1 → go older (prev), dir=-1 → go newer (next)
+    const newIdx = _periodIdx + dir;
+    if (newIdx < 0 || newIdx >= _periodList.length) return;
+    _periodIdx = newIdx;
+    const opt = _periodList[_periodIdx];
+    updatePeriodNav(opt);
+    changePeriod(opt.value);
+}
+
+function updatePeriodNav(opt) {
+    const lbl  = document.getElementById('periodLabel');
+    const yr   = document.getElementById('periodYear');
+    const prev = document.getElementById('periodPrev');
+    const next = document.getElementById('periodNext');
+    if (lbl)  lbl.textContent  = opt.label;
+    if (yr)   yr.textContent   = opt.year;
+    if (prev) prev.disabled    = (_periodIdx >= _periodList.length - 1);
+    if (next) next.disabled    = (_periodIdx <= 0);
+}
 
 function changePeriod(val) {
     currentPeriod = val;
@@ -563,8 +632,11 @@ function changePeriod(val) {
             allData = Object.assign({}, allData, d);
             rebuildDataAttrs(d);
             setViewMode(currentMode);
-            const lbl = document.getElementById('toggleMTDLabel');
-            if (lbl && d.revPeriodLabel) lbl.textContent = d.revPeriodLabel;
+            // Update period label in nav
+            if (d.revPeriodLabel) {
+                const lbl = document.getElementById('periodLabel');
+                if (lbl) lbl.textContent = d.revPeriodLabel;
+            }
             if (d.revByCarrier) { allData.revByCarrier = d.revByCarrier; buildCarrierChart(); }
             if (d.salesPerCloser) {
                 renderClosers(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()===currentTeam));
@@ -619,11 +691,20 @@ function rebuildDataAttrs(d) {
         const el = document.getElementById(id); if (!el) return;
         el.dataset.mtd = mtd; el.dataset.today = today;
     };
-    setData('kpiDailyAvg',    fmt(dailyAvg),    fmt(tdRev));
-    setData('kpiEstRevenue',  fmt(estComm),      fmt(todayEst));
-    setData('pipeSubmitted',  submitted,         tdSales);
-    setData('pipeApproved',   mtdApp,            tdApp);
-    setData('pipeDeclined',   mtdDec,            tdDec);
+    setData('kpiTotalPremium', fmt(mtdRev),   fmt(tdRev));
+    setData('kpiDailyAvg',    fmt(dailyAvg), fmt(tdRev));
+    setData('kpiEstRevenue',  fmt(estComm),  fmt(todayEst));
+    setData('kpiSalesPeriod', submitted,     tdSales);
+    setData('pipeApproved',   mtdApp,        tdApp);
+    setData('pipeDeclined',   mtdDec,        tdDec);
+
+    // Update sub-text for total premium
+    const tpSub = document.getElementById('kpiTotalPremiumSub');
+    if (tpSub && d.mtdSales !== undefined) tpSub.textContent = d.mtdSales + ' sales · ' + (d.revPeriodLabel || '');
+
+    // Update pending / action needed (period-fixed, not toggle-sensitive)
+    const pendingEl = document.getElementById('pipePending');
+    if (pendingEl && d.pendingApprovalCount !== undefined) pendingEl.textContent = d.pendingApprovalCount;
 
     // Revenue Summary stats (always show MTD — period-based, not toggle-sensitive)
     const revPrem = document.getElementById('revTotalPremium');
@@ -650,26 +731,28 @@ function setViewMode(mode) {
     const days      = allData.distinctSaleDays || SD.distinctSaleDays || 1;
 
     // Dollar KPIs
-    ['kpiDailyAvg', 'kpiEstRevenue'].forEach(id => {
+    ['kpiTotalPremium', 'kpiDailyAvg', 'kpiEstRevenue'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
         el.textContent = '$' + (el.dataset[mode] !== undefined ? el.dataset[mode] : '0');
     });
-    // Numeric KPIs
-    ['pipeSubmitted', 'pipeApproved', 'pipeDeclined'].forEach(id => {
+    // Numeric KPIs (with data-mtd / data-today)
+    ['kpiSalesPeriod', 'pipeApproved', 'pipeDeclined'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
         if (el.dataset[mode] !== undefined) el.textContent = el.dataset[mode];
     });
 
     // Labels
     const lblMap = {
-        kpiDailyAvgLbl:   mode === 'mtd' ? 'Daily Avg Premium · MTD' : 'Today Total Premium',
-        kpiDailyAvgSub:   mode === 'mtd' ? days + ' sale days · ' + periodLbl : periodLbl,
-        kpiEstRevenueLbl: 'Est. Revenue · ' + suffix,
-        kpiEstRevenueSub: periodLbl,
-        pipeLblSubmitted: 'Submitted ' + suffix,
-        pipeLblApproved:  'Approved ' + suffix,
-        pipeLblDeclined:  'Declined ' + suffix,
-        closerChartLbl:   suffix,
+        kpiTotalPremiumLbl: mode === 'mtd' ? 'Total Premium · Period' : 'Today Total Premium',
+        kpiDailyAvgLbl:     mode === 'mtd' ? 'Daily Avg Premium'      : 'Today Revenue',
+        kpiDailyAvgSub:     mode === 'mtd' ? days + ' active days'     : 'Today · PT',
+        kpiEstRevenueLbl:   'Est. Commission',
+        kpiEstRevenueSub:   mode === 'mtd' ? 'premium × 9 × rate'     : 'Today · PT',
+        kpiSalesPeriodLbl:  mode === 'mtd' ? 'Sales this Period'       : 'Sales Today',
+        kpiSalesPeriodSub:  mode === 'mtd' ? 'validated + submitted'   : 'Today · PT',
+        pipeLblApproved:    'Approved '  + suffix,
+        pipeLblDeclined:    'Declined '  + suffix,
+        closerChartLbl:     suffix,
     };
     Object.entries(lblMap).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 
