@@ -60,56 +60,8 @@
     {{-- How it works --}}
     <div class="how-it-works">
         <strong><i class="bx bx-info-circle" style="color:#556ee6"></i> How device access works:</strong>
-        When someone visits the CRM from a new browser/machine, the server automatically assigns them a one-time <code>device token</code> (stored as an HttpOnly cookie — invisible to JavaScript). Their browser is then blocked until you approve that token here. Once approved, they can log in normally. Clearing cookies or using a different browser re-triggers approval.
+        New devices are <strong>not auto-registered</strong>. When a new user visits the CRM, they see a page with a generated token and instructions to send it to you. You add it here with their name and label, then they click <code>Activate</code> on their page to get in. Existing approved devices are unaffected. Use <strong>Disable</strong> to temporarily block a device and <strong>Re-enable</strong> to restore it.
     </div>
-
-    {{-- ── Pending approvals ──────────────────────────────────────────── --}}
-    @if($pending->isNotEmpty())
-    <div class="pending-card">
-        <h6><i class="bx bx-time"></i> Pending Approvals
-            <span class="v-badge v-warn" style="margin-left:.25rem">{{ $pending->count() }}</span>
-        </h6>
-        <table class="dv-table">
-            <thead>
-                <tr>
-                    <th>Device Token</th>
-                    <th>Last IP</th>
-                    <th>First Seen</th>
-                    <th>Approve As</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($pending as $device)
-                <tr>
-                    <td><span class="tok-cell">{{ $device->device_token }}</span></td>
-                    <td style="font-family:monospace;font-size:.7rem">{{ $device->last_seen_ip ?? '—' }}</td>
-                    <td style="font-size:.72rem;color:var(--bs-surface-500)">{{ $device->created_at->diffForHumans() }}</td>
-                    <td>
-                        <form action="{{ route('settings.devices.approve', $device) }}" method="POST" style="display:flex;gap:.35rem;align-items:center">
-                            @csrf
-                            <input type="text" name="name" class="f-input" placeholder="Person name" style="width:130px" value="{{ $device->name }}">
-                            <input type="text" name="label" class="f-input" placeholder="Device label" style="width:160px" value="{{ $device->label }}">
-                            <button type="submit" class="act-btn a-green" style="font-size:.67rem;white-space:nowrap">
-                                <i class="bx bx-check"></i> Approve
-                            </button>
-                        </form>
-                    </td>
-                    <td>
-                        <form action="{{ route('settings.devices.destroy', $device) }}" method="POST" style="display:inline"
-                            onsubmit="return confirm('Reject and delete this pending device?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="act-btn a-danger" style="font-size:.67rem;padding:.2rem .5rem">
-                                <i class="bx bx-x"></i> Reject
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    @endif
 
     {{-- ── Manual add form ─────────────────────────────────────────────── --}}
     <div class="add-card">

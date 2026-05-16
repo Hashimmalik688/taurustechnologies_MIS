@@ -431,6 +431,13 @@ Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Role
 // Employee Dock View - Read-only access for employees to view their own dock records
 Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::class, 'myDockRecords'])->name('my-dock-records')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::COORDINATOR)]);
 
+// My Devices — every logged-in user can see and name their own device
+Route::get('/my-devices', [\App\Http\Controllers\Admin\DeviceController::class, 'myDevices'])->name('my-devices')->middleware('auth');
+Route::post('/my-devices/name', [\App\Http\Controllers\Admin\DeviceController::class, 'updateMyDeviceName'])->name('my-devices.name')->middleware('auth');
+
+// Device activation — no auth needed, bypassed by RestrictToAllowedDevice middleware
+Route::post('/device/activate', [\App\Http\Controllers\Admin\DeviceController::class, 'activate'])->name('device.activate');
+
 // Attendance — access controlled by role.permission:attendance,level
 Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
     Route::get('/', [AttendanceController::class, 'index'])->name('index')->middleware('role.permission:attendance,view');
@@ -943,7 +950,6 @@ Route::group(['prefix' => 'settings/devices', 'as' => 'settings.devices.', 'midd
     Route::post('/{device}/disable', [DeviceController::class, 'disable'])->name('disable')->middleware('role.permission:allowed-devices,edit');
     Route::post('/{device}/enable', [DeviceController::class, 'enable'])->name('enable')->middleware('role.permission:allowed-devices,edit');
     Route::delete('/{device}', [DeviceController::class, 'destroy'])->name('destroy')->middleware('role.permission:allowed-devices,full');
-    Route::post('/reject-all', [DeviceController::class, 'rejectAllPending'])->name('reject-all')->middleware('role.permission:allowed-devices,full');
 });
 
 // Reports — access controlled by role.permission:reports,level

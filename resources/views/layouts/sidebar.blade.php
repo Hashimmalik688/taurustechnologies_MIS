@@ -355,6 +355,11 @@
                 <i class="bx bx-dock-top"></i>
                 <span class="menu-text">My Dock Records</span>
             </a>
+
+            <a href="{{ route('my-devices') }}" class="dropdown-item {{ Request::is('my-devices*') ? 'active' : '' }}">
+                <i class="bx bx-devices"></i>
+                <span class="menu-text">My Device</span>
+            </a>
         </div>
     </nav>
 

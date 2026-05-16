@@ -25,6 +25,7 @@ class RestrictToAllowedDevice
      */
     protected array $except = [
         'zoom/webhook',
+        'device/activate',
         'api/zoom-webhook',
     ];
 
@@ -62,100 +63,33 @@ class RestrictToAllowedDevice
             return response('', 403);
         }
 
-        // ── Only allow device registration from office/trusted networks ───
-        // If the request has no cookie (i.e. first-time visit that would trigger
-        // a new pending record), verify the IP is in an office network first.
-        // Approved devices that already have a cookie bypass this — employees
-        // working remotely are already approved and just need to be validated.
-        $incomingToken = $request->cookie(self::COOKIE);
-        if (empty($incomingToken) && ! $this->isFromAllowedNetwork($request->ip())) {
+        // ── IP check — applies to everyone, token or not ──────────────────
+        if (! $this->isFromAllowedNetwork($request->ip())) {
             return response('', 403);
         }
 
         $token = $request->cookie(self::COOKIE);
-        $newCookie = null;
 
-        // ── No cookie at all → first visit on this device ─────────────────
+        // ── No token → show registration page (IP already cleared above) ──
         if (empty($token)) {
-            // If this IP already has a rejected entry, block immediately without
-            // creating a new record (prevents re-registration after rejection).
-            $existingRejected = AllowedDevice::where('last_seen_ip', $request->ip())
-                ->where('status', 'rejected')
-                ->exists();
-            if ($existingRejected) {
-                return $this->disabledResponse($request);
-            }
-
-            // If this IP already has a pending entry (e.g. different browser on
-            // same machine), reuse that token instead of flooding the queue.
-            $existingPending = AllowedDevice::where('last_seen_ip', $request->ip())
-                ->where('status', 'pending')
-                ->latest()
-                ->first();
-            if ($existingPending) {
-                $token = $existingPending->device_token;
-                $newCookie = $this->makeCookie($request, $token);
-                $response = $this->pendingResponse($request, $token);
-                return $newCookie ? $response->withCookie($newCookie) : $response;
-            }
-
-            $token = (string) Str::uuid();
-            $newCookie = $this->makeCookie($request, $token);
-
-            AllowedDevice::create([
-                'device_token' => $token,
-                'status'       => 'pending',
-                'label'        => 'Auto-registered from ' . $request->ip(),
-                'last_seen_ip' => $request->ip(),
-                'last_seen_at' => now(),
-            ]);
-
-            $response = $this->pendingResponse($request, $token);
-            return $newCookie ? $response->withCookie($newCookie) : $response;
+            return $this->notRegisteredResponse($request);
         }
 
         // ── Token exists → look it up ──────────────────────────────────────
         $device = AllowedDevice::where('device_token', $token)->first();
 
-        // Token in cookie but not in DB. Check if IP is already rejected before
-        // issuing a new pending record.
+        // Token in cookie but not in DB → treat as unregistered
         if (! $device) {
-            $existingRejected = AllowedDevice::where('last_seen_ip', $request->ip())
-                ->where('status', 'rejected')
-                ->exists();
-            if ($existingRejected) {
-                return $this->disabledResponse($request);
-            }
-
-            $token = (string) Str::uuid();
-            $newCookie = $this->makeCookie($request, $token);
-
-            AllowedDevice::create([
-                'device_token' => $token,
-                'status'       => 'pending',
-                'label'        => 'Auto-registered from ' . $request->ip(),
-                'last_seen_ip' => $request->ip(),
-                'last_seen_at' => now(),
-            ]);
-
-            if (Auth::check()) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-            }
-
-            $response = $this->pendingResponse($request, $token);
-            return $newCookie ? $response->withCookie($newCookie) : $response;
+            return $this->notRegisteredResponse($request);
         }
 
-        // Permanently rejected — show disabled page, never allow re-registration
-        if ($device->status === 'rejected') {
-            return $this->disabledResponse($request);
+        // Rejected or pending — show disabled page
+        if (in_array($device->status, ['rejected', 'pending'])) {
+            return $this->disabledResponse($request, $token);
         }
 
         // Pending – waiting for admin
         if ($device->status === 'pending') {
-            // Keep last_seen_ip current so admin can identify the device
             $device->updateQuietly(['last_seen_ip' => $request->ip()]);
 
             if (Auth::check()) {
@@ -269,11 +203,20 @@ class RestrictToAllowedDevice
         return response($html, 403)->header('Content-Type', 'text/html');
     }
 
-    private function disabledResponse(Request $request): Response
+    private function disabledResponse(Request $request, ?string $token = null): Response
     {
         if ($request->expectsJson()) {
             return response()->json(['message' => 'This device has been disabled. Contact your administrator.'], 403);
         }
+
+        $tokenBlock = $token
+            ? '<div class="t">
+      <strong>Blocked Device Token</strong>
+      <code id="tok">' . e($token) . '</code>
+      <small>Send this token to your administrator so they can identify and re-enable your device.</small>
+    </div>
+    <button class="btn" onclick="copyToken()">Copy Token</button>'
+            : '<p class="m" style="margin-top:16px">No device token found — your administrator will need to identify your device by IP address.</p>';
 
         $html = '<!DOCTYPE html>
 <html lang="en">
@@ -283,10 +226,16 @@ class RestrictToAllowedDevice
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#1a1d21;color:#e4e6eb;display:flex;align-items:center;justify-content:center;min-height:100vh}
-    .c{text-align:center;max-width:480px;padding:40px}
+    .c{text-align:center;max-width:520px;padding:40px}
     .s{width:80px;height:80px;margin:0 auto 24px;background:#dc3545;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px}
     h1{font-size:24px;font-weight:700;margin-bottom:10px;color:#fff}
     .m{font-size:15px;color:#9ca3af;line-height:1.6}
+    .t{background:#2d3748;border:1px solid #4a5568;border-radius:10px;padding:18px 20px;margin:20px 0;text-align:left}
+    .t strong{display:block;color:#f0f0f0;font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+    .t code{display:block;word-break:break-all;background:#1a202c;padding:10px 14px;border-radius:6px;font-family:"Courier New",monospace;font-size:13px;color:#fc8181;margin-bottom:10px;user-select:all}
+    .t small{color:#9ca3af;font-size:13px;line-height:1.5}
+    .btn{display:inline-block;background:#4a5568;border:none;color:#e4e6eb;padding:9px 20px;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px}
+    .btn:hover{background:#718096}
   </style>
 </head>
 <body>
@@ -294,7 +243,101 @@ class RestrictToAllowedDevice
     <div class="s">🔒</div>
     <h1>Device Disabled</h1>
     <p class="m">This device has been disabled by your administrator.<br>Contact them to regain access.</p>
+    ' . $tokenBlock . '
   </div>
+  <script>
+    function copyToken(){
+      navigator.clipboard.writeText(document.getElementById("tok").textContent.trim()).then(function(){
+        var btn=document.querySelector(".btn");btn.textContent="Copied!";
+        setTimeout(function(){btn.textContent="Copy Token"},2000);
+      });
+    }
+  </script>
+</body>
+</html>';
+
+        return response($html, 403)->header('Content-Type', 'text/html');
+    }
+
+    private function notRegisteredResponse(Request $request): Response
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Device not registered. Contact your administrator.'], 403);
+        }
+
+        $html = '<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Device Not Registered</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#1a1d21;color:#e4e6eb;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .c{text-align:center;max-width:520px;padding:40px}
+    .s{width:80px;height:80px;margin:0 auto 24px;background:#556ee6;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px}
+    h1{font-size:24px;font-weight:700;margin-bottom:10px;color:#fff}
+    .m{font-size:15px;color:#9ca3af;line-height:1.6;margin-bottom:20px}
+    .t{background:#2d3748;border:1px solid #4a5568;border-radius:10px;padding:18px 20px;margin-bottom:20px;text-align:left}
+    .t strong{display:block;color:#f0f0f0;font-size:13px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+    .t code{display:block;word-break:break-all;background:#1a202c;padding:10px 14px;border-radius:6px;font-family:"Courier New",monospace;font-size:13px;color:#68d391;margin-bottom:10px;user-select:all}
+    .t small{color:#9ca3af;font-size:13px;line-height:1.5}
+    .steps{text-align:left;background:#2d3748;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:14px;color:#9ca3af;line-height:2}
+    .steps span{color:#e4e6eb;font-weight:600}
+    .btn{display:inline-block;background:#4a5568;border:none;color:#e4e6eb;padding:9px 20px;border-radius:8px;font-size:14px;cursor:pointer}
+    .btn:hover{background:#718096}
+    .btn-activate{background:linear-gradient(135deg,#2563eb,#1d4ed8);margin-left:8px}
+    .btn-activate:hover{background:linear-gradient(135deg,#1d4ed8,#1e40af)}
+    .act-input{width:100%;background:#1a202c;border:1px solid #4a5568;border-radius:8px;padding:10px 14px;font-family:"Courier New",monospace;font-size:13px;color:#e4e6eb;margin-top:10px}
+    .act-input:focus{outline:none;border-color:#556ee6}
+  </style>
+</head>
+<body>
+  <div class="c">
+    <div class="s">🖥️</div>
+    <h1>Device Not Registered</h1>
+    <p class="m">This device has not been registered with the system.<br>Follow the steps below to get access.</p>
+
+    <div class="t">
+      <strong>Your Device Token</strong>
+      <code id="tok"></code>
+      <small>Copy this token and send it to your administrator to get approved.</small>
+    </div>
+
+    <div class="steps">
+      <div>1. <span>Copy</span> the token above and send it to your admin</div>
+      <div>2. Admin adds it in <span>Settings → Allowed Devices</span></div>
+      <div>3. Come back and click <span>Activate</span> below</div>
+    </div>
+
+    <button class="btn" onclick="copyToken()">Copy Token</button>
+    <button class="btn btn-activate" onclick="activate()">✓ Activate (after admin approves)</button>
+
+    <form id="activateForm" action="/device/activate" method="POST" style="display:none">
+      <input type="hidden" name="_token" id="csrf">
+      <input type="hidden" name="device_token" id="activateToken">
+    </form>
+  </div>
+  <script>
+    var tok = null;
+    (function(){
+      var k = "cdvt_pending";
+      tok = localStorage.getItem(k);
+      if(!tok){ tok = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,function(c){return(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)}); localStorage.setItem(k, tok); }
+      document.getElementById("tok").textContent = tok;
+    })();
+    function copyToken(){
+      navigator.clipboard.writeText(tok).then(function(){
+        var b=document.querySelectorAll(".btn")[0]; b.textContent="Copied!";
+        setTimeout(function(){b.textContent="Copy Token"},2000);
+      });
+    }
+    function activate(){
+      document.getElementById("activateToken").value = tok;
+      fetch("/sanctum/csrf-cookie").then(function(){
+        document.getElementById("activateForm").submit();
+      });
+    }
+  </script>
 </body>
 </html>';
 

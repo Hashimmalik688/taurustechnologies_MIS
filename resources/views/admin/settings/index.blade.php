@@ -157,43 +157,6 @@
         </div>
         <div class="sec-body" style="padding:.75rem">
 
-            {{-- Pending --}}
-            @if($pending->count())
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
-                    <p class="f-label" style="color:#b89730;margin-bottom:0">Pending Approval</p>
-                    <form action="{{ route('settings.devices.reject-all') }}" method="POST" style="display:inline" onsubmit="return confirm('Reject ALL pending tokens? This cannot be undone.')">
-                        @csrf
-                        <button class="act-btn a-danger" style="font-size:.68rem;padding:.2rem .5rem"><i class="bx bx-trash"></i> Reject All</button>
-                    </form>
-                </div>
-                <div class="table-responsive" style="margin-bottom:1rem">
-                    <table class="table table-sm" style="font-size:.75rem">
-                        <thead><tr><th>Token</th><th>IP</th><th>First Seen</th><th></th></tr></thead>
-                        <tbody>
-                            @foreach($pending as $d)
-                            <tr>
-                                <td><code style="font-size:.7rem">{{ $d->device_token }}</code></td>
-                                <td>{{ $d->last_seen_ip ?? '—' }}</td>
-                                <td>{{ $d->created_at->diffForHumans() }}</td>
-                                <td style="white-space:nowrap">
-                                    <form action="{{ route('settings.devices.approve', $d) }}" method="POST" style="display:inline">
-                                        @csrf
-                                        <input type="text" name="name" placeholder="Person" class="f-input" style="width:90px;display:inline-block;margin-right:.2rem">
-                                        <input type="text" name="label" placeholder="Label" class="f-input" style="width:90px;display:inline-block;margin-right:.2rem">
-                                        <button class="act-btn a-success" style="font-size:.68rem;padding:.2rem .45rem">Approve</button>
-                                    </form>
-                                    <form action="{{ route('settings.devices.destroy', $d) }}" method="POST" style="display:inline" onsubmit="return confirm('Reject this device?')">
-                                        @csrf @method('DELETE')
-                                        <button class="act-btn a-danger" style="font-size:.68rem;padding:.2rem .45rem">Reject</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
             {{-- Manual Add --}}
             <form action="{{ route('settings.devices.store') }}" method="POST" style="margin-bottom:1rem">
                 @csrf
