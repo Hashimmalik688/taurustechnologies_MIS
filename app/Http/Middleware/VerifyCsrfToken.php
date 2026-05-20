@@ -14,5 +14,6 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'api/zoom-webhook',
         'zoom/webhook',  // Zoom calls this webhook URL
+        'device/activate', // Pre-auth page — no session yet; endpoint requires valid approved DB token
     ];
 }
