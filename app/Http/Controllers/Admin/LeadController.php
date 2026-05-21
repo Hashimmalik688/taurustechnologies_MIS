@@ -318,7 +318,7 @@ class LeadController extends Controller
         // Tab-based status filter
         $activeTab = $request->get('status', 'all');
         if ($activeTab === 'pending_validation') {
-            $query->whereNull('ravens_validated_at');
+            $query->whereNull('ravens_validation_status');
         } elseif ($activeTab === 'validated') {
             $query->where('ravens_validation_status', 'valid');
         } elseif ($activeTab === 'not_valid') {
@@ -376,7 +376,7 @@ class LeadController extends Controller
 
         $statusCounts = [
             'all'                => (clone $statsBase)->count(),
-            'pending_validation' => (clone $statsBase)->whereNull('ravens_validated_at')->count(),
+            'pending_validation' => (clone $statsBase)->whereNull('ravens_validation_status')->count(),
             'validated'          => (clone $statsBase)->where('ravens_validation_status', 'valid')->count(),
             'not_valid'          => (clone $statsBase)->where('ravens_validation_status', 'not_valid')->count(),
             'callback'           => (clone $statsBase)->whereNotNull('recall_requested_at')->count(),

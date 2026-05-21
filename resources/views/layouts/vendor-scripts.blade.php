@@ -161,8 +161,7 @@ $(document).ready(function() {
 });
 </script>
 
-<!-- Page specific scripts - load AFTER core libraries -->
-@yield('script')
+<!-- Page specific scripts are yielded at the bottom of master layout (avoid duplicate yield) -->
 
 <!-- Bottom scripts - for scripts that need to run last -->
 @yield('script-bottom')

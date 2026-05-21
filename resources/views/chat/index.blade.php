@@ -326,7 +326,7 @@
                 <div id="groups-tab" class="chat-sidebar-content">
                     <div class="chat-sidebar-header">
                         <h5><i class="bx bx-group"></i> Groups</h5>
-                        <button class="btn" data-bs-toggle="modal" data-bs-target="#newChatModal" title="Create new group">
+                        <button class="btn" id="openCreateGroupBtn" data-bs-toggle="modal" data-bs-target="#newChatModal" title="Create new group">
                             <i class="bx bx-plus"></i> Create
                         </button>
                     </div>
@@ -3843,7 +3843,7 @@ if (typeof window._echoChannel === 'undefined') { window._echoChannel = null; }
 var _echoInitPromise = null;
 function initEcho() {
     if (_echoInitPromise) return _echoInitPromise;
-    if (!echoConfig.key) return Promise.resolve(null);
+    if (typeof echoConfig === 'undefined' || !echoConfig || !echoConfig.key) return Promise.resolve(null);
 
     function loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -4268,30 +4268,64 @@ document.addEventListener('DOMContentLoaded', function() {
         createGroupChat();
     });
 
-    // Modal shown event
+    // Load users immediately when Create button is clicked (don't rely on shown.bs.modal)
+    const openCreateGroupBtn = document.getElementById('openCreateGroupBtn');
+    if (openCreateGroupBtn) {
+        openCreateGroupBtn.addEventListener('click', function() {
+            selectedMembers.clear();
+            loadUsersForGroup();
+            const input = document.getElementById('searchGroupUsers');
+            if (input) input.value = '';
+            updateSelectedMembersList();
+        });
+    }
+
+    // Keep shown.bs.modal as a fallback
     document.getElementById('newChatModal').addEventListener('shown.bs.modal', function() {
-        loadUsersForGroup();
-        selectedMembers.clear();
-        updateSelectedMembersList();
+        const container = document.getElementById('groupUsersList');
+        if (container && container.querySelectorAll('.user-item').length === 0) {
+            loadUsersForGroup();
+        }
     });
 
     // Add search functionality for group members
     const searchGroupUsersInput = document.getElementById('searchGroupUsers');
     if (searchGroupUsersInput) {
+        // Load users on focus as a safety net
+        searchGroupUsersInput.addEventListener('focus', function() {
+            const container = document.getElementById('groupUsersList');
+            if (container && container.querySelectorAll('.user-item').length === 0) {
+                loadUsersForGroup();
+            }
+        });
+
         searchGroupUsersInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const userItems = document.querySelectorAll('#groupUsersList .user-item');
-            
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const container = document.getElementById('groupUsersList');
+            const userItems = container.querySelectorAll('.user-item');
+            let visibleCount = 0;
+
             userItems.forEach(item => {
                 const userName = item.dataset.userName?.toLowerCase() || '';
                 const userEmail = item.querySelector('.user-email')?.textContent.toLowerCase() || '';
-                
-                if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
+                const matches = !searchTerm || userName.includes(searchTerm) || userEmail.includes(searchTerm);
+                item.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
             });
+
+            // Show/hide no-results message
+            let noResults = container.querySelector('.no-results-msg');
+            if (visibleCount === 0 && searchTerm && userItems.length > 0) {
+                if (!noResults) {
+                    noResults = document.createElement('div');
+                    noResults.className = 'no-results-msg text-muted text-center p-2';
+                    noResults.style.fontSize = '.8rem';
+                    container.appendChild(noResults);
+                }
+                noResults.textContent = `No users found for "${e.target.value}"`;
+            } else if (noResults) {
+                noResults.remove();
+            }
         });
     }
 });
@@ -4308,11 +4342,19 @@ async function loadUsersForDirectChat() {
 
 // Load users for group chat
 async function loadUsersForGroup() {
+    const container = document.getElementById('groupUsersList');
+    if (!container) return;
+    container.innerHTML = '<div class="text-muted text-center p-2" style="font-size:.8rem">Loading users…</div>';
     try {
         const data = await apiCall('/api/chat/users');
+        if (!data || !Array.isArray(data.users) || data.users.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center p-2" style="font-size:.8rem">No users available.</div>';
+            return;
+        }
         renderUsersList(data.users, 'groupUsersList', true);
     } catch (error) {
         console.error('Error loading users:', error);
+        container.innerHTML = `<div class="text-danger text-center p-2" style="font-size:.8rem">Failed to load users: ${error?.message || 'unknown error'}</div>`;
     }
 }
 
