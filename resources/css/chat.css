@@ -541,6 +541,7 @@
     line-height: 1.5;
     color: var(--bs-body-color, #1f2937);
     word-break: break-word;
+    white-space: pre-wrap;
     -webkit-user-select: text !important;
     user-select: text !important;
 }
