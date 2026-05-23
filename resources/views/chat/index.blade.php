@@ -974,6 +974,34 @@ if (typeof window.contextMenuCommunityName === 'undefined') {
 })();
 
 // ===== SIDEBAR TAB SWITCHING =====
+// Preserve line breaks when copying chat message text.
+// Browsers serialize `<br>` inconsistently when pasting into other apps (Teams, Word, etc.),
+// so on copy we explicitly rebuild the plain-text version with real newlines and put it on the clipboard.
+document.addEventListener('copy', function (e) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
+
+    // Only intercept when the selection is inside a chat message
+    const anchorEl = sel.anchorNode?.nodeType === 1 ? sel.anchorNode : sel.anchorNode?.parentElement;
+    if (!anchorEl || !anchorEl.closest('.message-text, #chatMessages')) return;
+
+    const container = document.createElement('div');
+    for (let i = 0; i < sel.rangeCount; i++) {
+        container.appendChild(sel.getRangeAt(i).cloneContents());
+    }
+    // Replace <br> with newlines and block elements with trailing newlines
+    container.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    container.querySelectorAll('p, div, tr').forEach(el => {
+        if (el.nextSibling) el.appendChild(document.createTextNode('\n'));
+    });
+    const text = container.innerText || container.textContent || '';
+    if (!text.trim()) return;
+
+    e.clipboardData.setData('text/plain', text);
+    e.clipboardData.setData('text/html', container.innerHTML);
+    e.preventDefault();
+}, true);
+
 document.addEventListener('DOMContentLoaded', function() {
     const tabButtons = document.querySelectorAll('.chat-tab-pill');
     const tabContents = document.querySelectorAll('.chat-sidebar-content');
