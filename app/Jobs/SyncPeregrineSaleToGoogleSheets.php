@@ -44,6 +44,14 @@ class SyncPeregrineSaleToGoogleSheets implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("SyncPeregrineSaleToGoogleSheets failed for Lead #{$this->lead->id}: {$exception->getMessage()}");
+        Log::critical("PERMANENT FAILURE: Peregrine Google Sheets sync failed after all retries", [
+            'lead_id' => $this->lead->id,
+            'customer_name' => $this->lead->cn_name,
+            'validator_name' => $this->lead->assignedValidator?->name,
+            'sale_at' => $this->lead->sale_at?->toDateTimeString(),
+            'team' => $this->lead->team,
+            'error' => $exception->getMessage(),
+            'resync_command' => "php artisan sales:resync-google-sheets --lead-id={$this->lead->id}",
+        ]);
     }
 }

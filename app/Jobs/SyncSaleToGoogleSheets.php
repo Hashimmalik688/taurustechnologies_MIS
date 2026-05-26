@@ -46,6 +46,14 @@ class SyncSaleToGoogleSheets implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("SyncSaleToGoogleSheets failed for Lead #{$this->lead->id}: {$exception->getMessage()}");
+        Log::critical("PERMANENT FAILURE: Google Sheets sync failed after all retries", [
+            'lead_id' => $this->lead->id,
+            'customer_name' => $this->lead->cn_name,
+            'closer_name' => $this->lead->closer_name,
+            'sale_at' => $this->lead->sale_at?->toDateTimeString(),
+            'team' => $this->lead->team,
+            'error' => $exception->getMessage(),
+            'resync_command' => "php artisan sales:resync-google-sheets --lead-id={$this->lead->id}",
+        ]);
     }
 }

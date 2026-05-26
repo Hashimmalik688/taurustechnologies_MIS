@@ -51,14 +51,20 @@ class GoogleSheetsService
 
             if (isset($data['status']) && $data['status'] === 'error') {
                 Log::error("GoogleSheetsService: Apps Script error for Lead #{$lead->id}: " . ($data['message'] ?? ''));
-            } else {
-                Log::info("GoogleSheetsService: Lead #{$lead->id} ({$lead->cn_name}) appended to sheet.");
+                throw new \RuntimeException("Apps Script returned error: " . ($data['message'] ?? 'Unknown error'));
             }
+
+            Log::info("GoogleSheetsService: Lead #{$lead->id} ({$lead->cn_name}) appended to sheet.");
+
+            // Mark as successfully synced
+            $lead->update(['google_sheet_synced_at' => now()]);
         } catch (RequestException $e) {
             $body = $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'no response';
             Log::error("GoogleSheetsService: HTTP error for Lead #{$lead->id} — {$e->getMessage()} | {$body}");
+            throw $e;
         } catch (\Throwable $e) {
             Log::error("GoogleSheetsService: Unexpected error for Lead #{$lead->id} — {$e->getMessage()}");
+            throw $e;
         }
     }
 
@@ -80,14 +86,20 @@ class GoogleSheetsService
 
             if (isset($data['status']) && $data['status'] === 'error') {
                 Log::error("GoogleSheetsService [Peregrine]: Apps Script error for Lead #{$lead->id}: " . ($data['message'] ?? ''));
-            } else {
-                Log::info("GoogleSheetsService [Peregrine]: Lead #{$lead->id} ({$lead->cn_name}) appended to Peregrines sheet.");
+                throw new \RuntimeException("Apps Script returned error: " . ($data['message'] ?? 'Unknown error'));
             }
+
+            Log::info("GoogleSheetsService [Peregrine]: Lead #{$lead->id} ({$lead->cn_name}) appended to Peregrines sheet.");
+
+            // Mark as successfully synced
+            $lead->update(['google_sheet_synced_at' => now()]);
         } catch (RequestException $e) {
             $body = $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'no response';
             Log::error("GoogleSheetsService [Peregrine]: HTTP error for Lead #{$lead->id} — {$e->getMessage()} | {$body}");
+            throw $e;
         } catch (\Throwable $e) {
             Log::error("GoogleSheetsService [Peregrine]: Unexpected error for Lead #{$lead->id} — {$e->getMessage()}");
+            throw $e;
         }
     }
 
