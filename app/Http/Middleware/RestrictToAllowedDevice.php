@@ -63,20 +63,36 @@ class RestrictToAllowedDevice
             return response('', 403);
         }
 
-        // ── IP check — applies to everyone, token or not ──────────────────
+        // ── Token check first — approved tokens bypass IP restriction ────────
+        // This allows remote users with dynamic IPs to access the system once
+        // their device token has been approved by an admin.
+        $token  = $request->cookie(self::COOKIE);
+        $device = null;
+
+        if (! empty($token)) {
+            $device = AllowedDevice::where('device_token', $token)->first();
+
+            if ($device && $device->status === 'approved') {
+                if (! $device->last_seen_at || $device->last_seen_at->diffInMinutes(now()) >= 1) {
+                    $device->updateQuietly([
+                        'last_seen_at' => now(),
+                        'last_seen_ip' => $request->ip(),
+                    ]);
+                }
+
+                return $next($request);
+            }
+        }
+
+        // ── IP check — gates everyone without an approved token ───────────
         if (! $this->isFromAllowedNetwork($request->ip())) {
             return response('', 403);
         }
-
-        $token = $request->cookie(self::COOKIE);
 
         // ── No token → show registration page (IP already cleared above) ──
         if (empty($token)) {
             return $this->notRegisteredResponse($request);
         }
-
-        // ── Token exists → look it up ──────────────────────────────────────
-        $device = AllowedDevice::where('device_token', $token)->first();
 
         // Token in cookie but not in DB → treat as unregistered
         if (! $device) {
@@ -116,14 +132,6 @@ class RestrictToAllowedDevice
             }
 
             return $this->disabledResponse($request);
-        }
-
-        // ── Approved ── update last-seen at most once per minute ──────────
-        if (! $device->last_seen_at || $device->last_seen_at->diffInMinutes(now()) >= 1) {
-            $device->updateQuietly([
-                'last_seen_at' => now(),
-                'last_seen_ip' => $request->ip(),
-            ]);
         }
 
         return $next($request);
