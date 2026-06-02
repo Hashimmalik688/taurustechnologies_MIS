@@ -149,33 +149,37 @@
     @if(auth()->user()->canViewModule('allowed-devices'))
     <div class="ex-card sec-card" style="margin-top:.65rem">
         <div class="sec-hdr">
-            <h6><i class="bx bx-devices"></i> Allowed Devices
-                @if($pending->count())
-                    <span class="badge bg-warning text-dark ms-1" style="font-size:.65rem">{{ $pending->count() }} pending</span>
-                @endif
-            </h6>
+            <h6><i class="bx bx-devices"></i> Allowed Devices</h6>
         </div>
         <div class="sec-body" style="padding:.75rem">
 
             {{-- Manual Add --}}
             <form action="{{ route('settings.devices.store') }}" method="POST" style="margin-bottom:1rem">
                 @csrf
-                <p class="f-label" style="margin-bottom:.4rem">Add a Device Manually</p>
-                <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:flex-end">
-                    <div style="flex:2;min-width:180px">
-                        <label class="f-label">Device Token (UUID)</label>
-                        <input type="text" name="device_token" class="f-input" placeholder="Paste UUID from the pending page" required>
-                    </div>
-                    <div style="flex:1;min-width:120px">
-                        <label class="f-label">Person</label>
-                        <input type="text" name="name" class="f-input" placeholder="e.g. Hashim">
-                    </div>
-                    <div style="flex:1;min-width:120px">
-                        <label class="f-label">Label</label>
-                        <input type="text" name="label" class="f-input" placeholder="e.g. Office PC" required>
-                    </div>
-                    <div>
-                        <button class="act-btn a-success" style="white-space:nowrap"><i class="bx bx-plus"></i> Add &amp; Approve</button>
+                <div style="background:linear-gradient(135deg,rgba(212,175,55,.06),rgba(85,110,230,.04));border:1px solid rgba(212,175,55,.12);border-radius:12px;padding:1rem;margin-bottom:1rem">
+                    <p class="f-label" style="margin-bottom:.5rem">Approve a Device</p>
+                    <p style="font-size:.75rem;color:var(--bs-surface-500);margin-bottom:1rem">User sees their <strong>Device Token</strong> when they try to access. They send it to you. Paste it here and approve:</p>
+                    <div style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:flex-end">
+                        <div style="flex:2;min-width:200px">
+                            <label class="f-label">Device Token (UUID)</label>
+                            <input type="text" name="device_token" class="f-input" placeholder="Paste UUID user sends you" required>
+                        </div>
+                        <div style="flex:1;min-width:120px">
+                            <label class="f-label">Assign User</label>
+                            <select name="user_id" class="f-input">
+                                <option value="">— Select User —</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div style="flex:1;min-width:120px">
+                            <label class="f-label">Device Label</label>
+                            <input type="text" name="label" class="f-input" placeholder="e.g. US Laptop" required>
+                        </div>
+                        <div>
+                            <button class="act-btn a-success" style="white-space:nowrap"><i class="bx bx-check"></i> Approve</button>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -187,12 +191,19 @@
             @else
                 <div class="table-responsive" style="margin-bottom:1rem">
                     <table class="table table-sm" style="font-size:.75rem">
-                        <thead><tr><th>Person</th><th>Label</th><th>Last Seen</th><th>IP</th><th style="width:1px"></th></tr></thead>
+                        <thead><tr><th>User</th><th>Label</th><th>Last Seen</th><th>IP</th><th style="width:1px"></th></tr></thead>
                         <tbody>
                             @foreach($approved as $d)
                             {{-- view row --}}
                             <tr id="dev-row-{{ $d->id }}">
-                                <td>{{ $d->name ?? '—' }}</td>
+                                <td>
+                                    @if($d->user)
+                                        <strong>{{ $d->user->name }}</strong><br>
+                                        <small style="color:var(--bs-surface-500)">{{ $d->name ?? '(no person label)' }}</small>
+                                    @else
+                                        <span style="color:var(--bs-surface-500)">{{ $d->name ?? '— Unassigned' }}</span>
+                                    @endif
+                                </td>
                                 <td>{{ $d->label }}</td>
                                 <td style="color:var(--bs-surface-500)">{{ $d->last_seen_at ? $d->last_seen_at->diffForHumans() : '—' }}</td>
                                 <td style="color:var(--bs-surface-500)">{{ $d->last_seen_ip ?? '—' }}</td>
@@ -215,10 +226,15 @@
                                 <td colspan="5" style="padding:.6rem .75rem;background:linear-gradient(135deg,rgba(212,175,55,.06),rgba(85,110,230,.03));border-bottom:2px solid rgba(212,175,55,.2)">
                                     <form action="{{ route('settings.devices.update', $d) }}" method="POST">
                                         @csrf @method('PUT')
-                                        <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 2fr;gap:.5rem;align-items:end">
+                                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem;align-items:end">
                                             <div>
-                                                <div class="f-label" style="margin-bottom:.2rem">Person</div>
-                                                <input type="text" name="name" class="f-input" value="{{ $d->name }}" placeholder="e.g. Hashim" style="margin:0">
+                                                <div class="f-label" style="margin-bottom:.2rem">Assigned User</div>
+                                                <select name="user_id" class="f-input" style="margin:0">
+                                                    <option value="">— None —</option>
+                                                    @foreach($users as $user)
+                                                        <option value="{{ $user->id }}" {{ $d->user_id === $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                             <div>
                                                 <div class="f-label" style="margin-bottom:.2rem">Label / Device</div>
@@ -260,11 +276,18 @@
                 <p class="f-label" style="margin-bottom:.4rem">Disabled Devices</p>
                 <div class="table-responsive" style="margin-bottom:1rem">
                     <table class="table table-sm" style="font-size:.75rem">
-                        <thead><tr><th>Person</th><th>Label</th><th style="width:1px"></th></tr></thead>
+                        <thead><tr><th>User</th><th>Label</th><th style="width:1px"></th></tr></thead>
                         <tbody>
                             @foreach($disabled as $d)
                             <tr id="dev-row-{{ $d->id }}">
-                                <td>{{ $d->name ?? '—' }}</td>
+                                <td>
+                                    @if($d->user)
+                                        <strong>{{ $d->user->name }}</strong><br>
+                                        <small style="color:var(--bs-surface-500)">{{ $d->name ?? '(no person label)' }}</small>
+                                    @else
+                                        <span style="color:var(--bs-surface-500)">{{ $d->name ?? '— Unassigned' }}</span>
+                                    @endif
+                                </td>
                                 <td>{{ $d->label }}</td>
                                 <td style="white-space:nowrap;text-align:right">
                                     <button class="act-btn" style="font-size:.68rem;padding:.2rem .5rem" onclick="devEditOpen({{ $d->id }})">
@@ -284,10 +307,15 @@
                                 <td colspan="3" style="padding:.6rem .75rem;background:linear-gradient(135deg,rgba(212,175,55,.06),rgba(85,110,230,.03));border-bottom:2px solid rgba(212,175,55,.2)">
                                     <form action="{{ route('settings.devices.update', $d) }}" method="POST">
                                         @csrf @method('PUT')
-                                        <div style="display:grid;grid-template-columns:1fr 1.5fr 1fr 2fr;gap:.5rem;align-items:end">
+                                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem;align-items:end">
                                             <div>
-                                                <div class="f-label" style="margin-bottom:.2rem">Person</div>
-                                                <input type="text" name="name" class="f-input" value="{{ $d->name }}" placeholder="e.g. Hashim" style="margin:0">
+                                                <div class="f-label" style="margin-bottom:.2rem">Assigned User</div>
+                                                <select name="user_id" class="f-input" style="margin:0">
+                                                    <option value="">— None —</option>
+                                                    @foreach($users as $user)
+                                                        <option value="{{ $user->id }}" {{ $d->user_id === $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                             <div>
                                                 <div class="f-label" style="margin-bottom:.2rem">Label / Device</div>
@@ -341,7 +369,7 @@
                                 <td>{{ $d->name ?? '—' }}</td>
                                 <td>{{ $d->label }}</td>
                                 <td style="font-family:monospace;font-size:.68rem">{{ $d->device_token }}</td>
-                                <td style="white-space:nowrap;text-align:right">
+                                <td style="white-space:nowrap;text-align:right;display:flex;gap:.2rem;justify-content:flex-end">
                                     <form action="{{ route('settings.devices.update', $d) }}" method="POST" style="display:inline" onsubmit="return confirm('Restore this device to Approved?')">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="name" value="{{ $d->name }}">
@@ -349,6 +377,10 @@
                                         <input type="hidden" name="status" value="approved">
                                         <input type="hidden" name="device_token" value="{{ $d->device_token }}">
                                         <button class="act-btn a-success" style="font-size:.68rem;padding:.2rem .5rem">Restore</button>
+                                    </form>
+                                    <form action="{{ route('settings.devices.destroy', $d) }}" method="POST" style="display:inline" onsubmit="return confirm('Permanently delete this device? This cannot be undone.')">
+                                        @csrf @method('DELETE')
+                                        <button class="act-btn a-danger" style="font-size:.68rem;padding:.2rem .5rem">Delete</button>
                                     </form>
                                 </td>
                             </tr>

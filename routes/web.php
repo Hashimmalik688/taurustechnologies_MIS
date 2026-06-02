@@ -435,6 +435,9 @@ Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::clas
 Route::get('/my-devices', [\App\Http\Controllers\Admin\DeviceController::class, 'myDevices'])->name('my-devices')->middleware('auth');
 Route::post('/my-devices/name', [\App\Http\Controllers\Admin\DeviceController::class, 'updateMyDeviceName'])->name('my-devices.name')->middleware('auth');
 
+// Device token retrieval — no auth needed, bypassed by RestrictToAllowedDevice middleware
+Route::get('/device/get-token', [\App\Http\Controllers\Admin\DeviceController::class, 'getToken'])->name('device.get-token');
+
 // Device activation — no auth needed, bypassed by RestrictToAllowedDevice middleware
 Route::post('/device/activate', [\App\Http\Controllers\Admin\DeviceController::class, 'activate'])->name('device.activate');
 

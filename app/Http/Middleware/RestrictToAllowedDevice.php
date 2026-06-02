@@ -25,6 +25,7 @@ class RestrictToAllowedDevice
      */
     protected array $except = [
         'zoom/webhook',
+        'device/get-token',
         'device/activate',
         'api/zoom-webhook',
     ];

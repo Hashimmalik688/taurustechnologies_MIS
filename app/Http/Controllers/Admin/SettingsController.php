@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\AllowedDevice;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -39,8 +40,9 @@ class SettingsController extends Controller
         $approved = AllowedDevice::where('status', 'approved')->latest()->get();
         $disabled = AllowedDevice::where('status', 'disabled')->latest()->get();
         $rejected = AllowedDevice::where('status', 'rejected')->latest()->get();
+        $users    = User::orderBy('name')->get();  // ← For device user_id assignment
 
-        return view('admin.settings.index', compact('settings', 'pending', 'approved', 'disabled', 'rejected'));
+        return view('admin.settings.index', compact('settings', 'pending', 'approved', 'disabled', 'rejected', 'users'));
     }
 
     public function update(Request $request)

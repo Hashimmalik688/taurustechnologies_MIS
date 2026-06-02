@@ -12,6 +12,7 @@ class AllowedDevice extends Model
         'status',
         'label',
         'name',
+        'user_id',
         'added_by',
         'last_seen_at',
         'last_seen_ip',
@@ -20,6 +21,11 @@ class AllowedDevice extends Model
     protected $casts = [
         'last_seen_at' => 'datetime',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function addedBy(): BelongsTo
     {
