@@ -113,6 +113,7 @@
                         <th>Date</th>
                         <th>PJC</th>
                         <th class="text-center">Status</th>
+                        <th>Comment</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -132,6 +133,7 @@
                                     <span class="s-pill s-transferred">Pending</span>
                                 @endif
                             </td>
+                            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $lead->comments }}">{{ $lead->comments ?? '—' }}</td>
                             <td class="text-center">
                                 <button class="act-btn a-primary" type="button"><i class="bx bx-edit"></i> Fill Form</button>
                             </td>
@@ -181,6 +183,10 @@
                                                 <label class="form-check-label" for="pr_{{ Str::slug($reason) }}_{{ $lead->id }}" style="font-size:.8rem;font-weight:600;">{{ $reason }}</label>
                                             </div>
                                             @endforeach
+                                            <div class="mt-3">
+                                                <label class="form-label" style="font-size:.78rem;font-weight:600;">Comment <span class="text-danger">*</span></label>
+                                                <textarea class="form-control" name="disposition_comment" rows="2" placeholder="Add a comment..." required style="font-size:.8rem;"></textarea>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -210,6 +216,10 @@
                                                 <label class="form-check-label" for="fr_{{ Str::slug($reason) }}_{{ $lead->id }}" style="font-size:.8rem;font-weight:600;">{{ $reason }}</label>
                                             </div>
                                             @endforeach
+                                            <div class="mt-3">
+                                                <label class="form-label" style="font-size:.78rem;font-weight:600;">Comment <span class="text-danger">*</span></label>
+                                                <textarea class="form-control" name="disposition_comment" rows="2" placeholder="Add a comment..." required style="font-size:.8rem;"></textarea>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -248,7 +258,7 @@
                         });
                         </script>
                     @empty
-                        <tr><td colspan="6" class="text-center" style="padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem;">
+                        <tr><td colspan="7" class="text-center" style="padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem;">
                             <i class="bx bx-inbox" style="font-size:1.3rem;display:block;margin-bottom:.3rem;"></i> No pending leads
                         </td></tr>
                     @endforelse
@@ -315,6 +325,7 @@
                         <th>Phone</th>
                         <th>PJC</th>
                         <th class="text-center">Reason</th>
+                        <th>Comment</th>
                         <th>Failed At</th>
                     </tr>
                 </thead>
@@ -333,10 +344,11 @@
                                     @endif
                                 </span>
                             </td>
+                            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $lead->comments }}">{{ $lead->comments ?? '—' }}</td>
                             <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-smile"></i> No failed leads</td></tr>
+                        <tr><td colspan="6" class="text-center" style="padding:1rem;color:var(--bs-surface-400);font-size:.75rem;"><i class="bx bx-smile"></i> No failed leads</td></tr>
                     @endforelse
                 </tbody>
             </table>

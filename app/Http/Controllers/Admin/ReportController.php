@@ -1664,6 +1664,42 @@ class ReportController extends Controller
             ? round(($teamTotals['total_sales'] / $teamTotals['total_leads']) * 100, 1)
             : 0;
 
+        // ── Disposition Counts ──────────────────────────────────
+        $allLeadsForDisp = ($baseQuery)()->select('id', 'status', 'decline_reason', 'pending_reason')->get();
+
+        $dispositionCounts = [];
+        $dispFilters = [
+            'dnq_age'             => fn($l) => str_contains($l->decline_reason ?? '', 'DNQ-Age'),
+            'dnq_health'          => fn($l) => str_contains($l->decline_reason ?? '', 'DNQ-Health'),
+            'dnc'                 => fn($l) => str_contains($l->decline_reason ?? '', 'DNC'),
+            'poa'                 => fn($l) => str_contains($l->decline_reason ?? '', 'POA'),
+            'not_interested'      => fn($l) => str_contains($l->decline_reason ?? '', 'Not Interested') || str_contains($l->decline_reason ?? '', 'No Pitch'),
+            'cannot_afford'       => fn($l) => str_contains($l->decline_reason ?? '', 'Cannot Afford'),
+            'declined_ssn'        => fn($l) => str_contains($l->decline_reason ?? '', 'Declined SSN'),
+            'declined_banking'    => fn($l) => str_contains($l->decline_reason ?? '', 'Declined Banking'),
+            'no_answer'           => fn($l) => str_contains($l->decline_reason ?? '', 'No Answer'),
+            'declined_simple'     => fn($l) => ($l->decline_reason ?? '') === 'Declined',
+            'callback'            => fn($l) => ($l->pending_reason ?? '') === 'Pending:Callback',
+            'future_potential'    => fn($l) => ($l->pending_reason ?? '') === 'Pending:Future Potential',
+            'pending_banking'     => fn($l) => ($l->pending_reason ?? '') === 'Pending:Pending Banking',
+            'pending_validation'  => fn($l) => ($l->pending_reason ?? '') === 'Pending:Pending Validation',
+            'home_office'         => fn($l) => ($l->pending_reason ?? '') === 'Pending:Sent to Home Office',
+            'returned'            => fn($l) => $l->status === Statuses::LEAD_RETURNED,
+        ];
+
+        foreach ($dispFilters as $key => $filter) {
+            $dispositionCounts[$key] = $allLeadsForDisp->filter($filter)->count();
+        }
+
+        // ── All leads detail for modals ──────────────────────────
+        $allLeadsDetail = ($baseQuery)()
+            ->with(['verifier:id,name', 'assignedCloser:id,name', 'assignedValidator:id,name'])
+            ->select('id', 'cn_name', 'monthly_premium', 'coverage_amount', 'status',
+                     'decline_reason', 'pending_reason',
+                     'verified_by', 'account_verified_by', 'managed_by', 'closer_name',
+                     'assigned_validator_id')
+            ->get();
+
         // ── Individual Sales Records ──────────────────────────────
         $salesLeads = Lead::where('team', Teams::PEREGRINE)
             ->whereDate('created_at', '>=', $dateFrom)
@@ -1677,7 +1713,7 @@ class ReportController extends Controller
 
         return view('admin.reports.peregrine-team-report', compact(
             'pjcRows', 'closerRows', 'validatorRows', 'teamTotals',
-            'salesLeads', 'dateFrom', 'dateTo'
+            'salesLeads', 'dateFrom', 'dateTo', 'dispositionCounts', 'allLeadsDetail'
         ));
     }
 }

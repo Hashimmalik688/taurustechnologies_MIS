@@ -195,12 +195,14 @@ class PeregrineController extends Controller
 
         $validated = $request->validate([
             'failure_reason' => ['required', 'in:Failed:POA,Failed:DNQ-Age,Failed:Declined SSN,Failed:Not Interested,Failed:DNC,Failed:Cannot Afford,Failed:DNQ-Health,Failed:Declined Banking,Failed:No Pitch (Not Interested),Failed:No Answer'],
+            'disposition_comment' => ['required', 'string', 'max:1000'],
         ]);
 
         $lead->update([
             'status' => Statuses::LEAD_DECLINED,
             'decline_reason' => $validated['failure_reason'],
             'declined_at' => now(),
+            'comments' => $validated['disposition_comment'],
         ]);
 
         // CRITICAL: Update status on all linked users (Validator and Manager)
@@ -231,6 +233,7 @@ class PeregrineController extends Controller
 
         $validated = $request->validate([
             'pending_reason' => ['required', 'in:Pending:Future Potential,Pending:Callback,Pending:Pending Banking,Pending:Pending Validation'],
+            'disposition_comment' => ['required', 'string', 'max:1000'],
         ]);
 
         // Save all form data without strict validation (partial data allowed)
@@ -262,6 +265,7 @@ class PeregrineController extends Controller
         
         $data['status'] = Statuses::LEAD_PENDING;
         $data['pending_reason'] = $validated['pending_reason'];
+        $data['comments'] = $validated['disposition_comment'];
         
         $lead->update($data);
 

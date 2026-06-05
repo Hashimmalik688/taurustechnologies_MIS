@@ -505,11 +505,16 @@
                                 <strong>Pending:Pending Banking</strong>
                             </label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="pending_reason" id="pendingValidation" value="Pending:Pending Validation" required>
                             <label class="form-check-label" for="pendingValidation">
                                 <strong>Pending:Pending Validation</strong>
                             </label>
+                        </div>
+                        <div class="mb-0">
+                            <label for="pendingComment" class="form-label required">Comment <span class="text-danger">*</span></label>
+                            <textarea class="form-control @error('disposition_comment') is-invalid @enderror" id="pendingComment" name="disposition_comment" rows="3" placeholder="Add a comment about why this lead is being marked as pending..." required></textarea>
+                            @error('disposition_comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -588,11 +593,16 @@
                                 <strong>Failed:No Pitch (Not Interested)</strong>
                             </label>
                         </div>
-                        <div class="form-check mb-2">
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="failure_reason" id="noAnswer" value="Failed:No Answer" required>
                             <label class="form-check-label" for="noAnswer">
                                 <strong>Failed:No Answer</strong>
                             </label>
+                        </div>
+                        <div class="mb-0">
+                            <label for="failedComment" class="form-label required">Comment <span class="text-danger">*</span></label>
+                            <textarea class="form-control @error('disposition_comment') is-invalid @enderror" id="failedComment" name="disposition_comment" rows="3" placeholder="Add a comment about why this lead is being marked as failed..." required></textarea>
+                            @error('disposition_comment')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                     <div class="modal-footer">

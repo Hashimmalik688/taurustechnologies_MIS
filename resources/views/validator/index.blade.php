@@ -111,6 +111,7 @@
                         <th class="text-center">Partner</th>
                         <th class="text-end">Coverage</th>
                         <th>Submitted</th>
+                        <th>Comment</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -130,6 +131,7 @@
                             </td>
                             <td class="text-end">${{ number_format($lead->coverage_amount ?? 0, 0) }}</td>
                             <td style="white-space:nowrap;">{{ $lead->updated_at->setTimezone('America/Los_Angeles')->format('M d, h:i A') }}</td>
+                            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $lead->comments }}">{{ $lead->comments ?? '—' }}</td>
                             <td class="text-center">
                                 <button type="button" class="act-btn a-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ $lead->id }}"><i class="bx bx-edit"></i> Review</button>
                             </td>
@@ -210,7 +212,7 @@
                         }
                         </script>
                     @empty
-                        <tr><td colspan="8" class="text-center" style="padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem;">
+                        <tr><td colspan="9" class="text-center" style="padding:1.5rem;color:var(--bs-surface-400);font-size:.75rem;">
                             <i class="bx bx-inbox" style="font-size:1.3rem;display:block;margin-bottom:.3rem;"></i> No pending leads for validation
                         </td></tr>
                     @endforelse
