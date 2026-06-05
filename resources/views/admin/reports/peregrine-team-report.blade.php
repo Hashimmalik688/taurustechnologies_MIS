@@ -523,28 +523,29 @@
 <script>
 const allLeads = @json($allLeadsDetail);
 
-(function() {
-    var currentDisp = 'all';
+var currentDisp = 'all';
 
-    var dispMatchers = {
-        all:             function() { return true; },
-        dnq_age:         function(l) { return (l.decline_reason || '').indexOf('DNQ-Age') !== -1; },
-        dnq_health:      function(l) { return (l.decline_reason || '').indexOf('DNQ-Health') !== -1; },
-        dnc:             function(l) { return (l.decline_reason || '').indexOf('DNC') !== -1; },
-        poa:             function(l) { return (l.decline_reason || '').indexOf('POA') !== -1; },
-        not_interested:  function(l) { var r = l.decline_reason || ''; return r.indexOf('Not Interested') !== -1 || r.indexOf('No Pitch') !== -1; },
-        cannot_afford:   function(l) { return (l.decline_reason || '').indexOf('Cannot Afford') !== -1; },
-        declined_ssn:    function(l) { return (l.decline_reason || '').indexOf('Declined SSN') !== -1; },
-        declined_banking: function(l) { return (l.decline_reason || '').indexOf('Declined Banking') !== -1; },
-        no_answer:       function(l) { return (l.decline_reason || '').indexOf('No Answer') !== -1; },
-        declined_simple: function(l) { return (l.decline_reason || '') === 'Declined'; },
-        callback:        function(l) { return (l.pending_reason || '') === 'Pending:Callback'; },
-        future_potential: function(l) { return (l.pending_reason || '') === 'Pending:Future Potential'; },
-        pending_banking:  function(l) { return (l.pending_reason || '') === 'Pending:Pending Banking'; },
-        pending_validation: function(l) { return (l.pending_reason || '') === 'Pending:Pending Validation'; },
-        home_office:     function(l) { return (l.pending_reason || '') === 'Pending:Sent to Home Office'; },
-        returned:        function(l) { return l.status === 'returned'; }
-    };
+var dispMatchers = {
+    all:             function() { return true; },
+    dnq_age:         function(l) { return (l.decline_reason || '').indexOf('DNQ-Age') !== -1; },
+    dnq_health:      function(l) { return (l.decline_reason || '').indexOf('DNQ-Health') !== -1; },
+    dnc:             function(l) { return (l.decline_reason || '').indexOf('DNC') !== -1; },
+    poa:             function(l) { return (l.decline_reason || '').indexOf('POA') !== -1; },
+    not_interested:  function(l) { var r = l.decline_reason || ''; return r.indexOf('Not Interested') !== -1 || r.indexOf('No Pitch') !== -1; },
+    cannot_afford:   function(l) { return (l.decline_reason || '').indexOf('Cannot Afford') !== -1; },
+    declined_ssn:    function(l) { return (l.decline_reason || '').indexOf('Declined SSN') !== -1; },
+    declined_banking: function(l) { return (l.decline_reason || '').indexOf('Declined Banking') !== -1; },
+    no_answer:       function(l) { return (l.decline_reason || '').indexOf('No Answer') !== -1; },
+    declined_simple: function(l) { return (l.decline_reason || '') === 'Declined'; },
+    callback:        function(l) { return (l.pending_reason || '') === 'Pending:Callback'; },
+    future_potential: function(l) { return (l.pending_reason || '') === 'Pending:Future Potential'; },
+    pending_banking:  function(l) { return (l.pending_reason || '') === 'Pending:Pending Banking'; },
+    pending_validation: function(l) { return (l.pending_reason || '') === 'Pending:Pending Validation'; },
+    home_office:     function(l) { return (l.pending_reason || '') === 'Pending:Sent to Home Office'; },
+    returned:        function(l) { return l.status === 'returned'; }
+};
+
+(function() {
 
     function filterTables() {
         var matcher = dispMatchers[currentDisp] || dispMatchers['all'];
@@ -642,6 +643,13 @@ function openPersonModal(type, id, name) {
         });
     } else {
         return;
+    }
+
+    if (currentDisp !== 'all') {
+        var matcher = dispMatchers[currentDisp];
+        if (matcher) {
+            leads = leads.filter(matcher);
+        }
     }
 
     var typeLabel = type === 'pjc' ? 'PJC' : type === 'closer' ? 'Closer' : 'Validator';
