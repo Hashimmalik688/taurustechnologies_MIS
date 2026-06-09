@@ -3000,7 +3000,7 @@ function renderMessages(messages) {
             </div>
             ${isSender ? `
             <div class="message-actions">
-                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
+                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'').replace(/"/g, '&quot;')}, ${JSON.stringify((msg.message||'').substring(0,60)).replace(/"/g, '&quot;')})" title="Reply"><i class="bx bx-reply"></i></button>
                 <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
                 <button onclick="startEditMessage(${msg.id}, ${JSON.stringify(msg.message || '').replace(/"/g, '&quot;')})" title="Edit"><i class="bx bx-edit-alt"></i></button>
                 <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
@@ -3008,7 +3008,7 @@ function renderMessages(messages) {
                 <button onclick="deleteMessage(${msg.id})" title="Delete"><i class="bx bx-trash"></i></button>
             </div>` : `
             <div class="message-actions">
-                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'')}, ${JSON.stringify((msg.message||'').substring(0,60))})" title="Reply"><i class="bx bx-reply"></i></button>
+                <button onclick="startReply(${msg.id}, ${JSON.stringify(msg.user?.name||'').replace(/"/g, '&quot;')}, ${JSON.stringify((msg.message||'').substring(0,60)).replace(/"/g, '&quot;')})" title="Reply"><i class="bx bx-reply"></i></button>
                 <button onclick="showReactionPicker(${msg.id}, this)" title="React"><i class="bx bx-smile"></i></button>
                 <button onclick="showForwardPicker(${msg.id})" title="Forward"><i class="bx bx-share"></i></button>
                 <button onclick="togglePin(${msg.id})" title="${msg.is_pinned ? 'Unpin' : 'Pin'}"><i class="bx bx-pin"></i></button>
@@ -3491,6 +3491,12 @@ async function sendMessage() {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true, timeZone:'America/Los_Angeles' }) + ' PT';
 
+    // Capture reply context before cancelReply() clears it
+    const replyBar = document.getElementById('replyContext');
+    const optimisticReplyHtml = (window.replyToId && replyBar)
+        ? `<div class="reply-preview"><div class="reply-preview-text">${escapeHtml(replyBar.querySelector('.reply-context-text')?.textContent || '')}</div></div>`
+        : '';
+
     // Clear input immediately
     input.value = '';
     if (window._chatAutoResizeReset) window._chatAutoResizeReset();
@@ -3508,6 +3514,7 @@ async function sendMessage() {
         tmp.innerHTML = `
             <div class="message-item message-sender" data-optimistic-id="${optimisticId}" style="position:relative;opacity:0.65;">
                 <div class="message-content">
+                    ${optimisticReplyHtml}
                     <div class="message-text">${formatMessageText(optimisticText)}</div>
                     <div class="message-time">${timeStr}<span class="msg-ticks"><i class="bx bx-time-five" style="font-size:.75rem;"></i></span></div>
                 </div>
@@ -3525,20 +3532,23 @@ async function sendMessage() {
                 window.lastRenderedMessageId = msg.id;
             }
 
-            // Update the optimistic element in-place (most reliable)
+            // Replace optimistic element with fully rendered message (includes reply_to preview)
             const optEl = document.querySelector(`[data-optimistic-id="${optimisticId}"]`);
             if (optEl) {
                 // Remove any copy the poll may have race-appended before we responded
                 if (messagesEl) {
                     messagesEl.querySelectorAll(`[data-message-id="${msg.id}"]`).forEach(el => el.remove());
                 }
-                optEl.setAttribute('data-message-id', msg.id);
-                optEl.removeAttribute('data-optimistic-id');
-                optEl.style.opacity = '1';
-                // Replace clock icon with single grey tick + data-ts for read receipt
-                const timeEl = optEl.querySelector('.message-time');
-                if (timeEl) {
-                    timeEl.innerHTML = `${timeStr}<span class="msg-ticks"><i class="bx bx-check"></i></span><span data-ts="${msg.created_at || now.toISOString()}" style="display:none"></span>`;
+                const tmp = document.createElement('div');
+                tmp.innerHTML = renderMessages([msg]);
+                // renderMessages may prepend a date separator; extract just the message-item
+                const msgEl = tmp.querySelector('.message-item');
+                if (msgEl) {
+                    optEl.replaceWith(msgEl);
+                } else {
+                    optEl.setAttribute('data-message-id', msg.id);
+                    optEl.removeAttribute('data-optimistic-id');
+                    optEl.style.opacity = '1';
                 }
             } else if (messagesEl && !messagesEl.querySelector(`[data-message-id="${msg.id}"]`)) {
                 // Optimistic bubble was wiped by a refresh poll — append real message
