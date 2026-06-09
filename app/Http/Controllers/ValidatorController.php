@@ -256,6 +256,7 @@ class ValidatorController extends Controller
             'insurance_carrier_id' => ['nullable', 'exists:insurance_carriers,id'],
             'policy_type' => ['required', 'string', 'max:255'],
             'initial_draft_date' => ['required', 'date'],
+            'future_draft_date' => ['required', 'date'],
             'coverage_amount' => ['required', 'numeric', 'min:0'],
             'monthly_premium' => ['required', 'numeric', 'min:0'],
             'source' => ['nullable', 'string', 'max:255'],

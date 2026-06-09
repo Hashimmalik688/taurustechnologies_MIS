@@ -30,6 +30,7 @@ class AttendanceController extends Controller
         Roles::RETENTION_OFFICER,
         Roles::COORDINATOR,
         Roles::SUPER_ADMIN,
+        Roles::IT_MANAGER,
     ];
 
     public function __construct(AttendanceService $attendanceService)

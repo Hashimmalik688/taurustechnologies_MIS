@@ -40,9 +40,9 @@ class ProfileController extends Controller
             ], 404);
         }
 
-        // Update name if provided
+        // Update display name only — does not touch users.name (used by backend queries)
         if ($request->filled('name')) {
-            $user->name = trim($request->name);
+            $user->display_name = trim($request->name);
         }
 
         // Update email if provided

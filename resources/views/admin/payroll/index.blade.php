@@ -152,6 +152,7 @@
                         <tr>
                             <th>Sr#</th>
                             <th>Employee</th>
+                            <th>Real Name</th>
                             <th>Join Date</th>
                             <th>Basic</th>
                             <th>Per Day</th>
@@ -226,6 +227,7 @@
                         <tr @if($employee->trashed()) style="border-left:3px solid #ef4444;opacity:.85" @endif>
                             <td><strong>{{ $index + 1 }}</strong></td>
                             <td style="text-align:left"><strong style="font-size:.75rem">{{ $employee->name }}</strong>@if($employee->trashed()) <span class="v-badge" style="font-size:.55rem;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.25);margin-left:4px">Terminated</span>@endif</td>
+                            <td style="text-align:left;font-size:.7rem;color:var(--bs-surface-500)">{{ $employee->real_name ?? '—' }}</td>
                             <td style="font-size:.65rem;color:var(--bs-surface-500)">{{ $joinDate }}</td>
                             <td class="amt">{{ number_format($basicSalary, 2) }}</td>
                             <td style="font-size:.65rem;color:var(--bs-surface-500)">{{ number_format($perDayWage, 2) }}</td>
@@ -339,7 +341,7 @@
                             </div>
                         </div>
                         @empty
-                        <tr><td colspan="17" class="text-center" style="padding:2rem;color:var(--bs-surface-500)"><i class="bx bx-inbox" style="font-size:2rem;opacity:.3"></i><br><span style="font-size:.75rem">No employees found</span></td></tr>
+                        <tr><td colspan="18" class="text-center" style="padding:2rem;color:var(--bs-surface-500)"><i class="bx bx-inbox" style="font-size:2rem;opacity:.3"></i><br><span style="font-size:.75rem">No employees found</span></td></tr>
                         @endforelse
 
                         {{-- Manual Entries --}}
@@ -363,6 +365,7 @@
                         <tr style="border-left:3px solid #f59e0b">
                             <td>{{ $employees->count() + $loop->iteration }}</td>
                             <td style="text-align:left"><strong style="font-size:.75rem">{{ $entry->employee_name }}</strong> <span class="v-badge" style="font-size:.55rem;background:rgba(245,158,11,.1);color:#f59e0b">M</span></td>
+                            <td></td>
                             <td style="font-size:.65rem;color:var(--bs-surface-500)">{{ $joinDate }}</td>
                             <td class="amt">{{ number_format($basicSalary, 2) }}</td>
                             <td style="font-size:.65rem;color:var(--bs-surface-500)">{{ number_format($perDayWage, 2) }}</td>
@@ -435,7 +438,7 @@
                     @if($employees->isNotEmpty() || $manualEntries->isNotEmpty())
                     <tfoot>
                         <tr style="font-weight:700;font-size:.75rem">
-                            <td colspan="3" style="text-align:right;padding-right:.5rem">TOTAL:</td>
+                            <td colspan="4" style="text-align:right;padding-right:.5rem">TOTAL:</td>
                             <td class="amt">{{ number_format($totalBasicSalary, 2) }}</td>
                             <td></td>
                             <td class="amt">{{ number_format($totalPunctuality, 2) }}</td>

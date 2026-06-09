@@ -122,7 +122,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Name</th>
+                        <th>Real Name</th>
                         <th>Phone</th>
                         <th>Email</th>
                         <th>Password</th>
@@ -200,15 +200,19 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:.6rem"></button>
                     </div>
-                    <form class="edit-user-form" data-user-id="{{ $user->id }}" data-update-url="{{ route('users.update', $user->id) }}" method="POST">
+                    <form class="edit-user-form" data-user-id="{{ $user->id }}" data-update-url="{{ route('users.update', $user->id) }}" method="POST" onsubmit="return false;">
                         @csrf
                         @method('PUT')
                         <div class="modal-body" style="max-height:70vh;overflow-y:auto;padding:1rem 1.25rem">
                             <div class="ajax-form-msg" style="display:none;margin-bottom:.75rem"></div>
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
                                 <div>
-                                    <label class="f-label">Name</label>
+                                    <label class="f-label">System Name <small style="font-weight:400;color:#888">(login / pseudo name)</small></label>
                                     <input type="text" class="f-input" name="name" value="{{ $user->name }}" required>
+                                </div>
+                                <div>
+                                    <label class="f-label">Real Name <small style="font-weight:400;color:#888">(shown in payroll)</small></label>
+                                    <input type="text" class="f-input" name="real_name" value="{{ $user->real_name ?? '' }}" placeholder="Legal / full name">
                                 </div>
                                 <div>
                                     <label class="f-label">Email</label>
@@ -308,7 +312,7 @@
                                 </div>
                                 <div>
                                     <label class="f-label">Date of Birth</label>
-                                    <input type="text" class="f-input sl-pill-date" name="dob" value="{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('Y-m-d') : '' }}" placeholder="Select date">
+                                    <input type="date" class="f-input" name="dob" value="{{ $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('Y-m-d') : '' }}">
                                 </div>
                                 <div>
                                     <label class="f-label">Gender</label>
@@ -321,7 +325,7 @@
                                 </div>
                                 <div>
                                     <label class="f-label">Join Date</label>
-                                    <input type="text" class="f-input sl-pill-date" name="join_date" value="{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('Y-m-d') : '' }}" placeholder="Select date">
+                                    <input type="date" class="f-input" name="join_date" value="{{ $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('Y-m-d') : '' }}">
                                 </div>
                                 <div>
                                     <label class="f-label">City</label>

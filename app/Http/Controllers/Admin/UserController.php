@@ -137,6 +137,7 @@ class UserController extends Controller
 
         // Update user basic info
         $user->name = $request->name;
+        $user->real_name = $request->real_name ?? null;
         $user->email = strtolower($request->email); // Convert to lowercase
         $user->zoom_number = $request->zoom_number;
         $user->zoom_user_id = $request->zoom_user_id;

@@ -24,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'display_name',
+        'real_name',
         'email',
         'password',
         'is_partner', // Flag for legacy partner records (should not be used for new partners)

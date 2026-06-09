@@ -866,14 +866,14 @@
                         <!-- Avatar Preview -->
                         <div class="text-center mb-3">
                             @if(Auth::user()->avatar)
- <img class="rounded-circle u-obj-cover" src="{{ Auth::user()->avatar }}" id="avatarPreview" alt="{{ Auth::user()->name }}" style="width: 100px; height: 100px">
+ <img class="rounded-circle u-obj-cover" src="{{ Auth::user()->avatar }}" id="avatarPreview" alt="{{ Auth::user()->display_name ?? Auth::user()->name }}" style="width: 100px; height: 100px">
                             @else
  <div class="rounded-circle d-inline-flex align-items-center justify-content-center u-fw-700 u-w-100 u-fs-250 bg-gold text-surface-700" id="avatarPreview" style="height: 100px">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                    {{ substr(Auth::user()->display_name ?? Auth::user()->name, 0, 1) }}
                                 </div>
                             @endif
                         </div>
-                        
+
                         <!-- Avatar Upload -->
                         <div class="mb-3">
                             <label for="avatar" class="form-label">Profile Picture</label>
@@ -884,8 +884,9 @@
 
                         <!-- Name -->
                         <div class="mb-3">
-                            <label for="profile-name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="profile-name" name="name" value="{{ Auth::user()->name }}" required>
+                            <label for="profile-name" class="form-label">Display Name</label>
+                            <input type="text" class="form-control" id="profile-name" name="name" value="{{ Auth::user()->display_name ?? Auth::user()->name }}" required>
+                            <div class="form-text">This name is shown only in your profile. It does not affect your account in other parts of the system.</div>
                             <span class="text-danger" id="nameError"></span>
                         </div>
 

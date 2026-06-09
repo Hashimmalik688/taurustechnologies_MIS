@@ -21,7 +21,7 @@ class EmployeeController extends Controller
         $this->middleware(function ($request, $next) {
             $user = auth()->user();
             \Log::debug('EMS: middleware user', ['user' => $user ? $user->email : null, 'roles' => $user ? $user->getRoleNames() : null]);
-            if (!$user->hasAnyRole([Roles::CEO, Roles::SUPER_ADMIN, Roles::HR, Roles::COORDINATOR, Roles::MANAGER])) {
+            if (!$user->canViewModule('ems')) {
                 \Log::debug('EMS: aborting 403 for user', ['user' => $user ? $user->email : null]);
                 abort(403, 'Unauthorized action.');
             }

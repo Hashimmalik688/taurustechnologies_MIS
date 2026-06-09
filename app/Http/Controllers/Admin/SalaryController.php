@@ -1410,7 +1410,7 @@ class SalaryController extends Controller
             $sheet->setCellValue('A1', 'TAURUS TECHNOLOGIES');
             $sheet->setCellValue('A2', 'Payroll Report — ' . $periodLabel);
             $sheet->setCellValue('A3', 'Generated: ' . now()->format('d M Y h:i A') . '   |   By: ' . Auth::user()->name);
-            foreach (['A1:P1', 'A2:P2', 'A3:P3'] as $merge) {
+            foreach (['A1:Q1', 'A2:Q2', 'A3:Q3'] as $merge) {
                 $sheet->mergeCells($merge);
             }
             $sheet->getStyle('A1')->applyFromArray([
@@ -1434,16 +1434,16 @@ class SalaryController extends Controller
             // Header row
             $headerRow = 5;
             $headers = [
-                'A' => 'Sr#',      'B' => 'Employee Name', 'C' => 'Join Date',
-                'D' => 'Basic Salary', 'E' => 'Per Day Wage', 'F' => 'Punctuality',
-                'G' => 'Total',    'H' => 'Full Days',    'I' => 'Half Days',
-                'J' => 'Late Days','K' => 'Qualified',    'L' => 'Dock',
-                'M' => 'Deductions','N' => 'Net Salary',  'O' => 'Advance', 'P' => 'Payable',
+                'A' => 'Sr#',      'B' => 'Employee Name', 'C' => 'Real Name', 'D' => 'Join Date',
+                'E' => 'Basic Salary', 'F' => 'Per Day Wage', 'G' => 'Punctuality',
+                'H' => 'Total',    'I' => 'Full Days',    'J' => 'Half Days',
+                'K' => 'Late Days','L' => 'Qualified',    'M' => 'Dock',
+                'N' => 'Deductions','O' => 'Net Salary',  'P' => 'Advance', 'Q' => 'Payable',
             ];
             foreach ($headers as $col => $label) {
                 $sheet->setCellValue($col . $headerRow, $label);
             }
-            $sheet->getStyle('A' . $headerRow . ':P' . $headerRow)->applyFromArray([
+            $sheet->getStyle('A' . $headerRow . ':Q' . $headerRow)->applyFromArray([
                 'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
                 'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '2D2D3F']],
                 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -1457,36 +1457,38 @@ class SalaryController extends Controller
             // Data rows
             $numFmt   = '#,##0.00';
             $currRow  = $headerRow + 1;
-            $currCols = ['D', 'E', 'F', 'G', 'L', 'M', 'N', 'O', 'P'];
-            $ctrCols  = ['A', 'C', 'H', 'I', 'J', 'K'];
+            $currCols = ['E', 'F', 'G', 'H', 'M', 'N', 'O', 'P', 'Q'];
+            $ctrCols  = ['A', 'D', 'I', 'J', 'K', 'L'];
 
             foreach ($payrollData as $i => $row) {
                 $bgColor  = ($i % 2 === 0) ? 'FFFFFF' : 'F8F9FA';
                 $isManual = isset($row['isManual']) && $row['isManual'];
-                $name     = $isManual ? ($row['employeeName'] . ' [MANUAL]') : $row['employee']->name;
-                if (!$isManual && !empty($row['isTerminated'])) $name .= ' [TERMINATED]';
+                $displayName = $isManual ? ($row['employeeName'] . ' [MANUAL]') : $row['employee']->name;
+                $realName    = $isManual ? '' : ($row['employee']->real_name ?? '');
+                if (!$isManual && !empty($row['isTerminated'])) { $displayName .= ' [TERMINATED]'; }
 
                 $sheet->setCellValue('A' . $currRow, $i + 1);
-                $sheet->setCellValue('B' . $currRow, $name);
-                $sheet->setCellValue('C' . $currRow, $row['joinDate']);
-                $sheet->setCellValue('D' . $currRow, $row['basicSalary']);
-                $sheet->setCellValue('E' . $currRow, $row['perDayWage']);
-                $sheet->setCellValue('F' . $currRow, $row['punctualityBonus']);
-                $sheet->setCellValue('G' . $currRow, $row['total']);
-                $sheet->setCellValue('H' . $currRow, $row['fullDays']);
-                $sheet->setCellValue('I' . $currRow, $row['halfDays']);
-                $sheet->setCellValue('J' . $currRow, $row['lateDays']);
-                $sheet->setCellValue('K' . $currRow, $row['isQualified'] ? 'Yes' : 'No');
-                $sheet->setCellValue('L' . $currRow, $row['dockAmount']);
-                $sheet->setCellValue('M' . $currRow, $row['otherDeductions']);
-                $sheet->setCellValue('N' . $currRow, $row['netSalary']);
-                $sheet->setCellValue('O' . $currRow, $row['advance']);
-                $sheet->setCellValue('P' . $currRow, $row['payable']);
+                $sheet->setCellValue('B' . $currRow, $displayName);
+                $sheet->setCellValue('C' . $currRow, $realName);
+                $sheet->setCellValue('D' . $currRow, $row['joinDate']);
+                $sheet->setCellValue('E' . $currRow, $row['basicSalary']);
+                $sheet->setCellValue('F' . $currRow, $row['perDayWage']);
+                $sheet->setCellValue('G' . $currRow, $row['punctualityBonus']);
+                $sheet->setCellValue('H' . $currRow, $row['total']);
+                $sheet->setCellValue('I' . $currRow, $row['fullDays']);
+                $sheet->setCellValue('J' . $currRow, $row['halfDays']);
+                $sheet->setCellValue('K' . $currRow, $row['lateDays']);
+                $sheet->setCellValue('L' . $currRow, $row['isQualified'] ? 'Yes' : 'No');
+                $sheet->setCellValue('M' . $currRow, $row['dockAmount']);
+                $sheet->setCellValue('N' . $currRow, $row['otherDeductions']);
+                $sheet->setCellValue('O' . $currRow, $row['netSalary']);
+                $sheet->setCellValue('P' . $currRow, $row['advance']);
+                $sheet->setCellValue('Q' . $currRow, $row['payable']);
 
                 foreach ($currCols as $col) {
                     $sheet->getStyle($col . $currRow)->getNumberFormat()->setFormatCode($numFmt);
                 }
-                $sheet->getStyle('A' . $currRow . ':P' . $currRow)->applyFromArray([
+                $sheet->getStyle('A' . $currRow . ':Q' . $currRow)->applyFromArray([
                     'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $bgColor]],
                     'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
                                                    'color'       => ['rgb' => 'ADB5BD']]],
@@ -1499,31 +1501,31 @@ class SalaryController extends Controller
             }
 
             // Totals row
-            $sheet->setCellValue('C' . $currRow, 'TOTALS');
-            $sheet->setCellValue('D' . $currRow, $totalBasicSalary);
-            $sheet->setCellValue('F' . $currRow, $totalPunctuality);
-            $sheet->setCellValue('G' . $currRow, $totalTotal);
-            $sheet->setCellValue('L' . $currRow, $totalDock);
-            $sheet->setCellValue('M' . $currRow, $totalDeductions - $totalDock);
-            $sheet->setCellValue('N' . $currRow, $totalNetSalary);
-            $sheet->setCellValue('O' . $currRow, $totalAdvance);
-            $sheet->setCellValue('P' . $currRow, $totalPayable);
-            $sheet->getStyle('A' . $currRow . ':P' . $currRow)->applyFromArray([
+            $sheet->setCellValue('D' . $currRow, 'TOTALS');
+            $sheet->setCellValue('E' . $currRow, $totalBasicSalary);
+            $sheet->setCellValue('G' . $currRow, $totalPunctuality);
+            $sheet->setCellValue('H' . $currRow, $totalTotal);
+            $sheet->setCellValue('M' . $currRow, $totalDock);
+            $sheet->setCellValue('N' . $currRow, $totalDeductions - $totalDock);
+            $sheet->setCellValue('O' . $currRow, $totalNetSalary);
+            $sheet->setCellValue('P' . $currRow, $totalAdvance);
+            $sheet->setCellValue('Q' . $currRow, $totalPayable);
+            $sheet->getStyle('A' . $currRow . ':Q' . $currRow)->applyFromArray([
                 'font'    => ['bold' => true],
                 'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E9ECEF']],
                 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
                                                'color'       => ['rgb' => '1A1A2E']]],
             ]);
-            $sheet->getStyle('C' . $currRow)->getAlignment()
+            $sheet->getStyle('D' . $currRow)->getAlignment()
                   ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-            foreach (['D', 'F', 'G', 'L', 'M', 'N', 'O', 'P'] as $col) {
+            foreach (['E', 'G', 'H', 'M', 'N', 'O', 'P', 'Q'] as $col) {
                 $sheet->getStyle($col . $currRow)->getNumberFormat()->setFormatCode($numFmt);
             }
             $currRow += 2;
 
             // Summary section
             $sheet->setCellValue('A' . $currRow, 'PAYROLL SUMMARY');
-            $sheet->mergeCells('A' . $currRow . ':P' . $currRow);
+            $sheet->mergeCells('A' . $currRow . ':Q' . $currRow);
             $sheet->getStyle('A' . $currRow)->applyFromArray([
                 'font'      => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                 'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '1A1A2E']],
@@ -1553,9 +1555,9 @@ class SalaryController extends Controller
 
             // Column widths & freeze
             $colWidths = [
-                'A' => 5, 'B' => 28, 'C' => 13, 'D' => 13, 'E' => 12,
-                'F' => 12, 'G' => 13, 'H' => 9,  'I' => 9,  'J' => 9,
-                'K' => 9, 'L' => 11, 'M' => 11,  'N' => 13, 'O' => 11, 'P' => 13,
+                'A' => 5, 'B' => 26, 'C' => 22, 'D' => 13, 'E' => 13, 'F' => 12,
+                'G' => 12, 'H' => 13, 'I' => 9,  'J' => 9,  'K' => 9,
+                'L' => 9, 'M' => 11, 'N' => 11,  'O' => 13, 'P' => 11, 'Q' => 13,
             ];
             foreach ($colWidths as $col => $width) {
                 $sheet->getColumnDimension($col)->setWidth($width);

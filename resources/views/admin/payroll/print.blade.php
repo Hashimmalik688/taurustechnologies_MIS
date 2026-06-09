@@ -104,6 +104,7 @@
             <tr>
                 <th style="width:25px">Sr#</th>
                 <th>Employee Name</th>
+                <th>Real Name</th>
                 <th>Join Date</th>
                 <th>Basic Salary</th>
                 <th>Per Day Wage</th>
@@ -135,6 +136,13 @@
                             @endif
                         @endif
                     </td>
+                    <td class="employee-name" style="color:#555">
+                        @if(isset($data['isManual']) && $data['isManual'])
+                            —
+                        @else
+                            {{ $data['employee']->real_name ?? '—' }}
+                        @endif
+                    </td>
                     <td class="text-center">{{ $data['joinDate'] }}</td>
                     <td class="number">{{ number_format($data['basicSalary'], 2) }}</td>
                     <td class="number">{{ number_format($data['perDayWage'], 2) }}</td>
@@ -156,7 +164,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="16" class="text-center" style="padding:20px">
+                    <td colspan="17" class="text-center" style="padding:20px">
                         <strong>No active employees found for the selected period</strong>
                     </td>
                 </tr>
@@ -164,7 +172,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" class="text-end" style="padding:8px 5px"><strong>TOTALS:</strong></td>
+                <td colspan="4" class="text-end" style="padding:8px 5px"><strong>TOTALS:</strong></td>
                 <td class="number"><strong>{{ number_format($totalBasicSalary, 2) }}</strong></td>
                 <td class="text-center">-</td>
                 <td class="number"><strong>{{ number_format($totalPunctuality, 2) }}</strong></td>

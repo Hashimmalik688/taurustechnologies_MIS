@@ -5,15 +5,15 @@
     <div class="sidebar-profile" id="sidebarProfile">
         <div class="sidebar-avatar-wrapper" onclick="toggleProfileDropdown(event)">
             @if(Auth::user()->avatar)
-                <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="sidebar-avatar">
+                <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->display_name ?? Auth::user()->name }}" class="sidebar-avatar">
             @else
                 <div class="sidebar-avatar sidebar-avatar-initial">
-                    {{ substr(Auth::user()->name, 0, 1) }}
+                    {{ substr(Auth::user()->display_name ?? Auth::user()->name, 0, 1) }}
                 </div>
             @endif
         </div>
         <div class="sidebar-profile-info">
-            <span class="sidebar-profile-name">{{ Auth::user()->name }}</span>
+            <span class="sidebar-profile-name">{{ Auth::user()->display_name ?? Auth::user()->name }}</span>
             <span class="sidebar-profile-role">{{ Auth::user()->roles->first()?->name ?? 'User' }}</span>
         </div>
         <!-- Profile Dropdown -->
@@ -21,13 +21,13 @@
             <div class="profile-dropdown-header">
                 <div class="profile-dropdown-avatar">
                     @if(Auth::user()->avatar)
-                        <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                        <img src="{{ asset(Auth::user()->avatar) }}" alt="{{ Auth::user()->display_name ?? Auth::user()->name }}">
                     @else
-                        <div class="avatar-initial">{{ substr(Auth::user()->name, 0, 1) }}</div>
+                        <div class="avatar-initial">{{ substr(Auth::user()->display_name ?? Auth::user()->name, 0, 1) }}</div>
                     @endif
                 </div>
                 <div class="profile-dropdown-info">
-                    <span class="profile-dropdown-name">{{ Auth::user()->name }}</span>
+                    <span class="profile-dropdown-name">{{ Auth::user()->display_name ?? Auth::user()->name }}</span>
                     <span class="profile-dropdown-email">{{ Auth::user()->email }}</span>
                 </div>
             </div>
