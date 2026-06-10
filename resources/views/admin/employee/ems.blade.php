@@ -157,7 +157,7 @@
                         <table id="employeeTable" class="ex-tbl">
                             <thead>
                                 <tr>
-                                    <th>Sr#</th><th>Name</th><th>Email</th><th>DOB</th><th>Join Date</th>
+                                    <th>Sr#</th><th>Name</th><th>Real Name</th><th>Email</th><th>DOB</th><th>Join Date</th>
                                     <th>Contact</th><th>Emergency</th><th>CNIC</th><th>Position</th>
                                     <th>Residence</th><th>Status</th><th>MIS</th><th>Photo</th><th>Actions</th>
                                 </tr>
@@ -166,12 +166,14 @@
                                 @forelse($activeEmployees as $i => $emp)
                                 @php
                                     $user = \App\Models\User::withTrashed()->where('email', $emp->email)->first();
+                                    $realName = $user->real_name ?? null;
                                     $dob = $user && $user->userDetail && $user->userDetail->dob ? \Carbon\Carbon::parse($user->userDetail->dob)->format('d M Y') : 'N/A';
                                     $joinDate = $user && $user->userDetail && $user->userDetail->join_date ? \Carbon\Carbon::parse($user->userDetail->join_date)->format('d M Y') : 'N/A';
                                 @endphp
                                 <tr>
                                     <td><strong>{{ $i+1 }}</strong></td>
                                     <td><strong>{{ $emp->name }}</strong></td>
+                                    <td>{{ $realName ?? '—' }}</td>
                                     <td><a href="mailto:{{ $emp->email }}" style="color:#556ee6;text-decoration:none;font-size:.72rem">{{ $emp->email }}</a></td>
                                     <td>{{ $dob }}</td>
                                     <td>{{ $joinDate }}</td>
@@ -222,7 +224,7 @@
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="14" class="text-center py-5">
+                                <tr><td colspan="15" class="text-center py-5">
                                     <i class="bx bx-inbox" style="font-size:2rem;color:#d4af37;opacity:.5"></i>
                                     <h6 class="mt-2 text-muted" style="font-size:.82rem">No Active Employees</h6>
                                 </td></tr>
@@ -240,13 +242,18 @@
                     <div class="table-responsive">
                         <table id="terminatedTable" class="ex-tbl">
                             <thead>
-                                <tr><th>Sr#</th><th>Name</th><th>Email</th><th>Contact</th><th>CNIC</th><th>Position</th><th>DOT</th><th>MIS</th><th>Photo</th><th>Actions</th></tr>
+                                <tr><th>Sr#</th><th>Name</th><th>Real Name</th><th>Email</th><th>Contact</th><th>CNIC</th><th>Position</th><th>DOT</th><th>MIS</th><th>Photo</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
                                 @forelse($terminatedEmployees as $i => $emp)
+                                @php
+                                    $termUser = \App\Models\User::withTrashed()->where('email', $emp->email)->first();
+                                    $termRealName = $termUser->real_name ?? null;
+                                @endphp
                                 <tr>
                                     <td><strong>{{ $loop->iteration }}</strong></td>
                                     <td><strong>{{ $emp->name }}</strong></td>
+                                    <td>{{ $termRealName ?? '—' }}</td>
                                     <td><a href="mailto:{{ $emp->email }}" style="color:#556ee6;text-decoration:none;font-size:.72rem">{{ $emp->email }}</a></td>
                                     <td>{{ $emp->contact_info }}</td>
                                     <td>{{ $emp->cnic }}</td>
@@ -276,7 +283,7 @@
                                     </td>
                                 </tr>
                                 @empty
-                                <tr><td colspan="10" class="text-center py-5">
+                                <tr><td colspan="11" class="text-center py-5">
                                     <i class="bx bx-check-circle" style="font-size:2rem;color:#1a8754;opacity:.5"></i>
                                     <h6 class="mt-2 text-muted" style="font-size:.82rem">No Terminated Employees</h6>
                                 </td></tr>
@@ -428,7 +435,7 @@ $(document).ready(function() {
         $('#employeeTable').DataTable({
             responsive: false, pageLength: 25, order: [[0, 'asc']],
             language: { search: "_INPUT_", searchPlaceholder: "Search employees...", lengthMenu: "Show _MENU_ employees per page", info: "Showing _START_ to _END_ of _TOTAL_", infoEmpty: "No employees", infoFiltered: "(filtered from _MAX_)" },
-            columnDefs: [{ orderable: false, targets: [10, 11, 12, 13] }]
+            columnDefs: [{ orderable: false, targets: [11, 12, 13, 14] }]
         });
     }
 
@@ -445,7 +452,7 @@ $(document).ready(function() {
             $('#terminatedTable').DataTable({
                 responsive: false, pageLength: 25, order: [[0, 'asc']],
                 language: { search: "_INPUT_", searchPlaceholder: "Search terminated...", lengthMenu: "Show _MENU_ per page", info: "Showing _START_ to _END_ of _TOTAL_", infoEmpty: "None", infoFiltered: "(filtered from _MAX_)" },
-                columnDefs: [{ orderable: false, targets: [7, 8, 9] }]
+                columnDefs: [{ orderable: false, targets: [8, 9, 10] }]
             });
         }
     });

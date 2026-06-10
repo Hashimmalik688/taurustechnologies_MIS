@@ -446,11 +446,11 @@
         <label class="form-label required">Follow Up Required</label>
         <select class="form-select followup-required-select" name="followup_required" required>
             <option value="">Select option...</option>
-            <option value="1" {{ old('followup_required', $lead->followup_required ?? '') == '1' ? 'selected' : '' }}>Yes</option>
+            <option value="1" {{ old('followup_required', $lead->followup_required ?? '1') == '1' ? 'selected' : '' }}>Yes</option>
             <option value="0" {{ old('followup_required', $lead->followup_required ?? '') === '0' || old('followup_required', $lead->followup_required ?? '') === 0 ? 'selected' : '' }}>No</option>
         </select>
     </div>
-    <div class="col-md-12 followup-schedule-fields d-none">
+    <div class="col-md-12 followup-schedule-fields">
         <label class="form-label required">Follow Up Date & Time</label>
         <input type="datetime-local" class="form-control followup-scheduled-at" name="followup_scheduled_at" value="{{ old('followup_scheduled_at', $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '') }}">
         <small class="text-muted">When should the follow-up call be scheduled?</small>
@@ -459,7 +459,6 @@
 
 <script>
 (function() {
-    // Scope to the last rendered select on the page (this include's instance)
     var selects = document.querySelectorAll('.followup-required-select');
     var sel = selects[selects.length - 1];
     var wrapper = sel.closest('.row').querySelector('.followup-schedule-fields');
@@ -467,10 +466,10 @@
 
     function toggleFollowupFields() {
         if (sel.value === '1') {
-            wrapper.classList.remove('d-none');
+            wrapper.style.display = '';
             input.setAttribute('required', 'required');
         } else {
-            wrapper.classList.add('d-none');
+            wrapper.style.display = 'none';
             input.removeAttribute('required');
         }
     }

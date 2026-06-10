@@ -400,6 +400,50 @@
 </div>
 
 
+{{-- ═══════════════════════════════════════════
+     DOWNLINE AGENTS
+═══════════════════════════════════════════ --}}
+@if($downlineAgents->isNotEmpty())
+<div class="pd-card pd-anim pd-d4" style="margin-top:1rem;">
+    <div class="pd-head">
+        <h6><i class="bx bx-user-voice"></i> Downline Agents</h6>
+        <span class="pd-count">{{ $downlineAgents->count() }} agent{{ $downlineAgents->count() > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="pd-body np">
+        <table class="pd-table">
+            <thead>
+                <tr>
+                    <th>Agent</th>
+                    <th>Status</th>
+                    <th>Total Sales</th>
+                    <th>Issued</th>
+                    <th>Period Sales</th>
+                    <th>Period Comm</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($downlineAgents as $agent)
+                <tr>
+                    <td style="font-weight:700">
+                        <i class="bx bx-user" style="color:#6d28d9;margin-right:.35rem"></i>
+                        {{ $agent['name'] }}
+                        <span style="font-size:.62rem;color:#9ca3af;margin-left:.3rem">{{ $agent['code'] }}</span>
+                    </td>
+                    <td>
+                        <span class="sc sc-{{ $agent['is_active'] ? 'ok' : 'danger' }}">{{ $agent['is_active'] ? 'Active' : 'Inactive' }}</span>
+                    </td>
+                    <td>{{ $agent['total_sales'] }}</td>
+                    <td>{{ $agent['issued_sales'] }}</td>
+                    <td>{{ $agent['period_sales'] }}</td>
+                    <td style="font-weight:700;color:var(--pd-green)">${{ number_format($agent['period_commission'], 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
+
 {{-- Quick links to the split-out sections --}}
 <div class="row g-3 pd-anim pd-d4" style="margin-top:1rem;">
     <div class="col-md-4">

@@ -35,6 +35,11 @@ class PartnerDashboardController extends Controller
     {
         $partner = Auth::guard('partner')->user();
 
+        // ── Agent routing: agents get a simplified dashboard ──
+        if ($partner->type === 'agent') {
+            return $this->agentDashboard($partner);
+        }
+
         // Get period filter
         $month = $request->get('month', Carbon::now()->format('Y-m'));
         $dateFrom = $request->get('date_from');
@@ -87,6 +92,25 @@ class PartnerDashboardController extends Controller
         // ── Carriers list for filter pills ─────────────────────────────
         $activeCarriers = $this->revenueService->getActiveCarriers();
 
+        // ── Downline agent summary ─────────────────────────────────────
+        $downlineAgents = $partner->agents()->get()->map(function ($agent) use ($periodStart, $periodEnd) {
+            $leads = Lead::where('partner_id', $agent->id)
+                ->whereNotNull('pending_contract_at');
+            return [
+                'id'         => $agent->id,
+                'name'       => $agent->name,
+                'code'       => $agent->code,
+                'is_active'  => $agent->is_active,
+                'total_sales'   => (clone $leads)->count(),
+                'issued_sales'   => (clone $leads)->where('issuance_status', 'Issued')->count(),
+                'period_sales'   => (clone $leads)->whereBetween('sale_date', [$periodStart, $periodEnd])->count(),
+                'period_commission' => Lead::where('partner_id', $agent->id)
+                    ->whereNotNull('pending_contract_at')
+                    ->whereBetween('sale_date', [$periodStart, $periodEnd])
+                    ->sum('agent_commission'),
+            ];
+        });
+
         return view('partner.dashboard-advanced', compact(
             'partner',
             'activeCarriers',
@@ -104,7 +128,87 @@ class PartnerDashboardController extends Controller
             'partnerEarnedShare',
             'partnerProjectedShare',
             'currentBalance',
-            'month'
+            'month',
+            'downlineAgents'
+        ));
+    }
+
+    /**
+     * Agent-specific simplified dashboard
+     */
+    protected function agentDashboard($agent)
+    {
+        $upline = $agent->parent;
+        if (!$upline) {
+            $upline = new \stdClass();
+            $upline->name = 'N/A';
+        }
+
+        // Agent's carrier states
+        $agentCarriers = AgentCarrierState::where('partner_id', $agent->id)
+            ->with('insuranceCarrier')
+            ->get()
+            ->groupBy('insurance_carrier_id')
+            ->map(function ($states) {
+                $first = $states->first();
+                return [
+                    'carrier'               => $first->insuranceCarrier,
+                    'states'                => $states->pluck('state')->sort()->values()->toArray(),
+                    'state_count'           => $states->count(),
+                ];
+            });
+        $carrierCount = $agentCarriers->count();
+        $stateCount = AgentCarrierState::where('partner_id', $agent->id)->count();
+
+        // Agent's leads
+        $myLeads = Lead::where('partner_id', $agent->id)
+            ->whereNotNull('pending_contract_at')
+            ->with('insuranceCarrier')
+            ->orderBy('sale_date', 'desc')
+            ->take(50)
+            ->get();
+
+        $commSvc = new CommissionCalculationService();
+        $totalCommission = 0;
+        foreach ($myLeads as $lead) {
+            $premiumVal    = (float) ($lead->monthly_premium ?? 0);
+            $lCarrierId    = $lead->insurance_carrier_id;
+            $lState        = $lead->state;
+            $lSettlement   = CommissionCalculationService::normalizeSettlementType(
+                $lead->settlement_type ?? $lead->policy_type
+            );
+            if ($premiumVal > 0 && $lCarrierId && $lState) {
+                $result = $commSvc->calculateCommission(
+                    $agent->id,
+                    $lCarrierId,
+                    $lState,
+                    $lSettlement,
+                    $premiumVal
+                );
+                if ($result['success']) {
+                    $lead->agent_commission = $result['commission'];
+                    $totalCommission += $result['commission'];
+                }
+            }
+        }
+
+        $totalSales   = Lead::where('partner_id', $agent->id)->whereNotNull('pending_contract_at')->count();
+        $pendingSales = Lead::where('partner_id', $agent->id)
+            ->whereNotNull('pending_contract_at')
+            ->where(function ($q) {
+                $q->whereNull('issuance_status')->orWhere('issuance_status', 'Pending');
+            })->count();
+
+        return view('partner.agent-dashboard', compact(
+            'agent',
+            'upline',
+            'agentCarriers',
+            'carrierCount',
+            'stateCount',
+            'myLeads',
+            'totalSales',
+            'pendingSales',
+            'totalCommission'
         ));
     }
 

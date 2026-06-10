@@ -16,6 +16,8 @@ class Partner extends Authenticatable
         'password',
         'is_active',
         'our_commission_percentage',
+        'parent_partner_id',
+        'type',
     ];
 
     protected $hidden = [
@@ -46,5 +48,37 @@ class Partner extends Authenticatable
             'partner_id',
             'insurance_carrier_id'
         )->distinct();
+    }
+
+    /**
+     * Parent partner (upline)
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Partner::class, 'parent_partner_id');
+    }
+
+    /**
+     * Child agents (downline)
+     */
+    public function agents()
+    {
+        return $this->hasMany(Partner::class, 'parent_partner_id');
+    }
+
+    /**
+     * Scope: only partner-type (not agents)
+     */
+    public function scopePartners($query)
+    {
+        return $query->where('type', 'partner');
+    }
+
+    /**
+     * Scope: only agent-type
+     */
+    public function scopeAgents($query)
+    {
+        return $query->where('type', 'agent');
     }
 }

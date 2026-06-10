@@ -195,8 +195,13 @@
 
             <div id="carrier-states-container">
                 @foreach($insuranceCarriers as $carrier)
-                    <div class="ap-carrier-sec">
-                        <h6><i class="bx bx-shield-quarter"></i> {{ $carrier->name }}</h6>
+                    <div class="ap-carrier-sec" id="carrier-state-section-{{ $carrier->id }}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <h6 style="margin:0"><i class="bx bx-shield-quarter"></i> {{ $carrier->name }}</h6>
+                            <button type="button" class="cs-copy-btn" onclick="copyStatesFromCreate({{ $carrier->id }})" title="Copy states from another carrier">
+                                <i class="bx bx-copy"></i> Copy from
+                            </button>
+                        </div>
 
                         <div class="mb-2">
                             <label class="ap-label">Select States</label>
@@ -278,5 +283,39 @@ $(document).ready(function() {
         }
     });
 });
+
+function copyStatesFromCreate(targetCarrierId) {
+    const allSections = document.querySelectorAll('.ap-carrier-sec');
+    const carrierOpts = [];
+    allSections.forEach(sec => {
+        const idMatch = sec.id.match(/carrier-state-section-(\d+)/);
+        const h6 = sec.querySelector('h6');
+        const name = h6 ? h6.textContent.replace(/\s+/g,' ').trim() : '';
+        if (idMatch && parseInt(idMatch[1]) !== targetCarrierId) {
+            carrierOpts.push({ id: parseInt(idMatch[1]), name });
+        }
+    });
+    if (carrierOpts.length === 0) { alert('No other carriers to copy states from.'); return; }
+    let list = '';
+    carrierOpts.forEach((c,i) => { list += `${i+1}. ${c.name}\n`; });
+    const choice = prompt(`Copy states FROM:\n\n${list}\nType the number or carrier name:`, '');
+    if (!choice) return;
+    let source = null;
+    if (/^\d+$/.test(choice)) {
+        const idx = parseInt(choice)-1;
+        if (idx >= 0 && idx < carrierOpts.length) source = carrierOpts[idx];
+    } else {
+        source = carrierOpts.find(c => c.name.toLowerCase().includes(choice.toLowerCase()));
+    }
+    if (!source) { alert('No matching carrier found.'); return; }
+
+    // Copy select2 values
+    const sourceSelect = document.querySelector(`select.state-select[data-carrier-id="${source.id}"]`);
+    const targetSelect = document.querySelector(`select.state-select[data-carrier-id="${targetCarrierId}"]`);
+    if (!sourceSelect || !targetSelect) { alert('Source or target carrier not found.'); return; }
+    const sourceVals = $(sourceSelect).val() || [];
+    if (sourceVals.length === 0) { alert('Source carrier has no states selected.'); return; }
+    $(targetSelect).val(sourceVals).trigger('change');
+}
 </script>
 @endsection

@@ -251,12 +251,12 @@
                 </button>
 
                 {{-- User capsule --}}
-                @php $__pUser = Auth::guard('partner')->user(); @endphp
+                @php $AuthPartner = Auth::guard('partner')->user(); @endphp
                 <div class="pp-user-capsule">
-                    <div class="pp-user-avatar">{{ strtoupper(substr($__pUser->name ?? 'P', 0, 2)) }}</div>
+                    <div class="pp-user-avatar">{{ strtoupper(substr($AuthPartner->name ?? 'P', 0, 2)) }}</div>
                     <div>
-                        <div class="pp-user-name">{{ $__pUser->name }}</div>
-                        <div class="pp-user-code">{{ $__pUser->code }}</div>
+                        <div class="pp-user-name">{{ $AuthPartner->name }}</div>
+                        <div class="pp-user-code">{{ $AuthPartner->code }}</div>
                     </div>
                 </div>
 
@@ -273,12 +273,14 @@
             <a href="{{ route('partner.dashboard') }}" class="pp-nav-tab {{ request()->routeIs('partner.dashboard') ? 'active' : '' }}">
                 <i class="bx bx-grid-alt"></i> Dashboard
             </a>
+            @if(($AuthPartner->type ?? 'partner') === 'partner')
             <a href="{{ route('partner.sales') }}" class="pp-nav-tab {{ request()->routeIs('partner.sales') ? 'active' : '' }}">
                 <i class="bx bx-trending-up"></i> Sales
             </a>
             <a href="{{ route('partner.ledger') }}" class="pp-nav-tab {{ request()->routeIs('partner.ledger') ? 'active' : '' }}">
                 <i class="bx bx-receipt"></i> Ledger
             </a>
+            @endif
             <a href="{{ route('partner.carriers') }}" class="pp-nav-tab {{ request()->routeIs('partner.carriers') ? 'active' : '' }}">
                 <i class="bx bx-briefcase"></i> Carriers &amp; States
             </a>

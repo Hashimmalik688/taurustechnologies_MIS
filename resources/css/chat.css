@@ -91,7 +91,7 @@
     border-right: 1px solid var(--bs-border-color, #e5e7eb);
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    overflow: hidden;
     flex-shrink: 0;
 }
 
@@ -147,7 +147,7 @@
 .chat-sidebar-header .btn i { font-size: .8rem; }
 
 /* Sidebar content tabs / hidden panels */
-.chat-sidebar-content { display: none; flex-direction: column; flex: 1; overflow: visible; }
+.chat-sidebar-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
 .chat-sidebar-content.active { display: flex; }
 
 /* Search box — pipe-search pattern */

@@ -450,6 +450,50 @@
                             </div>
                         </div>
 
+                        <!-- Follow Up Schedule Section -->
+                        <h6 class="form-section-title mt-4">
+                            <i class="bx bx-calendar-event me-2"></i>
+                            Follow Up Schedule
+                        </h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="followup_required" class="form-label required">Follow Up Required</label>
+                                <select class="form-select @error('followup_required') is-invalid @enderror" id="followup_required" name="followup_required" required>
+                                    <option value="">Select option...</option>
+                                    <option value="1" {{ old('followup_required', $lead->followup_required ?? '1') == '1' ? 'selected' : '' }}>Yes</option>
+                                    <option value="0" {{ old('followup_required', $lead->followup_required ?? '') === '0' || old('followup_required', $lead->followup_required ?? '') === 0 ? 'selected' : '' }}>No</option>
+                                </select>
+                                @error('followup_required')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="col-md-6" id="followup-datetime-wrapper">
+                                <label for="followup_scheduled_at" class="form-label required">Follow Up Date &amp; Time</label>
+                                <input type="datetime-local" class="form-control @error('followup_scheduled_at') is-invalid @enderror"
+                                    id="followup_scheduled_at" name="followup_scheduled_at"
+                                    value="{{ old('followup_scheduled_at', $lead->followup_scheduled_at ? \Carbon\Carbon::parse($lead->followup_scheduled_at)->format('Y-m-d\TH:i') : '') }}">
+                                @error('followup_scheduled_at')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <small class="text-muted">When should the follow-up call be scheduled?</small>
+                            </div>
+                        </div>
+
+                        <script>
+                        (function() {
+                            var sel = document.getElementById('followup_required');
+                            var wrapper = document.getElementById('followup-datetime-wrapper');
+                            var input = document.getElementById('followup_scheduled_at');
+                            function toggle() {
+                                if (sel.value === '1') {
+                                    wrapper.style.display = '';
+                                    input.setAttribute('required', 'required');
+                                } else {
+                                    wrapper.style.display = 'none';
+                                    input.removeAttribute('required');
+                                }
+                            }
+                            toggle();
+                            sel.addEventListener('change', toggle);
+                        })();
+                        </script>
+
                         <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="bx bx-save me-2"></i>

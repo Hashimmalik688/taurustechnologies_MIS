@@ -308,5 +308,59 @@ function openCreateCarrierModal() {
     window.open('{{ route("admin.insurance-carriers.create") }}?modal=1', 'CreateCarrier', `width=${w},height=${h},left=${l},top=${t},scrollbars=yes,resizable=yes`);
     window.addEventListener('message', function(e) { if (e.data.type === 'carrierCreated') location.reload(); });
 }
+
+function copyStatesFrom(targetCarrierId) {
+    // Collect carrier names and IDs from the page
+    const allSections = document.querySelectorAll('.cs-carrier');
+    const carrierOpts = [];
+    allSections.forEach(sec => {
+        const nameEl = sec.querySelector('.cs-carrier-name');
+        const cleansed = nameEl ? nameEl.textContent.replace(/\s+/g, ' ').trim() : '';
+        const idMatch = sec.id.match(/carrier-state-section-(\d+)/);
+        if (idMatch && parseInt(idMatch[1]) !== targetCarrierId) {
+            carrierOpts.push({ id: parseInt(idMatch[1]), name: cleansed });
+        }
+    });
+    if (carrierOpts.length === 0) {
+        alert('No other carriers to copy states from.');
+        return;
+    }
+    // Build a selector prompt
+    let list = '';
+    carrierOpts.forEach((c, i) => { list += `${i+1}. ${c.name}\n`; });
+    const choice = prompt(`Copy states & commission rates FROM:\n\n${list}\nType the number or carrier name:`, '');
+    if (!choice) return;
+    // Match by number or name
+    let source = null;
+    if (/^\d+$/.test(choice)) {
+        const idx = parseInt(choice) - 1;
+        if (idx >= 0 && idx < carrierOpts.length) source = carrierOpts[idx];
+    } else {
+        source = carrierOpts.find(c => c.name.toLowerCase().includes(choice.toLowerCase()));
+    }
+    if (!source) { alert('No matching carrier found.'); return; }
+
+    // Copy states from source to target select2
+    const sourceSelect = document.getElementById('carrier_states_' + source.id);
+    const targetSelect = document.getElementById('carrier_states_' + targetCarrierId);
+    if (!sourceSelect || !targetSelect) { alert('Source or target carrier not found on page.'); return; }
+    const selectedValues = $(sourceSelect).val() || [];
+    if (selectedValues.length === 0) { alert('Source carrier has no states selected.'); return; }
+
+    $(targetSelect).val(selectedValues).trigger('change');
+
+    // Copy commission rates from source to target
+    const rateFields = ['level','graded','gi','modified'];
+    rateFields.forEach(field => {
+        // Look for the input: name="settlement_LEVEL[SOURCE_ID]"
+        const sourceInput = document.querySelector(`input[name^="settlement_${field}"][name$="[${source.id}]"]`);
+        const targetInput = document.querySelector(`input[name^="settlement_${field}"][name$="[${targetCarrierId}]"]`);
+        if (sourceInput && targetInput) {
+            targetInput.value = sourceInput.value;
+        }
+    });
+
+    updateStateSettlementFields(targetCarrierId);
+}
 </script>
 @endsection

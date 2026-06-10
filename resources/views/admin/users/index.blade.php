@@ -122,6 +122,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Name</th>
                         <th>Real Name</th>
                         <th>Phone</th>
                         <th>Email</th>
@@ -138,6 +139,7 @@
                         <tr>
                             <td>{{ $user->id }}</td>
                             <td style="font-weight:600">{{ $user->name }}</td>
+                            <td style="font-weight:600">{{ $user->real_name ?? '—' }}</td>
                             <td>{{ $user->userDetail->phone ?? '—' }}</td>
                             <td>{{ $user->email }}</td>
                             <td>

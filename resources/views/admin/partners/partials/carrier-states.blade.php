@@ -11,9 +11,14 @@
                     <span class="cs-pay-tag">{{ ucfirst(str_replace('_', ' ', $carrier->payment_module)) }}</span>
                 @endif
             </div>
-            <button type="button" class="cs-remove-btn" onclick="removeCarrierSection({{ $carrier->id }})" title="Remove carrier">
-                <i class="bx bx-x"></i> Remove
-            </button>
+            <div style="display:flex;align-items:center;gap:.3rem;margin-left:auto;">
+                <button type="button" class="cs-copy-btn" onclick="copyStatesFrom({{ $carrier->id }})" title="Copy states & rates from another carrier">
+                    <i class="bx bx-copy"></i> Copy from
+                </button>
+                <button type="button" class="cs-remove-btn" onclick="removeCarrierSection({{ $carrier->id }})" title="Remove carrier">
+                    <i class="bx bx-x"></i>
+                </button>
+            </div>
         </div>
 
         {{-- State Selection --}}
@@ -151,6 +156,14 @@
     background:rgba(244,106,106,.04); transition:all .15s;
 }
 .cs-remove-btn:hover { background:rgba(244,106,106,.1); border-color:#f46a6a; }
+
+.cs-copy-btn {
+    font-size:.6rem; font-weight:600; color:#556ee6; cursor:pointer;
+    display:inline-flex; align-items:center; gap:.2rem;
+    border:1px solid rgba(85,110,230,.15); padding:.15rem .4rem; border-radius:.25rem;
+    background:rgba(85,110,230,.04); transition:all .15s;
+}
+.cs-copy-btn:hover { background:rgba(85,110,230,.1); border-color:#556ee6; }
 
 .cs-field-group { margin-bottom:.5rem; }
 .cs-label { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; color:var(--bs-surface-500); margin-bottom:.2rem; display:block; }
