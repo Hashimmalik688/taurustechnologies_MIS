@@ -122,18 +122,38 @@
         <div class="ap-card-hdr"><i class="bx bx-user"></i><h6>Basic Information</h6></div>
         <div class="ap-card-body">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="ap-label required">Partner Name</label>
                     <input type="text" class="ap-input @error('name') is-invalid @enderror"
                            name="name" value="{{ old('name') }}" required>
                     @error('name')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="ap-label required">Partner Code</label>
                     <input type="text" class="ap-input @error('code') is-invalid @enderror"
                            name="code" value="{{ old('code') }}" maxlength="10" required>
                     @error('code')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
                     <div class="ap-hint">Unique identifier (max 10 chars), e.g. E-1, Y-1, F-1</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ap-label required">Type</label>
+                    <select class="ap-input @error('type') is-invalid @enderror" name="type" required>
+                        <option value="partner" {{ old('type') === 'partner' ? 'selected' : '' }}>Partner</option>
+                        <option value="agent" {{ old('type') === 'agent' ? 'selected' : '' }}>Downline</option>
+                    </select>
+                    @error('type')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                    <div class="ap-hint">Partner = standalone or upline. Downline = works under a partner</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="ap-label">Upline Partner</label>
+                    <select class="ap-input @error('parent_partner_id') is-invalid @enderror" name="parent_partner_id">
+                        <option value="">— None (standalone partner) —</option>
+                        @foreach(\App\Models\Partner::partners()->orderBy('name')->get() as $pp)
+                            <option value="{{ $pp->id }}" {{ old('parent_partner_id') == $pp->id ? 'selected' : '' }}>{{ $pp->name }} ({{ $pp->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('parent_partner_id')<div class="invalid-feedback" style="font-size:.6rem">{{ $message }}</div>@enderror
+                    <div class="ap-hint">Required for downline agents — select their upline partner</div>
                 </div>
             </div>
         </div>

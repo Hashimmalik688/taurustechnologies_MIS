@@ -140,16 +140,36 @@
         <div class="ep-card-hdr"><i class="bx bx-user"></i><h6>Basic Information</h6></div>
         <div class="ep-card-body">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="ep-label required">Partner Name</label>
                     <input type="text" class="ep-input @error('name') is-invalid @enderror" name="name" value="{{ old('name', $partner->name) }}" required>
                     @error('name')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="ep-label required">Partner Code</label>
                     <input type="text" class="ep-input @error('code') is-invalid @enderror" name="code" value="{{ old('code', $partner->code) }}" required>
                     @error('code')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
                     <div class="ep-hint">Unique ID e.g., E-1, Y-1, F-1</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label required">Type</label>
+                    <select class="ep-input @error('type') is-invalid @enderror" name="type" required>
+                        <option value="partner" {{ old('type', $partner->type) === 'partner' ? 'selected' : '' }}>Partner</option>
+                        <option value="agent" {{ old('type', $partner->type) === 'agent' ? 'selected' : '' }}>Downline</option>
+                    </select>
+                    @error('type')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                    <div class="ep-hint">Partner = standalone/upline. Downline = works under a partner</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="ep-label">Upline Partner</label>
+                    <select class="ep-input @error('parent_partner_id') is-invalid @enderror" name="parent_partner_id">
+                        <option value="">— None (standalone) —</option>
+                        @foreach(\App\Models\Partner::partners()->where('id', '!=', $partner->id)->orderBy('name')->get() as $pp)
+                            <option value="{{ $pp->id }}" {{ old('parent_partner_id', $partner->parent_partner_id) == $pp->id ? 'selected' : '' }}>{{ $pp->name }} ({{ $pp->code }})</option>
+                        @endforeach
+                    </select>
+                    @error('parent_partner_id')<div class="invalid-feedback" style="font-size:.62rem">{{ $message }}</div>@enderror
+                    <div class="ep-hint">Required for downline — their upline partner</div>
                 </div>
                 <div class="col-md-4">
                     <label class="ep-label">Email Address</label>

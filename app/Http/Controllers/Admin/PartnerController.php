@@ -16,13 +16,22 @@ class PartnerController extends Controller
     /**
      * Display a listing of partners.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $partners = Partner::with(['carrierStates.insuranceCarrier'])
+        $typeFilter = $request->get('type');
+
+        $partners = Partner::with(['carrierStates.insuranceCarrier', 'parent', 'agents'])
+            ->when($typeFilter === 'partner', fn ($q) => $q->partners())
+            ->when($typeFilter === 'agent', fn ($q) => $q->agents())
+            ->orderBy('type')
             ->orderBy('name')
             ->get();
 
-        return view('admin.partners.index', compact('partners'));
+        // Separate counts for KPIs
+        $partnerCount = $partners->where('type', 'partner')->count();
+        $agentCount   = $partners->where('type', 'agent')->count();
+
+        return view('admin.partners.index', compact('partners', 'typeFilter', 'partnerCount', 'agentCount'));
     }
 
     /**
@@ -50,12 +59,12 @@ class PartnerController extends Controller
             'ssn_last4' => 'nullable|string|size:4',
             'is_active' => 'boolean',
             'our_commission_percentage' => 'nullable|numeric|min:0|max:100',
+            'type' => 'required|in:partner,agent',
+            'parent_partner_id' => 'nullable|exists:partners,id',
         ]);
 
         DB::transaction(function () use ($request, $validated) {
             $partner = Partner::create($validated);
-
-            // Save carrier-state relationships
             $this->syncCarrierStates($partner, $request);
         });
 
@@ -69,7 +78,7 @@ class PartnerController extends Controller
      */
     public function show($id)
     {
-        $partner = Partner::with(['carrierStates.insuranceCarrier'])
+        $partner = Partner::with(['carrierStates.insuranceCarrier', 'parent', 'agents.carrierStates.insuranceCarrier'])
             ->findOrFail($id);
 
         return view('admin.partners.show', compact('partner'));
@@ -111,6 +120,8 @@ class PartnerController extends Controller
             'password' => 'sometimes|nullable|string|min:8|confirmed',
             'is_active' => 'boolean',
             'our_commission_percentage' => 'nullable|numeric|min:0|max:100',
+            'type' => 'required|in:partner,agent',
+            'parent_partner_id' => 'nullable|exists:partners,id',
         ]);
 
         // Remove password from validated data if not provided

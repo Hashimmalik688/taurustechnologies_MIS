@@ -61,6 +61,17 @@
 .pt-empty { text-align:center; padding:3rem 1rem; color:var(--bs-surface-500); }
 .pt-empty i { font-size:3rem; display:block; margin-bottom:.75rem; opacity:.15; }
 .pt-empty p { font-size:.78rem; margin:.25rem 0; }
+
+/* Type badges */
+.pt-type-badge { font-size:.58rem; font-weight:700; padding:.15rem .45rem; border-radius:.3rem; display:inline-flex; align-items:center; gap:.25rem }
+.pt-type-badge.partner { background:rgba(85,110,230,.1); color:#556ee6; border:1px solid rgba(85,110,230,.15) }
+.pt-type-badge.agent { background:rgba(139,92,246,.1); color:#7c3aed; border:1px solid rgba(139,92,246,.15) }
+.pt-downline-badge { font-size:.6rem; font-weight:700; color:#f59e0b; background:rgba(245,158,11,.08); padding:.1rem .4rem; border-radius:.25rem; border:1px solid rgba(245,158,11,.12) }
+
+/* Filter pills */
+.pt-filter-pill { font-size:.65rem; font-weight:600; padding:.2rem .55rem; border-radius:.3rem; text-decoration:none; transition:all .15s; border:1px solid rgba(0,0,0,.08); color:var(--bs-surface-500); background:var(--bs-card-bg) }
+.pt-filter-pill:hover { border-color:var(--bs-gradient-start); color:var(--bs-gradient-start) }
+.pt-filter-pill.active { background:rgba(85,110,230,.1); border-color:rgba(85,110,230,.3); color:var(--bs-gradient-start); font-weight:700 }
 </style>
 @endsection
 
@@ -91,26 +102,38 @@
     $totalStatesCovered = $partners->sum(fn($p) => $p->carrierStates->pluck('state')->unique()->count());
 @endphp
 <div class="pt-kpi-row">
-    <div class="pt-kpi k-blue"><i class="bx bx-group k-icon"></i><div class="k-val">{{ $partners->count() }}</div><div class="k-lbl">Total Partners</div></div>
-    <div class="pt-kpi k-green"><i class="bx bx-check-shield k-icon"></i><div class="k-val">{{ $activeCount }}</div><div class="k-lbl">Active</div></div>
+    <div class="pt-kpi k-blue"><i class="bx bx-group k-icon"></i><div class="k-val">{{ $partners->count() }}</div><div class="k-lbl">Total</div></div>
+    <div class="pt-kpi k-green"><i class="bx bx-buildings k-icon"></i><div class="k-val">{{ $partnerCount }}</div><div class="k-lbl">Partners</div></div>
+    <div class="pt-kpi k-purple"><i class="bx bx-user-voice k-icon"></i><div class="k-val">{{ $agentCount }}</div><div class="k-lbl">Downline Agents</div></div>
     <div class="pt-kpi k-orange"><i class="bx bx-briefcase k-icon"></i><div class="k-val">{{ $totalCarrierAssignments }}</div><div class="k-lbl">Carrier Assignments</div></div>
-    <div class="pt-kpi k-purple"><i class="bx bx-map k-icon"></i><div class="k-val">{{ $totalStatesCovered }}</div><div class="k-lbl">States Covered</div></div>
 </div>
 
 <div class="pt-card">
     <div class="pt-card-hdr">
-        <h6><i class="bx bx-list-ul me-1"></i> All Partners</h6>
-        <input type="text" class="pt-search" id="ptSearch" placeholder="Search partners..." autocomplete="off">
+        <h6>
+            <i class="bx bx-list-ul me-1"></i>
+            @if($typeFilter === 'agent') Downline Agents
+            @elseif($typeFilter === 'partner') Partners
+            @else All Partners &amp; Downline
+            @endif
+        </h6>
+        <div style="display:flex;align-items:center;gap:.5rem;">
+            <a href="{{ route('admin.partners.index') }}" class="pt-filter-pill {{ !$typeFilter ? 'active' : '' }}">All</a>
+            <a href="{{ route('admin.partners.index', ['type' => 'partner']) }}" class="pt-filter-pill {{ $typeFilter === 'partner' ? 'active' : '' }}">Partners</a>
+            <a href="{{ route('admin.partners.index', ['type' => 'agent']) }}" class="pt-filter-pill {{ $typeFilter === 'agent' ? 'active' : '' }}">Downline</a>
+            <input type="text" class="pt-search" id="ptSearch" placeholder="Search..." autocomplete="off">
+        </div>
     </div>
     <div class="table-responsive">
         <table class="pt-table" id="ptTable">
             <thead>
                 <tr>
                     <th>Partner</th>
-                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Upline</th>
+                    <th>Downline</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Our Commission</th>
+                    <th>Our Comm</th>
                     <th>Carriers</th>
                     <th>States</th>
                     <th>Status</th>
@@ -125,17 +148,40 @@
                     $totalStatesP = $partner->carrierStates->pluck('state')->unique()->count();
                     $hue = crc32($partner->name) % 360;
                     $ini = strtoupper(collect(explode(' ', $partner->name))->map(fn($w) => substr($w,0,1))->take(2)->join(''));
+                    $downlineCount = $partner->agents->count();
                 @endphp
                 <tr>
                     <td>
                         <div class="pt-name-cell">
                             <div class="pt-avatar" style="background:hsl({{ $hue }},55%,50%)">{{ $ini }}</div>
                             <span class="pt-name">{{ $partner->name }}</span>
+                            <span class="pt-code">{{ $partner->code }}</span>
                         </div>
                     </td>
-                    <td><span class="pt-code">{{ $partner->code }}</span></td>
+                    <td>
+                        @if(($partner->type ?? 'partner') === 'agent')
+                            <span class="pt-type-badge agent"><i class="bx bx-user"></i> Downline</span>
+                        @else
+                            <span class="pt-type-badge partner"><i class="bx bx-buildings"></i> Partner</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($partner->parent)
+                            <a href="{{ route('admin.partners.show', $partner->parent->id) }}" style="color:var(--bs-gradient-start);font-weight:600;font-size:.68rem;text-decoration:none">
+                                {{ $partner->parent->name }}
+                            </a>
+                        @else
+                            <span style="color:var(--bs-surface-400);font-size:.65rem">—</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($downlineCount > 0)
+                            <span class="pt-downline-badge">{{ $downlineCount }} agent{{ $downlineCount > 1 ? 's' : '' }}</span>
+                        @else
+                            <span style="color:var(--bs-surface-400);font-size:.65rem">—</span>
+                        @endif
+                    </td>
                     <td class="pt-email">{{ $partner->email ?? '—' }}</td>
-                    <td style="font-size:.68rem">{{ $partner->phone ?? '—' }}</td>
                     <td><span class="pt-commission">{{ number_format($partner->our_commission_percentage ?? 0, 1) }}%</span></td>
                     <td>
                         @foreach($uniqueCarriers as $cid)
@@ -170,10 +216,10 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10">
+                    <td colspan="11">
                         <div class="pt-empty">
                             <i class="bx bx-user-x"></i>
-                            <p><strong>No Partners Found</strong></p>
+                            <p><strong>No {{ $typeFilter === 'agent' ? 'Downline Agents' : 'Partners' }} Found</strong></p>
                             <p>Click "Add Partner" to create your first partner</p>
                         </div>
                     </td>

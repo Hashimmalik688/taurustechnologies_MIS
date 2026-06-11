@@ -236,46 +236,90 @@
                 <div class="pd-avatar">{{ substr($partner->name, 0, 2) }}</div>
                 <div class="pd-hero-info">
                     <h4>{{ $partner->name }}</h4>
-                    <div class="pd-code"><i class="bx bx-hash"></i> Partner Code: {{ $partner->code }}</div>
+                    <div class="pd-code"><i class="bx bx-hash"></i> Code: {{ $partner->code }}</div>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
+                @if(($partner->type ?? 'partner') === 'agent')
+                    <span class="pd-status-pill" style="background:rgba(139,92,246,.2);color:#fff"><span class="pd-dot" style="background:#a78bfa"></span> Downline Agent</span>
+                @elseif($partner->agents->isNotEmpty())
+                    <span class="pd-status-pill" style="background:rgba(245,158,11,.2);color:#fff"><span class="pd-dot" style="background:#fbbf24"></span> Upline Partner</span>
+                @else
+                    <span class="pd-status-pill active"><span class="pd-dot"></span> Partner</span>
+                @endif
                 @if($partner->is_active)
-                    <span class="pd-status-pill active"><span class="pd-dot"></span> Active Partner</span>
+                    <span class="pd-status-pill active"><span class="pd-dot"></span> Active</span>
                 @else
                     <span class="pd-status-pill inactive"><span class="pd-dot"></span> Inactive</span>
                 @endif
             </div>
         </div>
     </div>
-
-    <!-- KPI Row -->
     <div class="pd-sec-body">
         <div class="pd-kpi-row">
-            <div class="pd-kpi k-blue">
-                <div class="k-val">{{ $totalCarriers }}</div>
-                <div class="k-lbl">Carriers</div>
-            </div>
-            <div class="pd-kpi k-green">
-                <div class="k-val">{{ $totalStates }}</div>
-                <div class="k-lbl">Licensed States</div>
-            </div>
-            <div class="pd-kpi k-purple">
-                <div class="k-val">{{ $totalLeads }}</div>
-                <div class="k-lbl">Total Leads</div>
-            </div>
-            <div class="pd-kpi k-teal">
-                <div class="k-val">{{ $partner->our_commission_percentage ?? 0 }}%</div>
-                <div class="k-lbl">Our Commission</div>
-            </div>
+            <div class="pd-kpi k-blue"><div class="k-val">{{ $totalCarriers }}</div><div class="k-lbl">Carriers</div></div>
+            <div class="pd-kpi k-green"><div class="k-val">{{ $totalStates }}</div><div class="k-lbl">Licensed States</div></div>
+            <div class="pd-kpi k-purple"><div class="k-val">{{ $totalLeads }}</div><div class="k-lbl">Total Leads</div></div>
+            <div class="pd-kpi k-teal"><div class="k-val">{{ $partner->our_commission_percentage ?? 0 }}%</div><div class="k-lbl">Our Commission</div></div>
+            @if($partner->agents->isNotEmpty())
+            <div class="pd-kpi" style="--k-color:#f59e0b"><div class="k-val" style="color:#d97706">{{ $partner->agents->count() }}</div><div class="k-lbl">Downline Agents</div></div>
+            @endif
         </div>
     </div>
 </div>
 
+{{-- Upline --}}
+@if($partner->parent)
+<div class="pd-card" style="border-left:3px solid #764ba2;margin-bottom:.65rem">
+    <div class="pd-sec-hdr"><h6><i class="bx bx-up-arrow-alt"></i> Upline Partner</h6></div>
+    <div class="pd-sec-body">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width:38px;height:38px;border-radius:.4rem;background:linear-gradient(135deg,#764ba2,#a880d4);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.7rem">{{ substr($partner->parent->name, 0, 2) }}</div>
+            <div>
+                <a href="{{ route('admin.partners.show', $partner->parent->id) }}" style="font-weight:700;color:#764ba2;font-size:.82rem;text-decoration:none">{{ $partner->parent->name }}</a>
+                <div style="font-size:.62rem;color:var(--bs-surface-500)">Code: {{ $partner->parent->code }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+{{-- Downline Agents --}}
+@if($partner->agents->isNotEmpty())
+<div class="pd-card" style="border-left:3px solid #f59e0b;margin-bottom:.65rem">
+    <div class="pd-sec-hdr">
+        <h6><i class="bx bx-user-voice"></i> Downline Agents</h6>
+        <span style="font-size:.6rem;font-weight:600;padding:.15rem .45rem;border-radius:1rem;background:rgba(245,158,11,.1);color:#d97706">{{ $partner->agents->count() }} agent{{ $partner->agents->count() > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="pd-sec-body">
+        @foreach($partner->agents as $agent)
+            @php
+                $aCarriers = $agent->carrierStates->pluck('insurance_carrier_id')->unique()->count();
+                $aStates = $agent->carrierStates->pluck('state')->unique()->count();
+                $aLeads = \App\Models\Lead::where('partner_id', $agent->id)->count();
+            @endphp
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:.5rem;border-radius:.4rem;border:1px solid rgba(0,0,0,.04);background:rgba(0,0,0,.01);margin-bottom:.3rem">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:32px;height:32px;border-radius:.3rem;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.6rem">{{ substr($agent->name, 0, 2) }}</div>
+                    <div>
+                        <a href="{{ route('admin.partners.show', $agent->id) }}" style="font-weight:700;color:var(--bs-heading-color,#323a46);font-size:.75rem;text-decoration:none">{{ $agent->name }}</a>
+                        <div style="font-size:.58rem;color:var(--bs-surface-500)">{{ $agent->code }}</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:.6rem;font-size:.62rem;color:var(--bs-surface-500)">
+                    <span><strong style="color:var(--bs-surface-700)">{{ $aCarriers }}</strong> carr.</span>
+                    <span><strong style="color:var(--bs-surface-700)">{{ $aStates }}</strong> states</span>
+                    <span><strong style="color:var(--bs-surface-700)">{{ $aLeads }}</strong> leads</span>
+                    <span class="pt-badge {{ $agent->is_active ? 'active' : 'inactive' }}">{{ $agent->is_active ? 'Active' : 'Inactive' }}</span>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 <div class="row">
-    <!-- Left Column -->
     <div class="col-lg-5">
-        <!-- Contact Information -->
         <div class="pd-card">
             <div class="pd-sec-hdr">
                 <h6><i class="bx bx-id-card"></i> Contact Information</h6>
