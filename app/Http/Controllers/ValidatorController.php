@@ -136,8 +136,8 @@ class ValidatorController extends Controller
             'validated_by'             => Auth::id(),
             'validated_at'             => now(),
             'ravens_validation_status' => 'valid',
-            'sale_at'                  => now(),
-            'sale_date'                => now()->format('Y-m-d'),
+            'sale_at'                  => $lead->closed_at ?? now(),
+            'sale_date'                => $lead->closed_at ? $lead->closed_at->format('Y-m-d') : now()->format('Y-m-d'),
         ]);
 
         SyncPeregrineSaleToGoogleSheets::dispatch($lead->fresh());
@@ -288,8 +288,8 @@ class ValidatorController extends Controller
         $validated['validated_by']             = Auth::id();
         $validated['validated_at']             = now();
         $validated['ravens_validation_status'] = 'valid';
-        $validated['sale_at']                  = now();
-        $validated['sale_date']                = now()->format('Y-m-d');
+        $validated['sale_at']                  = $lead->closed_at ?? now();
+        $validated['sale_date']                = $lead->closed_at ? $lead->closed_at->format('Y-m-d') : now()->format('Y-m-d');
         
         $lead->update($validated);
 
@@ -370,8 +370,8 @@ class ValidatorController extends Controller
             'validated_by'             => Auth::id(),
             'validated_at'             => now(),
             'ravens_validation_status' => 'valid',
-            'sale_at'                  => now(),
-            'sale_date'                => now()->format('Y-m-d'),
+            'sale_at'                  => $lead->closed_at ?? now(),
+            'sale_date'                => $lead->closed_at ? $lead->closed_at->format('Y-m-d') : now()->format('Y-m-d'),
         ]);
 
         SyncPeregrineSaleToGoogleSheets::dispatch($lead->fresh());
