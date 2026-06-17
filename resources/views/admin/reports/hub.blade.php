@@ -97,6 +97,17 @@
             </a>
             @endcanViewModule
 
+            @canViewModule('report-peregrine-sales')
+            <a href="{{ route('settings.reports.peregrine-sales-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-dollar-circle"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Peregrine Sales Report</div>
+                    <p class="hub-card-desc">Individual Peregrine closer sales — customer details, premium, coverage, PJC, validator &amp; pipeline status (Paid, Pending Contract, Pending Draft, Declined)</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
             @canViewModule('report-zoom-logs')
             <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>

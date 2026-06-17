@@ -974,6 +974,7 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/closer-report', [CloserReportController::class, 'index'])->name('closer-report')->middleware('role.permission:reports,view');
     Route::get('/closer-report/drilldown', [CloserReportController::class, 'drilldown'])->name('closer-report.drilldown')->middleware('role.permission:reports,view');
     Route::get('/peregrine-team-report', [ReportController::class, 'peregrineTeamReport'])->name('peregrine-team-report')->middleware('role.permission:reports,view');
+    Route::get('/peregrine-sales-report', [ReportController::class, 'peregrineSalesReport'])->name('peregrine-sales-report')->middleware('role.permission:reports,view');
 
     // ── Carrier Commission Sheet (standalone) ──────────
     Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {

@@ -1716,4 +1716,99 @@ class ReportController extends Controller
             'salesLeads', 'dateFrom', 'dateTo', 'dispositionCounts', 'allLeadsDetail'
         ));
     }
+
+    public function peregrineSalesReport(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-peregrine-sales'), 403, 'Access denied.');
+
+        $dateFrom   = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo     = $request->get('date_to',   now()->toDateString());
+        $closerFilter    = $request->get('closer_id');
+        $validatorFilter = $request->get('validator_id');
+        $pjcFilter       = $request->get('pjc_id');
+        $statusFilter    = $request->get('sale_status'); // pending_contract|pending_draft|paid|declined
+
+        $query = \App\Models\Lead::where('team', \App\Support\Teams::PEREGRINE)
+            ->whereNotNull('sale_at')
+            ->whereDate('sale_at', '>=', $dateFrom)
+            ->whereDate('sale_at', '<=', $dateTo)
+            ->with(['verifier:id,name', 'assignedCloser:id,name', 'assignedValidator:id,name'])
+            ->select(
+                'id', 'cn_name', 'phone_number', 'monthly_premium', 'coverage_amount',
+                'managed_by', 'closer_name', 'assigned_validator_id',
+                'verified_by', 'account_verified_by',
+                'pending_contract_at', 'pending_draft_at', 'paid_at', 'declined_at',
+                'sale_at', 'policy_type', 'status'
+            );
+
+        if ($closerFilter) {
+            $query->where('managed_by', $closerFilter);
+        }
+        if ($validatorFilter) {
+            $query->where('assigned_validator_id', $validatorFilter);
+        }
+        if ($pjcFilter) {
+            $query->where('verified_by', $pjcFilter);
+        }
+        if ($statusFilter) {
+            $query->when($statusFilter === 'paid',             fn($q) => $q->whereNotNull('paid_at'));
+            $query->when($statusFilter === 'pending_contract', fn($q) => $q->whereNotNull('pending_contract_at')->whereNull('paid_at')->whereNull('declined_at'));
+            $query->when($statusFilter === 'pending_draft',    fn($q) => $q->whereNotNull('pending_draft_at')->whereNull('paid_at')->whereNull('declined_at'));
+            $query->when($statusFilter === 'declined',         fn($q) => $q->whereNotNull('declined_at'));
+        }
+
+        $sales = $query->orderByDesc('sale_at')->get();
+
+        // Derive a human-readable pipeline status for each sale
+        $sales = $sales->map(function ($lead) {
+            if ($lead->declined_at)         { $lead->sale_status = 'declined';          $lead->sale_status_label = 'Declined'; }
+            elseif ($lead->paid_at)         { $lead->sale_status = 'paid';              $lead->sale_status_label = 'Paid'; }
+            elseif ($lead->pending_draft_at){ $lead->sale_status = 'pending_draft';     $lead->sale_status_label = 'Pending Draft'; }
+            elseif ($lead->pending_contract_at){ $lead->sale_status = 'pending_contract'; $lead->sale_status_label = 'Pending Contract'; }
+            else                            { $lead->sale_status = 'sale';              $lead->sale_status_label = 'Sale'; }
+            return $lead;
+        });
+
+        // KPIs
+        $kpis = [
+            'total_sales'        => $sales->count(),
+            'paid'               => $sales->where('sale_status', 'paid')->count(),
+            'pending_contract'   => $sales->where('sale_status', 'pending_contract')->count(),
+            'pending_draft'      => $sales->where('sale_status', 'pending_draft')->count(),
+            'declined'           => $sales->where('sale_status', 'declined')->count(),
+        ];
+
+        // Filter dropdowns — all peregrine users who appear in sales this period (unfiltered for dropdowns)
+        $allSalesForFilters = \App\Models\Lead::where('team', \App\Support\Teams::PEREGRINE)
+            ->whereNotNull('sale_at')
+            ->whereDate('sale_at', '>=', $dateFrom)
+            ->whereDate('sale_at', '<=', $dateTo)
+            ->with(['verifier:id,name', 'assignedCloser:id,name', 'assignedValidator:id,name'])
+            ->select('id', 'managed_by', 'closer_name', 'assigned_validator_id', 'verified_by', 'account_verified_by')
+            ->get();
+
+        $closerOptions = $allSalesForFilters
+            ->whereNotNull('managed_by')
+            ->groupBy('managed_by')
+            ->map(fn($g) => ['id' => $g->first()->managed_by, 'name' => $g->first()->assignedCloser?->name ?? $g->first()->closer_name ?? 'Unknown'])
+            ->values()->sortBy('name');
+
+        $validatorOptions = $allSalesForFilters
+            ->whereNotNull('assigned_validator_id')
+            ->groupBy('assigned_validator_id')
+            ->map(fn($g) => ['id' => $g->first()->assigned_validator_id, 'name' => $g->first()->assignedValidator?->name ?? 'Unknown'])
+            ->values()->sortBy('name');
+
+        $pjcOptions = $allSalesForFilters
+            ->whereNotNull('verified_by')
+            ->groupBy('verified_by')
+            ->map(fn($g) => ['id' => $g->first()->verified_by, 'name' => $g->first()->verifier?->name ?? $g->first()->account_verified_by ?? 'Unknown'])
+            ->values()->sortBy('name');
+
+        return view('admin.reports.peregrine-sales-report', compact(
+            'sales', 'kpis', 'dateFrom', 'dateTo',
+            'closerOptions', 'validatorOptions', 'pjcOptions',
+            'closerFilter', 'validatorFilter', 'pjcFilter', 'statusFilter'
+        ));
+    }
 }
