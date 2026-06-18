@@ -221,27 +221,52 @@ class DeviceController extends Controller
 
   <script>
     var tok = null;
-    (function(){
-      var k = "cdvt_pending";
-      tok = localStorage.getItem(k);
-      if(!tok){ tok = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,function(c){return(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)}); localStorage.setItem(k, tok); }
-      document.getElementById("tok").textContent = tok;
-    })();
-    function copyToken(){
-      navigator.clipboard.writeText(document.getElementById("tok").textContent.trim()).then(function(){
-        var b=event.target; b.textContent="✓ Copied!";
-        setTimeout(function(){b.textContent="📋 Copy Token"},2000);
+
+    function generateUUID() {
+      return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, function(c) {
+        return (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16);
       });
     }
+
+    (function(){
+      var k = "cdvt_pending";
+      try { tok = localStorage.getItem(k); } catch(e) { tok = null; }
+      if (!tok) {
+        tok = generateUUID();
+        try { localStorage.setItem(k, tok); } catch(e) { /* private mode — token shown but not persisted */ }
+      }
+      document.getElementById("tok").textContent = tok;
+    })();
+
+    function copyToken(){
+      var t = document.getElementById("tok").textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function(){
+          var b = document.querySelector(".btn-copy"); b.textContent="✓ Copied!";
+          setTimeout(function(){ b.textContent="📋 Copy Token"; }, 2000);
+        }).catch(function(){ fallbackCopy(t); });
+      } else {
+        fallbackCopy(t);
+      }
+    }
+    function fallbackCopy(t) {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand("copy"); } catch(e) {}
+      document.body.removeChild(ta);
+    }
     function openMail(){
-      var tokenText = document.getElementById("tok").textContent.trim();
+      var t = document.getElementById("tok").textContent.trim();
       var subject = encodeURIComponent("Device Token for Taurus CRM Approval");
-      var body = encodeURIComponent("Hi Admin,\n\nPlease approve my device token:\n\n" + tokenText + "\n\nThank you");
+      var body = encodeURIComponent("Hi Admin,\n\nPlease approve my device token:\n\n" + t + "\n\nThank you");
       window.location.href = "mailto:?subject=" + subject + "&body=" + body;
     }
     function activate(){
       document.getElementById("activateToken").value = tok;
       fetch("/sanctum/csrf-cookie").then(function(){
+        document.getElementById("activateForm").submit();
+      }).catch(function(){
         document.getElementById("activateForm").submit();
       });
     }

@@ -280,21 +280,31 @@ class PartnerDashboardController extends Controller
             ->whereNotNull('partner_id')
             ->whereNotNull('pending_contract_at')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId))
-            ->when($statusFilter, fn ($q) => $q->where('issuance_status', $statusFilter))
+            ->when($statusFilter, function ($q) use ($statusFilter) {
+                if ($statusFilter === 'Pending Draft') {
+                    $q->whereNotNull('pending_draft_at')->where('status', '!=', 'chargeback');
+                } elseif ($statusFilter === 'Chargeback') {
+                    $q->where('status', 'chargeback');
+                } else {
+                    $q->where('issuance_status', $statusFilter);
+                }
+            })
             ->when($search, fn ($q) => $q->where('cn_name', 'like', '%' . $search . '%'))
             ->whereBetween('sale_date', [$periodStart, $periodEnd]);
 
-        $monthlyContracts   = (clone $baseQuery)->count();
-        $issuedContracts    = (clone $baseQuery)->where('issuance_status', 'Issued')->count();
-        $notIssuedContracts = (clone $baseQuery)->where('issuance_status', 'Not Issued')->count();
-        $pendingContracts   = (clone $baseQuery)->where(function ($q) {
+        $monthlyContracts      = (clone $baseQuery)->count();
+        $issuedContracts       = (clone $baseQuery)->where('issuance_status', 'Issued')->where('status', '!=', 'chargeback')->whereNull('pending_draft_at')->count();
+        $notIssuedContracts    = (clone $baseQuery)->where('issuance_status', 'Not Issued')->count();
+        $pendingContracts      = (clone $baseQuery)->where(function ($q) {
             $q->whereNull('issuance_status')
               ->orWhere('issuance_status', 'Pending');
         })->count();
-        $draftContracts     = (clone $baseQuery)
+        $draftContracts        = (clone $baseQuery)
             ->whereNotNull('pending_draft_at')
             ->where('issuance_status', 'Issued')
+            ->where('status', '!=', 'chargeback')
             ->count();
+        $chargebackContracts   = (clone $baseQuery)->where('status', 'chargeback')->count();
 
         // ── Annual Premium (respects all active filters) ────────────────
         $totalAP = (clone $baseQuery)->sum(DB::raw('monthly_premium * 12'));
@@ -350,6 +360,7 @@ class PartnerDashboardController extends Controller
             'notIssuedContracts',
             'pendingContracts',
             'draftContracts',
+            'chargebackContracts',
             'totalAP',
             'revenueByCarrier',
             'leads',

@@ -85,14 +85,15 @@ class RestrictToAllowedDevice
             }
         }
 
-        // ── IP check — gates everyone without an approved token ───────────
-        if (! $this->isFromAllowedNetwork($request->ip())) {
-            return response('', 403);
-        }
-
-        // ── No token → show registration page (IP already cleared above) ──
+        // ── No token → show registration page so they can request access ──
+        // Registration is allowed from any IP; security comes from admin approval.
         if (empty($token)) {
             return $this->notRegisteredResponse($request);
+        }
+
+        // ── Has a token but it's not approved — enforce IP restriction ────────
+        if (! $this->isFromAllowedNetwork($request->ip())) {
+            return response('', 403);
         }
 
         // Token in cookie but not in DB → treat as unregistered
@@ -330,19 +331,32 @@ class RestrictToAllowedDevice
     var tok = null;
     (function(){
       var k = "cdvt_pending";
-      tok = localStorage.getItem(k);
-      if(!tok){ tok = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,function(c){return(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)}); localStorage.setItem(k, tok); }
+      try { tok = localStorage.getItem(k); } catch(e) { tok = null; }
+      if (!tok) {
+        tok = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,function(c){return(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)});
+        try { localStorage.setItem(k, tok); } catch(e) {}
+      }
       document.getElementById("tok").textContent = tok;
     })();
     function copyToken(){
-      navigator.clipboard.writeText(tok).then(function(){
-        var b=document.querySelectorAll(".btn")[0]; b.textContent="Copied!";
-        setTimeout(function(){b.textContent="Copy Token"},2000);
-      });
+      var t = tok;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function(){
+          var b=document.querySelectorAll(".btn")[0]; b.textContent="Copied!";
+          setTimeout(function(){b.textContent="Copy Token"},2000);
+        }).catch(function(){ fallbackCopy(t); });
+      } else { fallbackCopy(t); }
+    }
+    function fallbackCopy(t){
+      var ta=document.createElement("textarea"); ta.value=t; ta.style.position="fixed"; ta.style.opacity="0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta);
     }
     function activate(){
       document.getElementById("activateToken").value = tok;
       fetch("/sanctum/csrf-cookie").then(function(){
+        document.getElementById("activateForm").submit();
+      }).catch(function(){
         document.getElementById("activateForm").submit();
       });
     }

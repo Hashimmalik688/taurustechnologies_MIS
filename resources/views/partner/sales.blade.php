@@ -119,9 +119,11 @@
     <span class="pd-period-label" style="margin-left:.35rem;"><i class="bx bx-filter"></i> Status</span>
     <select name="status" class="pd-period-input" style="width:auto;">
         <option value="">All</option>
-        <option value="Issued"     {{ request('status') === 'Issued'     ? 'selected' : '' }}>Issued</option>
-        <option value="Not Issued" {{ request('status') === 'Not Issued' ? 'selected' : '' }}>Not Issued</option>
-        <option value="Pending"    {{ request('status') === 'Pending'    ? 'selected' : '' }}>Pending</option>
+        <option value="Issued"        {{ request('status') === 'Issued'        ? 'selected' : '' }}>Issued</option>
+        <option value="Pending Draft" {{ request('status') === 'Pending Draft' ? 'selected' : '' }}>Pending Draft</option>
+        <option value="Not Issued"    {{ request('status') === 'Not Issued'    ? 'selected' : '' }}>Not Issued</option>
+        <option value="Pending"       {{ request('status') === 'Pending'       ? 'selected' : '' }}>Pending</option>
+        <option value="Chargeback"    {{ request('status') === 'Chargeback'    ? 'selected' : '' }}>Chargeback</option>
     </select>
 
     <input type="text" name="search" class="pd-period-input" style="width:160px;" placeholder="Search customer…" value="{{ request('search') }}">
@@ -136,13 +138,21 @@
 @include('partner.partials.carrier-filter')
 
 {{-- Stats strip --}}
-<div class="pd-stats" style="grid-template-columns:repeat(5,1fr);">
+<div class="pd-stats" style="grid-template-columns:repeat(7,1fr);">
     <div class="pd-stat">
         <div class="pd-stat-icon si-violet"><i class="bx bx-trending-up"></i></div>
         <div>
             <div class="pd-stat-val">{{ $monthlyContracts }}</div>
             <div class="pd-stat-lbl">Total Sales</div>
             <div class="pd-stat-sub">in selected period</div>
+        </div>
+    </div>
+    <div class="pd-stat">
+        <div class="pd-stat-icon si-amber"><i class="bx bx-time"></i></div>
+        <div>
+            <div class="pd-stat-val">{{ $pendingContracts }}</div>
+            <div class="pd-stat-lbl">Pending</div>
+            <div class="pd-stat-sub">awaiting carrier</div>
         </div>
     </div>
     <div class="pd-stat">
@@ -154,11 +164,27 @@
         </div>
     </div>
     <div class="pd-stat">
+        <div class="pd-stat-icon si-blue"><i class="bx bx-file"></i></div>
+        <div>
+            <div class="pd-stat-val">{{ $draftContracts }}</div>
+            <div class="pd-stat-lbl">Pending Draft</div>
+            <div class="pd-stat-sub">awaiting payment</div>
+        </div>
+    </div>
+    <div class="pd-stat">
         <div class="pd-stat-icon si-amber"><i class="bx bx-x-circle"></i></div>
         <div>
             <div class="pd-stat-val">{{ $notIssuedContracts }}</div>
             <div class="pd-stat-lbl">Not Issued</div>
-            <div class="pd-stat-sub">{{ $pendingContracts }} pending</div>
+            <div class="pd-stat-sub">carrier rejected</div>
+        </div>
+    </div>
+    <div class="pd-stat">
+        <div class="pd-stat-icon" style="background:rgba(220,38,38,.1);color:#dc2626;"><i class="bx bx-revision"></i></div>
+        <div>
+            <div class="pd-stat-val">{{ $chargebackContracts }}</div>
+            <div class="pd-stat-lbl">Chargeback</div>
+            <div class="pd-stat-sub">commission reversed</div>
         </div>
     </div>
     <div class="pd-stat">
@@ -167,14 +193,6 @@
             <div class="pd-stat-val">${{ number_format($revenueByCarrier->sum('partner_share'), 0) }}</div>
             <div class="pd-stat-lbl">Your Earned Share</div>
             <div class="pd-stat-sub">After {{ $taurusPct }}% Taurus fee</div>
-        </div>
-    </div>
-    <div class="pd-stat">
-        <div class="pd-stat-icon" style="background:rgba(8,145,178,.12);color:#0891b2;"><i class="bx bx-dollar-circle"></i></div>
-        <div>
-            <div class="pd-stat-val">${{ number_format($totalAP, 0) }}</div>
-            <div class="pd-stat-lbl">Annual Premium (AP)</div>
-            <div class="pd-stat-sub">Premium × 12 · filtered</div>
         </div>
     </div>
 </div>
@@ -253,14 +271,24 @@
                         @foreach($leads as $lead)
                         @php
                             $isStatus = $lead->issuance_status ?? null;
-                            $scCls = match($isStatus) {
-                                'Issued'     => 'sc-ok',
-                                'Not Issued' => 'sc-danger',
-                                'Pending', 'Incomplete', null => 'sc-warn',
-                                default      => 'sc-def',
-                            };
-                            $statusLabel = $isStatus ?? 'Pending';
-                            $isDraft = !empty($lead->pending_draft_at) && $isStatus === 'Issued';
+                            $isChargeback = $lead->status === 'chargeback';
+                            $isPendingDraft = !empty($lead->pending_draft_at) && $isStatus === 'Issued' && !$isChargeback;
+                            if ($isChargeback) {
+                                $scCls = 'sc-danger';
+                                $statusLabel = 'Chargeback';
+                            } elseif ($isPendingDraft) {
+                                $scCls = 'sc-info';
+                                $statusLabel = 'Pending Draft';
+                            } else {
+                                $scCls = match($isStatus) {
+                                    'Issued'     => 'sc-ok',
+                                    'Not Issued' => 'sc-danger',
+                                    'Pending', 'Incomplete', null => 'sc-warn',
+                                    default      => 'sc-def',
+                                };
+                                $statusLabel = $isStatus ?? 'Pending';
+                            }
+                            $isDraft = false;
 
                             // Policy type display
                             $policyType    = $lead->policy_type ?? null;
