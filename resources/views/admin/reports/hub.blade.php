@@ -108,6 +108,28 @@
             </a>
             @endcanViewModule
 
+            @canViewModule('report-peregrine-performance')
+            <a href="{{ route('settings.reports.peregrine-performance-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-trophy"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Peregrine Performance Report</div>
+                    <p class="hub-card-desc">Per-agent leaderboard — Approved, Paid, Draft, Not Issued &amp; Declined counts with paid rate ranking so you can see who is performing best</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
+            @canViewModule('report-ravens-performance')
+            <a href="{{ route('settings.reports.ravens-performance-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-trophy"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Ravens Performance Report</div>
+                    <p class="hub-card-desc">Per-agent Ravens leaderboard — Approved, Paid, Draft, Not Issued &amp; Declined counts with paid rate ranking</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
             @canViewModule('report-zoom-logs')
             <a href="{{ route('settings.reports.zoom-logs') }}" class="hub-card">
                 <div class="hub-card-icon"><i class="bx bx-video"></i></div>

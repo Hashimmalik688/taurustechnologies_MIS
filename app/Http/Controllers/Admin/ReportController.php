@@ -1811,4 +1811,178 @@ class ReportController extends Controller
             'closerFilter', 'validatorFilter', 'pjcFilter', 'statusFilter'
         ));
     }
+
+    public function peregrinePerformanceReport(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-peregrine-performance'), 403, 'Access denied.');
+        $data = $this->buildTeamPerformanceData($request, \App\Support\Teams::PEREGRINE, \App\Support\Roles::PEREGRINE_CLOSER, \App\Support\Roles::VERIFIER, 'managed_by');
+        return view('admin.reports.peregrine-performance-report', array_merge($data, [
+            'teamLabel'   => 'Peregrine',
+            'teamColor'   => '#1a8754',
+            'pjcLabel'    => 'PJC — Junior Closers',
+            'closerLabel' => 'Closers',
+            'reportRoute' => 'settings.reports.peregrine-performance-report',
+            'printRoute'  => 'settings.reports.peregrine-performance-report.print',
+        ]));
+    }
+
+    public function peregrinePerformanceReportPrint(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-peregrine-performance'), 403, 'Access denied.');
+        $data = $this->buildTeamPerformanceData($request, \App\Support\Teams::PEREGRINE, \App\Support\Roles::PEREGRINE_CLOSER, \App\Support\Roles::VERIFIER, 'managed_by');
+        return view('admin.reports.peregrine-performance-print', array_merge($data, [
+            'teamLabel'   => 'Peregrine',
+            'teamColor'   => '#1a8754',
+            'pjcLabel'    => 'PJC — Junior Closers',
+            'closerLabel' => 'Closers',
+            'reportRoute' => 'settings.reports.peregrine-performance-report',
+            'printRoute'  => 'settings.reports.peregrine-performance-report.print',
+        ]));
+    }
+
+    public function ravensPerformanceReport(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-ravens-performance'), 403, 'Access denied.');
+        $data = $this->buildTeamPerformanceData($request, \App\Support\Teams::RAVENS, null, null, 'closer_id');
+        return view('admin.reports.peregrine-performance-report', array_merge($data, [
+            'teamLabel'   => 'Ravens',
+            'teamColor'   => '#7c3aed',
+            'pjcLabel'    => '',
+            'closerLabel' => 'Closers',
+            'reportRoute' => 'settings.reports.ravens-performance-report',
+            'printRoute'  => 'settings.reports.ravens-performance-report.print',
+        ]));
+    }
+
+    public function ravensPerformanceReportPrint(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-ravens-performance'), 403, 'Access denied.');
+        $data = $this->buildTeamPerformanceData($request, \App\Support\Teams::RAVENS, null, null, 'closer_id');
+        return view('admin.reports.peregrine-performance-print', array_merge($data, [
+            'teamLabel'   => 'Ravens',
+            'teamColor'   => '#7c3aed',
+            'pjcLabel'    => '',
+            'closerLabel' => 'Closers',
+            'reportRoute' => 'settings.reports.ravens-performance-report',
+            'printRoute'  => 'settings.reports.ravens-performance-report.print',
+        ]));
+    }
+
+    private function buildPeregrinePerformanceData(Request $request): array
+    {
+        return $this->buildTeamPerformanceData($request, \App\Support\Teams::PEREGRINE, \App\Support\Roles::PEREGRINE_CLOSER, \App\Support\Roles::VERIFIER, 'managed_by');
+    }
+
+    private function buildTeamPerformanceData(Request $request, ?string $team, ?string $closerRole, ?string $pjcRole, string $closerField = 'managed_by'): array
+    {
+        $dateFrom     = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo       = $request->get('date_to',   now()->toDateString());
+        $closerFilter = $request->get('closer_id');
+
+        // null closerRole = no role filtering (Ravens pattern — show everyone with the field set)
+        $closerIds = $closerRole ? \App\Models\User::role($closerRole)->pluck('id') : collect();
+        $pjcIds    = $pjcRole    ? \App\Models\User::role($pjcRole)->pluck('id')    : collect();
+
+        $query = \App\Models\Lead::where('team', $team)
+            ->whereNotNull('sale_at')
+            ->whereDate('sale_at', '>=', $dateFrom)
+            ->whereDate('sale_at', '<=', $dateTo);
+
+        if ($closerFilter) {
+            $query->where($closerField, $closerFilter);
+        }
+
+        $leads = $query->with(['assignedCloser:id,name', 'verifier:id,name'])
+            ->select(
+                'id', 'cn_name', 'monthly_premium', 'coverage_amount',
+                'policy_type', 'state', 'carrier_name',
+                'managed_by', 'closer_name', 'closer_id',
+                'verified_by', 'account_verified_by',
+                'sale_at', 'pending_contract_at', 'pending_draft_at',
+                'paid_at', 'not_issued_at', 'declined_at'
+            )
+            ->get();
+
+        $leads = $leads->map(function ($lead) {
+            if ($lead->declined_at)            { $lead->sale_stage = 'declined';   }
+            elseif ($lead->paid_at)            { $lead->sale_stage = 'paid';       }
+            elseif ($lead->not_issued_at)      { $lead->sale_stage = 'not_issued'; }
+            elseif ($lead->pending_draft_at)   { $lead->sale_stage = 'draft';      }
+            elseif ($lead->pending_contract_at){ $lead->sale_stage = 'approved';   }
+            else                               { $lead->sale_stage = 'pending';    }
+            return $lead;
+        });
+
+        $kpis = [
+            'total'         => $leads->count(),
+            'paid'          => $leads->where('sale_stage', 'paid')->count(),
+            'approved'      => $leads->where('sale_stage', 'approved')->count(),
+            'draft'         => $leads->where('sale_stage', 'draft')->count(),
+            'not_issued'    => $leads->where('sale_stage', 'not_issued')->count(),
+            'declined'      => $leads->where('sale_stage', 'declined')->count(),
+            'pending'       => $leads->where('sale_stage', 'pending')->count(),
+            'total_premium' => $leads->where('sale_stage', 'paid')->sum('monthly_premium'),
+        ];
+
+        $buildRows = function ($collection, $nameResolver) {
+            $total = $collection->count();
+            $paid  = $collection->where('sale_stage', 'paid')->count();
+            return (object) [
+                'agent_id'   => $collection->first()->{'_group_id'},
+                'agent_name' => $nameResolver($collection),
+                'total'      => $total,
+                'paid'       => $paid,
+                'approved'   => $collection->where('sale_stage', 'approved')->count(),
+                'draft'      => $collection->where('sale_stage', 'draft')->count(),
+                'not_issued' => $collection->where('sale_stage', 'not_issued')->count(),
+                'declined'   => $collection->where('sale_stage', 'declined')->count(),
+                'pending'    => $collection->where('sale_stage', 'pending')->count(),
+                'paid_rate'  => $total > 0 ? round(($paid / $total) * 100, 1) : 0,
+                'premium'    => $collection->where('sale_stage', 'paid')->sum('monthly_premium'),
+                'leads'      => $collection->sortByDesc('sale_at')->values(),
+            ];
+        };
+
+        // Closers: apply role filter only when a closerRole was given AND it resolved IDs;
+        // otherwise show everyone who has the closerField set (Ravens pattern)
+        $closerLeads = ($closerRole && $closerIds->isNotEmpty())
+            ? $leads->filter(fn($l) => $l->{$closerField} && $closerIds->contains($l->{$closerField}))
+            : $leads->filter(fn($l) => (bool) $l->{$closerField});
+
+        $agentRows = $closerLeads
+            ->each(fn($l) => $l->{'_group_id'} = $l->{$closerField})
+            ->groupBy($closerField)
+            ->map(fn($g) => $buildRows($g, fn($g) => $g->first()->assignedCloser?->name ?? $g->first()->closer_name ?? 'Unknown'))
+            ->sortByDesc('paid_rate')
+            ->values();
+
+        // PJCs: only if a pjcRole was provided for this team
+        $pjcRows = $pjcIds->isNotEmpty()
+            ? $leads
+                ->filter(fn($l) => $l->verified_by && $pjcIds->contains($l->verified_by))
+                ->each(fn($l) => $l->{'_group_id'} = $l->verified_by)
+                ->groupBy('verified_by')
+                ->map(fn($g) => $buildRows($g, fn($g) => $g->first()->verifier?->name ?? $g->first()->account_verified_by ?? 'Unknown'))
+                ->sortByDesc('paid_rate')
+                ->values()
+            : collect();
+
+        // Closer options for the filter dropdown (unfiltered — all closers in the period)
+        $allCloserLeads = \App\Models\Lead::where('team', $team)
+            ->whereNotNull('sale_at')
+            ->whereNotNull($closerField)
+            ->whereDate('sale_at', '>=', $dateFrom)
+            ->whereDate('sale_at', '<=', $dateTo)
+            ->with('assignedCloser:id,name')
+            ->select($closerField, 'managed_by', 'closer_name', 'closer_id')
+            ->get();
+
+        $closerOptions = $allCloserLeads
+            ->groupBy($closerField)
+            ->map(fn($g) => ['id' => $g->first()->{$closerField}, 'name' => $g->first()->assignedCloser?->name ?? $g->first()->closer_name ?? 'Unknown'])
+            ->sortBy('name')
+            ->values();
+
+        return compact('kpis', 'agentRows', 'pjcRows', 'dateFrom', 'dateTo', 'closerFilter', 'closerOptions');
+    }
 }

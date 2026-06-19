@@ -975,6 +975,10 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/closer-report/drilldown', [CloserReportController::class, 'drilldown'])->name('closer-report.drilldown')->middleware('role.permission:reports,view');
     Route::get('/peregrine-team-report', [ReportController::class, 'peregrineTeamReport'])->name('peregrine-team-report')->middleware('role.permission:reports,view');
     Route::get('/peregrine-sales-report', [ReportController::class, 'peregrineSalesReport'])->name('peregrine-sales-report')->middleware('role.permission:reports,view');
+    Route::get('/peregrine-performance-report', [ReportController::class, 'peregrinePerformanceReport'])->name('peregrine-performance-report')->middleware('role.permission:reports,view');
+    Route::get('/peregrine-performance-report/print', [ReportController::class, 'peregrinePerformanceReportPrint'])->name('peregrine-performance-report.print')->middleware('role.permission:reports,view');
+    Route::get('/ravens-performance-report', [ReportController::class, 'ravensPerformanceReport'])->name('ravens-performance-report')->middleware('role.permission:reports,view');
+    Route::get('/ravens-performance-report/print', [ReportController::class, 'ravensPerformanceReportPrint'])->name('ravens-performance-report.print')->middleware('role.permission:reports,view');
 
     // ── Carrier Commission Sheet (standalone) ──────────
     Route::prefix('carrier-sheet')->as('carrier-sheet.')->group(function () {
