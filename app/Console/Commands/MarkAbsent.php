@@ -41,19 +41,8 @@ class MarkAbsent extends Command
 
         $roles = $this->option('roles');
         if (empty($roles)) {
-            // default list of worker roles
-            $roles = [
-                Roles::EMPLOYEE,
-                Roles::VERIFIER,
-                Roles::RAVENS_CLOSER,
-                Roles::PEREGRINE_CLOSER,
-                Roles::PEREGRINE_VALIDATOR,
-                Roles::RETENTION_OFFICER,
-                Roles::QA,
-                Roles::HR,
-                Roles::MANAGER,
-                Roles::COORDINATOR,
-            ];
+            // Default to the shared tracked-attendance roster (single source of truth).
+            $roles = Roles::TRACKABLE_ATTENDANCE;
         }
 
         $cutoff = $this->option('cutoff') ?: '09:30';

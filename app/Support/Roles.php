@@ -57,6 +57,30 @@ class Roles
         self::RETENTION_OFFICER,
     ];
 
+    /**
+     * Roles whose attendance is tracked (roster, absentee list, stats,
+     * print grids, and the nightly attendance:mark-absent job).
+     *
+     * Single source of truth — reference this instead of redeclaring the
+     * list per call site, so the display roster and the absent-marking job
+     * can never drift out of sync.
+     */
+    public const TRACKABLE_ATTENDANCE = [
+        self::EMPLOYEE,
+        self::PEREGRINE_CLOSER,
+        self::PEREGRINE_VALIDATOR,
+        self::PEREGRINE_MANAGER,
+        self::VERIFIER,
+        self::RAVENS_CLOSER,
+        self::MANAGER,
+        self::HR,
+        self::QA,
+        self::RETENTION_OFFICER,
+        self::COORDINATOR,
+        self::SUPER_ADMIN,
+        self::IT_MANAGER,
+    ];
+
     // ── Helpers ────────────────────────────────────────────────────────
 
     /**

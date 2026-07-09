@@ -17,21 +17,8 @@ class AttendanceController extends Controller
 {
     private $attendanceService;
 
-    // Roles that should track attendance (all non-admin roles)
-    private $trackableRoles = [
-        Roles::EMPLOYEE,
-        Roles::PEREGRINE_CLOSER,
-        Roles::PEREGRINE_VALIDATOR,
-        Roles::VERIFIER,
-        Roles::RAVENS_CLOSER,
-        Roles::MANAGER,
-        Roles::HR,
-        Roles::QA,
-        Roles::RETENTION_OFFICER,
-        Roles::COORDINATOR,
-        Roles::SUPER_ADMIN,
-        Roles::IT_MANAGER,
-    ];
+    // Roles whose attendance is tracked — single source of truth in Roles.
+    private $trackableRoles = Roles::TRACKABLE_ATTENDANCE;
 
     public function __construct(AttendanceService $attendanceService)
     {
