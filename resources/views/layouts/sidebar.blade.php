@@ -294,6 +294,10 @@
                         <i class="bx bx-user-circle"></i>
                         <span class="menu-text">Partners</span>
                     </a>
+                    <a href="{{ route('admin.cc-partners.index') }}" class="dropdown-item {{ Request::is('admin/cc-partners*') ? 'active' : '' }}">
+                        <i class="bx bx-buildings"></i>
+                        <span class="menu-text">CC Partners</span>
+                    </a>
                 @endcanViewModule
 
                 @canViewModule('carriers')

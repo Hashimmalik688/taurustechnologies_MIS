@@ -53,6 +53,18 @@ use App\Support\Roles;
 |--------------------------------------------------------------------------
 */
 
+// CC Partner portal — clean login at the root of the cc subdomain
+// (cc.taurustechnologies.co/login). Registered BEFORE Auth::routes so it wins
+// over the employee /login for that host only. Reuses the partner guard/controller;
+// the rest of the portal continues to live under /partner.
+Route::domain('cc.taurustechnologies.co')->middleware('prevent.user')->group(function () {
+    Route::get('/', fn () => redirect()->route('cc.login'));
+    Route::get('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'showLoginForm'])->name('cc.login');
+    Route::post('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'login'])
+        ->middleware('throttle:partner-login')
+        ->name('cc.login.submit');
+});
+
 // Authentication routes (without registration)
 Auth::routes(['register' => false, 'reset' => false, 'confirm' => false, 'verify' => false]);
 
@@ -72,6 +84,17 @@ Route::prefix('partner')->group(function () {
         Route::get('carriers', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'carriers'])->name('partner.carriers');
         Route::get('sales', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'sales'])->name('partner.sales');
         Route::get('ledger', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'ledger'])->name('partner.ledger');
+
+        // ── Partner sale intake + tracking ──────────────────────────────
+        Route::get('submit-sale', [App\Http\Controllers\Partner\PartnerSalesController::class, 'create'])->name('partner.sales.create');
+        Route::post('submit-sale', [App\Http\Controllers\Partner\PartnerSalesController::class, 'store'])->name('partner.sales.store');
+        Route::get('submissions', [App\Http\Controllers\Partner\PartnerSalesController::class, 'submissions'])->name('partner.submissions');
+
+        // ── Company-only: manage closer logins ──────────────────────────
+        Route::get('closers', [App\Http\Controllers\Partner\PartnerCloserController::class, 'index'])->name('partner.closers.index');
+        Route::post('closers', [App\Http\Controllers\Partner\PartnerCloserController::class, 'store'])->name('partner.closers.store');
+        Route::patch('closers/{id}/toggle', [App\Http\Controllers\Partner\PartnerCloserController::class, 'toggleActive'])->name('partner.closers.toggle');
+        Route::patch('closers/{id}/reset-password', [App\Http\Controllers\Partner\PartnerCloserController::class, 'resetPassword'])->name('partner.closers.reset-password');
         Route::post('mark-commission-paid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionPaid'])->name('partner.mark-commission-paid');
         Route::post('mark-commission-unpaid', [App\Http\Controllers\Partner\PartnerDashboardController::class, 'markCommissionUnpaid'])->name('partner.mark-commission-unpaid');
         Route::post('logout', [App\Http\Controllers\Partner\PartnerAuthController::class, 'logout'])->name('partner.logout');
@@ -217,6 +240,16 @@ Route::group(['prefix' => 'admin/partners', 'as' => 'admin.partners.', 'middlewa
     Route::put('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'update'])->name('update')->middleware('role.permission:partners,edit');
     Route::delete('/{id}', [App\Http\Controllers\Admin\PartnerController::class, 'destroy'])->name('destroy')->middleware('role.permission:partners,full');
     Route::delete('/{partnerId}/carriers/{carrierId}', [App\Http\Controllers\Admin\PartnerController::class, 'removeCarrierAssignment'])->name('remove-carrier-assignment')->middleware('role.permission:partners,edit');
+});
+
+// CC Partners Management (outsource sales companies) — reuses the partners permission
+Route::group(['prefix' => 'admin/cc-partners', 'as' => 'admin.cc-partners.', 'middleware' => ['auth', Roles::middleware(...Roles::ALL)]], function () {
+    Route::get('/', [App\Http\Controllers\Admin\CcPartnerController::class, 'index'])->name('index')->middleware('role.permission:partners,view');
+    Route::get('/create', [App\Http\Controllers\Admin\CcPartnerController::class, 'create'])->name('create')->middleware('role.permission:partners,edit');
+    Route::post('/store', [App\Http\Controllers\Admin\CcPartnerController::class, 'store'])->name('store')->middleware('role.permission:partners,edit');
+    Route::get('/{id}/edit', [App\Http\Controllers\Admin\CcPartnerController::class, 'edit'])->name('edit')->middleware('role.permission:partners,edit');
+    Route::put('/{id}', [App\Http\Controllers\Admin\CcPartnerController::class, 'update'])->name('update')->middleware('role.permission:partners,edit');
+    Route::patch('/{id}/toggle', [App\Http\Controllers\Admin\CcPartnerController::class, 'toggleActive'])->name('toggle')->middleware('role.permission:partners,edit');
 });
 
 // Insurance Carriers Management — access controlled by role.permission:carriers,level

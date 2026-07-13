@@ -188,7 +188,13 @@
             </div>
             @endif
 
-            <form method="POST" action="{{ route('partner.login.submit') }}">
+            @php
+                // On the cc subdomain the form posts to the clean /login; elsewhere to /partner/login.
+                $loginAction = (request()->getHost() === 'cc.taurustechnologies.co' && \Illuminate\Support\Facades\Route::has('cc.login.submit'))
+                    ? route('cc.login.submit')
+                    : route('partner.login.submit');
+            @endphp
+            <form method="POST" action="{{ $loginAction }}">
                 @csrf
 
                 <div class="lc-group">

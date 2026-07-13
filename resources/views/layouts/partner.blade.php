@@ -273,7 +273,23 @@
             <a href="{{ route('partner.dashboard') }}" class="pp-nav-tab {{ request()->routeIs('partner.dashboard') ? 'active' : '' }}">
                 <i class="bx bx-grid-alt"></i> Dashboard
             </a>
-            @if(($AuthPartner->type ?? 'partner') === 'partner')
+            @php($ppType = $AuthPartner->type ?? 'partner')
+            {{-- CC Partners (outsource firms) + their closers: submit & track sales --}}
+            @if(in_array($ppType, ['cc_partner', 'closer']))
+            <a href="{{ route('partner.sales.create') }}" class="pp-nav-tab {{ request()->routeIs('partner.sales.create') ? 'active' : '' }}">
+                <i class="bx bx-plus-circle"></i> Submit Sale
+            </a>
+            <a href="{{ route('partner.submissions') }}" class="pp-nav-tab {{ request()->routeIs('partner.submissions') ? 'active' : '' }}">
+                <i class="bx bx-list-check"></i> Submissions
+            </a>
+            @endif
+            @if($ppType === 'cc_partner')
+            <a href="{{ route('partner.closers.index') }}" class="pp-nav-tab {{ request()->routeIs('partner.closers.*') ? 'active' : '' }}">
+                <i class="bx bx-group"></i> Closers
+            </a>
+            @endif
+            {{-- Affiliate partners: revenue sales & ledger (unchanged) --}}
+            @if($ppType === 'partner')
             <a href="{{ route('partner.sales') }}" class="pp-nav-tab {{ request()->routeIs('partner.sales') ? 'active' : '' }}">
                 <i class="bx bx-trending-up"></i> Sales
             </a>
@@ -281,9 +297,11 @@
                 <i class="bx bx-receipt"></i> Ledger
             </a>
             @endif
+            @unless(in_array($ppType, ['cc_partner', 'closer']))
             <a href="{{ route('partner.carriers') }}" class="pp-nav-tab {{ request()->routeIs('partner.carriers') ? 'active' : '' }}">
                 <i class="bx bx-briefcase"></i> Carriers &amp; States
             </a>
+            @endunless
             <div class="pp-nav-spacer"></div>
             {{-- Right-side nav extras from child views --}}
             @stack('nav-right')
