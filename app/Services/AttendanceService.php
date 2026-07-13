@@ -119,8 +119,10 @@ class AttendanceService
             }
         }
 
-        // Check office network unless forced
-        if (! $forceOffice && ! $this->isInOfficeNetwork()) {
+        // Check office network unless forced, or unless the office-only restriction
+        // is disabled. Set the `attendance_restrict_to_office` setting to true to
+        // re-enable office-network-only attendance marking.
+        if (Setting::get('attendance_restrict_to_office', false) && ! $forceOffice && ! $this->isInOfficeNetwork()) {
             return [
                 'success' => false,
                 'message' => 'Attendance can only be marked from office network.',
@@ -233,8 +235,8 @@ class AttendanceService
             ];
         }
 
-        // Check if user is in office network
-        if ($this->isInOfficeNetwork()) {
+        // Auto-mark unless office-only restriction is enabled and the user is off-network.
+        if (! Setting::get('attendance_restrict_to_office', false) || $this->isInOfficeNetwork()) {
             return $this->markAttendance($userId);
         }
 
