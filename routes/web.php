@@ -53,6 +53,18 @@ use App\Support\Roles;
 |--------------------------------------------------------------------------
 */
 
+// CC Partner portal — clean login at the root of the cc subdomain
+// (cc.taurustechnologies.co/login). Registered BEFORE Auth::routes so it wins
+// over the employee /login for that host only. Reuses the partner guard/controller;
+// the rest of the portal continues to live under /partner.
+Route::domain('cc.taurustechnologies.co')->middleware('prevent.user')->group(function () {
+    Route::get('/', fn () => redirect()->route('cc.login'));
+    Route::get('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'showLoginForm'])->name('cc.login');
+    Route::post('login', [App\Http\Controllers\Partner\PartnerAuthController::class, 'login'])
+        ->middleware('throttle:partner-login')
+        ->name('cc.login.submit');
+});
+
 // Authentication routes (without registration)
 Auth::routes(['register' => false, 'reset' => false, 'confirm' => false, 'verify' => false]);
 
