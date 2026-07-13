@@ -81,4 +81,67 @@ class Partner extends Authenticatable
     {
         return $query->where('type', 'agent');
     }
+
+    /**
+     * Scope: only CC Partner companies (outsource sales firms — distinct from
+     * affiliate `partner`/`agent` records; they have no ledger/commission).
+     */
+    public function scopeCcPartners($query)
+    {
+        return $query->where('type', 'cc_partner');
+    }
+
+    /**
+     * Scope: only closer-type (a CC Partner's sales staff who submit the sale form).
+     */
+    public function scopeClosers($query)
+    {
+        return $query->where('type', 'closer');
+    }
+
+    /**
+     * Closers belonging to this CC Partner (downline of type=closer).
+     */
+    public function closers()
+    {
+        return $this->hasMany(Partner::class, 'parent_partner_id')->where('type', 'closer');
+    }
+
+    /**
+     * The CC Partner this record belongs to. For a closer this is the parent;
+     * for a CC Partner it is itself.
+     */
+    public function company()
+    {
+        return $this->isCloser() ? $this->parent : $this;
+    }
+
+    /**
+     * A CC Partner company (can manage closers and see the submissions roll-up).
+     */
+    public function isCcPartner(): bool
+    {
+        return $this->type === 'cc_partner';
+    }
+
+    /**
+     * A CC Partner's closer (submits the sale form, sees own submissions).
+     */
+    public function isCloser(): bool
+    {
+        return $this->type === 'closer';
+    }
+
+    /**
+     * Partner ids whose submitted sales roll up under this record:
+     * a CC Partner sees itself + all its closers; a closer sees only itself.
+     */
+    public function salesScopeIds(): array
+    {
+        if ($this->isCcPartner()) {
+            return $this->closers()->pluck('id')->push($this->id)->all();
+        }
+
+        return [$this->id];
+    }
 }

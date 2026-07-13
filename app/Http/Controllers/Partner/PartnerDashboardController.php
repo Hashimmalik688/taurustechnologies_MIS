@@ -35,6 +35,12 @@ class PartnerDashboardController extends Controller
     {
         $partner = Auth::guard('partner')->user();
 
+        // ── CC Partner routing: outsource firms + their closers live on the ──
+        // submissions roll-up; they have no affiliate revenue/ledger dashboard.
+        if (in_array($partner->type, ['cc_partner', 'closer'], true)) {
+            return redirect()->route('partner.submissions');
+        }
+
         // ── Agent routing: agents get a simplified dashboard ──
         if ($partner->type === 'agent') {
             return $this->agentDashboard($partner);
