@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ChartOfAccount;
 use App\Models\LedgerJournalEntry;
 use App\Models\LedgerJournalEntryLine;
+use App\Support\SequenceLock;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -340,27 +341,34 @@ class LedgerService
         array   $lines,
         array   $extra = []
     ): LedgerJournalEntry {
-        return DB::transaction(function () use ($type, $date, $description, $reference, $lines, $extra) {
-            $totalDebit = array_sum(array_column($lines, 'debit'));
+        // Hold the sequence lock across the WHOLE transaction: entry_number is
+        // MAX(entry_number)+1, and under MySQL REPEATABLE READ a concurrent
+        // poster would still read the pre-insert max until this transaction
+        // commits. Locking outside DB::transaction keeps generation serialised
+        // through commit so two posts can't mint the same JE-YYYY-NNNN.
+        return SequenceLock::run('ledger_journal_entry', function () use ($type, $date, $description, $reference, $lines, $extra) {
+            return DB::transaction(function () use ($type, $date, $description, $reference, $lines, $extra) {
+                $totalDebit = array_sum(array_column($lines, 'debit'));
 
-            $entry = LedgerJournalEntry::create(array_merge([
-                'entry_number' => LedgerJournalEntry::generateEntryNumber(),
-                'entry_date'   => $date,
-                'type'         => $type,
-                'reference'    => $reference,
-                'description'  => $description,
-                'is_posted'    => true,
-                'total_debit'  => $totalDebit,
-                'created_by'   => Auth::id(),
-            ], $extra));
+                $entry = LedgerJournalEntry::create(array_merge([
+                    'entry_number' => LedgerJournalEntry::generateEntryNumber(),
+                    'entry_date'   => $date,
+                    'type'         => $type,
+                    'reference'    => $reference,
+                    'description'  => $description,
+                    'is_posted'    => true,
+                    'total_debit'  => $totalDebit,
+                    'created_by'   => Auth::id(),
+                ], $extra));
 
-            foreach ($lines as $lineData) {
-                $entry->lines()->create($lineData);
-            }
+                foreach ($lines as $lineData) {
+                    $entry->lines()->create($lineData);
+                }
 
-            $this->updateAccountBalances($entry->fresh('lines'));
+                $this->updateAccountBalances($entry->fresh('lines'));
 
-            return $entry;
+                return $entry;
+            });
         });
     }
 
@@ -397,22 +405,36 @@ class LedgerService
      */
     private function updateAccountBalances(LedgerJournalEntry $entry): void
     {
+        // Look up the account types in one query rather than find()-ing each
+        // account inside the loop (was N queries per posting).
+        $accountTypes = ChartOfAccount::whereIn('id', $entry->lines->pluck('account_id')->unique())
+            ->pluck('account_type', 'id');
+
+        // Aggregate the signed balance delta per account so each account is
+        // touched once, even if it appears on several lines of the same entry.
+        $deltas = [];
         foreach ($entry->lines as $line) {
-            /** @var ChartOfAccount $account */
-            $account = ChartOfAccount::find($line->account_id);
-            if (!$account) {
+            if (!isset($accountTypes[$line->account_id])) {
+                continue; // account no longer exists
+            }
+
+            $normalDebit = in_array($accountTypes[$line->account_id], ['Asset', 'Expense']);
+
+            $deltas[$line->account_id] = ($deltas[$line->account_id] ?? 0)
+                + ($normalDebit
+                    ? ($line->debit - $line->credit)
+                    : ($line->credit - $line->debit));
+        }
+
+        // Apply each delta as an atomic `current_balance = current_balance + ?`
+        // UPDATE. This avoids the read-modify-write lost-update race that a
+        // find()/`+=`/save() sequence has under concurrent postings.
+        foreach ($deltas as $accountId => $delta) {
+            if ((float) $delta === 0.0) {
                 continue;
             }
 
-            $normalDebit = in_array($account->account_type, ['Asset', 'Expense']);
-
-            if ($normalDebit) {
-                $account->current_balance += ($line->debit - $line->credit);
-            } else {
-                $account->current_balance += ($line->credit - $line->debit);
-            }
-
-            $account->save();
+            ChartOfAccount::whereKey($accountId)->increment('current_balance', $delta);
         }
     }
 

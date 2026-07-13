@@ -169,15 +169,6 @@ class CarrierSheetController extends Controller
             'period_month'      => 'nullable|date',
         ]);
 
-        // Auto-assign SR number
-        $maxSr = $rate->entries()->withoutTrashed()
-            ->when($validated['period_month'] ?? null, function ($q, $m) {
-                $parsed = \Carbon\Carbon::parse($m);
-                $q->whereYear('period_month', $parsed->year)
-                  ->whereMonth('period_month', $parsed->month);
-            })
-            ->max('sr_number');
-        $validated['sr_number'] = ($maxSr ?? 0) + 1;
         $validated['carrier_sheet_rate_id'] = $rate->id;
         $validated['created_by'] = auth()->id();
         $validated['premium'] = $validated['premium'] ?? 0;
@@ -189,9 +180,24 @@ class CarrierSheetController extends Controller
             $validated['period_month'] = \Carbon\Carbon::parse($validated['entry_date'])->startOfMonth()->toDateString();
         }
 
-        $entry = new CarrierSheetEntry($validated);
-        $this->service->recalculateEntry($entry);
-        $entry->save();
+        // Auto-assign SR number and save inside a per-rate sequence lock so two
+        // concurrent inserts can't read the same MAX(sr_number) and collide.
+        $entry = \App\Support\SequenceLock::run('carrier_sheet_entry:' . $rate->id, function () use ($rate, &$validated) {
+            $maxSr = $rate->entries()->withoutTrashed()
+                ->when($validated['period_month'] ?? null, function ($q, $m) {
+                    $parsed = \Carbon\Carbon::parse($m);
+                    $q->whereYear('period_month', $parsed->year)
+                      ->whereMonth('period_month', $parsed->month);
+                })
+                ->max('sr_number');
+            $validated['sr_number'] = ($maxSr ?? 0) + 1;
+
+            $entry = new CarrierSheetEntry($validated);
+            $this->service->recalculateEntry($entry);
+            $entry->save();
+
+            return $entry;
+        });
         
         // Clear cache for this carrier 
         $this->service->clearCache($rate->id, $validated['period_month'] ?? null);

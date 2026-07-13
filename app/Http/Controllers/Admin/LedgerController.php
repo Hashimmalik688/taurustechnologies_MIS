@@ -476,18 +476,20 @@ class LedgerController extends Controller
             $credit = $request->credit ?? 0;
 
             // Calculate the next serial number (excluding soft-deleted records)
-            $maxSerial = \App\Models\PettyCashLedger::withoutTrashed()->max('serial_number');
-            $nextSerialNumber = ($maxSerial ?? 0) + 1;
+            // and insert inside a sequence lock so two concurrent requests
+            // can't read the same MAX(serial_number) and create duplicates.
+            \App\Support\SequenceLock::run('petty_cash_ledger', function () use ($request, $debit, $credit) {
+                $maxSerial = \App\Models\PettyCashLedger::withoutTrashed()->max('serial_number');
 
-            // Create new entry
-            \App\Models\PettyCashLedger::create([
-                'serial_number' => $nextSerialNumber,
-                'date' => $request->date,
-                'description' => $request->description,
-                'head' => $request->head,
-                'debit' => $debit,
-                'credit' => $credit,
-            ]);
+                return \App\Models\PettyCashLedger::create([
+                    'serial_number' => ($maxSerial ?? 0) + 1,
+                    'date' => $request->date,
+                    'description' => $request->description,
+                    'head' => $request->head,
+                    'debit' => $debit,
+                    'credit' => $credit,
+                ]);
+            });
 
             return redirect()->route('petty-cash.index')->with('success', 'Entry created successfully');
         } catch (\Exception $e) {
