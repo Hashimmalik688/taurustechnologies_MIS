@@ -306,9 +306,9 @@
 <div class="kpi-grid mb-1">
     <div class="kpi-card kpi-blue ex-card">
         <div class="kpi-icon"><i class="bx bx-receipt"></i></div>
-        <div class="kpi-val" id="kpiTotalPremium" data-mtd="{{ number_format($total_revenue, 0) }}" data-today="{{ number_format($today_revenue, 0) }}">${{ number_format($total_revenue, 0) }}</div>
-        <div class="kpi-lbl" id="kpiTotalPremiumLbl">Total Premium · Period</div>
-        <div class="kpi-sub" id="kpiTotalPremiumSub">{{ $mtd_sales }} sales · {{ $revenue_period_label }}</div>
+        <div class="kpi-val" id="kpiTotalPremium" data-mtd="{{ number_format($total_revenue * 12, 0) }}" data-today="{{ number_format($today_revenue * 12, 0) }}">${{ number_format($total_revenue * 12, 0) }}</div>
+        <div class="kpi-lbl" id="kpiTotalPremiumLbl">Annual Premium</div>
+        <div class="kpi-sub" id="kpiTotalPremiumSub">{{ $mtd_sales }} sales · {{ $revenue_period_label }} (×12)</div>
     </div>
     <div class="kpi-card kpi-gold ex-card">
         <div class="kpi-icon"><i class="bx bx-trending-up"></i></div>
@@ -316,16 +316,16 @@
         <div class="kpi-lbl" id="kpiDailyAvgLbl">Daily Avg Premium</div>
         <div class="kpi-sub" id="kpiDailyAvgSub">{{ $distinct_sale_days }} active days</div>
     </div>
-    <div class="kpi-card kpi-green ex-card">
+    <div class="kpi-card kpi-green ex-card" style="cursor:pointer" onclick="location.href='{{ route('settings.reports.partner-commission-report') }}?period=' + currentPeriod" title="View commission breakdown per partner">
         <div class="kpi-icon"><i class="bx bx-dollar-circle"></i></div>
         <div class="kpi-val" id="kpiEstRevenue" data-mtd="{{ number_format($est_commission, 0) }}" data-today="{{ number_format($today_est_commission, 0) }}">${{ number_format($est_commission, 0) }}</div>
         <div class="kpi-lbl" id="kpiEstRevenueLbl">Est. Commission</div>
-        <div class="kpi-sub" id="kpiEstRevenueSub">premium × 9 × rate</div>
+        <div class="kpi-sub" id="kpiEstRevenueSub">premium × 9 × rate · click for per-partner</div>
     </div>
     <div class="kpi-card kpi-teal ex-card">
         <div class="kpi-icon"><i class="bx bx-transfer"></i></div>
         <div class="kpi-val" id="kpiSalesPeriod" data-mtd="{{ $submitted_count }}" data-today="{{ $today_sales }}">{{ $submitted_count }}</div>
-        <div class="kpi-lbl" id="kpiSalesPeriodLbl">Sales this Period</div>
+        <div class="kpi-lbl" id="kpiSalesPeriodLbl">Submissions this Period</div>
         <div class="kpi-sub" id="kpiSalesPeriodSub">validated + submitted</div>
     </div>
 </div>
@@ -342,12 +342,12 @@
     <div class="pipeline-stage ps-green">
         <i class="bx bx-check-double ps-icon"></i>
         <div class="ps-val" id="pipeApproved" data-mtd="{{ $approved_count }}" data-today="{{ $today_approved }}">{{ $approved_count }}</div>
-        <div class="ps-lbl" id="pipeLblApproved">Approved Period</div>
+        <div class="ps-lbl" id="pipeLblApproved">Submitted · Approved</div>
     </div>
     <div class="pipeline-stage ps-red">
         <i class="bx bx-x-circle ps-icon"></i>
         <div class="ps-val" id="pipeDeclined" data-mtd="{{ $sub_declined_count }}" data-today="{{ $today_declined }}">{{ $sub_declined_count }}</div>
-        <div class="ps-lbl" id="pipeLblDeclined">Declined Period</div>
+        <div class="ps-lbl" id="pipeLblDeclined">Submitted · Declined</div>
     </div>
     <div class="pipeline-stage" style="background:rgba(212,175,55,.06)">
         <i class="bx bx-stats ps-icon" style="color:#b89730"></i>
@@ -365,7 +365,7 @@
         {{-- Team Performance --}}
         <div class="ex-card sec-card">
             <div class="sec-hdr">
-                <h6><i class="bx bx-group"></i> Team Performance</h6>
+                <h6><i class="bx bx-group"></i> Team Performance <span class="bd bd-blue" style="font-size:.6rem;vertical-align:middle" title="Leads that reached the Pending Contract stage this period">Pending Contract</span></h6>
                 <div class="d-flex align-items-center gap-2">
                     <span class="last-updated"><i class="bx bx-time-five"></i> <span id="lastUpdated">–</span></span>
                     <div class="team-tabs">
@@ -380,7 +380,7 @@
                         <tr>
                             <th>Closer</th>
                             <th class="text-center">Today</th>
-                            <th class="text-center">MTD</th>
+                            <th class="text-center" title="Pending Contract this period">Contract</th>
                             <th class="text-center">Approved</th>
                             <th class="text-center">Declined</th>
                             <th style="min-width:60px">Progress</th>
@@ -405,6 +405,16 @@
                         <tr><td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No closers data</td></tr>
                         @endforelse
                     </tbody>
+                    <tfoot id="closerTableFoot">
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-center"><span class="bd bd-teal">{{ collect($sales_per_closer)->sum('today') }}</span></td>
+                            <td class="text-center"><span class="bd bd-blue">{{ collect($sales_per_closer)->sum('mtd') }}</span></td>
+                            <td class="text-center"><span class="bd bd-green">{{ collect($sales_per_closer)->sum('approvedMTD') }}</span></td>
+                            <td class="text-center"><span class="bd bd-red">{{ collect($sales_per_closer)->sum('declinedMTD') }}</span></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -423,11 +433,11 @@
                     </div>
                     <div class="col-4 text-center">
                         <div id="revSubmissions" style="font-size:1.3rem;font-weight:800;color:#556ee6">{{ $mtd_sales }}</div>
-                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Contracted</div>
+                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Pending Contract</div>
                     </div>
                     <div class="col-4 text-center">
                         <div id="revAvgSale" style="font-size:1.3rem;font-weight:800;color:#b89730">${{ $mtd_sales > 0 ? number_format($total_revenue / $mtd_sales, 0) : '0' }}</div>
-                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Avg / Sale</div>
+                        <div style="font-size:0.6rem;text-transform:uppercase;font-weight:700;letter-spacing:.4px;color:var(--bs-surface-500)">Avg / Contract</div>
                     </div>
                 </div>
                 <div id="revCarrierBars">
@@ -473,8 +483,8 @@
                     <thead>
                         <tr>
                             <th>Manager</th>
-                            <th class="text-center">PC</th>
-                            <th class="text-center">Dec</th>
+                            <th class="text-center" title="Pending Contract">PC</th>
+                            <th class="text-center" title="Declined">Dec</th>
                             <th style="text-align:right">Premium</th>
                         </tr>
                     </thead>
@@ -691,7 +701,7 @@ function rebuildDataAttrs(d) {
         const el = document.getElementById(id); if (!el) return;
         el.dataset.mtd = mtd; el.dataset.today = today;
     };
-    setData('kpiTotalPremium', fmt(mtdRev),   fmt(tdRev));
+    setData('kpiTotalPremium', fmt(mtdRev * 12), fmt(tdRev * 12));
     setData('kpiDailyAvg',    fmt(dailyAvg), fmt(tdRev));
     setData('kpiEstRevenue',  fmt(estComm),  fmt(todayEst));
     setData('kpiSalesPeriod', submitted,     tdSales);
@@ -700,7 +710,7 @@ function rebuildDataAttrs(d) {
 
     // Update sub-text for total premium
     const tpSub = document.getElementById('kpiTotalPremiumSub');
-    if (tpSub && d.mtdSales !== undefined) tpSub.textContent = d.mtdSales + ' sales · ' + (d.revPeriodLabel || '');
+    if (tpSub && d.mtdSales !== undefined) tpSub.textContent = d.mtdSales + ' sales · ' + (d.revPeriodLabel || '') + ' (×12)';
 
     // Update pending / action needed (period-fixed, not toggle-sensitive)
     const pendingEl = document.getElementById('pipePending');
@@ -743,21 +753,21 @@ function setViewMode(mode) {
 
     // Labels
     const lblMap = {
-        kpiTotalPremiumLbl: mode === 'mtd' ? 'Total Premium · Period' : 'Today Total Premium',
+        kpiTotalPremiumLbl: mode === 'mtd' ? 'Annual Premium' : 'Today Annual Premium',
         kpiDailyAvgLbl:     mode === 'mtd' ? 'Daily Avg Premium'      : 'Today Revenue',
         kpiDailyAvgSub:     mode === 'mtd' ? days + ' active days'     : 'Today · PT',
         kpiEstRevenueLbl:   'Est. Commission',
-        kpiEstRevenueSub:   mode === 'mtd' ? 'premium × 9 × rate'     : 'Today · PT',
-        kpiSalesPeriodLbl:  mode === 'mtd' ? 'Sales this Period'       : 'Sales Today',
+        kpiEstRevenueSub:   (mode === 'mtd' ? 'premium × 9 × rate' : 'Today · PT') + ' · click for per-partner',
+        kpiSalesPeriodLbl:  mode === 'mtd' ? 'Submissions this Period' : 'Submissions Today',
         kpiSalesPeriodSub:  mode === 'mtd' ? 'validated + submitted'   : 'Today · PT',
-        pipeLblApproved:    'Approved '  + suffix,
-        pipeLblDeclined:    'Declined '  + suffix,
+        pipeLblApproved:    'Submitted · Approved' + (mode === 'today' ? ' Today' : ''),
+        pipeLblDeclined:    'Submitted · Declined' + (mode === 'today' ? ' Today' : ''),
         closerChartLbl:     suffix,
     };
     Object.entries(lblMap).forEach(([id, txt]) => { const el = document.getElementById(id); if (el) el.textContent = txt; });
 
     // Approval rate
-    const sub = +(document.getElementById('pipeSubmitted')?.dataset[mode] || 0);
+    const sub = +(document.getElementById('kpiSalesPeriod')?.dataset[mode] || 0);
     const app = +(document.getElementById('pipeApproved')?.dataset[mode]  || 0);
     const rateEl = document.getElementById('pipeApprovalRate');
     if (rateEl) rateEl.textContent = sub > 0 ? Math.round(app / sub * 100) + '%' : '0%';
@@ -802,8 +812,10 @@ function switchTeam(team) {
 
 function renderClosers(closers) {
     const tbody = document.getElementById('closerTable');
+    const tfoot = document.getElementById('closerTableFoot');
     if (!closers || !closers.length) {
         tbody.innerHTML='<tr><td colspan="6" class="text-center py-3" style="color:var(--bs-surface-400);font-size:.78rem">No closers in this team</td></tr>';
+        if (tfoot) tfoot.innerHTML = '';
         return;
     }
     tbody.innerHTML = closers.map(c=>{
@@ -817,6 +829,25 @@ function renderClosers(closers) {
             <td><div style="height:6px;background:var(--bs-surface-200);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#556ee6,#8b9cf7);border-radius:3px"></div></div></td>
         </tr>`;
     }).join('');
+
+    if (tfoot) {
+        const totals = closers.reduce((acc, c) => {
+            acc.today    += c.today || 0;
+            acc.mtd      += c.mtd || 0;
+            acc.approved += c.approved || c.approvedMTD || 0;
+            acc.declined += c.declined || c.declinedMTD || 0;
+            return acc;
+        }, { today: 0, mtd: 0, approved: 0, declined: 0 });
+
+        tfoot.innerHTML = `<tr>
+            <td>Total</td>
+            <td class="text-center"><span class="bd bd-teal">${totals.today}</span></td>
+            <td class="text-center"><span class="bd bd-blue">${totals.mtd}</span></td>
+            <td class="text-center"><span class="bd bd-green">${totals.approved}</span></td>
+            <td class="text-center"><span class="bd bd-red">${totals.declined}</span></td>
+            <td></td>
+        </tr>`;
+    }
 }
 
 function renderManagerTable(managers) {

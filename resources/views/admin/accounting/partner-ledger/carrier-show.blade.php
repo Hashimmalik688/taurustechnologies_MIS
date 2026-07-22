@@ -113,12 +113,38 @@
     .stmt-header { background:#2d2d2d !important; -webkit-print-color-adjust:exact; }
     body { font-size:11px; }
 }
+
+/* ── Period filter bar ── */
+.pl-period-bar {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    background:#fff; border:1px solid #dee2e6; border-radius:5px; padding:10px 16px; margin-bottom:16px;
+}
+.pl-period-nav { display:flex; align-items:center; gap:.6rem; font-size:.85rem; }
+.pl-period-nav a.pl-nav-arrow {
+    display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+    border:1px solid #dee2e6; color:inherit; text-decoration:none; transition:all .15s;
+}
+.pl-period-nav a.pl-nav-arrow:hover { background:rgba(212,175,55,.14); border-color:var(--acct-gold); }
+.pl-period-nav .pl-period-lbl { font-weight:700; min-width:160px; text-align:center; }
+.pl-period-toggle { display:flex; gap:6px; }
+.pl-period-toggle a {
+    font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:4px; text-decoration:none;
+    border:1px solid #dee2e6; color:#6c757d; transition:all .15s;
+}
+.pl-period-toggle a.active { background:var(--acct-gold); border-color:var(--acct-gold); color:#1a1a1a; }
+.pl-period-toggle a:not(.active):hover { background:#f8f9fa; }
 </style>
 @endsection
 
 @section('content')
 @include('admin.accounting._nav')
 <div class="container-fluid">
+
+    @php
+        $backParams = ['partnerId' => $partner->id];
+        if ($period) { $backParams['period'] = $period['selected']; }
+        $backUrl = route('admin.accounting.partner-ledger.show', $backParams);
+    @endphp
 
     {{-- Breadcrumb --}}
     <div class="d-flex align-items-center gap-2 mb-3 no-print" style="font-size:.82rem;color:#888;">
@@ -130,17 +156,43 @@
             Partner Ledger
         </a>
         <i class="bx bx-chevron-right"></i>
-        <a href="{{ route('admin.accounting.partner-ledger.show', $partner->id) }}"
-           style="color:var(--acct-gold-dark);text-decoration:none;font-weight:600;">
+        <a href="{{ $backUrl }}" style="color:var(--acct-gold-dark);text-decoration:none;font-weight:600;">
             {{ $partner->name }}
         </a>
         <i class="bx bx-chevron-right"></i>
         <span style="color:#495057;font-weight:600;">{{ $carrier?->name ?? 'Unassigned' }}</span>
     </div>
 
+    {{-- Period filter --}}
+    <div class="pl-period-bar no-print">
+        <div class="pl-period-nav">
+            @if($period)
+                <a href="{{ route('admin.accounting.partner-ledger.carrier.show', ['partnerId' => $partner->id, 'carrierId' => $carrierId, 'period' => $period['prev']]) }}" class="pl-nav-arrow" title="Previous period">
+                    <i class="bx bx-chevron-left"></i>
+                </a>
+                <span class="pl-period-lbl">{{ $period['label'] }}</span>
+                @if(!$period['is_current'])
+                    <a href="{{ route('admin.accounting.partner-ledger.carrier.show', ['partnerId' => $partner->id, 'carrierId' => $carrierId, 'period' => $period['next']]) }}" class="pl-nav-arrow" title="Next period">
+                        <i class="bx bx-chevron-right"></i>
+                    </a>
+                @else
+                    <span style="width:26px;height:26px;display:inline-block"></span>
+                @endif
+            @else
+                <span class="pl-period-lbl" style="color:#888;">
+                    <i class="bx bx-infinity" style="vertical-align:middle;margin-right:4px;"></i>All Time (full history)
+                </span>
+            @endif
+        </div>
+        <div class="pl-period-toggle">
+            <a href="{{ route('admin.accounting.partner-ledger.carrier.show', ['partnerId' => $partner->id, 'carrierId' => $carrierId]) }}" class="{{ !$period ? 'active' : '' }}">All Time</a>
+            <a href="{{ route('admin.accounting.partner-ledger.carrier.show', ['partnerId' => $partner->id, 'carrierId' => $carrierId, 'period' => $period['selected'] ?? $currentPeriodKey]) }}" class="{{ $period ? 'active' : '' }}">By Period</a>
+        </div>
+    </div>
+
     {{-- Toolbar --}}
     <div class="d-flex justify-content-between align-items-center mb-3 no-print flex-wrap gap-2">
-        <a href="{{ route('admin.accounting.partner-ledger.show', $partner->id) }}"
+        <a href="{{ $backUrl }}"
            class="btn btn-sm btn-outline-secondary" style="font-size:.8rem;">
             <i class="bx bx-arrow-back me-1"></i> All Carriers
         </a>
@@ -239,6 +291,24 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @if($period)
+                    <tr class="opening-row">
+                        <td style="white-space:nowrap;font-size:.82rem;">{{ $period['start']->copy()->subDay()->format('d M Y') }}</td>
+                        <td>—</td>
+                        <td><span class="acct-type-badge acct-badge-opening">B/F</span></td>
+                        <td colspan="2">Balance brought forward (all activity before {{ $period['start']->format('M j, Y') }})</td>
+                        <td class="col-dr"><span style="color:#ccc;">—</span></td>
+                        <td class="col-cr"><span style="color:#ccc;">—</span></td>
+                        <td class="col-bal">
+                            <span class="{{ $openingBalance >= 0 ? 'bal-pos' : 'bal-neg' }}">
+                                {{ number_format(abs($openingBalance), 2) }}
+                            </span>
+                            <small style="font-size:.68rem;font-family:sans-serif;color:#999;margin-left:2px;">
+                                {{ $openingBalance >= 0 ? 'Dr' : 'Cr' }}
+                            </small>
+                        </td>
+                    </tr>
+                    @endif
                     @forelse($lines as $line)
                     @php
                         $type  = $line->journalEntry->type;
@@ -306,7 +376,7 @@
                     </tr>
                     @endforelse
                 </tbody>
-                @if($lines->isNotEmpty())
+                @if($lines->isNotEmpty() || $period)
                 <tfoot>
                     <tr>
                         <td colspan="5" class="text-end"

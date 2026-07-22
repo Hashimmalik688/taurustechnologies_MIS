@@ -160,7 +160,7 @@ class DashboardController extends Controller
         $revenue_leads = Lead::whereNotNull('pending_contract_at')
             ->whereDate('pending_contract_at', '>=', $rev_period_start)
             ->whereDate('pending_contract_at', '<=', $rev_period_end)
-            ->get(['id', 'monthly_premium', 'carrier_name', 'assigned_partner', 'closer_name',
+            ->get(['id', 'monthly_premium', 'carrier_name', 'assigned_partner', 'closer_name', 'team',
                    'submission_status', 'pending_contract_at',
                    'partner_id', 'insurance_carrier_id', 'state', 'settlement_type', 'policy_type']);
 
@@ -261,10 +261,16 @@ class DashboardController extends Controller
             $todaySales = $sales->filter(fn($s) =>
                 $s->pending_contract_at && \Carbon\Carbon::parse($s->pending_contract_at)->isSameDay($today)
             )->count();
-            $user = User::where('name', $closerName)->first();
-            $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
-                ? Teams::PEREGRINE
-                : Teams::RAVENS;
+            // Team is determined by the team recorded on the closer's own leads this
+            // period (most common value), not by their current role — closers can hold
+            // both Peregrine and Ravens roles, which would misclassify them by role alone.
+            $team = $sales->pluck('team')->filter()->countBy()->sortDesc()->keys()->first();
+            if (!$team) {
+                $user = User::where('name', $closerName)->first();
+                $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
+                    ? Teams::PEREGRINE
+                    : Teams::RAVENS;
+            }
 
             $sales_per_closer[] = [
                 'closer'      => $closerName,
@@ -415,7 +421,7 @@ class DashboardController extends Controller
         $revLeads = Lead::whereNotNull('pending_contract_at')
             ->whereDate('pending_contract_at', '>=', $rev_start)
             ->whereDate('pending_contract_at', '<=', $rev_end)
-            ->get(['id', 'monthly_premium', 'closer_name', 'submission_status', 'pending_contract_at',
+            ->get(['id', 'monthly_premium', 'closer_name', 'team', 'submission_status', 'pending_contract_at',
                    'carrier_name', 'assigned_partner',
                    'partner_id', 'insurance_carrier_id', 'state', 'settlement_type', 'policy_type']);
 
@@ -500,9 +506,12 @@ class DashboardController extends Controller
             $todaySalesKpi = $sales->filter(fn($s) =>
                 $s->pending_contract_at && \Carbon\Carbon::parse($s->pending_contract_at)->isSameDay($today)
             )->count();
-            $user = User::where('name', $closerName)->first();
-            $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
-                ? Teams::PEREGRINE : Teams::RAVENS;
+            $team = $sales->pluck('team')->filter()->countBy()->sortDesc()->keys()->first();
+            if (!$team) {
+                $user = User::where('name', $closerName)->first();
+                $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
+                    ? Teams::PEREGRINE : Teams::RAVENS;
+            }
 
             $sales_per_closer[] = [
                 'closer'   => $closerName,

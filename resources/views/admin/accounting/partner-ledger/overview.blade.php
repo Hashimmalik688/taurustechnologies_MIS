@@ -106,6 +106,26 @@
 }
 .section-label::after { content:''; flex:1; height:1px; background:#e9ecef; }
 
+/* ── Period filter bar ── */
+.pl-period-bar {
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    background:#fff; border:1px solid #dee2e6; border-radius:5px; padding:10px 16px; margin-bottom:16px;
+}
+.pl-period-nav { display:flex; align-items:center; gap:.6rem; font-size:.85rem; }
+.pl-period-nav a.pl-nav-arrow {
+    display:flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+    border:1px solid #dee2e6; color:inherit; text-decoration:none; transition:all .15s;
+}
+.pl-period-nav a.pl-nav-arrow:hover { background:rgba(212,175,55,.14); border-color:var(--acct-gold); }
+.pl-period-nav .pl-period-lbl { font-weight:700; min-width:160px; text-align:center; }
+.pl-period-toggle { display:flex; gap:6px; }
+.pl-period-toggle a {
+    font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:4px; text-decoration:none;
+    border:1px solid #dee2e6; color:#6c757d; transition:all .15s;
+}
+.pl-period-toggle a.active { background:var(--acct-gold); border-color:var(--acct-gold); color:#1a1a1a; }
+.pl-period-toggle a:not(.active):hover { background:#f8f9fa; }
+
 /* ── Quick action buttons ── */
 .quick-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
 .btn-qa {
@@ -165,6 +185,33 @@
                 <i class="bx bx-money"></i> Payment
             </a>
             @endcanEditModule
+        </div>
+    </div>
+
+    {{-- Period filter --}}
+    <div class="pl-period-bar">
+        <div class="pl-period-nav">
+            @if($period)
+                <a href="{{ route('admin.accounting.partner-ledger.show', ['partnerId' => $partner->id, 'period' => $period['prev']]) }}" class="pl-nav-arrow" title="Previous period">
+                    <i class="bx bx-chevron-left"></i>
+                </a>
+                <span class="pl-period-lbl">{{ $period['label'] }}</span>
+                @if(!$period['is_current'])
+                    <a href="{{ route('admin.accounting.partner-ledger.show', ['partnerId' => $partner->id, 'period' => $period['next']]) }}" class="pl-nav-arrow" title="Next period">
+                        <i class="bx bx-chevron-right"></i>
+                    </a>
+                @else
+                    <span style="width:26px;height:26px;display:inline-block"></span>
+                @endif
+            @else
+                <span class="pl-period-lbl" style="color:#888;">
+                    <i class="bx bx-infinity" style="vertical-align:middle;margin-right:4px;"></i>All Time (full history)
+                </span>
+            @endif
+        </div>
+        <div class="pl-period-toggle">
+            <a href="{{ route('admin.accounting.partner-ledger.show', $partner->id) }}" class="{{ !$period ? 'active' : '' }}">All Time</a>
+            <a href="{{ route('admin.accounting.partner-ledger.show', ['partnerId' => $partner->id, 'period' => $period['selected'] ?? $currentPeriodKey]) }}" class="{{ $period ? 'active' : '' }}">By Period</a>
         </div>
     </div>
 
@@ -228,9 +275,9 @@
     <div class="carrier-cards-grid">
         @foreach($carrierSummaries as $cs)
         @php
-            $url = $cs['carrier_id'] > 0
-                ? route('admin.accounting.partner-ledger.carrier.show', [$partner->id, $cs['carrier_id']])
-                : route('admin.accounting.partner-ledger.carrier.show', [$partner->id, 0]);
+            $carrierParams = ['partnerId' => $partner->id, 'carrierId' => $cs['carrier_id'] > 0 ? $cs['carrier_id'] : 0];
+            if ($period) { $carrierParams['period'] = $period['selected']; }
+            $url = route('admin.accounting.partner-ledger.carrier.show', $carrierParams);
             $bal = $cs['balance'];
         @endphp
         <a href="{{ $url }}" class="carrier-card {{ $cs['tx_count'] === 0 ? 'no-tx' : '' }}">

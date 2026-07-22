@@ -547,15 +547,58 @@ class LedgerJournalController extends Controller
         return view('admin.accounting.partner-ledger.index', compact('partners'));
     }
 
-    public function partnerLedgerShow(int $partnerId)
+    /**
+     * Resolve an optional "3rd → 3rd" period from a ?period=YYYY-MM param,
+     * matching the Executive Dashboard's period logic. Returns null (= All Time)
+     * when no valid period param is given.
+     */
+    private function resolveOptionalPeriod(?string $periodParam): ?array
+    {
+        if (!$periodParam || !preg_match('/^\d{4}-\d{2}$/', $periodParam)) {
+            return null;
+        }
+        $anchor = \Carbon\Carbon::createFromFormat('Y-m', $periodParam)->setDay(3);
+        if ($anchor->day >= 3) {
+            $start = $anchor->copy()->setDay(3)->startOfDay();
+            $end   = $anchor->copy()->addMonthNoOverflow()->setDay(3)->endOfDay();
+        } else {
+            $start = $anchor->copy()->subMonthNoOverflow()->setDay(3)->startOfDay();
+            $end   = $anchor->copy()->setDay(3)->endOfDay();
+        }
+
+        return [
+            'start'            => $start,
+            'end'              => $end,
+            'label'            => $start->format('M j') . ' → ' . $end->format('M j, Y'),
+            'selected'         => $start->format('Y-m'),
+            'prev'             => $start->copy()->subMonthNoOverflow()->format('Y-m'),
+            'next'             => $start->copy()->addMonthNoOverflow()->format('Y-m'),
+            'is_current'       => today()->betweenIncluded($start, $end),
+        ];
+    }
+
+    /** The "Y-m" key for the 3rd→3rd period currently in progress. */
+    private function currentPeriodKey(): string
+    {
+        return today()->day >= 3
+            ? today()->format('Y-m')
+            : today()->copy()->subMonthNoOverflow()->format('Y-m');
+    }
+
+    public function partnerLedgerShow(int $partnerId, Request $request)
     {
         $partner   = Partner::findOrFail($partnerId);
         $arAccount = ChartOfAccount::where('account_code', LedgerService::ACCOUNT_AR)->first();
+        $period    = $this->resolveOptionalPeriod($request->get('period'));
 
         $allLines = $arAccount
             ? LedgerJournalEntryLine::with('carrier')
                 ->where('partner_id', $partnerId)
                 ->where('account_id', $arAccount->id)
+                ->when($period, fn ($q) => $q->whereHas('journalEntry', fn ($je) => $je->dateRange(
+                    $period['start']->toDateString(),
+                    $period['end']->toDateString()
+                )))
                 ->get()
             : collect();
 
@@ -597,22 +640,35 @@ class LedgerJournalController extends Controller
         $totalCr    = (float) $allLines->sum('credit');
         $netBalance = $totalDr - $totalCr;
 
+        $currentPeriodKey = $this->currentPeriodKey();
+
         return view('admin.accounting.partner-ledger.overview',
-            compact('partner', 'carrierSummaries', 'totalDr', 'totalCr', 'netBalance'));
+            compact('partner', 'carrierSummaries', 'totalDr', 'totalCr', 'netBalance', 'period', 'currentPeriodKey'));
     }
 
-    public function partnerCarrierLedgerShow(int $partnerId, int $carrierId)
+    public function partnerCarrierLedgerShow(int $partnerId, int $carrierId, Request $request)
     {
         $partner = Partner::findOrFail($partnerId);
         $carrier = $carrierId > 0 ? InsuranceCarrier::findOrFail($carrierId) : null;
-        $lines   = $this->ledger->getPartnerCarrierLedger($partnerId, $carrierId > 0 ? $carrierId : null);
+        $period  = $this->resolveOptionalPeriod($request->get('period'));
+
+        $ledger         = $this->ledger->getPartnerCarrierLedger(
+            $partnerId,
+            $carrierId > 0 ? $carrierId : null,
+            $period['start'] ?? null,
+            $period['end'] ?? null
+        );
+        $lines          = $ledger['lines'];
+        $openingBalance = $ledger['openingBalance'];
 
         $totalDr        = (float) $lines->sum('debit');
         $totalCr        = (float) $lines->sum('credit');
-        $closingBalance = $lines->last()?->running_balance ?? 0;
+        $closingBalance = $lines->last()?->running_balance ?? $openingBalance;
+
+        $currentPeriodKey = $this->currentPeriodKey();
 
         return view('admin.accounting.partner-ledger.carrier-show',
-            compact('partner', 'carrier', 'carrierId', 'lines', 'totalDr', 'totalCr', 'closingBalance'));
+            compact('partner', 'carrier', 'carrierId', 'lines', 'totalDr', 'totalCr', 'closingBalance', 'period', 'openingBalance', 'currentPeriodKey'));
     }
 
     // ── Financial Reports ───────────────────────────────────────────────────

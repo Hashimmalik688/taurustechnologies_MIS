@@ -1006,6 +1006,7 @@ Route::group(['prefix' => 'settings/reports', 'as' => 'settings.reports.', 'midd
     Route::get('/manager-submission-report/drilldown', [ReportController::class, 'managerSubmissionDrilldown'])->name('manager-submission-report.drilldown')->middleware('role.permission:reports,view');
     Route::get('/closer-report', [CloserReportController::class, 'index'])->name('closer-report')->middleware('role.permission:reports,view');
     Route::get('/closer-report/drilldown', [CloserReportController::class, 'drilldown'])->name('closer-report.drilldown')->middleware('role.permission:reports,view');
+    Route::get('/partner-commission-report', [\App\Http\Controllers\Admin\PartnerCommissionReportController::class, 'index'])->name('partner-commission-report')->middleware('role.permission:reports,view');
     Route::get('/peregrine-team-report', [ReportController::class, 'peregrineTeamReport'])->name('peregrine-team-report')->middleware('role.permission:reports,view');
     Route::get('/peregrine-sales-report', [ReportController::class, 'peregrineSalesReport'])->name('peregrine-sales-report')->middleware('role.permission:reports,view');
     Route::get('/peregrine-performance-report', [ReportController::class, 'peregrinePerformanceReport'])->name('peregrine-performance-report')->middleware('role.permission:reports,view');

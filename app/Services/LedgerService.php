@@ -300,31 +300,66 @@ class LedgerService
      * Return ledger lines for a given partner+carrier combination.
      * Pass $carrierId = null to retrieve lines with no carrier assigned.
      * Running balance is appended to each row.
+     *
+     * When $periodStart/$periodEnd are given, only lines within that date range
+     * are returned, with the running balance carried forward from an opening
+     * balance computed over everything before $periodStart (like a bank statement).
+     *
+     * @return array{lines: Collection, openingBalance: float}
      */
-    public function getPartnerCarrierLedger(int $partnerId, ?int $carrierId): Collection
-    {
+    public function getPartnerCarrierLedger(
+        int $partnerId,
+        ?int $carrierId,
+        ?\Carbon\Carbon $periodStart = null,
+        ?\Carbon\Carbon $periodEnd = null
+    ): array {
         $arAccount = $this->account(self::ACCOUNT_AR);
 
-        $query = LedgerJournalEntryLine::with(['journalEntry', 'account', 'carrier'])
-            ->where('partner_id', $partnerId)
-            ->where('account_id', $arAccount->id)
-            ->join('ledger_journal_entries', 'ledger_journal_entries.id', '=', 'ledger_journal_entry_lines.journal_entry_id')
+        $baseQuery = function () use ($partnerId, $carrierId, $arAccount) {
+            $q = LedgerJournalEntryLine::query()
+                ->where('partner_id', $partnerId)
+                ->where('account_id', $arAccount->id)
+                ->join('ledger_journal_entries', 'ledger_journal_entries.id', '=', 'ledger_journal_entry_lines.journal_entry_id');
+
+            if ($carrierId === null) {
+                $q->whereNull('ledger_journal_entry_lines.insurance_carrier_id');
+            } else {
+                $q->where('ledger_journal_entry_lines.insurance_carrier_id', $carrierId);
+            }
+
+            return $q;
+        };
+
+        $openingBalance = 0.0;
+        if ($periodStart) {
+            $prior = $baseQuery()
+                ->whereDate('ledger_journal_entries.entry_date', '<', $periodStart->toDateString())
+                ->selectRaw('SUM(ledger_journal_entry_lines.debit) as dr, SUM(ledger_journal_entry_lines.credit) as cr')
+                ->first();
+            $openingBalance = (float) ($prior->dr ?? 0) - (float) ($prior->cr ?? 0);
+        }
+
+        $query = $baseQuery()
+            ->with(['journalEntry', 'account', 'carrier'])
             ->orderBy('ledger_journal_entries.entry_date')
             ->orderBy('ledger_journal_entry_lines.id')
             ->select('ledger_journal_entry_lines.*');
 
-        if ($carrierId === null) {
-            $query->whereNull('ledger_journal_entry_lines.insurance_carrier_id');
-        } else {
-            $query->where('ledger_journal_entry_lines.insurance_carrier_id', $carrierId);
+        if ($periodStart) {
+            $query->whereDate('ledger_journal_entries.entry_date', '>=', $periodStart->toDateString());
+        }
+        if ($periodEnd) {
+            $query->whereDate('ledger_journal_entries.entry_date', '<=', $periodEnd->toDateString());
         }
 
-        $running = 0;
-        return $query->get()->map(function ($line) use (&$running) {
+        $running = $openingBalance;
+        $lines = $query->get()->map(function ($line) use (&$running) {
             $running += ($line->debit - $line->credit);
             $line->running_balance = $running;
             return $line;
         });
+
+        return ['lines' => $lines, 'openingBalance' => $openingBalance];
     }
 
     // ── Private helpers ────────────────────────────────────────────────────
