@@ -250,6 +250,7 @@ Route::group(['prefix' => 'admin/cc-partners', 'as' => 'admin.cc-partners.', 'mi
     Route::get('/{id}/edit', [App\Http\Controllers\Admin\CcPartnerController::class, 'edit'])->name('edit')->middleware('role.permission:partners,edit');
     Route::put('/{id}', [App\Http\Controllers\Admin\CcPartnerController::class, 'update'])->name('update')->middleware('role.permission:partners,edit');
     Route::patch('/{id}/toggle', [App\Http\Controllers\Admin\CcPartnerController::class, 'toggleActive'])->name('toggle')->middleware('role.permission:partners,edit');
+    Route::delete('/{id}', [App\Http\Controllers\Admin\CcPartnerController::class, 'destroy'])->name('destroy')->middleware('role.permission:partners,full');
 });
 
 // Insurance Carriers Management — access controlled by role.permission:carriers,level

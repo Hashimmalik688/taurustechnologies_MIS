@@ -43,14 +43,16 @@ class PartnerSalesController extends Controller
 
         $leadData = $request->validated();
 
-        // Carrier goes on the related carrier row, not the lead itself.
+        // Carrier goes on the related carrier row AND stays on the lead itself —
+        // the Pending Submission queue's filter checks the lead's own carrier_name
+        // column (see PendingsApprovedController::baseConditions), so it must not
+        // be stripped here the way it used to be.
         $carrierData = [
             'name'            => $leadData['carrier_name'] ?? null,
             'coverage_amount' => $leadData['coverage_amount'] ?? null,
             'premium_amount'  => $leadData['monthly_premium'] ?? null,
             'status'          => 'pending',
         ];
-        unset($leadData['carrier_name']);
 
         // Partner submissions enter the Peregrine pipeline, same as internal sales.
         $leadData['source']      = 'Partner Portal';
@@ -67,6 +69,16 @@ class PartnerSalesController extends Controller
 
         // 'closed' = form submitted by closer (NOT a completed sale), matching internal intake.
         $leadData['status'] = Statuses::LEAD_CLOSED;
+
+        // Partner companies are pre-vetted, so their sales skip the internal Ravens
+        // validator queue entirely (unlike internal closer submissions, which sit
+        // behind an assigned_validator_id until a validator marks them as a sale).
+        // Stamping these now is what makes the lead satisfy the Pending Submission
+        // queue's filter immediately, landing it in front of a manager to
+        // approve/decline rather than an unassigned, invisible limbo.
+        $leadData['validated_at'] = now();
+        $leadData['sale_at']      = now();
+        $leadData['sale_date']    = now()->toDateString();
 
         if (isset($leadData['smoker'])) {
             $leadData['smoker'] = $leadData['smoker'] ? 'yes' : 'no';

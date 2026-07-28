@@ -17,6 +17,9 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <div class="card">
         <div class="card-body p-0">
@@ -54,6 +57,13 @@
                                         @csrf @method('PATCH')
                                         <button type="submit" class="btn btn-sm btn-outline-{{ $cc->is_active ? 'danger' : 'success' }}">
                                             {{ $cc->is_active ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.cc-partners.destroy', $cc->id) }}" method="POST" class="d-inline"
+                                          onsubmit="return confirm('Permanently delete CC Partner \'{{ addslashes($cc->name) }}\'? This cannot be undone.');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bx bx-trash"></i>
                                         </button>
                                     </form>
                                 </td>

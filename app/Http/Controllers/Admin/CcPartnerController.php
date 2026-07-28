@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Lead;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -97,6 +98,37 @@ class CcPartnerController extends Controller
         $state = $ccPartner->is_active ? 'activated' : 'deactivated';
 
         return back()->with('success', "CC Partner '{$ccPartner->name}' {$state}.");
+    }
+
+    public function destroy(int $id)
+    {
+        $ccPartner = Partner::ccPartners()->findOrFail($id);
+
+        $closerCount = $ccPartner->closers()->count();
+        if ($closerCount > 0) {
+            return redirect()->route('admin.cc-partners.index')
+                ->with('error', "Cannot delete '{$ccPartner->name}' because it has {$closerCount} closer(s). Remove its closers first.");
+        }
+
+        $leadCount = Lead::where('partner_id', $ccPartner->id)->count();
+        if ($leadCount > 0) {
+            return redirect()->route('admin.cc-partners.index')
+                ->with('error', "Cannot delete '{$ccPartner->name}' because {$leadCount} lead(s) were submitted under it. Deactivate it instead to preserve that history.");
+        }
+
+        \Log::warning('CC Partner deletion', [
+            'cc_partner_id'   => $ccPartner->id,
+            'cc_partner_name' => $ccPartner->name,
+            'cc_partner_code' => $ccPartner->code,
+            'user_id'         => auth()->id(),
+            'user_email'      => auth()->user()->email ?? 'unknown',
+        ]);
+
+        $name = $ccPartner->name;
+        $ccPartner->delete();
+
+        return redirect()->route('admin.cc-partners.index')
+            ->with('success', "CC Partner '{$name}' deleted.");
     }
 
     protected function generateCode(string $name): string
