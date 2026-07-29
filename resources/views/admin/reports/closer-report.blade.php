@@ -126,8 +126,9 @@
                     <span class="cr-filter-lbl">Team</span>
                     <select name="team" class="cr-filter-ctrl" style="min-width:110px">
                         <option value="">All Teams</option>
-                        <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
-                        <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+                        @foreach(\App\Support\Teams::ALL as $t)
+                            <option value="{{ $t }}" {{ ($team ?? '') === $t ? 'selected' : '' }}>{{ \App\Support\Teams::label($t) }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <button type="submit" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
@@ -211,11 +212,7 @@
                                     ])) }}" class="cr-closer-name">
                                         {{ $stat['closer_name'] }}
                                     </a>
-                                    @if(($stat['team'] ?? null) === 'peregrine')
-                                        <span class="badge bg-purple" title="Peregrine" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">P</span>
-                                    @elseif(($stat['team'] ?? null) === 'ravens')
-                                        <span class="badge bg-dark" title="Ravens" style="font-size:.55rem;padding:.08rem .3rem;margin-left:.2rem;vertical-align:middle">R</span>
-                                    @endif
+                                    @include('admin.reports.partials.team-badge', ['team' => $stat['team'] ?? null, 'assignedPartner' => $stat['assigned_partner'] ?? null])
                                 </td>
                                 <td><span style="display:inline-block;padding:.2rem .5rem;background:linear-gradient(135deg,#e0f2fe,#bae6fd);border-radius:.3rem;color:#0369a1;font-weight:700">{{ $stat['sales_count'] }}</span></td>
                                 <td><span style="display:inline-block;padding:.2rem .5rem;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-radius:.3rem;color:#059669;font-weight:700">{{ $stat['approved_count'] }}</span></td>

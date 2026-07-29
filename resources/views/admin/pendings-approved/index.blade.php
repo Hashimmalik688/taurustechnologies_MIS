@@ -254,6 +254,7 @@ a.kpi-link{text-decoration:none;color:inherit;display:contents;}
                                     @else
                                         <span style="color:#94a3b8;font-size:.72rem;">—</span>
                                     @endif
+                                    @include('admin.reports.partials.team-badge', ['team' => $lead->team, 'assignedPartner' => $lead->assigned_partner])
                                     <button class="a-btn a-covr btn-edit-coverage"
                                         data-id="{{ $lead->id }}"
                                         data-name="{{ $lead->cn_name }}"

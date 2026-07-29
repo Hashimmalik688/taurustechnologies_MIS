@@ -394,10 +394,8 @@ $uniquePartners = $leads->whereNotNull('assigned_partner')->pluck('assigned_part
                     </td>
                     {{-- Team --}}
                     <td>
-                        @if($lead->team === 'peregrine')
-                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
-                        @elseif($lead->team === 'ravens')
-                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @if(in_array($lead->team, \App\Support\Teams::ALL, true))
+                            @include('admin.reports.partials.team-badge', ['team' => $lead->team, 'assignedPartner' => $lead->assigned_partner])
                         @else
                             <span style="color:var(--ssd-text-4,#94a3b8);font-size:.65rem">—</span>
                         @endif

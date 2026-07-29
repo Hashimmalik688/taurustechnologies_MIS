@@ -173,9 +173,9 @@
                             </td>
                             <td>{{ $lead->policy_number ?? '—' }}</td>
                             <td>
-                                @if($lead->partner)
-                                    <span style="font-size:.7rem;font-weight:500;">{{ $lead->partner->name }}</span>
-                                    @if($lead->partner->code)
+                                @if($lead->assigned_partner || $lead->partner)
+                                    <span style="font-size:.7rem;font-weight:500;">{{ $lead->assigned_partner ?: $lead->partner->name }}</span>
+                                    @if(!$lead->assigned_partner && $lead->partner?->code)
                                         <span style="font-size:.6rem;color:var(--bs-surface-400);display:block;">{{ $lead->partner->code }}</span>
                                     @endif
                                 @else

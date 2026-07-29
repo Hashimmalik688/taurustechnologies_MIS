@@ -392,8 +392,9 @@ $grandTotal = $grandTotalSales;
             <label for="sp-team">Team</label>
             <select id="sp-team" name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--sp-border);background:var(--bs-input-bg,#f8fafc);color:var(--sp-text-1);outline:none;transition:border-color .15s;min-width:110px">
                 <option value="">All Teams</option>
-                <option value="peregrine" @selected($team === 'peregrine')>Peregrine</option>
-                <option value="ravens" @selected($team === 'ravens')>Ravens</option>
+                @foreach(\App\Support\Teams::ALL as $t)
+                    <option value="{{ $t }}" @selected($team === $t)>{{ \App\Support\Teams::label($t) }}</option>
+                @endforeach
             </select>
         </div>
         <button type="submit" class="sp-btn sp-btn-apply" style="align-self:flex-end">

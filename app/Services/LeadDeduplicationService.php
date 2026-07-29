@@ -12,9 +12,10 @@ class LeadDeduplicationService
     /**
      * Scan all leads for duplicates by phone number and merge them
      * Keeps the most complete record and removes duplicates
-     * 
-     * CRITICAL: Peregrine team leads are ALWAYS excluded from deduplication
-     * to protect closer-submitted leads from being automatically merged.
+     *
+     * CRITICAL: Peregrine and CC Partner team leads are ALWAYS excluded from
+     * deduplication to protect closer-submitted leads (internal or outsourced)
+     * from being automatically merged.
      */
     public function deduplicateByPhone()
     {
@@ -24,12 +25,12 @@ class LeadDeduplicationService
 
         Log::info('Starting lead deduplication by phone number...');
 
-        // Find all duplicate phone numbers (ALWAYS exclude Peregrine leads)
+        // Find all duplicate phone numbers (ALWAYS exclude Peregrine + CC Partner leads)
         $dupePhones = Lead::select('phone_number', DB::raw('COUNT(*) as count'))
             ->whereNotNull('phone_number')
             ->where('phone_number', '!=', '')
             ->where(function($query) {
-                $query->where('team', '!=', Teams::PEREGRINE)
+                $query->whereNotIn('team', [Teams::PEREGRINE, Teams::CC_PARTNER])
                       ->orWhereNull('team');
             })
             ->groupBy('phone_number')
@@ -38,11 +39,11 @@ class LeadDeduplicationService
 
         foreach ($dupePhones as $dupePhone) {
             $phoneNumber = $dupePhone->phone_number;
-            
-            // Get all leads with this phone number (ALWAYS exclude Peregrine leads)
+
+            // Get all leads with this phone number (ALWAYS exclude Peregrine + CC Partner leads)
             $leads = Lead::where('phone_number', $phoneNumber)
                 ->where(function($query) {
-                    $query->where('team', '!=', Teams::PEREGRINE)
+                    $query->whereNotIn('team', [Teams::PEREGRINE, Teams::CC_PARTNER])
                           ->orWhereNull('team');
                 })
                 ->orderBy('id', 'asc')

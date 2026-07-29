@@ -123,8 +123,9 @@
                     <span class="cr-filter-lbl">Team</span>
                     <select name="team" class="cr-filter-ctrl" style="min-width:110px">
                         <option value="">All Teams</option>
-                        <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
-                        <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+                        @foreach(\App\Support\Teams::ALL as $t)
+                            <option value="{{ $t }}" {{ ($team ?? '') === $t ? 'selected' : '' }}>{{ \App\Support\Teams::label($t) }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <button type="submit" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem;margin-top:1.25rem">
@@ -171,10 +172,8 @@
                             <tr>
                                 <td class="lead-name">{{ $lead->cn_name }}</td>
                                 <td>
-                                    @if($lead->team === 'peregrine')
-                                        <span class="badge bg-purple" title="Peregrine" style="font-size:.55rem;padding:.08rem .3rem">P</span>
-                                    @elseif($lead->team === 'ravens')
-                                        <span class="badge bg-dark" title="Ravens" style="font-size:.55rem;padding:.08rem .3rem">R</span>
+                                    @if(in_array($lead->team, \App\Support\Teams::ALL, true))
+                                        @include('admin.reports.partials.team-badge', ['team' => $lead->team, 'assignedPartner' => $lead->assigned_partner])
                                     @else
                                         <span style="color:#94a3b8;font-size:.65rem">—</span>
                                     @endif

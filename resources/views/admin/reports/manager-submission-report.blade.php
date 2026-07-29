@@ -157,8 +157,9 @@ function setToday() {
         <label>Team</label>
         <select name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--msr-border);background:var(--bs-input-bg,#f8fafc);color:var(--msr-text-1);outline:none;min-width:110px">
             <option value="">All Teams</option>
-            <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
-            <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+            @foreach(\App\Support\Teams::ALL as $t)
+                <option value="{{ $t }}" {{ ($team ?? '') === $t ? 'selected' : '' }}>{{ \App\Support\Teams::label($t) }}</option>
+            @endforeach
         </select>
     </div>
     <button type="submit" class="msr-btn msr-btn-apply">

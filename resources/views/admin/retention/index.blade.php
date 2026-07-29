@@ -341,7 +341,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
-                                'assigned_partner'=>$lead->partner->name??null,
+                                'assigned_partner'=>$lead->assigned_partner?:($lead->partner->name??null),
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         @endphp
@@ -514,7 +514,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
-                                'assigned_partner'=>$lead->partner->name??null,
+                                'assigned_partner'=>$lead->assigned_partner?:($lead->partner->name??null),
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         @endphp
@@ -681,7 +681,7 @@ textarea.ret-edit-input{resize:vertical;min-height:54px;}
                                 'retention_disposition'=>$retDisp,
                                 'recall_requested_at'=>$lead->recall_requested_at?'yes':null,
                                 'recall_note'=>$lead->recall_note,
-                                'assigned_partner'=>$lead->partner->name??null,
+                                'assigned_partner'=>$lead->assigned_partner?:($lead->partner->name??null),
                                 'field_highlights'=>$lead->fieldHighlights->mapWithKeys(fn($h)=>[$h->field_name=>['by'=>$h->updatedBy->name??'','at'=>$h->updated_at->format('m/d/Y h:i A')]])->toArray(),
                             ]);
                         @endphp

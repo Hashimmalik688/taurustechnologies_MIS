@@ -58,14 +58,15 @@ class CloserReportController extends Controller
 
         // Get all closers who have made sales
         $closerStats = (clone $baseQuery)
-            ->select('closer_name', 'team')
-            ->groupBy('closer_name', 'team')
+            ->select('closer_name', 'team', 'assigned_partner')
+            ->groupBy('closer_name', 'team', 'assigned_partner')
             ->get()
             ->groupBy('closer_name')
             ->map(function ($items) use ($dateFrom, $dateTo, $team) {
                 $closerName = $items->first()->closer_name;
                 // Determine the closer's team: pick most-common non-null team value
                 $closerTeam = $items->pluck('team')->filter()->countBy()->sortDesc()->keys()->first();
+                $assignedPartner = $items->pluck('assigned_partner')->filter()->first();
 
                 // Base query for this closer
                 $closerQuery = Lead::where('closer_name', $closerName)
@@ -111,6 +112,7 @@ class CloserReportController extends Controller
                 return [
                     'closer_name' => $closerName,
                     'team' => $closerTeam,
+                    'assigned_partner' => $assignedPartner,
                     'sales_count' => $salesCount,
                     'approved_count' => $approvedCount,
                     'declined_count' => $declinedCount,

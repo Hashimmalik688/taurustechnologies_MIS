@@ -54,10 +54,12 @@ class PartnerSalesController extends Controller
             'status'          => 'pending',
         ];
 
-        // Partner submissions enter the Peregrine pipeline, same as internal sales.
+        // Partner submissions are a distinct team from internal Peregrine/Ravens sales —
+        // pre-vetted outsourced sales, tagged with the submitting company via
+        // assigned_partner (set below) for display everywhere team is shown.
         $leadData['source']      = 'Partner Portal';
-        $leadData['source_type'] = Teams::PEREGRINE;
-        $leadData['team']        = Teams::PEREGRINE;
+        $leadData['source_type'] = Teams::CC_PARTNER;
+        $leadData['team']        = Teams::CC_PARTNER;
 
         // Attribution: partner_id drives the existing per-partner dashboards.
         // A closer's own id is used so the company roll-up (itself + closers) works.

@@ -438,8 +438,8 @@
                                     <td><strong>{{ $lead->cn_name ?? 'N/A' }}</strong></td>
                                     <td>{{ $lead->closer_name ?? '—' }}</td>
                                     <td>
-                                        @if($lead->partner)
-                                            <span class="bd-mini bd-teal">{{ $lead->partner->code ?? $lead->partner->name }}</span>
+                                        @if($lead->assigned_partner || $lead->partner)
+                                            <span class="bd-mini bd-teal">{{ $lead->assigned_partner ?: ($lead->partner->code ?? $lead->partner->name) }}</span>
                                         @else
                                             <span style="color:var(--bs-surface-400);">—</span>
                                         @endif

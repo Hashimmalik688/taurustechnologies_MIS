@@ -387,8 +387,8 @@ class LeadController extends Controller
         // Calculate resale history for each lead (detailed info for modal)
         $phoneNumbers = $leads->pluck('phone_number')->unique()->filter();
         if ($phoneNumbers->isNotEmpty()) {
-            $resaleHistory = Lead::select('id', 'phone_number', 'cn_name', 'closer_name', 'carrier_name', 
-                    'coverage_amount', 'monthly_premium', 'sale_date', 'created_at', 'team', 'status')
+            $resaleHistory = Lead::select('id', 'phone_number', 'cn_name', 'closer_name', 'carrier_name',
+                    'coverage_amount', 'monthly_premium', 'sale_date', 'created_at', 'team', 'status', 'assigned_partner')
                 ->whereIn('phone_number', $phoneNumbers)
                 ->whereNotNull('closer_name')
                 ->where(function($q) {
@@ -415,6 +415,7 @@ class LeadController extends Controller
                         'sale_date' => $sale->sale_date,
                         'created_at' => $sale->created_at?->format('M d, Y'),
                         'team' => $sale->team,
+                        'assigned_partner' => $sale->assigned_partner,
                         'status' => $sale->status,
                     ];
                 })->values()->toArray();

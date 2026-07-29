@@ -717,6 +717,8 @@
                                                         <span class="badge bg-purple ms-1" title="Peregrine Team">Peregrine</span>
                                                     @elseif($lead->team === 'ravens')
                                                         <span class="badge bg-dark ms-1" title="Ravens Team"><i class="bx bxs-star me-1" style="font-size:.65rem"></i>Ravens</span>
+                                                    @elseif($lead->team === 'cc_partner')
+                                                        <span class="badge bg-info text-dark ms-1" title="CC Partner">{{ \App\Support\Teams::label($lead->team, $lead->assigned_partner) }}</span>
                                                     @endif
                                                 @else
                                                     <span class="text-muted">—</span>
@@ -804,6 +806,8 @@
                                                         <span class="badge bg-purple ms-1" title="Peregrine Team">Peregrine</span>
                                                     @elseif($lead->team === 'ravens')
                                                         <span class="badge bg-dark ms-1" title="Ravens Team"><i class="bx bxs-star me-1" style="font-size:.65rem"></i>Ravens</span>
+                                                    @elseif($lead->team === 'cc_partner')
+                                                        <span class="badge bg-info text-dark ms-1" title="CC Partner">{{ \App\Support\Teams::label($lead->team, $lead->assigned_partner) }}</span>
                                                     @endif
                                                 @else
                                                     <span class="text-muted">—</span>
@@ -1820,10 +1824,12 @@ document.querySelectorAll('.resale-history-btn').forEach(btn => {
             if (sale.is_current) {
                 row.classList.add('table-success');
             }
-            const teamBadge = sale.team === 'ravens' 
+            const teamBadge = sale.team === 'ravens'
                 ? '<span class="badge bg-dark"><i class="bx bxs-star me-1" style="font-size:.6rem"></i>Ravens</span>'
                 : sale.team === 'peregrine'
                 ? '<span class="badge bg-purple">Peregrine</span>'
+                : sale.team === 'cc_partner'
+                ? '<span class="badge bg-info text-dark">' + (sale.assigned_partner || 'CC Partner') + '</span>'
                 : '<span class="badge bg-secondary">' + (sale.team || 'N/A') + '</span>';
             
             const coverage = sale.coverage_amount ? '$' + Number(sale.coverage_amount).toLocaleString() : '-';

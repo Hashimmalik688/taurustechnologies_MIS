@@ -271,15 +271,17 @@ class DashboardController extends Controller
                     ? Teams::PEREGRINE
                     : Teams::RAVENS;
             }
+            $assignedPartner = $sales->pluck('assigned_partner')->filter()->first();
 
             $sales_per_closer[] = [
-                'closer'      => $closerName,
-                'today'       => $todaySales,
-                'mtd'         => $sales->count(),
-                'approvedMTD' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
-                'declinedMTD' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
-                'uwMTD'       => 0,
-                'team'        => $team,
+                'closer'          => $closerName,
+                'today'           => $todaySales,
+                'mtd'             => $sales->count(),
+                'approvedMTD'     => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
+                'declinedMTD'     => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
+                'uwMTD'           => 0,
+                'team'            => $team,
+                'assignedPartner' => $assignedPartner,
             ];
         }
         usort($sales_per_closer, fn($a, $b) => $b['mtd'] - $a['mtd']);
@@ -289,6 +291,8 @@ class DashboardController extends Controller
             ->where('status', '!=', Statuses::USER_INACTIVE)->count();
         $ravens_count = User::role(Roles::RAVENS_CLOSER)
             ->where('status', '!=', Statuses::USER_INACTIVE)->count();
+        // CC Partners have no internal User/role roster — count is sales-derived instead.
+        $cc_partner_count = collect($sales_per_closer)->where('team', Teams::CC_PARTNER)->count();
 
         // ── Manager Submission Breakdown — today PT ───────────────
         $managerTodayLeads = Lead::where(function ($q) use ($today) {
@@ -380,6 +384,7 @@ class DashboardController extends Controller
             'sales_per_closer',
             'peregrine_count',
             'ravens_count',
+            'cc_partner_count',
             'manager_breakdown',
             'mgr_total_pending',
             'mgr_total_declined',
@@ -512,15 +517,17 @@ class DashboardController extends Controller
                 $team = ($user && $user->hasRole([Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR]))
                     ? Teams::PEREGRINE : Teams::RAVENS;
             }
+            $assignedPartner = $sales->pluck('assigned_partner')->filter()->first();
 
             $sales_per_closer[] = [
-                'closer'   => $closerName,
-                'today'    => $todaySalesKpi,
-                'mtd'      => $sales->count(),
-                'approved' => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
-                'declined' => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
-                'uw'       => 0,
-                'team'     => $team,
+                'closer'          => $closerName,
+                'today'           => $todaySalesKpi,
+                'mtd'             => $sales->count(),
+                'approved'        => $sales->where('submission_status', Statuses::SUB_APPROVED)->count(),
+                'declined'        => $sales->where('submission_status', Statuses::SUB_DECLINED)->count(),
+                'uw'              => 0,
+                'team'            => $team,
+                'assignedPartner' => $assignedPartner,
             ];
         }
         usort($sales_per_closer, fn($a, $b) => $b['mtd'] - $a['mtd']);

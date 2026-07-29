@@ -109,7 +109,7 @@
             <td>{{ $lead->closer_name ?? '—' }}</td>
             <td>{{ $lead->carrier_name ?? ($lead->insuranceCarrier->name ?? '—') }}</td>
             <td class="mono">{{ $lead->policy_number ?? '—' }}</td>
-            <td>{{ $lead->partner->name ?? '—' }}</td>
+            <td>{{ $lead->assigned_partner ?: ($lead->partner->name ?? '—') }}</td>
             <td class="num">${{ number_format($lead->monthly_premium ?? 0, 2) }}</td>
             <td>{{ $lead->sale_date ? \Carbon\Carbon::parse($lead->sale_date)->format('M j, Y') : '—' }}</td>
             <td>{{ $lead->followup_done_at ? $lead->followup_done_at->format('M j, Y') : '—' }}</td>

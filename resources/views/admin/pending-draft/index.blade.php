@@ -370,8 +370,8 @@
                                 @endif
                             </td>
                             <td>
-                                @if($lead->partner)
-                                    <span class="bd-mini bd-green">{{ $lead->partner->name }}</span>
+                                @if($lead->assigned_partner || $lead->partner)
+                                    <span class="bd-mini bd-green">{{ $lead->assigned_partner ?: $lead->partner->name }}</span>
                                 @else
                                     <span style="color:var(--bs-surface-400);">—</span>
                                 @endif

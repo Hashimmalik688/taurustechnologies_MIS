@@ -176,8 +176,9 @@
         <label style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--dd-text-4);display:block;margin-bottom:.12rem">Team</label>
         <select name="team" style="font-size:.73rem;padding:.28rem .45rem;border-radius:.4rem;border:1.5px solid var(--dd-border);background:var(--bs-input-bg,#f8fafc);color:var(--dd-text-1);outline:none;min-width:110px">
             <option value="">All Teams</option>
-            <option value="peregrine" {{ ($team ?? '') === 'peregrine' ? 'selected' : '' }}>Peregrine</option>
-            <option value="ravens"    {{ ($team ?? '') === 'ravens'    ? 'selected' : '' }}>Ravens</option>
+            @foreach(\App\Support\Teams::ALL as $t)
+                <option value="{{ $t }}" {{ ($team ?? '') === $t ? 'selected' : '' }}>{{ \App\Support\Teams::label($t) }}</option>
+            @endforeach
         </select>
     </div>
     <button type="submit" style="font-size:.7rem;font-weight:700;padding:.3rem .65rem;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.22rem;background:linear-gradient(135deg,var(--dd-gold),#b8941f);color:#0f172a">
@@ -312,10 +313,8 @@
 
                     {{-- Team --}}
                     <td>
-                        @if($lead->team === 'peregrine')
-                            <span class="badge bg-purple" title="Peregrine" style="font-size:.58rem;padding:.1rem .35rem">P</span>
-                        @elseif($lead->team === 'ravens')
-                            <span class="badge bg-dark" title="Ravens" style="font-size:.58rem;padding:.1rem .35rem">R</span>
+                        @if(in_array($lead->team, \App\Support\Teams::ALL, true))
+                            @include('admin.reports.partials.team-badge', ['team' => $lead->team, 'assignedPartner' => $lead->assigned_partner])
                         @else
                             <span style="color:var(--dd-text-4,#94a3b8);font-size:.65rem">—</span>
                         @endif

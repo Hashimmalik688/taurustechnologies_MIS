@@ -10,22 +10,22 @@ use Illuminate\Support\Facades\DB;
 class DeduplicateLeads extends Command
 {
     protected $signature = 'leads:deduplicate';
-    protected $description = 'Deduplicate leads by phone number (ALWAYS excludes peregrine team)';
+    protected $description = 'Deduplicate leads by phone number (ALWAYS excludes peregrine and cc_partner teams)';
 
     public function handle()
     {
         $this->info('Starting lead deduplication by phone number...');
-        $this->warn('NOTE: Peregrine team leads are ALWAYS excluded from deduplication.');
-        
-        // ALWAYS exclude peregrine team - they must be protected at all costs
+        $this->warn('NOTE: Peregrine and CC Partner team leads are ALWAYS excluded from deduplication.');
+
+        // ALWAYS exclude peregrine + cc_partner teams - they must be protected at all costs
         $query = Lead::select('phone_number', DB::raw('COUNT(*) as count'))
             ->whereNotNull('phone_number')
             ->where('phone_number', '!=', '')
             ->where(function($q) {
-                $q->where('team', '!=', Teams::PEREGRINE)
+                $q->whereNotIn('team', [Teams::PEREGRINE, Teams::CC_PARTNER])
                   ->orWhereNull('team');
             });
-        
+
         $dupePhones = $query->groupBy('phone_number')
             ->having('count', '>', 1)
             ->get();
@@ -36,10 +36,10 @@ class DeduplicateLeads extends Command
         $deleted = 0;
 
         foreach ($dupePhones as $dupePhone) {
-            // ALWAYS exclude peregrine team from deduplication
+            // ALWAYS exclude peregrine + cc_partner teams from deduplication
             $leads = Lead::where('phone_number', $dupePhone->phone_number)
                 ->where(function($q) {
-                    $q->where('team', '!=', Teams::PEREGRINE)
+                    $q->whereNotIn('team', [Teams::PEREGRINE, Teams::CC_PARTNER])
                       ->orWhereNull('team');
                 })
                 ->orderBy('id', 'asc')

@@ -371,6 +371,7 @@
                     <div class="team-tabs">
                         <button class="team-tab-btn active" onclick="switchTeam('peregrine')" id="peregrineTab">Peregrine (<span id="peregrineCount">{{ $peregrine_count ?? 0 }}</span>)</button>
                         <button class="team-tab-btn" onclick="switchTeam('ravens')" id="ravensTab">Ravens (<span id="ravensCount">{{ $ravens_count ?? 0 }}</span>)</button>
+                        <button class="team-tab-btn" onclick="switchTeam('cc_partner')" id="cc_partnerTab">CC Partners (<span id="ccPartnerCount">{{ $cc_partner_count ?? 0 }}</span>)</button>
                     </div>
                 </div>
             </div>
@@ -389,7 +390,12 @@
                     <tbody id="closerTable">
                         @forelse($sales_per_closer as $closer)
                         <tr class="closer-row" data-team="{{ $closer['team'] ?? '' }}">
-                            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>{{ $closer['closer'] ?? 'N/A' }}</td>
+                            <td>
+                                <i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>{{ $closer['closer'] ?? 'N/A' }}
+                                @if(($closer['team'] ?? null) === \App\Support\Teams::CC_PARTNER)
+                                    <span class="badge bg-info text-dark ms-1" style="font-size:.55rem;vertical-align:middle">{{ $closer['assignedPartner'] ?? 'CC Partner' }}</span>
+                                @endif
+                            </td>
                             <td class="text-center"><span class="bd bd-teal">{{ $closer['today'] ?? 0 }}</span></td>
                             <td class="text-center"><span class="bd bd-blue">{{ $closer['mtd'] ?? 0 }}</span></td>
                             <td class="text-center"><span class="bd bd-green">{{ $closer['approvedMTD'] ?? 0 }}</span></td>
@@ -674,6 +680,7 @@ function updateKPIs(d) {
     if (d.salesPerCloser) {
         $('#peregrineCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='peregrine').length);
         $('#ravensCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='ravens').length);
+        $('#ccPartnerCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='cc_partner').length);
         renderClosers(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()===currentTeam));
         buildCloserTodayChart(d.salesPerCloser);
     }
@@ -793,6 +800,7 @@ function updateKPIs(d) {
     if (d.salesPerCloser) {
         $('#peregrineCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='peregrine').length);
         $('#ravensCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='ravens').length);
+        $('#ccPartnerCount').text(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()==='cc_partner').length);
         renderClosers(d.salesPerCloser.filter(c=>(c.team||'').toLowerCase()===currentTeam));
         updateCarrierChart(d.revByCarrier);
         buildCloserTodayChart(d.salesPerCloser);
@@ -820,8 +828,11 @@ function renderClosers(closers) {
     }
     tbody.innerHTML = closers.map(c=>{
         const pct=c.mtd>0?Math.min(100,Math.round(c.today/c.mtd*100)):0;
+        const partnerBadge = (c.team||'').toLowerCase()==='cc_partner'
+            ? `<span class="badge bg-info text-dark ms-1" style="font-size:.55rem;vertical-align:middle">${c.assignedPartner||'CC Partner'}</span>`
+            : '';
         return `<tr>
-            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>${c.closer||'N/A'}</td>
+            <td><i class="bx bx-user-circle me-1" style="color:var(--bs-gold);opacity:.7"></i>${c.closer||'N/A'}${partnerBadge}</td>
             <td class="text-center"><span class="bd bd-teal">${c.today||0}</span></td>
             <td class="text-center"><span class="bd bd-blue">${c.mtd||0}</span></td>
             <td class="text-center"><span class="bd bd-green">${c.approved||c.approvedMTD||0}</span></td>

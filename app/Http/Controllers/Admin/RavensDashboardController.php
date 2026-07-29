@@ -240,9 +240,9 @@ class RavensDashboardController extends Controller
             // OR include leads sold by current user (so they can see their own sales)
             ->orWhere('closer_name', $currentUser->name);
         })
-        // Exclude Peregrine team leads
+        // Exclude Peregrine + CC Partner team leads
         ->where(function($query) {
-            $query->where('team', '!=', Teams::PEREGRINE)
+            $query->whereNotIn('team', [Teams::PEREGRINE, Teams::CC_PARTNER])
                   ->orWhereNull('team');
         })
         // MUST have valid phone number for calling system

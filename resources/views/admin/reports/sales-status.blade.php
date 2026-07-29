@@ -411,8 +411,9 @@ $grandTotal = $grandTotals['total_sales'] ?? 0;
             <label for="ss-team">Team</label>
             <select id="ss-team" name="team" style="min-width:110px">
                 <option value="">All Teams</option>
-                <option value="peregrine" @selected(($team ?? '') === 'peregrine')>Peregrine</option>
-                <option value="ravens"    @selected(($team ?? '') === 'ravens')>Ravens</option>
+                @foreach(\App\Support\Teams::ALL as $t)
+                    <option value="{{ $t }}" @selected(($team ?? '') === $t)>{{ \App\Support\Teams::label($t) }}</option>
+                @endforeach
             </select>
         </div>
         <button type="submit" class="ss-btn ss-btn-apply" style="align-self:flex-end">
