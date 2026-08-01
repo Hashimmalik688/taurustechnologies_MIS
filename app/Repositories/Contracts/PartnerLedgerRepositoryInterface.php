@@ -9,6 +9,8 @@ interface PartnerLedgerRepositoryInterface
 {
     public function getBalance(Partner $partner): float;
 
+    public function getBalanceForIds(array $partnerIds): float;
+
     public function getLedger(Partner $partner, \DateTime $from = null, \DateTime $to = null): Collection;
 
     public function getLedgerByCarrier(Partner $partner, int $carrierId, \DateTime $from = null, \DateTime $to = null): Collection;

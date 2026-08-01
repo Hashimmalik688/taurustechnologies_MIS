@@ -162,6 +162,7 @@
             <thead>
                 <tr>
                     <th>Date</th>
+                    @if($hasDownline)<th>Partner</th>@endif
                     <th>Type</th>
                     <th>Carrier</th>
                     <th>Reference / Note</th>
@@ -186,6 +187,13 @@
                 @endphp
                 <tr>
                     <td style="white-space:nowrap;color:#6b7280;font-size:.78rem;">{{ \Carbon\Carbon::parse($txn['date'])->format('M d, Y') }}</td>
+                    @if($hasDownline)
+                    <td>
+                        <span style="display:inline-block;padding:.14rem .45rem;border-radius:.22rem;font-size:.68rem;font-weight:700;background:{{ ($txn['partner_code'] ?? null) === $partner->code ? 'rgba(79,70,229,.08)' : 'rgba(5,150,105,.08)' }};color:{{ ($txn['partner_code'] ?? null) === $partner->code ? '#4f46e5' : '#059669' }};">
+                            {{ $txn['partner_code'] ?? '—' }}
+                        </span>
+                    </td>
+                    @endif
                     <td><span class="tc {{ $tc }}">{{ str_replace('_', ' ', $txn['type'] ?? '—') }}</span></td>
                     <td style="font-size:.8rem;color:#6b7280;">{{ $txn['carrier'] ?? '—' }}</td>
                     <td style="font-size:.78rem;color:#6b7280;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
@@ -204,7 +212,7 @@
             <tfoot>
                 @php $finalBal = $ledgerEntries->last()['running_balance'] ?? 0; @endphp
                 <tr>
-                    <td colspan="4">Closing Balance</td>
+                    <td colspan="{{ $hasDownline ? 5 : 4 }}">Closing Balance</td>
                     <td class="text-end">
                         ${{ number_format($ledgerEntries->sum('debit'), 2) }}
                     </td>

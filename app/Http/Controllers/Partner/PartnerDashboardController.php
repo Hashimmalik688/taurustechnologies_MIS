@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Partner;
 use App\Http\Controllers\Controller;
 use App\Models\AgentCarrierState;
 use App\Models\Lead;
+use App\Models\Partner;
 use App\Services\CommissionCalculationService;
 use App\Services\PartnerRevenueService;
 use App\Repositories\PartnerLedgerRepository;
@@ -60,6 +61,9 @@ class PartnerDashboardController extends Controller
             $periodEnd   = Carbon::parse($month . '-01')->endOfMonth();
         }
 
+        // ── Downline scope: this partner + any direct downline agents ──
+        $partnerIds = $partner->downlineScopeIds();
+
         // ── Revenue KPIs (global – not carrier-scoped) ─────────────────
         $projectedRevenue    = $this->revenueService->getProjectedRevenue($periodStart, $periodEnd);
         $earnedRevenue       = $this->revenueService->getEarnedRevenue($periodStart, $periodEnd);
@@ -67,11 +71,11 @@ class PartnerDashboardController extends Controller
         $partnerEarnedShare  = $this->revenueService->getPartnerEarnedShare($periodStart, $periodEnd);
         $partnerProjectedShare = $this->revenueService->getPartnerProjectedShare($periodStart, $periodEnd);
 
-        // ── Balance ─────────────────────────────────────────────────────
-        $currentBalance = $this->ledgerRepository->getBalance($partner);
+        // ── Balance (combined across downline group) ────────────────────
+        $currentBalance = $this->ledgerRepository->getBalanceForIds($partnerIds);
 
         // ── Pending Contract counts (carrier-scoped) ───────────────────
-        $allTimeQuery = Lead::where('partner_id', $partner->id)
+        $allTimeQuery = Lead::whereIn('partner_id', $partnerIds)
             ->whereNotNull('partner_id')
             ->whereNotNull('pending_contract_at')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId));
@@ -281,8 +285,12 @@ class PartnerDashboardController extends Controller
         $activeCarriers = $this->revenueService->getActiveCarriers();
         $taurusPct = $partner->our_commission_percentage ?? 15.0;
 
+        // ── Downline scope: this partner + any direct downline agents ──
+        $partnerIds = $partner->downlineScopeIds();
+        $partnersById = Partner::whereIn('id', $partnerIds)->get()->keyBy('id');
+
         // Base query — pending contracts only (carrier + period filtered)
-        $baseQuery = Lead::where('partner_id', $partner->id)
+        $baseQuery = Lead::whereIn('partner_id', $partnerIds)
             ->whereNotNull('partner_id')
             ->whereNotNull('pending_contract_at')
             ->when($carrierId, fn ($q) => $q->where('insurance_carrier_id', $carrierId))
@@ -340,8 +348,11 @@ class PartnerDashboardController extends Controller
             );
 
             if ($premiumVal > 0 && $lCarrierId && $lState) {
+                // Use the lead's OWNING partner's rates, not the logged-in
+                // partner's — a downline agent's sales must be rated with
+                // that agent's own carrier-state settlement %, not J-1's.
                 $result = $commSvc->calculateCommission(
-                    $partner->id,
+                    $lead->partner_id,
                     $lCarrierId,
                     $lState,
                     $lSettlement,
@@ -355,7 +366,16 @@ class PartnerDashboardController extends Controller
                     $lead->setAttribute('_settlement_type', $lSettlement);
                 }
             }
+
+            // Taurus's cut is also owning-partner-specific.
+            $lead->setAttribute(
+                '_taurus_pct',
+                $partnersById->get($lead->partner_id)?->our_commission_percentage ?? $taurusPct
+            );
+            $lead->setAttribute('_owning_partner', $partnersById->get($lead->partner_id));
         }
+
+        $hasDownline = count($partnerIds) > 1;
 
         return view('partner.sales', compact(
             'partner',
@@ -371,7 +391,8 @@ class PartnerDashboardController extends Controller
             'revenueByCarrier',
             'leads',
             'month',
-            'taurusPct'
+            'taurusPct',
+            'hasDownline'
         ));
     }
 
@@ -389,8 +410,13 @@ class PartnerDashboardController extends Controller
         $periodStart = $dateFrom ? Carbon::parse($dateFrom)->startOfDay() : null;
         $periodEnd   = $dateTo   ? Carbon::parse($dateTo)->endOfDay()     : null;
 
+        // ── Downline scope: this partner + any direct downline agents ──
+        $partnerIds = $partner->downlineScopeIds();
+        $partnersById = Partner::whereIn('id', $partnerIds)->get()->keyBy('id');
+        $hasDownline = count($partnerIds) > 1;
+
         $activeCarriers = $this->revenueService->getActiveCarriers();
-        $currentBalance = $this->ledgerRepository->getBalance($partner);
+        $currentBalance = $this->ledgerRepository->getBalanceForIds($partnerIds);
 
         // Full ledger – AR account 1200, with optional carrier & date filters
         $arAccount = DB::table('chart_of_accounts')->where('account_code', '1200')->first();
@@ -400,7 +426,7 @@ class PartnerDashboardController extends Controller
             $rows = DB::table('ledger_journal_entry_lines as l')
                 ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
                 ->leftJoin('insurance_carriers as ic', 'l.insurance_carrier_id', '=', 'ic.id')
-                ->where('l.partner_id', $partner->id)
+                ->whereIn('l.partner_id', $partnerIds)
                 ->where('l.account_id', $arAccount->id)
                 ->when($carrierId, fn ($q) => $q->where('l.insurance_carrier_id', $carrierId))
                 ->when($periodStart, fn ($q) => $q->where('je.entry_date', '>=', $periodStart))
@@ -409,6 +435,7 @@ class PartnerDashboardController extends Controller
                 ->orderBy('l.id', 'asc')
                 ->select([
                     'l.id',
+                    'l.partner_id',
                     'je.entry_date',
                     'je.type',
                     'je.reference',
@@ -420,13 +447,14 @@ class PartnerDashboardController extends Controller
                 ->get();
 
             $runBal = 0;
-            $ledgerEntries = $rows->map(function ($line) use (&$runBal) {
+            $ledgerEntries = $rows->map(function ($line) use (&$runBal, $partnersById) {
                 $runBal += ((float) $line->debit - (float) $line->credit);
                 return [
                     'date'            => Carbon::parse($line->entry_date),
                     'type'            => $line->type,
                     'reference'       => $line->reference,
                     'carrier'         => $line->carrier_name ?? 'General',
+                    'partner_code'    => $partnersById->get($line->partner_id)?->code,
                     'debit'           => (float) $line->debit,
                     'credit'          => (float) $line->credit,
                     'running_balance' => $runBal,
@@ -442,7 +470,8 @@ class PartnerDashboardController extends Controller
             'ledgerEntries',
             'currentBalance',
             'dateFrom',
-            'dateTo'
+            'dateTo',
+            'hasDownline'
         ));
     }
 

@@ -45,6 +45,32 @@ class PartnerLedgerRepository implements PartnerLedgerRepositoryInterface
     }
 
     /**
+     * Get combined current balance across several partner ids (e.g. a partner
+     * plus its downline agents). Same semantics as getBalance().
+     *
+     * @param int[] $partnerIds
+     * @return float
+     */
+    public function getBalanceForIds(array $partnerIds): float
+    {
+        $arAccount = $this->getARAccount();
+
+        if (!$arAccount || empty($partnerIds)) {
+            return 0;
+        }
+
+        $balance = DB::table('ledger_journal_entry_lines as l')
+            ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
+            ->whereIn('l.partner_id', $partnerIds)
+            ->where('l.account_id', $arAccount->id)
+            ->whereNotIn('je.type', ['sales_return', 'chargeback'])
+            ->selectRaw('SUM(l.debit) as total_debit, SUM(l.credit) as total_credit')
+            ->first();
+
+        return ((float) ($balance->total_debit ?? 0)) - ((float) ($balance->total_credit ?? 0));
+    }
+
+    /**
      * Get full ledger for a partner with running balances
      * 
      * @param Partner $partner

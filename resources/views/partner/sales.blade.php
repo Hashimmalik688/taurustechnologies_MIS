@@ -246,9 +246,13 @@
                 @php
                     $totalTableAP   = $leads->sum(fn($l) => (float)($l->monthly_premium ?? 0) * 12);
                     $totalTableComm = $leads->sum(fn($l) => (float)($l->agent_commission ?? 0));
-                    $totalTableShare = $totalTableComm > 0 ? $totalTableComm - ($totalTableComm * $taurusPct / 100) : 0;
-                    // Column count: Customer + [Carrier] + State + PolicyType + AP + Status + Commission + Share + Date
-                    $colCount = $carrierId ? 8 : 9;
+                    $totalTableShare = $leads->sum(function ($l) use ($taurusPct) {
+                        $c = (float)($l->agent_commission ?? 0);
+                        $pct = (float)($l->getAttribute('_taurus_pct') ?? $taurusPct);
+                        return $c > 0 ? $c - ($c * $pct / 100) : 0;
+                    });
+                    // Column count: Customer + [Partner] + [Carrier] + State + PolicyType + AP + Status + Commission + Share + Date
+                    $colCount = ($carrierId ? 8 : 9) + ($hasDownline ? 1 : 0);
                 @endphp
                 <div style="padding:.35rem .85rem;font-size:.68rem;color:#9ca3af;background:#fafafa;border-bottom:1px solid rgba(0,0,0,.04);">
                     <span style="color:#a78bfa;font-weight:800;">~</span> = estimated (premium &times; 9 &times; carrier%) — finalised once policy is accepted
@@ -257,6 +261,7 @@
                     <thead>
                         <tr>
                             <th>Customer</th>
+                            @if($hasDownline)<th>Partner</th>@endif
                             @if(!$carrierId)<th>Carrier</th>@endif
                             <th>State</th>
                             <th>Policy Type</th>
@@ -311,7 +316,9 @@
                                 $isEst = true;
                             }
                             $hasComm = $comm > 0;
-                            $share   = $hasComm ? $comm - ($comm * $taurusPct / 100) : null;
+                            $leadTaurusPct = (float)($lead->getAttribute('_taurus_pct') ?? $taurusPct);
+                            $share   = $hasComm ? $comm - ($comm * $leadTaurusPct / 100) : null;
+                            $owningPartner = $lead->getAttribute('_owning_partner');
 
                             $settlementLabel = $ptColors[$settlementKey]['label'] ?? ucfirst($settlementKey ?? 'Level');
                         @endphp
@@ -320,6 +327,13 @@
                                 <div style="font-weight:700;font-size:.84rem;">{{ $lead->cn_name ?? '—' }}</div>
                                 @if($premium > 0)<div style="font-size:.7rem;color:#9ca3af;">${{ number_format($premium,2) }}/mo</div>@endif
                             </td>
+                            @if($hasDownline)
+                            <td>
+                                <span style="display:inline-block;padding:.14rem .45rem;border-radius:.22rem;font-size:.68rem;font-weight:700;background:{{ $lead->partner_id == $partner->id ? 'rgba(79,70,229,.08)' : 'rgba(5,150,105,.08)' }};color:{{ $lead->partner_id == $partner->id ? '#4f46e5' : '#059669' }};">
+                                    {{ $owningPartner->code ?? '—' }}
+                                </span>
+                            </td>
+                            @endif
                             @if(!$carrierId)
                             <td style="font-size:.8rem;color:#6b7280;">{{ $lead->insuranceCarrier->name ?? '—' }}</td>
                             @endif
@@ -358,7 +372,7 @@
                             <td class="text-end">
                                 @if($share !== null)
                                 <span class="{{ $isEst ? '' : 'col-cr' }}" style="{{ $isEst ? 'color:#818cf8;' : '' }}"
-                                      @if($isEst) title="Est. partner share after {{ $taurusPct }}% fee" @elseif($isLive) title="Your share after {{ $taurusPct }}% Taurus fee" @endif>
+                                      @if($isEst) title="Est. partner share after {{ $leadTaurusPct }}% fee" @elseif($isLive) title="Your share after {{ $leadTaurusPct }}% Taurus fee" @endif>
                                     {{ $isEst ? '~' : '' }}${{ number_format($share, 2) }}
                                 </span>
                                 @else<span class="col-dim">—</span>@endif
@@ -369,7 +383,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="{{ $carrierId ? 4 : 5 }}">Totals ({{ $leads->count() }} sales)</td>
+                            <td colspan="{{ ($carrierId ? 4 : 5) + ($hasDownline ? 1 : 0) }}">Totals ({{ $leads->count() }} sales)</td>
                             <td class="text-end" style="color:#0891b2;font-weight:800;">${{ number_format($totalTableAP, 2) }}</td>
                             <td></td>
                             <td class="text-end col-dr">${{ number_format($totalTableComm, 2) }}</td>

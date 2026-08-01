@@ -62,7 +62,7 @@ class PartnerApiController extends Controller
         $partner = Auth::guard('partner')->user();
 
         return response()->json([
-            'current_balance' => $this->ledgerRepository->getBalance($partner),
+            'current_balance' => $this->ledgerRepository->getBalanceForIds($partner->downlineScopeIds()),
             'stats' => $this->ledgerRepository->getDashboardStats($partner),
         ]);
     }

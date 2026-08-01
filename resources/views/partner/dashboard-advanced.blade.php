@@ -259,6 +259,11 @@
                     @if($chargebacks > 0)
                     <span class="pd-chip pd-chip-amber">CB: ${{ number_format($chargebacks,0) }} shared</span>
                     @endif
+                    @if($downlineAgents->isNotEmpty())
+                    <span class="pd-chip pd-chip-glass" title="Figures below include {{ $downlineAgents->pluck('code')->implode(', ') }}">
+                        <i class="bx bx-group"></i> Includes {{ $downlineAgents->count() }} downline agent{{ $downlineAgents->count() > 1 ? 's' : '' }}
+                    </span>
+                    @endif
                 </div>
             </div>
             <form method="GET" action="{{ route('partner.dashboard') }}" class="pd-period-form" id="pd-filter-form">

@@ -22,9 +22,24 @@ class PartnerRevenueService
 {
     protected Partner $partner;
 
+    /** Partner ids this service reports on: the partner itself + any downline agents. */
+    protected array $partnerIds;
+
     public function __construct(Partner $partner)
     {
         $this->partner = $partner;
+        $this->partnerIds = $partner->downlineScopeIds();
+    }
+
+    /**
+     * our_commission_percentage keyed by partner id, for all ids in scope.
+     * Each lead's share must use its OWNING partner's rate, not the logged-in
+     * partner's rate — otherwise a downline agent's commission split gets
+     * mis-calculated using the parent's percentage.
+     */
+    protected function ratesByPartnerId(): Collection
+    {
+        return Partner::whereIn('id', $this->partnerIds)->pluck('our_commission_percentage', 'id');
     }
 
     /**
@@ -37,7 +52,7 @@ class PartnerRevenueService
      */
     public function getProjectedRevenue(\DateTime $from = null, \DateTime $to = null): float
     {
-        $query = Lead::where('partner_id', $this->partner->id)
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
             ->where('issuance_status', 'Issued')
             ->whereNull('paid_at')
             ->where('monthly_premium', '>', 0);
@@ -62,7 +77,7 @@ class PartnerRevenueService
      */
     public function getEarnedRevenue(\DateTime $from = null, \DateTime $to = null): float
     {
-        $query = Lead::where('partner_id', $this->partner->id)
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
             ->whereNotNull('paid_at')
             ->where('agent_commission', '>', 0);
 
@@ -79,7 +94,7 @@ class PartnerRevenueService
     /**
      * Get total chargebacks (sales returns)
      * From ledger_journal_entries with type 'sales_return'
-     * 
+     *
      * @param \DateTime|null $from
      * @param \DateTime|null $to
      * @return float
@@ -88,7 +103,7 @@ class PartnerRevenueService
     {
         $query = DB::table('ledger_journal_entry_lines as l')
             ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
-            ->where('l.partner_id', $this->partner->id)
+            ->whereIn('l.partner_id', $this->partnerIds)
             ->whereIn('je.type', ['sales_return', 'chargeback']);
 
         if ($from) {
@@ -123,7 +138,7 @@ class PartnerRevenueService
         // not money the partner owes Taurus
         $balance = DB::table('ledger_journal_entry_lines as l')
             ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
-            ->where('l.partner_id', $this->partner->id)
+            ->whereIn('l.partner_id', $this->partnerIds)
             ->where('l.account_id', $arAccount->id)
             ->whereNotIn('je.type', ['sales_return', 'chargeback'])
             ->selectRaw('SUM(l.debit) - SUM(l.credit) as balance')
@@ -143,11 +158,25 @@ class PartnerRevenueService
      */
     public function getPartnerEarnedShare(\DateTime $from = null, \DateTime $to = null): float
     {
-        $earnedRevenue = $this->getEarnedRevenue($from, $to);
-        $ourSharePct = $this->partner->our_commission_percentage ?? 15.0;
-        $ourShare = $earnedRevenue * ($ourSharePct / 100);
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
+            ->whereNotNull('paid_at')
+            ->where('agent_commission', '>', 0);
 
-        return round($earnedRevenue - $ourShare, 2);
+        if ($from) {
+            $query->where('paid_at', '>=', $from);
+        }
+        if ($to) {
+            $query->where('paid_at', '<=', $to);
+        }
+
+        $rates = $this->ratesByPartnerId();
+        $partnerShare = $query->get()->sum(function ($lead) use ($rates) {
+            $pct = $rates->get($lead->partner_id) ?? $this->partner->our_commission_percentage ?? 15.0;
+            $comm = (float) $lead->agent_commission;
+            return $comm - ($comm * $pct / 100);
+        });
+
+        return round($partnerShare, 2);
     }
 
     /**
@@ -159,11 +188,26 @@ class PartnerRevenueService
      */
     public function getPartnerProjectedShare(\DateTime $from = null, \DateTime $to = null): float
     {
-        $projectedRevenue = $this->getProjectedRevenue($from, $to);
-        $ourSharePct = $this->partner->our_commission_percentage ?? 15.0;
-        $ourShare = $projectedRevenue * ($ourSharePct / 100);
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
+            ->where('issuance_status', 'Issued')
+            ->whereNull('paid_at')
+            ->where('monthly_premium', '>', 0);
 
-        return round($projectedRevenue - $ourShare, 2);
+        if ($from) {
+            $query->where('issuance_date', '>=', $from);
+        }
+        if ($to) {
+            $query->where('issuance_date', '<=', $to);
+        }
+
+        $rates = $this->ratesByPartnerId();
+        $partnerShare = $query->get()->sum(function ($lead) use ($rates) {
+            $pct = $rates->get($lead->partner_id) ?? $this->partner->our_commission_percentage ?? 15.0;
+            $comm = (float) $lead->agent_commission;
+            return $comm - ($comm * $pct / 100);
+        });
+
+        return round($partnerShare, 2);
     }
 
     /**
@@ -175,7 +219,7 @@ class PartnerRevenueService
      */
     public function getEarnedRevenueByCarrier(\DateTime $from = null, \DateTime $to = null): Collection
     {
-        $query = Lead::where('partner_id', $this->partner->id)
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
             ->whereNotNull('paid_at')
             ->with('insuranceCarrier')
             ->where('agent_commission', '>', 0);
@@ -187,12 +231,16 @@ class PartnerRevenueService
             $query->where('paid_at', '<=', $to);
         }
 
+        $rates = $this->ratesByPartnerId();
+
         return $query->get()
             ->groupBy('insurance_carrier_id')
-            ->map(function ($leads) {
+            ->map(function ($leads) use ($rates) {
+                $ourShare = $leads->sum(function ($lead) use ($rates) {
+                    $pct = $rates->get($lead->partner_id) ?? $this->partner->our_commission_percentage ?? 15.0;
+                    return (float) $lead->agent_commission * ($pct / 100);
+                });
                 $total = $leads->sum('agent_commission');
-                $ourSharePct = $this->partner->our_commission_percentage ?? 15.0;
-                $ourShare = $total * ($ourSharePct / 100);
                 $partnerShare = $total - $ourShare;
 
                 return [
@@ -216,7 +264,7 @@ class PartnerRevenueService
      */
     public function getEarnedRevenueByState(\DateTime $from = null, \DateTime $to = null): Collection
     {
-        $query = Lead::where('partner_id', $this->partner->id)
+        $query = Lead::whereIn('partner_id', $this->partnerIds)
             ->whereNotNull('paid_at')
             ->where('agent_commission', '>', 0);
 
@@ -227,12 +275,16 @@ class PartnerRevenueService
             $query->where('paid_at', '<=', $to);
         }
 
+        $rates = $this->ratesByPartnerId();
+
         return $query->get()
             ->groupBy('state')
-            ->map(function ($leads) {
+            ->map(function ($leads) use ($rates) {
+                $ourShare = $leads->sum(function ($lead) use ($rates) {
+                    $pct = $rates->get($lead->partner_id) ?? $this->partner->our_commission_percentage ?? 15.0;
+                    return (float) $lead->agent_commission * ($pct / 100);
+                });
                 $total = $leads->sum('agent_commission');
-                $ourSharePct = $this->partner->our_commission_percentage ?? 15.0;
-                $ourShare = $total * ($ourSharePct / 100);
                 $partnerShare = $total - $ourShare;
 
                 return [
@@ -320,7 +372,7 @@ class PartnerRevenueService
         $query = DB::table('ledger_journal_entry_lines as l')
             ->join('ledger_journal_entries as je', 'l.journal_entry_id', '=', 'je.id')
             ->leftJoin('insurance_carriers as ic', 'l.insurance_carrier_id', '=', 'ic.id')
-            ->where('l.partner_id', $this->partner->id);
+            ->whereIn('l.partner_id', $this->partnerIds);
 
         if ($periodStart && $periodEnd) {
             $query->whereBetween('je.entry_date', [$periodStart->toDateString(), $periodEnd->toDateString()]);

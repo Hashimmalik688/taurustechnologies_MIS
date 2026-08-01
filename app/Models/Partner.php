@@ -67,6 +67,15 @@ class Partner extends Authenticatable
     }
 
     /**
+     * Partner ids whose sales/revenue/ledger roll up under this partner's
+     * dashboard: itself + all direct downline agents.
+     */
+    public function downlineScopeIds(): array
+    {
+        return $this->agents()->pluck('id')->push($this->id)->values()->all();
+    }
+
+    /**
      * Scope: only partner-type (not agents)
      */
     public function scopePartners($query)
