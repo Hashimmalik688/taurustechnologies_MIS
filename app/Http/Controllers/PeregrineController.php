@@ -20,6 +20,7 @@ class PeregrineController extends Controller
     public function closersIndex(Request $request)
     {
         $userId = Auth::id();
+        $team = Teams::fromUser(Auth::user());
         $filter = $request->get('filter', 'today'); // Default to 'today'
         $customStart = $request->get('start_date');
         $customEnd = $request->get('end_date');
@@ -27,27 +28,27 @@ class PeregrineController extends Controller
 
         // Get date range based on office hours (7am-5pm PT)
         [$startDate, $endDate] = $this->getDateRange($filter, $customStart, $customEnd);
-        
-        // Get validators for dropdown (only Managers and Peregrine Validators)
-        $validators = User::role([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])
+
+        // Get validators for dropdown (only Managers and this team's Validators)
+        $validators = User::role([Teams::validatorRole($team), Roles::MANAGER])
             ->orderBy('name')
             ->get(['id', 'name']);
-        
+
         // Get pending/transferred leads assigned to this closer (including returned from validator)
         // Apply date filter only if NOT showing all pending
-        $pendingQuery = Lead::where('team', Teams::PEREGRINE)
+        $pendingQuery = Lead::where('team', $team)
             ->where('managed_by', $userId)
             ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->with(['assignedValidator']);
-        
+
         if (!$showAllPending) {
             $pendingQuery->whereBetween('updated_at', [$startDate, $endDate]);
         }
-        
+
         $pendingLeads = $pendingQuery->orderBy('created_at', 'desc')->get();
 
         // Get completed/sent leads (closed, sale, or forwarded) - filtered by date
-        $completedLeads = Lead::where('team', Teams::PEREGRINE)
+        $completedLeads = Lead::where('team', $team)
             ->where('managed_by', $userId)
             ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_FORWARDED])
             ->whereBetween('updated_at', [$startDate, $endDate])
@@ -56,7 +57,7 @@ class PeregrineController extends Controller
             ->get();
 
         // Get failed leads (includes both closer failures and validator declines) - filtered by date
-        $failedLeads = Lead::where('team', Teams::PEREGRINE)
+        $failedLeads = Lead::where('team', $team)
             ->where('managed_by', $userId)
             ->where('status', Statuses::LEAD_DECLINED)
             ->whereBetween('updated_at', [$startDate, $endDate])
@@ -64,13 +65,13 @@ class PeregrineController extends Controller
             ->get();
 
         // Calculate filtered total for conversion rate
-        $filteredTotal = Lead::where('team', Teams::PEREGRINE)
+        $filteredTotal = Lead::where('team', $team)
             ->where('managed_by', $userId)
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
 
         // Daily stats within the selected date range
-        $todayStats = $this->getDailyStats($userId, $startDate, $endDate);
+        $todayStats = $this->getDailyStats($userId, $team, $startDate, $endDate);
 
         $carrierPartnerData = $this->buildCarrierPartnerData();
 
@@ -93,12 +94,14 @@ class PeregrineController extends Controller
      */
     public function closerEdit($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $team = Teams::fromUser(Auth::user());
+
+        $lead = Lead::where('team', $team)
             ->where('managed_by', Auth::id())
             ->findOrFail($id);
 
-        // Get validators for dropdown (only Managers and Peregrine Validators)
-        $validators = User::role([Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])
+        // Get validators for dropdown (only Managers and this team's Validators)
+        $validators = User::role([Teams::validatorRole($team), Roles::MANAGER])
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -112,7 +115,7 @@ class PeregrineController extends Controller
      */
     public function closerUpdate(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('managed_by', Auth::id())
             ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
@@ -192,7 +195,7 @@ class PeregrineController extends Controller
      */
     public function closerMarkFailed(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('managed_by', Auth::id())
             ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
@@ -230,7 +233,7 @@ class PeregrineController extends Controller
      */
     public function closerMarkPending(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('managed_by', Auth::id())
             ->whereIn('status', [Statuses::LEAD_PENDING, Statuses::LEAD_TRANSFERRED, Statuses::LEAD_RETURNED])
             ->findOrFail($id);
@@ -394,12 +397,12 @@ class PeregrineController extends Controller
             'beneficiary'           => $firstBeneficiary['name'] ?? null,
             'beneficiary_dob'       => $firstBeneficiary['dob'] ?? null,
             // Pipeline identifiers
-            'team'                  => Teams::PEREGRINE,
+            'team'                  => Teams::fromUser(Auth::user()),
             'status'                => Statuses::LEAD_CLOSED,
             'managed_by'            => Auth::id(),
             'closer_id'             => Auth::id(),
             'closer_name'           => Auth::user()->name,
-            'source_type'           => Teams::PEREGRINE,
+            'source_type'           => Teams::fromUser(Auth::user()),
             'closed_at'             => now(),
         ]);
 
@@ -436,9 +439,9 @@ class PeregrineController extends Controller
     /**
      * Get daily stats for closer
      */
-    private function getDailyStats($closerId, $startDate, $endDate)
+    private function getDailyStats($closerId, $team, $startDate, $endDate)
     {
-        $leads = Lead::where('team', Teams::PEREGRINE)
+        $leads = Lead::where('team', $team)
             ->where('managed_by', $closerId)
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->get();

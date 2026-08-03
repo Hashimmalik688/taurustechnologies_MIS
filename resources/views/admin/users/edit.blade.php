@@ -217,6 +217,29 @@
                                                 <label class="form-check-label" for="role-retention-officer">{{ Roles::RETENTION_OFFICER }}</label>
                                             </div>
                                         </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-primary">Hell Cats Team</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_MANAGER }}" id="role-hell-cats-manager"
+                                                    {{ in_array(Roles::HELL_CATS_MANAGER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hell-cats-manager">{{ Roles::HELL_CATS_MANAGER }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_CLOSER }}" id="role-hell-cats-closer"
+                                                    {{ in_array(Roles::HELL_CATS_CLOSER, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hell-cats-closer">{{ Roles::HELL_CATS_CLOSER }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_VALIDATOR }}" id="role-hell-cats-validator"
+                                                    {{ in_array(Roles::HELL_CATS_VALIDATOR, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hell-cats-validator">{{ Roles::HELL_CATS_VALIDATOR }}</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_PJC }}" id="role-hell-cats-pjc"
+                                                    {{ in_array(Roles::HELL_CATS_PJC, old('roles', $currentRoles)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role-hell-cats-pjc">{{ Roles::HELL_CATS_PJC }}</label>
+                                            </div>
+                                        </div>
                                     </div>
                                     @error('roles')
                                         <div class="text-danger mt-2">

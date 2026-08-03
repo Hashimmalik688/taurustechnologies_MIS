@@ -67,6 +67,10 @@ class DashboardController extends Controller
             Roles::QA                  => 'qa.review',
             Roles::RETENTION_OFFICER   => 'retention.dashboard',
             Roles::HR                  => 'attendance.index',
+            Roles::HELL_CATS_PJC       => 'verifier.dashboard',
+            Roles::HELL_CATS_CLOSER    => 'peregrine.closers.index',
+            Roles::HELL_CATS_VALIDATOR => 'validator.index',
+            Roles::HELL_CATS_MANAGER   => 'settings.reports.hub',
         ];
 
         foreach ($roleRedirects as $role => $routeName) {

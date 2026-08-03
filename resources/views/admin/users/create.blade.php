@@ -210,6 +210,25 @@
                                                 <label class="form-check-label" for="role-ceo">CEO</label>
                                             </div>
                                         </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label text-primary">Hell Cats Team</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_MANAGER }}" id="role-hell-cats-manager">
+                                                <label class="form-check-label" for="role-hell-cats-manager">Hell Cats Manager</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_CLOSER }}" id="role-hell-cats-closer">
+                                                <label class="form-check-label" for="role-hell-cats-closer">Hell Cats Closer</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_VALIDATOR }}" id="role-hell-cats-validator">
+                                                <label class="form-check-label" for="role-hell-cats-validator">Hell Cats Validator</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_PJC }}" id="role-hell-cats-pjc">
+                                                <label class="form-check-label" for="role-hell-cats-pjc">{{ Roles::HELL_CATS_PJC }}</label>
+                                            </div>
+                                        </div>
                                     </div>
                                     @error('roles')
                                         <div class="text-danger mt-2">

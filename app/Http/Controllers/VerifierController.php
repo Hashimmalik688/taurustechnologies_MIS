@@ -13,16 +13,19 @@ use Carbon\Carbon;
 
 class VerifierController extends Controller
 {
-    public function create(string $team = Teams::PEREGRINE)
+    public function create(?string $team = null)
     {
-        $team = strtolower($team);
+        // No {team} URL segment (e.g. plain /verifier/create) — infer the
+        // team from the submitting PJC's own role instead of always
+        // defaulting to Peregrine, so Hell Cats PJCs land correctly too.
+        $team = $team ? strtolower($team) : Teams::fromUser(auth()->user());
         if (!in_array($team, Teams::ALL)) {
             abort(404);
         }
 
-        // Fetch Peregrine closers (by role or department)
-        $closers = User::role(Roles::PEREGRINE_CLOSER)
-            ->orWhere('department', Teams::PEREGRINE)
+        // Fetch closers for this team (by role or department)
+        $closers = User::role(Teams::closerRole($team))
+            ->orWhere('department', $team)
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -32,9 +35,9 @@ class VerifierController extends Controller
         ]);
     }
 
-    public function store(Request $request, string $team = Teams::PEREGRINE)
+    public function store(Request $request, ?string $team = null)
     {
-        $team = strtolower($team);
+        $team = $team ? strtolower($team) : Teams::fromUser(auth()->user());
         if (!in_array($team, Teams::ALL)) {
             abort(404);
         }
@@ -92,7 +95,7 @@ class VerifierController extends Controller
             'verified_by' => auth()->id(),
             'verified_at' => now(),
             'transferred_at' => now(),
-            'source_type' => Teams::PEREGRINE, // Mark as peregrine lead
+            'source_type' => $team,
         ]);
 
         // Push real-time update to the assigned closer's dashboard

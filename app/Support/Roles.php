@@ -38,6 +38,13 @@ class Roles
     public const RAVENS_CLOSER = 'Ravens Closer';
     public const RETENTION_OFFICER = 'Retention Officer';
 
+    // Hell Cats team — shares the Peregrine PJC/closer/validator pipeline
+    // (same forms, same routes/views), distinguished only by team tagging.
+    public const HELL_CATS_MANAGER = 'Hell Cats Manager';
+    public const HELL_CATS_CLOSER = 'Hell Cats Closer';
+    public const HELL_CATS_VALIDATOR = 'Hell Cats Validator';
+    public const HELL_CATS_PJC = 'Hell Cats Junior Closer';
+
     // ── All active user roles (for reference / iteration) ──────────────
 
     public const ALL = [
@@ -55,6 +62,10 @@ class Roles
         self::PEREGRINE_VALIDATOR,
         self::RAVENS_CLOSER,
         self::RETENTION_OFFICER,
+        self::HELL_CATS_MANAGER,
+        self::HELL_CATS_CLOSER,
+        self::HELL_CATS_VALIDATOR,
+        self::HELL_CATS_PJC,
     ];
 
     /**
@@ -79,6 +90,10 @@ class Roles
         self::COORDINATOR,
         self::SUPER_ADMIN,
         self::IT_MANAGER,
+        self::HELL_CATS_MANAGER,
+        self::HELL_CATS_CLOSER,
+        self::HELL_CATS_VALIDATOR,
+        self::HELL_CATS_PJC,
     ];
 
     // ── Helpers ────────────────────────────────────────────────────────

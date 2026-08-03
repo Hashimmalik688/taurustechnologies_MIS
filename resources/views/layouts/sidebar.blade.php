@@ -133,7 +133,22 @@
 
         {{-- PEREGRINE OPERATIONS --}}
         @php
-            $canSeePeregrine = auth()->check() && (
+            $isHellCatsOnly = auth()->check() && auth()->user()->hasAnyRole([
+                \App\Support\Roles::HELL_CATS_MANAGER,
+                \App\Support\Roles::HELL_CATS_CLOSER,
+                \App\Support\Roles::HELL_CATS_VALIDATOR,
+                \App\Support\Roles::HELL_CATS_PJC,
+            ]) && !auth()->user()->hasAnyRole([
+                \App\Support\Roles::PEREGRINE_MANAGER,
+                \App\Support\Roles::PEREGRINE_CLOSER,
+                \App\Support\Roles::PEREGRINE_VALIDATOR,
+                \App\Support\Roles::VERIFIER,
+                \App\Support\Roles::MANAGER,
+                \App\Support\Roles::COORDINATOR,
+                \App\Support\Roles::SUPER_ADMIN,
+                \App\Support\Roles::CEO,
+            ]);
+            $canSeePeregrine = auth()->check() && !$isHellCatsOnly && (
                 auth()->user()->canViewModule('peregrine') ||
                 auth()->user()->canViewModule('peregrine-dashboard') ||
                 auth()->user()->canViewModule('peregrine-verifier') ||
@@ -174,6 +189,38 @@
                     <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
                         <i class="bx bx-check-shield"></i>
                         <span class="menu-text">Peregrines Validator</span>
+                    </a>
+                @endcanViewModule
+            </div>
+        @endif
+
+        {{-- HELL CATS OPERATIONS --}}
+        @if($isHellCatsOnly)
+            <a href="#" class="menu-item menu-dropdown-toggle" onclick="toggleDropdown(event, 'hellCatsDropdown')">
+                <i class="bx bx-shield-alt"></i>
+                <span class="menu-text">Hell Cats Operations</span>
+                <i class="bx bx-chevron-down dropdown-icon"></i>
+            </a>
+
+            <div class="menu-dropdown" id="hellCatsDropdown">
+                @canViewModule('peregrine-verifier')
+                    <a href="{{ route('verifier.create.team', 'hell_cats') }}" class="dropdown-item {{ Request::is('verifier*create*') ? 'active' : '' }}">
+                        <i class="bx bx-edit-alt"></i>
+                        <span class="menu-text">PJC Form</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('peregrine-closers')
+                    <a href="{{ route('peregrine.closers.index') }}" class="dropdown-item {{ Request::is('peregrine/closers*') ? 'active' : '' }}">
+                        <i class="bx bx-shield-alt"></i>
+                        <span class="menu-text">Hell Cats Closers</span>
+                    </a>
+                @endcanViewModule
+
+                @canViewModule('peregrine-validation')
+                    <a href="{{ route('validator.index') }}" class="dropdown-item {{ Request::is('validator*') ? 'active' : '' }}">
+                        <i class="bx bx-check-shield"></i>
+                        <span class="menu-text">Hell Cats Validator</span>
                     </a>
                 @endcanViewModule
             </div>

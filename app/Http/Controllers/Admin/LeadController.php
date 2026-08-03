@@ -456,8 +456,8 @@ class LeadController extends Controller
             // Determine source_type based on user role
             $user = Auth::user();
             $sourceType = null;
-            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-                $sourceType = Teams::PEREGRINE;
+            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+                $sourceType = Teams::fromUser($user);
             }
 
             // Convert smoker to 'yes'/'no' for ENUM
@@ -501,11 +501,11 @@ class LeadController extends Controller
         // Remove carrier fields from lead data to avoid issues
         unset($leadData['carrier_name']);
 
-        // Mark lead as Teams::PEREGRINE if created by a peregrine team member
+        // Mark lead's team based on the creating user's role
         $user = Auth::user();
-        if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-            $leadData['source_type'] = Teams::PEREGRINE;
-            $leadData['team'] = Teams::PEREGRINE;
+        if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+            $leadData['source_type'] = Teams::fromUser($user);
+            $leadData['team'] = Teams::fromUser($user);
         } elseif ($user->hasAnyRole([Roles::RAVENS_CLOSER])) {
             $leadData['team'] = Teams::RAVENS;
         }

@@ -20,6 +20,7 @@ class ValidatorController extends Controller
      */
     public function index(Request $request)
     {
+        $team = Teams::fromUser(Auth::user());
         $filter = $request->get('filter', 'today'); // Default to 'today'
         $customStart = $request->get('start_date');
         $customEnd = $request->get('end_date');
@@ -30,19 +31,19 @@ class ValidatorController extends Controller
 
         // Get leads assigned to this validator that need validation
         // Apply date filter only if NOT showing all pending
-        $pendingQuery = Lead::where('team', Teams::PEREGRINE)
+        $pendingQuery = Lead::where('team', $team)
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_CLOSED)
             ->with(['assignedValidator', 'assignedCloser']);
-        
+
         if (!$showAllPending) {
             $pendingQuery->whereBetween('closed_at', [$startDate, $endDate]);
         }
-        
+
         $pendingLeads = $pendingQuery->orderBy('closed_at', 'desc')->get();
-            
+
         // Get leads sent to home office
-        $homeOfficeLeads = Lead::where('team', Teams::PEREGRINE)
+        $homeOfficeLeads = Lead::where('team', $team)
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_PENDING)
             ->where('pending_reason', 'Pending:Sent to Home Office')
@@ -51,7 +52,7 @@ class ValidatorController extends Controller
             ->get();
 
         // Get completed leads (marked as sale, declined, forwarded, or returned by this validator) - filtered by date
-        $completedLeads = Lead::where('team', Teams::PEREGRINE)
+        $completedLeads = Lead::where('team', $team)
             ->where('assigned_validator_id', Auth::id())
             ->whereIn('status', [Statuses::LEAD_SALE, Statuses::LEAD_DECLINED, Statuses::LEAD_FORWARDED, Statuses::LEAD_RETURNED])
             ->whereBetween('validated_at', [$startDate, $endDate])
@@ -60,7 +61,7 @@ class ValidatorController extends Controller
             ->get();
 
         // Calculate stats - based on validator performance within date range
-        $allLeads = Lead::where('team', Teams::PEREGRINE)
+        $allLeads = Lead::where('team', $team)
             ->where('assigned_validator_id', Auth::id())
             ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_SALE, Statuses::LEAD_DECLINED, Statuses::LEAD_RETURNED])
             ->where(function($query) use ($startDate, $endDate) {
@@ -82,7 +83,7 @@ class ValidatorController extends Controller
         $returnedLeads = $allLeads->where('status', Statuses::LEAD_RETURNED);
         
         // Submitted to Sales Management (has sale_at timestamp) within date range
-        $submittedLeads = Lead::where('team', Teams::PEREGRINE)
+        $submittedLeads = Lead::where('team', $team)
             ->where('assigned_validator_id', Auth::id())
             ->whereNotNull('sale_at')
             ->whereBetween('sale_at', [$startDate, $endDate])
@@ -92,7 +93,7 @@ class ValidatorController extends Controller
         $filteredTotal = $allLeads->count();
 
         // Daily stats
-        $todayStats = $this->getDailyStats(Auth::id(), $startDate, $endDate);
+        $todayStats = $this->getDailyStats(Auth::id(), $team, $startDate, $endDate);
 
         $carrierPartnerData = $this->buildCarrierPartnerData();
 
@@ -119,7 +120,7 @@ class ValidatorController extends Controller
      */
     public function markAsSale($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_CLOSED)
             ->findOrFail($id);
@@ -151,7 +152,7 @@ class ValidatorController extends Controller
      */
     public function markAsForwarded($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_CLOSED)
             ->findOrFail($id);
@@ -173,7 +174,7 @@ class ValidatorController extends Controller
      */
     public function returnToCloser(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_CLOSED)
             ->findOrFail($id);
@@ -198,7 +199,7 @@ class ValidatorController extends Controller
      */
     public function edit($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where(function($q) {
                 $q->where('status', Statuses::LEAD_CLOSED)
@@ -209,7 +210,7 @@ class ValidatorController extends Controller
             })
             ->findOrFail($id);
 
-        $validators = User::role([Roles::VERIFIER, Roles::PEREGRINE_VALIDATOR, Roles::MANAGER])->get(['id', 'name']);
+        $validators = User::role([Roles::VERIFIER, Teams::validatorRole($lead->team), Roles::MANAGER])->get(['id', 'name']);
 
         $carrierPartnerData = $this->buildCarrierPartnerData();
 
@@ -221,7 +222,7 @@ class ValidatorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where(function($q) {
                 $q->where('status', Statuses::LEAD_CLOSED)
@@ -304,7 +305,7 @@ class ValidatorController extends Controller
      */
     public function markAsFailed(Request $request, $id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_PENDING])
             ->findOrFail($id);
@@ -330,7 +331,7 @@ class ValidatorController extends Controller
      */
     public function markAsSimpleDeclined($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->whereIn('status', [Statuses::LEAD_CLOSED, Statuses::LEAD_PENDING])
             ->findOrFail($id);
@@ -352,7 +353,7 @@ class ValidatorController extends Controller
      */
     public function markHomeOfficeSale($id)
     {
-        $lead = Lead::where('team', Teams::PEREGRINE)
+        $lead = Lead::where('team', Teams::fromUser(Auth::user()))
             ->where('assigned_validator_id', Auth::id())
             ->where('status', Statuses::LEAD_PENDING)
             ->where('pending_reason', 'Pending:Sent to Home Office')
@@ -415,17 +416,17 @@ class ValidatorController extends Controller
     /**
      * Get daily stats for validator
      */
-    private function getDailyStats($validatorId, $startDate, $endDate)
+    private function getDailyStats($validatorId, $team, $startDate, $endDate)
     {
         // Leads submitted to validator (closed) within date range
-        $submitted = Lead::where('team', Teams::PEREGRINE)
+        $submitted = Lead::where('team', $team)
             ->where('assigned_validator_id', $validatorId)
             ->whereNotNull('closed_at')
             ->whereBetween('closed_at', [$startDate, $endDate])
             ->count();
 
         // Sales approved by this validator (uses validated_at)
-        $sales = Lead::where('team', Teams::PEREGRINE)
+        $sales = Lead::where('team', $team)
             ->where('assigned_validator_id', $validatorId)
             ->where('status', Statuses::LEAD_SALE)
             ->whereNotNull('validated_at')
@@ -433,7 +434,7 @@ class ValidatorController extends Controller
             ->count();
 
         // Declined by this validator (uses validated_at)
-        $declined = Lead::where('team', Teams::PEREGRINE)
+        $declined = Lead::where('team', $team)
             ->where('assigned_validator_id', $validatorId)
             ->where('status', Statuses::LEAD_DECLINED)
             ->whereNotNull('validated_at')
@@ -441,7 +442,7 @@ class ValidatorController extends Controller
             ->count();
 
         // Returned by this validator (uses validated_at)
-        $returned = Lead::where('team', Teams::PEREGRINE)
+        $returned = Lead::where('team', $team)
             ->where('assigned_validator_id', $validatorId)
             ->where('status', Statuses::LEAD_RETURNED)
             ->whereNotNull('validated_at')
@@ -449,7 +450,7 @@ class ValidatorController extends Controller
             ->count();
 
         // Pending validation (status = closed) within date range
-        $pending = Lead::where('team', Teams::PEREGRINE)
+        $pending = Lead::where('team', $team)
             ->where('assigned_validator_id', $validatorId)
             ->where('status', Statuses::LEAD_CLOSED)
             ->whereBetween('closed_at', [$startDate, $endDate])

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Lead;
 use App\Support\Roles;
+use App\Support\Teams;
 use Livewire\Component;
 
 class CreateLead extends Component
@@ -227,9 +228,9 @@ class CreateLead extends Component
             }
         }
 
-        // Mark as peregrine if user has peregrine role
-        if (auth()->check() && auth()->user()->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR])) {
-            $leadData['source_type'] = 'peregrine';
+        // Mark team based on the submitting user's role
+        if (auth()->check() && auth()->user()->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+            $leadData['source_type'] = Teams::fromUser(auth()->user());
         }
 
         // Set proper status and timestamps so manually created leads appear in Leads Management
