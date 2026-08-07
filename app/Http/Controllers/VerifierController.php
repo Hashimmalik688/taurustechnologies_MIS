@@ -23,9 +23,17 @@ class VerifierController extends Controller
             abort(404);
         }
 
-        // Fetch closers for this team (by role or department)
-        $closers = User::role(Teams::closerRole($team))
-            ->orWhere('department', $team)
+        // Fetch closers across all Peregrine-pipeline teams (Peregrine and
+        // Hell Cats), not just the team the PJC form was opened for — PJCs
+        // need to be able to hand a lead to any live closer regardless of
+        // team.
+        $closerRoles = array_values(array_filter(array_map(
+            fn (string $t) => Teams::closerRole($t),
+            Teams::ALL
+        )));
+
+        $closers = User::role($closerRoles)
+            ->orWhereIn('department', [Teams::PEREGRINE, Teams::HELL_CATS])
             ->orderBy('name')
             ->get(['id', 'name']);
 
