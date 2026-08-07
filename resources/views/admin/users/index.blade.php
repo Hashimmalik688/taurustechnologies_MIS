@@ -287,6 +287,23 @@
                                         <input type="checkbox" name="roles[]" value="{{ Roles::VERIFIER }}" id="mr-vr-{{ $user->id }}" {{ in_array(Roles::VERIFIER, $currentRoles) ? 'checked' : '' }}>
                                         <label for="mr-vr-{{ $user->id }}">PJC</label>
                                     </div>
+                                    <div class="role-section-lbl">Hell Cats Team</div>
+                                    <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_MANAGER }}" id="mr-hcm-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_MANAGER, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-hcm-{{ $user->id }}">Hell Cats Manager</label>
+                                    </div>
+                                    <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_CLOSER }}" id="mr-hcc-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_CLOSER, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-hcc-{{ $user->id }}">Hell Cats Closer</label>
+                                    </div>
+                                    <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_VALIDATOR }}" id="mr-hcv-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_VALIDATOR, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-hcv-{{ $user->id }}">Hell Cats Validator</label>
+                                    </div>
+                                    <div class="role-check">
+                                        <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_PJC }}" id="mr-hcp-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_PJC, $currentRoles) ? 'checked' : '' }}>
+                                        <label for="mr-hcp-{{ $user->id }}">Hell Cats PJC</label>
+                                    </div>
                                     <div class="role-section-lbl">Other Roles</div>
                                     <div class="role-check">
                                         <input type="checkbox" name="roles[]" value="{{ Roles::RAVENS_CLOSER }}" id="mr-rc-{{ $user->id }}" {{ in_array(Roles::RAVENS_CLOSER, $currentRoles) ? 'checked' : '' }}>

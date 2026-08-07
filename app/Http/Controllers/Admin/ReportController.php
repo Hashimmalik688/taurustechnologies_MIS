@@ -1572,10 +1572,39 @@ class ReportController extends Controller
     public function peregrineTeamReport(Request $request)
     {
         abort_unless(auth()->user()->canViewModule('report-peregrine-team'), 403, 'Access denied.');
+
+        return $this->teamReport($request, Teams::PEREGRINE, 'admin.reports.peregrine-team-report', [
+            'teamLabel'   => 'Peregrine',
+            'reportRoute' => 'settings.reports.peregrine-team-report',
+        ]);
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+     * HELL CATS TEAM REPORT
+     * Same PJC/Closer/Validator breakdown as the Peregrine team report,
+     * scoped to team = 'hell_cats' instead.
+     * ────────────────────────────────────────────────────────────── */
+    public function hellCatsTeamReport(Request $request)
+    {
+        abort_unless(auth()->user()->canViewModule('report-hell-cats-team'), 403, 'Access denied.');
+
+        return $this->teamReport($request, Teams::HELL_CATS, 'admin.reports.peregrine-team-report', [
+            'teamLabel'   => 'Hell Cats',
+            'reportRoute' => 'settings.reports.hell-cats-team-report',
+        ]);
+    }
+
+    /**
+     * Shared PJC/Closer/Validator breakdown builder for any Peregrine-pipeline
+     * team (Peregrine, Hell Cats). $extra carries view-only display params
+     * (teamLabel, reportRoute) so the same Blade view renders either team.
+     */
+    private function teamReport(Request $request, string $team, string $view, array $extra = [])
+    {
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
         $dateTo   = $request->get('date_to',   now()->toDateString());
 
-        $baseQuery = fn() => Lead::where('team', Teams::PEREGRINE)
+        $baseQuery = fn() => Lead::where('team', $team)
             ->whereDate('created_at', '>=', $dateFrom)
             ->whereDate('created_at', '<=', $dateTo);
 
@@ -1602,7 +1631,7 @@ class ReportController extends Controller
         })->sortByDesc('total')->values();
 
         // ── Closer Performance ────────────────────────────────────
-        $closerLeads = Lead::where('team', Teams::PEREGRINE)
+        $closerLeads = Lead::where('team', $team)
             ->whereDate('created_at', '>=', $dateFrom)
             ->whereDate('created_at', '<=', $dateTo)
             ->whereNotNull('managed_by')
@@ -1629,7 +1658,7 @@ class ReportController extends Controller
         })->sortByDesc('total_received')->values();
 
         // ── Validator Performance ─────────────────────────────────
-        $validatorLeads = Lead::where('team', Teams::PEREGRINE)
+        $validatorLeads = Lead::where('team', $team)
             ->whereDate('created_at', '>=', $dateFrom)
             ->whereDate('created_at', '<=', $dateTo)
             ->whereNotNull('assigned_validator_id')
@@ -1701,7 +1730,7 @@ class ReportController extends Controller
             ->get();
 
         // ── Individual Sales Records ──────────────────────────────
-        $salesLeads = Lead::where('team', Teams::PEREGRINE)
+        $salesLeads = Lead::where('team', $team)
             ->whereDate('created_at', '>=', $dateFrom)
             ->whereDate('created_at', '<=', $dateTo)
             ->whereNotNull('sale_at')
@@ -1711,10 +1740,10 @@ class ReportController extends Controller
             ->orderByDesc('sale_at')
             ->get();
 
-        return view('admin.reports.peregrine-team-report', compact(
+        return view($view, array_merge(compact(
             'pjcRows', 'closerRows', 'validatorRows', 'teamTotals',
             'salesLeads', 'dateFrom', 'dateTo', 'dispositionCounts', 'allLeadsDetail'
-        ));
+        ), $extra));
     }
 
     public function peregrineSalesReport(Request $request)

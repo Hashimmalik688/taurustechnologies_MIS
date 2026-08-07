@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    Peregrine Team Report
+    {{ $teamLabel ?? 'Peregrine' }} Team Report
 @endsection
 
 @section('css')
@@ -101,7 +101,7 @@
     {{-- Page Header --}}
     <div class="rp-page-hdr">
         <h5>
-            <i class="bx bx-shield-alt"></i> Peregrine Team Report
+            <i class="bx bx-shield-alt"></i> {{ $teamLabel ?? 'Peregrine' }} Team Report
         </h5>
         <a href="{{ route('settings.reports.hub') }}" class="act-btn a-primary" style="font-size:.72rem;padding:.3rem .65rem">
             <i class="bx bx-arrow-back"></i> Reports
@@ -109,7 +109,7 @@
     </div>
 
     {{-- Date Filter --}}
-    <form method="GET" action="{{ route('settings.reports.peregrine-team-report') }}" class="ex-card sec-card" style="margin-bottom:.65rem;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.15)">
+    <form method="GET" action="{{ route($reportRoute ?? 'settings.reports.peregrine-team-report') }}" class="ex-card sec-card" style="margin-bottom:.65rem;background:rgba(212,175,55,.06);border:1px solid rgba(212,175,55,.15)">
         <div class="sec-body" style="padding:.9rem 1rem">
             <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
                 <div>
@@ -123,11 +123,11 @@
                 <button type="submit" class="pipe-pill-apply" style="font-size:.82rem;padding:.45rem 1rem">
                     <i class="bx bx-refresh" style="font-size:.9rem;vertical-align:middle;margin-right:.2rem"></i> Apply
                 </button>
-                <a href="{{ route('settings.reports.peregrine-team-report', ['date_from' => now()->startOfMonth()->toDateString(), 'date_to' => now()->toDateString()]) }}"
+                <a href="{{ route($reportRoute ?? 'settings.reports.peregrine-team-report', ['date_from' => now()->startOfMonth()->toDateString(), 'date_to' => now()->toDateString()]) }}"
                    class="pipe-pill" style="font-size:.82rem;padding:.45rem .9rem;font-weight:600">
                     <i class="bx bx-calendar-check" style="font-size:.9rem;vertical-align:middle;margin-right:.2rem"></i> This Month
                 </a>
-                <a href="{{ route('settings.reports.peregrine-team-report', ['date_from' => now()->toDateString(), 'date_to' => now()->toDateString()]) }}"
+                <a href="{{ route($reportRoute ?? 'settings.reports.peregrine-team-report', ['date_from' => now()->toDateString(), 'date_to' => now()->toDateString()]) }}"
                    class="pipe-pill" style="font-size:.82rem;padding:.45rem .9rem;font-weight:600">
                     <i class="bx bx-calendar" style="font-size:.9rem;vertical-align:middle;margin-right:.2rem"></i> Today
                 </a>
@@ -241,7 +241,7 @@
         <div class="sec-hdr">
             <h6>
                 <span class="sec-pill sec-pill-pjc"><i class="bx bx-edit-alt"></i> PJC Performance</span>
-                <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">Peregrines Junior Closers — {{ $pjcRows->count() }} active · {{ $dateFrom }} → {{ $dateTo }}</span>
+                <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">{{ $teamLabel ?? 'Peregrine' }} Junior Closers — {{ $pjcRows->count() }} active · {{ $dateFrom }} → {{ $dateTo }}</span>
             </h6>
         </div>
         <div class="scroll-tbl">
@@ -308,7 +308,7 @@
         <div class="sec-hdr">
             <h6>
                 <span class="sec-pill sec-pill-closer"><i class="bx bx-user-pin"></i> Closer Performance</span>
-                <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">Peregrine Closers — {{ $closerRows->count() }} active</span>
+                <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">{{ $teamLabel ?? 'Peregrine' }} Closers — {{ $closerRows->count() }} active</span>
             </h6>
         </div>
         <div class="scroll-tbl">
@@ -370,7 +370,7 @@
     <div class="ex-card sec-card">
         <div class="sec-hdr">
             <h6>
-                <span class="sec-pill sec-pill-validator"><i class="bx bx-check-shield"></i> Peregrines Validator Performance</span>
+                <span class="sec-pill sec-pill-validator"><i class="bx bx-check-shield"></i> {{ $teamLabel ?? 'Peregrine' }} Validator Performance</span>
                 <span style="font-size:.62rem;color:var(--bs-surface-400);font-weight:400">{{ $validatorRows->count() }} active</span>
             </h6>
         </div>

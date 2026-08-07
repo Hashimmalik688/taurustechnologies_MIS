@@ -8,6 +8,22 @@
 @include('components.hub-styles')
 @endsection
 
+@php
+    // Each section header should only render when at least one card inside
+    // it is visible to the current user — otherwise narrowly-permissioned
+    // roles (e.g. a single-report Hell Cats Manager) see empty headings.
+    $canSeeUser = auth()->check() ? auth()->user() : null;
+    $canAny = fn(...$slugs) => $canSeeUser && collect($slugs)->contains(fn($slug) => $canSeeUser->canViewModule($slug));
+
+    $showSalesPerformance = $canAny('report-submission-performance', 'report-policy-type', 'report-sales-status');
+    $showCallTracking = $canAny(
+        'report-disposition', 'report-closer', 'report-manager-submission',
+        'report-peregrine-team', 'report-hell-cats-team', 'report-peregrine-sales',
+        'report-peregrine-performance', 'report-ravens-performance', 'report-zoom-logs'
+    );
+    $showCommissionTracking = $canAny('carrier-sheet');
+@endphp
+
 @section('content')
     <div class="hub-page">
         <div class="hub-header">
@@ -15,6 +31,7 @@
             <p>Analytics, performance tracking &amp; data exports</p>
         </div>
 
+        @if($showSalesPerformance)
         <div class="hub-section-label">Sales &amp; Performance</div>
         <div class="hub-grid">
             @canViewModule('report-submission-performance')
@@ -50,7 +67,9 @@
             </a>
             @endcanViewModule
         </div>
+        @endif
 
+        @if($showCallTracking)
         <div class="hub-section-label">Call Tracking</div>
         <div class="hub-grid">
             @canViewModule('report-disposition')
@@ -92,6 +111,17 @@
                 <div class="hub-card-body">
                     <div class="hub-card-title">Peregrine Team Report</div>
                     <p class="hub-card-desc">PJC submissions, Closer pipeline &amp; Validator outcomes — full Peregrine team performance in one view</p>
+                </div>
+                <i class="bx bx-chevron-right hub-card-arrow"></i>
+            </a>
+            @endcanViewModule
+
+            @canViewModule('report-hell-cats-team')
+            <a href="{{ route('settings.reports.hell-cats-team-report') }}" class="hub-card">
+                <div class="hub-card-icon"><i class="bx bx-shield-alt"></i></div>
+                <div class="hub-card-body">
+                    <div class="hub-card-title">Hell Cats Team Report</div>
+                    <p class="hub-card-desc">PJC submissions, Closer pipeline &amp; Validator outcomes — full Hell Cats team performance in one view</p>
                 </div>
                 <i class="bx bx-chevron-right hub-card-arrow"></i>
             </a>
@@ -141,7 +171,9 @@
             </a>
             @endcanViewModule
         </div>
+        @endif
 
+        @if($showCommissionTracking)
         <div class="hub-section-label">Commission Tracking</div>
         <div class="hub-grid">
             @canViewModule('carrier-sheet')
@@ -155,5 +187,6 @@
             </a>
             @endcanViewModule
         </div>
+        @endif
     </div>
 @endsection
