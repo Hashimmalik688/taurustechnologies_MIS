@@ -136,7 +136,6 @@
             $isHellCatsOnly = auth()->check() && auth()->user()->hasAnyRole([
                 \App\Support\Roles::HELL_CATS_MANAGER,
                 \App\Support\Roles::HELL_CATS_CLOSER,
-                \App\Support\Roles::HELL_CATS_VALIDATOR,
                 \App\Support\Roles::HELL_CATS_PJC,
             ]) && !auth()->user()->hasAnyRole([
                 \App\Support\Roles::PEREGRINE_MANAGER,

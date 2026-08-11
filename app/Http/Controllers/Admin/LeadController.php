@@ -456,7 +456,7 @@ class LeadController extends Controller
             // Determine source_type based on user role
             $user = Auth::user();
             $sourceType = null;
-            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+            if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC])) {
                 $sourceType = Teams::fromUser($user);
             }
 
@@ -503,7 +503,7 @@ class LeadController extends Controller
 
         // Mark lead's team based on the creating user's role
         $user = Auth::user();
-        if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+        if ($user->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC])) {
             $leadData['source_type'] = Teams::fromUser($user);
             $leadData['team'] = Teams::fromUser($user);
         } elseif ($user->hasAnyRole([Roles::RAVENS_CLOSER])) {

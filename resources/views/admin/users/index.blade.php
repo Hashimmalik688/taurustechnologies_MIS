@@ -297,10 +297,6 @@
                                         <label for="mr-hcc-{{ $user->id }}">Hell Cats Closer</label>
                                     </div>
                                     <div class="role-check">
-                                        <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_VALIDATOR }}" id="mr-hcv-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_VALIDATOR, $currentRoles) ? 'checked' : '' }}>
-                                        <label for="mr-hcv-{{ $user->id }}">Hell Cats Validator</label>
-                                    </div>
-                                    <div class="role-check">
                                         <input type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_PJC }}" id="mr-hcp-{{ $user->id }}" {{ in_array(Roles::HELL_CATS_PJC, $currentRoles) ? 'checked' : '' }}>
                                         <label for="mr-hcp-{{ $user->id }}">Hell Cats PJC</label>
                                     </div>

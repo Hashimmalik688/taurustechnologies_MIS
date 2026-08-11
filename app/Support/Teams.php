@@ -57,22 +57,30 @@ class Teams
     }
 
     /**
-     * Validator role for a team that shares the Peregrine-style pipeline.
+     * Validator role — one shared Peregrine Validator pool reviews leads for
+     * BOTH Peregrine and Hell Cats (there is no separate Hell Cats Validator
+     * role by design). ValidatorController does not filter by team at all;
+     * this is only used to build the "assign to validator" dropdown on the
+     * closer form, and is intentionally the same for every team on this
+     * pipeline.
      */
     public static function validatorRole(string $team): ?string
     {
         return match ($team) {
-            self::PEREGRINE => Roles::PEREGRINE_VALIDATOR,
-            self::HELL_CATS => Roles::HELL_CATS_VALIDATOR,
-            default         => null,
+            self::PEREGRINE, self::HELL_CATS => Roles::PEREGRINE_VALIDATOR,
+            default => null,
         };
     }
 
     /**
-     * Resolve which Peregrine-pipeline team a closer/validator/manager
-     * belongs to, based on their role. Defaults to PEREGRINE so existing
+     * Resolve which Peregrine-pipeline team a PJC/closer/manager belongs to,
+     * based on their role. Defaults to PEREGRINE so existing
      * Peregrine/Manager/Coordinator/Admin behavior is unchanged — only
      * users holding a Hell Cats role are routed to Hell Cats data.
+     *
+     * Validators are intentionally excluded — there is one shared Peregrine
+     * Validator pool for both teams, so a validator's "team" is not
+     * meaningful (see validatorRole()).
      */
     public static function fromUser(?User $user): string
     {
@@ -82,7 +90,6 @@ class Teams
 
         $hellCatsRoles = [
             Roles::HELL_CATS_CLOSER,
-            Roles::HELL_CATS_VALIDATOR,
             Roles::HELL_CATS_MANAGER,
             Roles::HELL_CATS_PJC,
         ];

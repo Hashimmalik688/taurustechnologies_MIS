@@ -221,10 +221,6 @@
                                                 <label class="form-check-label" for="role-hell-cats-closer">Hell Cats Closer</label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_VALIDATOR }}" id="role-hell-cats-validator">
-                                                <label class="form-check-label" for="role-hell-cats-validator">Hell Cats Validator</label>
-                                            </div>
-                                            <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" name="roles[]" value="{{ Roles::HELL_CATS_PJC }}" id="role-hell-cats-pjc">
                                                 <label class="form-check-label" for="role-hell-cats-pjc">{{ Roles::HELL_CATS_PJC }}</label>
                                             </div>

@@ -229,7 +229,7 @@ class CreateLead extends Component
         }
 
         // Mark team based on the submitting user's role
-        if (auth()->check() && auth()->user()->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC])) {
+        if (auth()->check() && auth()->user()->hasAnyRole([Roles::VERIFIER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC])) {
             $leadData['source_type'] = Teams::fromUser(auth()->user());
         }
 

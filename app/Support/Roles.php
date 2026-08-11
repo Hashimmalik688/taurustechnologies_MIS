@@ -40,9 +40,10 @@ class Roles
 
     // Hell Cats team — shares the Peregrine PJC/closer/validator pipeline
     // (same forms, same routes/views), distinguished only by team tagging.
+    // No separate Hell Cats Validator role — validation for both teams is
+    // handled by the one shared Peregrine Validator pool.
     public const HELL_CATS_MANAGER = 'Hell Cats Manager';
     public const HELL_CATS_CLOSER = 'Hell Cats Closer';
-    public const HELL_CATS_VALIDATOR = 'Hell Cats Validator';
     public const HELL_CATS_PJC = 'Hell Cats Junior Closer';
 
     // ── All active user roles (for reference / iteration) ──────────────
@@ -64,7 +65,6 @@ class Roles
         self::RETENTION_OFFICER,
         self::HELL_CATS_MANAGER,
         self::HELL_CATS_CLOSER,
-        self::HELL_CATS_VALIDATOR,
         self::HELL_CATS_PJC,
     ];
 
@@ -92,7 +92,6 @@ class Roles
         self::IT_MANAGER,
         self::HELL_CATS_MANAGER,
         self::HELL_CATS_CLOSER,
-        self::HELL_CATS_VALIDATOR,
         self::HELL_CATS_PJC,
     ];
 

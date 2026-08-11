@@ -69,7 +69,6 @@ class DashboardController extends Controller
             Roles::HR                  => 'attendance.index',
             Roles::HELL_CATS_PJC       => 'verifier.dashboard',
             Roles::HELL_CATS_CLOSER    => 'peregrine.closers.index',
-            Roles::HELL_CATS_VALIDATOR => 'validator.index',
             Roles::HELL_CATS_MANAGER   => 'settings.reports.hub',
         ];
 

@@ -111,7 +111,7 @@ Route::get('/logout', function() {
 
 // Authenticated routes - Dashboard with role-based redirects
 // Prevent partners from accessing user/employee areas
-Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::PEREGRINE_MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR, Roles::IT_MANAGER, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC)]], function () {
+Route::group(['middleware' => ['auth', 'prevent.partner', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::PEREGRINE_MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::COORDINATOR, Roles::HR, Roles::IT_MANAGER, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC)]], function () {
     // Smart router - redirects each user to their appropriate landing page
     Route::get('/', [DashboardController::class, 'root'])->name('root');
     
@@ -361,7 +361,7 @@ Route::group(['prefix' => 'qa', 'as' => 'qa.', 'middleware' => ['auth', Roles::m
 });
 
 // Followup Routes
-Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC)]], function () {
+Route::group(['prefix' => 'followup', 'as' => 'followup.', 'middleware' => ['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::COORDINATOR, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC)]], function () {
     Route::post('/{id}/assign-person', [\App\Http\Controllers\Admin\FollowupController::class, 'updateFollowupPerson'])->name('assignPerson');
     
     // View and update followups - only shows leads assigned to the user
@@ -463,7 +463,7 @@ Route::group(['prefix' => 'dock', 'as' => 'dock.', 'middleware' => ['auth', Role
 });
 
 // Employee Dock View - Read-only access for employees to view their own dock records
-Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::class, 'myDockRecords'])->name('my-dock-records')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::COORDINATOR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC)]);
+Route::get('/my-dock-records', [\App\Http\Controllers\Admin\DockController::class, 'myDockRecords'])->name('my-dock-records')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::QA, Roles::RETENTION_OFFICER, Roles::HR, Roles::COORDINATOR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC)]);
 
 // My Devices — every logged-in user can see and name their own device
 Route::get('/my-devices', [\App\Http\Controllers\Admin\DeviceController::class, 'myDevices'])->name('my-devices')->middleware('auth');
@@ -499,7 +499,7 @@ Route::group(['prefix' => 'attendance', 'as' => 'attendance.', 'middleware' => [
 Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index')->middleware(['auth', Roles::middleware(Roles::CEO, Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::COORDINATOR)]);
 
 // API routes for AJAX requests
-Route::prefix('api/notifications')->name('api.notifications.')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RETENTION_OFFICER, Roles::QA, Roles::COORDINATOR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_VALIDATOR, Roles::HELL_CATS_PJC)])->group(function () {
+Route::prefix('api/notifications')->name('api.notifications.')->middleware(['auth', Roles::middleware(Roles::SUPER_ADMIN, Roles::MANAGER, Roles::EMPLOYEE, Roles::RAVENS_CLOSER, Roles::PEREGRINE_CLOSER, Roles::PEREGRINE_VALIDATOR, Roles::VERIFIER, Roles::RETENTION_OFFICER, Roles::QA, Roles::COORDINATOR, Roles::HELL_CATS_MANAGER, Roles::HELL_CATS_CLOSER, Roles::HELL_CATS_PJC)])->group(function () {
     Route::get('/topbar', [NotificationController::class, 'topbar'])->name('topbar');
     Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unread-count');
     Route::patch('/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('mark-read');
