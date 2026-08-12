@@ -308,8 +308,20 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        @php
+                            $user = \App\Models\User::withTrashed()->where('email', $emp->email)->first();
+                        @endphp
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ $emp->name }}"></div>
+                            <div class="col-md-6">
+                                <label class="form-label">System Name <small style="font-weight:400;color:#888">(login / pseudo name)</small></label>
+                                <input type="text" name="pseudo_name" class="form-control" value="{{ $user->name ?? '' }}" placeholder="Login name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Real Name <small style="font-weight:400;color:#888">(shown in payroll)</small></label>
+                                <input type="text" name="real_name" class="form-control" value="{{ $user->real_name ?? '' }}" placeholder="Legal / full name">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ $emp->email }}"></div>
                         </div>
                         <div class="row mb-3">
@@ -392,7 +404,16 @@
                     </div>
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <div class="col-md-6"><label class="form-label">Name</label><input type="text" name="name" class="form-control"></div>
+                            <div class="col-md-6">
+                                <label class="form-label">System Name <small style="font-weight:400;color:#888">(login / pseudo name)</small></label>
+                                <input type="text" name="pseudo_name" class="form-control" placeholder="Login name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Real Name <small style="font-weight:400;color:#888">(shown in payroll)</small></label>
+                                <input type="text" name="real_name" class="form-control" placeholder="Legal / full name">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
                             <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
                         </div>
                         <div class="row mb-3">

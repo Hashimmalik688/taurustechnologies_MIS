@@ -110,6 +110,8 @@ class EmployeeController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
+            'pseudo_name' => 'nullable|string|max:255',
+            'real_name' => 'nullable|string|max:255',
             'contact_info' => 'nullable|string|max:255',
             'emergency_contact' => 'nullable|string|max:255',
             'cnic' => 'nullable|string|max:30',
@@ -158,7 +160,25 @@ class EmployeeController extends Controller
             $saveData['passport_image'] = $request->file('passport_image')->store('employee_passports', 'public');
         }
 
-        Employee::create($saveData);
+        $employee = Employee::create($saveData);
+
+        // Update the associated User record with pseudo_name and real_name
+        if ($request->filled('email')) {
+            $user = User::where('email', strtolower(trim($request->email)))->first();
+            if ($user) {
+                $userData = [];
+                if ($request->filled('pseudo_name')) {
+                    $userData['name'] = trim($request->pseudo_name);
+                }
+                if ($request->filled('real_name')) {
+                    $userData['real_name'] = trim($request->real_name);
+                }
+                if (!empty($userData)) {
+                    $user->update($userData);
+                }
+            }
+        }
+
         return redirect()->route('employee.ems')->with('success', 'Employee added successfully.');
     }
 
@@ -167,6 +187,8 @@ class EmployeeController extends Controller
         $request->validate([
             'name' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
+            'pseudo_name' => 'nullable|string|max:255',
+            'real_name' => 'nullable|string|max:255',
             'contact_info' => 'nullable|string|max:255',
             'emergency_contact' => 'nullable|string|max:255',
             'cnic' => 'nullable|string|max:30',
@@ -241,6 +263,21 @@ class EmployeeController extends Controller
         // Only update if there's data to update
         if (!empty($updateData)) {
             $employee->update($updateData);
+        }
+
+        // Update the associated User record with pseudo_name and real_name
+        $user = User::withTrashed()->where('email', $employee->email)->first();
+        if ($user) {
+            $userData = [];
+            if ($request->filled('pseudo_name')) {
+                $userData['name'] = trim($request->pseudo_name);
+            }
+            if ($request->filled('real_name')) {
+                $userData['real_name'] = trim($request->real_name);
+            }
+            if (!empty($userData)) {
+                $user->update($userData);
+            }
         }
 
         // If status changed to Terminated, soft-delete the user account

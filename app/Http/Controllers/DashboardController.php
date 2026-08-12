@@ -64,7 +64,7 @@ class DashboardController extends Controller
             Roles::PEREGRINE_MANAGER   => 'settings.reports.hub',
             Roles::EMPLOYEE            => 'attendance.dashboard',
             Roles::RAVENS_CLOSER       => 'ravens.dashboard',
-            Roles::QA                  => 'qa.review',
+            Roles::QA                  => 'attendance.dashboard',
             Roles::RETENTION_OFFICER   => 'retention.dashboard',
             Roles::HR                  => 'attendance.index',
             Roles::HELL_CATS_PJC       => 'verifier.dashboard',
